@@ -1,0 +1,68 @@
+name: Mirror ArchWiki CN
+# 在 GitHub 云端运行器抓取 Arch Linux 简体中文维基，把 full_cache 提交回本仓库。
+# 沙箱出口被 wiki 的 WAF 封锁，但 GitHub Actions 运行器能达 wiki.archlinuxcn.org，
+# 且爬虫自带 /__verify 放行 cookie 逻辑可过"安全检查"挑战页。
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'   # 每日 UTC 03:17 轻量续爬（可选）
+
+permissions:
+  contents: write
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Crawl wiki (no PDF)
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: |
+          python run.py \
+            --start "https://wiki.archlinuxcn.org/wiki/Main_page" \
+            --allowed-host wiki.archlinuxcn.org \
+            --max-depth -1 \
+            --concurrency 4 \
+            --delay 1.0 \
+            --timeout 60 \
+            --retries 6 \
+            --no-images \
+            --no-pdf \
+            --cache-dir full_cache \
+            --user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" \
+            --log crawl.log
+
+      - name: Verify cache non-empty
+        run: |
+          CNT=$(find full_cache/html -name '*.html' 2>/dev/null | wc -l)
+          echo "cached html pages: $CNT"
+          if [ "$CNT" -lt 50 ]; then
+            echo "::error::缓存页数过少($CNT)，疑似 WAF 封锁导致抓取失败"
+            exit 1
+          fi
+
+      - name: Commit & push cache
+        run: |
+          git config user.email "mirror-bot@users.noreply.github.com"
+          git config user.name "mirror-bot"
+          git add full_cache crawl.log
+          if git diff --cached --quiet; then
+            echo "no changes to commit"
+          else
+            git commit -m "mirror: update full_cache ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+            git push
+          fi

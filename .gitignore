@@ -1,0 +1,5 @@
+archwiki_crawler/__pycache__/
+__pycache__/
+*.pyc
+full_cache/
+*.log

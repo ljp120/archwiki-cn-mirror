@@ -1,0 +1,7 @@
+# ArchWiki 爬虫依赖
+reportlab>=4.0
+beautifulsoup4>=4.12
+lxml>=4.9
+requests>=2.28
+pillow>=9.0
+tqdm>=4.64
