@@ -1,0 +1,581 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg9800307f9050">Intel 图形处理器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Intel_graphics">Intel graphics</a>，最近一次同步于 2024-05-13，若英文版本有所<a href="https://wiki.archlinux.org/title/Intel_graphics?diff=0&amp;oldid=808039">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Intel_graphics_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg03406696f775">Intel GMA 3600</a></li>
+<li><a href="#pga36c0aff60be">Xorg</a></li>
+<li><a href="#pg1b16260aab54">Kernel mode setting</a></li>
+<li><a href="#pgaa98d1ed067b">Xrandr</a></li>
+<li><a href="#pg236e07734567">Hybrid graphics</a></li>
+<li><a href="#pg813471eccd07">Vulkan</a></li>
+<li><a href="#pg9c80e5163dff">GPGPU</a></li>
+</ul></div>
+<p>由于 Intel 提供并维护开源驱动程序，因此 Intel 显卡基本上是即插即用的。
+</p><p>有关 Intel GPU 型号以及相应芯片组和 CPU 的全面列表，请参阅 <a href="https://en.wikipedia.org/wiki/list_of_Intel_graphics_processing_units">Wikipedia:list of Intel graphics processing units</a> 和 <a href="https://wiki.gentoo.org/wiki/Intel#Feature_support">Gentoo:Intel#Feature support</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>开源驱动不支持基于 PowerVR 架构的图形卡 (比如<a href="#pg03406696f775">GMA 3600</a> 系列)</li>
+<li>Intel 第 <i>N</i> 代硬件不代表 CPU 的代数，它表示不同于 CPU 代数的 <a href="https://en.wikipedia.org/wiki/list_of_Intel_graphics_processing_units">GPU 的代数</a></li>
+<li>参见 <a href="#pga36c0aff60be">Xorg#驱动安装</a> 来识别你的显卡</li></ul>
+</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9800307f9050_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<ul><li><a href="#pg811194d6beaa">安装</a>以下任一软件包，它提供用于 3D 加速的 <a href="https://en.wikipedia.org/wiki/Direct_Rendering_Infrastructure">DRI</a> 驱动程序。
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span> 是最新的 <a href="#pgb19d18f87176">Mesa</a> 软件包，其中包括用于 Intel 第 3 代及更高版本硬件的现代 Gallium3D 驱动程序。这是推荐选择。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa-amber">mesa-amber</a></span><sup><small>包</small></sup></span> 是旧版 Mesa 软件包，包括用于第 2 代至第 11 代硬件的经典（非 Gallium3D）驱动程序。此驱动程序对于第 7 代和较旧的硬件具有更好的性能和稳定性，但是不再维护。</li></ul></li></ul>
+<ul><li>为支持 32 位程序，请同时从 <a href="#pg9d2c9cc56d04">multilib</a> 仓库中安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-mesa">lib32-mesa</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-mesa-amber">lib32-mesa-amber</a></span><sup><small>包</small></sup></span> 软件包。</li></ul>
+<ul><li>对于 <a href="https://en.wikipedia.org/wiki/X.Org_Server#DDX">DDX</a> 驱动支持（可提供对 <a href="#pga36c0aff60be">Xorg</a> 的 2D 加速），安装以下任一软件包：
+<ul><li>包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-server">xorg-server</a></span><sup><small>包</small></sup></span> 软件包内的 <i>modesetting</i> 驱动是对于第 4 代及以上硬件的推荐选择。它通过 <i>glamor</i> 使用 DRI 来实现加速。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> 软件包为第 2 代至第 9 代硬件提供了旧的 Intel DDX 驱动。通常不建议使用此软件包，请参见下面的注释。</li></ul></li></ul>
+<ul><li>为支持 <a href="#pg813471eccd07">Vulkan</a> （Haswell 及更新架构，对于老更老架构的支持是<a href="https://gitlab.freedesktop.org/mesa/mesa/-/issues/8249#note_1758622">不完整或缺失的</a>），安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vulkan-intel">vulkan-intel</a></span><sup><small>包</small></sup></span> 软件包。对于 32 位的 <a href="#pg813471eccd07">Vulkan</a> 支持，安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-vulkan-intel">lib32-vulkan-intel</a></span><sup><small>包</small></sup></span> 软件包。</li></ul>
+<p>另请参见<a href="#pge457f2232320">硬件视频加速</a>.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>有的文档 (<a href="https://www.phoronix.com/scan.php?page=news_item&amp;px=Ubuntu-Debian-Abandon-Intel-DDX">Debian &amp; Ubuntu</a>, <a href="https://www.phoronix.com/scan.php?page=news_item&amp;px=Fedora-Xorg-Intel-DDX-Switch">Fedora</a>, <a href="https://community.kde.org/Plasma/5.9_Errata#Intel_GPUs">KDE</a>) 推荐不安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> 驱动程序，而是回落到给第四代及更新 GPU (2006年以来的GMA 3000及以上显卡) 使用的 modesetting 驱动程序。请参考 <a href="https://web.archive.org/web/20160714232204/https://www.reddit.com/r/archlinux/comments/4cojj9/it_is_probably_time_to_ditch_xf86videointel/">[1]</a>、<a href="https://www.phoronix.com/scan.php?page=article&amp;item=intel-modesetting-2017&amp;num=1">[2]</a>, <a href="#pga36c0aff60be">Xorg#安装</a> 和 <span class="plainlinks archwiki-template-man" title="$ man 4 modesetting"><a href="https://man.archlinux.org/man/modesetting.4">modesetting(4)</a></span>. 然而，modesetting 驱动程序可能导致比如 <a href="https://gitlab.freedesktop.org/xorg/xserver/-/issues/1364">XFCE 上的屏幕撕裂和鼠标抖动</a>、<a href="https://bugs.chromium.org/p/chromium/issues/detail?id=370022">切换Chromium中虚拟的桌面产生伪影</a> 和<a href="https://gitlab.freedesktop.org/xorg/xserver/-/issues/928">mpv中的vsync抖动/视频抖动</a> 等问题</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> 软件包未正确支持第 11 代及更新硬件，会导致硬件加速的缺失和可能会导致 Plasma Desktop 几乎不可用的渲染问题。参见 <a href="https://gitlab.freedesktop.org/xorg/driver/xf86-video-intel/-/commit/7181c5a41c3f00eaf996caa156523c708a18081e">[3]</a></li>
+<li>有多起报告（参见 <a href="https://bbs.archlinux.org/viewtopic.php?id=263323">[4]</a> <a href="https://github.com/qutebrowser/qutebrowser/issues/4641">[5]</a>）称当安装有 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> 软件包时，整个图形栈会卡死，甚至切换至不同的虚拟控制台（通过按下 <code>Ctrl+Alt+F<i>n</i></code>）都无法解决问题，只有通过使用 <a href="#pg8b69f7e24e08">SysRq</a> 杀死用户进程可以解决问题</li></ul></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9800307f9050_.E5.8A.A0.E8.BD.BD" id="加载"><span id=".E5.8A.A0.E8.BD.BD"></span>加载</h2></div>
+<p>Intel 内核模块应会在系统引导时自动加载。
+</p><p>如果它没有自动加载，请尝试：
+</p>
+<ul><li>由于 Intel 需要内核模式设置，确保您<b>没有</b>在<a href="#pgec0856954f1c">内核参数</a>中添加 <code>nomodeset</code></li>
+<li>请同时确认您没有在 <code>/etc/modprobe.d/</code> 或 <code>/usr/lib/modprobe.d/</code> 中把 Intel 列入 modprobe 的黑名单导致禁用了 Intel。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E5.90.AF.E7.94.A8_KMS_.E6.97.A9.E5.90.AF.E5.8A.A8" id="启用_KMS_早启动"><span id=".E5.90.AF.E7.94.A8_KMS_.E6.97.A9.E5.90.AF.E5.8A.A8"></span>启用 KMS 早启动</h3></div>
+<p><code>i915</code> 驱动支持<a href="#pg1b16260aab54">内核级显示模式设置</a> (KMS)，并且从 <a href="#pgbd0f46fbac92">mkinitcpio</a> v32 开始启用，因为 <code>kms</code> 钩子被默认包含。对于其他配置方式，请参考 <a href="#pg1b16260aab54">Kernel_mode_setting#KMS_早启动</a>获得有关如何在启动过程中第一时间启用KMS的说明。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E5.90.AF.E7.94.A8_GuC_.2F_HuC_.E5.9B.BA.E4.BB.B6.E5.8A.A0.E8.BD.BD" id="启用_GuC_/_HuC_固件加载"><span id=".E5.90.AF.E7.94.A8_GuC_.2F_HuC_.E5.9B.BA.E4.BB.B6.E5.8A.A0.E8.BD.BD"></span>启用 GuC / HuC 固件加载</h3></div>
+
+<p><br/>
+从第 9 代硬件 (Skylake 及以后的架构) 开始, Intel GPU 都包含了一个用于提供以下功能的图形微控制器 “<i>Graphics micro (μ) Controller</i>” (GuC)  <a href="https://01.org/linuxgraphics/downloads/firmware">[6]</a>:
+</p>
+<ul><li>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-media-driver">intel-media-driver</a></span><sup><small>包</small></sup></span> 软件包来启用<a href="#pge1e061b4fab9">硬件视频加速</a>后，能够把一些多媒体解码功能从 CPU 分载（offload）到 <i>HEVC/H.265 微控制器 （micro (µ) Controller）</i> (HuC) 上。该功能于第 9 代推出。</li>
+<li>使用 GuC 进行调度、上下文提交（context submission）和电源管理。该功能通过第 12 代硬件于 Alder Lake-P（移动端）推出。</li></ul>
+<p>为了使用这些功能，您必须加载 GuC 固件。对于 HuC 支持，一些视频特性(如 SKL 低功耗编码模式下的 CBR 速率控制)也需要加载 HuC 固件才能实现。 <a href="https://github.com/intel/media-driver#known-issues-and-limitations">[7]</a> GuC 和 HuC 的固件文件都包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span> 软件包中。
+</p><p>GuC 功能由 <code>i915.enable_guc</code> <a href="#pgec0856954f1c">内核参数</a>控制，用法如下：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>enable_guc 的值</th>
+<th>GuC Submission</th>
+<th>HuC Firmware Loading</th>
+<th>作为平台默认值</th>
+<th>支持的平台
+</th></tr>
+<tr>
+<td>0</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>Tiger Lake, Rocket Lake, 和 Pre-Gen12 <a href="https://github.com/torvalds/linux/blob/b3454ce0b2c8a56e760e6baa88ed10278585072b/drivers/gpu/drm/i915/gt/uc/intel_uc.c#L26-L36">[8]</a></td>
+<td>All
+</td></tr>
+<tr>
+<td>1</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td>Alder Lake-P (Mobile) 及更新
+</td></tr>
+<tr>
+<td>2</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Alder Lake-S (Desktop) <a href="https://github.com/torvalds/linux/blob/b3454ce0b2c8a56e760e6baa88ed10278585072b/drivers/gpu/drm/i915/gt/uc/intel_uc.c#L38-L42">[9]</a> <a href="https://lore.kernel.org/all/87ee6wit2r.fsf@intel.com/T/">[10]</a></td>
+<td>Gen9 及更新
+</td></tr>
+<tr>
+<td>3</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Alder Lake-P (Mobile) 及更新</td>
+<td>第 9.5 代或更新（某些程度上更好）
+</td></tr></tbody></table>
+<p>如果 GuC submission 或者 HuC 固件加载并未在您的 GPU 上默认启用，您可以手动启用它。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><a href="https://bugs.freedesktop.org/show_bug.cgi?id=111918">即使您的显卡不支持相关功能</a>，手动启用 GuC/HuC 固件加载也可能会污染内核。此外，启用GuC/HuC固件加载可能会导致某些系统出现问题；如果您遇到冻结（例如，从休眠恢复后），请禁用它。</div>
+<p>首先确保您已经<a href="#pg811194d6beaa">安装</a>了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span> 软件包。
+</p><p>配置 <code>i915.enable_guc</code> <a href="#pgec0856954f1c">内核参数</a>，比如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/i915.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options i915 enable_guc=2</pre>
+<p>然后<a href="#pgbd0f46fbac92">重建 initramfs</a>，在下一次启动时您可以通过 <a href="#pgcfe31b67199d">dmesg</a> 命令来确认 GuC 和 HuC 都已被启用。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[30130.586970] i915 0000:00:02.0: [drm] GuC firmware i915/icl_guc_33.0.0.bin version 33.0 submission:disabled
+[30130.586973] i915 0000:00:02.0: [drm] HuC firmware i915/icl_huc_9.0.0.bin version 9.0 authenticated:yes</pre>
+<p>如果您的显卡不支持它们，你会看到：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[    0.571339] i915 0000:00:02.0: [drm] Incompatible option enable_guc=2 - GuC is not supported!
+[    0.571340] i915 0000:00:02.0: [drm] Incompatible option enable_guc=2 - HuC is not supported!</pre>
+<p>或者，使用以下方法进行检查：
+</p>
+<pre># cat /sys/kernel/debug/dri/0/gt/uc/guc_info
+# cat /sys/kernel/debug/dri/0/gt/uc/huc_info
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>从 Linux 4.20.11 起，当 GuC/HuC 被启用时，不支持通过设置 <code>enable_gvt=1</code> 来使用 <a href="#pg9b71abeb4ba3">GVT-g 图形虚拟化</a> 功能。i915模块将无法初始化，如系统日志所示：
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># journalctl</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">... kernel: [drm:intel_gvt_init [i915]] *ERROR* i915 GVT-g loading failed due to Graphics virtualization is not yet supported with GuC submission
+... kernel: i915 0000:00:02.0: [drm:i915_driver_load [i915]] Device initialization failed (-5)
+... kernel: i915: probe of 0000:00:02.0 failed with error -5
+... kernel: snd_hda_intel 0000:00:1f.3: failed to add i915 component master (-19)
+</pre>
+<p>请注意相关警告并非致命，正如<a href="https://github.com/intel/gvt-linux/issues/77#issuecomment-707541069">[11]</a> 中解释的那样：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># journalctl -b </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">... kernel: i915 0000:00:02.0: Direct firmware load for i915/gvt/vid_0x8086_did_0x5916_rid_0x02.golden_hw_state failed with error -2
+</pre></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9800307f9050_Xorg_.E9.85.8D.E7.BD.AE" id="Xorg_配置"><span id="Xorg_.E9.85.8D.E7.BD.AE"></span>Xorg 配置</h2></div>
+<p>通常不需要为了运行 <a href="#pga36c0aff60be">Xorg</a> 去配置任何东西。
+</p><p>但是如果需要使用一些驱动选项或是 <a href="#pga36c0aff60be">Xorg</a> 未正常启动，您可以创建一个 Xorg 配置文件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E4.BD.BF.E7.94.A8_modesetting_.E9.A9.B1.E5.8A.A8" id="使用_modesetting_驱动"><span id=".E4.BD.BF.E7.94.A8_modesetting_.E9.A9.B1.E5.8A.A8"></span>使用 modesetting 驱动</h3></div>
+<p>如果您已经安装了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> 软件包但是想要显式加载 modesetting 驱动而不是让 DDX 驱动有着更高的优先级，比如试着去比较它们：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-intel.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Device"
+  Identifier "Intel Graphics"
+  Driver "modesetting"
+EndSection
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E4.BD.BF.E7.94.A8_Intel_.E9.A9.B1.E5.8A.A8" id="使用_Intel_驱动"><span id=".E4.BD.BF.E7.94.A8_Intel_.E9.A9.B1.E5.8A.A8"></span>使用 Intel 驱动</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>以下操作需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> 软件包。</div>
+<p>创建一个与下述类似的 Xorg 配置文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-intel.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Device"
+  Identifier "Intel Graphics"
+  Driver "intel"
+EndSection
+</pre>
+<p>您可以在 <code>Driver "intel"</code> 下方开新行添加额外的选项。请参考 <span class="plainlinks archwiki-template-man" title="$ man 4 intel"><a href="https://man.archlinux.org/man/intel.4">intel(4)</a></span> 手册页以获得完整的选项列表。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>您可能需要添加不止一段 <code>device</code> 配置，本文将在需要的地方指出。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9800307f9050_AccelMethod" id="AccelMethod">AccelMethod</h4></div>
+<p>创建配置文件时，您可能需要指定 <code>Option "AccelMethod"</code> 。传统的选项包括 <code>UXA</code>, <code>SNA</code> (默认) 和 <code>BLT</code>.
+</p><p>如果您在使用默认选项 <code>SNA</code> 时遇到问题 (比如花屏、文字损坏等)，尝试改用<code>UXA</code> 。只需要在<a href="#pgcf92ea97092d">配置文件</a>中添加如下一行即可： 
+</p>
+<pre>Option      "AccelMethod"  "uxa"
+</pre>
+<p>另请参阅 <span class="plainlinks archwiki-template-man" title="$ man 4 intel"><a href="https://man.archlinux.org/man/intel.4#CONFIGURATION_DETAILS">intel(4) § CONFIGURATION DETAILS</a></span> 手册文件中的 AccelMethod 选项。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9800307f9050_.E5.AF.B9.E4.BA.8E.E8.BE.83.E6.96.B0.E7.9A.84_GPU_.E4.BD.BF.E7.94.A8_Intel_DDX_.E9.A9.B1.E5.8A.A8" id="对于较新的_GPU_使用_Intel_DDX_驱动"><span id=".E5.AF.B9.E4.BA.8E.E8.BE.83.E6.96.B0.E7.9A.84_GPU_.E4.BD.BF.E7.94.A8_Intel_DDX_.E9.A9.B1.E5.8A.A8"></span>对于较新的 GPU 使用 Intel DDX 驱动</h4></div>
+<p>从第 8 代 Intel GPU 开始（Broadwell），需要 Iris Mesa 驱动：
+</p>
+<pre>Option      "DRI"  "iris"
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9800307f9050_.E7.A6.81.E7.94.A8_TearFree.EF.BC.8CTripleBuffer.EF.BC.8CSwapbuffersWait" id="禁用_TearFree，TripleBuffer，SwapbuffersWait"><span id=".E7.A6.81.E7.94.A8_TearFree.EF.BC.8CTripleBuffer.EF.BC.8CSwapbuffersWait"></span>禁用 TearFree，TripleBuffer，SwapbuffersWait</h4></div>
+<p>如果你在使用组合器（在比如 GNOME，KDE Plasma，Xfce 等现代桌面环境中是默认的），那么 TearFree，TripleBuffer 和 SwapbuffersWait 通常可以禁用以提高性能和省电。
+</p>
+<pre>Option      "TearFree"        "false"
+Option      "TripleBuffer"    "false"
+Option      "SwapbuffersWait" "false"
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9800307f9050_.E5.9F.BA.E4.BA.8E.E5.86.85.E6.A0.B8.E6.A8.A1.E5.9D.97.E5.8F.82.E6.95.B0.E7.9A.84.E9.80.89.E9.A1.B9" id="基于内核模块参数的选项"><span id=".E5.9F.BA.E4.BA.8E.E5.86.85.E6.A0.B8.E6.A8.A1.E5.9D.97.E5.8F.82.E6.95.B0.E7.9A.84.E9.80.89.E9.A1.B9"></span>基于内核模块参数的选项</h2></div>
+<p><code>i915</code> 内核模块允许您通过<a href="#pg6dbfce2ea89d">内核模块参数</a>来配置选项。其中一些选项会影响到省电。
+</p><p>您可以使用以下命令生成所有选项的列表以及简短说明和默认值：
+</p>
+<pre>$ modinfo -p i915
+</pre>
+<p>若要检查当前启用了哪些选项，请运行
+</p>
+<pre># systool -m i915 -av
+</pre>
+<p>您将注意到，许多选项默认为 -1，说明芯片的省电状态都为默认值。然而，您可以通过<a href="#pg6dbfce2ea89d">修改内核模块参数</a>来配置更积极的省电策略。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Diverting from the defaults will mark the kernel as <a href="https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=fc9740cebc3ab7c65f3c5f6ce0caf3e4969013ca">tainted</a> from Linux 3.18 onwards. This basically implies using other options than the per-chip defaults is considered experimental and not supported by the developers.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_Framebuffer_.E5.8E.8B.E7.BC.A9_.28enable_fbc.29" id="Framebuffer_压缩_(enable_fbc)"><span id="Framebuffer_.E5.8E.8B.E7.BC.A9_.28enable_fbc.29"></span>Framebuffer 压缩 (enable_fbc)</h3></div>
+<p>启用 Framebuffer 压缩 (FBC) 功能能够减少电源消耗，同时减少刷新屏幕所需的内存带宽。
+</p><p>如果您的硬件支持，此功能将被自动启用。您可以通过该命令来检查是否启用：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ modinfo i915 | grep enable_fbc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">parm:           enable_fbc:Enable frame buffer compression for power savings (default: -1 (use per-chip default)) (int)
+</pre>
+<p>如果 parm 被设为 <code>-1</code>，那您不需要做任何事。如果在其他情况下要强制启用 FBC，请在内核参数中添加 <code>i915.enable_fbc=1</code> 或在 <code>/etc/modprobe.d/i915.conf</code> 中进行如下配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/i915.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options i915 enable_fbc=1</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在 Sandy Bridge (第6代)之前的几代 Intel GPU 上，帧缓冲（Framebuffer）压缩可能不可靠或不可用。 这导致系统日志中可能会记录类似如下信息：
+<pre>kernel: drm: not enough stolen space for compressed buffer, disabling.
+</pre>
+<p>在Sandy Bridge之前的CPU上启用帧缓冲区压缩会导致无休止的错误消息：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[ 2360.475430] [drm] not enough stolen space for compressed buffer (need 4325376 bytes), disabling
+[ 2360.475437] [drm] hint: you may be able to increase stolen memory size in the BIOS to avoid this
+</pre>
+解决方案是禁用帧缓冲压缩，这将增加些微功耗（约0.06W）。为了禁用它，请在内核参数中添加<code>i915.enable_fbc=0</code> 。 请<a href="https://web.archive.org/web/20200228230053/https://kernel.ubuntu.com/~cking/power-benchmarking/background-colour-and-framebuffer-compression/">参阅此处</a> 了解更多关于禁用帧缓冲的影响。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_Fastboot" id="Fastboot">Fastboot</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Skylake 和更新的架构，会在默认情况下启用此参数<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=3d6535cbed4a4b029602ff83efb2adec7cb8d28b">[12]</a>。以及 Bay- 和 Cherry-Trail (VLV/CHV)<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=7360c9f6b857e22a48e545f4e99c79630994e932">[13]</a> 自 Linux 5.1 版本以来也会启用。<a href="https://kernelnewbies.org/Linux_5.1#Graphics">[14]</a></div>
+<p>Intel Fastboot 的目标是在 <a href="#pga36c0aff60be">Xorg</a> 启动之前将帧缓冲区保留为 BIOS 或<a href="#pg7e866ec617d4">引导加载程序</a>设置的内容，以避免出现屏闪。<a href="https://lists.freedesktop.org/archives/intel-gfx/2012-May/017653.html">[15]</a><a href="https://www.phoronix.com/scan.php?page=news_item&amp;px=MTEwNzc">[16]</a>
+</p><p>要在未默认启用快速启动的平台上强制启用快速启动，请设置 <code>i915.fastboot=1</code> <a href="#pgec0856954f1c">内核参数</a>，或在 <code>/etc/modprobe.d/i915.conf</code> 里作如下设置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/i915.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options i915 fastboot=1</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_Intel_GVT-g_.E5.9B.BE.E5.BD.A2.E8.99.9A.E6.8B.9F.E5.8C.96.E6.94.AF.E6.8C.81" id="Intel_GVT-g_图形虚拟化支持"><span id="Intel_GVT-g_.E5.9B.BE.E5.BD.A2.E8.99.9A.E6.8B.9F.E5.8C.96.E6.94.AF.E6.8C.81"></span>Intel GVT-g 图形虚拟化支持</h3></div>
+<p>请参考 <a href="#pg9b71abeb4ba3">Intel GVT-g</a> 以了解详细信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E5.90.AF.E7.94.A8.E6.80.A7.E8.83.BD.E6.94.AF.E6.8C.81" id="启用性能支持"><span id=".E5.90.AF.E7.94.A8.E6.80.A7.E8.83.BD.E6.94.AF.E6.8C.81"></span>启用性能支持</h3></div>
+
+<p>从第六代处理器 (Sandy Bridge 及更新的架构) 开始，Intel GPU 提供性能计数器，用于向驱动程序提供内部性能数据。 驱动程序和硬件寄存器将此基础结构称为 <i>Observation Architecture</i> (内部称为 "OA") <a href="https://www.phoronix.com/scan.php?page=news_item&amp;px=Intel-HSW-Observation-Arch">[18]</a>，但英特尔的文档一般普遍将此功能称为 提供<i>可观测性能计数器（Observability Performance Counters）</i><a href="https://01.org/sites/default/files/documentation/observability_performance_counters_haswell.pdf">[19]</a> <a href="https://01.org/sites/default/files/documentation/intel-gfx-prm-osrc-skl-vol14-observability.pdf">[20]</a>.
+</p><p>默认情况下，只有使用 <a href="https://lwn.net/Articles/486306/">CAP_SYS_ADMIN</a>（相当于root）或 <a href="https://lwn.net/Articles/812719/">CAP_PERFMON</a> <a href="#pg0d85601792d1">能力</a>（Capabilities）运行的程序才能使用 OA​ <a href="https://github.com/torvalds/linux/blob/b14ffae378aa1db993e62b01392e70d1e585fb23/drivers/gpu/drm/i915/i915_perf.c#L267">[21]</a> <a href="https://github.com/torvalds/linux/blob/b14ffae378aa1db993e62b01392e70d1e585fb23/drivers/gpu/drm/i915/i915_perf.c#L3481-L3484">[22]</a>。 大多数应用程序将在没有这两种情况下运行，从而导致以下警告：
+</p>
+<pre>MESA-INTEL: warning: Performance support disabled, consider sysctl dev.i915.perf_stream_paranoid=0
+</pre>
+<p>若要在不使用能力(或 root)的情况下启用性能支持，请按 <a href="#pg7b7cc2bbe79a">sysctl</a> 中的描述设置内核参数。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><code>perf_event_paranoid</code> 系列选项默认为限制访问，因为允许应用程序访问性能数据存在风险 <a href="https://docs.kernel.org/admin-guide/perf-security.html">[23]</a>。话虽如此， <code>dev.i915.perf_stream_paranoid</code> 只会影响对 GPU 性能计数器的访问，这比访问 CPU 架构执行上下文寄存器之类的带来的风险要小。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9800307f9050_.E6.8A.80.E5.B7.A7.E5.92.8C.E7.AA.8D.E9.97.A8" id="技巧和窍门"><span id=".E6.8A.80.E5.B7.A7.E5.92.8C.E7.AA.8D.E9.97.A8"></span>技巧和窍门</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E8.AE.BE.E7.BD.AE.E7.BC.A9.E6.94.BE.E6.A8.A1.E5.BC.8F" id="设置缩放模式"><span id=".E8.AE.BE.E7.BD.AE.E7.BC.A9.E6.94.BE.E6.A8.A1.E5.BC.8F"></span>设置缩放模式</h3></div>
+<p>这对于某些全屏应用程序很有用：
+</p>
+<pre>$ xrandr --output LVDS1 --set PANEL_FITTING <i>param</i>
+</pre>
+<p>其中 <code><i>param</i></code> 可以为：
+</p>
+<ul><li><code>center</code>: 分辨率将完全保持原设置，不会进行缩放</li>
+<li><code>full</code>: 缩放分辨率，以便使用整个屏幕</li>
+<li><code>full_aspect</code>: 将分辨率缩放到可能的最大值，但保持纵横比。</li></ul>
+<p>如果它不起作用，请尝试：
+</p>
+<pre>$ xrandr --output LVDS1 --set "scaling mode" <i>param</i>
+</pre>
+<p>其中 <code><i>param</i></code> 可以为 <code>"Full"</code>、 <code>"Center"</code> 或 <code>"Full aspect"</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此选项目前不适用于外接显示器 (比如 VGA, DVI, HDMI, DP). <a href="https://bugs.freedesktop.org/show_bug.cgi?id=90989">[24]</a></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_GMA_4500.E4.B8.8A.E7.9A.84.E7.A1.AC.E4.BB.B6.E5.8A.A0.E9.80.9F_H.264_.E8.A7.A3.E7.A0.81" id="GMA_4500上的硬件加速_H.264_解码"><span id="GMA_4500.E4.B8.8A.E7.9A.84.E7.A1.AC.E4.BB.B6.E5.8A.A0.E9.80.9F_H.264_.E8.A7.A3.E7.A0.81"></span>GMA 4500上的硬件加速 H.264 解码</h3></div>
+<p>对于某些 GMA 4500 系列的 GPU，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva-intel-driver">libva-intel-driver</a></span><sup><small>包</small></sup></span> 软件包只提供对 MPEG-2 解码的硬件加速，而并不包括 H.264 解码。要检查这是否对您的 GPU 有影响，请同时安装驱动和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva-utils">libva-utils</a></span><sup><small>包</small></sup></span> 软件包，并检查 <code>vainfo</code> 命令的输出结果中是否包含以 <code>VAProfileH264</code> 开头的项目。
+</p><p>对于 H.264 的解码支持是在另一个 g45-h264 分支中独立维护的。您可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libva-intel-driver-g45-h264/">libva-intel-driver-g45-h264</a></span><sup><small>AUR</small></sup></span> 软件包来使用它。然而，要注意该支持是实验性的，并且其开发工作已被放弃。在GMA 4500系列GPU上使用VA-API与此驱动程序能够帮助 CPU 分载（offload），但可能无法实现像非硬件加速那样平滑的播放。使用 mplayer 进行的测试表明，使用 vaapi 播放 H.264编码的1080p 视频可以将 CPU 负载减半(与 XV overlay相比) ，但是播放非常卡顿，而720p 播放效果相当不错 <a href="https://bbs.archlinux.org/viewtopic.php?id=150550">[25]</a>。这与其他人的经历相印证 <a href="https://web.archive.org/web/20160325142959/http://www.emmolution.org/?p=192&amp;cpage=1#comment-12292">[26]</a>。在 BIOS 中将预先分配的显存大小设置得更高，可以获得更好的硬件解码播放效果。这样做了之后即使是1080p h264视频也可以流畅播放<a href="https://lists.libreplanet.org/archive/html/guix-patches/2019-11/msg00652.html">[27]</a>。同时使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mpv-git/">mpv-git</a></span><sup><small>AUR</small></sup></span> 、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ffmpeg-git/">ffmpeg-git</a></span><sup><small>AUR</small></sup></span> 和  <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libva-intel-driver-g45-h264/">libva-intel-driver-g45-h264</a></span><sup><small>AUR</small></sup></span> 也可以流畅播放(1080p/720p)视频。通过 MPV 和 Firefox 插件“发送到 MPV 播放器”<a href="https://addons.mozilla.org/firefox/addon/send-to-mpv-player/">[28]</a> ，可以观看硬件加速的 YouTube 视频。 
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E8.A6.86.E5.86.99.E6.8A.A5.E5.91.8A.E7.9A.84_OpenGL_.E7.89.88.E6.9C.AC" id="覆写报告的_OpenGL_版本"><span id=".E8.A6.86.E5.86.99.E6.8A.A5.E5.91.8A.E7.9A.84_OpenGL_.E7.89.88.E6.9C.AC"></span>覆写报告的 OpenGL 版本</h3></div>
+<p><code>MESA_GL_VERSION_OVERRIDE</code> <a href="#pg4989d4f46056">环境变量</a>可以为任何应用程序覆写报告的 OpenGL 版本。比如，设置 <code>MESA_GL_VERSION_OVERRIDE=4.5</code> 环境变量将会把 OpenGL 版本报告为 4.5.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>您可以使用此变量报告任何已知的 OpenGL 版本，即使 GPU 不支持它。一些应用程序可能不再崩溃，而一些可能反而开始崩溃。所以您可能不希望全局设置这个变量。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E7.9B.91.E6.8E.A7" id="监控"><span id=".E7.9B.91.E6.8E.A7"></span>监控</h3></div>
+
+<ul><li><b>intel_gpu_top</b> — 适用于 Intel GPU 的类似 top 命令的任务监视器。 （需要 root 权限）</li></ul>
+<dl><dd><a href="https://gitlab.freedesktop.org/drm/igt-gpu-tools">https://gitlab.freedesktop.org/drm/igt-gpu-tools</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-gpu-tools">intel-gpu-tools</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>nvtop</b> — 适用于 AMD、Intel 和 NVIDIA 的 GPU 进程监视器（目前对 Intel GPU 仅有非常基础的支持）</li></ul>
+<dl><dd><a href="https://github.com/Syllo/nvtop">https://github.com/Syllo/nvtop</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvtop">nvtop</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E8.AE.BE.E7.BD.AE.E4.BA.AE.E5.BA.A6.E5.92.8C.E4.BC.BD.E7.8E.9B.E5.80.BC" id="设置亮度和伽玛值"><span id=".E8.AE.BE.E7.BD.AE.E4.BA.AE.E5.BA.A6.E5.92.8C.E4.BC.BD.E7.8E.9B.E5.80.BC"></span>设置亮度和伽玛值</h3></div>
+<p>参见<a href="#pga0bdbde91ee9">背光</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E6.B5.8B.E8.AF.95.E6.96.B0.E7.9A.84.E5.AE.9E.E9.AA.8C.E6.80.A7_Xe_.E9.A9.B1.E5.8A.A8" id="测试新的实验性_Xe_驱动"><span id=".E6.B5.8B.E8.AF.95.E6.96.B0.E7.9A.84.E5.AE.9E.E9.AA.8C.E6.80.A7_Xe_.E9.A9.B1.E5.8A.A8"></span>测试新的实验性 Xe 驱动</h3></div>
+<p>为了尝试（实验性的）<a href="https://www.kernel.org/doc/html//next/gpu/rfc/xe.html">新的 Xe 驱动</a>，你需要：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 6.8 或更高版本</li>
+<li><a href="https://en.wikipedia.org/wiki/Tiger_Lake">Tiger Lake</a> 或更新的集成显卡，或者独立显卡</li>
+<li>官方源的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span> 软件包。或者保证 mesa 使用 <code>-D intel-xe-kmd=enabled</code> 进行编译</li></ul>
+<p>运行此命令，然后记录下您的 PCI ID：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">lspci -nn | grep VGA</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">00:02.0 VGA compatible controller [0300]: Intel Corporation TigerLake-LP GT2 [Iris Xe Graphics] [8086:<b>9a49</b>] (rev 01)
+</pre>
+<p>然后将带有合适 PCI ID 的以下内容添加到<a href="#pgec0856954f1c">内核参数</a>里：
+</p>
+<pre>... i915.force_probe=!<b>9a49</b> xe.force_probe=<b>9a49</b>
+</pre>
+<p>确保您有在需要时可以撤销变更的备用启动方案。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9800307f9050_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E7.94.BB.E9.9D.A2.E6.92.95.E8.A3.82" id="画面撕裂"><span id=".E7.94.BB.E9.9D.A2.E6.92.95.E8.A3.82"></span>画面撕裂</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9800307f9050_.E4.BD.BF.E7.94.A8.E4.BA.86_Intel_.E9.A9.B1.E5.8A.A8" id="使用了_Intel_驱动"><span id=".E4.BD.BF.E7.94.A8.E4.BA.86_Intel_.E9.A9.B1.E5.8A.A8"></span>使用了 Intel 驱动</h4></div>
+<p>SNA 加速方法在一些机器上引起撕裂。要解决这个问题，请在驱动程序中启用 <code>TearFree</code> 选项，方法是在<a href="#pgcf92ea97092d">配置文件</a>中添加以下内容：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-intel.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Device"
+  Identifier "Intel Graphics"
+  Driver "intel"
+  Option "TearFree" "true"
+EndSection</pre>
+<p>参见<a href="https://bugs.freedesktop.org/show_bug.cgi?id=37686">原始错误报告</a>以获得更多信息。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>当 <code>SwapbuffersWait</code> 为 <code>false</code> 时，该选项可能不工作</li>
+<li>此选项可能会显著增加内存分配并降低性能。<a href="https://bugs.freedesktop.org/show_bug.cgi?id=37686#c123">[29]</a></li>
+<li>对于对vsync定时非常挑剔的应用程序来说，这个选项是有问题的，比如 <a href="https://en.wikipedia.org/wiki/Super_Meat_Boy">Super Meat Boy</a>.</li>
+<li>此选项不适用于UXA加速方法，仅适用于SNA。</li>
+<li>对于 Intel UHD 620 或 630 显卡，您需要添加 <code>Option "TripleBuffer" "true"</code> 选项才能使 <code>TearFree</code> 工作。</li>
+<li>通过添加 <code>Option "DRI" "2"</code> 来禁用 DRI3 可能是必须的，不然任意全屏应用（比如视频播放）会使 TearFree 失效。<a href="https://bugs.freedesktop.org/show_bug.cgi?id=96847#c7">[30]</a></li></ul></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9800307f9050_.E4.BD.BF.E7.94.A8.E4.BA.86_modesetting_.E9.A9.B1.E5.8A.A8" id="使用了_modesetting_驱动"><span id=".E4.BD.BF.E7.94.A8.E4.BA.86_modesetting_.E9.A9.B1.E5.8A.A8"></span>使用了 modesetting 驱动</h4></div>
+<p>modesetting 驱动<a href="https://gitlab.freedesktop.org/xorg/xserver/-/merge_requests/1006">在最近才支持</a> TearFree <a href="https://www.phoronix.com/news/xf86-video-modesetting-TearFree">[31]</a><a href="https://www.phoronix.com/news/Modesetting-TearFree-Merged">[32]</a>。直到 2023 年 11 月，这个补丁还没有进入稳定版，所以现在你会需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xorg-server-git/">xorg-server-git</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-intel.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Device"
+  Identifier "Intel Graphics"
+  Driver "modesetting"
+  Option "TearFree" "true"
+EndSection
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E7.A6.81.E7.94.A8.E5.9E.82.E7.9B.B4.E5.90.8C.E6.AD.A5_.28VSYNC.29" id="禁用垂直同步_(VSYNC)"><span id=".E7.A6.81.E7.94.A8.E5.9E.82.E7.9B.B4.E5.90.8C.E6.AD.A5_.28VSYNC.29"></span>禁用垂直同步 (VSYNC)</h3></div>
+<p>适用于以下情景：
+</p>
+<ul><li>由于 GPU 的原因，Chomium/Chrome 有滞后和性能低下的问题，而在使用 --disable-gpu 选项启动时能流畅运行。</li>
+<li>glxgears 测试未显示预期性能</li></ul>
+<p>Intel 驱动程序使用<a href="https://www.intel.com/support/graphics/sb/CS-004527.htm">三重缓冲</a>进行垂直同步；这允许充分的性能释放并避免画面撕裂。若要关闭垂直同步（例如用于基准测试），请在主目录中使用如下 <code>.drirc</code> 文件： 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.drirc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">&lt;device screen="0" driver="dri2"&gt;
+	&lt;application name="Default"&gt;
+		&lt;option name="vblank_mode" value="0"/&gt;
+	&lt;/application&gt;
+&lt;/device&gt;</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>不要使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/driconf/">driconf</a></span><sup><small>AUR</small></sup></span> 来创建此文件。它有问题，会设置错误的驱动程序。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_DRI3_.E9.97.AE.E9.A2.98" id="DRI3_问题"><span id="DRI3_.E9.97.AE.E9.A2.98"></span>DRI3 问题</h3></div>
+<p><i>DRI3</i> 是  <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> 中的默认 DRI 版本。在某些系统上，这可能会导致<a href="https://bugs.chromium.org/p/chromium/issues/detail?id=370022">这样</a>的问题。要切换回 DRI2，请在<a href="#pgcf92ea97092d">配置文件</a>中添加以下行：
+</p>
+<pre>Option "DRI" "2"
+</pre>
+<p>对于 <code>modesetting</code> 驱动程序，这种禁用 DRI3 的方法不起作用。所以我们可以设置环境变量 <code>LIBGL_DRI3_DISABLE=1</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_GTK.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.AD.E7.9A.84.E5.AD.97.E4.BD.93.E5.92.8C.E5.B1.8F.E6.98.BE.E6.8D.9F.E5.9D.8F.EF.BC.88.E6.8C.82.E8.B5.B7.2F.E6.81.A2.E5.A4.8D.E5.90.8E.E7.BC.BA.E5.B0.91.E5.AD.97.E5.BD.A2.EF.BC.89" id="GTK应用程序中的字体和屏显损坏（挂起/恢复后缺少字形）"><span id="GTK.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.AD.E7.9A.84.E5.AD.97.E4.BD.93.E5.92.8C.E5.B1.8F.E6.98.BE.E6.8D.9F.E5.9D.8F.EF.BC.88.E6.8C.82.E8.B5.B7.2F.E6.81.A2.E5.A4.8D.E5.90.8E.E7.BC.BA.E5.B0.91.E5.AD.97.E5.BD.A2.EF.BC.89"></span>GTK应用程序中的字体和屏显损坏（挂起/恢复后缺少字形）</h3></div>
+<p>如果您在 GTK 应用程序中遇到缺少字形的问题，以下解决方法可能会有所帮助。编辑  <code>/etc/environment</code>  并添加以下行：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/environment</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">COGL_ATLAS_DEFAULT_BLIT_MODE=framebuffer</pre>
+<p>另请参考 <a href="https://bugs.freedesktop.org/show_bug.cgi?id=88584">FreeDesktop bug 88584</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E5.90.AF.E5.8A.A8.E8.BF.87.E7.A8.8B.E4.B8.AD.E5.8A.A0.E8.BD.BD.E6.A8.A1.E5.9D.97.E6.97.B6.E6.98.BE.E7.A4.BA.E7.A9.BA.E7.99.BD.E5.B1.8F.E5.B9.95" id="启动过程中加载模块时显示空白屏幕"><span id=".E5.90.AF.E5.8A.A8.E8.BF.87.E7.A8.8B.E4.B8.AD.E5.8A.A0.E8.BD.BD.E6.A8.A1.E5.9D.97.E6.97.B6.E6.98.BE.E7.A4.BA.E7.A9.BA.E7.99.BD.E5.B1.8F.E5.B9.95"></span>启动过程中加载模块时显示空白屏幕</h3></div>
+
+<p><br/>
+如果您使用 KMS 晚启动，然后屏幕在加载模块（Loading modules）时显示为空白，您可以试着把 <code>i915</code> 和 <code>intel_agp</code> 添加到 initramfs 中。请参考<a href="#pg4955543b232e">内核级显示模式设置#KMS_早启动</a>。
+</p><p>另外，附加以下<a href="#pgec0856954f1c">内核参数</a>似乎也有效：
+</p>
+<pre>video=SVIDEO-1:d
+</pre>
+<p>如果您需要输出到VGA，请尝试以下操作：
+</p>
+<pre>video=VGA-1:1280x800
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_X_.E7.AA.97.E5.8F.A3.E7.B3.BB.E7.BB.9F.E5.9C.A8.E4.BD.BF.E7.94.A8_Intel_.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F.E6.97.B6.E5.86.BB.E7.BB.93.E6.88.96.E5.B4.A9.E6.BA.83" id="X_窗口系统在使用_Intel_驱动程序时冻结或崩溃"><span id="X_.E7.AA.97.E5.8F.A3.E7.B3.BB.E7.BB.9F.E5.9C.A8.E4.BD.BF.E7.94.A8_Intel_.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F.E6.97.B6.E5.86.BB.E7.BB.93.E6.88.96.E5.B4.A9.E6.BA.83"></span>X 窗口系统在使用 Intel 驱动程序时冻结或崩溃</h3></div>
+<p>一些关于 X 窗口系统崩溃、冻结或 GPU 挂起的问题，可以通过设置 NoAccel 选项禁用 GPU 来解决。请在<a href="#pgcf92ea97092d">配置文件</a>中添加以下内容：
+</p>
+<pre>  Option "NoAccel" "True"
+</pre>
+<p>或者，尝试通过设置 DRI 选项来只禁用 3D 加速：
+</p>
+<pre>  Option "DRI" "False"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E6.B7.BB.E5.8A.A0.E6.9C.AA.E6.A3.80.E6.B5.8B.E5.88.B0.E7.9A.84.E5.88.86.E8.BE.A8.E7.8E.87" id="添加未检测到的分辨率"><span id=".E6.B7.BB.E5.8A.A0.E6.9C.AA.E6.A3.80.E6.B5.8B.E5.88.B0.E7.9A.84.E5.88.86.E8.BE.A8.E7.8E.87"></span>添加未检测到的分辨率</h3></div>
+<p>这个问题在 <a href="#pgaa98d1ed067b">Xrandr 页面</a>中有详细的说明。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E6.97.A0.E6.B3.95.E8.B0.83.E8.8A.82.E8.83.8C.E5.85.89" id="无法调节背光"><span id=".E6.97.A0.E6.B3.95.E8.B0.83.E8.8A.82.E8.83.8C.E5.85.89"></span>无法调节背光</h3></div>
+<p>如果您的设备从挂起中恢复后，调整屏幕背光亮度的热键失效，请根据 <a href="#pg1be8a95c5cf0">Backlight</a> 一文检查您的配置。
+</p><p>如果问题仍然存在，请尝试如下任一<a href="#pgec0856954f1c">内核参数</a>:
+</p>
+<pre>acpi_osi=Linux
+acpi_osi="!Windows 2012"
+acpi_osi=
+</pre>
+<p>还要确保您没有使用 fastboot 模式 (<code>i915.fastboot</code>  内核参数) ，因为它<a href="https://www.phoronix.com/forums/forum/software/mobile-linux/1066447-arch-linux-users-with-intel-graphics-can-begin-enjoying-a-flicker-free-boot">会破坏背光控制</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_Chromium_.E5.92.8C_Firefox_.E6.8D.9F.E5.9D.8F.E6.88.96.E6.97.A0.E5.93.8D.E5.BA.94" id="Chromium_和_Firefox_损坏或无响应"><span id="Chromium_.E5.92.8C_Firefox_.E6.8D.9F.E5.9D.8F.E6.88.96.E6.97.A0.E5.93.8D.E5.BA.94"></span>Chromium 和 Firefox 损坏或无响应</h3></div>
+<p>如果您在 Chromium 和/或 Firefox 中遇到了损坏、无响应、性能滞后或缓慢的问题，一些可能的解决方案包括：
+</p>
+<ul><li><a href="#pgcf92ea97092d">把 AccelMethod 设置为 "uxa"</a></li>
+<li><a href="#pgcf92ea97092d">禁用垂直同步 (VSYNC)</a></li>
+<li><a href="#pgcf92ea97092d">启用 TearFree 选项</a></li>
+<li>禁用 DRI 和加速法 (在 Intel 第十代处理器 Iris 显卡上测试过): <pre>Option "NoAccel" "True"
+Option "DRI" "False"
+</pre></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_4.0.2B_.E7.89.88.E6.9C.AC.E7.9A.84.E5.86.85.E6.A0.B8.E4.BC.9A.E5.9C.A8.E4.BD.BF.E7.94.A8_Broadwell_.E6.88.96_Core-M_.E8.8A.AF.E7.89.87.E6.97.B6.E5.B4.A9.E6.BA.83" id="4.0+_版本的内核会在使用_Broadwell_或_Core-M_芯片时崩溃"><span id="4.0.2B_.E7.89.88.E6.9C.AC.E7.9A.84.E5.86.85.E6.A0.B8.E4.BC.9A.E5.9C.A8.E4.BD.BF.E7.94.A8_Broadwell_.E6.88.96_Core-M_.E8.8A.AF.E7.89.87.E6.97.B6.E5.B4.A9.E6.BA.83"></span>4.0+ 版本的内核会在使用 Broadwell 或 Core-M 芯片时崩溃</h3></div>
+<p>X/Wayland 加载后几秒钟，机器将冻结，journalctl 将记录内核崩溃并提到 Intel 显卡：
+</p>
+<pre>Jun 16 17:54:03 hostname kernel: BUG: unable to handle kernel NULL pointer dereference at           (null)
+Jun 16 17:54:03 hostname kernel: IP: [&lt;          (null)&gt;]           (null)
+...
+Jun 16 17:54:03 hostname kernel: CPU: 0 PID: 733 Comm: gnome-shell Tainted: G     U     O    4.0.5-1-ARCH #1
+...
+Jun 16 17:54:03 hostname kernel: Call Trace:
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffffa055cc27&gt;] ? i915_gem_object_sync+0xe7/0x190 [i915]
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffffa0579634&gt;] intel_execlists_submission+0x294/0x4c0 [i915]
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffffa05539fc&gt;] i915_gem_do_execbuffer.isra.12+0xabc/0x1230 [i915]
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffffa055d349&gt;] ? i915_gem_object_set_to_cpu_domain+0xa9/0x1f0 [i915]
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffff811ba2ae&gt;] ? __kmalloc+0x2e/0x2a0
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffffa0555471&gt;] i915_gem_execbuffer2+0x141/0x2b0 [i915]
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffffa042fcab&gt;] drm_ioctl+0x1db/0x640 [drm]
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffffa0555330&gt;] ? i915_gem_execbuffer+0x450/0x450 [i915]
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffff8122339b&gt;] ? eventfd_ctx_read+0x16b/0x200
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffff811ebc36&gt;] do_vfs_ioctl+0x2c6/0x4d0
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffff811f6452&gt;] ? __fget+0x72/0xb0
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffff811ebec1&gt;] SyS_ioctl+0x81/0xa0
+Jun 16 17:54:03 hostname kernel:  [&lt;ffffffff8157a589&gt;] system_call_fastpath+0x12/0x17
+Jun 16 17:54:03 hostname kernel: Code:  Bad RIP value.
+Jun 16 17:54:03 hostname kernel: RIP  [&lt;          (null)&gt;]           (null)
+</pre>
+<p>这可以通过禁用 execlist 支持来解决，该支持在 4.0 内核中被设为为默认值。添加以下<a href="#pgec0856954f1c">内核参数</a>：
+</p>
+<pre>i915.enable_execlists=0
+</pre>
+<p>目前已知该问题直到 4.0.5 内核上仍存在。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_Windows_.E5.AE.A2.E6.88.B7.E6.9C.BA.E8.BF.90.E8.A1.8C.E8.BF.9F.E7.BC.93" id="Windows_客户机运行迟缓"><span id="Windows_.E5.AE.A2.E6.88.B7.E6.9C.BA.E8.BF.90.E8.A1.8C.E8.BF.9F.E7.BC.93"></span>Windows 客户机运行迟缓</h3></div>
+<p>VirtualBox 中 Windows 客户机的视频输出有时会挂起，直到主机强制屏幕更新(例如移动鼠标光标)。删除 <code>enable_fbc=1</code> 选项可以解决这个问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E5.B1.8F.E5.B9.95.E9.97.AA.E7.83.81" id="屏幕闪烁"><span id=".E5.B1.8F.E5.B9.95.E9.97.AA.E7.83.81"></span>屏幕闪烁</h3></div>
+<p>面板自刷新 (PSR), 一种 Intel iGPU （核显）使用的节能技术已知在某些情况下会导致闪烁 <a href="https://bugs.archlinux.org/task/49628">FS#49628</a> <a href="https://bugs.archlinux.org/task/49371">FS#49371</a> <a href="https://bugs.archlinux.org/task/50605">FS#50605</a>. 临时的解决办法是通过设置 <code>i915.enable_psr=0</code> <a href="#pgec0856954f1c">内核参数</a>来禁用该功能。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E5.9C.A8_i915_.E9.A9.B1.E5.8A.A8.E4.B8.8A.E4.BD.BF.E7.94.A8_OpenGL_2.1" id="在_i915_驱动上使用_OpenGL_2.1"><span id=".E5.9C.A8_i915_.E9.A9.B1.E5.8A.A8.E4.B8.8A.E4.BD.BF.E7.94.A8_OpenGL_2.1"></span>在 i915 驱动上使用 OpenGL 2.1</h3></div>
+<p>正如<a href="https://www.phoronix.com/scan.php?page=news_item&amp;px=Mesa-i915-OpenGL-2-Drop">这篇文章</a>所说，把 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span> 从 13.x 版本更新到 17 可能会导致第三代 Intel GPU （如GMA3100，参阅<a href="https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units#Third_generation">这里</a>）上的 OpenGL 2.1 支持失效，并使其降级到 OpenGL 1.4。然而您可以通过配置 <code>/etc/drirc</code> 或 <code>~/.drirc</code> 文件中的选项来手动恢复它：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/drirc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">&lt;driconf&gt;
+...
+    &lt;device driver="i915"&gt;
+        &lt;application name="Default"&gt;
+            &lt;option name="<b>stub_occlusion_query</b>" value="<b>true</b>" /&gt;
+            &lt;option name="<b>fragment_shader</b>" value="<b>true</b>" /&gt;
+        &lt;/application&gt;
+    &lt;/device&gt;
+...
+&lt;/driconf&gt;</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>作出该让步的原因是 Chromium 和其他应用程序的糟糕体验。如果有需要，您可以参考 <a href="https://dri.freedesktop.org/wiki/ConfigurationInfrastructure/">此文</a> 来对 drirc 文件作特定于应用程序的修改，比如专门针对 Chromium 禁用 gl2.1。</li>
+<li>新的包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span> 软件包内的基于 Gallium 的 i915 驱动会一直报告 OpenGL 2.1，所以这些设置对于那个驱动来说不再需要了。</li></ul></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_KMS_.E9.97.AE.E9.A2.98.EF.BC.9A.E7.BB.88.E7.AB.AF.E5.8F.AA.E5.9C.A8.E5.BE.88.E5.B0.8F.E7.9A.84.E4.B8.80.E5.9D.97.E5.8C.BA.E5.9F.9F.E4.B8.AD.E6.98.BE.E7.A4.BA" id="KMS_问题：终端只在很小的一块区域中显示"><span id="KMS_.E9.97.AE.E9.A2.98.EF.BC.9A.E7.BB.88.E7.AB.AF.E5.8F.AA.E5.9C.A8.E5.BE.88.E5.B0.8F.E7.9A.84.E4.B8.80.E5.9D.97.E5.8C.BA.E5.9F.9F.E4.B8.AD.E6.98.BE.E7.A4.BA"></span>KMS 问题：终端只在很小的一块区域中显示</h3></div>
+<p>其中一个低分辨率视频端口会在引导时启用，这将导致终端仅能使用屏幕的一小块区域。 要修复这个问题，在引导加载程序的内核命令行参数中，使用 i915 模块参数 <code>video=SVIDEO-1:d</code> 来明确禁用该端口。有关详细信息，请参阅<a href="#pgec0856954f1c">内核参数</a>。 
+</p><p>如果这不起作用，请尝试禁用 TV1 或 VGA1，而不是 SVIDEO-1。视频端口名称可以用 <a href="#pgaa98d1ed067b">xrandr</a> 列出。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_Haswell_CPU_.E4.BD.BF.E7.94.A8_HDMI_.E8.BE.93.E5.87.BA.E6.97.B6.E6.B2.A1.E6.9C.89.E5.A3.B0.E9.9F.B3" id="Haswell_CPU_使用_HDMI_输出时没有声音"><span id="Haswell_CPU_.E4.BD.BF.E7.94.A8_HDMI_.E8.BE.93.E5.87.BA.E6.97.B6.E6.B2.A1.E6.9C.89.E5.A3.B0.E9.9F.B3"></span>Haswell CPU 使用 HDMI 输出时没有声音</h3></div>
+<p>根据一个 <a href="https://bugzilla.kernel.org/show_bug.cgi?id=60769">Linux 内核问题</a>，在设置 <code>intel_iommu=on</code> 参数时声音不会通过 HDMI 端口输出。要修复该问题，使用如下<a href="#pgec0856954f1c">内核参数</a>：
+</p>
+<pre>intel_iommu=on,igfx_off
+</pre>
+<p>或者也可以禁用 IOMMU：
+</p>
+<pre>intel_iommu=off
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E4.BD.8E.E5.8A.9F.E8.80.97_Intel_CPU_.E4.BC.9A.E5.B4.A9.E6.BA.83.E6.88.96.E5.86.BB.E7.BB.93" id="低功耗_Intel_CPU_会崩溃或冻结"><span id=".E4.BD.8E.E5.8A.9F.E8.80.97_Intel_CPU_.E4.BC.9A.E5.B4.A9.E6.BA.83.E6.88.96.E5.86.BB.E7.BB.93"></span>低功耗 Intel CPU 会崩溃或冻结</h3></div>
+
+<p><br/>
+由于低功耗 Intel CPU 上电源管理功能的问题，低功耗 Intel 处理器和/或笔记本电脑处理器有随机挂起或崩溃的倾向。如果发生此类崩溃，您将看不到任何报告此问题的日志。添加以下<a href="#pgec0856954f1c">内核参数</a>可能有助于解决问题。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>不建议同时使用以下三个内核参数</div>
+<pre>intel_idle.max_cstate=1 i915.enable_dc=0 ahci.mobile_lpm_policy=1
+</pre>
+<p><code>ahci.mobile_lpm_policy=1</code> 能修复部分联想笔记本电脑和一些宏碁笔记本电脑因 SATA 控制器电源管理问题而出现的挂起故障。该解决方法严格来说与 Intel 显卡无关，但它确实解决了相关问题。添加此内核参数可以将链路电源管理(LPM)从固件默认值修改为最大性能，并且还可以解决当您在某些联想机器上更改显示器亮度时出现的挂起问题。但这么做在现代超级本上会增加 1 至 1.5 W 的闲置功耗。有关更多信息，特别是有关其他状态的信息，请参阅 <a href="https://lore.kernel.org/lkml/20171211165216.5604-1-hdegoede@redhat.com/">Linux内核邮件列表</a>和 <a href="https://access.redhat.com/documentation/en-en/red_hat_enterprise_linux/6/html/power_management_guide/alpm">Red Hat 文档</a>。
+</p><p><code>i915.enable_dc=0</code> 会禁用GPU电源管理。这确实解决了某些 Intel 系统上的随机挂起问题，特别是 Goldmount 和 Kaby Lake Refresh 芯片。但使用此参数会提高笔记本电脑的功耗并缩短电池寿命。
+</p><p><code>intel_idle.max_cstate=1</code> 会限制处理器的睡眠状态，防止处理器进入深度睡眠状态。这绝对不是理想的做法，而且确实会导致更高的功率使用和更低的电池寿命。然而，它确实解决了许多 Intel 系统上的随机挂起问题。如果您使用的是 Intel Baytrail 或 Kaby Lake Refresh 芯片，请使用此参数。Intel Baytrail 芯片由于一个硬件缺陷，在没有这个内核参数的情况下会随机挂起<a href="https://bugzilla.kernel.org/show_bug.cgi?id=109051#c752">[33]</a>。有关 max_cstate 参数的更多信息，请参见<a href="https://docs.kernel.org/admin-guide/pm/intel_idle.html#kernel-command-line-options-and-module-parameters">内核文档</a>以及 <a href="https://gist.github.com/wmealing/2dd2b543c4d3cff6cab7">GitHub 上</a>关于 cstates 的一篇文章。
+</p><p>如果您尝试通过一次性添加 <code>intel_idle.max_cstate=1 i915.enable_dc=0 ahci.mobile_lpm_policy=1</code> 等三个参数来解决频繁挂起的问题，然后成功了，那您应该用排除法找出真正解决问题的那个参数。因为如果实际的问题与 SATA 电源管理有关，并且 <code>ahci.mobile_lpm_policy=1</code> 参数解决了这个问题，那么禁用 cstate 和显示电源管理是不可取的。 
+</p><p>参考 <a href="https://linuxreviews.org/Intel_graphics#Kernel_Parameters">Linux Reviews</a> 网站以获取更多信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_.E6.B7.BB.E5.8A.A0.E5.AF.B9_165Hz_.E6.98.BE.E7.A4.BA.E5.99.A8.E7.9A.84.E6.94.AF.E6.8C.81" id="添加对_165Hz_显示器的支持"><span id=".E6.B7.BB.E5.8A.A0.E5.AF.B9_165Hz_.E6.98.BE.E7.A4.BA.E5.99.A8.E7.9A.84.E6.94.AF.E6.8C.81"></span>添加对 165Hz 显示器的支持</h3></div>
+
+<p>对于某些 165Hz 显示器，<i>xrandr</i> 可能不会显示165Hz选项，且 #添加未检测到的分辨率中的方法并不能解决这一问题。在这种情况下，请参见 StackExchange 上的问答  <a href="https://unix.stackexchange.com/questions/680356/i915-driver-stuck-at-40hz-on-165hz-screen">i915-driver-stuck-at-40hz-on-165hz-screen</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>除了创建 <code>/etc/initramfs-tools/hooks/edid</code> 文件之外，应该通过以下方式创建 <a href="#pgbd0f46fbac92">mkinitcpio</a> 钩子：
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/initcpio/install/edid</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+
+build() {
+    add_file /lib/firmware/edid/edid.bin
+}
+
+help() {
+    cat &lt;&lt;HELPEOF
+This hook add support for 165Hz
+HELPEOF
+}
+</pre>
+<p>然后在 <code>/etc/mkinitcpio.conf</code> 文件的 HOOKS 中添加 <i>edid</i> ，就像下面这样
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">HOOKS=(... fsck edid)</pre>
+<p>最后 <a href="#pgbd0f46fbac92">重新生成initramfs</a>. 
+</p>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9800307f9050_Raptor_Lake_.E5.92.8C_Alder_Lake-P_.E5.A4.84.E7.90.86.E5.99.A8.E4.BB.8E.E7.9D.A1.E7.9C.A0.2F.E6.8C.82.E8.B5.B7.E4.B8.AD.E6.81.A2.E5.A4.8D.E6.97.B6.E5.86.BB.E7.BB.93" id="Raptor_Lake_和_Alder_Lake-P_处理器从睡眠/挂起中恢复时冻结"><span id="Raptor_Lake_.E5.92.8C_Alder_Lake-P_.E5.A4.84.E7.90.86.E5.99.A8.E4.BB.8E.E7.9D.A1.E7.9C.A0.2F.E6.8C.82.E8.B5.B7.E4.B8.AD.E6.81.A2.E5.A4.8D.E6.97.B6.E5.86.BB.E7.BB.93"></span>Raptor Lake 和 Alder Lake-P 处理器从睡眠/挂起中恢复时冻结</h3></div>
+<p>来自不同供应商的 Raptor Lake 和 Alder Lake-P 第 12 代移动处理器的笔记本电脑的用户在从暂停状态中醒来后，遇到了了冻结和黑屏。这是因为根据 freedesktop issue <a href="https://gitlab.freedesktop.org/drm/intel/-/issues/5531">5531</a> 和 <a href="https://gitlab.freedesktop.org/drm/intel/-/issues/6401">6401</a> 的描述，许多笔记本电脑供应商提供了错误的 VBT（Video BIOS Table，视频 BIOS 表），错误地描述了连接到 iGPU 的实际端口。在这种情况下，所有被记录的案例都怀疑是重复的 eDP 条目。
+</p><p>考虑到大多数供应商<a href="https://gitlab.freedesktop.org/drm/i915/kernel/-/issues/7402">不会</a>为运行正常的 Windows 操作系统的笔记本电脑发布 BIOS 更新，Linux 用户只能在内核端解决这个问题。有两个方法可以防止出现重复的 eDP 条目以影响到内核：<a href="https://bbs.archlinux.org/viewtopic.php?id=284176">修补内核</a>或者<a href="https://gitlab.freedesktop.org/drm/i915/kernel/-/issues/7709">加载一个 修改过的 VBT</a>。
+</p><p>为了修补内核，重复的 eDP 条目需要通过分析以下命令的输出被辨别出来：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># intel_vbt_decode /sys/kernel/debug/dri/1/i915_vbt</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Child device info:
+        Device handle: 0x0008 (LFP 1 (eDP))
+        Device type: 0x1806 (unknown)
+ ...
+ Child device info:
+        Device handle: 0x0080 (LFP 2 (eDP))
+        Device type: 0x1806 (unknown)</pre>
+<p>输出表明这里确实存在重复的 eDP，内核应该忽略掉第二个，但是用户还是被鼓励检查这个。然后可以使用下面的补丁修补内核，如果有需要的话重复条目的索引可以被替换为 <code>ignoreEntry = 1</code>。
+</p>
+<pre>--- a/drivers/gpu/drm/i915/display/intel_bios.c
++++ b/drivers/gpu/drm/i915/display/intel_bios.c
+@@ -3688,6 +3688,14 @@
+{
+       struct intel_bios_encoder_data *devdata;
+
++       int ignoreEntry = 0;
++
+       list_for_each_entry(devdata, &amp;i915-&gt;display.vbt.display_devices, node)
+-               func(i915, devdata);
++       {
++               if (ignoreEntry != 1)
++               {
++                       func(i915, devdata);
++                       ignoreEntry++;
++               }
++       }
+}</pre>
+<p>第二种解决这个问题的方法是通过直接<a href="https://gitlab.freedesktop.org/drm/i915/kernel/-/issues/7709">清除 VBT 内重复条目</a>来修改 VBT。
+</p><p>复制 VBT，使用十六进制编辑器编辑它然后修改重复的 device handle 的 device type 至 <code>00 00</code>：
+</p>
+<pre>$ cat /sys/kernel/debug/dri/0/i915_vbt &gt; vbt
+</pre>
+<pre>--- vbt
++++ modified_vbt
+@@ -22,10 +22,10 @@
+ 00000150  00 08 00 20 00 08 00 10  00 08 00 02 00 08 00 01  |... ............|
+ 00000160  00 08 00 00 01 08 00 00  00 04 00 00 00 40 00 00  |.............@..|
+ 00000170  00 20 00 00 00 10 00 00  00 02 00 00 00 01 00 00  |. ..............|
+-00000180  00 00 01 00 00 02 8b 01  02 04 00 00 27 08 00 06  |............'...|
+-00000190  18 00 00 00 00 00 00 00  00 00 00 00 00 0a 00 00  |................|
++00000180  00 00 01 00 00 02 8b 01  02 04 00 00 27 08 00 00  |............'...|
++00000190  00 00 00 00 00 00 00 00  00 00 00 00 00 0a 00 00  |................|
+ 000001a0  03 00 00 00 c0 00 40 00  20 00 00 00 00 00 00 00  |......@. .......|
+-000001b0  00 00 20 00 80 00 06 18  00 00 00 00 00 00 00 00  |.. .............|
++000001b0  00 00 20 00 80 00 00 00  00 00 00 00 00 00 00 00  |.. .............|
+ 000001c0  00 00 00 00 07 00 00 00  00 00 00 c0 00 10 00 20  |............... |
+ 000001d0  00 00 00 00 00 00 00 00  00 20 00 04 00 d2 60 00  |......... ....`.|
+ 000001e0  10 10 00 23 21 10 00 00  00 00 00 07 00 00 02 00  |...#!...........|
+</pre>
+<p>这个修改过的 VBT 可以通过复制到 <code>/lib/firmware/modified_vbt</code> 再传递 <code>i915.vbt_firmware=modified_vbt</code> 的内核参数来加载，以及如果有需要，<a href="#pgbd0f46fbac92">重新生成 initramfs</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9800307f9050_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><a href="https://www.intel.cn/content/www/cn/zh/support/articles/000005520/graphics.html">linux graphics</a>（包含一个有 106 种相关产品的列表）</li>
+<li><a href="https://www.intel.cn/content/www/cn/zh/developer/articles/guide/intel-graphics-developers-guides.html">Intel® Processor Graphics</a>（包含一个含有处理器系列、正式的代号、发行日期和显示技术的表）</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807032219
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.393 seconds
+Real time usage: 0.405 seconds
+Preprocessor visited node count: 1772/1000000
+Revision size: 41237/2097152 bytes
+Post‐expand include size: 39764/2097152 bytes
+Template argument size: 20675/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 120/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  123.127      1 -total
+ 11.43%   14.070     15 Template:注意
+  7.75%    9.546     72 Template:Ic
+  6.00%    7.388      4 Template:No
+  5.93%    7.299      2 Template:Accuracy
+  5.38%    6.622     25 Template:Pkg
+  4.46%    5.489      6 Template:META_Message
+  4.34%    5.344      2 Template:Merge
+  4.20%    5.176      4 Template:Yes
+  3.82%    4.705      1 Template:R
+-->
+<!-- Render ID 3239b38e-920f-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6002:|#|:idhash:canonical!zh-cn and timestamp 20260807032219 and revision id 33632. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

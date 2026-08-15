@@ -1,0 +1,432 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg1ba73eaeffc3">Firefox/微调</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Firefox/Tweaks">Firefox/Tweaks</a>，最近一次同步于 2025-01-04，若英文版本有所<a href="https://wiki.archlinux.org/title/Firefox/Tweaks?diff=0&amp;oldid=821721">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Firefox_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Tweaks_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg9b5d7fec8088">Firefox</a></li>
+<li><a href="#pgb2dbc548c89a">浏览器插件</a></li>
+<li><a href="#pgfdbcc5602284">Firefox/在 RAM 中存储配置</a></li>
+<li><a href="#pg5cc59e2910b1">Firefox/隐私</a></li>
+</ul></div>
+<p>此页面包含高级 Firefox 配置选项和性能优化方法。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1ba73eaeffc3_.E6.80.A7.E8.83.BD" id="性能"><span id=".E6.80.A7.E8.83.BD"></span>性能</h2></div>
+<p>提升 Firefox 性能分为两部分：修改运行时参数或开发者提供的配置，以及使用外部程序或脚本进行高级操作。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>以下选项可能仅适用于最新版的 Firefox。</div>
+<p>本节包含用于性能优化的高级 Firefox 选项。更多信息请参阅<a href="https://kb.mozillazine.org/Category:Tweaking_preferences">这些 MozillaZine 文章</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E6.9B.B4.E6.94.B9.E6.80.A7.E8.83.BD.E8.AE.BE.E7.BD.AE" id="更改性能设置"><span id=".E6.9B.B4.E6.94.B9.E6.80.A7.E8.83.BD.E8.AE.BE.E7.BD.AE"></span>更改性能设置</h3></div>
+<p>Firefox 会根据计算机的硬件规格自动选择设置 <a href="https://support.mozilla.org/zh-CN/kb/performance-settings">[1]</a>。不过，您可能希望手动调整此设置，以进一步提升性能或在低端设备上减少内存占用。
+</p><p>可以在“设置”页面调整这些设置，或在 <code>about:config</code> 中手动将 <code>dom.ipc.processCount</code> 的值设置为 <code>1-8</code>，并将 <code>browser.preferences.defaultPerformanceSettings.enabled</code> 设置为 <code>false</code>。
+</p><p>在这种情况下，当前用户的<b>内容进程限制</b>已增加到 <b>4</b>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ps -e | grep 'Web Content'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">13991 tty1     00:00:04 Web Content
+14027 tty1     00:00:09 Web Content
+14031 tty1     00:00:20 Web Content
+14040 tty1     00:00:26 Web Content
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_WebRender" id="WebRender">WebRender</h3></div>
+<p>WebRender 是一个使用 Rust 编写的高性能、基于 GPU 加速的 2D 渲染引擎，是 Firefox 和 <a href="https://zh.wikipedia.org/wiki/Servo">Servo</a> 浏览器引擎项目的渲染架构，从 Firefox 93 开始默认启用，并在硬件<a href="https://searchfox.org/mozilla-central/rev/2b3f6e5bf3ed0f13a08d0efbafeca57df6616ffa/gfx/webrender_bindings/WebRenderAPI.cpp#141">至少支持 OpenGL 3.0 或 OpenGL ES 3.0（截至 2021-04）</a>且<a href="https://searchfox.org/mozilla-central/source/widget/gtk/GfxInfo.cpp#680">满足最低驱动程序要求</a>的情况下默认使用硬件渲染。如果系统不满足这些要求，则回退到使用 <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1601053">WebRender 软件</a>渲染。
+</p><p>如果在设备驱动程序已更新的情况下仍然遇到渲染问题，可以在 <code>about:config</code> 中将 <code>gfx.webrender.software</code> 设置为 <code>true</code> 强制启用 WebRender 软件渲染。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>由于<a href="https://github.com/servo/webrender/wiki/Driver-issues">稳定性、渲染输出和性能的关键问题</a>，WebRender 硬件渲染在许多 GPU 和驱动程序上禁用。不建议在这些硬件上强制启用 WebRender 硬件渲染。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E5.85.B3.E9.97.AD.E7.A3.81.E7.9B.98.E7.BC.93.E5.AD.98" id="关闭磁盘缓存"><span id=".E5.85.B3.E9.97.AD.E7.A3.81.E7.9B.98.E7.BC.93.E5.AD.98"></span>关闭磁盘缓存</h3></div>
+<p>加载的每个对象（HTML 页面、JPEG 图像、CSS 样式表、GIF 横幅）都会保存到 Firefox 缓存中，以便将来无需重新下载即可使用。由于因为对象的过期时间较短、更新频繁或用户行为（加载新页面而不是返回已访问的页面），估计其中只有约 30% 的对象会被重复使用。Firefox 缓存分为内存缓存和磁盘缓存，后者会导致频繁的磁盘写入：新加载的对象会写入内存，而旧对象会被移除。
+</p><p>一种替代方法是在 <code>about:config</code> 中进行以下设置：
+</p>
+<ul><li>将 <code>browser.cache.disk.enable</code> 设置为 <code>false</code></li>
+<li>确保 <code>browser.cache.memory.enable</code> 设置为 <code>true</code>，关于此选项的更多信息请参见 <a href="https://kb.mozillazine.org/Browser.cache.memory.enable">browser.cache.memory MozillaZine 文章</a></li>
+<li>添加条目 <code>browser.cache.memory.capacity</code>，并将其设置为想要的容量（单位为 KB），或设置为 <code>-1</code> 以进行<a href="https://kb.mozillazine.org/Browser.cache.memory.capacity#-1">自动</a>缓存大小选择（跳过此步骤的效果等同于将值设置为 <code>-1</code>）
+<ul><li>“自动”大小选择基于一个十年前的表格，该表格仅包含适用于 8GB 或以下系统内存的设置。以下公式非常接近该表格，可以用来更动态地设置 Firefox 缓存：<code>41297 - (41606 / (1 + ((RAM / 1.16) ^ 0.75)))</code>, 其中 <code>RAM</code> 以 GB 为单位，结果以 KB 为单位。</li></ul></li></ul>
+<p>此方法有一些缺点：
+</p>
+<ul><li>浏览器崩溃或重新启动后，当前浏览的网页内容将丢失。可以使用 <a href="#pg494980c7859a">anything-sync-daemon</a> 或类似的周期性同步脚本定期将缓存复制到磁盘上来避免这种情况。</li>
+<li>需要为每个用户单独配置这些设置。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E5.B0.86.E7.A3.81.E7.9B.98.E7.BC.93.E5.AD.98.E7.A7.BB.E5.8A.A8.E5.88.B0.E5.86.85.E5.AD.98.E4.B8.AD" id="将磁盘缓存移动到内存中"><span id=".E5.B0.86.E7.A3.81.E7.9B.98.E7.BC.93.E5.AD.98.E7.A7.BB.E5.8A.A8.E5.88.B0.E5.86.85.E5.AD.98.E4.B8.AD"></span>将磁盘缓存移动到内存中</h3></div>
+<p>另一种方法是将“磁盘”缓存移动到内存盘中，这是一种介于以上两种方案之间的解决方案。这样缓存将在 Firefox 会话之间（包括 Firefox 崩溃恢复）保留，但在重启（包括操作系统崩溃）后会被丢弃。
+</p><p>要实现这一点，进入 <code>about:config</code> 并将 <code>browser.cache.disk.parent_directory</code> 设置为 <code>/run/user/<i>UID</i>/firefox</code>，其中 <code><i>UID</i></code> 是用户 ID，可以通过 <code>id -u</code> 获取当前用户 ID。
+</p><p>打开 <code>about:cache</code> 以验证新的磁盘缓存位置。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E5.BB.B6.E9.95.BF.E4.BC.9A.E8.AF.9D.E4.BF.A1.E6.81.AF.E8.AE.B0.E5.BD.95.E9.97.B4.E9.9A.94.E6.97.B6.E9.97.B4" id="延长会话信息记录间隔时间"><span id=".E5.BB.B6.E9.95.BF.E4.BC.9A.E8.AF.9D.E4.BF.A1.E6.81.AF.E8.AE.B0.E5.BD.95.E9.97.B4.E9.9A.94.E6.97.B6.E9.97.B4"></span>延长会话信息记录间隔时间</h3></div>
+<p>Firefox 会定期将当前会话状态（打开的网址、cookies、历史记录和表单数据）存储到磁盘上。这些信息用于在崩溃时恢复上一次的会话。
+默认设置是每 15 秒保存一次会话，这会导致频繁的磁盘访问。
+</p><p>例如，要将保存间隔增加到 10 分钟（600000 毫秒），可以在 <code>about:config</code> 中将 <code>browser.sessionstore.interval</code> 的值更改为 <code>600000</code>。
+</p><p>若要完全禁用此功能，请将 <code>browser.sessionstore.resume_from_crash</code> 更改为 <code>false</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E5.AF.B9.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6.E7.9A.84_SQLite_.E6.95.B0.E6.8D.AE.E5.BA.93.E8.BF.9B.E8.A1.8C.E7.A2.8E.E7.89.87.E6.95.B4.E7.90.86" id="对配置文件的_SQLite_数据库进行碎片整理"><span id=".E5.AF.B9.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6.E7.9A.84_SQLite_.E6.95.B0.E6.8D.AE.E5.BA.93.E8.BF.9B.E8.A1.8C.E7.A2.8E.E7.89.87.E6.95.B4.E7.90.86"></span>对配置文件的 SQLite 数据库进行碎片整理</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>此操作可能会损坏数据库，从而导致会话无法正确保存。</div>
+<p>Firefox 将书签、历史记录和密码存储在 SQLite 数据库中。随着时间推移，这些数据库会产生碎片，空闲空间散布各处。但由于没有管理进程检查和优化数据库，这些因素最终会对性能造成影响。通过整理碎片和清理未使用空间，可以提升启动速度以及与书签和历史记录相关的一些任务性能。
+</p><p>在 Firefox <b>未运行</b>的情况下，可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=profile-cleaner">profile-cleaner</a></span><sup><small>包</small></sup></span> 来完成此操作：
+</p>
+<table class="wikitable">
+<caption>profile-cleaner 使用示例：
+</caption>
+<tbody><tr>
+<th>SQLite 数据库</th>
+<th>整理前大小</th>
+<th>整理后大小</th>
+<th>变化百分比
+</th></tr>
+<tr>
+<td>urlclassifier3.sqlite</td>
+<td>37 M</td>
+<td>30 M</td>
+<td>19 %
+</td></tr>
+<tr>
+<td>places.sqlite</td>
+<td>16 M</td>
+<td>2.4 M</td>
+<td>85 %
+</td></tr>
+</tbody></table>
+<p>Firefox 提供了一个工具，用于整理和优化 places 数据库（这是导致性能下降和配置文件损坏的主要原因）。要访问此工具，请打开 <code>about:support</code> 页面，找到 <code>Places 数据库</code>，然后点击 <code>验证完整性</code> 按钮。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E9.80.9A.E8.BF.87_tmpfs_.E5.B0.86.E6.95.B4.E4.B8.AA.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6.E7.BC.93.E5.AD.98.E5.88.B0.E5.86.85.E5.AD.98.E4.B8.AD" id="通过_tmpfs_将整个配置文件缓存到内存中"><span id=".E9.80.9A.E8.BF.87_tmpfs_.E5.B0.86.E6.95.B4.E4.B8.AA.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6.E7.BC.93.E5.AD.98.E5.88.B0.E5.86.85.E5.AD.98.E4.B8.AD"></span>通过 tmpfs 将整个配置文件缓存到内存中</h3></div>
+<p>如果系统有多余的内存，可以使用 <code>tmpfs</code> <a href="#pge5ecbcd25064">将整个配置文件目录缓存到内存中</a>，这可能会提高 Firefox 的响应速度。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E7.A6.81.E7.94.A8_Pocket_.E6.9C.8D.E5.8A.A1" id="禁用_Pocket_服务"><span id=".E7.A6.81.E7.94.A8_Pocket_.E6.9C.8D.E5.8A.A1"></span>禁用 Pocket 服务</h3></div>
+<p>如果您不使用 Pocket 服务，可以通过在 <code>about:config</code> 中将 <code>extensions.pocket.enabled</code> 设置为 <i>false</i> 来禁用它。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1ba73eaeffc3_.E5.A4.96.E8.A7.82" id="外观"><span id=".E5.A4.96.E8.A7.82"></span>外观</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E5.AD.97.E4.BD.93" id="字体"><span id=".E5.AD.97.E4.BD.93"></span>字体</h3></div>
+<p>参见主条目：<a href="#pg3ffaba980b7a">字体配置</a>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_.E9.85.8D.E7.BD.AE_DPI_.E5.80.BC" id="配置_DPI_值"><span id=".E9.85.8D.E7.BD.AE_DPI_.E5.80.BC"></span>配置 DPI 值</h4></div>
+<p>如果系统的 DPI 值低于 96，修改以下值可以改善 Firefox 中字体的显示效果。默认情况下，Firefox 使用的 DPI 值为 96，只有当系统的 DPI 值高于 96 时才会使用系统的 DPI 值。要强制使用系统的 DPI 值（无论其具体大小），在地址栏输入 <code>about:config</code> 并将 <code>layout.css.dpi</code> 设置为 <b>0</b>。
+</p><p>注意，上述方法仅影响 Firefox 用户界面的 DPI 设置。网页内容的 DPI 值仍为 96，这可能会导致字体显示得难看，或者在高分辨率显示器上字体过小，难以阅读。解决方案是将 <code>layout.css.devPixelsPerPx</code> 设置为系统 DPI 除以 96。例如，如果系统 DPI 是 144，则需要设置的值为 144/96 = 1.5。将 <code>layout.css.devPixelsPerPx</code> 设置为 <b>1.5</b> 后，网页内容将使用 144 的 DPI 值，看起来会更好。
+</p><p>如果在 Firefox 103 之后的版本中字体过大，可将 <code>browser.display.os-zoom-behavior</code> 设置为 0。接着，在 <code>about:config</code> 搜索框中输入 <code>ui.textScaleFactor</code>，选择“数值”选项，点击“＋”按钮添加该首选项，并将其值编辑为 <code>layout.css.devPixelsPerPx</code> 值的 100 倍。例如，如果 <code>layout.css.devPixelsPerPx</code> 设置为 1.25，则 <code>ui.textScaleFactor</code> 应设置为 125。
+</p><p>参见 <a href="#pg1f5bbda7ab0a">HiDPI#Firefox</a> 了解有关 HiDPI 显示器的信息，以及<a href="https://www.sven.de/dpi/">计算 DPI 的工具</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_Microsoft_Windows_.E9.BB.98.E8.AE.A4.E5.AD.97.E4.BD.93.E8.AE.BE.E7.BD.AE" id="Microsoft_Windows_默认字体设置"><span id="Microsoft_Windows_.E9.BB.98.E8.AE.A4.E5.AD.97.E4.BD.93.E8.AE.BE.E7.BD.AE"></span>Microsoft Windows 默认字体设置</h4></div>
+<p>以下是在 Microsoft Windows 上安装 Firefox 时的默认字体设置。许多网站使用 Microsoft 字体。
+</p>
+<pre>比例字体：衬线字体 字号：16（像素）
+衬线字体：Times New Roman
+无衬线字体：Arial
+等宽字体：Courier New 字号：13（像素）
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E9.80.9A.E7.94.A8.E7.94.A8.E6.88.B7.E7.95.8C.E9.9D.A2_CSS_.E8.AE.BE.E7.BD.AE" id="通用用户界面_CSS_设置"><span id=".E9.80.9A.E7.94.A8.E7.94.A8.E6.88.B7.E7.95.8C.E9.9D.A2_CSS_.E8.AE.BE.E7.BD.AE"></span>通用用户界面 CSS 设置</h3></div>
+<p>可以通过编辑 <code>~/.mozilla/firefox/<i>配置文件夹</i>/chrome/</code>（<code><i>配置文件夹</i></code> 的格式为 <code><i>hash</i>.<i>name</i></code>，其中 <code><i>hash</i></code> 是一个 8 位随机字符串，<code><i>name</i></code> 通常为 <code>default</code>）路径下的 <code>userChrome.css</code> 和 <code>userContent.css</code> 文件修改 Firefox 的用户界面。您可以通过在 URL 栏中输入 <code>about:support</code>，在 <code>应用程序概要</code> 部分查找 <code>配置文件夹</code> 字段来获取具体的配置文件名称（参考 <a href="https://support.mozilla.org/zh-CN/kb/%E7%94%A8%E6%88%B7%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E2%80%94%E2%80%94Firefox%20%E4%BF%9D%E5%AD%98%E4%B9%A6%E7%AD%BE%E3%80%81%E5%AF%86%E7%A0%81%E5%92%8C%E5%85%B6%E4%BB%96%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E7%9A%84%E6%96%87%E4%BB%B6">Firefox 文档</a>）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li><code>chrome/</code> 文件夹和 <code>userChrome.css</code> 或 <code>userContent.css</code> 文件可能不存在，因此可能需要手动创建。</li>
+<li>必须在 <code>about:config</code> 中启用 <code>toolkit.legacyUserProfileCustomizations.stylesheets</code>。</li></ul>
+</div>
+<p>本节仅涉及修改 Firefox 用户界面的 <code>userChrome.css</code> 文件，不包含网页内容的修改。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_.E6.9B.B4.E6.94.B9.E7.95.8C.E9.9D.A2.E5.AD.97.E4.BD.93" id="更改界面字体"><span id=".E6.9B.B4.E6.94.B9.E7.95.8C.E9.9D.A2.E5.AD.97.E4.BD.93"></span>更改界面字体</h4></div>
+<p>该设置能够覆盖 GTK 全局字体首选项，并且仅更改界面字体而不改变网页字体：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.mozilla/firefox/<i>配置文件夹</i>/chrome/userChrome.css</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">* {
+    font-family: "FONT_NAME";
+}
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_.E9.9A.90.E8.97.8F.E6.8C.89.E9.92.AE.E5.9B.BE.E6.A0.87" id="隐藏按钮图标"><span id=".E9.9A.90.E8.97.8F.E6.8C.89.E9.92.AE.E5.9B.BE.E6.A0.87"></span>隐藏按钮图标</h4></div>
+<p>启用仅文本按钮：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.mozilla/firefox/<i>配置文件夹</i>/chrome/userChrome.css</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">.button-box .button-icon {
+    display: none;
+}
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_.E9.9A.90.E8.97.8F.E6.A0.87.E7.AD.BE.E9.A1.B5.E6.A0.8F.E4.B8.8A.E7.9A.84.E5.90.84.E7.A7.8D.E6.8C.89.E9.92.AE" id="隐藏标签页栏上的各种按钮"><span id=".E9.9A.90.E8.97.8F.E6.A0.87.E7.AD.BE.E9.A1.B5.E6.A0.8F.E4.B8.8A.E7.9A.84.E5.90.84.E7.A7.8D.E6.8C.89.E9.92.AE"></span>隐藏标签页栏上的各种按钮</h4></div>
+<p>以下设置可以隐藏标签页栏水平边缘上的箭头、切换“所有标签页”下拉列表的按钮以及用于创建新标签的页加号按钮。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.mozilla/firefox/<i>配置文件夹</i>/chrome/userChrome.css</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/* 标签页栏 */
+
+toolbarbutton#scrollbutton-up, toolbarbutton#scrollbutton-down {
+    /* 隐藏标签页栏滚动按钮 */
+    display: none;
+}
+
+.browser-toolbar &gt; * #alltabs-button {
+    /* 隐藏切换“所有标签页”下拉列表的按钮 */
+    display: none;
+}
+
+.browser-toolbar &gt; * #new-tab-button {
+    /* 隐藏打开新标签页按钮 */
+    display: none;
+}
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_.E7.AB.96.E7.9B.B4.2F.E6.A0.91.E7.8A.B6.E6.A0.87.E7.AD.BE.E9.A1.B5" id="竖直/树状标签页"><span id=".E7.AB.96.E7.9B.B4.2F.E6.A0.91.E7.8A.B6.E6.A0.87.E7.AD.BE.E9.A1.B5"></span>竖直/树状标签页</h4></div>
+<p>使用以下插件之一将标签栏放置在侧边栏/树中：
+</p>
+<ul><li><a href="https://addons.mozilla.org/firefox/addon/tree-style-tab/">Tree Style Tab</a></li>
+<li><a href="https://addons.mozilla.org/firefox/addon/sidebery/">Sidebery</a></li>
+<li><a href="https://addons.mozilla.org/firefox/addon/tabby-window-tab-manager/">Tabby</a></li></ul>
+<p>Firefox 插件无法通过其扩展 API 隐藏原生标签栏⸺要做到这一点，请按照插件的设置/高级说明进行操作。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_.E9.9A.90.E8.97.8F.E6.A0.87.E9.A2.98.E6.A0.8F.E5.92.8C.E7.AA.97.E5.8F.A3.E8.BE.B9.E6.A1.86" id="隐藏标题栏和窗口边框"><span id=".E9.9A.90.E8.97.8F.E6.A0.87.E9.A2.98.E6.A0.8F.E5.92.8C.E7.AA.97.E5.8F.A3.E8.BE.B9.E6.A1.86"></span>隐藏标题栏和窗口边框</h4></div>
+<p>要用标签栏替换标题栏，请在 <code>about:config</code> 中将 <code>browser.tabs.inTitlebar</code> 设置为 <code>1</code>。
+</p><p>或者转到“更多工具”中的“定制工具栏⋯”，取消选中左下角的“标题栏”复选框。如果该复选框本未选中，请确保正确设置了 <code>XDG_CURRENT_DESKTOP</code> 环境变量和/或将 <code>MOZ_GTK_TITLEBAR_DECORATION</code> 环境变量设置为 <code>client</code>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_.E8.87.AA.E5.8A.A8.E9.9A.90.E8.97.8F.E4.B9.A6.E7.AD.BE.E5.B7.A5.E5.85.B7.E6.A0.8F" id="自动隐藏书签工具栏"><span id=".E8.87.AA.E5.8A.A8.E9.9A.90.E8.97.8F.E4.B9.A6.E7.AD.BE.E5.B7.A5.E5.85.B7.E6.A0.8F"></span>自动隐藏书签工具栏</h4></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.mozilla/firefox/<i>配置文件夹</i>/chrome/userChrome.css</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#PersonalToolbar {
+    visibility: collapse !important;
+}
+
+#navigator-toolbox:hover &gt; #PersonalToolbar {
+    visibility: visible !important;
+}
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_.E5.8F.96.E6.B6.88.E4.BE.A7.E8.BE.B9.E6.A0.8F.E5.AE.BD.E5.BA.A6.E9.99.90.E5.88.B6" id="取消侧边栏宽度限制"><span id=".E5.8F.96.E6.B6.88.E4.BE.A7.E8.BE.B9.E6.A0.8F.E5.AE.BD.E5.BA.A6.E9.99.90.E5.88.B6"></span>取消侧边栏宽度限制</h4></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.mozilla/firefox/<i>配置文件夹</i>/chrome/userChrome.css</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/* 取消侧边栏最大与最小宽度限制 */
+#sidebar {
+    max-width: none !important;
+    min-width: 0px !important;
+}
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_.E4.BD.BF.E7.94.A8.E6.B7.B1.E8.89.B2_GTK_.E4.B8.BB.E9.A2.98.E6.97.B6.E8.BE.93.E5.85.A5.E5.AD.97.E6.AE.B5.E4.B8.8D.E5.8F.AF.E8.AF.BB" id="使用深色_GTK_主题时输入字段不可读"><span id=".E4.BD.BF.E7.94.A8.E6.B7.B1.E8.89.B2_GTK_.E4.B8.BB.E9.A2.98.E6.97.B6.E8.BE.93.E5.85.A5.E5.AD.97.E6.AE.B5.E4.B8.8D.E5.8F.AF.E8.AF.BB"></span>使用深色 GTK 主题时输入字段不可读</h4></div>
+<p>在使用深色 <a href="#pg6438c4cbb62c">GTK</a> 主题时，可能会遇到网页上的输入和文本字段不可读的问题（例如，文本输入字段中的白色文本显示在白色背景上，或黑色文本显示在深色背景上）。这种情况的发生是因为网站仅设置了背景色或文本颜色之一，而 Firefox 则从主题中获取了另一种颜色。为防止 Firefox 使用主题颜色和网页中的深色主题，请确保在 <code>about:config</code> 中将 <code>browser.display.use_system_colors</code> 和 <code>widget.content.allow-gtk-dark-theme</code> 均设置为 <code>false</code>。
+</p><p>如果上述修改未能解决问题，可以通过添加一个新的字符串键 <code>widget.content.gtk-theme-override</code> 并将其设置为浅色主题（如 <code>Breeze:light</code> 或 <code>Adwaita:light</code>），以浅色 GTK 主题启动 Firefox。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg1ba73eaeffc3_.E4.BD.BF.E7.94.A8_CSS_.E8.A6.86.E7.9B.96.E8.BE.93.E5.85.A5.E5.AD.97.E6.AE.B5.E9.A2.9C.E8.89.B2" id="使用_CSS_覆盖输入字段颜色"><span id=".E4.BD.BF.E7.94.A8_CSS_.E8.A6.86.E7.9B.96.E8.BE.93.E5.85.A5.E5.AD.97.E6.AE.B5.E9.A2.9C.E8.89.B2"></span>使用 CSS 覆盖输入字段颜色</h5></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>相关问题从版本 68 开始已修复。<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1527048#c44">[2]</a></div>
+<p>扩展程序 <a href="https://addons.mozilla.org/firefox/addon/text-contrast-for-dark-themes/">Text Contrast for Dark Themes</a> 根据需要设置其他颜色以保持对比度。
+</p><p>或者，可以在 <code>userContent.css</code> 中为所有网页显式设置标准颜色，或者使用 <a href="https://addons.mozilla.org/firefox/addon/styl-us/">Stylus</a> 扩展来完成。样式表位于配置文件夹（可通过 <code>about:profiles</code> 查看路径）中的 <code>chrome/userContent.css</code>，如果不存在，可以在该位置创建。
+</p><p>以下设置将输入字段设置为标准的白底黑字。这两种颜色可以被网页覆盖，从而按照网页的设计显示颜色：
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>删除前两个 <code>:not</code> CSS 选择器以设置地址栏和搜索栏为白底黑字。</div>
+<pre>input:not(.urlbar-input):not(.textbox-input):not(.form-control):not([type='checkbox']):not([type='radio']), textarea, select {
+    -moz-appearance: none !important;
+    background-color: white;
+    color: black;
+}
+
+#downloads-indicator-counter {
+    color: white;
+}</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg1ba73eaeffc3_.E6.9B.B4.E6.94.B9_GTK_.E4.B8.BB.E9.A2.98" id="更改_GTK_主题"><span id=".E6.9B.B4.E6.94.B9_GTK_.E4.B8.BB.E9.A2.98"></span>更改 GTK 主题</h5></div>
+<p>要强制 Firefox 同时为网页内容和 UI 使用浅色主题（例如 Adwaita），参见 <a href="#pg6438c4cbb62c">GTK#主题</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg1ba73eaeffc3_.E4.BB.85.E4.B8.BA.E7.BD.91.E9.A1.B5.E5.86.85.E5.AE.B9.E6.9B.B4.E6.94.B9_GTK_.E4.B8.BB.E9.A2.98" id="仅为网页内容更改_GTK_主题"><span id=".E4.BB.85.E4.B8.BA.E7.BD.91.E9.A1.B5.E5.86.85.E5.AE.B9.E6.9B.B4.E6.94.B9_GTK_.E4.B8.BB.E9.A2.98"></span>仅为网页内容更改 GTK 主题</h5></div>
+<p>要强制 Firefox 仅为网页内容使用浅色主题（例如 Adwaita）：
+</p>
+<ol><li>在地址栏中打开 <code>about:config</code>。</li>
+<li>创建名为 <code>widget.content.gtk-theme-override</code> 的字符串首选项（<code>鼠标右键</code> &gt; 新建 &gt; 字符串）。</li>
+<li>将值设置为用于渲染的浅色主题（例如 <code>Adwaita:light</code>）。</li>
+<li>重新启动 Firefox。</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E7.BD.91.E9.A1.B5.E5.86.85.E5.AE.B9_CSS_.E8.AE.BE.E7.BD.AE" id="网页内容_CSS_设置"><span id=".E7.BD.91.E9.A1.B5.E5.86.85.E5.AE.B9_CSS_.E8.AE.BE.E7.BD.AE"></span>网页内容 CSS 设置</h3></div>
+<p>本节介绍 <code>userContent.css</code> 文件，在其中可以添加自定义网页内容的 CSS 规则。对此文件的更改会在浏览器重新启动后生效。
+</p><p>此文件可用于进行小范围修复或为经常访问的网站应用个性化样式。热门网站的自定义样式表可从 <a href="https://userstyles.org/">userstyles.org</a> 等来源获得，也可以安装某些插件来管理主题。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_.E5.AF.BC.E5.85.A5.E5.85.B6.E4.BB.96_CSS_.E6.96.87.E4.BB.B6" id="导入其他_CSS_文件"><span id=".E5.AF.BC.E5.85.A5.E5.85.B6.E4.BB.96_CSS_.E6.96.87.E4.BB.B6"></span>导入其他 CSS 文件</h4></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.mozilla/firefox/<i>配置文件夹</i>/chrome/userContent.css</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">@import url("./imports/some_file.css");
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_.E5.B1.8F.E8.94.BD.E6.9D.A5.E8.87.AA.E7.89.B9.E5.AE.9A.E5.9F.9F.E5.90.8D.E7.9A.84.E9.83.A8.E5.88.86" id="屏蔽来自特定域名的部分"><span id=".E5.B1.8F.E8.94.BD.E6.9D.A5.E8.87.AA.E7.89.B9.E5.AE.9A.E5.9F.9F.E5.90.8D.E7.9A.84.E9.83.A8.E5.88.86"></span>屏蔽来自特定域名的部分</h4></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.mozilla/firefox/<i>配置文件夹</i>/chrome/userContent.css</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">@-moz-document domain(example.com) {
+    div#header {
+        background-image: none !important;
+    } 
+}
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1ba73eaeffc3_.E5.9C.A8.E6.8C.87.E5.90.91_PDF_.E6.96.87.E4.BB.B6.E7.9A.84.E9.93.BE.E6.8E.A5.E6.96.87.E6.9C.AC.E5.90.8E.E8.BF.BD.E5.8A.A0.E2.80.9C.5Bpdf.5D.E2.80.9D" id="在指向_PDF_文件的链接文本后追加“[pdf]”"><span id=".E5.9C.A8.E6.8C.87.E5.90.91_PDF_.E6.96.87.E4.BB.B6.E7.9A.84.E9.93.BE.E6.8E.A5.E6.96.87.E6.9C.AC.E5.90.8E.E8.BF.BD.E5.8A.A0.E2.80.9C.5Bpdf.5D.E2.80.9D"></span>在指向 PDF 文件的链接文本后追加“[pdf]”</h4></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.mozilla/firefox/<i>配置文件夹</i>/chrome/userContent.css</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/* 在指向 PDF 文件的链接文本后追加“[pdf]” */
+a[href$=".pdf"]:after {
+    font-size: smaller;
+    content: " [pdf]";
+}
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1ba73eaeffc3_.E9.BC.A0.E6.A0.87.E4.B8.8E.E9.94.AE.E7.9B.98" id="鼠标与键盘"><span id=".E9.BC.A0.E6.A0.87.E4.B8.8E.E9.94.AE.E7.9B.98"></span>鼠标与键盘</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E9.BC.A0.E6.A0.87.E6.BB.9A.E8.BD.AE.E6.BB.9A.E5.8A.A8.E9.80.9F.E5.BA.A6" id="鼠标滚轮滚动速度"><span id=".E9.BC.A0.E6.A0.87.E6.BB.9A.E8.BD.AE.E6.BB.9A.E5.8A.A8.E9.80.9F.E5.BA.A6"></span>鼠标滚轮滚动速度</h3></div>
+<p>要修改鼠标滚轮滚动速度的默认值（例如用于加快速度），请进入 <code>about:config</code> 并搜索 <code>mousewheel.acceleration</code> 以显示可用的首选项，修改以下设置：
+</p>
+<ul><li>将 <code>mousewheel.acceleration.start</code> 设置为 <code>1</code>。</li>
+<li>将 <code>mousewheel.acceleration.factor</code> 设置为所需的数值（常见值为 <code>10</code> 至 <code>20</code>）。</li></ul>
+<p>或者，如果想使用系统值（类似于 Chromium 的滚动方式），将 <code>mousewheel.system_scroll_override.enabled</code> 设置为 <code>false</code>。
+</p><p>Mozilla 推荐通过以下方式提高鼠标滚轮的滚动速度：
+</p>
+<ul><li>将 <code>mousewheel.default.delta_multiplier_y</code> 设置为 <code>200</code> 到 <code>500</code> 之间的值（默认值：<code>100</code>）。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E5.83.8F.E7.B4.A0.E7.BA.A7.E7.B2.BE.E7.A1.AE.E7.9A.84.E8.A7.A6.E6.8E.A7.E6.9D.BF.E6.BB.9A.E5.8A.A8" id="像素级精确的触控板滚动"><span id=".E5.83.8F.E7.B4.A0.E7.BA.A7.E7.B2.BE.E7.A1.AE.E7.9A.84.E8.A7.A6.E6.8E.A7.E6.9D.BF.E6.BB.9A.E5.8A.A8"></span>像素级精确的触控板滚动</h3></div>
+<p>要启用 1:1 的触控板滚动效果（如在 Nautilus 等 GTK3 应用中所见），在启动 Firefox 之前设置<a href="#pg4989d4f46056">环境变量</a> <code>MOZ_USE_XINPUT2=1</code>。
+</p><p>如果滚动时不够流畅，可以在“设置 &gt; 常规 &gt; 浏览”中启用 Firefox 的“使用平滑滚动(M)”选项。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E5.90.AF.E7.94.A8.E8.A7.A6.E6.91.B8.E5.B1.8F.E6.89.8B.E5.8A.BF" id="启用触摸屏手势"><span id=".E5.90.AF.E7.94.A8.E8.A7.A6.E6.91.B8.E5.B1.8F.E6.89.8B.E5.8A.BF"></span>启用触摸屏手势</h3></div>
+<p>在 <a href="#pga21a6be8b605">Wayland</a> 上，触摸屏手势默认启用。
+</p><p>在 X11 上，确保将 <code>dom.w3c_touch_events.enabled</code> 设置为 1（“启用”）或 2（“默认，自动检测”），并设置<a href="#pg4989d4f46056">环境变量</a> <code>MOZ_USE_XINPUT2=1</code>。
+</p><p>在某些设备上，可能需要通过运行以下命令禁用 xinput 的触摸屏手势：
+</p>
+<pre>$ xsetwacom --set <i>设备</i> Gesture off
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E9.BC.A0.E6.A0.87.E7.82.B9.E5.87.BB.E5.9C.B0.E5.9D.80.E6.A0.8F.E6.97.B6.E7.9A.84.E8.A1.8C.E4.B8.BA" id="鼠标点击地址栏时的行为"><span id=".E9.BC.A0.E6.A0.87.E7.82.B9.E5.87.BB.E5.9C.B0.E5.9D.80.E6.A0.8F.E6.97.B6.E7.9A.84.E8.A1.8C.E4.B8.BA"></span>鼠标点击地址栏时的行为</h3></div>
+<p>在旧版本的 Firefox 中，可以在 <code>about:config</code> 中调整地址栏的行为，但此功能<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=333714">已在 2020 年 3 月被移除</a>。
+</p><p>例如，要禁用首次点击时自动选中地址栏内容的行为，或允许双击地址栏以选中全部 URL，可参考用户提供的脚本，如：<a href="https://github.com/SebastianSimon/firefox-omni-tweaks">https://github.com/SebastianSimon/firefox-omni-tweaks</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E5.B9.B3.E6.BB.91.E6.BB.9A.E5.8A.A8" id="平滑滚动"><span id=".E5.B9.B3.E6.BB.91.E6.BB.9A.E5.8A.A8"></span>平滑滚动</h3></div>
+<p>要在 Firefox 中实现基于物理效果的平滑滚动，可以修改 <code>general.smoothScroll.msdPhysics</code> 配置，以模拟其他浏览器中的更灵敏滚动行为。为了快速配置，可将以下内容追加到 <code>~/.mozilla/firefox/<i>配置文件夹</i>/user.js</code>（需要重启浏览器）：
+</p>
+<pre>user_pref("general.smoothScroll.lines.durationMaxMS", 125);
+user_pref("general.smoothScroll.lines.durationMinMS", 125);
+user_pref("general.smoothScroll.mouseWheel.durationMaxMS", 200);
+user_pref("general.smoothScroll.mouseWheel.durationMinMS", 100);
+user_pref("general.smoothScroll.msdPhysics.enabled", true);
+user_pref("general.smoothScroll.other.durationMaxMS", 125);
+user_pref("general.smoothScroll.other.durationMinMS", 125);
+user_pref("general.smoothScroll.pages.durationMaxMS", 125);
+user_pref("general.smoothScroll.pages.durationMinMS", 125);
+</pre>
+<p>此外，还必须更改鼠标滚轮滚动设置才能以平滑的方式做出反应：
+</p>
+<pre>user_pref("mousewheel.min_line_scroll_amount", 30);
+user_pref("mousewheel.system_scroll_override_on_root_content.enabled", true);
+user_pref("mousewheel.system_scroll_override_on_root_content.horizontal.factor", 175);
+user_pref("mousewheel.system_scroll_override_on_root_content.vertical.factor", 175);
+user_pref("toolkit.scrollbox.horizontalScrollDistance", 6);
+user_pref("toolkit.scrollbox.verticalScrollDistance", 2);
+</pre>
+<p>如果在性能不稳定的设备上遇到问题，可以尝试修改 <code>mousewheel.min_line_scroll_amount</code>，直到滚动感觉足够流畅。
+</p><p>要进行更高级的配置以修改质量-弹簧-阻尼器参数，请参阅 <a href="https://github.com/AveYo/fox/blob/main/Natural%20Smooth%20Scrolling%20for%20user.js">AveYo 的自然平滑滚动配置</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在 <a href="#pga21a6be8b605">Wayland</a> 上，这些设置可能会因 <code>apz.gtk.kinetic_scroll.enabled</code> 的默认值为 <code>true</code> 而完全无效。如果发现这些调整不起作用，请尝试将此值设置为 <code>false</code>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E8.AE.BE.E7.BD.AE_Backspace_.E9.94.AE.E8.A1.8C.E4.B8.BA" id="设置_Backspace_键行为"><span id=".E8.AE.BE.E7.BD.AE_Backspace_.E9.94.AE.E8.A1.8C.E4.B8.BA"></span>设置 Backspace 键行为</h3></div>
+<p>参见 <a href="#pg9b5d7fec8088">Firefox#Backspace 键无法用作“后退”按钮</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E7.A6.81.E7.94.A8.E4.B8.AD.E9.94.AE.E5.8D.95.E5.87.BB.E6.97.B6.E4.BB.8E.E5.89.AA.E8.B4.B4.E6.9D.BF.E7.B2.98.E8.B4.B4.E5.86.85.E5.AE.B9" id="禁用中键单击时从剪贴板粘贴内容"><span id=".E7.A6.81.E7.94.A8.E4.B8.AD.E9.94.AE.E5.8D.95.E5.87.BB.E6.97.B6.E4.BB.8E.E5.89.AA.E8.B4.B4.E6.9D.BF.E7.B2.98.E8.B4.B4.E5.86.85.E5.AE.B9"></span>禁用中键单击时从剪贴板粘贴内容</h3></div>
+<p>参见 <a href="#pg9b5d7fec8088">Firefox#中键单击行为</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_Emacs_.E6.8C.89.E9.94.AE.E7.BB.91.E5.AE.9A" id="Emacs_按键绑定"><span id="Emacs_.E6.8C.89.E9.94.AE.E7.BB.91.E5.AE.9A"></span>Emacs 按键绑定</h3></div>
+<p>要在文本字段中启用类似 Emacs/Readline 的按键绑定，请参阅 <a href="#pg6438c4cbb62c">GTK#Emacs 按键绑定</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1ba73eaeffc3_.E6.9D.82.E9.A1.B9" id="杂项"><span id=".E6.9D.82.E9.A1.B9"></span>杂项</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E5.BC.BA.E5.88.B6.E5.90.AF.E7.94.A8.E7.A1.AC.E4.BB.B6.E8.A7.86.E9.A2.91.E8.A7.A3.E7.A0.81" id="强制启用硬件视频解码"><span id=".E5.BC.BA.E5.88.B6.E5.90.AF.E7.94.A8.E7.A1.AC.E4.BB.B6.E8.A7.86.E9.A2.91.E8.A7.A3.E7.A0.81"></span>强制启用硬件视频解码</h3></div>
+<p>尽管 <code>media.hardware-video-decoding.enabled</code> 默认已启用，但有时可能需要通过将 <code>media.hardware-video-decoding.force-enabled</code> 设置为 <code>true</code> 来强制启用硬件视频解码。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E7.A7.BB.E9.99.A4.E5.85.A8.E5.B1.8F.E6.8F.90.E7.A4.BA" id="移除全屏提示"><span id=".E7.A7.BB.E9.99.A4.E5.85.A8.E5.B1.8F.E6.8F.90.E7.A4.BA"></span>移除全屏提示</h3></div>
+<p>可以通过将 <code>full-screen-api.warning.timeout</code> 设置为 <code>0</code> 来禁用全屏模式播放视频时的提示（“⋯⋯已进入全屏模式”）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E6.9B.B4.E6.94.B9_Firefox_.E6.90.9C.E7.B4.A2.E6.A0.8F.E4.B8.AD.E7.9A.84.E6.90.9C.E7.B4.A2.E5.BC.95.E6.93.8E.E9.A1.BA.E5.BA.8F" id="更改_Firefox_搜索栏中的搜索引擎顺序"><span id=".E6.9B.B4.E6.94.B9_Firefox_.E6.90.9C.E7.B4.A2.E6.A0.8F.E4.B8.AD.E7.9A.84.E6.90.9C.E7.B4.A2.E5.BC.95.E6.93.8E.E9.A1.BA.E5.BA.8F"></span>更改 Firefox 搜索栏中的搜索引擎顺序</h3></div>
+<p>要更改显示搜索引擎的顺序：
+</p>
+<ul><li>打开搜索引擎下拉列表，点击“管理搜索引擎...”项。</li>
+<li>高亮显示您要移动的引擎，使用“上移”“下移”或直接拖放来移动。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E2.80.9C.E6.89.8B.E6.B0.94.E4.B8.8D.E9.94.99.E2.80.9D.E6.A8.A1.E5.BC.8F" id="“手气不错”模式"><span id=".E2.80.9C.E6.89.8B.E6.B0.94.E4.B8.8D.E9.94.99.E2.80.9D.E6.A8.A1.E5.BC.8F"></span>“手气不错”模式</h3></div>
+<p>一些搜索引擎（例如 Google）有“手气不错”功能。
+</p><p>要启用它们，请在 <code>about:config</code> 中搜索 <code>keyword.url</code> 并将其值（如果有的话）修改为搜索引擎的 URL。
+</p><p>对于 Google，将其设置为：
+</p>
+<pre>https://www.google.com/search?btnI=I%27m+Feeling+Lucky&amp;q=</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E4.BD.BF.E7.94.A8_DNSSEC_.E5.90.AF.E7.94.A8.E5.AE.89.E5.85.A8_DNS" id="使用_DNSSEC_启用安全_DNS"><span id=".E4.BD.BF.E7.94.A8_DNSSEC_.E5.90.AF.E7.94.A8.E5.AE.89.E5.85.A8_DNS"></span>使用 DNSSEC 启用安全 DNS</h3></div>
+<p>您可以启用 <span class="ilh-all" data-foreign-title="DNSSEC" data-lang-code="en" data-lang-name="英语" data-orig-title="DNSSEC"><span class="ilh-page"><a href="#pge1e95b2c1d6a">DNSSEC</a></span></span> 支持以提高浏览安全性。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E4.BD.BF.E7.94.A8_DNS_over_HTTPS_.E5.90.AF.E7.94.A8.E5.AE.89.E5.85.A8_DNS" id="使用_DNS_over_HTTPS_启用安全_DNS"><span id=".E4.BD.BF.E7.94.A8_DNS_over_HTTPS_.E5.90.AF.E7.94.A8.E5.AE.89.E5.85.A8_DNS"></span>使用 DNS over HTTPS 启用安全 DNS</h3></div>
+<p>请参阅<a href="#pg5622270e5836">域名解析#应用级 DNS</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E6.B7.BB.E5.8A.A0.E7.A3.81.E5.8A.9B.E9.93.BE.E6.8E.A5.E5.8D.8F.E8.AE.AE.E5.85.B3.E8.81.94" id="添加磁力链接协议关联"><span id=".E6.B7.BB.E5.8A.A0.E7.A3.81.E5.8A.9B.E9.93.BE.E6.8E.A5.E5.8D.8F.E8.AE.AE.E5.85.B3.E8.81.94"></span>添加磁力链接协议关联</h3></div>
+<p>在 <code>about:config</code> 中将 <code>network.protocol-handler.expose.magnet</code> 设置为 <code>false</code>。如果该项不存在，则首先创建其为布尔值。
+</p><p>下次打开磁力链接时，您将看到一个“启动应用程序”对话框。只需选择需要的 <a href="#pgaf1b27bddf8e">BitTorrent 客户端</a>。这种方法也可以用于其他协议：<code>network.protocol-handler.expose.<i>协议</i></code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E9.98.B2.E6.AD.A2.E6.84.8F.E5.A4.96.E5.85.B3.E9.97.AD" id="防止意外关闭"><span id=".E9.98.B2.E6.AD.A2.E6.84.8F.E5.A4.96.E5.85.B3.E9.97.AD"></span>防止意外关闭</h3></div>
+<p>有不同的方式来处理这个问题：
+</p><p>可以通过在 <code>about:config</code> 中将 <code>browser.quitShortcut.disabled</code> 属性设置为 <code>true</code> 来禁用此行为。
+</p><p>另一种方法是在您的窗口管理器配置文件中添加规则。例如 <a href="#pg8bc45a0eb197">Openbox</a> 中，在 <code>~/.config/openbox/rc.xml</code> 文件的 <i>&lt;keyboard&gt;</i> 部分添加：
+</p>
+<pre> &lt;keybind key="C-q"&gt;
+   &lt;action name="Execute"&gt;
+     &lt;execute&gt;false&lt;/execute&gt;
+   &lt;/action&gt;
+ &lt;/keybind&gt;
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这将在图形服务器下对所有应用程序生效。</div>
+<p>可以安装 <a href="https://addons.mozilla.org/firefox/addon/disable-ctrl-q-and-cmd-q/">Disable Ctrl-Q and Cmd-Q</a> 扩展，以防止浏览器被意外关闭。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>由于<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1325692">一个 bug</a>，该扩展在 Linux 上不再有效。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E6.BB.9A.E5.8A.A8.E4.B8.8D.E7.A8.B3" id="滚动不稳"><span id=".E6.BB.9A.E5.8A.A8.E4.B8.8D.E7.A8.B3"></span>滚动不稳</h3></div>
+<p>Firefox 中的滚动可能会让人感觉“颠簸”或“不稳定”。<a href="https://forums.mozillazine.org/viewtopic.php?f=8&amp;t=2749475/">一篇 MozillaZine 上的帖子</a>提供了适用于 Gentoo 的设置，据说也适用于 Arch Linux：
+</p>
+<ol><li>设置 <code>mousewheel.min_line_scroll_amount</code> 为 40</li>
+<li>设置 <code>general.smoothScroll</code> 和 <code>general.smoothScroll.pages</code> 为 <b>false</b></li>
+<li>设置 <code>image.mem.min_discard_timeout_ms</code> 为一个非常大的值，例如 2100000000，但不要超过 2147483647（2<sup>31</sup> - 1）。超过该数值时，Firefox 会拒绝输入</li>
+<li>将 <code>image.mem.max_decoded_image_kb</code> 设置为至少 512（K）</li></ol>
+<p>现在滚动应该变得更稳定，但不再平滑。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E5.9C.A8_nspawn_.E5.AE.B9.E5.99.A8.E4.B8.AD.E8.BF.90.E8.A1.8C_Firefox" id="在_nspawn_容器中运行_Firefox"><span id=".E5.9C.A8_nspawn_.E5.AE.B9.E5.99.A8.E4.B8.AD.E8.BF.90.E8.A1.8C_Firefox"></span>在 nspawn 容器中运行 Firefox</h3></div>
+<p>请参阅 <a href="#pgf6282688d557">systemd-nspawn#运行 Firefox</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E7.A6.81.E7.94.A8_WebRTC_.E9.9F.B3.E9.A2.91.E5.90.8E.E5.A4.84.E7.90.86" id="禁用_WebRTC_音频后处理"><span id=".E7.A6.81.E7.94.A8_WebRTC_.E9.9F.B3.E9.A2.91.E5.90.8E.E5.A4.84.E7.90.86"></span>禁用 WebRTC 音频后处理</h3></div>
+<p>如果使用 PulseAudio <a href="#pga942ba974b3d">PulseAudio#麦克风回声/噪音消除</a>，可能不希望 Firefox 执行额外的音频后处理。
+</p><p>要禁用音频后处理，请将以下首选项的值更改为 <code>false</code>：
+</p>
+<ul><li><code>media.getusermedia.aec_enabled</code>（声学回声消除）</li>
+<li><code>media.getusermedia.agc_enabled</code>（自动增益控制）</li>
+<li><code>media.getusermedia.noise_enabled</code>（噪声抑制）</li>
+<li><code>media.getusermedia.hpf_enabled</code>（高通滤波器）</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_Fido_U2F_.E8.BA.AB.E4.BB.BD.E9.AA.8C.E8.AF.81" id="Fido_U2F_身份验证"><span id="Fido_U2F_.E8.BA.AB.E4.BB.BD.E9.AA.8C.E8.AF.81"></span>Fido U2F 身份验证</h3></div>
+<p>Firefox 支持 Fido <a href="#pgcafdda92e85c">U2F</a> 身份验证协议。安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libfido2">libfido2</a></span><sup><small>包</small></sup></span> 以获取所需的 udev 规则。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E6.81.A2.E5.A4.8D_ALSA_.E9.9F.B3.E9.A2.91.E5.8A.9F.E8.83.BD" id="恢复_ALSA_音频功能"><span id=".E6.81.A2.E5.A4.8D_ALSA_.E9.9F.B3.E9.A2.91.E5.8A.9F.E8.83.BD"></span>恢复 ALSA 音频功能</h3></div>
+<p>只要 Arch 继续使用 <code>ac_add_options --enable-alsa</code> 构建 Firefox，Firefox 就可以在系统中没有 PulseAudio 的情况下正常工作而无需任何特殊配置，也无需 apulse（除非系统中使用 PulseAudio 且希望 Firefox 避免使用它）。曾经，需要允许 ioctl 系统调用（被 Firefox 沙箱默认阻止），并且 ALSA 设置 <code>security.sandbox.content.syscall_whitelist</code> 中必须包含正确的 ioctl 系统调用号码，对于 x86-64 是 <i>16</i>，对于 x86-32 是 <i>54</i>，但现在不再需要。参考：
+</p><p><a href="https://www.linuxquestions.org/questions/slackware-14/firefox-in-current-alsa-sound-4175622116">[3]</a>
+<a href="https://codelab.wordpress.com/2017/12/11/firefox-drops-alsa-apulse-to-the-rescue">[4]</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E5.BC.BA.E5.88.B6.E5.90.AF.E7.94.A8_WebGL" id="强制启用_WebGL"><span id=".E5.BC.BA.E5.88.B6.E5.90.AF.E7.94.A8_WebGL"></span>强制启用 WebGL</h3></div>
+<p>在某些平台上，WebGL 可能会被<a href="https://wiki.mozilla.org/Blocklisting/Blocked_Graphics_Drivers">禁用</a>。要强制启用 WebGL，请将 <code>webgl.force-enabled</code> 设置为 <code>true</code>，要强制启用 WebGL 抗锯齿，请将 <code>webgl.msaa-force</code> 设置为 <code>true</code>。
+</p><p>如果出现类似以下错误：
+</p>
+<pre>libGL error: MESA-LOADER: failed to retrieve device information
+libGL error: image driver extension not found
+libGL error: failed to load driver: i915
+libGL error: MESA-LOADER: failed to retrieve device information
+...</pre>
+<p>您可以尝试按照 Firefox bug 1480755 中解释的解决方案 <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1480755">[5]</a>：
+</p><p>将 <code>security.sandbox.content.read_path_whitelist</code> 设置为 <code>/sys/</code>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E5.90.AF.E7.94.A8_Pocket_.E6.8E.A8.E8.8D.90.E5.86.85.E5.AE.B9" id="启用_Pocket_推荐内容"><span id=".E5.90.AF.E7.94.A8_Pocket_.E6.8E.A8.E8.8D.90.E5.86.85.E5.AE.B9"></span>启用 Pocket 推荐内容</h3></div>
+<p>如果您没有看到“由 Pocket 推荐”（“设置 &gt; 主页 &gt; Firefox 首页内容”），可以通过在 <code>about:config</code> 中将 <code>browser.newtabpage.activity-stream.feeds.<b>section</b>.topstories</code> 和 <code>browser.newtabpage.activity-stream.feeds.<b>system</b>.topstories</code> 设置为 <code>true</code> 来启用它。尽管此选项仍不会显示在首选项中，但重新打开的标签页/窗口（如果设置为 <code>Firefox 首页</code>）现在应该会显示 Pocket 推荐内容。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1ba73eaeffc3_.E9.98.B2.E6.AD.A2.E4.B8.8B.E8.BD.BD.E9.9D.A2.E6.9D.BF.E8.87.AA.E5.8A.A8.E6.89.93.E5.BC.80" id="防止下载面板自动打开"><span id=".E9.98.B2.E6.AD.A2.E4.B8.8B.E8.BD.BD.E9.9D.A2.E6.9D.BF.E8.87.AA.E5.8A.A8.E6.89.93.E5.BC.80"></span>防止下载面板自动打开</h3></div>
+<p>从 Firefox 98 开始，下载面板（显示正在进行/最近的下载）会在每次下载开始时自动打开。
+</p><p>您可以通过在 <code>about:config</code> 中将 <code>browser.download.alwaysOpenPanel</code> 设置为 <code>false</code> 来禁用此行为。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1ba73eaeffc3_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://kb.mozillazine.org/Knowledge_Base">MozillaZine Wiki</a></li>
+<li><a href="https://kb.mozillazine.org/About:config_entries">about:config entries MozillaZine article</a></li>
+<li><a href="https://linuxtidbits.wordpress.com/2009/08/01/better-fox-cat-and-weasel/">Firefox touch-ups that might be desired</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807054352
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.305 seconds
+Real time usage: 0.313 seconds
+Preprocessor visited node count: 1490/1000000
+Revision size: 27610/2097152 bytes
+Post‐expand include size: 13245/2097152 bytes
+Template argument size: 6165/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 573/5000000 bytes
+Lua time usage: 0.010/7.000 seconds
+Lua memory usage: 540698/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  114.149      1 -total
+ 27.29%   31.148      1 Template:Link-en
+ 16.03%   18.292    148 Template:Ic
+  3.84%    4.382      7 Template:注意
+  3.29%    3.754      1 Template:翻译状态
+  2.48%    2.829      9 Template:Hc
+  2.29%    2.612      2 Template:Pkg
+  2.02%    2.306      4 Template:Related
+  1.94%    2.211      1 Template:相关文章开始
+  1.25%    1.426      4 Template:Bc
+-->
+<!-- Render ID f872a80e-9222-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8017:|#|:idhash:canonical!zh-cn and timestamp 20260807054352 and revision id 34265. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

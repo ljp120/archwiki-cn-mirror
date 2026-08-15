@@ -1,0 +1,102 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg1230b8f54241">硬盘主动防护系统</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Hard_Drive_Active_Protection_System">Hard Drive Active Protection System</a>，最近一次同步于 2023-05-23，若英文版本有所<a href="https://wiki.archlinux.org/title/Hard_Drive_Active_Protection_System?diff=0&amp;oldid=778604">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Hard_Drive_Active_Protection_System_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg40ba748efa57">hpfall</a></li>
+</ul></div>
+<p>硬盘主动防护系统(HDAPS)可以在硬盘受到突然冲击时(比如你的笔记本掉落或撞击到桌子上时)保护硬盘,其工作原理是在发生意外冲击时停放磁头,这样磁头就不会撞击到盘片上,也许这会避免一个灾难性的硬盘损伤。参阅<a href="https://en.wikipedia.org/wiki/Active_hard-drive_protection">wikipedia:Active hard-drive protection</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><a href="#pgc9fcf3c7441d">固态硬盘</a>不需要HDAPS,因为其不包含高速旋转的机械部件.</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1230b8f54241_.E9.9C.87.E5.8A.A8.E6.A3.80.E6.B5.8B" id="震动检测"><span id=".E9.9C.87.E5.8A.A8.E6.A3.80.E6.B5.8B"></span>震动检测</h2></div>
+<p>硬件需要支持震动检测。一般来说，实现此功能的是笔记本主板上的一个加速度计。除了硬件，还需要有驱动程序将硬件检测到的内容告诉操作系统。这个部分描述实现此功能的驱动程序。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1230b8f54241_tp_smapi" id="tp_smapi">tp_smapi</h3></div>
+<p><a href="#pg7c46d848d55d">tp_smapi</a> 是一套适用于ThinkPad的驱动程序集。如果你有一台支持此功能的ThinkPad，就算你没打算使用HDAPS也强烈推荐使用tp_smapi。除了很多有用的功能外，tp_smapi还会把加速计输出为操纵杆设备<code>/dev/input/js#</code>
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这可能会干扰到系统的其他操纵杆设备</div><p>。
+</p><p>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tp_smapi">tp_smapi</a></span><sup><small>包</small></sup></span>.重启后会启动大部分的驱动，设备信息位于<code>/sys/devices/platform/smapi</code>.
+</p><p>内核有自己的 HDAPS 驱动，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tp_smapi">tp_smapi</a></span><sup><small>包</small></sup></span> 软件包会将<code>hdaps.ko</code> 安装到 <a href="https://www.mail-archive.com/arch-dev-public@archlinux.org/msg01995.html">/lib/modules/$(uname -r)/updates</a>，替换掉内置模块。这样只需在 <code>MODULES</code> 中加入<code>hdaps</code>模块就好了。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>参见 <a href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=628829">这个bug报告</a>, 某些ThinkPad使用了tp_smapi不支持的固件,并且看起来在不久的将来tp_smapi也不会支持这些固件. 这些系列存在此问题: Edge, SL, L, X1xxe. 项目页面表示 x121e 主要功能应该没问题，但是用户报告无法工作，所以这些设备目前的支持都有问题。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1230b8f54241_.E6.A8.A1.E5.9D.97.E5.8F.82.E6.95.B0invert" id="模块参数invert"><span id=".E6.A8.A1.E5.9D.97.E5.8F.82.E6.95.B0invert"></span>模块参数invert</h3></div>
+<p>某些ThinkPads需要添加invert模块参数来正确处理X和Y旋转轴. 如果需要的话,在<code>/etc/modprobe.d/modprobe.conf</code>中添加:
+</p>
+<pre>options hdaps invert=1
+</pre>
+<p>例如 ThinkPad T410,可以添加<code>invert=1</code> .invert可以取如下值:
+</p>
+<ul><li>invert=1 反转X和Y轴;</li>
+<li>invert=2 反转X轴 (如果已经倒置两轴则此参数值无效)</li>
+<li>invert=4 交换X和Y (在反转之前)</li></ul>
+<p>参数值可以相加. 例如, invert=5 交换两轴后反转两轴. 最大的参数值是7.如果你不清楚该怎么办的话,可以使用<a href="https://aur.archlinux.org/packages/?K=hdaps-gl">hdaps-gl</a>或者其它图形界面工具 (见下). 另外, 你可以从<a href="https://www.thinkwiki.org/wiki/Tp_smapi#Model-specific_status">这张表</a>里的"HDAPS axis orientation"项中得出你需要的参数值.
+</p><p>除了修改后重新载入 <code>hdaps</code> 模块之外, 还可以通过直接写 <code>/sys/devices/platform/hdaps/invert</code> 来修改 <code>invert</code> 值。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1230b8f54241_.E4.BF.9D.E6.8A.A4" id="保护"><span id=".E4.BF.9D.E6.8A.A4"></span>保护</h2></div>
+<p>现在,你的硬件已经能将受到冲击的信息报告给操作系统,我们需要让操作系统在收到此信息后保护硬盘.这个部分描述的是在收到信息后保护硬盘的软件.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1230b8f54241_hdapsd" id="hdapsd">hdapsd</h3></div>
+<p>hdapsd可以接收HDAPS传感器的信息并判断是否受到冲击,如果是的话通知内核停放磁头.
+</p><p>设置hdaps时你应该检查硬盘的<a href="#pgd2cf619d06cb">SMART</a>信息中的"Load cycle count". 如果检测太过于敏感的话,磁头将会不停地进行停放操作,load cycle count将会上升很快.
+</p><p><a href="#pg9ef105bf1e3c">安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hdapsd">hdapsd</a></span><sup><small>包</small></sup></span>后,通过 <code>hdapsd@device.service</code> 来<a href="#pgac06dd8bfe95">启动</a> hdapsd 守护进程，但是不需要设置为开机启动。
+</p><p>软件包会安装 udev 规则， udev 会对每个机械磁盘启用 hdapsd 实例。
+</p><p>更多信息请参考 <a href="https://github.com/evgeni/hdapsd#systemd-and-udev-integration:Link">hdapsd github 页面</a>。
+</p><p>你可以在hdaps的unit file里调整参数(详见<a href="#pgac06dd8bfe95">systemd的文章</a>). 比如以下面的文件覆盖默认的service文件将调整hdaps的灵敏度与记录:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/hdapsd.service.d/sensitivity.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+ExecStart=
+ExecStart=/usr/bin/hdapsd --sensitivity=40 -blp
+</pre>
+<p>然后重载配置.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1230b8f54241_.E5.9B.BE.E5.BD.A2.E7.95.8C.E9.9D.A2.E5.B7.A5.E5.85.B7" id="图形界面工具"><span id=".E5.9B.BE.E5.BD.A2.E7.95.8C.E9.9D.A2.E5.B7.A5.E5.85.B7"></span>图形界面工具</h2></div>
+<p>这里有一些显示hdapsd状态的软件,通过它们你很容易知道发生了些什么.你可以选择不安装它们.
+</p><p><b>xfce4-hdaps</b> — Xfce4面板小程序.
+</p>
+<dl><dd><a href="http://michael.orlitzky.com/code/xfce4-hdaps.xhtml">http://michael.orlitzky.com/code/xfce4-hdaps.xhtml</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xfce4-hdaps/">xfce4-hdaps</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<p><b>HDAPSicon</b> — （之前的thinkhdaps）是一个独立的GTK小程序.运行时会在通知区显示图标.
+</p>
+<dl><dd><a href="https://github.com/thpani/thinkhdaps">https://github.com/thpani/thinkhdaps</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hdapsicon-git/">hdapsicon-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<p><b>hdaps-gl</b> — 一个简单的OpenGL程序 ,它以3D动画的形式显示您的ThinkPad的状态,和联想的Windows下的软件很像.
+</p>
+<dl><dd><a href="https://github.com/evgeni/hdapsd">https://github.com/evgeni/hdapsd</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hdaps-gl/">hdaps-gl</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1230b8f54241_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://www.thinkwiki.org/wiki/How_to_protect_the_harddisk_through_APS">How to protect the harddisk through APS at ThinkWiki</a></li>
+<li><a href="https://www.thinkwiki.org/wiki/HDAPS">HDAPS at ThinkWiki</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808023517
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.095 seconds
+Real time usage: 0.101 seconds
+Preprocessor visited node count: 257/1000000
+Revision size: 5232/2097152 bytes
+Post‐expand include size: 4623/2097152 bytes
+Template argument size: 1965/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 70/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   34.306      1 -total
+ 14.70%    5.044      3 Template:App
+ 13.80%    4.735      1 Template:Related
+ 11.01%    3.777      1 Template:相关文章开始
+ 10.21%    3.503      1 Template:翻译状态
+  7.70%    2.640      3 Template:Pkg
+  6.45%    2.213     11 Template:Ic
+  6.35%    2.180      1 Template:相关文章结束
+  4.07%    1.398      3 Template:AUR
+  3.85%    1.321      1 Template:Hc
+-->
+<!-- Render ID ca986c8e-92d1-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3227:|#|:idhash:canonical!zh-cn and timestamp 20260808023517 and revision id 33815. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,144 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgc58950f08e5c">mkinitcpio/极简 initramfs</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<div class="noteTA" id="noteTA-b829cfa9"><div class="noteTA-local"><div data-noteta-code="zh-cn:模块;zh-tw:模組;"></div><div data-noteta-code="zh-cn:字段;zh-tw:欄位;"></div><div data-noteta-code="zh-cn:数组;zh-tw:陣列;"></div></div></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/mkinitcpio/Minimal_initramfs">mkinitcpio/Minimal  initramfs</a>，最近一次同步于 2024-7-19，若英文版本有所<a href="https://wiki.archlinux.org/title/mkinitcpio/Minimal_initramfs?diff=0&amp;oldid=812636">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/mkinitcpio_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Minimal_initramfs_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文介绍如何为具有特定、已知和静态硬件配置的系统创建精简、最小的 initramfs。 Falconindy (Dave Reisner) 的 <a href="http://blog.falconindy.com/articles/optmizing-bootup-with-mkinitcpio.html">Optimizing Bootup With mkinitcpio</a> 详细阐述了该过程。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc58950f08e5c_Udev_.E8.A6.81.E6.B1.82" id="Udev_要求"><span id="Udev_.E8.A6.81.E6.B1.82"></span>Udev 要求</h2></div>
+<p>创建自己的 initramfs 映像的一大优点是可以移除 <code>udev</code> 钩子。这个钩子在 initramfs 中占了相当大一块空间（使用 LZ4 和 LZOP 压缩时约为 700-800 KiB，其他算法较小）。因此它不仅导致启动时加载耗时更长（需要解压更多的数据），而且初始化其自身时也要额外的时间。<b>但是，仍有部分操作需要</b> <code>udev</code>，包括解析 UUID、LABEL、PARTUUID 和 PARTLABEL 标识符（<a href="https://unix.stackexchange.com/questions/352381/how-to-boot-into-root-btrfs-file-system-with-minimal-initramfs-without-udev-hook/352932#answer-352932">workaround hook without-udev</a>）以及包含 <code>root</code> 分区的 LVM 和 mdadm 设备。
+若您不确定是否需要 <code>udev</code>，请继续按照本页上的说明操作，直到 #初步测试章节。如果在没有 <code>udev</code> 的时候出了问题，请重新启用此钩子，再试一次。
+</p><p>另请注意，虽然大部分键盘（AT，PS/2，USB）不需要 <code>udev</code> 钩子也能正常工作，但使用罗技统一接收器（Logitech Unified Receiver）的 USB 设备需要。此时，您可以在所有映像中包含 <code>udev</code> 或依赖 <code>fallback</code> 映像正常工作。
+</p><p>如果您确实需要 <code>udev</code>，最小化映像的努力可能就白费了。映像大小也许能减小约 600 KiB，但是启动时间不会有显著改变。在此情况继续下去，不失为一次学习机会。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc58950f08e5c_.E7.BC.96.E8.BE.91_.preset_.E6.96.87.E4.BB.B6" id="编辑_.preset_文件"><span id=".E7.BC.96.E8.BE.91_.preset_.E6.96.87.E4.BB.B6"></span>编辑 .preset 文件</h2></div>
+<p>在 Falconidy 的教程中，他编辑 <code>/etc/mkinitcpio.conf</code> 并运行 <code>mkinitcpio -g</code> 来创建测试 initramfs 映像，使系统上已知正常启动的 initramfs 映像保持不变。 但是，如果您事后盲目运行 <code>mkinitcpio -P</code>，甚至 <code>fallback</code> 映像也会被删除。
+</p><p>准备自行创建 initramfs 的更安全方法是修改 <code>/etc/mkinitcpio.d</code> 中的 <code>.preset</code> 文件。以下的示例设定将以最小的 initramfs 映像取代<code>default</code>，并依照 The Arch Way 的方式建立一个新的正常映像文件。 如果出现问题，您仍可以使用 <code>normal</code> 或 <code>fallback</code> 映像。 完成后，您可以从配置中删除 <code>normal_*</code> 行并删除 <code>initramfs-linux*-normal.img</code> 文件。
+</p>
+<pre>...
+
+PRESETS=('default' 'normal' 'fallback')
+...
+
+default_options="-S udev,block,mdadm_udev,filesystems,keyboard,fsck,consolefont"
+...
+
+#normal_config="/etc/mkinitcpio.conf"
+normal_image="/boot/initramfs-linux-normal.img"
+#normal_options=""
+...</pre>
+<p><code>mdadm_udev</code> 和 <code>consolefont</code>钩子不在 Arch Linux 默认的配置中，在 <code>*_options</code> 行的 <code>-S</code> 参数中包含无关的钩子不会导致错误。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc58950f08e5c_.E6.89.BE.E5.87.BA.E9.9C.80.E8.A6.81.E7.9A.84.E6.A8.A1.E5.9D.97" id="找出需要的模块"><span id=".E6.89.BE.E5.87.BA.E9.9C.80.E8.A6.81.E7.9A.84.E6.A8.A1.E5.9D.97"></span>找出需要的模块</h2></div>
+
+<p>找出机器需要的模块的最快方法是重启电脑，使用 <code>fallback</code> 映像并通过引导加载程序（boot loader）添加 <code>break=postmount</code> 内核参数。于是在根文件系统挂载好后便可进入命令行界面。
+</p><p>重启电脑后，通过以下命令来获取需要的模块：
+</p>
+<pre>lsmod | awk 'NF==3{print $1}'
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>awk</code> 命令会返回每一行的第一个字段（使用 <code>{print $1</code>），但只限于那些刚好有三个字段的行，这是通过 <code>NF==3</code> 来强制筛选的。
+模块依赖关系会包含第四个字段，用来显示是由哪个模块引入这个依赖，因此这些行会因为有第四个字段而被过滤掉。Arch 的 <code>mkinitcpio</code> 会处理那些正当包含在 <code>MODULES=()</code>、<code>FILES=()</code> 和 <code>BINARIES=()</code> 数组中的依赖项目。</div>
+<p>保存已加载模块的清单，输入 <code>exit</code> 继续启动机器。
+</p><p>另一种方式是<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hwdetect">hwdetect</a></span><sup><small>包</small></sup></span> 来帮助确定所需的模块。虽然此软件包已停止维护，它仍可提供有价值的信息。另外，请参阅<a href="#pg6dbfce2ea89d">内核模块</a>以开始使用本机工具。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc58950f08e5c_.E5.88.9D.E6.AD.A5.E7.BC.96.E8.BE.91_mkinitcpio.conf" id="初步编辑_mkinitcpio.conf"><span id=".E5.88.9D.E6.AD.A5.E7.BC.96.E8.BE.91_mkinitcpio.conf"></span>初步编辑 mkinitcpio.conf</h2></div>
+<p>编辑 <code>/etc/mkinitcpio.conf</code> 修改 <code>MODULES=</code> 数组。值得注意 <code>/etc/mkinitcpio.conf</code> <a href="#pg04471119f812">作为脚本调用</a>，可以使用 bash 脚本构建 MODULES 数组。
+</p>
+<pre>MODULES=()   # filesystems
+MODULES+=()  # storage
+MODULES+=()  # keyboard
+MODULES+=()  # miscellaneous
+</pre>
+<p>把模块添加到配置中最后的 <code>miscellaneous</code> 行中，整理时再将模块移至合适的行去。
+</p><p>若需要对 <code>root</code> 分区设备和在 <code>/etc/fstab</code> 的<b>任何其他挂载点</b>进行文件系统检查操作，请按下文配置：
+</p>
+<ul><li>对于 ext[2|3|4] 设备：</li></ul>
+<pre>BINARIES=(fsck fsck.ext[2|3|4] e2fsck)
+</pre>
+<ul><li>对于 vfat (UEFI boot) 设备：</li></ul>
+<pre>BINARIES=(fsck fsck.vfat dosfsck)
+</pre>
+<ul><li>对于 btrfs 单盘设备：</li></ul>
+<pre>BINARIES=(fsck fsck.btrfs btrfsck)
+</pre>
+<ul><li>对于 btrfs 多盘设备：</li></ul>
+<pre>BINARIES=(fsck fsck.btrfs btrfs btrfsck)
+</pre>
+<ul><li>对于 xfs 设备：</li></ul>
+<pre>BINARIES=(fsck fsck.xfs xfs_repair)
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>上述示例中的第三个选项都是可选的，但除去它们将导致无法修复损坏的文件系统，此时需要从另一个 initramfs 启动。</li>
+<li>鼓励添加其他文件系统的条目。</li></ul>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc58950f08e5c_.E5.88.9D.E6.AD.A5.E6.B5.8B.E8.AF.95" id="初步测试"><span id=".E5.88.9D.E6.AD.A5.E6.B5.8B.E8.AF.95"></span>初步测试</h2></div>
+<p>编辑 <code>/etc/mkinitcpio.conf</code> 并运行 <code>mkinitcpio -P</code> 重建所有 initramfs 镜像。 然后重启。
+</p><p><b>如果不需要 <code>udev</code></b>，第一次启动应该会成功。 如果出现故障（例如，Arch 找不到根分区或键盘失灵），则需要返回并从<code>default_options</code>行的<code>-S</code>参数中删除<code>udev</code>，然后再试一次。 如果需要使用 <code>udev</code>，请注意启动时间不会有明显改善，继续尝试只能作为学习经验。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc58950f08e5c_.E6.95.B4.E7.90.86.E6.A8.A1.E5.9D.97" id="整理模块"><span id=".E6.95.B4.E7.90.86.E6.A8.A1.E5.9D.97"></span>整理模块</h2></div>
+<p>现在您已经有了一个已知正常的可启动 initramfs，是时候进一步精简 initramfs 了。通常是一次删除几个模块，重建 initramfs 映像，然后重新启动以查看一切是否仍然正常。若有功能异常，请使用 <code>fallback</code> initramfs 映像重启并重新添加已删除的模块，直到再次恢复正常。多次重复，直到只剩下所需的模块。
+这可能是相对乏味的过程，因此提供了以下列表，以便减少前期工作。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>以下仅作示例参考，并不意味着适合每台设备。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc58950f08e5c_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E6.A8.A1.E5.9D.97" id="文件系统模块"><span id=".E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E6.A8.A1.E5.9D.97"></span>文件系统模块</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>只需要对应的模块：启动时需要检查文件系统的 <code>root</code> 设备和在 <code>/etc/fstab</code> 中的其他设备</div>
+<ul><li><code>ext[2,3,4]</code></li>
+<li><code>xfs</code></li>
+<li><code>jfs</code></li>
+<li><code>reiserfs</code></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc58950f08e5c_.E5.AD.98.E5.82.A8.E8.AE.BE.E5.A4.87.E6.A8.A1.E5.9D.97" id="存储设备模块"><span id=".E5.AD.98.E5.82.A8.E8.AE.BE.E5.A4.87.E6.A8.A1.E5.9D.97"></span>存储设备模块</h3></div>
+<ul><li><code>sd_mod</code> 用于所有 SCSI、SATA 和 PATA（IDE）设备</li>
+<li><code>ahci</code> 用于现代 AHCI 控制器上的 SATA 设备</li>
+<li><code>nvme</code> 和 <code>nvme_core</code> 用于 NVMe（M.2、PCI-E）设备</li>
+<li><code>sata_*</code> 用于 IDE 模式控制器上的 SATA 设备</li>
+<li><code>pata_*</code> 用于 PATA（IDE）设备</li>
+<li><code>ehci_pci</code> 和 <code>usb_storage</code> 用于 USB 存储设备</li>
+<li><code>virtio_blk</code> 和 <code>virtio_pci</code> 用于使用 VirtIO 进行存储的 QEMU/KVM 虚拟机</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc58950f08e5c_.E9.94.AE.E7.9B.98.E6.A8.A1.E5.9D.97" id="键盘模块"><span id=".E9.94.AE.E7.9B.98.E6.A8.A1.E5.9D.97"></span>键盘模块</h3></div>
+<ul><li><code>atkbd</code> 用于 AT 和 PS/2 键盘，以及 QEMU/KVM 中的模拟键盘。</li>
+<li><code>hid_generic</code>、<code>ohci_pci</code>和 <code>usbhid</code> 用于普通 USB 键盘。</li>
+<li><code>hid_logitech_dj</code>、<code>uhci_hcd</code> 和 <code>usbhid</code> 适用于使用罗技统一接收器的罗技 USB 键盘（<b>需要</b> {ic|udev}} <b>钩子</b>）。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc58950f08e5c_.E6.94.B6.E5.B0.BE.E5.B7.A5.E4.BD.9C" id="收尾工作"><span id=".E6.94.B6.E5.B0.BE.E5.B7.A5.E4.BD.9C"></span>收尾工作</h2></div>
+<p>将 initramfs 压缩到最小后，移除（或注释掉）<code>.preset</code> 文件中的 <code>normal_*</code> 行，并移除 <code>/boot</code> 中的 <code>initramfs-linux*-normal.img</code> 文件。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808040127
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.239 seconds
+Real time usage: 0.244 seconds
+Preprocessor visited node count: 658/1000000
+Revision size: 8080/2097152 bytes
+Post‐expand include size: 6725/2097152 bytes
+Template argument size: 2452/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.067/7.000 seconds
+Lua memory usage: 659545/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  175.102      1 -total
+ 73.86%  129.322      1 Template:NoteTA
+  5.36%    9.384     75 Template:Ic
+  3.24%    5.670      4 Template:Note
+  2.50%    4.386      1 Template:Lowercase_title
+  1.85%    3.242      1 Template:需要翻译
+  1.32%    2.312      1 Template:翻译状态
+  1.17%    2.048      1 Template:Pkg
+  0.96%    1.673      1 Template:META_Message
+  0.60%    1.052      1 Template:Bc
+-->
+<!-- Render ID d427d18e-92dd-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7807:|#|:idhash:canonical!zh-cn and timestamp 20260808040127 and revision id 33646. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

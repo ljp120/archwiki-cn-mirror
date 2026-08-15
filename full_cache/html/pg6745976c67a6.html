@@ -1,0 +1,107 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg6745976c67a6">Haskell 打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Haskell_package_guidelines">Haskell package guidelines</a>，最近一次同步于 2020-05-03，若英文版本有所<a href="https://wiki.archlinux.org/title/Haskell_package_guidelines?diff=0&amp;oldid=610337">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Haskell_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – Haskell – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<p>本文档旨在涵盖在Arch上创建优质 <a href="#pgccd29da0297b">Haskell</a> <a href="#pgca951d402f98">软件包</a>标准和准则。
+</p><p>在撰写本文之前，请联系 <a href="#pg2eb22ba652f5">User:Felixonmars</a>
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6745976c67a6_.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.91.BD.E5.90.8D" id="软件包命名"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E5.91.BD.E5.90.8D"></span>软件包命名</h2></div>
+<p>对于 Haskell 库，使用 <code>haskell-<i>libraryname</i></code>，通常与 <a href="https://hackage.haskell.org/">hackage</a> 相同。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>软件包名称应完全小写。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6745976c67a6_.E4.BD.93.E7.B3.BB.E6.9E.B6.E6.9E.84" id="体系架构"><span id=".E4.BD.93.E7.B3.BB.E6.9E.B6.E6.9E.84"></span>体系架构</h2></div>
+<p>参见 <a href="#pgf9d748a7b27b">PKGBUILD#arch</a>。
+</p><p>每个 Haskell 库或程序都依赖于体系结构。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6745976c67a6_.E6.9D.A5.E6.BA.90" id="来源"><span id=".E6.9D.A5.E6.BA.90"></span>来源</h2></div>
+<p>Haskell程序或库的首选来源是 <a href="https://hackage.haskell.org">hackage</a>。<a href="#pgf9d748a7b27b">PKGBUILD#source</a> <code>source=()</code> 数组应使用以下 URL 模板：
+</p>
+<dl><dd><code>https://hackage.haskell.org/packages/archive/$_hkgname/$pkgver/$_hkgname-$pkgver.tar.gz</code></dd></dl>
+<p>请注意，因为 Haskell 软件包通常以 haskell- 为前缀，所以使用自定义 _hkgname 变量而不是 pkgname 。通常可以如下定义此变量：
+</p>
+<pre>_hkgname=stm-delay
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6745976c67a6_.E9.87.8D.E5.BB.BA.E9.A1.BA.E5.BA.8F" id="重建顺序"><span id=".E9.87.8D.E5.BB.BA.E9.A1.BA.E5.BA.8F"></span>重建顺序</h2></div>
+<p>当 Haskell 库更改时，它的构建标志或被更新，所有依赖包都需要重建。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6745976c67a6_PKGBUILD_.E5.BA.93.E7.A4.BA.E4.BE.8B" id="PKGBUILD_库示例"><span id="PKGBUILD_.E5.BA.93.E7.A4.BA.E4.BE.8B"></span>PKGBUILD 库示例</h2></div>
+<p>打包 Haskell 库与打包 Haskell 程序不同，Arch Linux 中打包的库供打包的 Haskell 程序使用。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PKGBUILD</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Contributor: Your Name &lt;youremail@domain.com&gt;
+_hkgname=stm-delay
+pkgname=haskell-stm-delay
+arch=('x86_64')
+url="https://hackage.haskell.org/package/$hkgname"
+depends=(ghc-libs)
+makedepends=(ghc)
+source=("https://hackage.haskell.org/packages/archive/$_hkgname/$pkgver/$_hkgname-$pkgver.tar.gz")
+
+build() {
+  cd $_hkgname-$pkgver    
+    
+  runhaskell Setup configure -O --enable-shared --enable-executable-dynamic --disable-library-vanilla \
+    --prefix=/usr --docdir=/usr/share/doc/$pkgname --enable-tests \
+    --dynlibdir=/usr/lib --libsubdir=\$compiler/site-local/\$pkgid \
+    --ghc-option=-optl-Wl\,-z\,relro\,-z\,now \
+    --ghc-option='-pie'
+
+  runhaskell Setup build
+  runhaskell Setup register --gen-script
+  runhaskell Setup unregister --gen-script
+  sed -i -r -e "s|ghc-pkg.*update[^ ]* |&amp;'--force' |" register.sh
+  sed -i -r -e "s|ghc-pkg.*unregister[^ ]* |&amp;'--force' |" unregister.sh
+}
+
+check() {
+  cd $_hkgname-$pkgver
+  runhaskell Setup test
+}
+
+package() {
+  cd $_hkgname-$pkgver
+
+  install -D -m744 register.sh "$pkgdir"/usr/share/haskell/register/$pkgname.sh
+  install -D -m744 unregister.sh "$pkgdir"/usr/share/haskell/unregister/$pkgname.sh
+  runhaskell Setup copy --destdir="$pkgdir"
+  install -D -m644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  rm -f "${pkgdir}/usr/share/doc/${pkgname}/LICENSE"
+}
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260808002735
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.105 seconds
+Real time usage: 0.110 seconds
+Preprocessor visited node count: 90/1000000
+Revision size: 2745/2097152 bytes
+Post‐expand include size: 2748/2097152 bytes
+Template argument size: 261/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 1435/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   14.344      1 -total
+ 28.99%    4.159      1 Template:翻译状态
+ 17.14%    2.459      1 Template:Package_guidelines
+ 12.19%    1.749      3 Template:Ic
+ 11.34%    1.627      1 Template:Hc
+  8.44%    1.210      1 Template:注意
+-->
+<!-- Render ID f3b0018e-92bf-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3231:|#|:idhash:canonical!zh-cn and timestamp 20260808002735 and revision id 33630. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

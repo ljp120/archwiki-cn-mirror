@@ -1,0 +1,69 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pga90a06607c35">音频系统</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg74c1ac5b6606">编解码器与容器</a></li>
+<li><a href="#pgb760a443d51a">MIDI</a></li>
+<li><a href="#pg562e8d103236">PC 扬声器</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Sound_system">Sound system</a>，最近一次同步于 2026-04-14，若英文版本有所<a href="https://wiki.archlinux.org/title/Sound_system?diff=0&amp;oldid=869766">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Sound_system_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>任何 <a href="https://zh.wikipedia.org/wiki/Linux">Linux</a> 音频系统都包含数个层级：
+</p>
+<ul><li>驱动和底层接口 — 硬件支持与控制</li>
+<li><a href="https://en.wikipedia.org/wiki/Protection_ring">用户模式</a> API（库）— 应用调用所需</li>
+<li>用户模式音频服务器<b>（可选）</b>— 适用于复杂桌面环境，同时存在多个音频应用，以及需要高级特性的环境（如专业音频环境）</li>
+<li>音频框架<b>（可选）</b>— 与服务器进程无关的高层级应用环境</li></ul>
+<p>默认 Arch 安装就已包含了内核音频系统（<a href="#pgb16dfd48462f">ALSA</a>），且<a href="#pg15c7e809c461">官方仓库</a>中包含很多相关工具。如果你想要更多其它功能，可以选择安装一个音频服务器，大多数发行版默认会使用 <a href="#pgfd2dc6e44edd">PipeWire</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>更多信息请参考<a href="#pgb3b4b5c595bd">专业音频</a>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga90a06607c35_.E9.A9.B1.E5.8A.A8.E5.92.8C.E5.BA.95.E5.B1.82.E6.8E.A5.E5.8F.A3" id="驱动和底层接口"><span id=".E9.A9.B1.E5.8A.A8.E5.92.8C.E5.BA.95.E5.B1.82.E6.8E.A5.E5.8F.A3"></span>驱动和底层接口</h2></div>
+<ul><li><b><a href="#pgb16dfd48462f">高级 Linux 声音体系</a>（Advanced Linux Sound Architecture，ALSA）</b> — 为音频硬件提供设备驱动及最底层支持的默认 Linux 内核组件。</li></ul>
+<dl><dd><a href="https://www.alsa-project.org/wiki/Main_Page">https://www.alsa-project.org/wiki/Main_Page</a> || 随默认内核附带</dd></dl>
+<ul><li><b><a href="#pg1ae094749ee0">Open Sound System</a>（OSS）</b> — 早期的 Linux 音频系统。</li></ul>
+<dl><dd><a href="http://www.opensound.com/">http://www.opensound.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/oss/">oss</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga90a06607c35_.E9.9F.B3.E9.A2.91.E6.9C.8D.E5.8A.A1.E5.99.A8" id="音频服务器"><span id=".E9.9F.B3.E9.A2.91.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>音频服务器</h2></div>
+<ul><li><b><a href="#pg9fd97b0c6a8a">JACK Audio Connection Kit</a></b> — 用于专业音频应用的音频服务器，特别是如录音，效果插入，实时合成等低延迟应用。</li></ul>
+<dl><dd><a href="https://jackaudio.org/">https://jackaudio.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jack/">jack</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=jack2">jack2</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Network Audio System</b> — 开源，网络透明，客户端-服务端架构的音频传输系统。</li></ul>
+<dl><dd><a href="https://www.radscan.com/nas/nas-links.html">https://www.radscan.com/nas/nas-links.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nas/">nas</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgfd2dc6e44edd">PipeWire</a></b> — 目标取代 PulseAudio 和 JACK 的多媒体框架，支持类似 <a href="#pge822df3d71e0">Flatpak</a> 的容器。</li></ul>
+<dl><dd><a href="https://pipewire.org/">https://pipewire.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pipewire">pipewire</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pga942ba974b3d">PulseAudio</a></b> — 通用音频系统，目标为开箱即用，多同时音频输入，可以处理复杂场景，带有网络功能。</li></ul>
+<dl><dd><a href="https://www.freedesktop.org/wiki/Software/PulseAudio/">https://www.freedesktop.org/wiki/Software/PulseAudio/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pulseaudio">pulseaudio</a></span><sup><small>包</small></sup></span></dd></dl>
+<p>另请参考 <a href="https://en.wikipedia.org/wiki/Sound_server">Wikipedia:Sound server</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807043702
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.089 seconds
+Real time usage: 0.093 seconds
+Preprocessor visited node count: 172/1000000
+Revision size: 2207/2097152 bytes
+Post‐expand include size: 4230/2097152 bytes
+Template argument size: 2116/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   25.402      1 -total
+ 33.01%    8.384      6 Template:App
+ 18.27%    4.642      1 Template:Related_articles_start
+  9.70%    2.463      3 Template:Pkg
+  8.62%    2.189      3 Template:Related
+  8.60%    2.184      1 Template:Tip
+  7.78%    1.976      1 Template:翻译状态
+  7.12%    1.809      1 Template:Related_articles_end
+  5.29%    1.343      3 Template:AUR
+  3.45%    0.876      1 Template:META_Related_articles_start
+-->
+<!-- Render ID a24d370e-9219-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7927:|#|:idhash:canonical!zh-cn and timestamp 20260807043702 and revision id 35032. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

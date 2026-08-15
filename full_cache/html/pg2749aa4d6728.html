@@ -1,0 +1,741 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg2749aa4d6728">pacman/提示和技巧</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Pacman/Tips_and_tricks">Pacman/Tips and tricks</a>，最近一次同步于 2025-01-23，若英文版本有所<a href="https://wiki.archlinux.org/title/Pacman/Tips_and_tricks?diff=0&amp;oldid=822132">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Pacman_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Tips_and_tricks_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg162da9020ecd">镜像源</a></li>
+<li><a href="#pgf054312e26a1">创建软件包</a></li>
+</ul></div>
+<p>通用优化请参考<a href="#pgc9277cee06e3">核心工具</a>和 <a href="#pg1ca1e15827ff">Bash</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2749aa4d6728_.E7.BB.B4.E6.8A.A4" id="维护"><span id=".E7.BB.B4.E6.8A.A4"></span>维护</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>您也可以使用 <code>grep -Fxf</code> 或 <code>grep -Fxvf</code>，而不是像下面的章节中一样使用 <i>comm</i>（需要排序输入和 <i>sort</i>）。</div>
+<p>另见<a href="#pg9a1cc6af125e">系统维护</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E6.9F.A5.E8.AF.A2.E8.BD.AF.E4.BB.B6.E5.8C.85" id="查询软件包"><span id=".E6.9F.A5.E8.AF.A2.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>查询软件包</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E6.9C.AA.E4.BD.BF.E7.94.A8.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.BA.93" id="未使用的软件库"><span id=".E6.9C.AA.E4.BD.BF.E7.94.A8.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.BA.93"></span>未使用的软件库</h4></div>
+<p>默认情况下，<code>pacman.conf</code> 中列出的软件库用于同步、搜索、安装和升级。可以通过更改配置来增加灵活性，例如仅使用某些软件库进行搜索<a href="http://allanmcrae.com/2014/12/pacman-4-2-released/">[1]</a>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+[multilib]
+Usage = Sync Search
+...</pre>
+<p>参见 <span class="plainlinks archwiki-template-man" title="$ man 5 pacman.conf"><a href="https://man.archlinux.org/man/pacman.conf.5#REPOSITORY_SECTIONS">pacman.conf(5) § REPOSITORY SECTIONS</a></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E5.B8.A6.E6.9C.89.E7.89.88.E6.9C.AC" id="带有版本"><span id=".E5.B8.A6.E6.9C.89.E7.89.88.E6.9C.AC"></span>带有版本</h4></div>
+<p>您可能希望获得已安装的软件包及其版本的列表，这在报告错误或讨论已安装的软件包时非常有用。
+</p>
+<ul><li>所有明确安装的软件包：<code>pacman -Qe</code>。</li>
+<li>列出 <code><i>group</i></code> <a href="#pgac5d7e9d277d">软件包组</a>中的所有软件包：<code>pacman -Sg <i>group</i></code>。</li>
+<li>所有外部软件包 (通常是手动下载安装，或者已经从数据库中删除)：<code>pacman -Qm</code>。</li>
+<li>列出所有从数据库中安装的软件包：<code>pacman -Qn</code>。</li>
+<li>所有明确安装的，存在于数据库而且不是直接或可选依赖的软件包：<code>pacman -Qent</code>。</li>
+<li>按正则表达式查询软件包：<code>pacman -Qs <i>regex</i></code>。</li>
+<li>按正则表达式查询软件包，自定义输出格式（需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=expac">expac</a></span><sup><small>包</small></sup></span>）：<code>expac -s "%-30n %v" <i>regex</i></code>。</li>
+<li>从<a href="#pg89d12f7bfda9">数据库</a>查询<a href="#pga91974b87c5a">软件包</a>，（如如需<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iwd">iwd</a></span><sup><small>包</small></sup></span>）: <code>pacman -Ss iwd</code></li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E5.B8.A6.E6.9C.89.E5.A4.A7.E5.B0.8F" id="带有大小"><span id=".E5.B8.A6.E6.9C.89.E5.A4.A7.E5.B0.8F"></span>带有大小</h4></div>
+<p>在尝试释放硬盘上的空间时，弄清楚哪些软件包最大可能非常有用。这里有两个选项：获取单个包的大小，或者获取包的大小及其依赖关系。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg2749aa4d6728_.E5.8D.95.E4.B8.AA.E5.8C.85" id="单个包"><span id=".E5.8D.95.E4.B8.AA.E5.8C.85"></span>单个包</h5></div>
+<p>用下面命令查看单个软件包的大小:
+</p>
+<pre>$ LC_ALL=C.UTF-8 pacman -Qi | awk '/^Name/{name=$3} /^Installed Size/{print $4$5, name}' | LC_ALL=C.UTF-8 sort -h
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg2749aa4d6728_.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.92.8C.E4.BE.9D.E8.B5.96.E9.A1.B9" id="软件包和依赖项"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E5.92.8C.E4.BE.9D.E8.B5.96.E9.A1.B9"></span>软件包和依赖项</h5></div>
+<p>要列出软件包及其依赖项，
+</p>
+<ul><li>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=expac">expac</a></span><sup><small>包</small></sup></span> 并运行 <code>expac -H M '%m\t%n' | sort -h</code>。</li>
+<li>运行 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pacgraph/">pacgraph</a></span><sup><small>AUR</small></sup></span> 带 <code>-c</code> 选项。</li></ul>
+<p>查询软件包的下载大小（不加 <code><i>packages</i></code> 将查询所有软件包）：
+</p>
+<pre>$ expac -S -H M '%k\t%n' <i>packages</i>
+</pre>
+<p>要列出不属于<a href="#pgac5d7e9d277d">元软件包</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base">base</a></span><sup><small>包</small></sup></span> 或<a href="#pgac5d7e9d277d">软件包组</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/xorg/">xorg</a></span><sup><small>包组</small></sup></span> 中的明确安装的包，带大小和描述：
+</p>
+<pre>$ expac -H M "%011m\t%-20n\t%10d" $(comm -23 &lt;(pacman -Qqen | sort) &lt;({ pacman -Qqg xorg; expac -l '\n' '%E' base; } | sort -u)) | sort -n
+</pre>
+<p>要列出标记为可升级的软件包及其下载大小：
+</p>
+<pre>$ expac -S -H M '%k\t%n' $(pacman -Qqu) | sort -sh
+</pre>
+<p>要仅列出可选依赖：
+</p>
+<pre>$ expac -S "%o" <i>package</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E6.8C.89.E6.97.A5.E6.9C.9F.E6.9F.A5.E8.AF.A2" id="按日期查询"><span id=".E6.8C.89.E6.97.A5.E6.9C.9F.E6.9F.A5.E8.AF.A2"></span>按日期查询</h4></div>
+<p>用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=expac">expac</a></span><sup><small>包</small></sup></span> 查询最近安装的 20 个软件包：
+</p>
+<pre>$ expac --timefmt='%Y-%m-%d %T' '%l\t%n' | sort | tail -n 20
+</pre>
+<p>或者，用从 epoch(1970-01-01 UTC) 开始的秒数：
+</p>
+<pre>$ expac --timefmt=%s '%l\t%n' | sort -n | tail -n 20
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E4.B8.8D.E5.9C.A8.E6.8C.87.E5.AE.9A.E7.9A.84.E5.8C.85.E7.BB.84.E3.80.81.E8.BD.AF.E4.BB.B6.E5.BA.93.E6.88.96.E5.85.83.E5.8C.85.E4.B8.AD" id="不在指定的包组、软件库或元包中"><span id=".E4.B8.8D.E5.9C.A8.E6.8C.87.E5.AE.9A.E7.9A.84.E5.8C.85.E7.BB.84.E3.80.81.E8.BD.AF.E4.BB.B6.E5.BA.93.E6.88.96.E5.85.83.E5.8C.85.E4.B8.AD"></span>不在指定的包组、软件库或元包中</h4></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>要获取作为依赖项安装但已没有任何包依赖它的包的列表，见#删除未使用的软件包（孤立软件包）.
+</div>
+<p>列出不在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base">base</a></span><sup><small>包</small></sup></span> <a href="#pgac5d7e9d277d">元软件包</a>中的明确安装的软件包：
+</p>
+<pre>$ comm -23 &lt;(pacman -Qqe | sort) &lt;(expac -l '\n' '%E' base | sort)
+</pre>
+<p>列出不在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base">base</a></span><sup><small>包</small></sup></span> 元软件包或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/xorg/">xorg</a></span><sup><small>包组</small></sup></span> <a href="#pgac5d7e9d277d">软件包组</a>中的明确安装的软件包：
+</p>
+<pre>$ comm -23 &lt;(pacman -Qqe | sort) &lt;({ pacman -Qqg xorg; expac -l '\n' '%E' base; } | sort -u)
+</pre>
+<p>列出所有没有任何软件包依赖它的已安装软件包，并且这些软件包不在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base">base</a></span><sup><small>包</small></sup></span> 元软件包或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/xorg/">xorg</a></span><sup><small>包组</small></sup></span> 软件包组中：
+</p>
+<pre>$ comm -23 &lt;(pacman -Qqt | sort) &lt;({ pacman -Qqg xorg; echo base; } | sort -u)
+</pre>
+<p>同上，但带描述：
+</p>
+<pre>$ expac -H M '%-20n\t%10d' $(comm -23 &lt;(pacman -Qqt | sort) &lt;({ pacman -Qqg xorg; echo base; } | sort -u))
+</pre>
+<p>列出<b>不</b>在指定软件库 <i>repo_name</i> 中的所有已安装软件包（可以同时检查多个软件库）：
+</p>
+<pre>$ comm -23 &lt;(pacman -Qq | sort) &lt;(pacman -Sql <i>repo_name</i> | sort)
+</pre>
+<p>列出在指定软件库 <i>repo_name</i> 中的所有已安装软件包（可以同时检查多个软件库）：
+</p>
+<pre>$ comm -12 &lt;(pacman -Qq | sort) &lt;(pacman -Sql <i>repo_name</i> | sort)
+</pre>
+<p>列出 Arch Linux ISO 上不在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base">base</a></span><sup><small>包</small></sup></span> 元软件包中的所有包：
+</p>
+<pre>$ comm -23 &lt;(curl https://gitlab.archlinux.org/archlinux/archiso/-/raw/master/configs/releng/packages.x86_64) &lt;(expac -l '\n' '%E' base | sort)
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>或者，使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=moreutils">moreutils</a></span><sup><small>包</small></sup></span> 包中的 <code>combine</code>（而不是 <code>comm</code>），该命令的语法更容易记住。见 <span class="plainlinks archwiki-template-man" title="$ man 1 combine"><a href="https://man.archlinux.org/man/combine.1">combine(1)</a></span>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E5.BC.80.E5.8F.91.E7.89.88.E8.BD.AF.E4.BB.B6.E5.8C.85" id="开发版软件包"><span id=".E5.BC.80.E5.8F.91.E7.89.88.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>开发版软件包</h4></div>
+<p>要列出所有开发版/不稳定软件包，请运行：
+</p>
+<pre>$ pacman -Qq | grep -Ee '-(bzr|cvs|darcs|git|hg|svn)$'
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.9A.84.E4.BE.9D.E8.B5.96.E9.A1.B9" id="软件包的依赖项"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E7.9A.84.E4.BE.9D.E8.B5.96.E9.A1.B9"></span>软件包的依赖项</h4></div>
+<p>要获得包的依赖项列表，最简单的解决方案是读取以下命令的输出：
+</p>
+<pre>$ pacman -Qi <i>package</i>
+</pre>
+<p>要实现自动化，而不是分析 pacman 输出这种容易出错的方法，使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=expac">expac</a></span><sup><small>包</small></sup></span>：
+</p>
+<pre>$ expac -S '%D' <i>package</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E5.B8.A6.E6.9C.89.E5.8F.AF.E9.80.89.E4.BE.9D.E8.B5.96" id="带有可选依赖"><span id=".E5.B8.A6.E6.9C.89.E5.8F.AF.E9.80.89.E4.BE.9D.E8.B5.96"></span>带有可选依赖</h4></div>
+<p>要列出明确安装的软件包及其可选依赖，请运行：
+</p>
+<pre>$ LC_ALL=C.UTF-8 pacman -Qei | sed '/^[^NO ]/d;/None$/d' | awk 'BEGIN{RS=ORS="\n\n";FS=OFS="\n\\S"} /Optional Deps/ {print $1"\nO"$2}'
+</pre>
+<p>或者，使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=expac">expac</a></span><sup><small>包</small></sup></span>：
+</p>
+<pre>$ expac -d '\n\n' -l '\n\t' -Q '%n\n\t%O' $(pacman -Qeq)
+</pre>
+<p>要列出它们并忽略已安装的可选依赖，请运行：
+</p>
+<pre>$ LC_ALL=C.UTF-8 pacman -Qei | sed '/^[^NO ]/d;/None$/d' | awk 'BEGIN{RS=ORS="\n\n";FS=OFS="\n\\S"} /Optional Deps/ {print $1"\nO"$2}' | sed 's/^Optional Deps   ://;/\[installed\]$/d;s/\s\+/ /'
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E6.9F.A5.E7.9C.8B.E7.89.B9.E5.AE.9A.E6.89.93.E5.8C.85.E8.80.85.E6.89.93.E5.8C.85.E7.9A.84.E6.89.80.E6.9C.89.E8.BD.AF.E4.BB.B6.E5.8C.85" id="查看特定打包者打包的所有软件包"><span id=".E6.9F.A5.E7.9C.8B.E7.89.B9.E5.AE.9A.E6.89.93.E5.8C.85.E8.80.85.E6.89.93.E5.8C.85.E7.9A.84.E6.89.80.E6.9C.89.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>查看特定打包者打包的所有软件包</h4></div>
+<p>这里用到了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gawk">gawk</a></span><sup><small>包</small></sup></span>。
+</p>
+<pre>$ pacman -Qi | awk -F': ' '/^名字/ {name=$2} /^打包者/ &amp;&amp; $2 ~ /<i>特定打包者</i>/ {print name}'
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E6.B5.8F.E8.A7.88.E8.BD.AF.E4.BB.B6.E5.8C.85" id="浏览软件包"><span id=".E6.B5.8F.E8.A7.88.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>浏览软件包</h3></div>
+<p>要浏览所有已安装软件包并即时预览每个软件包：
+</p>
+<pre>$ pacman -Qq | fzf --preview 'pacman -Qil {}' --layout=reverse --bind 'enter:execute(pacman -Qil {} | less)'
+</pre>
+<p>这使用 <span class="ilh-all" data-foreign-title="fzf" data-lang-code="en" data-lang-name="英语" data-orig-title="fzf"><span class="ilh-page"><a href="#pga155e3e123ce">fzf</a></span></span> 来显示一个两窗格视图，其中列出了所有软件包，包信息显示在右侧。
+</p><p>输入字母以过滤包列表；使用箭头键（或 <code>Ctrl-j</code>/<code>Ctrl-k</code>）浏览；按 <code>Enter</code> 在 <i>less</i> 下查看包信息。
+</p><p>要使用 fzf 以类似的方式浏览当前已知的所有 <i>pacman</i> 软件包（已安装和尚未安装），请使用：
+</p>
+<pre>$ pacman -Slq | fzf --preview 'pacman -Si {}' --layout=reverse
+</pre>
+<p>浏览的按键绑定是相同的，不过 <code>Enter</code> 不能同样工作。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E5.88.97.E5.87.BA.E8.BD.AF.E4.BB.B6.E5.8C.85.E6.8B.A5.E6.9C.89.E7.9A.84.E6.96.87.E4.BB.B6.E5.B9.B6.E5.B8.A6.E5.A4.A7.E5.B0.8F" id="列出软件包拥有的文件并带大小"><span id=".E5.88.97.E5.87.BA.E8.BD.AF.E4.BB.B6.E5.8C.85.E6.8B.A5.E6.9C.89.E7.9A.84.E6.96.87.E4.BB.B6.E5.B9.B6.E5.B8.A6.E5.A4.A7.E5.B0.8F"></span>列出软件包拥有的文件并带大小</h3></div>
+<p>如果您发现某个特定的包使用了大量空间，并且您想知道哪些文件占了其中的大部分，那么这个命令可能会很有用。
+</p>
+<pre>$ pacman -Qlq <i>package</i> | grep -v '/$' | xargs -r du -h | sort -h
+</pre>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E6.9F.A5.E6.89.BE.E4.B8.8D.E5.B1.9E.E4.BA.8E.E4.BB.BB.E4.BD.95.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.9A.84.E6.96.87.E4.BB.B6" id="查找不属于任何软件包的文件"><span id=".E6.9F.A5.E6.89.BE.E4.B8.8D.E5.B1.9E.E4.BA.8E.E4.BB.BB.E4.BD.95.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.9A.84.E6.96.87.E4.BB.B6"></span>查找不属于任何软件包的文件</h3></div>
+<p>如果您的系统中有不属于任何软件包的零散文件（通常是由于您没有<a href="#pg9a1cc6af125e">使用包管理器安装软件</a>），您可能需要查找这些文件以清理它们。
+</p><p>一种方法是列出所有感兴趣的文件，并对照 <i>pacman</i> 进行检查：
+</p>
+<pre># (export LC_ALL=C.UTF-8; comm -13 &lt;(pacman -Qlq | sed 's,/$,,' | sort) &lt;(find /etc /usr /opt -path /usr/lib/modules -prune -o -print | sort))
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lostfiles">lostfiles</a></span><sup><small>包</small></sup></span> 脚本执行类似的步骤，但还包括一个广泛的黑名单，以从输出中删除常见的误报。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E8.B7.9F.E8.B8.AA.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.88.9B.E5.BB.BA.E7.9A.84.E6.97.A0.E4.B8.BB.E6.96.87.E4.BB.B6" id="跟踪软件包创建的无主文件"><span id=".E8.B7.9F.E8.B8.AA.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.88.9B.E5.BB.BA.E7.9A.84.E6.97.A0.E4.B8.BB.E6.96.87.E4.BB.B6"></span>跟踪软件包创建的无主文件</h3></div>
+<p>多数系统将通过通常的操作过程慢慢的收集一些 <a href="http://ftp.rpm.org/max-rpm/s1-rpm-inside-files-list-directives.html#S3-RPM-INSIDE-FLIST-GHOST-DIRECTIVE">ghost</a> 文件，如状态文件、日志、索引等。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacutils">pacutils</a></span><sup><small>包</small></sup></span> 中的 <code>pacreport</code> 可用于通过 <code>/etc/pacreport.conf</code> 跟踪这些文件及其关联（见 <span class="plainlinks archwiki-template-man" title="$ man 1 pacreport"><a href="https://man.archlinux.org/man/pacreport.1#FILES">pacreport(1) § FILES</a></span>）。
+</p><p>一个例子可能看起来像这样（摘要）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacreport.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Options]
+IgnoreUnowned = usr/share/applications/mimeinfo.cache
+
+[PkgIgnoreUnowned]
+alsa-utils = var/lib/alsa/asound.state
+bluez = var/lib/bluetooth
+ca-certificates = etc/ca-certificates/trust-source/*
+dbus = var/lib/dbus/machine-id
+glibc = etc/ld.so.cache
+grub = boot/grub/*
+linux = boot/initramfs-linux.img
+pacman = var/lib/pacman/local
+update-mime-database = usr/share/mime/magic</pre>
+<p>然后，当由 root 用户使用 <code>pacreport --unowned-files</code> 时，如果不再安装关联的软件包（或者如果已创建任何新文件），则会列出所有无主文件。
+</p><p>此外，<a href="https://github.com/CyberShadow/aconfmgr">aconfmgr</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aconfmgr-git/">aconfmgr-git</a></span><sup><small>AUR</small></sup></span>）允许使用配置脚本跟踪修改的和孤立的文件。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E5.88.A0.E9.99.A4.E6.9C.AA.E4.BD.BF.E7.94.A8.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85.EF.BC.88.E5.AD.A4.E7.AB.8B.E8.BD.AF.E4.BB.B6.E5.8C.85.EF.BC.89" id="删除未使用的软件包（孤立软件包）"><span id=".E5.88.A0.E9.99.A4.E6.9C.AA.E4.BD.BF.E7.94.A8.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85.EF.BC.88.E5.AD.A4.E7.AB.8B.E8.BD.AF.E4.BB.B6.E5.8C.85.EF.BC.89"></span>删除未使用的软件包（孤立软件包）</h3></div>
+<p>孤立软件包是作为依赖项安装的包，任何软件包都不再依赖它。
+</p><p>由于使用 <code>pacman -R <i>package</i></code> 而不是 <code>pacman -Rs <i>package</i></code> 卸载软件包，将软件包安装为 <a href="#pge8237c80873f">makedepends</a>，或者软件包的较新版本中删除了依赖项，它们可能会随着时间的推移在您的系统上累积。
+</p><p>递归删除孤立软件包及其配置文件：
+</p>
+<pre># pacman -Qdtq | pacman -Rns -
+</pre>
+<p>如果没有孤立软件包，将显示错误 <code>错误：有参数 '-' 但标准输入流为空</code>。这个是正常的，因为 <code>pacman -Rns</code> 没有收到任何参数。可以通过在第二个命令前面加上来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=moreutils">moreutils</a></span><sup><small>包</small></sup></span> 包的 <span class="plainlinks archwiki-template-man" title="$ man 1 ifne"><a href="https://man.archlinux.org/man/ifne.1">ifne(1)</a></span> 来避免该错误。
+</p><p>如果列出的软件包中有您不想删除的，可以通过将其标记为显式安装来将其从孤立软件包列表中排除：
+</p>
+<pre># pacman -D --asexplicit <i>package</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>-Qt</code> 仅显示真的孤立包，要包含可选依赖，请使用 <code>-Qtt</code> .</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>将 <code>pacman -Qdt</code> 添加到 pacman 的一个处理后<a href="#pg9ef105bf1e3c">钩子</a>用于在如果有处理产生孤立包后获得提示。这在当有软件包被仓库放弃时是有用的，因为任何被抛弃的包都会成为本地的一个孤立包（除非它是被显式安装的）。要避免在没有找到孤立包时“执行命令失败”的错误，在你的钩子中为 <code>Exec</code> 使用如下的指令: <code>/usr/bin/bash -c "/usr/bin/pacman -Qdt || /usr/bin/echo '=&gt; 未找到。'"</code> 软件包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pacman-log-orphans-hook/">pacman-log-orphans-hook</a></span><sup><small>AUR</small></sup></span> 使用类似的钩子提供了更详细的指示。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E6.A3.80.E6.B5.8B.E6.9B.B4.E5.A4.9A.E4.B8.8D.E9.9C.80.E8.A6.81.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85" id="检测更多不需要的软件包"><span id=".E6.A3.80.E6.B5.8B.E6.9B.B4.E5.A4.9A.E4.B8.8D.E9.9C.80.E8.A6.81.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>检测更多不需要的软件包</h3></div>
+<p>在某些情况下，上述方法不会检测到所有可能不需要的包。例如，依赖环（也称为“循环依赖”）、额外依赖（多次满足）、一些非显式的可选项等。
+</p><p>要检测此类包：
+</p>
+<pre>$ pacman -Qqd | pacman -Rsu --print -
+</pre>
+<p>如果要一次删除列表中的所有包，请运行不带 <code>--print</code> 参数的命令。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E5.88.A0.E9.99.A4.E5.BF.85.E9.9C.80.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.BB.A5.E5.A4.96.E7.9A.84.E6.89.80.E6.9C.89.E8.BD.AF.E4.BB.B6.E5.8C.85" id="删除必需的软件包以外的所有软件包"><span id=".E5.88.A0.E9.99.A4.E5.BF.85.E9.9C.80.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.BB.A5.E5.A4.96.E7.9A.84.E6.89.80.E6.9C.89.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>删除必需的软件包以外的所有软件包</h3></div>
+<p>如果需要删除必需的软件包以外的所有软件包，一种方法是将非必需包的安装原因设置为依赖项，然后删除所有不必要的依赖项。
+</p><p>首先，对于所有“显式安装”的包，将其安装原因更改为“作为依赖项安装”：
+</p>
+<pre># pacman -D --asdeps $(pacman -Qqe)
+</pre>
+<p>然后，将您<b>不</b>想删除的必需软件包安装原因更改为“显式安装”，以避免将其作为目标：
+</p>
+<pre># pacman -D --asexplicit base linux linux-firmware
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>可以向上述命令中添加其他包，以避免被删除。请参阅<a href="#pgbdbcbed611fc">安装指南#安装必需的软件包</a>，以了解功能完备的基本系统可能需要的其他软件包的更多信息。</li>
+<li>这还将引导加载程序选择为要删除的包。系统应该仍然可以启动，但如果没有它，启动参数可能无法更改。</li></ul>
+</div>
+<p>最后，按照#删除未使用的软件包（孤立软件包）中的说明删除“作为依赖项安装”的所有包。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E8.8E.B7.E5.8F.96.E8.8B.A5.E5.B9.B2.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.9A.84.E4.BE.9D.E8.B5.96.E9.A1.B9.E5.88.97.E8.A1.A8" id="获取若干软件包的依赖项列表"><span id=".E8.8E.B7.E5.8F.96.E8.8B.A5.E5.B9.B2.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.9A.84.E4.BE.9D.E8.B5.96.E9.A1.B9.E5.88.97.E8.A1.A8"></span>获取若干软件包的依赖项列表</h3></div>
+<p>依赖项按字母顺序排序，并删除重复项。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>要仅显示本地已安装软件包的树，使用 <code>pacman -Qi</code>。</div>
+<pre>$ LC_ALL=C.UTF-8 pacman -Si <i>packages</i> | awk -F'[:&lt;=&gt;]' '/^Depends/ {print $2}' | xargs -n1 | sort -u
+</pre>
+<p>或者，用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=expac">expac</a></span><sup><small>包</small></sup></span>：
+</p>
+<pre>$ expac -l '\n' %E -S <i>packages</i> | sort -u
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E5.88.97.E5.87.BA.E5.B7.B2.E6.9B.B4.E6.94.B9.E7.9A.84.E5.A4.87.E4.BB.BD.E6.96.87.E4.BB.B6" id="列出已更改的备份文件"><span id=".E5.88.97.E5.87.BA.E5.B7.B2.E6.9B.B4.E6.94.B9.E7.9A.84.E5.A4.87.E4.BB.BD.E6.96.87.E4.BB.B6"></span>列出已更改的备份文件</h3></div>
+<p>要列出被 <i>pacman</i> 跟踪的<a href="#pgb1b440c22f9e">易被用户更改</a>（即列在<a href="#pgf9d748a7b27b">PKGBUILD backup 数组</a>中的文件）且已被用户更改的文件，请使用以下命令：
+</p>
+<pre># pacman -Qii | awk '/\[modified\]/ {print $(NF - 1)}'
+</pre>
+<p>使用 root 权限运行此命令将确保输出中包含只能由 root 读取的文件（例如 <code>/etc/sudoers</code>）。
+</p><p>这可以用在执行选择性系统备份或尝试将系统配置从一台计算机复制到另一台计算机时。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>见#列出软件包中所有被更改的文件以列出 <i>pacman</i> 知道的所有更改过的文件，而不仅仅是备份文件。</li>
+<li>见#查找不属于任何软件包的文件以列出系统中未被 <i>pacman</i> 跟踪的所有文件。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E5.A4.87.E4.BB.BD_pacman_.E6.95.B0.E6.8D.AE.E5.BA.93" id="备份_pacman_数据库"><span id=".E5.A4.87.E4.BB.BD_pacman_.E6.95.B0.E6.8D.AE.E5.BA.93"></span>备份 pacman 数据库</h3></div>
+<p><span id="Back_up_the_pacman_database"></span>
+</p><p>以下命令可用于备份本地 <i>pacman</i> 数据库：
+</p>
+<pre>$ tar -cjf pacman_database.tar.bz2 /var/lib/pacman/local
+</pre>
+<p>将备份的 <i>pacman</i> 数据库文件存储在一个或多个脱机媒体上，如 U 盘、外部硬盘或 CD-R。
+</p><p>可以通过将 <code>pacman_database.tar.bz2</code> 文件移动到 <code>/</code> 目录并执行以下命令来恢复数据库：
+</p>
+<pre># tar -xjvf pacman_database.tar.bz2
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果 <i>pacman</i> 数据库文件已损坏，并且没有可用的备份文件，此时重建 <i>pacman</i> 数据库还是有希望的。查阅#恢复 pacman 的本地数据库。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pakbak-git/">pakbak-git</a></span><sup><small>AUR</small></sup></span> 包提供了一个脚本和一个 <a href="#pgac06dd8bfe95">systemd</a> 服务来自动化任务。可以在 <code>/etc/pakbak.conf</code> 中进行配置。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E7.AE.80.E5.8D.95.E7.9A.84.E6.A3.80.E6.9F.A5.E6.9B.B4.E6.94.B9.E6.97.A5.E5.BF.97" id="简单的检查更改日志"><span id=".E7.AE.80.E5.8D.95.E7.9A.84.E6.A3.80.E6.9F.A5.E6.9B.B4.E6.94.B9.E6.97.A5.E5.BF.97"></span>简单的检查更改日志</h3></div>
+<p>当维护者更新软件包时，提交通常会以有用的方式进行注释。用户可以通过安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pacolog/">pacolog</a></span><sup><small>AUR</small></sup></span> 从命令行快速检查这些。通过 <code>pacolog <i>package</i></code> 使用该实用程序列出来自官方软件库或 AUR 的包的最近提交消息。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2749aa4d6728_.E5.AE.89.E8.A3.85.E5.92.8C.E4.BF.AE.E5.A4.8D" id="安装和修复"><span id=".E5.AE.89.E8.A3.85.E5.92.8C.E4.BF.AE.E5.A4.8D"></span>安装和修复</h2></div>
+<p>获取和修复软件包的额外方法。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E4.BB.8E_CD.2FDVD_.E6.88.96_U_.E7.9B.98.E5.AE.89.E8.A3.85.E8.BD.AF.E4.BB.B6.E5.8C.85" id="从_CD/DVD_或_U_盘安装软件包"><span id=".E4.BB.8E_CD.2FDVD_.E6.88.96_U_.E7.9B.98.E5.AE.89.E8.A3.85.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>从 CD/DVD 或 U 盘安装软件包</h3></div>
+
+<p>要下载软件包，或软件包组：
+</p>
+<pre># cd ~/Packages
+# pacman -Syw --cachedir . base base-devel grub-bios xorg gimp
+# repo-add ./custom.db.tar.zst ./*.pkg.tar.zst
+</pre>
+<p>Pacman 默认情况下将引用主机安装，但无法正确解析和下载现有的依赖项。在需要所有包和依赖项的情况下，建议创建一个临时空白数据库，并使用 <code>--dbpath</code> 引用它：
+</p>
+<pre># mkdir /tmp/blankdb
+# pacman -Syw --cachedir . --dbpath /tmp/blankdb base base-devel grub-bios xorg gimp
+# repo-add ./custom.db.tar.zst ./*.pkg.tar.zst
+</pre>
+<p>然后，您可以将“Packages”目录刻录到光盘（如 CD、DVD）或将其传输到U盘、外部硬盘等。
+</p><p><b>1.</b> 挂载媒体：
+</p><p>对于光盘驱动器：
+</p>
+<pre># mount --mkdir /dev/sr0 /mnt/repo
+</pre>
+<p>对于 USB 闪存驱动器，硬盘驱动器等：
+</p>
+<pre># mount --mkdir /dev/sd<i>xY</i> /mnt/repo
+</pre>
+<p><b>2.</b> 编辑 <code>pacman.conf</code> 并将此存储库添加到其他存储库（例如，extra、core 等）<b>之前</b>。这很重要。不要只取消对底部的注释。这样可以确保 CD/DVD/USB 中的文件优先于标准存储库中的文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[custom]
+SigLevel = PackageRequired
+Server = file:///mnt/repo/Packages</pre>
+<p><b>3.</b> 最后，同步 <i>pacman</i> 数据库，以便能够使用新的存储库：
+</p>
+<pre># pacman -Syu
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E8.87.AA.E5.BB.BA.E6.9C.AC.E5.9C.B0.E4.BB.93.E5.BA.93" id="自建本地仓库"><span id=".E8.87.AA.E5.BB.BA.E6.9C.AC.E5.9C.B0.E4.BB.93.E5.BA.93"></span>自建本地仓库</h3></div>
+<p>使用 <i>pacman</i> 中包含的 <i>repo-add</i> 脚本为个人软件仓库生成数据库。请使用 <code>repo-add --help</code> 获取有关其用法的详细信息。
+软件包数据库是一个可以压缩的 tar 文件。有效的扩展名为 <i>.db</i> 或 <i>.files</i>，后跟归档扩展名<i>.tar</i>, <i>.tar.gz</i>, <i>.tar.bz2</i>, <i>.tar.xz</i>, <i>.tar.zst</i>, 或 <i>.tar.Z</i>。文件不需要存在，但所有父目录都必须存在。
+</p><p>要向数据库中添加新包，或替换数据库中现有包的旧版本，请运行：
+</p>
+<pre>$ repo-add <i>/path/to/repo.db.tar.zst /path/to/package-1.0-1-x86_64.pkg.tar.zst</i>
+</pre>
+<p>当使用 <i>repo-add</i> 时，数据库和包不需要位于同一目录中，但请记住，当和该数据库一起使用 <i>pacman</i> 时，它们应该在一起。将要加入仓库中的所有建好的包存储在一个目录中，还允许使用 shell glob 扩展一次添加或更新多个包：
+</p>
+<pre>$ repo-add <i>/path/to/repo.db.tar.zst /path/to/*.pkg.tar.zst</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><i>repo-add</i> 以与命令行上传递的顺序相同的顺序将条目添加到数据库中。如果涉及同一软件包的多个版本，必须小心确保最后添加正确的版本。特别注意，shell 使用的词法顺序取决于语言环境，并且不同于 <i>pacman</i> 使用的 <span class="plainlinks archwiki-template-man" title="$ man 8 vercmp"><a href="https://man.archlinux.org/man/vercmp.8">vercmp(8)</a></span> 顺序。</div>
+<p>如果您希望支持多个架构，则应采取预防措施以防止发生错误。每个架构都应有自己的目录树：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ tree ~/customrepo/ | sed "s/$(uname -m)/<i>arch</i>/g"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/home/archie/customrepo/
+└── <i>arch</i>
+    ├── customrepo.db -&gt; customrepo.db.tar.zst
+    ├── customrepo.db.tar.zst
+    ├── customrepo.files -&gt; customrepo.files.tar.zst
+    ├── customrepo.files.tar.zst
+    └── personal-website-git-b99cce0-1-<i>arch</i>.pkg.tar.zst
+
+1 directory, 5 files
+</pre>
+<p><i>repo-add</i> 可执行文件检查包软件是否适合。如果不是这样，您将遇到类似于以下内容的错误消息：
+</p>
+<pre>==&gt; 错误： '/home/archie/customrepo/<i>arch</i>/foo-<i>arch</i>.pkg.tar.zst' 未包含有效的数据库存档扩展名。
+</pre>
+<p><i>repo-remove</i> 用于从软件包数据库中删除包，命令行中只指定包名。
+</p>
+<pre>$ repo-remove <i>/path/to/repo.db.tar.zst pkgname</i>
+</pre>
+<p>创建本地仓库数据库后，将仓库添加到要使用该仓库的每个系统的 <code>pacman.conf</code> 中。自定义仓库的一个示例在 <code>pacman.conf</code> 中。仓库的名称是省略了文件扩展名的数据库文件名。在上面的示例中，仓库名仅为 <i>repo</i>。使用 <code>file://</code> URL 或通过 HTTP 使用 <code>http://localhost/path/to/directory</code> 引用仓库的位置。
+</p><p>如果愿意，可以将自定义仓库添加到<a href="#pgef9a589efc8b">非官方用户仓库列表</a>中，这样社区就可以从中受益。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E5.9C.A8.E7.BD.91.E7.BB.9C.E4.B8.8A.E5.85.B1.E4.BA.AB_pacman_.E7.BC.93.E5.AD.98" id="在网络上共享_pacman_缓存"><span id=".E5.9C.A8.E7.BD.91.E7.BB.9C.E4.B8.8A.E5.85.B1.E4.BA.AB_pacman_.E7.BC.93.E5.AD.98"></span>在网络上共享 pacman 缓存</h3></div>
+
+<p>如果你碰巧在你的局域网上运行了几个 Arch boxes，你可以共享软件包，这样可以大大减少下载时间。请记住，你不应在不同的体系结构（即 i686 和 x86_64）之间共享，否则会遇到问题。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E5.8F.AA.E8.AF.BB.E7.BC.93.E5.AD.98" id="只读缓存"><span id=".E5.8F.AA.E8.AF.BB.E7.BC.93.E5.AD.98"></span>只读缓存</h4></div>
+<p>Pacman 6.1.0 直接支持缓存服务器。缓存服务器将在任何非缓存服务器之前尝试，不会因为 HTTP 404 下载错误而从服务器池中移除，并且不会用于数据库文件。
+</p><p>如果您正在寻找快速解决方案，只需运行<a href="https://gist.github.com/willurd/5720255">基本临时网络服务器</a>，其他计算机可以将其用作缓存服务器。
+</p><p>使用 <a href="#pgf6d3de5ccfac">Python</a> <a href="https://docs.python.org/zh-cn/3/library/http.server.html#http-server-cli">http.server</a> 模块开始提供此目录：
+</p>
+<pre>$ python -m http.server -d /var/cache/pacman/pkg/
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>默认情况下，Python <code>http.server</code> 会监听任何接口的端口 <code>8000</code>。要使用其他端口或仅绑定到特定地址，只需添加一个参数和另一个参数：
+<pre>$ python -m http.server -d /var/cache/pacman/pkg/ --bind 127.0.0.1 8080
+</pre>
+</div>
+<p>然后在每台客户机上<a href="#pgfbacf3a1812d">编辑</a> <code>/etc/pacman.d/mirrorlist</code>，将此服务器添加为缓存服务器：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.d/mirrorlist</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">CacheServer = http://<i>server-ip</i>:<i>port</i></pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><b>不要</b>像其他条目一样将 <code>/repos/$repo/os/$arch</code> 追加到该自定义服务器，因为该层次结构不存在，因此查询将失败。</div>
+<p>如果要寻找更独立的解决方案，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=darkhttpd">darkhttpd</a></span><sup><small>包</small></sup></span> 提供了一个最小的网络服务器。将以前的 <code>python</code> 命令替换为如：
+</p>
+<pre>[http]$ darkhttpd /var/cache/pacman/pkg --no-server-id
+</pre>
+<p>为了方便，您还可以将 darkhttpd 作为 <i>systemd</i> 服务运行：见 <a href="#pgac06dd8bfe95">systemd#编写单元文件</a>。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=miniserve">miniserve</a></span><sup><small>包</small></sup></span>，一个用 Rust 编写的小型网络服务器，也可以使用：
+</p>
+<pre>$ miniserve /var/cache/pacman/pkg
+</pre>
+<p>然后像上面一样编辑 <code>/etc/pacman.d/mirrorlist</code>，让 url 位于第一位。
+</p><p>如果您已经在为其他用途运行网络服务器，您可能希望将其重新用作本地仓库服务器。例如，如果您已经使用 <a href="#pg84a88ef9597c">nginx</a> 服务于某个站点，则可以在端口8080上添加 <i>nginx</i> server 块侦听：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nginx/nginx.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">server {
+    listen 8080;
+    root /var/cache/pacman/pkg;
+    server_name myarchrepo.localdomain;
+    try_files $uri $uri/;
+}
+</pre>
+<p>进行此更改后，记得<a href="#pgaa5af66d88c3">重启</a> <code>nginx.service</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>无论您使用哪种网络服务器，请确保防火墙配置（若有）允许所需流量访问所配置的端口，并且不允许任何不希望的流量。见 <a href="#pgfefbd690c49d">安全#网络与防火墙</a>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E5.B1.82.E5.8F.A0.E6.8C.82.E8.BD.BD.E5.8F.AA.E8.AF.BB.E7.BC.93.E5.AD.98" id="层叠挂载只读缓存"><span id=".E5.B1.82.E5.8F.A0.E6.8C.82.E8.BD.BD.E5.8F.AA.E8.AF.BB.E7.BC.93.E5.AD.98"></span>层叠挂载只读缓存</h4></div>
+<p>通过<span class="ilh-all" data-foreign-title="Overlay filesystem" data-lang-code="en" data-lang-name="英语" data-orig-title="层叠文件系统"><span class="ilh-page"><a href="#pgf11cb3d56bae">层叠挂载</a></span></span>其 <code>/var/cache/pacman/pkg</code> 目录，可以将本地网络上的一台机器用作只读包缓存。如果该服务器已在其上安装了其他 boxes 也使用的合理全面的最新软件包，则这种配置是有利的。这对于在低带宽上游的连接末端维护多台机器非常有用。
+</p><p>例如，要使用此方法：
+</p>
+<pre># mkdir /tmp/remote_pkg /mnt/workdir_pkg /tmp/pacman_pkg
+# sshfs <i>remote_username</i>@<i>remote_pkgcache_addr</i>:/var/cache/pacman/pkg /tmp/remote_pkg -C
+# mount -t overlay overlay -o lowerdir=/tmp/remote_pkg,upperdir=/var/cache/pacman/pkg,workdir=/mnt/workdir_pkg /tmp/pacman_pkg
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>工作目录必须是与上级目录位于同一挂载设备上的空目录。见 <span class="ilh-all" data-foreign-title="Overlay filesystem#Usage" data-lang-code="en" data-lang-name="英语" data-orig-title="层叠文件系统#使用"><span class="ilh-page"><a href="#pgf11cb3d56bae">层叠文件系统#使用</a></span></span>。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果列出 <code>/tmp/pacman_pkg</code> 层叠目录会出现错误，例如“Stale file handle”，请尝试使用选项 <code>-o redirect_dir=off -o index=off</code> 进行层叠挂载。</div>
+<p>在之后，使用选项 <code>--cachedir /tmp/pacman_pkg</code> 运行 <i>pacman</i>，例如：
+</p>
+<pre># pacman -Syu --cachedir /tmp/pacman_pkg
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E5.88.86.E5.B8.83.E5.BC.8F.E5.8F.AA.E8.AF.BB.E7.BC.93.E5.AD.98" id="分布式只读缓存"><span id=".E5.88.86.E5.B8.83.E5.BC.8F.E5.8F.AA.E8.AF.BB.E7.BC.93.E5.AD.98"></span>分布式只读缓存</h4></div>
+<p>有一些特定于 Arch 的工具可以自动发现网络上的其他计算机，并提供包缓存。尝试 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacredir">pacredir</a></span><sup><small>包</small></sup></span>, <span class="ilh-all" data-foreign-title="pacserve" data-lang-code="en" data-lang-name="英语" data-orig-title="pacserve"><span class="ilh-page"><a href="#pg00b816ce553b">pacserve</a></span></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pkgdistcache/">pkgdistcache</a></span><sup><small>AUR</small></sup></span>, 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/paclan/">paclan</a></span><sup><small>AUR</small></sup></span>。pkgdistcache 使用 Avahi 而不是普通 UDP，这可能在某些家庭网络中更好地工作，这些家庭网络在 Wi-Fi 和以太网之间路由而不是桥接。
+</p><p>从历史上看，有 <a href="https://bbs.archlinux.org/viewtopic.php?id=64391">PkgD</a> 和 <a href="https://github.com/toofishes/multipkg">multipkg</a>，但它们都已不再维护。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E8.AF.BB.E5.86.99.E7.BC.93.E5.AD.98" id="读写缓存"><span id=".E8.AF.BB.E5.86.99.E7.BC.93.E5.AD.98"></span>读写缓存</h4></div>
+<p>为了在多台计算机之间共享软件包，只需使用任何基于网络的挂载协议共享 <code>/var/cache/pacman/</code>。本章节介绍如何使用 <a href="#pg46a1cfd06473">SSHFS</a> 在同一本地网络上的多台计算机之间共享包缓存和相关库目录。请记住，网络共享缓存可能会很慢，这取决于文件系统的选择以及其他因素。
+</p><p>首先，安装任何基于网络的文件系统软件包：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sshfs">sshfs</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=curlftpfs">curlftpfs</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=samba">samba</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nfs-utils">nfs-utils</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>要使用 <i>sshfs</i>，请考虑阅读<a href="#pg91b2409cb4d7">使用 SSH 密钥</a>。</li>
+<li>默认情况下，<i>smbfs</i> 不提供包含冒号的文件名，这会导致客户机重新下载有问题的包。若要防止这种情况，请在客户端上使用 <code>mapchars</code> 挂载选项。</li></ul>
+</div>
+<p>然后，要共享实际的软件包，请在每台客户机上从服务器挂载 <code>/var/cache/pacman/pkg</code> 到 <code>/var/cache/pacman/pkg</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不要将 <code>/var/cache/pacman/pkg</code> 或其任何祖先（例如，<code>/var</code>）设置为符号链接。Pacman 希望这些是目录。当 <i>pacman</i> 重新安装或升级自己时，它将删除符号链接并创建空目录。然而，在事务 <i>pacman</i> 期间，依赖于驻留在那里的一些文件，因此中断更新过程。更多信息请查阅 <a href="https://bugs.archlinux.org/task/50298">FS#50298</a>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E4.BD.BF.E7.94.A8_rsync_.E6.88.96_FTP_.E5.8F.8C.E5.90.91.E5.90.8C.E6.AD.A5" id="使用_rsync_或_FTP_双向同步"><span id=".E4.BD.BF.E7.94.A8_rsync_.E6.88.96_FTP_.E5.8F.8C.E5.90.91.E5.90.8C.E6.AD.A5"></span>使用 rsync 或 FTP 双向同步</h4></div>
+<p>本地环境中的另一种方法是 <a href="#pg4bb0ada72a54">rsync</a>。选择用于缓存的服务器并启用 <a href="#pg4bb0ada72a54">rsync 守护程序</a>。在客户端上，通过 rsync 协议与此共享进行双向同步。包含冒号的文件名对于 rsync 协议来说没有问题。
+</p><p>为客户端起草示例，在共享名称中使用 <code>uname -m</code> 可确保依赖于架构的同步：
+</p>
+<pre># rsync ... rsync://server/share_$(uname -m)/ /var/cache/pacman/pkg/ 
+# pacman -Syu
+# paccache --remove --keep 3
+# rsync --delete ... /var/cache/pacman/pkg/ rsync://server/share_$(uname -m)/
+</pre>
+<p>如果不依赖未加密的 <a href="#pg4bb0ada72a54">rsync 守护程序</a>，更安全的选择是通过 ssh 使用 rsync，<a href="#pg4bb0ada72a54">Rsync#使用 SSH 自动备份</a>提供了概述。
+</p><p>如果 rsync 在您的本地环境中不可用，简单的 ftp 服务也适合双向同步。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lftp">lftp</a></span><sup><small>包</small></sup></span> 提供了 <code>--mirror</code> 和 <code>--delete</code> 选项来同步本地和远程存储。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E4.BD.BF.E7.94.A8_nginx_.E7.9A.84.E5.8A.A8.E6.80.81.E5.8F.8D.E5.90.91.E4.BB.A3.E7.90.86.E7.BC.93.E5.AD.98" id="使用_nginx_的动态反向代理缓存"><span id=".E4.BD.BF.E7.94.A8_nginx_.E7.9A.84.E5.8A.A8.E6.80.81.E5.8F.8D.E5.90.91.E4.BB.A3.E7.90.86.E7.BC.93.E5.AD.98"></span>使用 nginx 的动态反向代理缓存</h4></div>
+<p><a href="#pg84a88ef9597c">nginx</a> 可用于将软件包请求代理到官方上游镜像，并将结果缓存到本地磁盘。该软件包的所有后续请求将直接从本地缓存提供，从而最大限度地减少更新大量计算机所需的互联网流量。
+</p><p>在本例中，缓存服务器将在 <code>http://cache.domain.example:8080/</code> 上运行并将软件包存储在 <code>/srv/http/pacman-cache/</code> 中。
+</p><p>在将托管缓存的计算机上安装 <a href="#pg84a88ef9597c">nginx</a>。为缓存创建目录并调整权限，以便 nginx 可以向其中写入文件：
+</p>
+<pre># mkdir /srv/http/pacman-cache
+# chown http:http /srv/http/pacman-cache
+</pre>
+<p>使用 <a href="https://github.com/nastasie-octavian/nginx_pacman_cache_config/blob/c54eca4776ff162ab492117b80be4df95880d0e2/nginx.conf">nginx pacman 缓存配置</a>作为 <code>/etc/nginx/nginx.conf</code> 的起点。检查 <code>resolver</code> 指令是否适合您的需要。在上游 server 块中，使用官方镜像的地址配置 <code>proxy_pass</code> 指令，请参阅配置文件中有关期待的格式的示例。一旦您对配置文件感到满意就<a href="#pg84a88ef9597c">启动并启用 nginx</a>。
+</p><p>为了使用缓存，每个 Arch Linux 计算机（包括托管缓存的计算机）必须在 <code>mirrorlist</code> 文件的顶部具有以下行：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.d/mirrorlist</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Server = http://cache.domain.example:8080/$repo/os/$arch
+...
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>您需要创建一个方法来清除旧包，因为缓存目录会随着时间的推移而不断增长。<code>paccache</code>（由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacman-contrib">pacman-contrib</a></span><sup><small>包</small></sup></span> 提供）可用于使用您选择的保留标准自动执行此操作。例如，<code>find /srv/http/pacman-cache/ -type d -exec paccache -v -r -k 2 -c {} \;</code> 将在缓存目录中保留最后两个版本的包。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_Pacoloco_.E4.BB.A3.E7.90.86.E7.BC.93.E5.AD.98.E6.9C.8D.E5.8A.A1.E5.99.A8" id="Pacoloco_代理缓存服务器"><span id="Pacoloco_.E4.BB.A3.E7.90.86.E7.BC.93.E5.AD.98.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>Pacoloco 代理缓存服务器</h4></div>
+<p><a href="https://github.com/anatol/pacoloco">Pacoloco</a> 是一个易于使用的 <i>pacman</i> 仓库代理缓存服务器。它还允许<a href="https://github.com/anatol/pacoloco/commit/048b09956b0d8ef71c0ed1f804fd332d9ab5e3c8">自动预取</a>缓存的包。
+</p><p>安装它为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacoloco">pacoloco</a></span><sup><small>包</small></sup></span>。打开配置文件并添加 <i>pacman</i> 镜像：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacoloco.yaml</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">port: 9129
+repos:
+  mycopy:
+    urls:
+      - http://mirror.lty.me/archlinux
+      - http://mirrors.kernel.org/archlinux
+</pre>
+<p><a href="#pgaa5af66d88c3">重启</a> <code>pacoloco.service</code>，代理仓库将在 <code>http://<i>myserver</i>:9129/repo/mycopy</code>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_Flexo_.E4.BB.A3.E7.90.86.E7.BC.93.E5.AD.98.E6.9C.8D.E5.8A.A1.E5.99.A8" id="Flexo_代理缓存服务器"><span id="Flexo_.E4.BB.A3.E7.90.86.E7.BC.93.E5.AD.98.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>Flexo 代理缓存服务器</h4></div>
+<p><a href="https://github.com/nroi/flexo">Flexo</a> 是 <i>pacman</i> 仓库的另一个代理缓存服务器。Flexo 由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/flexo-git/">flexo-git</a></span><sup><small>AUR</small></sup></span> 提供。安装后，<a href="#pg6ec215b93a06">启动</a> <code>flexo.service</code> 单元。
+</p><p>默认情况下，Flexo 在端口 <code>7878</code> 上运行。在 <code>/etc/pacman.d/mirrorlist</code> 的顶部加入 <code>Server = http://<i>myserver</i>:7878/$repo/os/$arch</code>，以便 <i>pacman</i> 通过 Flexo 下载软件包。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E4.BD.BF.E7.94.A8.E5.90.8C.E6.AD.A5.E7.A8.8B.E5.BA.8F.E5.90.8C.E6.AD.A5_pacman_.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.BC.93.E5.AD.98" id="使用同步程序同步_pacman_软件包缓存"><span id=".E4.BD.BF.E7.94.A8.E5.90.8C.E6.AD.A5.E7.A8.8B.E5.BA.8F.E5.90.8C.E6.AD.A5_pacman_.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.BC.93.E5.AD.98"></span>使用同步程序同步 pacman 软件包缓存</h4></div>
+<p>使用 <span class="ilh-all" data-foreign-title="Syncthing" data-lang-code="en" data-lang-name="英语" data-orig-title="Syncthing"><span class="ilh-page"><a href="#pgf96b38efc3dc">Syncthing</a></span></span> 或 <span class="ilh-all" data-foreign-title="Resilio Sync" data-lang-code="en" data-lang-name="英语" data-orig-title="Resilio Sync"><span class="ilh-page"><a href="#pgcb53639ea9b0">Resilio Sync</a></span></span> 以同步 <i>pacman</i> 缓存目录（即 <code>/var/cache/pacman/pkg</code>）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E9.81.BF.E5.85.8D.E8.BF.87.E5.BA.A6.E6.B8.85.E7.90.86.E7.BC.93.E5.AD.98" id="避免过度清理缓存"><span id=".E9.81.BF.E5.85.8D.E8.BF.87.E5.BA.A6.E6.B8.85.E7.90.86.E7.BC.93.E5.AD.98"></span>避免过度清理缓存</h4></div>
+<p>执行 <code>pacman -Sc</code> 清理软件包缓存时，会删除所有当前机器上未安装的软件包。由于 <i>pacman</i> 无法判断软件包是否在其他机器上安装，这会导致移除某些还需要的软件包。
+</p><p>要在清理缓存时只删除<i>过时</i>的 tarballs：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[options]
+CleanMethod = KeepCurrent</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E4.BB.8E.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E9.87.8D.E6.96.B0.E5.88.9B.E5.BB.BA.E8.BD.AF.E4.BB.B6.E5.8C.85" id="从文件系统重新创建软件包"><span id=".E4.BB.8E.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E9.87.8D.E6.96.B0.E5.88.9B.E5.BB.BA.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>从文件系统重新创建软件包</h3></div>
+<p>要从文件系统重新创建软件包，请使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fakepkg/">fakepkg</a></span><sup><small>AUR</small></sup></span>。系统中的文件按原样保存，因此任何修改都将出现在装配的软件包中。因此，不鼓励分发重新创建的包；有关替代方案，请参见 <a href="#pg8d559a1b1a4f">Arch 构建系统</a>和 <a href="#pg34e1f0126c90">Arch Linux Archive</a>。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E5.B7.B2.E5.AE.89.E8.A3.85.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.9A.84.E5.88.97.E8.A1.A8" id="已安装软件包的列表"><span id=".E5.B7.B2.E5.AE.89.E8.A3.85.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.9A.84.E5.88.97.E8.A1.A8"></span>已安装软件包的列表</h3></div>
+<p>保留所有明确安装的软件包的列表对于备份系统或加快新的安装非常有用：
+</p>
+<pre>$ pacman -Qqe &gt; pkglist.txt
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>加上选项 <code>-t</code>，其他明确安装的软件包依赖的软件包不会被提及。如果从此列表中重新安装，它们将仅作为依赖项被安装。</li>
+<li>加上选项 <code>-n</code>，将在列表中省略外部包（例如来自<a href="#pg6a9e963f286f">Arch 用户软件仓库 (AUR)</a>）。</li>
+<li>使用 <code>comm -13 &lt;(pacman -Qqdt | sort) &lt;(pacman -Qqdtt | sort) &gt; optdeplist.txt</code> 还可以创建一个已安装的可选依赖项列表，这些依赖项可以使用 <code>--asdeps</code> 重新安装。</li>
+<li>使用 <code>pacman -Qqem &gt; foreignpkglist.txt</code> 创建已明确安装的 AUR 和其他外部包的列表。</li></ul></div>
+<p>要保持明确安装的软件包的最新列表（例如与版本化的 <code>/etc/</code> 结合），可以设置<a href="#pg9ef105bf1e3c">钩子</a>。例子：
+</p>
+<pre>[Trigger]
+Operation = Install
+Operation = Remove
+Type = Package
+Target = *
+
+[Action]
+When = PostTransaction
+Exec = /bin/sh -c '/usr/bin/pacman -Qqe &gt; /etc/pkglist.txt'
+</pre>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E4.BB.8E.E5.88.97.E8.A1.A8.E5.AE.89.E8.A3.85.E8.BD.AF.E4.BB.B6.E5.8C.85" id="从列表安装软件包"><span id=".E4.BB.8E.E5.88.97.E8.A1.A8.E5.AE.89.E8.A3.85.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>从列表安装软件包</h3></div>
+<p>要从以前保存的软件包列表中安装软件包，而不重新安装已经安装的已更新的软件包，请运行：
+</p>
+<pre># pacman -S --needed - &lt; pkglist.txt
+</pre>
+<p>然而，列表中可能存在来自 AUR 或本地安装的外部软件包。要从列表中筛选出外部包，可以如下丰富前面的命令行：
+</p>
+<pre># pacman -S --needed $(comm -12 &lt;(pacman -Slq | sort) &lt;(sort pkglist.txt))
+</pre>
+<p>最后，要确保系统中安装的软件包与列表匹配，并删除列表中未提及的所有软件包：
+</p>
+<pre># pacman -Rsu $(comm -23 &lt;(pacman -Qq | sort) &lt;(sort pkglist.txt))
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>这些任务可以自动化。有关示例，请参见 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bacpac/">bacpac</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/packup/">packup</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pacmanity/">pacmanity</a></span><sup><small>AUR</small></sup></span>, 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pug/">pug</a></span><sup><small>AUR</small></sup></span>。</div>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E5.88.97.E5.87.BA.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.B8.AD.E6.89.80.E6.9C.89.E8.A2.AB.E6.9B.B4.E6.94.B9.E7.9A.84.E6.96.87.E4.BB.B6" id="列出软件包中所有被更改的文件"><span id=".E5.88.97.E5.87.BA.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.B8.AD.E6.89.80.E6.9C.89.E8.A2.AB.E6.9B.B4.E6.94.B9.E7.9A.84.E6.96.87.E4.BB.B6"></span>列出软件包中所有被更改的文件</h3></div>
+<p>如果您怀疑文件损坏（例如，由于软件/硬件故障），但不确定文件是否损坏，您可能需要与包中的哈希值进行比较。这可以通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacutils">pacutils</a></span><sup><small>包</small></sup></span>：
+</p>
+<pre># paccheck --sha256sum --quiet
+</pre>
+<p>有关数据库的恢复，请见#恢复 pacman 的本地数据库。<code>mtree</code> 文件也可以从相应的软件包文件中提取为 <code>.MTREE</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>当怀疑存在恶意更改时，<b>不要</b>按原样使用！在这种情况下，建议采取安全防范措施，例如使用 live 介质和独立的哈希值源。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E9.87.8D.E6.96.B0.E5.AE.89.E8.A3.85.E6.89.80.E6.9C.89.E8.BD.AF.E4.BB.B6.E5.8C.85" id="重新安装所有软件包"><span id=".E9.87.8D.E6.96.B0.E5.AE.89.E8.A3.85.E6.89.80.E6.9C.89.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>重新安装所有软件包</h3></div>
+<p>要重新安装所有本地软件包，使用：
+</p>
+<pre># pacman -Qqn | pacman -S -
+</pre>
+<p>外来（AUR）软件包必须单独重新安装；您可以使用 <code>pacman -Qqm</code> 列出它们。
+</p><p>Pacman 默认保留<a href="#pg9ef105bf1e3c">安装原因</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>要强制覆盖所有包，请使用 <code>--overwrite=*</code>，尽管这应该是绝对的最后手段。请见<a href="#pg9a1cc6af125e">系统维护#避免某些 pacman 命令</a>。</div>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E6.81.A2.E5.A4.8D_pacman_.E7.9A.84.E6.9C.AC.E5.9C.B0.E6.95.B0.E6.8D.AE.E5.BA.93" id="恢复_pacman_的本地数据库"><span id=".E6.81.A2.E5.A4.8D_pacman_.E7.9A.84.E6.9C.AC.E5.9C.B0.E6.95.B0.E6.8D.AE.E5.BA.93"></span>恢复 pacman 的本地数据库</h3></div>
+<p>见 <a href="#pgeb468ac3b4c8">pacman/Restore local database</a>。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E4.BB.8E.E5.B7.B2.E6.9C.89.E5.AE.89.E8.A3.85.E4.BF.AE.E5.A4.8D_USB_.E7.B3.BB.E7.BB.9F" id="从已有安装修复_USB_系统"><span id=".E4.BB.8E.E5.B7.B2.E6.9C.89.E5.AE.89.E8.A3.85.E4.BF.AE.E5.A4.8D_USB_.E7.B3.BB.E7.BB.9F"></span>从已有安装修复 USB 系统</h3></div>
+<p>如果你有一个 Arch 安装在U盘上，不小心搞坏了（比如，写入U盘时断电了），可以使用主机上的 Arch 修复U盘上的 Arch（假设U盘挂载在 <code>/newarch</code>）：
+</p>
+<pre># pacman -S $(pacman -Qq --dbpath /newarch/var/lib/pacman) --root /newarch --dbpath /newarch/var/lib/pacman
+</pre>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E6.9F.A5.E7.9C.8B_.pkg_.E6.96.87.E4.BB.B6.E4.B8.AD.E7.9A.84.E5.8D.95.E4.B8.AA.E6.96.87.E4.BB.B6" id="查看_.pkg_文件中的单个文件"><span id=".E6.9F.A5.E7.9C.8B_.pkg_.E6.96.87.E4.BB.B6.E4.B8.AD.E7.9A.84.E5.8D.95.E4.B8.AA.E6.96.87.E4.BB.B6"></span>查看 .pkg 文件中的单个文件</h3></div>
+<p>例如，如果您想查看 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd">systemd</a></span><sup><small>包</small></sup></span> 包中提供的 <code>/etc/systemd/logind.conf</code> 的内容：
+</p>
+<pre>$ bsdtar -xOf /var/cache/pacman/pkg/systemd-250.4-2-x86_64.pkg.tar.zst etc/systemd/logind.conf
+</pre>
+<p>或者您可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vim">vim</a></span><sup><small>包</small></sup></span> 浏览归档：
+</p>
+<pre>$ vim /var/cache/pacman/pkg/systemd-250.4-2-x86_64.pkg.tar.zst
+</pre>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E6.9F.A5.E6.89.BE.E4.BD.BF.E7.94.A8.E6.97.A7.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.B8.AD.E7.9A.84.E5.BA.93.E7.9A.84.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="查找使用旧软件包中的库的应用程序"><span id=".E6.9F.A5.E6.89.BE.E4.BD.BF.E7.94.A8.E6.97.A7.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.B8.AD.E7.9A.84.E5.BA.93.E7.9A.84.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>查找使用旧软件包中的库的应用程序</h3></div>
+<p>运行中的进程不会自动注意到由更新引起的更改。相反，它们继续使用旧的库版本。由于与安全漏洞或其他 bug 相关的潜在问题以及版本不兼容性，这可能是不可取的。
+</p><p>依赖于更新的库的进程可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=htop">htop</a></span><sup><small>包</small></sup></span> 来找到，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=htop">htop</a></span><sup><small>包</small></sup></span> 会突出显示受影响程序的名称，或者使用基于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lsof">lsof</a></span><sup><small>包</small></sup></span> 的代码片段，该代码片段还会打印库的名称：
+</p>
+<pre># lsof +c 0 | grep -w DEL | awk '1 { print $1 ": " $NF }' | sort -u
+</pre>
+<p>此解决方案一般将仅检测由运行中进程打开的文件，这基本上将其限制为共享库（<code>.so</code> 文件）。它可能会丢失一些依赖关系，例如 Java 或 Python 应用程序的依赖关系。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E4.BB.85.E5.AE.89.E8.A3.85.E6.89.80.E9.9C.80.E8.AF.AD.E8.A8.80.E7.9A.84.E5.86.85.E5.AE.B9" id="仅安装所需语言的内容"><span id=".E4.BB.85.E5.AE.89.E8.A3.85.E6.89.80.E9.9C.80.E8.AF.AD.E8.A8.80.E7.9A.84.E5.86.85.E5.AE.B9"></span>仅安装所需语言的内容</h3></div>
+<p>许多软件包会安装多种语言的文档和翻译。有些程序旨在删除这些不必要的文件，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/localepurge/">localepurge</a></span><sup><small>AUR</small></sup></span>，它在安装包后运行以删除不需要的区域设置文件。更直接的方法是通过 <code>/etc/pacman.conf</code> 中的 <code>NoExtract</code> 指令提供的，该指令可以防止这些文件被安装。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如 <a href="#pg9ef105bf1e3c">Pacman#跳过文件安装到系统</a> 中所述，“后面的规则会覆盖前面的规则，并且可以通过在规则前添加 <code>!</code> 来否定规则。”</div>
+<p>要防止安装所有帮助文件的翻译，除了 C 区域设置外，请添加：
+</p>
+<pre>NoExtract = usr/share/help/* !usr/share/help/C/*
+</pre>
+<p>要防止安装所有 HTML 文档，请添加：
+</p>
+<pre>NoExtract = usr/share/gtk-doc/html/*
+NoExtract = usr/share/doc/HTML/*
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>一些用户注意到，删除<b>所有</b>区域设置会导致 <a href="#pg4f959966967b">dmenu</a>, <a href="#pgec5d22882e1b">Steam</a>, 甚至 <a href="https://bbs.archlinux.org/viewtopic.php?id=250846">Xorg</a> 的意外结果。以下示例已进行调整，以避免此类问题，仅安装英文（US）文件和所需的 C 区域设置。</div>
+<p>要防止安装各种 <a href="#pgbf65db42be1c">locale</a>，除了所需的区域设置外，请添加：
+</p>
+<pre>NoExtract = usr/share/locale/* usr/share/X11/locale/*/* usr/share/i18n/locales/* opt/google/chrome/locales/* !usr/share/X11/locale/C/*
+NoExtract = !usr/share/X11/locale/compose.dir !usr/share/X11/locale/iso8859-1/*
+NoExtract = !*locale*/en*/* !usr/share/*locale*/locale.*
+NoExtract = !usr/share/*locales/en_?? !usr/share/*locales/i18n* !usr/share/*locales/iso*
+NoExtract = usr/share/i18n/charmaps/* !usr/share/i18n/charmaps/UTF-8.gz !usr/share/i18n/charmaps/ANSI_X3.4-1968.gz
+NoExtract = !usr/share/*locales/trans*
+NoExtract = !usr/share/*locales/C !usr/share/*locales/POSIX</pre>
+<p>要防止安装翻译的 <a href="#pg754181899aac">man page</a>，请添加：
+</p>
+<pre>NoExtract = usr/share/man/* !usr/share/man/man*
+</pre>
+<p>要防止安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vim-runtime">vim-runtime</a></span><sup><small>包</small></sup></span> 中的语言文件，请添加：
+</p>
+<pre>NoExtract = usr/share/vim/vim*/lang/*
+</pre>
+<p>要防止安装 <a href="#pg5016907af879">Qt</a> 应用程序中除英文内容外的所有内容，请添加：
+</p>
+<pre>NoExtract = usr/share/*/translations/*.qm usr/share/*/nls/*.qm usr/share/qt/phrasebooks/*.qph usr/share/qt/translations/*.pak !*/en-US.pak
+</pre>
+<p>要防止安装 <a href="#pgafb05f48c1a9">Electron</a> 应用程序中除英文内容外的所有内容，请添加：
+</p>
+<pre>NoExtract = usr/share/*/locales/*.pak opt/*/locales/*.pak usr/lib/*/locales/*.pak !*/en-US.pak
+</pre>
+<p>要防止安装 <a href="#pgaa27357d651e">LibreOffice</a> 中的英文帮助文件，请添加：
+</p>
+<pre>NoExtract = usr/lib/libreoffice/help/en-US/*
+</pre>
+<p>要防止安装 <a href="#pg4886dc47f318">OnlyOffice</a> 中除英文内容外的所有内容，请添加：
+</p>
+<pre>NoExtract = opt/onlyoffice/desktopeditors/dictionaries/* !opt/onlyoffice/desktopeditors/dictionaries/en_US/*
+NoExtract = opt/onlyoffice/desktopeditors/editors/web-apps/apps/*/main/locale/* !*/en.json
+NoExtract = opt/onlyoffice/desktopeditors/editors/web-apps/apps/*/main/resources/help/*/* !*/help/en/*
+NoExtract = opt/onlyoffice/desktopeditors/editors/web-apps/apps/*/main/resources/symboltable/* !*/en.json
+NoExtract = opt/onlyoffice/desktopeditors/editors/web-apps/apps/documenteditor/forms/locale/* !*/en.json
+NoExtract = opt/onlyoffice/desktopeditors/editors/web-apps/apps/spreadsheeteditor/main/resources/formula-lang/* !*/en.json !*/en_desc.json
+NoExtract = opt/onlyoffice/desktopeditors/converter/empty/*/* !opt/onlyoffice/desktopeditors/converter/empty/en-US/*
+NoExtract = opt/onlyoffice/desktopeditors/converter/templates/*/* !opt/onlyoffice/desktopeditors/converter/templates/EN/*</pre>
+<p>要防止安装除英文 <a href="#pg945bbdd1d2b5">iBus</a> 表情符号字典外的所有内容，请添加：
+</p>
+<pre>NoExtract = usr/share/ibus/dicts/emoji-*.dict !usr/share/ibus/dicts/emoji-en.dict
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E5.9C.A8.E4.B8.8D.E8.89.AF.E8.BF.9E.E6.8E.A5.E4.B8.8A.E5.AE.89.E8.A3.85.E8.BD.AF.E4.BB.B6.E5.8C.85" id="在不良连接上安装软件包"><span id=".E5.9C.A8.E4.B8.8D.E8.89.AF.E8.BF.9E.E6.8E.A5.E4.B8.8A.E5.AE.89.E8.A3.85.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>在不良连接上安装软件包</h3></div>
+<p>当试图从不良连接（例如在火车使用手机网络）安装软件包时，请使用 <code>--disable-download-timeout</code> 选项来减少接收错误的可能性，例如：
+</p>
+<pre>error: failed retrieving file […] Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds
+</pre>
+<p>或
+</p>
+<pre>error: failed retrieving file […] Operation timed out after 10014 milliseconds with 0 out of 0 bytes received
+</pre>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2749aa4d6728_.E6.80.A7.E8.83.BD" id="性能"><span id=".E6.80.A7.E8.83.BD"></span>性能</h2></div>
+
+<p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2749aa4d6728_.E4.B8.8B.E8.BD.BD.E9.80.9F.E5.BA.A6" id="下载速度"><span id=".E4.B8.8B.E8.BD.BD.E9.80.9F.E5.BA.A6"></span>下载速度</h3></div>
+<p>下载软件包时 <i>pacman</i> 按照 <code>/etc/pacman.d/mirrorlist</code> 的顺序使用镜像。默认情况下位于列表顶部的镜像可能不是最快的。要选择更快的镜像，请见<a href="#pg162da9020ecd">镜像源</a>。
+</p><p>Pacman 下载软件包的速度也可以通过<a href="#pg9ef105bf1e3c">启用并行下载</a>来提高，或者通过使用不同的应用程序来下载软件包，而不是使用 <i>pacman</i> 内建的文件下载器。
+</p><p>不论怎样，在做任何修改前，你必须确定拥有了最新版的 <i>pacman</i>。
+</p>
+<pre># pacman -Syu
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_Powerpill" id="Powerpill">Powerpill</h4></div>
+<p><a href="#pge94af8fe3764">Powerpill</a> 是 <i>pacman</i> 的包裹程序，增加了平行下载和分段下载功能，加速下载过程。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_wget" id="wget">wget</h4></div>
+<p>参见 <a href="#pga40a00ceba19">wget#pacman 集成</a>。
+</p><p>对于需要更强大代理设置的用户来说，用 wget 比用 <i>pacman</i> 内建的下载方式更加方便。
+</p><p>要使用 <code>wget</code>，首先<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wget">wget</a></span><sup><small>包</small></sup></span> 软件包，然后修改 <code>/etc/pacman.conf</code> 并在其中的 <code>[options]</code> 区段将下面内容去掉注释：
+</p>
+<pre>XferCommand = /usr/bin/wget --passive-ftp --show-progress -c -q -N %u
+</pre>
+<p>除了将 <code>wget</code> 参数放在 <code>/etc/pacman.conf</code> 里，你也可以直接修改 <code>wget</code> 配置文件（全局文件是 <code>/etc/wgetrc</code>，各个用户的文件是 <code>$HOME/.wgetrc</code>）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_aria2" id="aria2">aria2</h4></div>
+<p><a href="#pg217415a7695e">aria2</a> 是一个具有断点续传和分块下载功能的轻量级下载软件，支持 HTTP/HTTPS/FTP 协议。aria2 可以多线程通过 HTTP/HTTPS 和 FTP 协议连接镜像服务器，显著提高下载速度。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在 <i>pacman</i> 的 XferCommand 使用 aria2c <b>不会</b>导致并行下载多个包。因为 Pacman 调用 XferCommand 时是一次一个包调用的，等待下载完成才会启动下一个。想要并行下载多个包，参见 <a href="#pge94af8fe3764">Powerpill</a>。</div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=aria2">aria2</a></span><sup><small>包</small></sup></span>，修改 <code>/etc/pacman.conf</code>，在 <code>[options]</code> 段添加下列一行：
+</p>
+<pre>XferCommand = /usr/bin/aria2c --allow-overwrite=true --continue=true --file-allocation=none --log-level=error --max-tries=2 --max-connection-per-server=2 --max-file-not-found=5 --min-split-size=5M --no-conf --remote-time=true --summary-interval=60 --timeout=5 --dir=/ --out %o %u
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><a href="https://bbs.archlinux.org/viewtopic.php?pid=1491879#p1491879">使用 pacman 和 aria2 的另一种配置</a>]试图简化配置并添加更多配置选项。</div>
+<p>关于使用的 aria2c 选项，见 <span class="plainlinks archwiki-template-man" title="$ man 1 aria2c"><a href="https://man.archlinux.org/man/aria2c.1#OPTIONS">aria2c(1) § OPTIONS</a></span>。
+</p>
+<ul><li><code>-d, --dir</code>由 <i>pacman</i> 设定的文件下载目录。</li>
+<li><code>-o, --out</code>: 输出的下载文件的文件名。</li>
+<li><code>%o</code>: 代表 <i>pacman</i> 指定的本地文件名的变量。</li>
+<li><code>%u</code>: 代表 <i>pacman</i> 指定的下载 URL 的变量。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2749aa4d6728_.E5.85.B6.E5.AE.83.E7.A8.8B.E5.BA.8F" id="其它程序"><span id=".E5.85.B6.E5.AE.83.E7.A8.8B.E5.BA.8F"></span>其它程序</h4></div>
+<p>这里还有一些可以和 <i>pacman</i> 协同工作的下载软件。下面列举了它们对应的 XferCommand 命令写法：
+</p>
+<ul><li><code>snarf</code>: <code>XferCommand = /usr/bin/snarf -N %u</code></li>
+<li><code>lftp</code>: <code>XferCommand = /usr/bin/lftp -c pget %u</code></li>
+<li><code>axel</code>: <code>XferCommand = /usr/bin/axel -n 2 -v -a -o %o %u</code></li>
+<li><code>hget</code>: <code>XferCommand = /usr/bin/hget %u -n 2 -skip-tls false</code>（请阅读 <a href="https://github.com/huydx/hget">Github 项目页面上的文档</a>获取更多信息）</li>
+<li><code>saldl</code>: <code>XferCommand = /usr/bin/saldl -c6 -l4 -s2m -o %o %u</code>（请阅读<a href="https://saldl.github.io">项目页面上的文档</a>获取更多信息）</li></ul>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2749aa4d6728_.E5.B7.A5.E5.85.B7" id="工具"><span id=".E5.B7.A5.E5.85.B7"></span>工具</h2></div>
+<ul><li><b>isfree</b> — 一个 Bash 脚本，用于列出非自由软件包。基于 Parabola 的黑名单。</li></ul>
+<dl><dd><a href="https://github.com/leo-arch/isfree">https://github.com/leo-arch/isfree</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/isfree/">isfree</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Lostfiles</b> — 标识不属于任何包的文件的脚本。</li></ul>
+<dl><dd><a href="https://github.com/graysky2/lostfiles">https://github.com/graysky2/lostfiles</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lostfiles">lostfiles</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>pacutils</b> — 基于 libalpm 的程序的帮手库。</li></ul>
+<dl><dd><a href="https://github.com/andrewgregory/pacutils">https://github.com/andrewgregory/pacutils</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacutils">pacutils</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgca6ca9243a91">pkgfile</a></b> — 查找包拥有文件的工具。</li></ul>
+<dl><dd><a href="https://github.com/falconindy/pkgfile">https://github.com/falconindy/pkgfile</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pkgfile">pkgfile</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>pkgtop</b> — 为 GNU/Linux 设计的交互式包管理器和资源监视器。</li></ul>
+<dl><dd><a href="https://github.com/orhun/pkgtop">https://github.com/orhun/pkgtop</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pkgtop-git/">pkgtop-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pge94af8fe3764">Powerpill</a></b> — 通过 <a href="#pg217415a7695e">aria2</a> 和 <a href="#pgbbe2e08d29f9">Reflector</a> 使用并行和分段下载来尝试加快 <i>pacman</i> 的下载速度。</li></ul>
+<dl><dd><a href="https://xyne.dev/projects/powerpill/">https://xyne.dev/projects/powerpill/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/powerpill/">powerpill</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>repoctl</b> — 帮助管理本地仓库的工具。</li></ul>
+<dl><dd><a href="https://github.com/cassava/repoctl">https://github.com/cassava/repoctl</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/repoctl/">repoctl</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>repose</b> — Arch Linux 仓库构建工具。</li></ul>
+<dl><dd><a href="https://github.com/vodik/repose">https://github.com/vodik/repose</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=repose">repose</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgb3c697ba5d77">snap-pac</a></b> — 使 <i>pacman</i> 自动使用 snapper 创建前/后快照，类似 openSUSE 的 YaST。</li></ul>
+<dl><dd><a href="https://github.com/wesbarnett/snap-pac">https://github.com/wesbarnett/snap-pac</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=snap-pac">snap-pac</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>vrms-arch</b> — 一个虚拟的 Richard M. Stallman 告诉你安装了哪些非自由软件包。</li></ul>
+<dl><dd><a href="https://github.com/orospakr/vrms-arch">https://github.com/orospakr/vrms-arch</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vrms-arch-git/">vrms-arch-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<!-- 
+NewPP limit report
+Cached time: 20260807025235
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.462 seconds
+Real time usage: 0.472 seconds
+Preprocessor visited node count: 2420/1000000
+Revision size: 43617/2097152 bytes
+Post‐expand include size: 45836/2097152 bytes
+Template argument size: 19037/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 5/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 508/5000000 bytes
+Lua time usage: 0.020/7.000 seconds
+Lua memory usage: 757828/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  191.485      1 -total
+ 23.25%   44.518      6 Template:Link-en
+  8.41%   16.113    125 Template:Ic
+  5.49%   10.506     11 Template:注意
+  4.89%    9.363     41 Template:Pkg
+  4.78%    9.148     10 Template:提示
+  3.89%    7.442     10 Template:App
+  3.47%    6.641      2 Template:Merge
+  2.73%    5.231      6 Template:Man
+  2.51%    4.803      5 Template:警告
+-->
+<!-- Render ID 0ae0e78e-920b-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3660:|#|:idhash:canonical!zh-cn and timestamp 20260807025235 and revision id 34197. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

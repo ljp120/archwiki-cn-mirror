@@ -1,0 +1,348 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg7f0ae761f33a">systemd/Journal</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Systemd/Journal">Systemd/Journal</a>，最近一次同步于 2023-02-11，若英文版本有所<a href="https://wiki.archlinux.org/title/Systemd/Journal?diff=0&amp;oldid=767038">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Systemd_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Journal_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>主文档请参考 <a href="#pgac06dd8bfe95">systemd</a>。
+</p><p><i>systemd</i> 提供了自己的日志系统（logging system），称为 journal。使用 systemd 日志，无需额外安装日志服务（syslog）。使用 <span class="plainlinks archwiki-template-man" title="$ man 1 journalctl"><a href="https://man.archlinux.org/man/journalctl.1">journalctl(1)</a></span> 命令读取日志。
+</p><p>Arch Linux 中， <code>/var/log/journal/</code> 目录是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd">systemd</a></span><sup><small>包</small></sup></span> 软件包的一部分。默认情况下 <code>/etc/systemd/journald.conf</code> 中的<code>Storage=</code> 为 <code>auto</code>，systemd 会将日志记录写入 <code>/var/log/journal</code>。若被删除，systemd <b>不会</b>自动创建此目录，而是将日志写入 <code>/run/log/journal</code>，重启时内容会消失。如果 <code>journald.conf</code> 中的 <code>Storage=persistent</code>， <code>systemd-journald.service</code> <a href="#pgaa5af66d88c3">重启</a>或系统重启时会重新创建  <code>/var/log/journal/</code>。
+</p><p>Systemd 日志可以按照#优先级和#功能标记日志，符合 <a href="https://en.wikipedia.org/wiki/Syslog">syslog</a> 协议 (<a href="https://tools.ietf.org/html/rfc5424">RFC 5424</a>) 标准。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果 <code>/var/log/journal/</code> 位于 <a href="#pg429e7ec45c9c">btrfs</a> 文件系统，应该考虑对这个目录禁用写入时复制，方法参阅 <a href="#pg429e7ec45c9c">Btrfs#Copy-on-Write (CoW)</a>。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7f0ae761f33a_.E4.BC.98.E5.85.88.E7.BA.A7" id="优先级"><span id=".E4.BC.98.E5.85.88.E7.BA.A7"></span>优先级</h2></div>
+<p>日志会带 syslog 优先级代码，标记消息的重要性，参考 <a href="https://tools.ietf.org/html/rfc5424#section-6.2.1">RFC 5424 6.2.1</a>。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>数值</th>
+<th>优先级</th>
+<th>关键字</th>
+<th>描述</th>
+<th>示例
+</th></tr>
+<tr>
+<td>0</td>
+<td>Emergency</td>
+<td>emerg</td>
+<td>System is unusable</td>
+<td>Severe Kernel BUG, <a href="#pgfeca123684fe">systemd dumped core</a>.<br/>This level should not be used by applications.
+</td></tr>
+<tr>
+<td>1</td>
+<td>Alert</td>
+<td>alert</td>
+<td>Should be corrected immediately</td>
+<td>Vital subsystem goes out of work. Data loss. <br/><code>kernel: BUG: unable to handle kernel paging request at ffffc90403238ffc</code>.
+</td></tr>
+<tr>
+<td>2</td>
+<td>Critical</td>
+<td>crit</td>
+<td>Critical conditions</td>
+<td>Crashes, coredumps. Like familiar flash:<br/><code>systemd-coredump[25319]: Process 25310 (plugin-containe) of user 1000 dumped core</code><br/>Failure in the system primary application, like X11.
+</td></tr>
+<tr>
+<td>3</td>
+<td>Error</td>
+<td>err</td>
+<td>Error conditions</td>
+<td>Not fatal error reported:<br/><code>kernel: usb 1-3: 3:1: cannot get freq at ep 0x84</code>,<br/><code>systemd[1]: Failed unmounting /var.</code>,<br/><code>libvirtd[1720]: internal error: Failed to initialize a valid firewall backend</code>).
+</td></tr>
+<tr>
+<td>4</td>
+<td>Warning</td>
+<td>warning</td>
+<td>May indicate that an error will occur if action is not taken.</td>
+<td>A non-root file system has only 1GB free.<br/><code>org.freedesktop. Notifications[1860]: (process:5999): Gtk-WARNING **: Locale not supported by C library. Using the fallback 'C' locale</code>.
+</td></tr>
+<tr>
+<td>5</td>
+<td>Notice</td>
+<td>notice</td>
+<td>Events that are unusual, but not error conditions.</td>
+<td><code>systemd[1]: var.mount: Directory /var to mount over is not empty, mounting anyway</code>. <code>gcr-prompter[4997]: Gtk: GtkDialog mapped without a transient parent. This is discouraged</code>.
+</td></tr>
+<tr>
+<td>6</td>
+<td>Informational</td>
+<td>info</td>
+<td>Normal operational messages that require no action.</td>
+<td><code>lvm[585]:   7 logical volume(s) in volume group "archvg" now active</code>.
+</td></tr>
+<tr>
+<td>7</td>
+<td>Debug</td>
+<td>debug</td>
+<td>Messages which may need to be enabled first, only useful for debugging</td>
+<td><code>kdeinit5[1900]: powerdevil: Scheduling inhibition from ":1.14" "firefox" with cookie 13 and reason "screen"</code>
+</td></tr></tbody></table>
+<p>These rules are recommendations, and the priority level of a given error is at the application developer's discretion. It is always possible that the error will be at a higher or lower level than expected.
+</p><p>Examples:
+</p>
+<ul><li>Info message:  <pre>pulseaudio[2047]: W: [pulseaudio] alsa-mixer.c: Volume element Master has 8 channels. That's too much! I can't handle that!</pre> It is an warning or error by definition.</li>
+<li>Plaguing alert message: <pre>sudo[21711]:     user : a password is required ; TTY=pts/0 ; PWD=/home/user ; USER=root ; COMMAND=list /usr/bin/pacman --color auto -Sy</pre> The <a href="https://bbs.archlinux.org/viewtopic.php?id=184455">reason</a> - user was manually added to sudoers file, not to wheel group, which is arguably normal action, but sudo produced an alert on every occasion.</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7f0ae761f33a_.E5.8A.9F.E8.83.BD" id="功能"><span id=".E5.8A.9F.E8.83.BD"></span>功能</h2></div>
+<p>日志文件会带上 syslog 功能码，标记发出日志的程序类型 <a href="https://tools.ietf.org/html/rfc5424#section-6.2.1">RFC 5424 6.2.1</a>。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>功能码</th>
+<th>关键字</th>
+<th>描述</th>
+<th>信息
+</th></tr>
+<tr>
+<td>0</td>
+<td>kern</td>
+<td>kernel messages
+</td></tr>
+<tr>
+<td>1</td>
+<td>user</td>
+<td>user-level messages
+</td></tr>
+<tr>
+<td>2</td>
+<td>mail</td>
+<td>mail system</td>
+<td>Archaic POSIX still supported and sometimes used system, for more <span class="plainlinks archwiki-template-man" title="$ man 1 mail"><a href="https://man.archlinux.org/man/mail.1">mail(1)</a></span>)
+</td></tr>
+<tr>
+<td>3</td>
+<td>daemon</td>
+<td>system daemons</td>
+<td>All daemons, including systemd and its subsystems
+</td></tr>
+<tr>
+<td>4</td>
+<td>auth</td>
+<td>security/authorization messages</td>
+<td>Also watch for different facility 10
+</td></tr>
+<tr>
+<td>5</td>
+<td>syslog</td>
+<td>messages generated internally by syslogd</td>
+<td>As it standartized for syslogd, not used by systemd (see facility 3)
+</td></tr>
+<tr>
+<td>6</td>
+<td>lpr</td>
+<td>line printer subsystem (archaic subsystem)
+</td></tr>
+<tr>
+<td>7</td>
+<td>news</td>
+<td>network news subsystem (archaic subsystem)
+</td></tr>
+<tr>
+<td>8</td>
+<td>uucp</td>
+<td>UUCP subsystem (archaic subsystem)
+</td></tr>
+<tr>
+<td>9</td>
+<td></td>
+<td>clock daemon</td>
+<td>systemd-timesyncd
+</td></tr>
+<tr>
+<td>10</td>
+<td>authpriv</td>
+<td>security/authorization messages</td>
+<td>Also watch for different facility 4
+</td></tr>
+<tr>
+<td>11</td>
+<td>ftp</td>
+<td>FTP daemon
+</td></tr>
+<tr>
+<td>12</td>
+<td>-</td>
+<td>NTP subsystem
+</td></tr>
+<tr>
+<td>13</td>
+<td>-</td>
+<td>log audit
+</td></tr>
+<tr>
+<td>14</td>
+<td>-</td>
+<td>log alert
+</td></tr>
+<tr>
+<td>15</td>
+<td>cron</td>
+<td>scheduling daemon
+</td></tr>
+<tr>
+<td>16</td>
+<td>local0</td>
+<td>local use 0  (local0)
+</td></tr>
+<tr>
+<td>17</td>
+<td>local1</td>
+<td>local use 1  (local1)
+</td></tr>
+<tr>
+<td>18</td>
+<td>local2</td>
+<td>local use 2  (local2)
+</td></tr>
+<tr>
+<td>19</td>
+<td>local3</td>
+<td>local use 3  (local3)
+</td></tr>
+<tr>
+<td>20</td>
+<td>local4</td>
+<td>local use 4  (local4)
+</td></tr>
+<tr>
+<td>21</td>
+<td>local5</td>
+<td>local use 5  (local5)
+</td></tr>
+<tr>
+<td>22</td>
+<td>local6</td>
+<td>local use 6  (local6)
+</td></tr>
+<tr>
+<td>23</td>
+<td>local7</td>
+<td>local use 7  (local7)
+</td></tr></tbody></table>
+<p>So, useful facilities to watch: 0,1,3,4,9,10,15.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7f0ae761f33a_.E8.BF.87.E6.BB.A4.E8.BE.93.E5.87.BA" id="过滤输出"><span id=".E8.BF.87.E6.BB.A4.E8.BE.93.E5.87.BA"></span>过滤输出</h2></div>
+<p><code>journalctl</code>可以根据特定字段过滤输出。如果过滤的字段比较多，需要较长时间才能显示出来。
+</p><p>示例：
+</p>
+<ul><li>显示 <code><i>PATTERN</i></code> 模式的日志: <pre># journalctl --grep=<i>PATTERN</i></pre></li>
+<li>显示本次启动后的所有日志：<pre># journalctl -b</pre></li>
+<li><code>journalctl -b -0</code> 显示本次启动的信息</li>
+<li><code>journalctl -b -1</code> 显示上次启动的信息</li>
+<li><code>journalctl -b -2</code> 显示上上次启动的信息 <code>journalctl -b -2</code></li>
+<li>只显示错误、冲突和重要告警信息 <pre># journalctl -p err..alert</pre> 也可以使用数字， <code>journalctl -p 3..1</code>。If single number/keyword used, <code>journalctl -p 3</code> - all higher priority levels also included.</li>
+<li>包含日志消息类型的描述：<pre># journalctl -x</pre> 注意在报告 bug 和寻求帮助时不要使用此命令，因为这个命令会产生大量的输出。用 <code>journalctl --list-catalog</code> 可以查看所有类型的描述。</li>
+<li>显示从某个日期 ( 或时间 ) 开始的消息: <pre># journalctl --since="2012-10-30 18:17:16"</pre></li>
+<li>显示从某个时间 ( 例如 20分钟前 ) 的消息: <pre># journalctl --since "20 min ago"</pre></li>
+<li>显示最新信息<pre># journalctl -f</pre></li>
+<li>显示特定程序的所有消息: <pre># journalctl /usr/lib/systemd/systemd</pre></li>
+<li>显示特定进程的所有消息: <pre># journalctl _PID=1</pre></li>
+<li>显示指定单元的所有消息：<pre># journalctl -u man-db.service</pre></li>
+<li>Show all messages from user services by a specific unit: <pre>$ journalctl --user -u dbus</pre></li>
+<li>显示内核环缓存消息r: <pre># journalctl -k</pre></li>
+<li>Show auth.log equivalent by filtering on syslog facility: <pre># journalctl -f -l SYSLOG_FACILITY=10</pre></li>
+<li>If your journal directory (by default located under <code>/var/log/journal</code>) contains huge amount of log data then <code>journalctl</code> can take several minutes in filtering output. You can speed it up significantly by using <code>--file</code> option to force <code>journalctl</code> to look only into most recent journal: <pre># journalctl --file /var/log/journal/*/system.journal -f</pre></li></ul>
+<p>详情参阅<span class="plainlinks archwiki-template-man" title="$ man 1 journalctl"><a href="https://man.archlinux.org/man/journalctl.1">journalctl(1)</a></span>、<span class="plainlinks archwiki-template-man" title="$ man 7 systemd.journal-fields"><a href="https://man.archlinux.org/man/systemd.journal-fields.7">systemd.journal-fields(7)</a></span>，以及 Lennert 的这篇<a href="http://0pointer.de/blog/projects/journalctl.html">博文</a>。
+</p>
+<ul><li>By default, <i>journalctl</i> truncates lines longer than screen width, but in some cases, it may be better to enable wrapping instead of truncating. This can be controlled by the <code>SYSTEMD_LESS</code> <a href="#pg18ad99d88887">environment variable</a>, which contains options passed to <a href="#pg4bb6491c480c">less</a> (the default pager) and defaults to <code>FRSXMK</code> (see <span class="plainlinks archwiki-template-man" title="$ man 1 less"><a href="https://man.archlinux.org/man/less.1">less(1)</a></span> and <span class="plainlinks archwiki-template-man" title="$ man 1 journalctl"><a href="https://man.archlinux.org/man/journalctl.1">journalctl(1)</a></span> for details).</li></ul>
+<dl><dd>By omitting the <code>S</code> option, the output will be wrapped instead of truncated. For example, start <i>journalctl</i> as follows: <pre>$ SYSTEMD_LESS=FRXMK journalctl</pre></dd>
+<dd>To set this behaviour as default, <a href="#pge575f3f9cef9">export</a> the variable from <code>~/.bashrc</code> or <code>~/.zshrc</code>.</dd></dl>
+<ul><li>While the journal is stored in a binary format, the content of stored messages is not modified. This means it is viewable with <i>strings</i>, for example for recovery in an environment which does not have <i>systemd</i> installed, e.g.:{{bc|$ strings /mnt/arch/var/log/journal/af4967d77fba44c6b093d0e9862f6ddd/system.journal | grep -i <i>message</i></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7f0ae761f33a_.E6.97.A5.E5.BF.97.E5.A4.A7.E5.B0.8F.E9.99.90.E5.88.B6" id="日志大小限制"><span id=".E6.97.A5.E5.BF.97.E5.A4.A7.E5.B0.8F.E9.99.90.E5.88.B6"></span>日志大小限制</h2></div>
+<p>如果按上面的操作保留日志的话，默认日志最大限制为所在文件系统容量的 10%，即：如果 <code>/var/log/journal</code> 储存在 50GiB 的根分区中，那么日志最多存储 5GiB 数据。用 <code>systemd-journald</code> 日志查看当前设置:
+</p>
+<pre># journalctl -b -u systemd-journald
+</pre>
+<p>可以修改配置文件指定最大限制。如限制日志最大 50MiB：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/journald.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SystemMaxUse=50M</pre>
+<p>还可以通过配置片段而不是全局配置文件进行设置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/journald.conf.d/00-journal-size.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Journal]
+SystemMaxUse=50M</pre>
+<p>修改配置后要立即生效，请<a href="#pgdf6211f8fea3">重启</a> <code>systemd-journald.service</code> 服务。
+</p><p>详情参见 <span class="plainlinks archwiki-template-man" title="$ man 5 journald.conf"><a href="https://man.archlinux.org/man/journald.conf.5">journald.conf(5)</a></span>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7f0ae761f33a_.E9.85.8D.E5.90.88_syslog_.E4.BD.BF.E7.94.A8" id="配合_syslog_使用"><span id=".E9.85.8D.E5.90.88_syslog_.E4.BD.BF.E7.94.A8"></span>配合 syslog 使用</h2></div>
+<p>systemd 提供了 socket <code>/run/systemd/journal/syslog</code>，以兼容传统日志服务。所有系统信息都会被传入。要使传统日志服务工作，需要让服务链接该 socket，而非 <code>/dev/log</code>（<a href="https://lwn.net/Articles/474968/">官方说明</a>）。Arch 软件仓库中的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=syslog-ng">syslog-ng</a></span><sup><small>包</small></sup></span> 已经包含了需要的配置。
+</p><p><code>journald.conf</code> 使用 <code>no</code> 转发socket . 为了使 <i>syslog-ng</i> 配合 <i>journald</i> , 你需要在 <code>/etc/systemd/journald.conf</code>  中设置  <code>ForwardToSyslog=yes</code> . 参阅 <a href="#pg36c7963d9e88">Syslog-ng#Overview</a> 了解更多细节.
+</p><p>如果你选择使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rsyslog/">rsyslog</a></span><sup><small>AUR</small></sup></span> , 因为 <a href="#pg91f222484856">rsyslog</a> 从日志中<a href="https://lists.freedesktop.org/archives/systemd-devel/2014-August/022295.html#journald">直接</a>传出消息,所以不再必要改变那个选项..
+</p><p>设置开机启动 syslog-ng：
+</p>
+<pre> # systemctl enable syslog-ng
+</pre>
+<p><a href="http://0pointer.de/blog/projects/">这里</a>有一份很不错的 <code>journalctl</code> 指南。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7f0ae761f33a_Per_unit_size_limit_by_a_journal_namespa" id="Per_unit_size_limit_by_a_journal_namespace">Per unit size limit by a journal namespace</h3></div>
+<p><a href="#pgfbacf3a1812d">Edit</a> the unit file for the service you wish to configure (for example sshd) and add <code>LogNamespace=ssh</code> in the <code>[Service]</code> section.
+</p><p>Then create <code>/etc/systemd/journald@ssh.conf</code> by copying <code>/etc/systemd/journald.conf</code>. After that, edit <code>journald@ssh.conf</code> and adjust <code>SystemMaxUse</code> to your liking.
+</p><p><a href="#pgdf6211f8fea3">Restart</a>ing the service should automatically start the new journal service <code>systemd-journald@ssh.service</code>. The logs from the namespaced service can be viewed with <code>journalctl --namespace ssh</code>.
+</p><p>See <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-journald.service"><a href="https://man.archlinux.org/man/systemd-journald.service.8#JOURNAL_NAMESPACES">systemd-journald.service(8) § JOURNAL NAMESPACES</a></span> for details about journal namespaces.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7f0ae761f33a_.E6.89.8B.E5.8A.A8.E6.B8.85.E7.90.86.E6.97.A5.E5.BF.97" id="手动清理日志"><span id=".E6.89.8B.E5.8A.A8.E6.B8.85.E7.90.86.E6.97.A5.E5.BF.97"></span>手动清理日志</h2></div>
+<p><code>/var/log/journal</code> 存放着日志, <code>rm</code> 应该能工作. 或者使用<code>journalctl</code>,
+</p><p>例如:
+</p>
+<ul><li>清理日志使总大小小于 100M: <pre># journalctl --vacuum-size=100M</pre></li>
+<li>清理最早两周前的日志. <pre># journalctl --vacuum-time=2weeks</pre></li></ul>
+<p>Journal files must have been rotated out and made inactive before they can be trimmed by vacuum commands. Rotation of journal files can be done by running <code>journalctl --rotate</code>. The <code>--rotate</code> argument can also be provided alongside one or more vacuum criteria arguments to perform rotation and then trim files in a single command.
+</p><p>参阅 <span class="plainlinks archwiki-template-man" title="$ man 1 journalctl"><a href="https://man.archlinux.org/man/journalctl.1">journalctl(1)</a></span> 获得更多信息.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7f0ae761f33a_.E8.BD.AC.E5.8F.91_journald_.E5.88.B0_.2Fdev.2Ftty12" id="转发_journald_到_/dev/tty12"><span id=".E8.BD.AC.E5.8F.91_journald_.E5.88.B0_.2Fdev.2Ftty12"></span>转发 journald 到 /dev/tty12</h2></div>
+<p>建立一个 <a href="#pgac06dd8bfe95">Systemd#替换单元文件</a>|drop-in directory]] <code>/etc/systemd/journald.conf.d</code> 然后在其中建立 <code>fw-tty12.conf</code> :
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/journald.conf.d/fw-tty12.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Journal]
+ForwardToConsole=yes
+TTYPath=/dev/tty12
+MaxLevelConsole=info</pre>
+<p>然后重新启动  systemd-journald.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7f0ae761f33a_.E6.9F.A5.E7.9C.8B.E7.89.B9.E5.AE.9A.E4.BD.8D.E7.BD.AE.E7.9A.84.E6.97.A5.E5.BF.97" id="查看特定位置的日志"><span id=".E6.9F.A5.E7.9C.8B.E7.89.B9.E5.AE.9A.E4.BD.8D.E7.BD.AE.E7.9A.84.E6.97.A5.E5.BF.97"></span>查看特定位置的日志</h2></div>
+<p>有时你希望查看另一个系统上的日志.例如从 Live 环境修复现存的系统.
+</p><p>这种情况下你可以挂载目标系统 ( 例如挂载到 <code>/mnt</code> ),然后用 <code>-D</code>/<code>--directory</code> 参数指定目录,例如:
+</p>
+<pre># journalctl -D <i>/mnt</i>/var/log/journal -n 1000
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7f0ae761f33a_.E6.99.AE.E9.80.9A.E7.94.A8.E6.88.B7.E8.AE.BF.E9.97.AE.E6.97.A5.E5.BF.97" id="普通用户访问日志"><span id=".E6.99.AE.E9.80.9A.E7.94.A8.E6.88.B7.E8.AE.BF.E9.97.AE.E6.97.A5.E5.BF.97"></span>普通用户访问日志</h2></div>
+<p>在默认的配置中，普通用户仅能访问自己的日志，要让普通用户访问系统日志，可以将用户加入 <code>systemd-journal</code> <a href="#pg60160f86c6a5">用户组</a>。<code>adm</code> 和 <code>wheel</code> 组中的用户也可以读取日志。
+</p><p>更多信息请参考 <span class="plainlinks archwiki-template-man" title="$ man 1 journalctl"><a href="https://man.archlinux.org/man/journalctl.1#DESCRIPTION">journalctl(1) § DESCRIPTION</a></span> 和<a href="#pg60160f86c6a5">用户和用户组#用户组管理</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807022308
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.177 seconds
+Real time usage: 0.183 seconds
+Preprocessor visited node count: 1042/1000000
+Revision size: 13085/2097152 bytes
+Post‐expand include size: 9055/2097152 bytes
+Template argument size: 3417/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 29/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   59.398      1 -total
+ 14.99%    8.902     70 Template:Ic
+ 12.20%    7.248     10 Template:Man
+  6.28%    3.729      1 Template:小写标题
+  5.57%    3.309     19 Template:Bc
+  5.46%    3.242      1 Template:翻译状态
+  4.08%    2.424      2 Template:Pkg
+  2.71%    1.611      3 Template:Hc
+  2.30%    1.367      1 Template:提示
+  1.73%    1.028      1 Template:AUR
+-->
+<!-- Render ID edaa1a0e-9206-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7229:|#|:idhash:canonical!zh-cn and timestamp 20260807022308 and revision id 30530. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

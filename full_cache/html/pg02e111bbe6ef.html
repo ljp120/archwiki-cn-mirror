@@ -1,0 +1,366 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg02e111bbe6ef">NVIDIA/提示和技巧</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/NVIDIA/Tips_and_tricks">NVIDIA/Tips and tricks</a>，最近一次同步于 2025-01-24，若英文版本有所<a href="https://wiki.archlinux.org/title/NVIDIA/Tips_and_tricks?diff=0&amp;oldid=825820">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/NVIDIA_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Tips_and_tricks_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg02e111bbe6ef_.E4.BF.AE.E5.A4.8D.E7.BB.88.E7.AB.AF.E5.88.86.E8.BE.A8.E7.8E.87" id="修复终端分辨率"><span id=".E4.BF.AE.E5.A4.8D.E7.BB.88.E7.AB.AF.E5.88.86.E8.BE.A8.E7.8E.87"></span>修复终端分辨率</h2></div>
+<p>从 nouveau 切换可能会导致启动终端以较低分辨率显示。
+</p><p>对于 GRUB，请参阅 <a href="#pgc9828c7a368e">GRUB/Tips and tricks#设置帧缓冲分辨率</a>获取详细信息。<a href="https://forums.fedoraforum.org/showthread.php?t=306271">[1]</a> <a href="https://web.archive.org/web/20170405115954/https://www.reddit.com/r/archlinux/comments/4gwukx/nvidia_drivers_and_high_resolution_tty_possible/">[2]</a>
+</p><p>对于 <a href="#pg171755f7b428">systemd-boot</a>，请在 <code><i>esp</i>/loader/loader.conf</code> 中设置 <code>console-mode</code>。详情请参阅 <a href="#pg171755f7b428">systemd-boot#启动选单配置</a>。
+</p><p>对于 <a href="#pg155cf311d887">rEFInd</a>，请在 <code><i>esp</i>/EFI/refind/refind.conf</code> 中设置 <code>use_graphics_for +,linux</code>。<a href="https://www.reddit.com/r/archlinux/comments/86lqc5/tty_resolution_nvidia_psaish/">[3]</a> 一个小问题是，这会在启动时隐藏内核参数的显示。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果上述方法无法修复您的终端分辨率，可能需要在 UEFI 设置中完全禁用 Legacy BIOS 模式（通常称为兼容性支持模块，CSM 或 Legacy Boot）。在继续之前，请确保所有设备都配置为使用 UEFI 启动。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg02e111bbe6ef_.E4.BD.BF.E7.94.A8.E7.94.B5.E8.A7.86.E8.BE.93.E5.87.BA" id="使用电视输出"><span id=".E4.BD.BF.E7.94.A8.E7.94.B5.E8.A7.86.E8.BE.93.E5.87.BA"></span>使用电视输出</h2></div>
+<p>参见 <a href="https://en.wikibooks.org/wiki/NVIDIA/TV-OUT">Wikibooks:NVIDIA/TV-OUT</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg02e111bbe6ef_.E4.BD.BF.E7.94.A8.E7.94.B5.E8.A7.86.EF.BC.88DFP.EF.BC.89.E4.BD.9C.E4.B8.BA.E5.94.AF.E4.B8.80.E6.98.BE.E7.A4.BA.E5.99.A8.E7.9A.84_X_.E9.85.8D.E7.BD.AE" id="使用电视（DFP）作为唯一显示器的_X_配置"><span id=".E4.BD.BF.E7.94.A8.E7.94.B5.E8.A7.86.EF.BC.88DFP.EF.BC.89.E4.BD.9C.E4.B8.BA.E5.94.AF.E4.B8.80.E6.98.BE.E7.A4.BA.E5.99.A8.E7.9A.84_X_.E9.85.8D.E7.BD.AE"></span>使用电视（DFP）作为唯一显示器的 X 配置</h2></div>
+<p>如果未自动检测到显示器，X 服务器会回退到 CRT-0。当使用 DVI 连接的电视作为主显示器，并且在电视关闭或断开连接时启动 X 时，这可能会成为一个问题。
+</p><p>要强制 NVIDIA 使用 DFP，请将 EDID 的副本存储在文件系统中的某个位置，以便 X 可以解析该文件，而不是从电视/DFP 读取 EDID。
+</p><p>要获取 EDID，请启动 <code>nvidia-settings</code>。它会以树形格式显示一些信息，暂时忽略其他设置，选择 GPU（相应的条目应标为 "GPU-0" 或类似名称），点击 <code>DFP</code> 部分（同样，<code>DFP-0</code> 或类似名称），点击 <code>获取 EDID</code> 按钮并将其存储在某个位置，例如 <code>/etc/X11/dfp0.edid</code>。
+</p><p>如果前端没有连接鼠标和键盘，可以仅使用命令行获取 EDID。运行一个足够详细的 X 服务器以打印出 EDID 块：
+</p>
+<pre>$ startx -- -logverbose 6
+</pre>
+<p>X 服务器完成初始化后，关闭它，您的日志文件可能会在 <code>/var/log/Xorg.0.log</code> 中。使用 <code>nvidia-xconfig</code> 提取 EDID 块：
+</p>
+<pre>$ nvidia-xconfig --extract-edids-from-file=/var/log/Xorg.0.log --extract-edids-output-file=/etc/X11/dfp0.bin
+</pre>
+<p>编辑 <code>xorg.conf</code>，在 <code>Device</code> 部分添加：
+</p>
+<pre>Option "ConnectedMonitor" "DFP"
+Option "CustomEDID" "DFP-0:/etc/X11/dfp0.bin"
+</pre>
+<p><code>ConnectedMonitor</code> 选项强制驱动程序将 DFP 识别为已连接。<code>CustomEDID</code> 为设备提供 EDID 数据，这意味着它将像在 X 进程期间电视/DFP 已连接一样启动。
+</p><p>这样，您可以在启动时自动启动显示管理器，并在电视开机时拥有一个正常工作和正确配置的 X 屏幕。
+</p><p>如果上述更改没有生效，您可以在 <code>xorg.conf</code> 的 <code>Device</code> 部分尝试删除 <code>Option "ConnectedMonitor" "DFP"</code> 并添加以下行：
+</p>
+<pre>Option "ModeValidation" "NoDFPNativeResolutionCheck"
+Option "ConnectedMonitor" "DFP-0"
+</pre>
+<p><code>NoDFPNativeResolutionCheck</code> 防止 NVIDIA 驱动程序禁用所有不符合原生分辨率的模式。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg02e111bbe6ef_.E6.97.A0.E6.98.BE.E7.A4.BA.E5.99.A8.EF.BC.88Headless.EF.BC.89.E5.88.86.E8.BE.A8.E7.8E.87" id="无显示器（Headless）分辨率"><span id=".E6.97.A0.E6.98.BE.E7.A4.BA.E5.99.A8.EF.BC.88Headless.EF.BC.89.E5.88.86.E8.BE.A8.E7.8E.87"></span>无显示器（Headless）分辨率</h2></div>
+<p>在无显示器模式下，分辨率会回退到 640x480，这是 VNC 或 Steam Link 使用的分辨率。要以更高的分辨率（例如 1920x1080）启动，请在 <code>xorg.conf</code> 的 <code>Screen</code> 子节中指定一个 <code>Virtual</code> 条目：
+</p>
+<pre>Section "Screen"
+   [...]
+   SubSection     "Display"
+       Depth       24
+       Virtual     1920 1080
+   EndSubSection
+EndSection
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>使用无显示器模式可能会比较复杂且容易出错。例如，在无显示器模式下，桌面环境和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span><sup><small>包</small></sup></span> 不提供图形化的方式来更改分辨率。为了便于设置分辨率，可以使用 DP 或 HDMI 虚拟适配器，模拟连接到该端口的显示器的存在。然后可以通过远程会话（如 VNC 或 Steam Link）正常更改分辨率。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg02e111bbe6ef_.E6.A3.80.E6.9F.A5.E7.94.B5.E6.BA.90.E6.9D.A5.E6.BA.90" id="检查电源来源"><span id=".E6.A3.80.E6.9F.A5.E7.94.B5.E6.BA.90.E6.9D.A5.E6.BA.90"></span>检查电源来源</h2></div>
+<p>NVIDIA X.org 驱动也可以用来检测 GPU 当前的电源来源。要查看当前的电源来源，请检查 'GPUPowerSource' 只读参数（0 - 交流电，1 - 电池）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nvidia-settings -q GPUPowerSource -t</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">1</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg02e111bbe6ef_.E7.9B.91.E5.90.AC_ACPI_.E4.BA.8B.E4.BB.B6" id="监听_ACPI_事件"><span id=".E7.9B.91.E5.90.AC_ACPI_.E4.BA.8B.E4.BB.B6"></span>监听 ACPI 事件</h2></div>
+<p>NVIDIA 驱动程序会自动尝试连接到 <a href="#pg2b172a4074ba">acpid</a> 守护进程，并监听诸如电池电量、扩展坞、某些热键等 ACPI 事件。如果连接失败，X.org 将输出以下警告：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.local/share/xorg/Xorg.0.log</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NVIDIA(0): ACPI: failed to connect to the ACPI event daemon; the daemon
+NVIDIA(0):     may not be running or the "AcpidSocketPath" X
+NVIDIA(0):     configuration option may not be set correctly.  When the
+NVIDIA(0):     ACPI event daemon is available, the NVIDIA X driver will
+NVIDIA(0):     try to use it to receive ACPI event notifications.  For
+NVIDIA(0):     details, please see the "ConnectToAcpid" and
+NVIDIA(0):     "AcpidSocketPath" X configuration options in Appendix B: X
+NVIDIA(0):     Config Options in the README.
+</pre>
+<p>虽然完全无害，但你可以通过在 <code>/etc/X11/xorg.conf.d/20-nvidia.conf</code> 中禁用 <code>ConnectToAcpid</code> 选项来消除此消息：
+</p>
+<pre>Section "Device"
+  ...
+  Driver "nvidia"
+  Option "ConnectToAcpid" "0"
+  ...
+EndSection
+</pre>
+<p>如果你使用的是笔记本电脑，安装并启用 <a href="#pg2b172a4074ba">acpid</a> 守护进程可能是个好主意。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg02e111bbe6ef_.E5.9C.A8_shell_.E4.B8.AD.E6.98.BE.E7.A4.BA_GPU_.E6.B8.A9.E5.BA.A6" id="在_shell_中显示_GPU_温度"><span id=".E5.9C.A8_shell_.E4.B8.AD.E6.98.BE.E7.A4.BA_GPU_.E6.B8.A9.E5.BA.A6"></span>在 shell 中显示 GPU 温度</h2></div>
+<p>有三种方法可以查询 GPU 温度。<i>nvidia-settings</i> 要求你正在使用 X，而 <i>nvidia-smi</i> 或 <i>nvclock</i> 则不需要。另外请注意，<i>nvclock</i> 目前不适用于较新的 NVIDIA 显卡，如 GeForce 200 系列显卡以及嵌入式 GPU，如 Zotac IONITX 的 8800GS。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg02e111bbe6ef_nvidia_settings" id="nvidia-settings">nvidia-settings</h3></div>
+<p>要在 shell 中显示 GPU 温度，请使用 <i>nvidia-settings</i>，如下所示：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nvidia-settings -q gpucoretemp</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">  Attribute 'GPUCoreTemp' (hostname:0[gpu:0]): 49.
+    'GPUCoreTemp' is an integer attribute.
+    'GPUCoreTemp' is a read-only attribute.
+    'GPUCoreTemp' can use the following target types: GPU.
+</pre>
+<p>该主板的 GPU 温度为 49 °C。
+</p><p>为了仅获取温度以用于 <i>rrdtool</i> 或 <i>conky</i> 等工具：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nvidia-settings -q gpucoretemp -t</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">49</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg02e111bbe6ef_nvidia_smi" id="nvidia-smi">nvidia-smi</h3></div>
+<p>使用 <i>nvidia-smi</i>，它可以直接从 GPU 读取温度，而无需使用 X，例如在运行 Wayland 或无头服务器时。
+</p><p>要在 shell 中显示 GPU 温度，请使用 <i>nvidia-smi</i>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nvidia-smi</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Wed Feb 28 14:27:35 2024
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 550.54.14              Driver Version: 550.54.14      CUDA Version: 12.4     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce GTX 1660 Ti     Off |   00000000:01:00.0  On |                  N/A |
+|  0%   49C    P8              9W /  120W |     138MiB /   6144MiB |      2%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A    223179      G   weston                                        120MiB |
++-----------------------------------------------------------------------------------------+
+</pre>
+<p>仅获取温度：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nvidia-smi -q -d TEMPERATURE</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">==============NVSMI LOG==============
+
+Timestamp                                 : Wed Feb 28 14:27:35 2024
+Driver Version                            : 550.54.14
+CUDA Version                              : 12.4
+
+Attached GPUs                             : 1
+GPU 00000000:01:00.0
+    Temperature
+        GPU Current Temp                  : 49 C
+        GPU T.Limit Temp                  : N/A
+        GPU Shutdown Temp                 : 95 C
+        GPU Slowdown Temp                 : 92 C
+        GPU Max Operating Temp            : 90 C
+        GPU Target Temperature            : 83 C
+        Memory Current Temp               : N/A
+        Memory Max Operating Temp         : N/A</pre>
+<p>为了仅获取温度以用于 <i>rrdtool</i> 或 <i>conky</i> 等工具：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">49</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg02e111bbe6ef_nvclock" id="nvclock">nvclock</h3></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvclock/">nvclock</a></span><sup><small>AUR</small></sup></span> 包。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><i>nvclock</i> 无法访问较新的 NVIDIA 显卡（如 GeForce 200 系列显卡）上的温度传感器。</div>
+<p><i>nvclock</i> 和 <i>nvidia-settings</i>/<i>nv-control</i> 报告的温度之间可能存在显著差异。根据 <i>nvclock</i> 的作者（thunderbird）在<a href="https://sourceforge.net/projects/nvclock/forums/forum/67426/topic/1906899">这篇帖子</a>中的说法，<i>nvclock</i> 的值应该更准确。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg02e111bbe6ef_.E8.B6.85.E9.A2.91.E4.B8.8E.E6.95.A3.E7.83.AD" id="超频与散热"><span id=".E8.B6.85.E9.A2.91.E4.B8.8E.E6.95.A3.E7.83.AD"></span>超频与散热</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>超频可能会永久损坏您的硬件。您已被警告。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg02e111bbe6ef_.E5.9C.A8_nvidia-settings_.E4.B8.AD.E5.90.AF.E7.94.A8.E8.B6.85.E9.A2.91" id="在_nvidia-settings_中启用超频"><span id=".E5.9C.A8_nvidia-settings_.E4.B8.AD.E5.90.AF.E7.94.A8.E8.B6.85.E9.A2.91"></span>在 nvidia-settings 中启用超频</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>如果 Xorg 服务器以无根模式运行，则无法应用超频设置。考虑 <a href="#pga36c0aff60be">以 root 身份运行 Xorg</a>。</li>
+<li>启用 DRM 内核模式设置可能会导致超频不可用，无论 Coolbits 值如何。</li></ul></div>
+<p>超频通过 <code>Device</code> 部分中的 <i>Coolbits</i> 选项控制，该选项启用了各种不受支持的功能：
+</p>
+<pre>Option "Coolbits" "<i>value</i>"
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可以使用 <i>nvidia-xconfig</i> 轻松控制 <i>Coolbits</i> 选项，它会操作 Xorg 配置文件：<pre># nvidia-xconfig --cool-bits=<i>value</i></pre></div>
+<p><i>Coolbits</i> 值是二进制数系统中其组成位的总和。组成位如下：
+</p>
+<ul><li><code>1</code> (位 0) - 在 <i>nvidia-settings</i> 的<i>时钟频率</i>页面上启用旧版（Fermi 之前）核心的超频。</li>
+<li><code>2</code> (位 1) - 设置此位时，驱动程序将“尝试在使用具有不同显存量的 GPU 时初始化 SLI”。</li>
+<li><code>4</code> (位 2) - 在 <i>nvidia-settings</i> 的<i>温度监控</i>页面上启用手动配置 GPU 风扇速度。</li>
+<li><code>8</code> (位 3) - 在 <i>nvidia-settings</i> 的 <i>PowerMizer</i> 页面上启用超频。自 337.12 版本起适用于 Fermi 架构及更新架构。<a href="https://www.phoronix.com/scan.php?px=MTY1OTM&amp;page=news_item">[4]</a></li>
+<li><code>16</code> (位 4) - 使用 <i>nvidia-settings</i> CLI 选项启用超压。自 346.16 版本起适用于 Fermi 架构及更新架构。<a href="https://www.phoronix.com/scan.php?page=news_item&amp;px=MTg0MDI">[5]</a></li></ul>
+<p>要启用多个功能，请将 <i>Coolbits</i> 值相加。例如，要启用 Fermi 核心的超频和超压，请设置 <code>Option "Coolbits" "24"</code>。
+</p><p><i>Coolbits</i> 的文档可以在 <code>/usr/share/doc/nvidia/html/xconfigoptions.html</code> 和<a href="https://download.nvidia.com/XFree86/Linux-x86_64/565.77/README/xconfigoptions.html#Coolbits">这里</a>找到。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>另一种方法是在 DOS 下（首选）或在 Win32 环境中通过 <a href="https://www.techpowerup.com/download/nvidia-nvflash/">nvflash</a> 和 <a href="https://www.guru3d.com/files-details/nvidia-bios-editor-download-nibitor.html">NiBiTor 6.0</a> 编辑并重新刷写 GPU BIOS。刷写 BIOS 的优势在于不仅可以提高电压限制，而且通常比 Coolbits 等软件超频方法更稳定。<a href="https://ivanvojtko.blogspot.sk/2014/03/how-to-overclock-geforce-460gtx-fermi.html">Fermi BIOS 修改教程</a></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg02e111bbe6ef_.E8.AE.BE.E7.BD.AE.E9.9D.99.E6.80.81_2D.2F3D_.E6.97.B6.E9.92.9F" id="设置静态_2D/3D_时钟"><span id=".E8.AE.BE.E7.BD.AE.E9.9D.99.E6.80.81_2D.2F3D_.E6.97.B6.E9.92.9F"></span>设置静态 2D/3D 时钟</h3></div>
+<p>使用 <a href="#pg52b20d9b2847">kernel module parameter</a> 参数以最大性能级别启用 PowerMizer（没有此设置，VSync 将无法工作）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/nvidia.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options nvidia NVreg_RegistryDwords="PerfLevelSrc=0x2222"</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg02e111bbe6ef_.E9.99.8D.E4.BD.8E_GPU_Boost_.E6.97.B6.E9.92.9F" id="降低_GPU_Boost_时钟"><span id=".E9.99.8D.E4.BD.8E_GPU_Boost_.E6.97.B6.E9.92.9F"></span>降低 GPU Boost 时钟</h3></div>
+<p>对于 <a href="https://nouveau.freedesktop.org/CodeNames.html#NV170">Ampere (NV170/GA<i>XXX</i>)</a> GPU 及更高版本，时钟提升的工作方式不同，最大时钟在启动时设置为支持的最高限制。如果这是您想要的，则无需进一步配置。
+</p><p>缺点是电源效率较低。随着时钟速度的提高，需要增加电压以保持稳定性，从而导致功耗、发热和风扇噪音的非线性增加。因此，降低提升时钟限制将提高效率。
+</p><p>可以使用 nvidia-smi 更改提升时钟限制，以 root 身份运行：
+</p>
+<ul><li>列出支持的时钟速率：<pre>$ nvidia-smi -q -d SUPPORTED_CLOCKS</pre></li>
+<li>将 GPU 提升时钟限制设置为 1695 MHz：<pre># nvidia-smi --lock-gpu-clocks=0,1695 --mode=1</pre></li>
+<li>将内存提升时钟限制设置为 5001 MHz：<pre># nvidia-smi --lock-memory-clocks=0,5001</pre></li></ul>
+<p>为了优化效率，请使用 nvidia-smi 检查运行您最喜欢的游戏时的 GPU 利用率。VSync 应开启。降低提升时钟限制将增加 GPU 利用率，因为较慢的 GPU 将使用更多时间来渲染每一帧。最佳效率是在不会导致卡顿的最低时钟下实现的，当利用率达到 100% 时会出现卡顿。然后，每一帧都可以渲染得足够快以跟上刷新率。
+</p><p>例如，在 RTX 3090 Ti 上使用上述设置而不是默认设置，在 4K@60 下玩 Hitman 3 时，功耗降低了 30%，温度从 75 度降至 63 度，风扇速度从 73% 降至 57%。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg02e111bbe6ef_.E4.BF.9D.E5.AD.98.E8.B6.85.E9.A2.91.E8.AE.BE.E7.BD.AE" id="保存超频设置"><span id=".E4.BF.9D.E5.AD.98.E8.B6.85.E9.A2.91.E8.AE.BE.E7.BD.AE"></span>保存超频设置</h3></div>
+<p>通常，在 <i>nvidia-settings</i> 界面中插入的时钟和电压偏移不会保存，重启后会丢失。
+幸运的是，有一些工具提供了在专有驱动程序下进行超频的界面，能够保存用户的超频偏好并在启动时自动应用它们。
+其中一些工具是：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gwe/">gwe</a></span><sup><small>AUR</small></sup></span> - 图形界面，在桌面会话启动时应用设置</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvclock/">nvclock</a></span><sup><small>AUR</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/systemd-nvclock-unit/">systemd-nvclock-unit</a></span><sup><small>AUR</small></sup></span> - 图形界面，在系统启动时应用设置</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvoc/">nvoc</a></span><sup><small>AUR</small></sup></span> - 基于文本，配置文件位于 <code>/etc/nvoc.d/</code>，在桌面会话启动时应用设置</li></ul>
+<p>否则，可以在<a href="#pg19029f6f5dd9">启动</a>时在 <i>nvidia-settings</i> 的命令行界面中设置 <code>GPUGraphicsClockOffset</code> 和 <code>GPUMemoryTransferRateOffset</code> 属性。例如：
+</p>
+<pre>$ nvidia-settings -a "GPUGraphicsClockOffset[<i>performance_level</i>]=<i>offset</i>"
+$ nvidia-settings -a "GPUMemoryTransferRateOffset[<i>performance_level</i>]=<i>offset</i>"
+</pre>
+<p>其中 <code><i>performance_level</i></code> 是最高性能级别的编号。如果机器上有多个 GPU，则应指定 GPU ID：<code>[gpu:<i>gpu_id</i>]GPUGraphicsClockOffset[<i>performance_level</i>]=<i>offset</i></code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg02e111bbe6ef_.E8.87.AA.E5.AE.9A.E4.B9.89_TDP_.E9.99.90.E5.88.B6" id="自定义_TDP_限制"><span id=".E8.87.AA.E5.AE.9A.E4.B9.89_TDP_.E9.99.90.E5.88.B6"></span>自定义 TDP 限制</h3></div>
+<p>现代 NVIDIA 显卡会限制频率以保持在 TDP 和温度限制内。为了提高性能，可以更改 TDP 限制，这将导致更高的温度和更高的功耗。
+</p><p>例如，将功耗限制设置为 160.30W：
+</p>
+<pre># nvidia-smi -pl 160.30
+</pre>
+<p>要在启动时设置功耗限制（无需驱动程序持久性）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/nvidia-tdp.timer</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Set NVIDIA power limit on boot
+
+[Timer]
+OnBootSec=5
+
+[Install]
+WantedBy=timers.target</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/nvidia-tdp.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Set NVIDIA power limit
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/nvidia-smi -pl 160.30</pre>
+<p>现在<a href="#pg6bfd324d34c9">启用</a> <code>nvidia-tdp.timer</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg02e111bbe6ef_.E5.9C.A8.E7.99.BB.E5.BD.95.E6.97.B6.E8.AE.BE.E7.BD.AE.E9.A3.8E.E6.89.87.E9.80.9F.E5.BA.A6" id="在登录时设置风扇速度"><span id=".E5.9C.A8.E7.99.BB.E5.BD.95.E6.97.B6.E8.AE.BE.E7.BD.AE.E9.A3.8E.E6.89.87.E9.80.9F.E5.BA.A6"></span>在登录时设置风扇速度</h3></div>
+
+<p>您可以使用 <i>nvidia-settings</i> 控制台界面调整显卡的风扇速度。首先确保您的 Xorg 配置已在 Coolbits 选项中启用了位 2。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>GeForce 400/500 系列显卡目前无法使用此方法在登录时设置风扇速度。此方法仅允许通过 <i>nvidia-settings</i> 在当前 X 会话中设置风扇速度。</div>
+<p>将以下行放入您的 <a href="#pg05a4704b29d5">xinitrc</a> 文件中，以在启动 Xorg 时调整风扇速度。将 <code><i>n</i></code> 替换为您要设置的风扇速度百分比。
+</p>
+<pre>nvidia-settings -a "[gpu:0]/GPUFanControlState=1" -a "[fan:0]/GPUTargetFanSpeed=<i>n</i>"
+</pre>
+<p>您还可以通过增加 GPU 和风扇编号来配置第二个 GPU。
+</p>
+<pre>nvidia-settings -a "[gpu:0]/GPUFanControlState=1" -a "[fan:0]/GPUTargetFanSpeed=<i>n</i>" \
+                -a "[gpu:1]/GPUFanControlState=1" -a  [fan:1]/GPUTargetFanSpeed=<i>n</i>" &amp;
+</pre>
+<p>如果您使用 <a href="#pg89573e816846">GDM</a> 或 <a href="#pg3438569d0b30">SDDM</a> 等登录管理器，可以创建一个桌面条目文件来处理此设置。创建 <code>~/.config/autostart/nvidia-fan-speed.desktop</code> 并将此文本放入其中。再次将 <code><i>n</i></code> 更改为您想要的速度百分比。
+</p>
+<pre>[Desktop Entry]
+Type=Application
+Exec=nvidia-settings -a "[gpu:0]/GPUFanControlState=1" -a "[fan:0]/GPUTargetFanSpeed=<i>n</i>"
+X-GNOME-Autostart-enabled=true
+Name=nvidia-fan-speed
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在驱动程序版本 349.16 之前，使用 <code>GPUCurrentFanSpeed</code> 而不是 <code>GPUTargetFanSpeed</code>。<a href="https://devtalk.nvidia.com/default/topic/821563/linux/can-t-control-fan-speed-with-beta-driver-349-12/post/4526208/#4526208">[6]</a></div>
+<p>要调整多个显卡的风扇速度，请运行：
+</p>
+<pre>$ nvidia-xconfig --enable-all-gpus
+$ nvidia-xconfig --cool-bits=4
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在某些笔记本电脑上（包括 ThinkPad <a href="https://devtalk.nvidia.com/default/topic/1052110/linux/can-t-control-gtx-1050-ti-max-q-fan-on-thinkpad-x1-extreme-laptop/post/5340658/#5340658">X1 Extreme</a> 和 <a href="https://devtalk.nvidia.com/default/topic/1048624/linux/how-to-set-gpu-fan-speed/post/5321818/#5321818">P51/P52</a>），有两个风扇，但都不由 nvidia 控制。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg02e111bbe6ef_.E4.BD.BF.E7.94.A8_NVML_.E7.9A.84.E7.AE.80.E5.8D.95.E8.B6.85.E9.A2.91.E8.84.9A.E6.9C.AC" id="使用_NVML_的简单超频脚本"><span id=".E4.BD.BF.E7.94.A8_NVML_.E7.9A.84.E7.AE.80.E5.8D.95.E8.B6.85.E9.A2.91.E8.84.9A.E6.9C.AC"></span>使用 NVML 的简单超频脚本</h3></div>
+<p>Nvidia 管理库 (NVML) 提供了一个 API，可以管理 GPU 的核心和内存时钟偏移以及功耗限制。要使用此功能，您可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/python-nvidia-ml-py/">python-nvidia-ml-py</a></span><sup><small>AUR</small></sup></span>，然后使用以下 Python 脚本与您所需的设置。此脚本需要在每次重启后以 root 身份运行以重新应用超频/降压。
+</p>
+<pre>#!/usr/bin/env python
+
+from pynvml import *
+
+nvmlInit()
+
+# 这将设置 GPU 进行调整 - 如果这给您带来错误或您有多个 GPU，请设置为 1 或尝试其他值
+myGPU = nvmlDeviceGetHandleByIndex(0)
+
+# GPU 时钟偏移值应替换下面行中的 "000"。
+nvmlDeviceSetGpcClkVfOffset(myGPU, 000)
+
+# 内存时钟偏移应 **乘以 2** 以替换下面的 "000"
+# 例如，偏移量为 500 意味着在下一行中插入值 1000
+nvmlDeviceSetMemClkVfOffset(myGPU, 000)
+
+# 功耗限制可以在下面以 mW 为单位设置 - 216W 变为 216000，等等。如果您不想调整功耗限制，请删除下面这行。
+nvmlDeviceSetPowerManagementLimit(myGPU, 000000)</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg02e111bbe6ef_.E5.86.85.E6.A0.B8.E6.A8.A1.E5.9D.97.E5.8F.82.E6.95.B0" id="内核模块参数"><span id=".E5.86.85.E6.A0.B8.E6.A8.A1.E5.9D.97.E5.8F.82.E6.95.B0"></span>内核模块参数</h2></div>
+
+<p>一些选项可以设置为内核模块参数，完整的列表可以通过运行 <code>modinfo nvidia</code> 或查看 <code>nv-reg.h</code> 获得。另请参阅 <a href="https://wiki.gentoo.org/wiki/NVidia/nvidia-drivers#Kernel_module_parameters">Gentoo:NVidia/nvidia-drivers#Kernel module parameters</a>。
+</p><p>例如，启用以下选项将启用 PAT 功能 <a href="https://docs.kernel.org/arch/x86/pat.html">[7]</a>，这会影响内存的分配方式。PAT 最早在 Pentium III 中引入 <a href="https://www.kernel.org/doc/ols/2008/ols2008v2-pages-135-144.pdf">[8]</a>，并且大多数较新的 CPU 都支持此功能（参见 <a href="https://en.wikipedia.org/wiki/Page_attribute_table#Processors">wikipedia:Page attribute table#Processors</a>）。如果您的系统支持此功能，它应该会提高性能。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/nvidia.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options nvidia NVreg_UsePageAttributeTable=1</pre>
+<p>在某些笔记本电脑上，要启用任何 NVIDIA 设置调整，您必须包含此选项，否则会返回“不支持设置应用程序时钟”等错误。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/nvidia.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options nvidia NVreg_RegistryDwords="OverrideMaxPerf=0x1"</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>根据 <a href="#pga016157dc9e9">Kernel module#Using modprobe.d</a>，如果您使用 <a href="#pge12579b7d4ac">early KMS</a>，则需要 <a href="#pgea04d1b8515f">regenerate the initramfs</a>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg02e111bbe6ef_.E4.BF.9D.E7.95.99.E6.8C.82.E8.B5.B7.E5.90.8E.E7.9A.84.E6.98.BE.E5.AD.98" id="保留挂起后的显存"><span id=".E4.BF.9D.E7.95.99.E6.8C.82.E8.B5.B7.E5.90.8E.E7.9A.84.E6.98.BE.E5.AD.98"></span>保留挂起后的显存</h2></div>
+<p>默认情况下，NVIDIA Linux 驱动程序在系统挂起和恢复时仅保存和恢复必要的显存分配。引用 NVIDIA 的话：
+</p>
+<dl><dd>由此导致的显存内容丢失部分由用户空间的 NVIDIA 驱动程序和某些应用程序进行补偿，但在退出电源管理周期时可能会导致渲染损坏和应用程序崩溃等故障。</dd></dl>
+<p>“仍处于实验阶段”的接口允许保存所有显存（前提是磁盘或 RAM 上有足够的空间）。
+</p><p>要保存和恢复所有显存内容，需要为 <code>nvidia</code> 内核模块设置 <code>NVreg_PreserveVideoMemoryAllocations=1</code> <a href="#pg575dea0b2198">内核模块参数</a>。虽然 NVIDIA 默认不设置此参数，但 Arch Linux 为支持的驱动程序设置了此参数，使得保留功能开箱即用。
+</p><p>要验证 <code>NVreg_PreserveVideoMemoryAllocations</code> 是否已启用，请执行以下命令：
+</p>
+<pre># cat /proc/driver/nvidia/params | sort
+</pre>
+<p>输出中应包含一行 <code>PreserveVideoMemoryAllocations: 1</code>，以及 <code>TemporaryFilePath: "/var/tmp"</code>，您可以在下面阅读有关此内容的更多信息。
+</p><p>根据上游要求，必要的服务 <code>nvidia-suspend.service</code>、<code>nvidia-hibernate.service</code> 和 <code>nvidia-resume.service</code> 在支持的驱动程序上默认已<a href="#pg3ef6532bc644">启用</a>。
+</p><p>有关更多详细信息，请参阅 <a href="https://download.nvidia.com/XFree86/Linux-x86_64/565.77/README/powermanagement.html">NVIDIA 的文档</a>。
+</p>
+
+<p><br/>
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>根据 <a href="#pg6dbfce2ea89d">内核模块#使用 modprobe.d</a>，如果使用 <a href="#pge12579b7d4ac">早期 KMS</a>，则需要<a href="#pg82461695094b">重新生成 initramfs</a>。</li>
+<li>显存内容默认保存到 <code>/tmp</code>，这是一个 <a href="#pg96f7efa88158">tmpfs</a>。<a href="https://download.nvidia.com/XFree86/Linux-x86_64/565.77/README/powermanagement.html#PreserveAllVide719f0">NVIDIA 建议</a>使用其他文件系统以获得最佳性能。如果内存大小不足，这也是必需的。因此，Arch Linux 在支持的驱动程序上默认设置 <code>nvidia.NVreg_TemporaryFilePath=/var/tmp</code>。</li>
+<li>所选文件系统需要支持未命名的临时文件（例如 ext4 或 XFS），并且有足够的容量来存储显存分配（即至少比所有 NVIDIA GPU 的内存容量总和多 5%）。使用命令 <code>nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits</code> 列出系统中所有 GPU 的内存容量。</li>
+<li>虽然 <code>nvidia-resume.service</code> 被 NVIDIA 标记为必需，但它可以是可选的，因为它的功能也由 <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-sleep"><a href="https://man.archlinux.org/man/systemd-sleep.8">systemd-sleep(8)</a></span> 钩子（<code>/usr/lib/systemd/system-sleep/nvidia</code>）提供，并且后者会自动调用。请注意，<a href="https://gitlab.gnome.org/GNOME/gdm/-/issues/784">使用 Wayland 的 GDM</a> 明确要求启用 <code>nvidia-resume.service</code>。</li></ul>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg02e111bbe6ef_.E9.A9.B1.E5.8A.A8.E6.8C.81.E4.B9.85.E5.8C.96" id="驱动持久化"><span id=".E9.A9.B1.E5.8A.A8.E6.8C.81.E4.B9.85.E5.8C.96"></span>驱动持久化</h2></div>
+<p>NVIDIA 提供了一个可以在启动时选择运行的守护进程。在标准的单 GPU X 桌面环境中，持久化守护进程并不是必需的，实际上可能会引发一些问题 <a href="https://devtalk.nvidia.com/default/topic/1044421/linux/nvidia-persistenced-causing-60-second-reboot-delays">[9]</a>。更多详情请参阅 NVIDIA 文档中的<a href="https://docs.nvidia.com/deploy/driver-persistence/index.html#persistence-daemon">驱动持久化</a>部分。
+</p><p>要在启动时启动持久化守护进程，请<a href="#pg3ef6532bc644">启用</a> <code>nvidia-persistenced.service</code>。有关手动使用的信息，请参阅<a href="https://docs.nvidia.com/deploy/driver-persistence/index.html#usage">上游文档</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg02e111bbe6ef_Forcing_YCbCr_with_4_2_0_subsampling" id="Forcing_YCbCr_with_4:2:0_subsampling">Forcing YCbCr with 4:2:0 subsampling</h2></div>
+<p>If you are facing <a href="https://en.wikipedia.org/wiki/HDMI#Refresh_frequency_limits_for_standard_video">limitations of older output standards</a> that can still be mitigated by using YUV 4:2:0, the NVIDIA driver has an undocumented X11 option to enforce that:
+</p>
+<pre>Option "ForceYUV420" "True"
+</pre>
+<p>This will allow higher resolutions or refresh rates but have detrimental impact on the image quality.
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807023427
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.301 seconds
+Real time usage: 0.314 seconds
+Preprocessor visited node count: 965/1000000
+Revision size: 24377/2097152 bytes
+Post‐expand include size: 20389/2097152 bytes
+Template argument size: 10780/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 1683/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  137.234      1 -total
+ 42.30%   58.044      1 Template:翻译状态
+  8.02%   11.006     62 Template:Ic
+  5.63%    7.723      2 Template:注意
+  5.60%    7.678      3 Template:Tip
+  3.55%    4.877      4 Template:META_Message
+  3.45%    4.736      1 Template:准确性
+  3.21%    4.407      1 Template:Bad_translation
+  2.87%    3.938      2 Template:Style
+  2.62%    3.592     12 Template:Hc
+-->
+<!-- Render ID 8261478e-9208-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8101:|#|:idhash:canonical!zh-cn and timestamp 20260807023427 and revision id 34193. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

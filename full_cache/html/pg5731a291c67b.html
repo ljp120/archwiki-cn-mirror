@@ -1,0 +1,235 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg5731a291c67b">流式传输至 twitch.tv</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Streaming_to_twitch.tv">Streaming to twitch.tv</a>，最近一次同步于 2022-11-18，若英文版本有所<a href="https://wiki.archlinux.org/title/Streaming_to_twitch.tv?diff=0&amp;oldid=757367">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Streaming_to_twitch.tv_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>Twitch.tv 是一个流行的 <a href="https://en.wikipedia.org/wiki/Real_Time_Messaging_Protocol">RTMP</a> 的流媒体服务。因此，本页面为 Twitch.tv 提供流媒体服务的解决方案列表。使用案例可能包括流媒体游戏、Linux 桌面等。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5731a291c67b_Twitch_.E5.B9.BF.E6.92.AD.E8.A6.81.E6.B1.82" id="Twitch_广播要求"><span id="Twitch_.E5.B9.BF.E6.92.AD.E8.A6.81.E6.B1.82"></span>Twitch 广播要求</h2></div>
+<p>根据 <a href="https://help.twitch.tv/s/article/broadcast-guidelines?language=en_US">Twitch.tv 支持页面</a>: 
+</p>
+<dl><dt>视频要求</dt>
+<dd></dd></dl>
+<ul><li>编解码器：H.264 (x264)</li>
+<li>模式：严格恒定比特率</li>
+<li>关键帧间隔：2 秒</li></ul>
+<dl><dt>音频要求</dt>
+<dd></dd></dl>
+<ul><li>编解码器：AAC-LC，立体声或单声道</li>
+<li>最大比特率：160 kbps</li>
+<li>采样频率：任意</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>已取消支持 MP3 编解码器</div>
+<dl><dt>其他要求</dt>
+<dd></dd></dl>
+<ul><li>页面未列出对 <a href="https://en.wikipedia.org/wiki/YUV#Y.27UV420p_.28and_Y.27V12_or_YV12.29_to_RGB888_conversion">Y'UV420p 像素格式</a>的要求，因为对 Y'UV444 的支持还不广泛。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5731a291c67b_.E5.9B.BE.E5.BD.A2.E7.94.A8.E6.88.B7.E7.95.8C.E9.9D.A2.E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88" id="图形用户界面解决方案"><span id=".E5.9B.BE.E5.BD.A2.E7.94.A8.E6.88.B7.E7.95.8C.E9.9D.A2.E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88"></span>图形用户界面解决方案</h2></div>
+<ul><li><a href="#pgd16b19330c0a"> Open Broadcaster Software</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=obs-studio">obs-studio</a></span><sup><small>包</small></sup></span>）是一款流行的流媒体程序。Alpha Linux 构建的安装包（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/obs-studio-git/">obs-studio-git</a></span><sup><small>AUR</small></sup></span>）也可用于编译和测试。</li>
+<li>Castawesome（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/castawesome/">castawesome</a></span><sup><small>AUR</small></sup></span>）是一款用于 ffmpeg 流媒体的 Gtk3 前端，内置 Twitch.tv 支持。</li>
+<li>SimpleScreenRecorder（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-simplescreenrecorder">lib32-simplescreenrecorder</a></span><sup><small>包</small></sup></span>）可对 Twitch 串流（直播）进行配置：
+<ul><li>容器需设置为 FLV</li>
+<li>RTMP URL 需要放在‘另存为’栏中</li>
+<li>确保没有选中“文件分段”</li>
+<li>视频编解码器设置为 libx264（不是 H.264）</li>
+<li>设定合理的比特率，如 2000 kbps</li>
+<li>在自定义选项栏中，输入<code>preset=fast,minrate=2000,maxrate=2000,bufsize=2000,keyint=60</code></li></ul></li></ul>
+<dl><dd><dl><dd><div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>“minrate”、“maxrate”和“bufsize”的值应等于比特率。</div></dd></dl></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5731a291c67b_.E5.91.BD.E4.BB.A4.E8.A1.8C.E7.95.8C.E9.9D.A2.E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88" id="命令行界面解决方案"><span id=".E5.91.BD.E4.BB.A4.E8.A1.8C.E7.95.8C.E9.9D.A2.E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88"></span>命令行界面解决方案</h2></div>
+<ul><li><a href="#pg5731a291c67b_FFmpeg">FFmpeg</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ffmpeg">ffmpeg</a></span><sup><small>包</small></sup></span>)
+<ul><li>PyLivestream (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pylivestream-git/">pylivestream-git</a></span><sup><small>AUR</small></sup></span>)</li></ul></li>
+<li><a href="#pgdc8e7a283f0c">GStreamer</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gstreamer">gstreamer</a></span><sup><small>包</small></sup></span>)
+<ul><li><a href="https://github.com/joanrieu/gst-live">gst-live</a></li></ul></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5731a291c67b_FFmpeg" id="FFmpeg">FFmpeg</h3></div>
+<p>下面的解决方案利用了 <a href="#pgd5cab245336d">FFmpeg</a> 来实现向 Twitch.tv 串流（直播）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5731a291c67b_shell_.E8.84.9A.E6.9C.AC.E6.96.B9.E6.B3.95" id="shell_脚本方法"><span id="shell_.E8.84.9A.E6.9C.AC.E6.96.B9.E6.B3.95"></span>shell 脚本方法</h4></div>
+<p>使用 FFmpeg 实现的向 Twitch.tv 串流（直播）的 shell 脚本。它支持对桌面和 OpenGL 元素进行串流。可通过运行 <code>stream-to-twitch path/to/stream_key</code> 在 shell 中调用，密钥则使用 <a href="#pg9ed00e65a3b2">pass</a> 安全存储。脚本内容如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/sbin/stream-to-twitch</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/env sh
+#
+# Stream screen and audio (speakers and microphone) to Twitch.tv using FFmpeg.
+#
+# Usage: stream-to-twitch path/to/key
+
+set -euo pipefail
+
+#######################################
+# Stream to Twitch.tv.
+# Globals:
+#   None.
+# Arguments:
+#   Stream key. A string.
+# Returns:
+#   None.
+#######################################
+stream_to_twitch() {
+    res_input="1920x1080" # input resolution
+    res_output="1280x720" # output resolution
+    fps="30" # target FPS
+    gop="60" # i-frame interval, should be double of fps
+    gop_min="30" # min i-frame interval, should be equal to fps
+    probesize="42M" # https://stackoverflow.com/a/57904380
+    threads="2" # max 6
+    cbr="1000k" # constant bitrate (should be between 1000k–3000k)
+    quality="ultrafast" # one of the many FFmpeg presets
+    audio_input_speakers="0" # speakers' sink id
+    audio_input_mic="default" # microphone's sink id
+    audio_rate="44100"
+    stream_server="live-prg" # see https://stream.twitch.tv/ingests for list
+    stream_key="${1}" # key will be passed as an agument from the command line
+    loglevel="warning" # supress unecessary information from printing
+
+    ffmpeg \
+        -loglevel "${loglevel}" \
+        -f x11grab -s "${res_input}" -r ${fps} -probesize ${probesize} -i :0.0 \
+        -f pulse -i "${audio_input_speakers}" \
+        -f pulse -i "${audio_input_mic}" \
+        -filter_complex "[2]highpass=f=200,lowpass=f=3000[hl]; [1][hl]amix=inputs=2[a]" \
+        -map 0:v -map [a] \
+        -f flv -ac 2 -ar ${audio_rate} \
+        -vcodec libx264 -g ${gop} -keyint_min ${gop_min} -b:v ${cbr} \
+        -minrate ${cbr} -maxrate ${cbr} -pix_fmt yuv420p \
+        -s ${res_output} -preset "${quality}" -tune film -acodec aac \
+        -threads ${threads} -strict normal \
+        -bufsize ${cbr} \
+        "rtmp://${stream_server}.twitch.tv/app/${stream_key}"
+}
+
+# Get stream key securely stored with the password manager "pass"
+# and pass the key to the script to start the stream.
+stream_to_twitch "$(pass "${1}")"
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果使用 PulseAudio，请运行 <code>pactl list sinks short</code> 寻找输入音频流。也可使用混音器（例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pulsemixer">pulsemixer</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pavucontrol">pavucontrol</a></span><sup><small>包</small></sup></span>）在脚本运行时编辑音源。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>根据你的网络上传速度，你可能需要修改 FFmpeg 的参数。请使用参数明细作为参考。</div>
+<table class="wikitable">
+<caption><b>FFmpeg 参数明细</b>
+</caption>
+<tbody><tr>
+<th>参数</th>
+<th>描述
+</th></tr>
+<tr>
+<td><code>ffmpeg</code></td>
+<td>转换器
+</td></tr>
+<tr>
+<td><code>-loglevel "${LOGLEVEL}"</code></td>
+<td>-loglevel 设置日志输出级别
+</td></tr>
+<tr>
+<td><code>-f x11grab</code></td>
+<td>-f 强制从 x11grab 输入
+</td></tr>
+<tr>
+<td><code>-s $RES_INPUT</code></td>
+<td>-s 从输入源设置一个指定的图像尺寸，由变量 $RES_INPUT 提供
+</td></tr>
+<tr>
+<td><code>-r $FPS</code></td>
+<td>-r 设置帧率为 $FPS
+</td></tr>
+<tr>
+<td><code>-probesize "${PROBESIZE}"</code></td>
+<td>-probesize 设置要分析的数据大小，以获得流信息
+</td></tr>
+<tr>
+<td><code>-i :0.0</code></td>
+<td>-i 获取显示（器）输入，在这里，是从 x11 的 :0.0 显示（器）获取。可以调整，例如：-i :0.0+500,100 是指在屏幕位置 500/100 处开始获取
+</td></tr>
+<tr>
+<td><code>-f pulse</code></td>
+<td>强制从 PulseAudio 输入
+</td></tr>
+<tr>
+<td><code>-i "${AUDIO_INPUT_SPEAKERS</code>"}</td>
+<td>选择扬声器的 sink ID
+</td></tr>
+<tr>
+<td><code>-i "${AUDIO_INPUT_MIC</code>"}</td>
+<td>选择麦克风的 sink ID
+</td></tr>
+<tr>
+<td><code>-filter_complex ...</code></td>
+<td>将过滤器应用到麦克风，以减少噪音并合并音频流
+</td></tr>
+<tr>
+<td><code>-map 0:v</code></td>
+<td>映射视频流
+</td></tr>
+<tr>
+<td><code>-map [a]</code></td>
+<td>映射音频流
+</td></tr>
+<tr>
+<td><code>-f flv</code></td>
+<td>强制格式为 FLV
+</td></tr>
+<tr>
+<td><code>-ac 2</code></td>
+<td>设置声道为 2
+</td></tr>
+<tr>
+<td><code>-ar "${AUDIO_RATE}"</code></td>
+<td>-ar 设置音频比特率
+</td></tr>
+<tr>
+<td><code>-vcodec libx264</code></td>
+<td>设置视频编解码器为 libx264
+</td></tr>
+<tr>
+<td><code>-b:v "$CBR"</code></td>
+<td>-b:v 指定要改变到的视频比特率。比特率的值由 $CBR 决定
+</td></tr>
+<tr>
+<td><code>-pix_fmt yuv420p</code></td>
+<td>设置像素格式为 Y'UV420p。否则默认使用 Y'UV444，这与 Twitch 不兼容
+</td></tr>
+<tr>
+<td><code>-s $RES_OUTPUT</code></td>
+<td>-s 为输出设置一个指定的图像尺寸，由变量 $RES_OUTPUT 提供
+</td></tr>
+<tr>
+<td><code>-preset "{$QUALITY}"</code></td>
+<td>设置预设的压缩质量和速度
+</td></tr>
+<tr>
+<td><code>-acodec aac</code></td>
+<td>设置音频编解码器以使用 AAC
+</td></tr>
+<tr>
+<td><code>-threads 0</code></td>
+<td>设置启动的 CPU 线程，为 0 则根据 CPU 核心数自动启动线程
+</td></tr></tbody></table>
+<!-- 
+NewPP limit report
+Cached time: 20260808041233
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.090 seconds
+Real time usage: 0.092 seconds
+Preprocessor visited node count: 278/1000000
+Revision size: 6758/2097152 bytes
+Post‐expand include size: 4796/2097152 bytes
+Template argument size: 1553/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 2033/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   24.433      1 -total
+ 15.11%    3.692     26 Template:Ic
+ 13.55%    3.310      1 Template:翻译状态
+ 12.52%    3.060      6 Template:Pkg
+  8.59%    2.099      1 Template:提示
+  5.50%    1.343      3 Template:AUR
+  4.89%    1.194      1 Template:Hc
+  4.41%    1.078      3 Template:注意
+-->
+<!-- Render ID 611f5a8e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3812:|#|:idhash:canonical!zh-cn and timestamp 20260808041233 and revision id 33797. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

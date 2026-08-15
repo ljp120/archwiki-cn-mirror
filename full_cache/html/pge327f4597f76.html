@@ -1,0 +1,153 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pge327f4597f76">AUR 提交准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/AUR_submission_guidelines">AUR submission guidelines</a>，最近一次同步于 2025-01-31，若英文版本有所<a href="https://wiki.archlinux.org/title/AUR_submission_guidelines?diff=0&amp;oldid=822050">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/AUR_submission_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg604525fe585e">Arch 打包准则</a></li>
+<li><a href="#pgf4ebde60abfd">软件包维护者指导原则</a></li>
+</ul></div>
+<p>用户可以通过 <a href="#pg89cb7b475cfb">AUR</a> <b>分享</b> <a href="#pgf9d748a7b27b">PKGBUILD</a> 脚本。AUR 中不包含任何二进制包，仅包含用户上传的 <code>PKGBUILD</code>，供其他用户下载使用。这些 <code>PKGBUILD</code> 都是非官方的，没有经过完整审查，使用风险自担。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge327f4597f76_.E6.8F.90.E4.BA.A4.E8.BD.AF.E4.BB.B6.E5.8C.85" id="提交软件包"><span id=".E6.8F.90.E4.BA.A4.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>提交软件包</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>在提交前请先熟悉 <a href="#pg604525fe585e">Arch 打包准则</a>及所有的“相关文章”。请<b>仔细检查</b>上传的内容是否有误，<b>违反相应规则</b>的软件包可能会<b>不经警告被直接删除</b>。</div>
+<p>如果在反复阅读该章节后仍不清楚软件包或构建/提交流程是否正确，可以将自己的 <code>PKGBUILD</code> 贴到 <a href="https://lists.archlinux.org/mailman3/lists/aur-general.lists.archlinux.org/">AUR 邮件列表</a>、<a href="https://bbs.archlinux.org/viewforum.php?id=4">论坛 AUR 版</a>、<a href="https://bbs.archlinuxcn.org/viewforum.php?id=29">中文论坛 AUR/ABS/PKGBUILD 版</a>或 <a href="#pg407a04ca0d2a">IRC 频道</a>，让大家帮您检查。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge327f4597f76_.E6.8F.90.E4.BA.A4.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.9A.84.E8.A7.84.E5.88.99" id="提交软件包的规则"><span id=".E6.8F.90.E4.BA.A4.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.9A.84.E8.A7.84.E5.88.99"></span>提交软件包的规则</h3></div>
+<p>提交软件包时请遵循下列的规则:
+</p>
+<ul><li>任何提交的 <code>PKGBUILD</code> 都不能编译<b>已经</b>位于<b>官方</b>二进制软件包<b>仓库</b>的程序。可通过<a href="https://archlinux.org/packages/">官方软件包数据库</a>进行查找，如果在其中发现了任意版本的程序，就<b>不要</b>进行提交。如果认为官方仓库的软件包已过期，请标记它。如果它有问题或者缺少功能，请反馈<a href="#pgbd58e8d9d126">反馈 bug 报告</a>。</li></ul>
+<dl><dd><b>唯一的例外</b>是和官方打包版本相比增加或开启了<b>新的功能</b>或者使用了不同的<b>补丁</b>。这时需要修改 <code>pkgname</code> 来表示新增的功能。例如加入了边栏支持的 GNU screen（<code>screen</code>）应该命名为 <code>screen-sidebar</code>。此外还需要同时添加 <code>conflicts=('screen')</code> 以避免与官方仓库中的包冲突。</dd></dl>
+<ul><li><b>检查 AUR</b> 中是否<b>已有</b>相同软件包。如果已经有人维护某软件包，可以以评论的形式将更改报告给维护人员。如果软件包无人维护或维护者无反馈，可以按需将其认领并更新。不要创建重复的包。</li></ul>
+<ul><li>确保您的软件包<b>有人需要</b>。在提交前请仔细想想：有人会用这个软件包吗？它非常特别吗？如果不是只有少数人觉得它有用，就提交它。</li></ul>
+<dl><dd>AUR 和官方软件仓库是用于放置通用软件和软件相关的内容的，包括：可执行文件、配置文件、软件的在线/离线文档和软件直接使用的媒体数据。</dd></dl>
+<ul><li>不支持 <code>x86_64</code> 架构的软件包<a href="https://lists.archlinux.org/archives/list/aur-general@lists.archlinux.org/message/GMYC74CRSFH7GGNENEUOODZUPWHOMX7A/">不允许上传到 AUR</a>。</li></ul>
+<ul><li>不要在 AUR <code>PKGBUILD</code> 中使用 <code>replaces</code>，除非这个软件包将要被重命名（例如当 <i>Ethereal</i> 变成 <i>Wireshark</i> 时）。如果这个软件包是<b>已经存在的软件包的另一版本</b>，使用 <code>conflicts</code> （或者如果这个软件包被其他软件需要时，使用 <code>provides</code>）。两者的主要区别是：在 pacman 同步（-Sy）之后，如果遇到与 <code>replaces</code> 匹配并已经安装的软件包时，pacman 会立刻想去替换它。而 <code>conflicts</code> 则在安装软件包时进行替换。</li></ul>
+<ul><li>请为那些由版本控制系统构建，而不属于任何特定版本的软件包的包名添加合适的后缀，如 <code>-git</code>。具体细则见 <a href="#pg2e95a0584036">VCS 软件打包准则#软件包命名</a>。</li></ul>
+<ul><li>当源码可获得时，那些<b>预构建</b><a href="https://en.wikipedia.org/wiki/Deliverable">可以直接部署</a>的二进制包应该加上 <code>-bin</code> 后缀， <a href="#pg608e3a14075c">Java</a> 除外。除此之外，AUR 不应当包含 <code>makepkg</code> 创建的二进制包，也不应当包含文件列表。</li></ul>
+<ul><li>从特定版本的源码构建的包不应该添加后缀。</li></ul>
+<ul><li>请按照以下格式在 <code>PKGBUILD</code> 最上端加入包含当前<b>维护者</b>和过去的<b>贡献者</b>的信息<b>注释</b>，记得对邮件地址进行必要的处理以避免被垃圾邮件骚扰。然后移除所有不必要的行。例如：</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>对邮件地址进行混淆会导致别人更难联系上你。</div>
+<dl><dd>如果您从其它人接手了一个 <code>PKGBUILD</code>，像这样把您的名字和邮件地址加到最上面。</dd>
+<dd><pre># Maintainer: Your Name &lt;address at domain dot tld&gt;
+</pre></dd>
+<dd>如果在您之前有其他的维护者，请将它们添加到贡献者中。如果你不是初始上传者，也请将其加入贡献者中。如果您是协同维护者，也请加上现在的其他维护者。</dd>
+<dd><pre># Maintainer: Your name &lt;address at domain dot tld&gt;
+# Maintainer: Other maintainer's name &lt;address at domain dot tld&gt;
+# Contributor: Previous maintainer's name &lt;address at domain dot tld&gt;
+# Contributor: Original submitter's name &lt;address at domain dot tld&gt;
+</pre></dd></dl>
+<ul><li>为仓库添加 <code>LICENSE</code> 文件，建议使用 <a href="https://spdx.org/licenses/0BSD.html">0BSD 许可证</a>。你可以直接<a href="https://rfc.archlinux.page/0040-license-package-sources/#license-text">从 RFC 0040 复制许可证文本</a>。缺少许可证或使用与 0BSD 不同许可证的软件包<a href="https://rfc.archlinux.page/0040-license-package-sources/#aur">不允许</a>被加入到官方软件源中。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge327f4597f76_.E8.AE.A4.E8.AF.81" id="认证"><span id=".E8.AE.A4.E8.AF.81"></span>认证</h3></div>
+<p>要向 AUR 写入软件包，用户需要创建一个 <a href="#pg0f0d45f60e57">SSH 密钥</a>。将公钥导入到用户账户的 <i>My Account</i> 一节，然后为 <code>aur.archlinux.org</code> 主机配置对应的私钥，例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.ssh/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Host aur.archlinux.org
+  IdentityFile ~/.ssh/aur
+  User aur</pre>
+<p>你应当为 AUR <a href="#pg0f0d45f60e57">生成新的密钥</a>，而不是直接使用旧的，以在出问题时直接弃用密钥：
+</p>
+<pre>$ ssh-keygen -f ~/.ssh/aur
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>在输入公钥时可以通过换行的方式设置添加多个公钥。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge327f4597f76_.E5.88.9B.E5.BB.BA.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.BB.93.E5.BA.93" id="创建软件包仓库"><span id=".E5.88.9B.E5.BB.BA.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.BB.93.E5.BA.93"></span>创建软件包仓库</h3></div>
+<p>如果您正在<a href="#pgf054312e26a1">创建新的软件包</a>，请通过<a href="#pg0d34da84b694">克隆</a>所需的 <a href="#pgf9d748a7b27b">pkgbase</a> 的方式建立一个远程 AUR 仓库和本地 <a href="#pg0d34da84b694">Git</a> 仓库。如果软件包还不存在，则会出现以下预料之中的警告：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ git -c init.defaultBranch=master clone ssh://aur@aur.archlinux.org/<i>pkgbase</i>.git</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Cloning into '<i>pkgbase</i>'...
+warning: You appear to have cloned an empty repository.
+Checking connectivity... done.</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果 <code><i>pkgbase</i></code> 与被删除的软件包相同，那克隆下来的仓库会不为空。</div>
+<p>如果您已经有一个软件包了，但不是 Git 仓库的话，需要进行<a href="#pg0d34da84b694">初始化</a>：
+</p>
+<pre>$ git -c init.defaultBranch=master init
+</pre>
+<p>并添加远程 AUR 地址：
+</p>
+<pre>$ git remote add <i>label</i> ssh://aur@aur.archlinux.org/<i>pkgbase</i>.git
+</pre>
+<p>然后向远程仓库<a href="#pg0d34da84b694">拉取</a>以在 AUR 进行初始化。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>使用<a href="https://git-scm.com/docs/git-pull#git-pull---rebasefalsetruemergespreserveinteractive">拉取和变基</a>来解决 <code><i>pkgbase</i></code> 匹配到已删除软件包的冲突问题。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge327f4597f76_.E6.8F.90.E4.BA.A4.E5.92.8C.E6.9B.B4.E6.96.B0.E8.BD.AF.E4.BB.B6.E5.8C.85" id="提交和更新软件包"><span id=".E6.8F.90.E4.BA.A4.E5.92.8C.E6.9B.B4.E6.96.B0.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>提交和更新软件包</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不想以全局身份提交？记得通过 <code>git config user.name [...]</code> 和 <code>git config user.email [...]</code> 编辑自己的本地身份！</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>你的提交会以<a href="#pg0d34da84b694">全局 Git 名称和邮件地址</a>进行署名，且在推送后很难对提交进行修改（<a href="https://bugs.archlinux.org/task/45425">FS#45425</a>）。如果你想以不同的身份推送到 AUR，可以使用 <code>git config user.name "..."</code> 和 <code>git config user.email "..."</code> 对单个包进行修改。</div>
+<p>当释出新版本的软件时，更新 <a href="#pgf9d748a7b27b">pkgver</a> 或者 <a href="#pgf9d748a7b27b">pkgrel</a> 变量来提示所有的用户更新。如果仅仅是对 <a href="#pgf9d748a7b27b">PKGBUILD</a> 的小修改（例如修正笔误），请不要更新这些变量。
+</p><p>不要仅仅为了更新 <code>pkgver</code> 就更新 <a href="#pg2e95a0584036">VCS 软件包</a>。当上游有新的提交时，他们不会被视为过时。只有当有其他变化，比如打包流程发生变化时，才应该进行更新。
+</p><p>无论何时 <code>PKGBUILD</code> 的元数据发生变动（例如更新了 <code>pkgver()</code>），都需要重新生成 <a href="#pg3a7878c081d8">.SRCINFO</a>。否则 AUR 不会显示更新后的版本号。
+</p><p>要上传或者更新一个软件包，<i>至少</i>要<a href="#pg0d34da84b694">添加</a> <code>PKGBUILD</code> 和 <code>.SRCINFO</code> 和其它所有新增的或者修改过的辅助文件（例如 <a href="#pgf9d748a7b27b"><i>.install</i></a> 文件或者如<a href="#pg66d85d5f8d1e">软件包补丁</a>之类的<a href="#pgf9d748a7b27b">本地源码文件</a>），写上有意义的提交信息并<a href="#pg0d34da84b694">提交</a>，最后<a href="#pg0d34da84b694">推送</a>这些变动到 AUR 上。
+</p><p>例如:
+</p>
+<pre>$ makepkg --printsrcinfo &gt; .SRCINFO
+$ git add PKGBUILD .SRCINFO
+$ git commit -m "<i>useful commit message</i>"
+$ git push
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>如果您忘记在最后一次提交中包含 <code>.SRCINFO</code>，您可以通过 <code>git commit --amend</code> <a href="https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---amend">修改最后一次提交</a>来使得 AUR 接受您的推送。</li>
+<li>AUR 只允许推送到 <code>master</code> 分支。如果本地分支的名称不同，需要将其<a href="https://git-scm.com/docs/git-branch">重命名</a>后再次推送。</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>为了保持工作目录和提交尽可能的干净，可以创建 <span class="plainlinks archwiki-template-man" title="$ man 5 gitignore"><a href="https://man.archlinux.org/man/gitignore.5">gitignore(5)</a></span> 文件来排除所有文件，然后再按需添加文件。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge327f4597f76_.E7.BB.B4.E6.8A.A4.E8.BD.AF.E4.BB.B6.E5.8C.85" id="维护软件包"><span id=".E7.BB.B4.E6.8A.A4.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>维护软件包</h2></div>
+<ul><li>阅读其他用户的反馈，并试着听从建议改进软件包，这是个学习的过程！</li>
+<li>升级软件包后，不要在评论中加入版本更新信息，这些信息会冲淡更重要的用户评论。</li>
+<li>不要提交软件包后就放任不管！检查更新并改进 <code>PKGBUILD</code> 是维护者的责任。</li>
+<li>发觉自己不再想维护某个软件包？可以通过 AUR 网页界面 <code>disown</code> 一个软件包并/或是在 AUR 邮件列表发条消息。如果这个包的所有维护者都 disown，那么它就会变成一个<a href="https://aur.archlinux.org/packages?submit=Orphans">“orphaned”</a>软件包。</li>
+<li>自动化对维护人员来说很有用，但它不能取代<a href="https://lists.archlinux.org/archives/list/aur-general@lists.archlinux.org/message/AYISVT7SOB444HXHIF2CKA2TIHBESH2D/">人工干预</a>（例如：项目可能会修改许可证、添加或删除依赖关系，以及其它的显著更改）。自动更新 <code>PKGBUILD</code> 的风险将由您自行承担，任何出现问题的账户与他们提交的软件包都可能被无事前通知地删除。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge327f4597f76_.E8.AF.B7.E6.B1.82" id="请求"><span id=".E8.AF.B7.E6.B1.82"></span>请求</h2></div>
+<p>删除、合并、取消维护权限请求可以通过右侧“Package actions”的“File Request”链接执行。这会给当前的维护者和 <a href="https://lists.archlinux.org/mailman3/lists/aur-requests.lists.archlinux.org/">aur-requests 邮件列表</a>自动发送邮件通知，之后<a href="#pg773d97dbc20d">软件包维护者</a>会接受或拒绝请求。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge327f4597f76_.E5.88.A0.E9.99.A4" id="删除"><span id=".E5.88.A0.E9.99.A4"></span>删除</h3></div>
+<p>你可以请求 <i>unlist</i> AUR 中的一个 <code>pkgbase</code>。提交时请附上原因说明（务必用英语），也可以是其它有用的细节（比方说其它包提供了相同的东西，或者如果你就是这个包的维护者，需要重命名且软件包所有者同意，等等）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>只在软件包的评论区解释原因并不够。当软件包维护者采取行动前，aur-request 邮件列表是唯一能取得这些信息的地方。</li>
+<li>删除请求可能被否决。如果你是这个包的维护者，我们可能会建议你 disown 这个软件包，以便其他维护者认领。</li>
+<li>在软件包被“删除”后，其 <a href="#pg0d34da84b694">Git</a> 仓库仍可被<a href="#pg89cb7b475cfb">克隆</a>。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge327f4597f76_.E5.90.88.E5.B9.B6" id="合并"><span id=".E5.90.88.E5.B9.B6"></span>合并</h3></div>
+<p>合并请求会删除 <code>pkgbase</code>，并将现有的投票数、评论转移到另一个 <code>pkgbase</code> 中。需要用到目标软件包的名称。
+</p><p>这个操作适用于上游进行了<a href="https://lists.archlinux.org/archives/list/aur-requests@lists.archlinux.org/thread/CLPVKIYDKRCBOEITSWAG4FO5RBKTKGYG/#U73UG4AP6WMUIR23F7OA4ZKNILT6HZNU">重命名项目</a>等情况。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>这和 <code>git merge</code> 或者 GitLab 的 merge request 没有任何关系。</li>
+<li>由于投票和评论会转移到已经存在的目标中，如果一个包本身没有投票或评论，那么其效果与#删除并<a href="https://lists.archlinux.org/archives/list/aur-requests@lists.archlinux.org/thread/KSXL52EYMKTZXVO3WHWAUFEJI6DQAXV2/#KSXL52EYMKTZXVO3WHWAUFEJI6DQAXV2">链接到新包</a>完全相同。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge327f4597f76_.E6.92.A4.E9.94.80.E6.89.80.E6.9C.89.E6.9D.83.EF.BC.88orphan.EF.BC.89" id="撤销所有权（orphan）"><span id=".E6.92.A4.E9.94.80.E6.89.80.E6.9C.89.E6.9D.83.EF.BC.88orphan.EF.BC.89"></span>撤销所有权（orphan）</h3></div>
+<p>要求撤销当前维护者对 <code>pkgbase</code> 的所有权。如果现有维护者在两周之内没有响应，请求就会通过。另外，如果一个软件被标记为过期超过 180 天，请求会被自动通过。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807022935
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.158 seconds
+Real time usage: 0.164 seconds
+Preprocessor visited node count: 538/1000000
+Revision size: 12973/2097152 bytes
+Post‐expand include size: 7101/2097152 bytes
+Template argument size: 3760/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 353/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   43.713      1 -total
+ 13.36%    5.838     44 Template:Ic
+  8.47%    3.702      3 Template:提示
+  8.38%    3.663      1 Template:翻译状态
+  7.03%    3.071      1 Template:Warning
+  5.82%    2.544      2 Template:Note
+  5.30%    2.318      1 Template:相关文章开始
+  5.06%    2.210      2 Template:Related
+  4.19%    1.830      1 Template:Man
+  4.04%    1.768      2 Template:警告
+-->
+<!-- Render ID d4559d8e-9207-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2706:|#|:idhash:canonical!zh-cn and timestamp 20260807022935 and revision id 34324. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

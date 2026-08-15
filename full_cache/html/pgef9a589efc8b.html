@@ -1,0 +1,628 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgef9a589efc8b">非官方用户仓库</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Unofficial_user_repositories">Unofficial user repositories</a>，最近一次同步于 2025-11-04，若英文版本有所<a href="https://wiki.archlinux.org/title/Unofficial_user_repositories?diff=0&amp;oldid=851608">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Unofficial_user_repositories_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pge293c5f6dad1">Pacman/软件包签名</a></li>
+<li><a href="#pg15c7e809c461">官方仓库</a></li>
+</ul></div>
+<p>这篇文章列出了由社区创建的自由共享二进制软件包的软件仓库，其中很多的包都是由<a href="#pg89cb7b475cfb">AUR</a>中可以找到的<a href="#pgf9d748a7b27b">PKGBUILD</a>文件预编译打包而成。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>无论 Arch Linux 的开发者还是软件包维护者都不会对这些软件仓库做任何的测试与验证。需要每一个用户自己决定是否信任这些软件仓库的维护者，并且对软件源维护者做出的任何决定导致的后果负责。</div>
+<p>想要使用这些软件仓库，你需要把他们添加到 <code>/etc/pacman.conf</code>，详情请看 <a href="#pg9ef105bf1e3c">pacman#软件仓库</a>。如果一个软件仓库进行了签名，你必须要在本地签署这些key，详见<a href="#pge293c5f6dad1">Pacman/软件包签名#导入非官方密钥</a>。
+</p><p>如果你想自己建立一个软件仓库，请看 <a href="#pg2749aa4d6728">Pacman/提示和技巧#自建本地仓库</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgef9a589efc8b_.E5.8A.A0.E5.85.A5.E4.BD.A0.E8.87.AA.E5.B7.B1.E7.9A.84.E4.BB.93.E5.BA.93" id="加入你自己的仓库"><span id=".E5.8A.A0.E5.85.A5.E4.BD.A0.E8.87.AA.E5.B7.B1.E7.9A.84.E4.BB.93.E5.BA.93"></span>加入你自己的仓库</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>本文为<a href="#pg09ba3fa9b29b">Unofficial user repositories</a>的翻译，添加自己的仓库，建议同时更新<a href="#pg09ba3fa9b29b">英文原始页面</a>。</div>
+<p>如果你有自己的仓库，请添加到本页面中，这样其他用户就会知道哪里去找你的软件。
+在添加新的仓库时请保持队形，并遵守下列规则：
+</p>
+<ul><li>请按罗马字首排序列表。</li>
+<li>包含维护者的一些信息：包括至少一个名字（昵称也行）以及一些具有联系方式的信息（网址，邮箱，用户ArchWiki页面或者论坛帖子等等）。</li>
+<li>如果仓库是签名的，请添加一个key-id，最好把它编辑成一个链到密匙服务器的连接，直接连到密钥文件上。</li>
+<li>包含一些简短的描述（软件包的分类什么的）</li>
+<li>如果你有一个介绍性的网页（无论是ArchWiki或者其他网站），请添加一个连接。</li>
+<li>如果可能，不要在配置文件中添加注释，而是写在前面的描述中。</li>
+<li>一些仓库也有除 x86_64 架构以外的软件包。 变量 <code>$arch</code> 将会被 pacman 自动设置。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgef9a589efc8b_.E5.B7.B2.E7.AD.BE.E5.90.8D" id="已签名"><span id=".E5.B7.B2.E7.AD.BE.E5.90.8D"></span>已签名</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_ada" id="ada">ada</h3></div>
+<ul><li><b>Maintainer:</b> Rod Kay &lt;rodakay5 at gmail dot com&gt;</li></ul>
+<ul><li><b>Description:</b> Arch Ada Repository ~ all packages relating to the <a href="#pgad501d9b2e15">Ada</a> and SPARK programming languages.</li></ul>
+<ul><li><b>Key-ID:</b> <a href="https://keyserver.ubuntu.com/pks/lookup?op=vindex&amp;fingerprint=on&amp;exact=on&amp;search=0xED55AF75B0330A2A3BAA9986B6120CD888A0DFD2">0xED55AF75B0330A2A3BAA9986B6120CD888A0DFD2</a></li></ul>
+<pre>[ada]
+Server = http://www.orthanc.site:8080/assets/arch_ada_repo
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_alerque" id="alerque">alerque</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/alerque">Caleb Maclennan</a></li>
+<li><b>描述:</b> 字体开发，排版和发布相关工具，例如 SILE，CaSILE，Fontship，字体和相关依赖项，包括许多字体，Lua Rocks 和 Python 模块。 以及 Asterisk，很多<a href="https://aur.archlinux.org/packages/?O=0&amp;SeB=M&amp;K=alerque&amp;outdated=&amp;SB=n&amp;SO=a&amp;PP=250&amp;do_Search=Go">我（共同）维护的 AUR 包</a>，以及很多我自己使用的 AUR 包。</li>
+<li><b>Git 仓库:</b> <a href="https://github.com/alerque/aur">https://github.com/alerque/aur</a></li>
+<li><b>问题追踪:</b> <a href="https://github.com/alerque/aur/issues">https://github.com/alerque/aur/issues</a></li>
+<li><b>Key-ID:</b> <a href="https://keyserver.ubuntu.com/pks/lookup?op=vindex&amp;fingerprint=on&amp;exact=on&amp;search=0x9F377DDB6D3153A48EB3EB1E63CC496475267693">63CC496475267693</a></li></ul>
+<pre>[alerque]
+Server = https://arch.alerque.com/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_ALHP" id="ALHP"><a href="#pg8fb973af9439">ALHP</a></h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/anonfunc">Giovanni Harting</a></li>
+<li><b>描述:</b> 使用 <a href="https://en.wikipedia.org/wiki/Interprocedural_optimization">LTO</a>、<code>-march=x86-64-vN -O3</code> 编译的<a href="#pg15c7e809c461">官方仓库</a>软件包</li>
+<li><b>问题追踪:</b> <a href="https://somegit.dev/ALHP/ALHP.GO/issues">https://<ins>somegit</ins>.dev/ALHP/ALHP.GO/issues</a></li>
+<li><b>Keyring:</b> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/alhp-keyring/">alhp-keyring</a></span><sup><small>AUR</small></sup></span></li>
+<li><b>镜像列表:</b> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/alhp-mirrorlist/">alhp-mirrorlist</a></span><sup><small>AUR</small></sup></span></li>
+<li><b>上游页面:</b> <a href="https://somegit.dev/ALHP/ALHP.GO">https://<ins>somegit</ins>.dev/ALHP/ALHP.GO</a></li>
+<li><b>Debuginfod:</b> <a href="https://debuginfod.harting.dev">https://debuginfod.alhp.dev</a></li></ul>
+<pre>[core-x86-64-v3]
+Include = /etc/pacman.d/alhp-mirrorlist
+
+[extra-x86-64-v3]
+Include = /etc/pacman.d/alhp-mirrorlist
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_andontie_aur" id="andontie-aur">andontie-aur</h3></div>
+<ul><li><b>维护者:</b> Holly M.</li>
+<li><b>描述:</b> 包含最流行的 AUR 软件包以及我一直使用的软件包的仓库。在上游网站请求新软件包。</li>
+<li><b>Key-ID:</b> <a href="https://keyserver.ubuntu.com/pks/lookup?search=72BF227DD76AE5BF&amp;fingerprint=on&amp;op=index">72BF227DD76AE5BF</a></li>
+<li><b>上游页面:</b> <a href="https://aur.andontie.net">https://aur.andontie.net</a></li></ul>
+<pre>[andontie-aur]
+Server = https://aur.andontie.net/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_arcanisrepo" id="arcanisrepo">arcanisrepo</h3></div>
+<ul><li><b>维护者:</b> <a href="https://arcanis.me/">arcanis</a></li>
+<li><b>描述:</b> 包含一些 AUR 软件包（包括来自 VCS 的软件包）的仓库，以开发和科学工具为主。每日更新。</li>
+<li><b>Key-ID:</b> <a href="https://pgp.mit.edu/pks/lookup?op=get&amp;search=0xBD2AC8C5E989490C">0xBD2AC8C5E989490C</a></li>
+<li><b>上游页面:</b> <a href="https://repo.arcanis.me/arcanisrepo/x86_64/index.html"><ins>https</ins>://repo.arcanis.me<ins>/arcanisrepo</ins>/x86_64/index.html</a></li></ul>
+<pre>[arcanisrepo]
+Server = https://repo.arcanis.me/$repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_arch4edu" id="arch4edu">arch4edu</h3></div>
+<ul><li><b>维护者:</b> <a href="https://github.com/petronny">Jingbei Li (petronny)</a>和<a href="https://github.com/arch4edu/arch4edu/graphs/contributors">其他人</a></li>
+<li><b>描述:</b> arch4edu 是 Arch Linux 和 Arch Linux ARM 的社区仓库，致力于提供大学生使用的大多数软件的最新版本。</li>
+<li><b>Git 仓库:</b> <a href="https://github.com/arch4edu/arch4edu">https://github.com/arch4edu/arch4edu</a></li>
+<li><b>问题追踪:</b> <a href="https://github.com/arch4edu/arch4edu/issues">https://github.com/arch4edu/arch4edu/issues</a> for packaging issues, out-of-date notifications, package requests, and related questions</li>
+<li><b>镜像:</b> <a href="https://github.com/arch4edu/mirrorlist/blob/master/mirrorlist.arch4edu">https://github.com/arch4edu/mirrorlist/blob/master/mirrorlist.arch4edu</a></li>
+<li><b>Key-ID:</b> 7931B6D628C8D3BA</li></ul>
+<pre>[arch4edu]
+Server = https://mirrors.tuna.tsinghua.edu.cn/arch4edu/$arch
+## or other mirrors in https://github.com/arch4edu/mirrorlist/blob/master/mirrorlist.arch4edu
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_Arch_Linux_.E4.B8.AD.E6.96.87.E7.A4.BE.E5.8C.BA.E4.BB.93.E5.BA.93" id="Arch_Linux_中文社区仓库"><span id="Arch_Linux_.E4.B8.AD.E6.96.87.E7.A4.BE.E5.8C.BA.E4.BB.93.E5.BA.93"></span><a href="#pgc6e2daf482c3">Arch Linux 中文社区仓库</a></h3></div>
+<ul><li><b>维护者:</b> <a href="https://blog.phoenixlzx.com/">phoenixlzx</a>, <a href="https://archlinux.org/people/developers/#felixonmars">Felix Yan (felixonmars, dev)</a>, <a href="https://github.com/lilydjwg">lilydjwg</a>, <a href="https://archlinux.org/people/package-maintainer-fellows/#farseerfc">farseerfc</a>, 和<a href="https://github.com/archlinuxcn/repo/graphs/contributors">其他人</a></li>
+<li><b>描述:</b> 由 Arch Linux 中文社区提供的软件包，均已签名，又称 [archlinuxcn] 仓库。请注意，除了 x86_64 架构之外的软件包可能缺乏维护，如果发现问题，请创建 issue。</li>
+<li><b>Git 仓库:</b> <a href="https://github.com/archlinuxcn/repo">https://github.com/archlinuxcn/repo</a></li>
+<li><b>问题追踪:</b> <a href="https://github.com/archlinuxcn/repo/issues">https://github.com/archlinuxcn/repo/issues</a></li>
+<li><b>镜像:</b> <a href="https://github.com/archlinuxcn/mirrorlist-repo">https://github.com/archlinuxcn/mirrorlist-repo</a> 。也可以从本仓库安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/archlinuxcn-mirrorlist-git">archlinuxcn-mirrorlist-git</a></span><sup><small><a href="#pgc6e2daf482c3">CNRepo</a></small></sup></span>。</li>
+<li><b>Key-ID:</b> 添加 archlinuxcn 仓库之后，必须先安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/archlinuxcn-keyring">archlinuxcn-keyring</a></span><sup><small><a href="#pgc6e2daf482c3">CNRepo</a></small></sup></span> 钥匙环，之后才可以安装任何其它包，否则会出现 GPG 错误。archlinuxcn-keyring 包本身由 Arch Linux 开发者签名。</li>
+<li><b>Debuginfod:</b> <a href="https://repo.archlinuxcn.org">https://repo.archlinuxcn.org</a></li></ul>
+<pre>[archlinuxcn]
+Server = http://repo.archlinuxcn.org/$arch
+## or install archlinuxcn-mirrorlist-git and use the mirrorlist
+#Include = /etc/pacman.d/archlinuxcn-mirrorlist
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_archzfs" id="archzfs">archzfs</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/minextu">Jan Houben (minextu)</a></li>
+<li><b>描述:</b> Arch Linux 上 ZFS 的软件包。</li>
+<li><b>上游页面:</b> <a href="https://github.com/archzfs/archzfs">https://github.com/archzfs/archzfs</a></li>
+<li><b>Key-ID:</b> <a href="https://archzfs.com/archzfs.gpg">DDF7DB817396A49B2A2723F7403BD972F75D9D76</a></li></ul>
+<pre>[archzfs]
+# 源站 - 法国
+Server = http://archzfs.com/$repo/x86_64
+# 镜像 - 德国
+Server = http://mirror.sum7.eu/archlinux/archzfs/$repo/x86_64
+# 镜像 - 德国
+Server = https://mirror.biocrafting.net/archlinux/archzfs/$repo/x86_64
+# 镜像 - 印度
+Server = https://mirror.in.themindsmaze.com/archzfs/$repo/x86_64
+# 镜像 - 意大利
+Server = https://mirror.emanuelebertolucci.com/$repo/$arch
+# 镜像 - 美国
+Server = https://zxcvfdsa.com/archzfs/$repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_artafinde" id="artafinde">artafinde</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/trusted-users/#artafinde">Leonidas Spyropoulos</a></li>
+<li><b>描述:</b> 包含 AUR 和自定义软件包的个人仓库</li>
+<li><b>Key-ID:</b> 不需要，已经在 archlinux 密钥环里⋮</li></ul>
+<pre>[artafinde]
+Server = https://pkgbuild.com/~artafinde/repo
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_avr" id="avr">avr</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/vianney">Vianney Bouchaud</a></li>
+<li><b>描述:</b> 一些我自用的 AUR 包，主要和 kubernetes 有关，以及一些我自己的软件。</li>
+<li><b>Git 仓库:</b> <a href="https://github.com/vbouchaud/aur">https://github.com/vbouchaud/aur</a></li>
+<li><b>问题追踪:</b> <a href="https://github.com/vbouchaud/aur/issues">https://github.com/vbouchaud/aur/issues</a></li>
+<li><b>Key-ID:</b> <a href="https://keyserver.ubuntu.com/pks/lookup?op=vindex&amp;fingerprint=on&amp;exact=on&amp;search=0xAD53F33B1AB4C51802F25068157B08346330029C">157B08346330029C</a></li>
+<li><b>上游页面:</b> <a href="https://bouchaud.org/packages/avr">https://bouchaud.org/packages/avr</a></li></ul>
+<pre>[avr]
+Server = https://bouchaud.org/packages/$repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_bioarchlinux" id="bioarchlinux">bioarchlinux</h3></div>
+<ul><li><b>维护者:</b> BioArchLinux 团队</li>
+<li><b>描述:</b> Arch Linux 的生物学软件仓库</li>
+<li><b>上游页面:</b> <a href="https://github.com/BioArchLinux/Packages">https://github.com/BioArchLinux/Packages</a></li>
+<li><b>Key-ID:</b> B1F96021DB62254D</li>
+<li><b>文献:</b> <a href="https://doi.org/10.1093/bioinformatics/btaf106">https://doi.org/10.1093/bioinformatics/btaf106</a></li></ul>
+<pre>[bioarchlinux]
+Server = https://repo.bioarchlinux.org/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_blackeagle_pre_community" id="blackeagle-pre-community">blackeagle-pre-community</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/package-maintainers/#idevolder">Ike Devolder</a></li>
+<li><b>描述:</b> 我的包，在移动到 <i>extra</i> 仓库先行测试</li>
+<li><b>Key-ID:</b> 不需要，维护者是软件包维护者</li></ul>
+<pre>[blackeagle-pre-community]
+Server = https://repo.herecura.eu/$repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_build_kilabit_info" id="build.kilabit.info">build.kilabit.info</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/shulhan">shulhan</a></li>
+<li><b>包列表:</b> <a href="https://build.kilabit.info/karajo/app/">https://build.kilabit.info/karajo/app/</a></li>
+<li><b>Key-ID:</b> <a href="https://keys.openpgp.org/vks/v1/by-fingerprint/CEF1AA87E337A6C390DE5550F8507EE9148A4CE3">4A5360B500C9C4F0</a></li>
+<li><b>网站:</b> <a href="https://build.kilabit.info">https://build.kilabit.info</a></li></ul>
+<pre>[build.kilabit.info]
+Server = https://build.kilabit.info/aur
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_chaotic_aur" id="chaotic-aur">chaotic-aur</h3></div>
+<ul><li><b>维护者:</b> <a href="https://github.com/dr460nf1r3">dr460nf1r3</a>, <a href="https://github.com/pedrohlc">PedroHLC</a>, <a href="https://github.com/lordkitsuna">LordKitsuna</a>, <a href="https://github.com/librewish">Librewish</a>, <a href="https://github.com/SolarAquarion">SolarAquarion</a>, <a href="https://github.com/thotypous">thotypous</a> (前<a href="#pge422926aa85f">受信用户</a>), 和 <a href="https://github.com/RustemB">RustemB</a> (in memoriam).</li></ul>
+<ul><li><b>描述:</b> 自动构建的维护者们所使用的 AUR 软件包。每小时更新（有些是每天更新）。在全球拥有数个镜像。主要构建系统由巴西的圣卡洛斯联邦大学托管。仅 x86_64。</li></ul>
+<ul><li><b>Key-ID:</b> <a href="https://pgp.mit.edu/pks/lookup?search=0xFBA220DFC880C036&amp;op=index">FBA220DFC880C036</a>，以及一些子密钥。为了便于使用，密钥环和镜像列表也可在项目主页获取。</li></ul>
+<ul><li><b>注:</b> 见<a href="https://aur.chaotic.cx">仓库的主页</a>.</li></ul>
+<pre>[chaotic-aur]
+Server = https://geo-mirror.chaotic.cx/$repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_coderkun_aur" id="coderkun-aur">coderkun-aur</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/coderkun/">coderkun</a></li>
+<li><b>描述:</b> 带有随机软件的AUR软件包。支持软件包增量以及软件包和数据库签名。</li>
+<li><b>上游页面:</b> <a href="https://www.suruatoel.xyz/arch">https://www.suruatoel.xyz/arch</a></li>
+<li><b>Key-ID:</b> 39E27199A6BEE374</li>
+<li><b>Keyfile:</b> <a href="https://www.suruatoel.xyz/coderkun.key">https://www.suruatoel.xyz/coderkun.key</a></li></ul>
+<pre>[coderkun-aur]
+Server = https://arch.suruatoel.xyz/$repo/$arch/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_condorcore" id="condorcore">condorcore</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/MrHacker/">MrHacker</a></li>
+<li><b>描述:</b> Wazuh-SIEM packages that I co-maintain and AUR. signed from the database.</li>
+<li><b>上游页面:</b> <a href="https://aur.condorbs.net">https://aur.condorbs.net</a></li>
+<li><b>Key-ID:</b> 3CA0B9DF1BE7CE09</li>
+<li><b>Keyfile:</b><a href="https://openpgpkey.condorbs.net/.well-known/openpgpkey/condorbs.net/hu/6xijodcce66ymrrur6yqqeohwhzwz97m">GPG</a></li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>该仓库有自己的密钥环： <a href="https://aur.centauricorex.net/x86_64/condorcore-keyring-20231117-1-any.pkg.tar.zst">https://aur.centauricorex.net/x86_64/condorcore-keyring-20231117-1-any.pkg.tar.zst</a></div><pre>[condorcore]
+Server = https://aur.centauricorex.net/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_desolve" id="desolve">desolve</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/dviktor/">desolve</a></li>
+<li><b>描述:</b> 一些额外的东西</li>
+<li><b>Git 仓库（其它 AUR 软件包）:</b> <a href="https://github.com/dvdesolve/pkgbuilds">https://github.com/dvdesolve/pkgbuilds</a></li>
+<li><b>Key-ID:</b> <a href="https://keyserver.ubuntu.com/pks/lookup?op=get&amp;search=0xdd3bf75dcd96541ac723b7cd6a4cd3276ca8ebbd">DD3BF75DCD96541AC723B7CD6A4CD3276CA8EBBD</a></li></ul>
+<pre>[desolve]
+Server = https://desolve.ru/archrepo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_devkitpro" id="devkitpro">devkitpro</h3></div>
+<ul><li><b>维护者:</b> <a href="https://devkitpro.org/">wintermute</a></li>
+<li><b>描述:</b> 提供 Nintendo Wii，Gamecube，DS，GBA，Gamepark gp32 和 Nintendo Switch 的 Homebrew 工具链</li>
+<li><b>上游页面:</b> <a href="https://devkitpro.org/wiki/devkitPro_pacman">https://devkitpro.org/wiki/devkitPro_pacman</a></li>
+<li><b>Key-ID:</b> F7FD5492264BB9D0</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>仓库在 <a href="https://pkg.devkitpro.org/devkitpro-keyring.pkg.tar.xz">https://pkg.devkitpro.org/devkitpro-keyring.pkg.tar.xz</a> 有自己的密钥环</div><pre>[dkp-libs]
+Server = https://downloads.devkitpro.org/packages
+[dkp-linux]
+Server = https://downloads.devkitpro.org/packages/linux
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_g14" id="g14">g14</h3></div>
+<ul><li><b>维护者:</b> <a href="https://gitlab.com/flukejones">Luke Jones</a></li></ul>
+<ul><li><b>描述:</b> A custom repository for <a href="#pg5c2190a16103">ASUS Linux</a>, it contains prebuilt binaries for all of the software they offer.</li></ul>
+<ul><li><b>上游页面:</b> <a href="https://asus-linux.org/">https://asus-linux.org/</a></li></ul>
+<ul><li><b>包列表:</b> <a href="https://arch.asus-linux.org/">https://arch.asus-linux.org/</a></li></ul>
+<ul><li><b>Key-ID:</b> 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35</li></ul>
+<pre>[g14]
+# Germany, origin
+Server = https://arch.asus-linux.org
+# Republic of Korea
+Server = https://naru.jhyub.dev/$repo
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_grawlinson" id="grawlinson">grawlinson</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/grawlinson">George Rawlinson</a></li>
+<li><b>描述:</b> 用户维护的AUR软件包以及一些实验软件包。</li>
+<li><b>软件包列表:</b> <a href="https://mirror.little.kiwi">https://mirror.little.kiwi</a></li>
+<li><b>Key-ID:</b> 9D120F4AAF400B8313A87EF2369552B2069123EE</li>
+<li><b>Keyfile:</b> <a href="https://mirror.little.kiwi/grawlinson.asc">https://mirror.little.kiwi/grawlinson.asc</a></li>
+<li><b>源码:</b> <a href="https://git.little.kiwi/grawlinson/arch-pkgs">https://git.little.kiwi/grawlinson/arch-pkgs</a></li></ul>
+<pre>[grawlinson]
+Server = https://mirror.little.kiwi
+Server = https://pkgbuild.com/~grawlinson/repo/$repo
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_herecura" id="herecura">herecura</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/package-maintainers/#idevolder">Ike Devolder</a></li>
+<li><b>描述:</b> 在 <i>community</i> 库没有的额外软件包</li>
+<li><b>Key-ID:</b> 不需要，维护者是软件包维护者</li>
+<li><b>Git 仓库:</b> <a href="https://gitlab.com/herecura/packages">https://gitlab.com/herecura/packages</a></li></ul>
+<pre>[herecura]
+Server = https://repo.herecura.eu/$repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_ivasilev" id="ivasilev">ivasilev</h3></div>
+<ul><li><b>维护者:</b> <a href="https://ivasilev.net">Ianis G. Vasilev</a></li>
+<li><b>描述:</b> 各种软件包，主要是我自己的软件和AUR构建。</li>
+<li><b>上游页面:</b> <a href="https://ivasilev.net/pacman">https://ivasilev.net/pacman</a></li>
+<li><b>Key-ID:</b> <a href="https://pgp.mit.edu/pks/lookup?op=vindex&amp;search=0xB77A3C8832838F1F80ADFD7E1D0507B417DAB671">17DAB671</a></li></ul>
+<pre>[ivasilev]
+Server = https://ivasilev.net/pacman/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_jk_aur" id="jk-aur">jk-aur</h3></div>
+<ul><li><b>维护者:</b> <a href="https://github.com/jstkdng">JustKidding</a></li>
+<li><b>描述:</b> Packages from the AUR I maintain and co-maintain.</li>
+<li><b>上游页面:</b> <a href="https://github.com/jstkdng/aur">https://github.com/jstkdng/aur</a></li>
+<li><b>Key-ID:</b> <a href="https://build.opensuse.org/project/keys_and_certificates/home:justkidding:arch">7627D0F8F60FBA35371A29E1AA6B2752759F9361</a></li></ul>
+<pre>[home_justkidding_arch_Arch]
+Server = https://download.opensuse.org/repositories/home:/justkidding:/arch/Arch/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_kawaii" id="kawaii">kawaii</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/LeonidPilyugin">Leonid Pilyugin</a></li>
+<li><b>描述:</b> Kawaii modified packages from AUR and myself.</li>
+<li><b>上游页面:</b> <a href="https://github.com/LeonidPilyugin/kawaii-repo">https://github.com/LeonidPilyugin/kawaii-repo</a></li>
+<li><b>Key-ID:</b> A308BDBE10D7C9C168AA2E055F2E4806FFE6B2CD</li></ul>
+<pre>[kawaii]
+Server = https://raw.githubusercontent.com/LeonidPilyugin/kawaii-repo/main/x86_64/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_lahwaacz" id="lahwaacz">lahwaacz</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/package-maintainers/#Lahwaacz">Jakub Klinkovský</a></li>
+<li><b>描述:</b> Personal repository with AUR packages.</li>
+<li><b>Key-ID:</b> Not needed, as key is in archlinux keyring.</li></ul>
+<pre>[lahwaacz]
+Server = https://pkgbuild.com/~lahwaacz/repo
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_linux_lts66" id="linux-lts66">linux-lts66</h3></div>
+<ul><li><b>维护者:</b> <a href="https://www.bemxio.xyz">bemxio</a></li>
+<li><b>描述:</b> A repository for the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-lts66/">linux-lts66</a></span><sup><small>AUR</small></sup></span> kernel packages, including <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-lts66-headers/">linux-lts66-headers</a></span><sup><small>AUR</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-lts66-docs/">linux-lts66-docs</a></span><sup><small>AUR</small></sup></span>.</li>
+<li><b>Git 仓库:</b> <a href="https://github.com/bemxio/linux-lts66-repo">https://github.com/bemxio/linux-lts66-repo</a></li>
+<li><b>问题追踪:</b> <a href="https://github.com/bemxio/linux-lts66-repo/issues">https://github.com/bemxio/linux-lts66-repo/issues</a></li>
+<li><b>Key-ID:</b> <a href="https://keyserver.ubuntu.com/pks/lookup?search=D6BA2CBC66075B2B&amp;fingerprint=on&amp;op=index">D6BA2CBC66075B2B</a></li></ul>
+<pre>[linux-lts66]
+Server = https://linux-lts66.bemxio.xyz/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_linux_nitrous" id="linux-nitrous">linux-nitrous</h3></div>
+<ul><li><b>维护者:</b> <a href="https://superboring.dev">Simao Gomes Viana (superboringdev or xdevs23)</a></li>
+<li><b>描述:</b> linux-nitrous is a repository with prebuilt packages of the <a href="https://gitlab.com/xdevs23/linux-nitrous">linux-nitrous kernel</a></li>
+<li><b>Git 仓库:</b> <a href="https://gitlab.com/xdevs23/linux-nitrous">https://gitlab.com/xdevs23/linux-nitrous</a></li>
+<li><b>问题追踪:</b> <a href="https://github.com/xdevs23/linux-nitrous/issues">https://github.com/xdevs23/linux-nitrous/issues</a> for packaging issues and questions</li>
+<li><b>Key-ID:</b> <a href="https://keyserver.ubuntu.com/pks/lookup?op=get&amp;search=0xE52F66792B423413EA5F8B3BBCAFC8F93FFA4C23">3FFA4C23</a> (keyserver.ubuntu.com) | <a href="https://pgp.mit.edu/pks/lookup?op=get&amp;search=0xE52F66792B423413EA5F8B3BBCAFC8F93FFA4C23">3FFA4C23</a> (pgp.mit.edu) | <a href="http://pgp.net.nz:11371/pks/lookup?op=get&amp;fingerprint=on&amp;search=0xE52F66792B423413EA5F8B3BBCAFC8F93FFA4C23">3FFA4C23</a> (pgp.net.nz)</li></ul>
+<pre>[linux-nitrous]
+Server = https://github.com/xdevs23/linux-nitrous/releases/latest/download
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_liquorix" id="liquorix">liquorix</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/damentz">Steven Barrett (damentz)</a></li>
+<li><b>描述:</b> Repository containing automated builds of <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-lqx/">linux-lqx</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-lqx-headers/">linux-lqx-headers</a></span><sup><small>AUR</small></sup></span>, and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-lqx-docs/">linux-lqx-docs</a></span><sup><small>AUR</small></sup></span></li>
+<li><b>上游页面:</b> <a href="https://liquorix.net">https://liquorix.net</a></li>
+<li><b>Git 仓库:</b> <a href="https://github.com/damentz/liquorix-package">https://github.com/damentz/liquorix-package</a>, <a href="https://aur.archlinux.org/cgit/aur.git/log/?h=linux-lqx">https://aur.archlinux.org/cgit/aur.git/log/?h=linux-lqx</a></li>
+<li><b>问题追踪:</b> <a href="https://github.com/damentz/liquorix-package/issues">https://github.com/damentz/liquorix-package/issues</a></li>
+<li><b>Key-ID: </b> <a href="https://keys.openpgp.org/vks/v1/by-fingerprint/C5ADB4F3FEBBCE27A3E54D7D9AE4078033F8024D">9AE4078033F8024D</a> (keys.openpgp.org)</li></ul>
+<pre>[liquorix]
+Server = https://liquorix.net/archlinux/$repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_miffe" id="miffe">miffe</h3></div>
+<ul><li><b>维护者:</b> <a href="https://arch.miffe.org/README.html">miffe</a> (<a href="https://aur.archlinux.org/account/miffe">AUR profile</a>)</li>
+<li><b>描述:</b> AUR packages maintained by miffe, e.g. linux-mainline</li>
+<li><b>Key ID:</b> 313F5ABD</li></ul>
+<pre>[miffe]
+Server = https://arch.miffe.org/$arch/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_mxmeinhold" id="mxmeinhold">mxmeinhold</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/mxmeinhold">mxmeinhold</a></li>
+<li><b>描述:</b> Packages I maintain in the AUR, currently just factorio-headless</li>
+<li><b>Key ID:</b> B77D730E8D444707FA93320D72E05836F8252405</li>
+<li><b>Keyfile:</b> <a href="https://gpg.mxmeinhold.com">https://gpg.mxmeinhold.com</a></li></ul>
+<pre>[mxmeinhold]
+Server = https://arch.mxmeinhold.com/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_orhun" id="orhun">orhun</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/package-maintainers/#orhun">Orhun Parmaksiz</a></li>
+<li><b>描述:</b> Personal repository with AUR and custom packages.</li>
+<li><b>Key-ID:</b> 不需要，维护者是软件包维护者</li></ul>
+<pre>[orhun]
+Server = https://pkgbuild.com/~orhun/repo
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_oscloud" id="oscloud">oscloud</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/bionade24">bionade24</a></li>
+<li><b>描述:</b> <s>ROS melodic packages and necessary dependencies,</s> various cmd-line tools, and other packages from the AUR</li>
+<li><b>CI/CD 状态:</b> <a href="https://abs-cd.oscloud.info">https://abs-cd.oscloud.info</a></li>
+<li><b>Key-ID:</b> FF363C5F81664E2B</li></ul>
+<pre>[oscloud]
+Server = http://repo.oscloud.info/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_ownstuff" id="ownstuff">ownstuff</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/Martchus">Martchus</a></li>
+<li><b>描述:</b> A lot of packages from the AUR, e.g. a great number packages for mingw-w64 and Android cross compilation, fonts, Perl modules, tools like <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tageditor/">tageditor</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/syncthingtray/">syncthingtray</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/subtitlecomposer/">subtitlecomposer</a></span><sup><small>AUR</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qmplay2/">qmplay2</a></span><sup><small>AUR</small></sup></span></li>
+<li><b>上游页面</b>: <a href="https://github.com/Martchus/PKGBUILDs">https://github.com/Martchus/PKGBUILDs</a> (sources beside the AUR) and <a href="https://martchus.no-ip.biz/buildservice/#package-search-section">https://martchus.no-ip.biz/buildservice/#package-search-section</a> (package browser/search)</li>
+<li><b>Key-ID:</b> B9E36A7275FC61B464B67907E06FE8F53CDC6A4C</li></ul>
+<pre>[ownstuff-testing]
+Server = https://ftp.f3l.de/~martchus/$repo/os/$arch
+Server = https://martchus.no-ip.biz/repo/arch/$repo/os/$arch
+
+[ownstuff]
+Server = https://ftp.f3l.de/~martchus/$repo/os/$arch
+Server = https://martchus.no-ip.biz/repo/arch/$repo/os/$arch
+</pre><div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>The testing repository is supposed to be used together with the official testing repositories.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_pkgbuilder" id="pkgbuilder">pkgbuilder</h3></div>
+<ul><li><b>维护者:</b> <a href="https://chriswarrick.com/">Chris Warrick</a></li>
+<li><b>描述:</b> A repository for PKGBUILDer, a Python AUR helper.</li>
+<li><b>上游页面:</b> <a href="https://github.com/Kwpolska/pkgbuilder">https://github.com/Kwpolska/pkgbuilder</a></li>
+<li><b>Key-ID:</b> 5EAAEA16</li></ul>
+<pre>[pkgbuilder]
+Server = https://pkgbuilder-repo.chriswarrick.com/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_post_factum_kernels" id="post-factum_kernels">post-factum kernels</h3></div>
+<ul><li><b>维护者</b>: <a href="https://aur.archlinux.org/account/post-factum">Oleksandr Natalenko aka post-factum</a></li>
+<li><b>上游页面</b>: <a href="https://pfkernel.natalenko.name">https://pfkernel.natalenko.name</a></li>
+<li><b>描述</b>: <span class="ilh-all" data-foreign-title="linux-pf" data-lang-code="en" data-lang-name="英语" data-orig-title="linux-pf"><span class="ilh-page"><a href="#pg09f982ca3a45">pf-kernel</a></span></span> packages by its developer, post-factum</li>
+<li><b>Key-ID:</b>: 95C357D2AF5DA89D</li>
+<li><b>Keyfile</b>: <a href="https://download.opensuse.org/repositories/home:/post-factum:/kernels/Arch/x86_64/home_post-factum_kernels_Arch.key">https://download.opensuse.org/repositories/home:/post-factum:/kernels/Arch/x86_64/home_post-factum_kernels_Arch.key</a></li></ul>
+<pre>[home_post-factum_kernels_Arch]
+Server = https://download.opensuse.org/repositories/home:/post-factum:/kernels/Arch/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_pro_audio_legacy" id="pro-audio-legacy">pro-audio-legacy</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/developers/#dvzrv">David Runge</a></li>
+<li><b>描述:</b> Legacy tooling for <a href="#pgb3b4b5c595bd">pro-audio</a> (e.g. <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jack/">jack</a></span><sup><small>AUR</small></sup></span>), mainly useful for old setups or CI</li>
+<li><b>Key-ID:</b> Not needed, as maintainer is a developer/TU</li></ul>
+<pre>[pro-audio-legacy]
+Server = https://pkgbuild.com/~dvzrv/repos/pro-audio-legacy/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_proaudio" id="proaudio">proaudio</h3></div>
+<ul><li><b>维护者:</b> <a href="https://github.com/osam-cologne/">OSAMC</a> members (<a href="https://aur.archlinux.org/account/SpotlightKid">SpotlightKid</a>, <a href="https://aur.archlinux.org/account/cbix">cbix</a>, <a href="https://aur.archlinux.org/account/daniel.appelt">daniel.appelt</a> et al.)</li>
+<li><b>描述:</b> <a href="#pgb3b4b5c595bd">Pro Audio</a> packages not (yet) in the official repos, built for x86_64 and aarch64</li>
+<li><b>上游页面:</b> <a href="https://arch.osamc.de/">https://arch.osamc.de/</a></li>
+<li><b>GitHub 仓库:</b> <a href="https://github.com/osam-cologne/archlinux-proaudio">https://github.com/osam-cologne/archlinux-proaudio</a> (PRs welcome)</li>
+<li><b>Key-ID:</b> 762AE5DB2B38786364BD81C4B9141BCC62D38EE5</li>
+<li><b>Keyfile:</b> <a href="https://arch.osamc.de/proaudio/osamc.gpg">https://arch.osamc.de/proaudio/osamc.gpg</a></li></ul>
+<pre>[proaudio]
+Server = https://arch.osamc.de/$repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_QOwnNotes" id="QOwnNotes">QOwnNotes</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/pbek">Patrizio Bekerle</a> (pbek), QOwnNotes author</li>
+<li><b>描述:</b> QOwnNotes是一个开源记事本和待办事项列表管理器，具有降价支持和 <a href="#pg0bddf7624c22">ownCloud</a> integration.</li>
+<li><b>Key-ID:</b> F2205FB121DF142B31450865A3BA514562A835DB</li>
+<li><b>Keyfile:</b> <a href="https://download.opensuse.org/repositories/home:/pbek:/QOwnNotes/Arch_Extra/x86_64/home_pbek_QOwnNotes_Arch_Extra.key">https://download.opensuse.org/repositories/home:/pbek:/QOwnNotes/Arch_Extra/x86_64/home_pbek_QOwnNotes_Arch_Extra.key</a></li></ul>
+<pre>[home_pbek_QOwnNotes_Arch_Extra]
+Server = https://download.opensuse.org/repositories/home:/pbek:/QOwnNotes/Arch_Extra/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_quarry" id="quarry">quarry</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/developers/#anatolik">anatolik</a></li>
+<li><b>描述:</b> Arch binary repository for <a href="https://rubygems.org/">Rubygems</a> packages. See <a href="https://bbs.archlinux.org/viewtopic.php?id=182729">forum announcement</a> for more information.</li>
+<li><b>源码:</b> <a href="https://github.com/anatol/quarry">https://github.com/anatol/quarry</a></li>
+<li><b>Key-ID:</b> Not needed, as maintainer is a developer</li></ul>
+<pre>[quarry]
+Server = https://pkgbuild.com/~anatolik/quarry/x86_64/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_repo_mksscryertower_quest" id="repo.mksscryertower.quest">repo.mksscryertower.quest</h3></div>
+<ul><li><b>维护者:</b> <a href="#pga72b6a71b873">Klimenko Maxim Sergievich</a></li></ul>
+<ul><li><b>描述:</b> Collection of AUR packages that I personally use: Crowdsec, libraries and etc.</li></ul>
+<ul><li><b>Key-ID:</b> <a href="https://keyserver.ubuntu.com/pks/lookup?search=CF26478FD667CD54&amp;fingerprint=on&amp;op=index">CF26478FD667CD54</a></li></ul>
+<pre>	
+[repo.mksscryertower.quest]
+	
+Server = https://repo.mksscryertower.quest/repo/x86_64/
+	
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_rne" id="rne">rne</h3></div>
+<ul><li><b>Maintainer:</b> <a href="https://wiki.archlinux.org/title/User:Schard">Richard Neumann</a></li>
+<li><b>Description:</b> Collection of AUR packages that I personally use.</li>
+<li><b>Key-ID:</b> <a href="https://keyserver.ubuntu.com/pks/lookup?search=4CA8D523BD386AF7&amp;fingerprint=on&amp;op=index">4CA8D523BD386AF7</a></li></ul>
+<pre>[rne]
+Server = https://srv.richard-neumann.de/pub/repo/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_seblu" id="seblu">seblu</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/developers/#seblu">Sébastien Luttringer</a></li>
+<li><b>描述:</b> 所有seblu有用的预制包，有些是自制的 (linux-seblu-meta, zfs-dkms, spotify, masterpdfeditor, etc).</li>
+<li><b>Key-ID:</b> <a href="https://seblu.net/.well-known/openpgpkey/hu/fmrhcha6xtpwnfp1enxwfw1wac7a77um?h=95b08852">8DBD63B82072D77A</a></li></ul>
+<pre>[seblu]
+Server = https://al1.seblu.net/$repo/$arch
+Server = https://al2.seblu.net/$repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_seiichiro" id="seiichiro">seiichiro</h3></div>
+<ul><li><b>维护者:</b> <a href="https://www.seiichiro0185.org">Stefan Brand (seiichiro0185)</a></li>
+<li><b>描述:</b> AUR-packages I use frequently</li>
+<li><b>Key-ID:</b> 805517CC</li></ul>
+<pre>[seiichiro]
+Server = https://www.seiichiro0185.org/repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_sergej_repo" id="sergej-repo">sergej-repo</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/package-maintainers/#spupykin">Sergej Pupykin</a></li>
+<li><b>描述:</b> nextcloud, prosody, and some other stuff.</li>
+<li><b>Key-ID:</b> 不需要，维护者是软件包维护者</li></ul>
+<pre>[sergej-repo]
+Server = http://repo.p5n.pp.ru/$repo/os/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_sublime_text" id="sublime-text">sublime-text</h3></div>
+<ul><li><b>维护者:</b> Sublime Text developer</li>
+<li><b>描述:</b> Sublime Text editor packages from developer's repository</li>
+<li><b>上游页面:</b> <a href="https://www.sublimetext.com/docs/3/linux_repositories.html#pacman">https://www.sublimetext.com/docs/3/linux_repositories.html#pacman</a></li>
+<li><b>Key-ID:</b> 8A8F901A</li></ul>
+<pre>[sublime-text]
+Server = https://download.sublimetext.com/arch/stable/x86_64
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_supermario" id="supermario">supermario</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/supermario">Mario Finelli (supermario)</a></li>
+<li><b>描述:</b> AUR packages that I use or maintain</li>
+<li><b>Git Repository:</b> <a href="https://github.com/mfinelli/pkgs">https://github.com/mfinelli/pkgs</a>, <a href="https://github.com/mfinelli/aur-packages">https://github.com/mfinelli/aur-packages</a></li>
+<li><b>Key-ID:</b> C3CD75B002978A8468CA7B1F6C3ADDDE36FDA306</li>
+<li><b>Keyfile:</b> <a href="https://finelli.pub/36FDA306.asc">https://finelli.pub/36FDA306.asc</a></li></ul>
+<pre>[supermario]
+Server = https://pkgs.finelli.dev/arch/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_trinity" id="trinity">trinity</h3></div>
+<ul><li><b>维护者:</b> <a href="https://trinitydesktop.org/">Trinity Desktop Environment Developers</a></li>
+<li><b>描述:</b> <a href="#pgcf3d215315ed">Trinity</a> 桌面环境</li>
+<li><b>Key-ID:</b> 8685AD8B</li></ul>
+<pre>[trinity]
+Server = https://mirror.ppa.trinitydesktop.org/trinity/archlinux/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_xyne_x86_64" id="xyne-x86_64">xyne-x86_64</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/package-maintainer-fellows/#xyne">Xyne</a></li>
+<li><b>描述:</b> A repository for Xyne's own projects.</li>
+<li><b>上游页面:</b> <a href="https://xyne.dev/projects/">https://xyne.dev/projects/</a></li>
+<li><b>Key-ID:</b> 不需要，维护者是软件包维护者</li></ul>
+<pre>[xyne-x86_64]
+Server = https://xyne.dev/repos/xyne
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgef9a589efc8b_.E6.9C.AA.E7.AD.BE.E5.90.8D" id="未签名"><span id=".E6.9C.AA.E7.AD.BE.E5.90.8D"></span>未签名</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>用户将需要在这些条目中添加以下内容: <code>SigLevel = PackageOptional</code></div><div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不要对未签名仓库使用 HTTP 协议。不用 HTTPS 的话，就没有任何正确性验证来保证你下载到的内容是服务器所提供的。通过<a href="#pg90282d127dcf">中间人攻击</a>，攻击者可能向你的系统上安装任意软件。HTTPS 避免了此类漏洞。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_alucryd" id="alucryd">alucryd</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/package-maintainers/#alucryd">Maxime Gauduin</a></li>
+<li><b>描述:</b> Various packages Maxime Gauduin maintains (or not) in the AUR, in particular the multilib repository is for various packages needed to run Steam without its runtime environment.</li></ul>
+<pre>[core-alucryd]
+Server = https://pkgbuild.com/~alucryd/$repo/$arch
+[core-testing-alucryd]
+Server = https://pkgbuild.com/~alucryd/$repo/$arch
+[extra-alucryd]
+Server = https://pkgbuild.com/~alucryd/$repo/$arch
+[extra-testing-alucryd]
+Server = https://pkgbuild.com/~alucryd/$repo/$arch
+[multilib-alucryd]
+Server = https://pkgbuild.com/~alucryd/$repo/$arch
+[multilib-testing-alucryd]
+Server = https://pkgbuild.com/~alucryd/$repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_arch_mact2" id="arch-mact2">arch-mact2</h3></div>
+<ul><li><b>Maintainer:</b> <a href="https://noa.codes">Noa Himesaka</a></li></ul>
+<ul><li><b>Description:</b> Kernel and utilities for use on Macs with T2 security chip.</li></ul>
+<ul><li><b>Upstream page:</b> <a href="https://mirror.funami.tech/arch-mact2">https://mirror.funami.tech/arch-mact2</a></li></ul>
+<pre>[arch-mact2]
+Server = https://mirror.funami.tech/arch-mact2/os/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_archlinuxgr" id="archlinuxgr">archlinuxgr</h3></div>
+<ul><li><b>Maintainer:</b></li></ul>
+<ul><li><b>Description:</b> many interesting packages provided by the Hellenic (Greek) Arch Linux community</li></ul>
+<pre>	
+[archlinuxgr]
+	
+Server = https://archlinuxgr.tiven.org/archlinux/$arch
+	
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_archlinux_phalcon" id="archlinux-phalcon">archlinux-phalcon</h3></div>
+<ul><li><b>Maintainer:</b> Michal Sotolar &lt;michal at sotolar dot com&gt;</li>
+<li><b>Description:</b> Phalcon Framework PHP 5.6 - 7.x extension builds</li>
+<li><b>Upstream page:</b> <a href="https://archlinux-phalcon.gitlab.io">https://archlinux-phalcon.gitlab.io</a></li></ul>
+<pre>[archlinux-phalcon]
+Server = https://archlinux-phalcon.gitlab.io/repository
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_archlinux_php" id="archlinux-php">archlinux-php</h3></div>
+<ul><li><b>Maintainer:</b> Michal Sotolar &lt;michal at sotolar dot com&gt;</li>
+<li><b>Description:</b> PHP 5.6 - 7.x old stable builds coexistable with mainline version</li>
+<li><b>Upstream page:</b> <a href="https://archlinux-php.gitlab.io">https://archlinux-php.gitlab.io</a></li></ul>
+<pre>[archlinux-php]
+Server = https://archlinux-php.gitlab.io/repository
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_dx37essentials" id="dx37essentials">dx37essentials</h3></div>
+<ul><li><b>维护者:</b> <a href="https://aur.archlinux.org/account/DragonX256">DragonX256</a></li>
+<li><b>描述:</b> Personal repository. Contains packages from AUR, which I using every day.</li>
+<li><b>Git repo:</b> <a href="https://gitlab.com/DX37/dx37essentials">https://gitlab.com/DX37/dx37essentials</a></li>
+<li><b>Upstream page:</b> <a href="https://dx3756.ru/dx37essentials">https://dx3756.ru/dx37essentials</a></li></ul>
+<pre>[dx37essentials]
+Server = https://dx3756.ru/$repo/$arch
+Server = https://dx37.gitlab.io/$repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_ffy00_.28python.29" id="ffy00_(python)"><span id="ffy00_.28python.29"></span>ffy00 (python)</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/package-maintainers/#FFY00">Filipe Laíns</a></li>
+<li><b>描述:</b> 提供几种不同的Python版本（例如3.5、3.6、3.7）。所有有效的Python版本均应在此处提供。</li>
+<li><b>Git repo:</b> <a href="https://github.com/FFY00/arch-python-repo">https://github.com/FFY00/arch-python-repo</a></li>
+<li><b>上游页面:</b> <a href="https://github.com/FFY00/arch-python-repo">https://github.com/FFY00/arch-python-repo</a></li></ul>
+<pre>[python]
+Server = https://ffy00.github.io/arch-python-repo/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_heftig" id="heftig">heftig</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/developers/#heftig">Jan Alexander Steffens</a></li>
+<li><b>描述:</b> Includes <a href="https://pkgbuild.com/~heftig/packages/firefox-nightly/">firefox-nightly</a>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/freetype2-git/">freetype2-git</a></span><sup><small>AUR</small></sup></span> and <a href="https://pkgbuild.com/~heftig/packages/crawl-git/">crawl-git</a></li>
+<li><b>上游页面:</b> <a href="https://bbs.archlinux.org/viewtopic.php?id=117157">https://bbs.archlinux.org/viewtopic.php?id=117157</a></li></ul>
+<pre>[heftig]
+Server = https://pkgbuild.com/~heftig/repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_kernel" id="kernel">kernel</h3></div>
+<ul><li><b>维护者:</b> blacksy3 &lt;blacksky3@tuta.io&gt;</li>
+<li><b>描述:</b> Prebuilt packages for XanMod and Liquorix kernel with config tweak for performance</li>
+<li><b>Git repo:</b> <a href="https://github.com/blacksky3/linux-xanmod.git">https://github.com/blacksky3/linux-xanmod.git</a></li>
+<li><b>Git repo:</b> <a href="https://github.com/blacksky3/linux-lqx.git">https://github.com/blacksky3/linux-lqx.git</a></li>
+<li><b>上游页面:</b> <a href="https://repo.blacksky3.com/">https://repo.blacksky3.com/</a></li></ul>
+<pre>[kernel]
+Server = https://repo.blacksky3.com/$arch/$repo
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_kicad_nightly" id="kicad-nightly">kicad-nightly</h3></div>
+<ul><li><b>Maintainer:</b> Rafael Silva &lt;perigoso@riseup.net&gt;</li></ul>
+<ul><li><b>Description:</b> Prebuilt nightly packages for KiCad</li></ul>
+<ul><li><b>Git repo:</b> <a href="https://gitlab.com/kicad/packaging/kicad-arch/kicad-arch-builder">https://gitlab.com/kicad/packaging/kicad-arch/kicad-arch-builder</a></li></ul>
+<ul><li><b>Upstream page:</b> <a href="https://www.kicad.org/help/nightlies-and-rcs/">https://www.kicad.org/help/nightlies-and-rcs/</a></li></ul>
+<pre>[kicad-nightly]
+Server = https://kicad.gitlab.io/packaging/kicad-arch/kicad-arch-builder/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_mesa_git" id="mesa-git">mesa-git</h3></div>
+<ul><li><b>维护者:</b> <a href="https://archlinux.org/people/package-maintainers/#lcarlier">Laurent Carlier</a></li>
+<li><b>描述:</b> Mesa git builds for the <i>testing</i> repositories</li></ul>
+<pre>[mesa-git]
+Server = https://pkgbuild.com/~lcarlier/$repo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_principia" id="principia">principia</h3></div>
+<ul><li><b>Maintainer:</b> ROllerozxa &lt;rollerozxa@voxelmanip.se&gt;</li>
+<li><b>Description:</b> Binary builds of the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/principia/">principia</a></span><sup><small>AUR</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/principia-git/">principia-git</a></span><sup><small>AUR</small></sup></span> packages.</li>
+<li><b>Upstream page:</b> <a href="https://arch.principia-web.se">https://arch.principia-web.se</a></li></ul>
+<pre>[principia]
+Server = https://arch.principia-web.se/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_rayr" id="rayr">rayr</h3></div>
+<ul><li><b>Maintainer:</b> <a href="https://rayr.link/LinkInBio">Rayr</a></li>
+<li><b>Description:</b> Prebuilt packages of my AUR packages, as an Arch repo.</li>
+<li><b>Upstream page:</b> <a href="https://github.com/Rayrsn/ArchRepo">https://github.com/Rayrsn/ArchRepo</a></li></ul>
+<pre>[rayr]
+Server = https://rayrsn.github.io/ArchRepo/$arch
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_selinux" id="selinux">selinux</h3></div>
+<ul><li><b>Maintainer:</b> Nicolas Iooss (nicolas &lt;dot&gt; iooss &lt;at&gt; m4x &lt;dot&gt; org)</li></ul>
+<ul><li><b>Description:</b> Provide binary packages for <a href="#pg7e957d97ab97">SELinux</a>.</li></ul>
+<ul><li><b>Upstream Page:</b> <a href="https://github.com/archlinuxhardened/selinux">https://github.com/archlinuxhardened/selinux</a></li></ul>
+<pre>[selinux]
+Server = https://github.com/archlinuxhardened/selinux/releases/download/ArchLinux-SELinux
+SigLevel = Never
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_stx4" id="stx4">stx4</h3></div>
+<ul><li><b>维护者:</b> StarterX4 &lt;starterx4[at]gmail.com&gt;</li>
+<li><b>描述:</b> Any – some fonts and fakepkgs; x86_64 – archival yet might useful packages (like PacmanXG4) and some AUR soft I use(d).</li>
+<li><b>Upstream Page:</b> <a href="https://github.com/StarterX4/StarterX4.github.io">https://github.com/StarterX4/StarterX4.github.io</a></li></ul>
+<pre>[stx4-any]
+Server = https://starterx4.github.io/repos/arch/$arch/stx4
+[stx4-x86_64]
+Server = https://starterx4.github.io/repos/arch/$arch/stx4
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgef9a589efc8b_vdr4arch" id="vdr4arch">vdr4arch</h3></div>
+<ul><li><b>Maintainers:</b> <a href="https://aur.archlinux.org/account/CReimer">CReimer</a>, <a href="https://aur.archlinux.org/account/M-Reimer">M-Reimer</a></li>
+<li><b>Description:</b> A set of VDR packages for Arch Linux</li>
+<li><b>Upstream page:</b> <a href="https://github.com/VDR4Arch/vdr4arch">https://github.com/VDR4Arch/vdr4arch</a></li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Packages are automatically built with <a href="https://github.com/VDR4Arch/vdr4arch/blob/master/.ci/repo-make-ci.sh">repo-make-ci.sh</a>.</div><pre>[vdr4arch]
+Server = https://vdr4arch.github.io/$arch
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgef9a589efc8b_Packages_search" id="Packages_search">Packages search</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><code>pkgs.org</code> 将 <a href="#pg5d0fcaebff4d">Arch Linux ARM</a> 的 aarch64 仓库列为 Arch Linux 组织的官方仓库，这是错误的。这些仓库不是 Arch Linux 官方的，使用它们请风险自担。</div><p>很多非官方仓库在 <a href="https://archlinux.pkgs.org/">https://archlinux.pkgs.org/</a> 上有索引。此网站提供了仓库浏览和软件包搜索的功能。</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807022403
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.393 seconds
+Real time usage: 0.403 seconds
+Preprocessor visited node count: 1150/1000000
+Revision size: 34167/2097152 bytes
+Post‐expand include size: 11001/2097152 bytes
+Template argument size: 4330/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 5866/5000000 bytes
+Lua time usage: 0.010/7.000 seconds
+Lua memory usage: 540707/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   89.404      1 -total
+ 33.20%   29.681      1 Template:Link-en
+ 12.97%   11.599     64 Template:Bc
+  4.10%    3.665     16 Template:AUR
+  3.81%    3.409      1 Template:翻译状态
+  2.66%    2.379      1 Template:相关文章开始
+  2.36%    2.113      2 Template:Related
+  1.94%    1.731      5 Template:注意
+  1.79%    1.596      2 Template:Warning
+  1.55%    1.385      4 Template:Ic
+-->
+<!-- Render ID 0e726f8e-9207-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3926:|#|:idhash:canonical!zh-cn and timestamp 20260807022403 and revision id 34542. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

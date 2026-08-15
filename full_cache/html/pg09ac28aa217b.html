@@ -1,0 +1,556 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg09ac28aa217b">用户和用户组</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Users_and_Groups">Users and Groups</a>，最近一次同步于 2020-06-16，若英文版本有所<a href="https://wiki.archlinux.org/title/Users_and_Groups?diff=0&amp;oldid=618545">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Users_and_Groups_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg1bada12a0420">DeveloperWiki:UID / GID Database</a></li>
+<li><a href="#pg74611dd9d3c8">polkit</a></li>
+<li><a href="#pg0ddb07e8c589">File permissions and attributes</a></li>
+<li><a href="#pg84f144084f89">Reset lost root password</a></li>
+<li><a href="#pg755e5f753866">认证管理</a></li>
+</ul></div>
+<p>GNU/Linux 通过用户和用户组实现<a href="https://en.wikipedia.org/wiki/access_control#Computer_security">访问控制</a>——包括对文件访问、设备使用的控制。Linux 默认的访问控制机制相对简单直接，不过还有一些更加高级的机制，包括 <a href="#pg5a0884778d38">ACL</a>、<a href="#pg0d85601792d1">Capabilities</a> 和 <a href="#pg4e165f93ce98">LDAP 认证</a>.
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09ac28aa217b_.E6.A6.82.E8.A7.88" id="概览"><span id=".E6.A6.82.E8.A7.88"></span>概览</h2></div>
+<p><i>用户</i>一般指使用计算机的人。在本文语境中，该词指用来识别用户的用户名称，既可以是 Mary 或 Bill 这样的真名，也可以是 Dragonlady, Pirate 这样的昵称。关键是，计算机给每个账户分配了特定的名称，而用户则使用这些名称访问计算机。除了人之外，一些系统服务也以有部分限制，由享有部分特权的用户账户身份运行。
+</p><p>由于安全需要，“用户管理”应运而生，以加以明确限制各个用户账户的权限。<a href="https://en.wikipedia.org/wiki/Superuser">超级用户</a> root 于计算机里拥有至高无上的管理权限，所以一般只作管理用。非特权用户则可以用 <a href="#pg8b873c561d21">su</a> 或 <a href="#pg023562413be7">sudo</a> 程序以临时获得特权。
+</p><p>个体可以拥有多账户，只不过彼此名称当然不同。但有一些用户名称已事先被系统占用，比如 "root". 
+</p><p>此外，任意用户可能从属某个“用户组”。此外用户也能够新加入某些已经存在的用户组，以获取该组所拥有的特权。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>新手请务必谨慎地使用这方面的工具，并且要避免对除自己以外的其他<b>已存在</b>用户发生误操作。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><b>“root”</b>重定向至此。关于“根目录”的内容，参见<a href="#pg8edad8d1135b">分区#根分区</a>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09ac28aa217b_.E6.9D.83.E9.99.90.E4.B8.8E.E5.B1.9E.E4.B8.BB" id="权限与属主"><span id=".E6.9D.83.E9.99.90.E4.B8.8E.E5.B1.9E.E4.B8.BB"></span>权限与属主</h2></div>
+<p>摘自 <a href="https://web.archive.org/web/20190816135930/http://ph7spot.com/musings/in-unix-everything-is-a-file">In UNIX Everything is a File （UNIX 中一切皆文件）</a>：
+</p>
+<dl><dd>集众多灵感及理念之大成，UNIX 操作系统打造出了它的设计、接口、文化甚至革新。重中之重，有一句道理：“一切皆文件”可谓 UNIX 的真谛之一。</dd></dl>
+<dl><dd>根据这一设计原则，必须要有统一的模型，用以管理对大量 I/O 资源的访问：文档、目录、磁盘、CD-ROM、调制解调器、键盘、打印机、显示器和终端等等，甚至也包括了进程、网络之间的通信。而解决之策，就是为所有这些资源提成一个抽象层，UNIX 之父们称之为“文件”。所有文件都通过一致的 API 以提供访问，因此光只用同一套简单的命令，就可以读写磁盘、键盘、文档以及网络设备。</dd></dl>
+<p>摘自 <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.597.4699&amp;rep=rep1&amp;type=pdf">Extending UNIX File Abstraction for General-Purpose Networking （针对常规的网络应用，扩展出 UNIX 文件抽象层）</a>：
+</p>
+<dl><dd>UNIX 及兼容系统提供了一个即基本又强悍的抽象层——文件。很多系统服务和设备的应用程序接口，一开始都被设计为文件或文件系统之类的东西。这赋予程序全新的姿态——通过文件抽象层，我们就可以以全新的方式使用众多现成的、且用途单一的小工具。例如 cat 工具，原本只用来读取文件，再将其内容发送到标准输出，但现在它也可以直接访问特殊设备文件（通常在 <code>/dev</code> 目录中），加以读取 I/O 设备。在很多系统上，音频记录和播放也可以通过一令执行：分别是 <code>cat /dev/audio &gt; myfile</code> 以及 <code>cat myfile &gt; /dev/audio</code>.</dd></dl>
+<p>GNU/Linux 系统中的每一个文件都从属一个用户（属主）和一个用户组（属组）。另外，还有三种类型的访问权限：读（read）、写（write）、运行（execute）。我们可以针对文件的属主、属组、而设置相应的访问权限。再次，我们可以通过 <a href="#pg4bb6491c480c">ls</a> 命令的长列表格式以查询文件属主、属组和权限：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls /boot/ -l</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">total 18492
+drwxr-xr-x 3 root root    12288 Aug 21 03:27 grub
+-rw-r--r-- 1 root root 12487150 Aug 29 18:24 initramfs-linux-fallback.img
+-rw-r--r-- 1 root root  2990626 Aug 29 18:23 initramfs-linux.img
+-rw-r--r-- 1 root root  3440576 Aug 26 15:17 vmlinuz-linux 
+</pre>
+<p>第一列是文件访问权限（例如，文件<code>initramfs-linux.img</code>的权限为<code>-rw-r--r--</code>），第三列和第四列分别是属主和属组（本例中所有文件属主都是<i>root</i>用户，属组都是<i>root</i>组）。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /media/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">total 16
+drwxrwx--- 1 root vboxsf 16384 Jan 29 11:02 sf_Shared</pre>
+<p>上述例子中，<code>sf_Shared</code>目录由<i>root</i>用户和<i>vboxsf</i>组所有。使用<code>stat</code>命令也可以查看文件所有权和权限：
+</p><p>属主：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ stat -c %U /media/sf_Shared/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">root</pre>
+<p>属组：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ stat -c %G /media/sf_Shared/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">vboxsf</pre>
+<p>访问权限：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ stat -c %A /media/sf_Shared/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">drwxrwx---</pre>
+<p>访问权限由三组字符组成，分别代表属主、属组、其他人的权限。例如，<code>-rw-r--r--</code>表示属主有读写权限、但无运行权限（<code>rw-</code>），属组用户和其他用户只有读取权限（<code>r--</code>）。又如，<code>drwxrwx---</code>表示文件属主和属组用户有读、写、执行权限（<code>rwx</code>），而禁止其他用户任何访问（<code>---</code>）。第一个字符”d“代表文件类型（目录）。
+</p><p>通过<code>find</code>命令查找属于某个用户或某个组的文件：
+</p>
+<pre># find / -group "用户组名"
+# find / -group "用户组编号"
+# find / -user "用户"
+</pre>
+<p>文件的属主、属组可以通过<code>chown</code>命令更改。文件的权限可以通过<code>chmod</code>命令修改。
+</p><p>详情参见：<span class="plainlinks archwiki-template-man" title="$ man 1 chown"><a href="https://man.archlinux.org/man/chown.1">chown(1)</a></span>、<span class="plainlinks archwiki-template-man" title="$ man 1 chmod"><a href="https://man.archlinux.org/man/chmod.1">chmod(1)</a></span>、<a href="https://www.linux.com/learn/tutorials/309527-understanding-linux-file-permissions">Linux 文件权限</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09ac28aa217b_Shadow" id="Shadow">Shadow</h2></div>
+<p>Arch Linux 的用户、群组和密码管理工具由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=shadow">shadow</a></span><sup><small>包</small></sup></span> 提供，这个软件包是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base">base</a></span><sup><small>包</small></sup></span> <a href="#pgba29d486f3a8">元软件包</a>的依赖。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09ac28aa217b_.E6.96.87.E4.BB.B6.E5.88.97.E8.A1.A8" id="文件列表"><span id=".E6.96.87.E4.BB.B6.E5.88.97.E8.A1.A8"></span>文件列表</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不要手动编辑这些文件。有些工具可以更好的处理锁定、避免数据库错误。</div>
+<table class="wikitable">
+<tbody><tr>
+<th>文件</th>
+<th>作用
+</th></tr>
+<tr>
+<td><code>/etc/shadow</code></td>
+<td>保存用户安全信息
+</td></tr>
+<tr>
+<td><code>/etc/passwd</code></td>
+<td>用户账户信息
+</td></tr>
+<tr>
+<td><code>/etc/gshadow</code></td>
+<td>保存组账号的安全信息
+</td></tr>
+<tr>
+<td><code>/etc/group</code></td>
+<td>定义用户所属的组
+</td></tr>
+<tr>
+<td><code>/etc/sudoers</code></td>
+<td>可以运行 sudo 的用户
+</td></tr>
+<tr>
+<td><code>/home/*</code></td>
+<td>主目录
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09ac28aa217b_.E7.94.A8.E6.88.B7.E7.AE.A1.E7.90.86" id="用户管理"><span id=".E7.94.A8.E6.88.B7.E7.AE.A1.E7.90.86"></span>用户管理</h2></div>
+<p>使用<code>who</code>命令，可以查看目前已登录的用户。要查看系统上的用户，以 root 执行 <code>passwd -Sa</code> 输出的数据格式可以参考 <span class="plainlinks archwiki-template-man" title="$ man 1 passwd"><a href="https://man.archlinux.org/man/passwd.1">passwd(1)</a></span>。
+</p><p>使用<code>useradd</code>命令添加用户：
+</p>
+<pre># useradd -m -G "附加组" -s "登录shell" "用户"
+</pre>
+<ul><li><code>-m</code>/<code>--create-home</code>：创建用户主目录<code>/home/[用户名]</code>；在自己的主目录内，即使不是root用户也可以读写文件、安装程序等等。</li>
+<li><code>-G</code>/<code>--groups</code>：用户要加入的附加组列表；使用逗号分隔多个组，不要添加空格；如果不设置，用户仅仅加入初始组。</li>
+<li><code>-s</code>/<code>--shell</code>：用户默认登录shell的路径；启动过程结束后，默认启动的登录shell在此处设定；请确保使用的shell已经安装，默认是 <a href="#pg1ca1e15827ff">Bash</a>。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>为了登录，登录 shell 必须位于 <code>/etc/shells</code> 中, 否则 <a href="#pgdacf2e1d6f91">PAM</a> 的 <code>pam_shell</code> 模块会阻止登录请求。不要使用 <code>/usr/bin/bash</code> 替代 <code>/bin/bash</code>, 除非这个路径已经在 <code>/etc/shells</code>中正确配置.</div>
+<ul><li>有时候需要禁止某些用户执行登录动作，例如用来执行系统服务的用户。将shell设置成 <code>/usr/bin/nologin</code> 就可以禁止用户登录。(<code>nologin(8)</code>).</li>
+<li>需要用 <i>passwd</i> 为新用户设置密码。</li>
+<li>如果设置了用户初始组的名称或数字ID；该组必须是存在的；如果没有设置该选项，<code>useradd</code>会根据<code>/etc/login.defs</code>文件中的USERGROUPS_ENAB环境变量进行设置。默认(<code>USERGROUPS_ENAB yes</code>) 会用和用户名相同的名字创建群组，<code>GID</code> 等于 <code>UID</code>。</li></ul>
+<p>更多选项说明请查看 <span class="plainlinks archwiki-template-man" title="$ man 8 useradd"><a href="https://man.archlinux.org/man/useradd.8">useradd(8)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09ac28aa217b_.E6.B7.BB.E5.8A.A0.E7.99.BB.E5.BD.95.E7.94.A8.E6.88.B7" id="添加登录用户"><span id=".E6.B7.BB.E5.8A.A0.E7.99.BB.E5.BD.95.E7.94.A8.E6.88.B7"></span>添加登录用户</h3></div>
+<p>要用默认设置添加一个名为<i>archie</i>的用户：
+</p>
+<pre># useradd -m archie
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>使用 <code>useradd --defaults</code> 可以查看 shell 的默认值。默认是 Bash。使用 <code>-s</code>/<code>--shell</code> 选项可以设置其他值。<code>/etc/shells</code> 记录了可以使用的登录 shell。</div>
+<p>此命令会自动创建 <code>archie</code> 群组，并成为 <code>archie</code> 的默认登录群组。建议每一个用户都设置自己的默认群组，因为<a href="#pgf51971ffe792">umask</a> 默认值是 <code>002</code>, 所以同一个默认群组的用户会有创建文件的写权限。参阅 <a href="https://security.ias.edu/how-and-why-user-private-groups-unix">User Private Groups</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2021-11-19 ⓘ]</sup>。
+</p><p>要赋予一个群组某个目录的写权限，可以在父目录中设置：
+</p>
+<pre># chmod g+s <i>our_shared_directory</i>
+</pre>
+<p>通过下列命令设置用户密码，虽然不是必须的，还是强烈建议设置密码
+</p>
+<pre># passwd [用户名]
+</pre>
+<p>如果需要临时更改GID，也可以使用 newgrp 命令在运行时将用户的默认 GID 更改为其他 GID。例如，执行 <code>newgrp <i>"组名"</i></code> 后，用户创建的文件将关联到该<code><i>组名</i></code>的 GID，而无需重新登录。若要恢复默认 GID，只需执行不带<code><i>组名</i></code>的 <code>newgrp</code> 命令即可。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09ac28aa217b_.E6.B7.BB.E5.8A.A0.E7.B3.BB.E7.BB.9F.E7.94.A8.E6.88.B7" id="添加系统用户"><span id=".E6.B7.BB.E5.8A.A0.E7.B3.BB.E7.BB.9F.E7.94.A8.E6.88.B7"></span>添加系统用户</h3></div>
+<p>为进程、守护进程分配不同的系统用户可以更安全的管控目录及文件的访问。下面命令创建一个不创建 <code>home</code> 目录的非登录用户(可以加入  <code>-U</code> 参数创建一个和用户名相同的群组):
+</p>
+<pre># useradd -r -s /usr/bin/nologin <i>username</i>
+</pre>
+<p>如果用户需要特殊的 UID/GID，可以加入 <code>-u</code>/<code>--uid</code> 和 <code>-g</code>/<code>--gid</code> 选项：
+</p>
+<pre># useradd -r -u 850 -g 850 -s /usr/bin/nologin <i>username</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09ac28aa217b_.E4.BF.AE.E6.94.B9.E7.99.BB.E5.BD.95.E5.90.8D.E6.88.96.E4.B8.BB.E7.9B.AE.E5.BD.95" id="修改登录名或主目录"><span id=".E4.BF.AE.E6.94.B9.E7.99.BB.E5.BD.95.E5.90.8D.E6.88.96.E4.B8.BB.E7.9B.AE.E5.BD.95"></span>修改登录名或主目录</h3></div>
+<p>更改用户主目录：
+</p>
+<pre># usermod -d /my/new/home -m <i>username</i>
+</pre>
+<p><code>-m</code> 选项会自动创建新目录并移动内容。
+</p><p>更改用户登录名：
+</p>
+<pre># usermod -l <i>newname</i> <i>oldname</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>确保你不是使用你要修改的用户名登录，同时按下(<code>Ctrl</code>+<code>Alt</code>+<code>F1</code>)打开一个新的终端，使用root用户登录，或用其他用户登录后使用su命令登录为root用户。</div>
+<p>操作得当的话，在Arch（或其他Linux发行版）中更改用户名是安全的，并且很简单。你可以更改用户所属的组。按照以下步骤进行，可以保留受影响用户的UID和GID，而不会搞乱你已经设置好的文件权限。还有一种方法是手动编辑 <code>/etc/passwd</code> 文件。
+</p>
+<ul><li>如果要使用<a href="#pg023562413be7">sudo</a>，请更新文件<code>/etc/sudoers</code>把新的用户（以root登录使用visudo命令）添加进去。</li>
+<li>如果修改了<code>~/.bashrc</code>的PATH环境变量，并把新的用户添加进去。。</li>
+<li>更改用户名后，我不得不重新安装Thunderbird扩展（<a href="https://enigmail.net/index.php/en/">Enigmail</a>）。</li>
+<li>系统（桌面快捷方式，脚本等）里使用了旧的用户主目录的地方，都需要进行修改。要在脚本中避免这样的问题，可以使用<code>~</code>或<code>$HOME</code>变量来表示主目录。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09ac28aa217b_.E5.85.B6.E4.BB.96.E7.94.A8.E6.88.B7.E7.AE.A1.E7.90.86.E7.A4.BA.E4.BE.8B" id="其他用户管理示例"><span id=".E5.85.B6.E4.BB.96.E7.94.A8.E6.88.B7.E7.AE.A1.E7.90.86.E7.A4.BA.E4.BE.8B"></span>其他用户管理示例</h3></div>
+<p>将用户加入 <code><i>群组</i></code>，用逗号分隔:
+</p>
+<pre># usermod -aG <i>群组</i> <i>username</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>如果不使用 <code>-a</code> 选项，用户会离开没有列在<code><i>群组</i></code>的其它群组。</div>
+<p>要修改用户的登录 shell:
+</p>
+<pre># usermod -s <i>/bin/bash</i> <i>username</i>
+</pre>
+<p>通过下列命令设置<i>GECOS</i>字段（用户信息，例如用户全名）：
+</p>
+<pre># chfn [用户名]
+</pre>
+<p>（这样将会以交互式模式启动<code>chfn</code>）
+</p><p>此外，可以设置 GECOS comment：
+</p>
+<pre># usermod -c "Comment" <i>username</i>
+</pre>
+<p>使用<code>userdel</code>命令删除用户：
+</p>
+<pre># userdel -r [用户名]
+</pre>
+<p><code>-r</code>选项表示一并删除用户主目录和邮件。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/adduser/">adduser</a></span><sup><small>AUR</small></sup></span> 可以以交互的方式执行 <i>useradd</i>, <i>chfn</i> 和 <i>passwd</i>，参考 <a href="https://bugs.archlinux.org/task/32893">FS#32893</a>.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09ac28aa217b_.E7.94.A8.E6.88.B7.E4.BF.A1.E6.81.AF.E5.AD.98.E5.82.A8" id="用户信息存储"><span id=".E7.94.A8.E6.88.B7.E4.BF.A1.E6.81.AF.E5.AD.98.E5.82.A8"></span>用户信息存储</h3></div>
+<p>本地用户信息储存在<code>/etc/passwd</code>文件中。要查看系统上所有用户账户：
+</p>
+<pre>$ cat /etc/passwd
+</pre>
+<p>一行代表一个用户，格式如下，每行分七个部分，用英文冒号“:”分开：
+</p>
+<pre>account:password:UID:GID:GECOS:directory:shell
+</pre>
+<p>此处：
+</p>
+<ul><li><code>account</code>：用户名，不能为空，而且要符合标准的*NIX命名规则。</li>
+<li><code>password</code>：加密的密码，可以使用一个小写的"x"（不带括号）表示密码保存在<code>/etc/shadow</code>文件里。</li>
+<li><code>UID</code> <code>GID</code>：每个用户和组有一个对应的UID和GID（用户ID和组ID）。Arch里面，第一个非 root 普通用户的默认 UID 是 1000，后续创建的用户UID也应大于1000，特定用户的GID应该属于指定的首要组，组的ID数值列在<code>/etc/group</code>文件里。</li>
+<li><code>GECOS</code>：可选的注释字段，通常记录用户全名</li>
+<li><code>directory</code>：用于登录命令设置<code>$HOME</code>环境变量。某些服务的用户主目录设置为"/"是安全的，但不建议普通用户设置为此目录。</li>
+<li><code>shell</code>：是用户默认登录的shell，通常是<a href="#pg1ca1e15827ff">Bash</a>，还可选择其他的命令解释器，默认是"/bin/bash"（不带括号），如果你用的是别的shell，在这里设置其路径，此部分是可选的，可留空。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Arch Linux 使用<i>影子</i>密码。<code>passwd</code>文件对所有人可读，在里面存储密码（无论是否加密过）是很不安全的。在<code>password</code>字段，通常使用一个占位字符（<code>x</code>）代替。加密过的密码储存在<code>/etc/shadow</code>文件，该文件对普通用户限制访问。</div>
+<p>示例：
+</p>
+<pre>jack:x:1001:1003:Jack Smith,some comment here,,:/home/jack:/bin/bash
+</pre>
+<p>示例分解说明：用户登录名为jack，密码保存在<code>/etc/shadow</code>，UID为1001，首要组的ID是1003 (users组)，全名Jack Smith并加了一些注释，主目录是<code>/home/jack</code>，使用Bash作为默认shell。
+</p><p><i>pwck</i> 命令可以用来验证用户数据库是否完整。它可以在检查的同时用 GID 排序用户列表，在比较时很有用：
+</p>
+<pre># pwck -s
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>Arch Linux的默认文件会由新版本的'<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=filesystem">filesystem</a></span><sup><small>包</small></sup></span> 软件包创建为<i>.pacnew</i>文件。除非Pacman输出了需要您采取行动的相关信息， 这些 <i>.pacnew</i> 可以且应当被删除。<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-sysusers"><a href="https://man.archlinux.org/man/systemd-sysusers.8">systemd-sysusers(8)</a></span> 或者软件包安装脚本会自动添加或重新添加新的，所需的默认用户和组。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09ac28aa217b_.E7.94.A8.E6.88.B7.E7.BB.84.E7.AE.A1.E7.90.86" id="用户组管理"><span id=".E7.94.A8.E6.88.B7.E7.BB.84.E7.AE.A1.E7.90.86"></span>用户组管理</h2></div>
+<p><code>/etc/group</code>文件储存了系统中用户组的信息，详情参见：<span class="plainlinks archwiki-template-man" title="$ man 5 group"><a href="https://man.archlinux.org/man/group.5">group(5)</a></span>。还有一个很少使用的 <code>gshadow</code>，详情请参考 <span class="plainlinks archwiki-template-man" title="$ man 5 gshadow"><a href="https://man.archlinux.org/man/gshadow.5">gshadow(5)</a></span>.
+</p><p>使用<code>groups</code>命令查看用户所在组的名称：
+</p>
+<pre>$ groups [用户名]
+</pre>
+<p>若省略用户名，默认显示当前用户所在组。
+</p><p><code>id</code>命令提供额外的信息，包括用户UID以及相关用户组GID：
+</p>
+<pre>$ id [用户名]
+</pre>
+<p>查看所有组：
+</p>
+<pre>$ cat /etc/group
+</pre>
+<p>使用<code>groupadd</code>创建新的组：
+</p>
+<pre># groupadd [组名]
+</pre>
+<p>使用<code>gpasswd</code>将用户添加到组：
+</p>
+<pre># gpasswd -a [用户名] [组名]
+</pre>
+<p>更改用户所属的组名，不变更<code>GID</code>：
+</p>
+<pre># groupmod -n newname oldname
+</pre>
+<p>删除用户组：
+</p>
+<pre># groupdel [组名]
+</pre>
+<p>将用户从组中移除：
+</p>
+<pre># gpasswd -d [用户名] [组名]
+</pre>
+<p>如果用户已登录，必须重新登录使更改生效。
+</p><p>可以使用 <i>grpck</i> 命令验证系统组文件的完整性。 
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>Arch Linux的默认文件会由新版本的'<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=filesystem">filesystem</a></span><sup><small>包</small></sup></span> 软件包创建为<i>.pacnew</i>文件。除非Pacman输出了需要您采取行动的相关信息， 这些 <i>.pacnew</i> 可以且应当被删除。<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-sysusers"><a href="https://man.archlinux.org/man/systemd-sysusers.8">systemd-sysusers(8)</a></span> 或者软件包安装脚本会自动添加或重新添加新的，所需的默认用户和组。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09ac28aa217b_.E7.BE.A4.E7.BB.84.E5.88.97.E8.A1.A8" id="群组列表"><span id=".E7.BE.A4.E7.BB.84.E5.88.97.E8.A1.A8"></span>群组列表</h2></div>
+<p>本节解释来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=filesystem">filesystem</a></span><sup><small>包</small></sup></span> 的常用组的用途。有很多其他组，在安装相关包时会使用<a href="#pg1bada12a0420">正确的 GID</a> 创建。请到相关软件的首页上了解更多信息。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>删除软件包并不会自动移除软件包自动创建的用户/组（UID/GID）。这是有意为之的设计，因为如果不这样做，在软件包使用期间创建的任何文件都将变为无主文件，从而构成潜在的安全风险。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09ac28aa217b_.E7.94.A8.E6.88.B7.E7.BB.84" id="用户组"><span id=".E7.94.A8.E6.88.B7.E7.BB.84"></span>用户组</h3></div>
+<table class="wikitable">
+<tbody><tr>
+<th>组</th>
+<th>影响文件</th>
+<th>作用
+</th></tr>
+<tr>
+<td>adm</td>
+<td></td>
+<td>通常用来给予系统日志读权限，可以读取 <a href="#pg47c5e1af4d24">journal</a> 文件。
+</td></tr>
+<tr>
+<td>ftp</td>
+<td><code>/srv/ftp/</code></td>
+<td>访问 <a href="https://en.wikipedia.org/wiki/FTP">FTP</a> 服务器.
+</td></tr>
+<tr>
+<td>games</td>
+<td><code>/var/games</code></td>
+<td>访问一些游戏。
+</td></tr>
+<tr>
+<td>log</td>
+<td></td>
+<td>访问  <a href="#pg36c7963d9e88">syslog-ng</a> 创建的 <code>/var/log/</code> 日志文件.</td>
+<td>
+</td></tr>
+<tr>
+<td>http</td>
+<td><code>/srv/http/</code></td>
+<td>访问 <a href="https://en.wikipedia.org/wiki/HTTP">HTTP</a> 服务器文件.
+</td></tr>
+<tr>
+<td>rfkill</td>
+<td><b>不再使用!</b> 控制无线设备的电源 (被 rfkill 使用).
+</td></tr>
+<tr>
+<td>sys</td>
+<td></td>
+<td>可以管理 <a href="#pg9c40a97c403d">CUPS</a> 打印服务。
+</td>
+<td>
+</td></tr>
+<tr>
+<td>systemd-journal</td>
+<td><code>/var/log/journal/*</code></td>
+<td>以只读方式访问系统日志，和 <code>adm</code> 和 <code>wheel</code> 不同 <a href="https://github.com/systemd/systemd/blob/19aadacf92ad86967ffb678e37b2ff9e83cb9480/README#L161">[1]</a>. 不在此组中的用户仅能访问自己生成的信息。
+</td></tr>
+<tr>
+<td>users</td>
+<td></td>
+<td>标准用户组。
+</td></tr>
+<tr>
+<td>uucp</td>
+<td><code>/dev/ttyS[0-9]+</code>, <code>/dev/tts/[0-9]+</code>, <code>/dev/ttyUSB[0-9]+</code>, <code>/dev/ttyACM[0-9]+</code>, <code>/dev/rfcomm[0-9]+</code></td>
+<td>串口和 USB 设备，例如猫、手柄 RS-232/串口。
+</td></tr>
+<tr>
+<td>wheel</td>
+<td></td>
+<td>管理组，可以访问 <a href="#pg47c5e1af4d24">journal</a> 文件和 <a href="#pg9c40a97c403d">CUPS</a> 打印服务，可以用户 sudo　和 su 命令权限管理(需要额外设置)。
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09ac28aa217b_.E7.B3.BB.E7.BB.9F.E7.BB.84" id="系统组"><span id=".E7.B3.BB.E7.BB.9F.E7.BB.84"></span>系统组</h3></div>
+<p>下列组系统使用，一般不被 Arch 用户使用：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>组</th>
+<th>影响文件</th>
+<th>作用
+</th></tr>
+<tr>
+<td>avahi</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<td>clamav</td>
+<td><code>/var/lib/clamav/*</code>, <code>/var/log/clamav/*</code></td>
+<td><a href="#pg91adb3047bd6">Clam AntiVirus</a> 使用.
+</td></tr>
+<tr>
+<td>dbus</td>
+<td><code>/var/run/dbus/*</code></td>
+<td>
+</td></tr>
+<tr>
+<td>kmem</td>
+<td><code>/dev/port</code>, <code>/dev/mem</code>, <code>/dev/kmem</code></td>
+<td>
+</td></tr>
+<tr>
+<td>locate</td>
+<td><code>/usr/bin/locate</code>, <code>/var/lib/locate</code>, <code>/var/lib/mlocate</code>, <code>/var/lib/slocate</code></td>
+<td>见 <a href="#pge74e7aaf6571">Locate</a>。
+</td></tr>
+<tr>
+<td>lp</td>
+<td><code>/dev/lp[0-9]*</code>, <code>/dev/parport[0-9]*</code></td>
+<td>访问并口设备（如打印机）。
+</td></tr>
+<tr>
+<td>mail</td>
+<td><code>/usr/bin/mail</code></td>
+<td>
+</td></tr>
+<tr>
+<td>mpd</td>
+<td><code>/var/lib/mpd/*</code>, <code>/var/log/mpd/*</code>, <code>/var/run/mpd/*</code>, 可选的音乐目录</td>
+<td><a href="#pg952e56b5087b">MPD</a> 组.
+</td></tr>
+<tr>
+<td>nobody</td>
+<td></td>
+<td>无权限的组。
+</td></tr>
+<tr>
+<td>ntp</td>
+<td><code>/var/lib/ntp/*</code></td>
+<td><a href="#pg695044e70cb1">NTPd</a> 组.
+</td></tr>
+<tr>
+<td>proc</td>
+<td><code>/proc/<i>pid</i>/</code></td>
+<td>A group authorized to learn processes information otherwise prohibited by <code>hidepid=</code> mount option of the <a href="https://docs.kernel.org/filesystems/proc.html">proc file system</a>. The group must be explicitly set with the <code>gid=</code> mount option.
+</td></tr>
+<tr>
+<td>root</td>
+<td><code>/*</code></td>
+<td>完全的系统管理和控制 (root, admin)
+</td></tr>
+<tr>
+<td>smmsp</td>
+<td></td>
+<td><a href="#pga5713eb23fcf">sendmail</a> 群组.
+</td></tr>
+<tr>
+<td>tty</td>
+<td><code>/dev/tty</code>, <code>/dev/vcc</code>, <code>/dev/vc</code>, <code>/dev/ptmx</code></td>
+<td>访问 <code>/dev/ACMx</code>
+</td></tr>
+<tr>
+<td>utmp</td>
+<td><code>/run/utmp</code>, <code>/var/log/btmp</code>, <code>/var/log/wtmp</code></td>
+<td>
+</td></tr>
+<tr>
+<td>vboxsf</td>
+<td>虚拟系统的共享目录</td>
+<td><a href="#pgbedf72352aa7">VirtualBox</a>使用.
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09ac28aa217b_systemd_.E4.B9.8B.E5.89.8D.E7.9A.84.E7.BE.A4.E7.BB.84" id="systemd_之前的群组"><span id="systemd_.E4.B9.8B.E5.89.8D.E7.9A.84.E7.BE.A4.E7.BB.84"></span>systemd 之前的群组</h3></div>
+<p>在 Arch 迁移到 <a href="#pgac06dd8bfe95">systemd</a> 之前，用户需要主动加入以下组，才能访问对应设备。This way has been deprecated in favour of <a href="#pge009209061ac">udev</a> marking the devices with a <code>uaccess</code> <a href="https://github.com/systemd/systemd/blob/main/src/login/70-uaccess.rules.in">tag</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2022-09-23 ⓘ]</sup> and <i>logind</i> assigning the permissions to users dynamically via <a href="#pg5a0884778d38">ACL</a>s according to which session is currently active. 注意在 session 没有损坏时这才能工作 (见 <a href="#pgcc0723982992">General troubleshooting#Session permissions</a> 以检查）。
+</p><p>There are some notable exceptions which require adding a user to some of these groups: for example if you want to allow users to access the device even when they are not logged in. However, note that adding users to the groups can even cause some functionality to break (for example, the <code>audio</code> group will break fast user switching and allows applications to block software mixing).
+</p><p>如下组是 systemd 之前使用，目前已经没有任何作用，使用后还可能对功能有影响:
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>组</th>
+<th>作用
+</th></tr>
+<tr>
+<td>audio</td>
+<td><code>/dev/audio</code>, <code>/dev/snd/*</code>, <code>/dev/rtc0</code></td>
+<td>直接访问声音硬件(<a href="#pgb16dfd48462f">ALSA</a> 和 <a href="#pg4b60cac0a197">OSS</a>),<a href="#pgd4e8cda1ef34">JACK</a> 也用来给予用户实时处理权限。
+</td></tr>
+<tr>
+<td>camera</td>
+<td></td>
+<td>访问 <a href="#pg6b48df3d0bd5">Digital Cameras</a>.
+</td></tr>
+<tr>
+<td>disk</td>
+<td><code>/dev/sda[1-9]</code>, <code>/dev/sdb[1-9]</code></td>
+<td>直接访问不受 <i>optical</i>, <i>floppy</i> 和 <i>storage</i> 组控制的块设备. 除非有特殊需要, 否则不建议将一般用户添加至该组.
+</td></tr>
+<tr>
+<td>floppy</td>
+<td><code>/dev/fd[0-9]</code></td>
+<td>访问软盘驱动器。
+</td></tr>
+<tr>
+<td>lp</td>
+<td><code>/etc/cups</code>, <code>/var/log/cups</code>, <code>/var/cache/cups</code>, <code>/var/spool/cups</code></td>
+<td>访问打印设备，管理打印任务。
+</td></tr>
+<tr>
+<td>network</td>
+<td></td>
+<td>改变网络设置的权限，比如使用 <a href="#pg5e6298ca298f">NetworkManager</a> 的权限.
+</td></tr>
+<tr>
+<td>optical</td>
+<td><code>/dev/sr[0-9]</code>, <code>/dev/sg[0-9]</code></td>
+<td>访问光学设备，比如CD，DVD。
+</td></tr>
+<tr>
+<td>scanner</td>
+<td><code>/var/lock/sane</code></td>
+<td>访问扫描仪硬件。
+</td></tr>
+<tr>
+<td>storage</td>
+<td></td>
+<td>访问可移动储存器，例如 USB 硬盘、flash 存储器、MP3 播放器等；用户可以通过 <a href="#pg05349798cdb5">D-Bus</a> 挂载设备。
+</td></tr>
+<tr>
+<td>sys</td>
+<td></td>
+<td>管理 <a href="#pg9c40a97c403d">CUPS</a> 中的打印机.
+</td></tr>
+<tr>
+<td>video</td>
+<td><code>/dev/fb/0</code>, <code>/dev/misc/agpgart</code></td>
+<td>访问视频捕获和硬件加速设备。例如framebuffer (<a href="#pga36c0aff60be">X</a> 不属于这个组也能使用).
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09ac28aa217b_.E4.B8.8D.E5.86.8D.E4.BD.BF.E7.94.A8.E7.9A.84.E7.BB.84" id="不再使用的组"><span id=".E4.B8.8D.E5.86.8D.E4.BD.BF.E7.94.A8.E7.9A.84.E7.BB.84"></span>不再使用的组</h3></div>
+<table class="wikitable">
+<tbody><tr>
+<th>Group</th>
+<th>Affected files</th>
+<th>Purpose
+</th></tr>
+<tr>
+<td>bin</td>
+<td>none</td>
+<td>Historical
+</td></tr>
+<tr>
+<td>daemon</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<td>lock</td>
+<td></td>
+<td>Used for lockfile access. Required by e.g. <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gnokii/">gnokii</a></span><sup><small>AUR</small></sup></span>.
+</td></tr>
+<tr>
+<td>mem</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<td>network</td>
+<td></td>
+<td>Unused by default. Can be used e.g. for granting access to NetworkManager (see <a href="#pg5e6298ca298f">NetworkManager#Set up PolicyKit permissions</a>).
+</td></tr>
+<tr>
+<td>power</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<td>uuidd</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<td>users</td>
+<td></td>
+<td>The primary group for users when user private groups are not used (generally not recommended), e.g. when creating users with <code>USERGROUPS_ENAB no</code> in <code>/etc/login.defs</code> or the <code>-N</code>/<code>--no-user-group</code> option of <i>useradd</i>.
+</td></tr></tbody></table>
+<!-- 
+NewPP limit report
+Cached time: 20260807022620
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.320 seconds
+Real time usage: 0.333 seconds
+Preprocessor visited node count: 1689/1000000
+Revision size: 22427/2097152 bytes
+Post‐expand include size: 14972/2097152 bytes
+Template argument size: 5976/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 4/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  114.828      1 -total
+ 18.42%   21.149    161 Template:Ic
+  7.65%    8.788      1 Template:翻译状态
+  4.83%    5.543      8 Template:Man
+  4.82%    5.530      2 Template:Tip_(简体中文)
+  3.91%    4.491      4 Template:警告
+  3.17%    3.636      2 Template:Warning_(简体中文)
+  2.95%    3.393      2 Template:Dead_link
+  2.84%    3.266      1 Template:相关文章开始
+  2.50%    2.874      5 Template:Pkg
+-->
+<!-- Render ID 601afa0e-9207-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3933:|#|:idhash:canonical!zh-cn and timestamp 20260807022620 and revision id 34532. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

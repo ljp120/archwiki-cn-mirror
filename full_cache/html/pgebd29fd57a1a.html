@@ -1,0 +1,140 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgebd29fd57a1a">Arch 术语</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<p><a href="#pg0f092efcfd44">Help:术语表</a>
+</p>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Arch_terminology">Arch terminology</a>，最近一次同步于 2024-07-16，若英文版本有所<a href="https://wiki.archlinux.org/title/Arch_terminology?diff=0&amp;oldid=812480">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Arch_terminology_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本页面试图揭开 Arch Linux 社区术语的神秘面纱。您可以自由的添加或更改任何术语，但是请使用某个章节的编辑选项。如果想添加新术语，请去原文界面编辑，然后翻译到此界面。
+</p><p>注：本文为规避后续争议，术语权且采用与原文一致的顺序。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_ABS" id="ABS">ABS</h2></div>
+<p>ABS 是 <a href="#pg8d559a1b1a4f">Arch Build System</a> 的缩写。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_Arch_Linux" id="Arch_Linux">Arch Linux</h2></div>
+<p>应该用下面术语指代 Arch：
+</p>
+<ul><li><b>Arch Linux</b></li>
+<li><b>Arch</b> （省略 Linux）</li>
+<li><b>archlinux</b> （UNIX 名）</li></ul>
+<p>Archlinux、ArchLinux、archLinux、aRcHlInUx 等称呼都是不标准的。
+</p><p>'Arch' 在 "Arch Linux" 中的官方读音是 /ɑːrtʃ/。"arch" 的读音不同于 "ark"：和单词 "archer" 或 "archnemesis" 中的一样，与 "archangel" 中的不同。
+近似拼音 "a er qi" 的读音，不读作 "a er ke"。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_Arch_Linux_.E6.A1.A3.E6.A1.88" id="Arch_Linux_档案"><span id="Arch_Linux_.E6.A1.A3.E6.A1.88"></span>Arch Linux 档案</h2></div>
+<p><a href="#pg34e1f0126c90">Arch Linux Archive</a> (ALA)，故称 Arch Linux Rollback Machine (ARM)，保存历史上的官方软件仓库快照、ISO 镜像和 boot straps 压缩包。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_AUR" id="AUR">AUR</h2></div>
+<p><a href="#pgb0e1a56d1c81">Arch User Repository</a>（Arch 用户仓库） 是一个社区驱动的 Arch 用户仓库。其储存包的描述信息（<a href="#pgf9d748a7b27b">PKGBUILD</a>），后者允许您用 <a href="#pg7edcce763396">makepkg</a>，从源码构建包并通过 <a href="#pg9ef105bf1e3c">pacman</a> 安装。AUR 的创建是为了整理和分享来自社区的新包，并促使 <a href="#pgf7c0fa24b620">extra 仓库</a>尽快收录受欢迎的包。
+</p><p>许多进入官方仓库的新包最先收录于 AUR。AUR 中，用户可以贡献自己的包构建（PKGBUILD 及相关文件）。AUR 社区可以对 AUR 中的包投票。如果一个包足够受欢迎——前提是它要有一个兼容的许可证，和良好的封装——它可能进入 <i>extra</i> 仓库（可以直接通过 <a href="#pg9ef105bf1e3c">pacman</a> 或 <a href="#pg649c5e3c750b">ABS</a> 访问）。
+</p><p>您可以<a href="https://aur.archlinux.org">在这里</a>访问 <i>A</i>rch Linux <i>U</i>ser Community <i>R</i>epository。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_bbs" id="bbs">bbs</h2></div>
+<p><b>B</b>ulletin <b>b</b>oard <b>s</b>ystem，在 Arch 中指<a href="https://bbs.archlinux.org">用户支持论坛</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_core.2F.5Bcore.5D" id="core/[core]"><span id="core.2F.5Bcore.5D"></span>core/[core]</h2></div>
+<p><i>core</i> 仓库包含 Arch linux 的最基本软件包：一个命令行系统的所需都在 [core] 中。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_custom.2Fuser_repository" id="custom/user_repository"><span id="custom.2Fuser_repository"></span>custom/user repository</h2></div>
+<p>任何人都可以创建供其它人使用的在线仓库。要这么做，需要一批软件包及对应的兼容 <a href="#pg9ef105bf1e3c">pacman</a> 的数据库文件。把这些托管到线上，其他人就可添加你的仓库并使用了。
+</p><p>参考 <a href="#pgf17d46e184e6">Custom local repository</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_Developer" id="Developer">Developer</h2></div>
+<p>这些半神级的开发者，无偿地为 Arch 持续改进。他们的地位仅次于 Arch 的神祇 Judd Vinet 和 Aaron Griffin，而这两位神祇又只能屈居于“玉米饼（tacos）”之下。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_extra.2F.5Bextra.5D" id="extra/[extra]"><span id="extra.2F.5Bextra.5D"></span>extra/[extra]</h2></div>
+<p>Arch 的官方软件包很精简，但是我们提供了更大更完整的 "附加" 软件仓库。其包含大量非 core 的软件包。此仓库在社区的强力支持下日益壮大。桌面软件环境，窗口管理器和常用程序都位于此仓库。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_initramfs.2Finitrd" id="initramfs/initrd"><span id="initramfs.2Finitrd"></span>initramfs/initrd</h2></div>
+<p>参见 <a href="#pgbd0f46fbac92">mkinitcpio</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_KISS" id="KISS">KISS</h2></div>
+<p>Keep It Simple, Stupid 的简写。<a href="#pg83506eae4ba0">简约</a>是 Arch Linux 坚持的原则。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_makepkg" id="makepkg">makepkg</h2></div>
+<p><a href="#pg7edcce763396">makepkg</a>  会读取 <a href="#pgf9d748a7b27b">PKGBUILD</a> 文件，然后按脚本编译软件包。所需的是 Linux 编译环境，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=curl">curl</a></span><sup><small>包</small></sup></span> 和一些编译脚本。基于脚本构建的优点是一劳永逸。有了编译脚本后，只需执行 makepkg，它会执行剩余的工作：下载并验证源代码，检查依赖关系，配置构建时间，构建软件包，安装软件包到临时根目录，进行定制，生成元数据，然后打包供 <a href="#pg9ef105bf1e3c">pacman</a> 使用。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_namcap" id="namcap">namcap</h2></div>
+<p><a href="#pg00c132d82a07">namcap</a> 是软件包分析工具，可以检查 Arch Linux 软件包及其 <a href="#pgf9d748a7b27b">PKGBUILD</a> 文件。 可以按规则检查文件列表、文件本身或单独的 PKGBUILD 文件。
+</p><p>规则检查会返回三类消息：错误（error），警告（warning）或信息（information）（类似提示或注释）。错误（'E:'）是 namcap 非常确信错误并需要修复的东西。警告（'W:'）是 namcap 认为应当更改，但如果您清楚您在做什么，就可以忽略的东西。信息（'I:'）只在您使用 info 参数时显示。信息类消息提供无需更改任何东西但可能有用的的信息。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_package" id="package">package</h2></div>
+<p>请参考 <a href="#pg9ef105bf1e3c">Pacman#安装软件包</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>不同 GNU/Linux 发行版使用不同的包和包管理器，这意味着您不能用 pacman 在 Arch 上安装一个 Debian 软件包。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.BB.B4.E6.8A.A4.E8.80.85" id="软件包维护者"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E7.BB.B4.E6.8A.A4.E8.80.85"></span>软件包维护者</h2></div>
+<p>软件包维护者的作用是：当上游新版本可用时，更新包；处理有关指定包中 bug 的支持问题。该术语适用于：
+</p>
+<ul><li>Arch 员工，故称<a href="https://lists.archlinux.org/archives/list/aur-general@lists.archlinux.org/thread/6UPKMAL2A7FNAUNWMTHWI4EXV2KS5OSC/">受信用户（Trusted User，TU）</a>，<a href="#pgfe8c1b30874f">管理</a> <i>extra</i> 仓库中的包，并监督 <a href="#pg89cb7b475cfb">AUR</a>。他们由现有软件包维护者以多数票任命，并遵循<a href="#pg3f6bbf19ee01"> AUR 软件包维护者指南</a>和<a href="https://package-maintainer-bylaws.aur.archlinux.org/">软件包维护者章程</a>。</li>
+<li>在<a href="#pg0a3e16d13281">官方仓库</a>（尤其是<i>core</i>）维护包的开发者。</li>
+<li>在 AUR 维护 PKGBUILD 的所有用户。</li></ul>
+<p>某个包的维护者是指此人当前对这个包负责。之前的维护者应当在 PKGBUILD 中，与其他对此包有贡献的人一同，作为贡献者列出。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_pacman" id="pacman">pacman</h2></div>
+<p>请参考 <a href="#pg9ef105bf1e3c">pacman</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_PKGBUILD" id="PKGBUILD">PKGBUILD</h2></div>
+<p><a href="#pgf9d748a7b27b">PKGBUILD</a> 是构建 Arch Linux 软件包所使用的脚本。详情参考 <a href="#pgca951d402f98">Creating packages</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_.E4.BB.93.E5.BA.93.2Frepo" id="仓库/repo"><span id=".E4.BB.93.E5.BA.93.2Frepo"></span>仓库/repo</h2></div>
+<p>软件仓库包含一个或（通常地）多个基于 <a href="#pgf9d748a7b27b">PKGBUILD</a> 预构建的软件包。<a href="#pg0a3e16d13281">官方仓库</a>分成多个部分以便管理。Pacman 使用这些仓库查找和安装软件包。一个仓库可以是本地的（在您自己的电脑上），也可以是远程的（先下载软件包再安装）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_RTFM" id="RTFM">RTFM</h2></div>
+<p><a href="https://en.wikipedia.org/wiki/RTFM">RTFM</a> 代表 "<i>R</i>ead <i>T</i>he <i>F</i>riendly <i>M</i>anual"（参阅友好文档）。很多 Linux/Arch 新用户在询问一个程序文档明确定义的问题时，会收到这个简洁回复。
+</p><p>通常，在用户在发问前，未曾尝试自己寻找解决方案时，这个缩写会出现。如果有人这么回复您，请注意：这并不是侮辱，只是委婉地请您更细心些，同时对您显现出的疏忽表示略微不满。
+</p><p>收到这个信息后，最正确的动作是阅读手册页面。要阅读某个特定程序的手册：<code>man <i>程序名称</i></code>,。
+</p><p>如果没有找到需要的信息，还可以查看下面内容：
+</p>
+<ul><li>搜索 <a href="#pg5886cc629582">wiki</a></li>
+<li>搜索<a href="https://bbs.archlinux.org">论坛</a></li>
+<li>搜索<a href="https://www.google.com/#hl=en&amp;q=arch+site:archlinux.org%2Fpipermail%2F">邮件列表</a></li>
+<li>搜索 <a href="https://www.google.com">web</a></li></ul>
+<p>注：以上链接直接出自英语原文，限于特殊情况，某些可能无法访问。读者请自行变通。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_.E6.B5.8B.E8.AF.95.E4.BB.93.E5.BA.93" id="测试仓库"><span id=".E6.B5.8B.E8.AF.95.E4.BB.93.E5.BA.93"></span>测试仓库</h2></div>
+<p>主要的软件包/更新在正式发布前，会放在此仓库进行测试，查看是否有 bug 和升级问题。<a href="#pg0a3e16d13281">默认禁用</a>，可在 <code>/etc/pacman.conf</code> 中启用。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_Arch_.E4.B9.8B.E9.81.93" id="Arch_之道"><span id="Arch_.E4.B9.8B.E9.81.93"></span>Arch 之道</h2></div>
+<p><a href="#pg83506eae4ba0">Arch Linux 原则</a>的一个非正式传统说法。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_.E5.8F.97.E4.BF.A1.E7.94.A8.E6.88.B7.EF.BC.88TU.EF.BC.89" id="受信用户（TU）"><span id=".E5.8F.97.E4.BF.A1.E7.94.A8.E6.88.B7.EF.BC.88TU.EF.BC.89"></span>受信用户（TU）</h2></div>
+<p>参见 #软件包维护者。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgebd29fd57a1a_Wiki" id="Wiki">Wiki</h2></div>
+<p>我们的 <a href="https://en.wikipedia.org/wiki/Wiki">wiki</a> 一个存放 Arch Linux 文档的地方，任何人都可以对这些文档做贡献。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807055632
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.102 seconds
+Real time usage: 0.109 seconds
+Preprocessor visited node count: 167/1000000
+Revision size: 7649/2097152 bytes
+Post‐expand include size: 1484/2097152 bytes
+Template argument size: 274/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   15.981      1 -total
+ 25.95%    4.147      1 Template:翻译状态
+ 17.70%    2.828      1 Template:相关文章开始
+ 13.19%    2.107      1 Template:Pkg
+ 12.05%    1.926      1 Template:Note
+  7.16%    1.145      2 Template:Ic
+  6.60%    1.054      1 Template:相关文章结束
+  6.04%    0.965      1 Template:META_Related_articles_start
+-->
+<!-- Render ID bd71740e-9224-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2796:|#|:idhash:canonical!zh-cn and timestamp 20260807055632 and revision id 33578. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

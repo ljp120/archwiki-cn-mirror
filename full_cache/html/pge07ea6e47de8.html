@@ -1,0 +1,162 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pge07ea6e47de8">通用第二因素</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Universal_2nd_Factor">Universal 2nd Factor</a>，最近一次同步于 2025-01-28，若英文版本有所<a href="https://wiki.archlinux.org/title/Universal_2nd_Factor?diff=0&amp;oldid=826070">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Universal_2nd_Factor_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p><a href="https://zh.wikipedia.org/wiki/%E9%80%9A%E7%94%A8%E7%AC%AC%E4%BA%8C%E5%9B%A0%E7%B4%A0">通用第二因素（U2F）</a>是一个开放标准，它基于类似智能卡中的安全技术，使用专门的 USB 或 NFC 设备来加强和简化双因素身份验证（2FA）。
+</p><p>该标准最早由谷歌和 Yubico 开发，并包含了来自 NXP 的贡献，现在由 FIDO 联盟进行维护。
+</p><p>所有与 U2F 和 U2F 设备相关的文章请参考<a href="#pg925aee83ac96">分类:通用第二因素</a>。
+</p><p>当前最新的标准是 <a href="#pg529f6ef7c993">WebAuthn</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge07ea6e47de8_.E7.94.A8.E4.BA.8E.E7.BD.91.E9.A1.B5.E8.AE.A4.E8.AF.81" id="用于网页认证"><span id=".E7.94.A8.E4.BA.8E.E7.BD.91.E9.A1.B5.E8.AE.A4.E8.AF.81"></span>用于网页认证</h2></div>
+<p>谷歌、Facebook、Twitter 和 GitHub 等主流网站都支持使用 U2F，更多网站的清单和设置文档请参考 <a href="https://2fa.directory/">2fa.directory</a> 或 <a href="https://www.dongleauth.com/">dongleauth.com</a>。对于所有支持该功能的浏览器，很可能只需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libfido2">libfido2</a></span><sup><small>包</small></sup></span>。Yubico 提供了一个<a href="https://demo.yubico.com/">测试页</a>用于进行测试。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge07ea6e47de8_Firefox" id="Firefox">Firefox</h3></div>
+<p><a href="#pg1ba73eaeffc3">Firefox/微调#Fido U2F 身份验证</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge07ea6e47de8_Chromium.2FChrome" id="Chromium/Chrome"><span id="Chromium.2FChrome"></span>Chromium/Chrome</h3></div>
+<p><a href="#pgad69d7c7a814">Chromium#U2F 身份验证</a>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge07ea6e47de8_.E7.94.A8.E4.BA.8E.E7.94.A8.E6.88.B7.E4.BC.9A.E8.AF.9D.E8.AE.A4.E8.AF.81" id="用于用户会话认证"><span id=".E7.94.A8.E4.BA.8E.E7.94.A8.E6.88.B7.E4.BC.9A.E8.AF.9D.E8.AE.A4.E8.AF.81"></span>用于用户会话认证</h2></div>
+<p>YubiKey 的制造商 Yubico 开发了一个 U2F <a href="#pgdacf2e1d6f91">PAM</a> 模块，可用于在登陆时进行二次验证，也可以完全替代密码。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>虽然本文提到了 Yubico/YubiKey，基本上所有 U2F 和/或 FIDO2 合规密钥都受 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pam-u2f">pam-u2f</a></span><sup><small>包</small></sup></span> 支持。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge07ea6e47de8_.E5.AE.89.E8.A3.85_PAM_.E6.A8.A1.E5.9D.97" id="安装_PAM_模块"><span id=".E5.AE.89.E8.A3.85_PAM_.E6.A8.A1.E5.9D.97"></span>安装 PAM 模块</h3></div>
+<p>该模块是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pam-u2f">pam-u2f</a></span><sup><small>包</small></sup></span> 的一部分。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge07ea6e47de8_.E6.B7.BB.E5.8A.A0.E5.AF.86.E9.92.A5" id="添加密钥"><span id=".E6.B7.BB.E5.8A.A0.E5.AF.86.E9.92.A5"></span>添加密钥</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>下面使用的目录是默认路径。对于<b>单用户</b>实现，可以将文件移动到你选择的目录下，然后在 pam_u2f.so 一行末添加 <code>authfile=/path/to/u2f_keys</code>，该操作可用于将 <code>u2f_keys</code> 移动到文件系统上的受保护位置。对于多用户实现，可参考 <a href="https://developers.yubico.com/pam-u2f/">pam-u2f</a> 官方文档使用中心化映射文件。</div>
+<p>首先使用 <code>pamu2fcfg</code> 添加密钥：
+</p>
+<pre>$ mkdir ~/.config/Yubico
+$ pamu2fcfg -o pam://<i>hostname</i> -i pam://<i>hostname</i> &gt; ~/.config/Yubico/u2f_keys
+</pre>
+<p>输入 PIN 码后，通过按下 U2F 密钥上的按钮进行确认。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果由于不同网络下的 DHCP 等原因导致系统主机名被更改，你将无法进行登录。为避免该情况发生，建议指定上述选项，并将 <code><i>hostname</i></code> 替换为正确的主机名。</div>
+<p>如果你有多个密钥，参考下方进行添加：
+</p>
+<pre>$ pamu2fcfg -o pam://<i>hostname</i> -i pam://<i>hostname</i> -n &gt;&gt; ~/.config/Yubico/u2f_keys
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>以上命令必须使用 <code>-n</code> 选项。对于同一用户的后续条目，它将按照规范要求省略生成条目中的用户名部分。多个相同用户名的条目会导致 PAM 出现不可预测的行为。另外，不要手动进行分行，<code>u2f_keys</code> 文件中只能存在一行内容。<a href="https://developers.yubico.com/pam-u2f/">[1]</a></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge07ea6e47de8_.E6.97.A0.E5.AF.86.E7.A0.81_sudo" id="无密码_sudo"><span id=".E6.97.A0.E5.AF.86.E7.A0.81_sudo"></span>无密码 sudo</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>在保存配置更改前，先单独打开一个具有 root 权限的 shell 环境（如 <code>sudo -s</code>），这样可以保证出问题后能够撤回更改。</div>
+<p>在文件中加入第一行：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/sudo</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">auth            sufficient      pam_u2f.so cue origin=pam://<i>hostname</i> appid=pam://<i>hostname</i></pre>
+<p>别忘了替换掉 <code><i>hostname</i></code> 一项。接下来打开一个新的命令行窗口，执行 <code>sudo ls</code>。密钥上的 LED 应该会开始闪烁，按下后命令就会开始执行。<code>cue</code> 选项用于提示用户所需进行的操作（<code>Please touch the device</code>）。
+</p><p>要让密钥作为使用 sudo 的唯一方法（即不回退使用密码），需要将其它认证方式注释掉（默认一般只有 system-auth 一项）。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/sudo</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#auth           include         system-auth
+</pre>
+<p>你还需要将 <code>pam_u2f.so</code> 一行的 <code>sufficient</code> 替换为 <code>required</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>这会导致用户在没有配置 U2F 密钥的情况下无法使用 sudo。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge07ea6e47de8_GDM_.E7.99.BB.E5.BD.95" id="GDM_登录"><span id="GDM_.E7.99.BB.E5.BD.95"></span>GDM 登录</h3></div>
+<p>在现有的 <code>auth</code> 行后添加以下内容：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/gdm-password</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">auth            required      pam_u2f.so nouserok origin=pam://<i>hostname</i> appid=pam://<i>hostname</i>
+</pre>
+<p>注意 <code>nouserok</code> 选项，该选项允许在用户未配置密钥时规则失效，适用于多用户环境下其中只有部分用户使用 U2F 密钥的情况。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>该方法不适用于用户主目录（home）加密的情况，该目录在登录流程完成前尚未完全解密，导致无法使用 <code>u2f_keys</code> 文件。在这种情况下，可以参考 <a href="https://developers.yubico.com/pam-u2f/">pam-u2f 官方文档</a>使用中心化映射文件。</div>
+<p>有些多功能密钥（例如 Trezor Model T）带有 U2F/PAM 功能，但根据 CTAP 2.0 标准<a href="https://github.com/trezor/trezor-firmware/issues/3486">[2]</a>，在系统启动时其可能不会启用该功能。在有多个 U2F 密钥的情况下，pam-u2f 会依次查找并等待设备（Trezor）超时，之后才提示提供或触碰其它 U2F 密钥，导致 GDM 出现长达 2 分钟的延时 <a href="https://github.com/Yubico/pam-u2f/issues/310">[3]</a>。You could try adding the <code>nodetect</code> option alongside <code>debug</code> and finish any device specific login (ex. screen PIN) before GDM loads.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge07ea6e47de8_SDDM.2FKDE" id="SDDM/KDE"><span id="SDDM.2FKDE"></span>SDDM/KDE</h3></div>
+<p><a href="#pg3438569d0b30">SDDM</a> 似乎在用户初始登录时不支持 pam_u2f。可以使用<a href="#pg3438569d0b30">自动登录</a>，然后编辑 <code>/etc/pam.d/kde</code> 来控制屏幕锁定。
+</p><p>如果你使用的是带有生物识别验证功能的 U2F 密钥（如 Yubikey Bio），并希望使用 1FA 功能，请使用 <code>/etc/pam.d/kde-fingerprint</code>，注释掉 pam_fprintd.so 行，并在其位置上进行修改。这样可以避免在身份验证后显示解锁按钮，而不是立即解锁 <a href="https://www.reddit.com/r/kdeneon/comments/1bgh78z/using_face_login_without_unlock_button_appearing/">[4]</a>。
+</p><p>以下为参考示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/kde-fingerprint</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+
+auth       required                    pam_shells.so
+auth       requisite                   pam_nologin.so
+auth       requisite                   pam_faillock.so      preauth
+
+# take over fprintd for u2f since yubikey bio is a fingerprint reader and bypasses kscreenlocker's "unlock" button
+#-auth      required                    pam_fprintd.so
+auth required pam_u2f.so cue pinverification=0 userverification=1
+
+auth       optional                    pam_permit.so
+auth       required                    pam_env.so
+
+account    include                     system-local-login
+
+password   required                    pam_deny.so
+
+session    include                     system-local-login
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不要像其它 PAM 配置文件一样在 <code>/etc/pam.d/kde-fingerprint</code> 中使用 <code>auth sufficient</code>，这会导致即使认证失败也能绕过锁屏界面。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge07ea6e47de8_.E5.85.B6.E5.AE.83.E8.AE.A4.E8.AF.81.E6.96.B9.E5.BC.8F" id="其它认证方式"><span id=".E5.85.B6.E5.AE.83.E8.AE.A4.E8.AF.81.E6.96.B9.E5.BC.8F"></span>其它认证方式</h3></div>
+<p>可以参考上文为其它服务启用 PAM 模块。以 <a href="#pgab6cec04e250">Cinnamon</a> 屏保为例，可以修改 <code>/etc/pam.d/cinnamon-screensaver</code>。
+</p><p>对于 <a href="#pg74611dd9d3c8">Polkit</a>，需要先将 <code>/usr/lib/pam.d/polkit-1</code> 复制到 <code>/etc/pam.d/polkit-1</code>，然后再进行修改。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge07ea6e47de8_.E6.8E.92.E9.9A.9C" id="排障"><span id=".E6.8E.92.E9.9A.9C"></span>排障</h3></div>
+<p>如果你把自己锁在系统外了，需要先启动到恢复模式或 U 盘，然后撤回 PAM 的配置并重启。
+</p><p>如果 pam-u2f 模块静默失败了，可以在 <code>/etc/pam.d/</code> 下文件对应的行中添加 <i>debug</i> 关键字。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge07ea6e47de8_OpenSSH" id="OpenSSH">OpenSSH</h2></div>
+<p>8.2 以及上版本的 <a href="#pg4df2d7b1a305">OpenSSH</a> 原生支持 FIDO/U2F 密钥，详情请参考 <a href="#pg0f0d45f60e57">SSH 密钥#FIDO/U2F</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge07ea6e47de8_.E4.BD.BF.E7.94.A8_LUKS_.E8.BF.9B.E8.A1.8C.E9.9D.99.E6.80.81.E6.95.B0.E6.8D.AE.E5.8A.A0.E5.AF.86" id="使用_LUKS_进行静态数据加密"><span id=".E4.BD.BF.E7.94.A8_LUKS_.E8.BF.9B.E8.A1.8C.E9.9D.99.E6.80.81.E6.95.B0.E6.8D.AE.E5.8A.A0.E5.AF.86"></span>使用 LUKS 进行静态数据加密</h2></div>
+
+<p><br/>
+从 248版本开始，可以通过 <a href="#pgac06dd8bfe95">systemd</a> 使用 FIDO2 密钥解锁 <a href="#pg29ec7c5af952">LUKS 分区</a>。
+</p><p>首先需要配置 <code>/etc/crypttab</code> 文件（具体参考下方），如果需要解锁根分区，也可以配置 <a href="#pg5409190f7704">initramfs</a>。配置步骤与使用 TPM 芯片解锁类似，具体请参考 <a href="#pgac5cf0d2e02d">systemd-cryptenroll#Trusted Platform Module</a>。
+</p><p>注册密钥需要使用 <i>systemd-cryptenroll</i>。首先使用以下命令列出检测到的密钥：
+</p>
+<pre>$ systemd-cryptenroll --fido2-device=list
+</pre>
+<p>然后在 LUKS 槽中注册密钥，指定 <code>auto</code> 值（如果有多个设备，也可以 FIDO2 设备的路径，例如 <code>/dev/hidrawX</code>）：
+</p>
+<pre>$ systemd-cryptenroll --fido2-device=auto /dev/sd<i>X</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge07ea6e47de8_.E9.9D.9E.E6.A0.B9.E5.88.86.E5.8C.BA" id="非根分区"><span id=".E9.9D.9E.E6.A0.B9.E5.88.86.E5.8C.BA"></span>非根分区</h3></div>
+<p>对于非根分区，<a href="#pg1340a4be8b92">crypttab</a> 如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">data /dev/sd<i>X</i> none fido2-device=auto
+</pre>
+<p>对于加密分区是由 <a href="#pg02cd87050dfd">LVM</a> 管理的逻辑卷的情况同样可用：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">data /dev/vg1/data none fido2-device=auto
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260808041438
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.128 seconds
+Real time usage: 0.132 seconds
+Preprocessor visited node count: 448/1000000
+Revision size: 8673/2097152 bytes
+Post‐expand include size: 8198/2097152 bytes
+Template argument size: 4105/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   34.745      1 -total
+ 18.17%    6.312      5 Template:Note
+ 13.20%    4.587      1 Template:Move
+ 12.26%    4.260     30 Template:Ic
+ 10.06%    3.495      1 Template:翻译状态
+  9.76%    3.391      3 Template:Warning
+  7.62%    2.646      3 Template:Pkg
+  6.64%    2.306      6 Template:Hc
+  3.64%    1.266      1 Template:META_Message
+-->
+<!-- Render ID aba0d70e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8068:|#|:idhash:canonical!zh-cn and timestamp 20260808041438 and revision id 33883. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

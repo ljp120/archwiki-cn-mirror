@@ -1,0 +1,313 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg1e179f17182c">先进格式化</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Advanced_Format">Advanced Format</a>，最近一次同步于 2025-06-17，若英文版本有所<a href="https://wiki.archlinux.org/title/Advanced_Format?diff=0&amp;oldid=834876">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Advanced_Format_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<p><br/>
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>“高级格式化”一词在中文下可以指代<a href="https://www.seagate.com/cn/zh/blog/advanced-format-4k-sector-hard-drives-master-ti/">先进磁盘格式</a>，也可指代<a href="https://en.wikipedia.org/wiki/Disk_formatting#High-level_formatting">高级磁盘格式化</a>；为避免歧义，本文将使用“先进格式化”一词：<a href="#pg3ef6e9ecbba6">讨论:先进格式化#关于名称</a></div>
+<p>机械硬盘的最小物理存储单元为单个<a href="https://en.wikipedia.org/wiki/Disk_sector">扇区</a>。固态硬盘（SSD）相对应为页。<a href="https://www.oo-software.com/en/docs/whitepaper/whitepaper_ssd.pdf">[1]</a> 存储设备的固件将设备上的物理扇区抽象为软件可操作的逻辑扇区。该扇区的大小即硬盘上最小可寻址单元的大小。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>无论存储设备为何种类型，软件和文档可能将“扇区”与“块”互换使用。</div>
+<dl><dt>物理扇区大小</dt>
+<dd>这是物理存储设备声称的可原子写入的最小单元。对于机械硬盘来说，这是指碟片上扇区的实际大小。在传统上，机械硬盘的物理扇区大小是 512 字节，这意味着每个扇区可以存放 512 字节的数据。但是，随着<a href="https://en.wikipedia.org/wiki/Advanced_Format#History">先进格式化</a>机械硬盘的出现，物理扇区的扇区提高到了 4096 字节（4 KiB），使得存储密度和错误校正能力都有所提升。固态硬盘（SSD）则不对外暴露 NAND 闪存的实际页大小（通常在 4 KiB 到 16 KiB 之间），而是将物理扇区大小和逻辑扇区大小汇报为同一值。对于 NVMe 固态硬盘，它会在电源故障原子写入单位（Atomic Write Unit Power Fail，AWUPF）参数可用时使用该值。</dd></dl>
+<dl><dt>逻辑扇区大小</dt>
+<dd>逻辑扇区大小（又称为操作系统扇区大小）代表了暴露给操作系统和应用的扇区大小。它是在软件层写入和读取存储设备的扇区大小。逻辑扇区大小可以和物理扇区不同，例如：为了保证旧系统和应用的兼容性，一个有 4096 字节物理扇区大小的先进格式化机械硬盘的逻辑扇区大小可能为 512 字节。</dd></dl>
+<p>对于不同的“层”而言，即设备，堆叠块设备和文件系统，应保持同一扇区大小。否则，虽然固件的转换层的映射操作是透明的，仍会带来本可避免的开销。
+</p><p>可通过 <a href="#pge173af99a32b">lsblk</a> 列出当前物理和逻辑扇区大小：
+</p>
+
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk -td</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME    ALIGNMENT MIN-IO OPT-IO PHY-SEC LOG-SEC ROTA SCHED       RQ-SIZE  RA WSAME
+sda             0   4096      0    4096    4096    1 mq-deadline      64 128    0B
+nvme1n1         0   4096      0    4096    4096    0 none           1023 128    0B
+nvme0n1         0   4096      0    4096    4096    0 none           1023 128    0B
+</pre>
+<p><code>PHY-SEC</code> 显示了物理扇区大小，<code>LOG-SEC</code> 显示了逻辑扇区大小。
+</p><p>另外，单个特定硬盘的值可以从下列 sysfs 条目读取：
+</p>
+<pre>$ cat /sys/class/block/<i>drive</i>/queue/physical_block_size
+$ cat /sys/class/block/<i>drive</i>/queue/logical_block_size
+</pre>
+<p>也可以通过 <a href="#pgc1328f332dd1">fdisk</a>，<a href="#pgf3fd55c81dde">smartctl</a> 和 <a href="#pg62a34c92338a">hdparm</a> 的输出查看扇区大小。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1e179f17182c_.E4.BF.AE.E6.94.B9.E6.89.87.E5.8C.BA.E5.A4.A7.E5.B0.8F" id="修改扇区大小"><span id=".E4.BF.AE.E6.94.B9.E6.89.87.E5.8C.BA.E5.A4.A7.E5.B0.8F"></span>修改扇区大小</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>修改硬盘的扇区大小将不可恢复地抹除所有数据。</div>
+<p>部分 NVMe 和“企业级”SATA 硬盘分别支持通过标准的 NVMe（NVMe 命令集标准 1.0 或以上的 <code>Format NVM</code>）或 ATA（ATA 命令集 - 4 或以上的 <code>SET SECTOR CONFIGURATION EXT</code>）命令修改它们汇报的扇区大小。对于机械硬盘而言，这一操作通过修改它们的逻辑扇区大小到与物理扇区大小一致，优化了硬盘性能。而对于 NVMe 固态硬盘而言，逻辑扇区和物理扇区的大小都受到更改。
+</p><p>SATA 固态硬盘通常不支持修改扇区大小。部分 Intel SATA SSD 仅可以被修改汇报的物理扇区大小，无法修改逻辑扇区大小。<a href="https://superuser.com/q/982680">[2]</a> 可按照 #Intel 中的操作来修改硬盘汇报的物理扇区大小。
+</p><p>修改扇区大小包含了一系列复杂的操作，其中涉及到了低级格式化。作为替代，你可以在硬盘上创建文件系统时手动指定扇区大小来优化性能。详细信息可参考 #dm-crypt 和#文件系统。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1e179f17182c_.E5.85.88.E8.BF.9B.E6.A0.BC.E5.BC.8F.E5.8C.96.E6.9C.BA.E6.A2.B0.E7.A1.AC.E7.9B.98" id="先进格式化机械硬盘"><span id=".E5.85.88.E8.BF.9B.E6.A0.BC.E5.BC.8F.E5.8C.96.E6.9C.BA.E6.A2.B0.E7.A1.AC.E7.9B.98"></span>先进格式化机械硬盘</h3></div>
+<p>使用 <a href="#pg62a34c92338a">hdparm</a> 工具确定先进格式化硬盘的扇区大小是否可被更改：
+</p>
+<pre># hdparm -I /dev/sd<i>X</i> | grep 'Sector size:'
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>对于通过 USB 连接的硬盘，对应的 USB 桥接器需支持 <a href="https://en.wikipedia.org/wiki/SCSI_/_ATA_Translation">SAT（SCSI/ATA 翻译）</a>（ANSI INCITS 431-2007）。</div>
+<p>Advanced Format drives whose Sector Configuration Log lists multiple logical sector sizes will show a list of them:
+</p>
+<pre>        Logical  Sector size:                   512 bytes [ Supported: 512 4096 ]
+        Physical Sector size:                  4096 bytes
+</pre>
+<p>不支持修改逻辑扇区大小的硬盘将只会汇报当前扇区大小。以一块 512e 先进格式化硬盘为例：
+</p>
+<pre>        Logical  Sector size:                   512 bytes
+        Physical Sector size:                  4096 bytes
+</pre>
+<p>为了达到这一类硬盘的最佳性能，请确保 #dm-crypt 扇区大小或#文件系统块大小至少为 4096 字节，并与其对齐。
+</p><p>对于一块先进格式化的 4Kn 硬盘：
+</p>
+<pre>        Logical  Sector size:                  4096 bytes
+        Physical Sector size:                  4096 bytes
+</pre>
+<p>4Kn 硬盘在出厂时已经是最佳配置，不需要在分区/格式化是进行特殊操作，可以照常使用。
+</p><p>如果你的 SATA 机械硬盘支持多个逻辑扇区大小和可选的 <code>SET SECTOR CONFIGURATION EXT</code> ATA 命令（通常只在企业级机械硬盘上提供），你可以使用 <i>hdparm</i> 来在支持的不同逻辑扇区大小间进行切换。可使用以下命令将其设为 4096 字节（即 4Kn）：
+</p>
+<pre># hdparm --set-sector-size 4096 --please-destroy-my-drive /dev/sd<i>X</i>
+</pre>
+<p>之后 <i>hdparm</i> 应汇报逻辑扇区大小为 4096 字节：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># hdparm -I /dev/sd<i>X</i> | grep 'Sector size:'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">        Logical  Sector size:                  4096 bytes [ Supported: 512 4096 ]
+        Physical Sector size:                  4096 bytes
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1e179f17182c_NVMe_.E5.9B.BA.E6.80.81.E7.A1.AC.E7.9B.98" id="NVMe_固态硬盘"><span id="NVMe_.E5.9B.BA.E6.80.81.E7.A1.AC.E7.9B.98"></span>NVMe 固态硬盘</h3></div>
+<p>虽然<a href="#pgcb28ba980ed7">固态硬盘</a>（SSD）经常使用较大的物理块（通常为 4 KiB，8 KiB，有时会更大），它们通常还是将自己的逻辑块大小汇报为 512 字节。
+</p><p>可以通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvme-cli">nvme-cli</a></span><sup><small>包</small></sup></span> 使用 <i>Identify Namespace</i> 命令来查看 <a href="#pgfabce5fffaa5">NVMe</a> 硬盘的格式化后逻辑块地址大小（Formatted Logical Block Address Size, FLBAS）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># nvme id-ns -H /dev/nvme0n1 | grep "Relative Performance"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">LBA Format  0 : Metadata Size: 0   bytes - Data Size: 512 bytes - Relative Performance: 0x2 Good (in use)
+LBA Format  1 : Metadata Size: 0   bytes - Data Size: 4096 bytes - Relative Performance: 0x1 Better
+</pre>
+<ul><li><code>Metadata Size</code> 是每个逻辑块地址（Logical Block Address, LBA）的额外元数据字节大小。这一功能在 Linux 上尚无完善支持，所以最好是使用该值为 0 的格式。</li>
+<li><code>Relative Performance</code> 代表各类格式所提供的性能级别（包括 <i>degraded</i>，<i>good</i>，<i>better</i> 和 <i>best</i>）。</li></ul>
+<p><a href="#pgf3fd55c81dde">smartctl</a> 也可以显示设备支持的逻辑块地址大小，但输出的结果可读性不佳。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># smartctl -c /dev/nvme0n1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+Supported LBA Sizes (NSID 0x1)
+Id Fmt  Data  Metadt  Rel_Perf
+ 0 +     512       0         2
+ 1 -    4096       0         1
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>特别是在高随机读取负载的情况下，有些显示支持 4K 扇区的 NVMe SSD 有可能会在启用该功能时断续出现稳定性问题。<a href="https://bbs.archlinux.org/viewtopic.php?pid=2238884#p2238884">[3]</a><a href="https://halestrom.net/darksleep/blog/054_nvme/">[4]</a>因此在向硬盘存入数据前，请确保已对配置进行了完善的测试。如果出现该问题，只需将其恢复到 512 扇区大小即可。</div>
+<p>可以使用 <code>--lbaf</code> 参数向 <code>nvme format</code> 命令传入目标值来修改逻辑块地址大小：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># nvme format --lbaf=1 /dev/nvme0n1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">You are about to format nvme0n1, namespace 0x1.
+WARNING: Format may irrevocably delete this device's data.
+You have 10 seconds to press Ctrl-C to cancel this operation.
+
+Use the force [--force] option to suppress this warning.
+Sending format operation ... 
+Success formatting namespace:1</pre>
+<p>修改需要数秒来完成。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>确保分区时参照#分区对齐进行，否则将破坏任何性能优势。</div>
+
+<p><br/>
+在启动结束阶段会发出非标准的“security freeze”的系统上时，生产于 2020 年前的硬盘可能会拦截 <code>Format NVM</code> 命令。<a href="https://github.com/linux-nvme/nvme-cli/issues/816">[5]</a><a href="https://forums.lenovo.com/topic/findpost/1300/5043069/5167342">[6]</a> 如果 <code>nvme format</code> 命令失败，可以先尝试<a href="#pgac06dd8bfe95">休眠系统</a>（确保<a href="#pg146ac4b0e523">使用 S3 而不是 S0ix 休眠</a>），然后在唤醒系统后尝试再次运行 <code>nvme format</code> 命令。<a href="https://github.com/linux-nvme/nvme-cli/issues/84">[7]</a><a href="https://forums.sandisk.com/t/sn750-cannot-format-using-the-nvme-command/253702">[8]</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1e179f17182c_.E4.BD.BF.E7.94.A8.E5.88.B6.E9.80.A0.E5.95.86.E4.B8.93.E7.94.A8.E5.B7.A5.E5.85.B7" id="使用制造商专用工具"><span id=".E4.BD.BF.E7.94.A8.E5.88.B6.E9.80.A0.E5.95.86.E4.B8.93.E7.94.A8.E5.B7.A5.E5.85.B7"></span>使用制造商专用工具</h3></div>
+<p>如果上述通用工具无法修改扇区大小，可以试下使用硬盘制造商的专用工具进行修改。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1e179f17182c_.E8.8B.B1.E7.89.B9.E5.B0.94.EF.BC.88Intel.EF.BC.89" id="英特尔（Intel）"><span id=".E8.8B.B1.E7.89.B9.E5.B0.94.EF.BC.88Intel.EF.BC.89"></span>英特尔（Intel）</h4></div>
+<p>对于 Intel 硬盘，需要通过 <a href="https://downloadcenter.intel.com/download/29337/Intel-Memory-and-Storage-Tool-CLI-Command-Line-Interface-?product=83425">Intel Memory and Storage（MAS）工具</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/intel-mas-cli-tool/">intel-mas-cli-tool</a></span><sup><small>AUR</small></sup></span>）使用 <code>-set PhysicalSectorSize=4096</code> 选项进行修改。注意，只有汇报的物理扇区大小会被修改，逻辑扇区大小不会变化。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>自从 Intel 固态硬盘业务被 SK 海力士收购为 Solidigm 品牌后，Intel MAS 工具就只能用于傲腾（Optane）产品上，不再能管理固态硬盘。Solidigm 提供了与 Intel MAS 过去功能相同的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/solidigm-sst-storage-tool-cli/">solidigm-sst-storage-tool-cli</a></span><sup><small>AUR</small></sup></span> 工具，具体信息可参考 <a href="#pg8835d166fb44">Solid_state_drive/NVMe#Intel/Solidigm</a>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1e179f17182c_.E5.B8.8C.E6.8D.B7.EF.BC.88Seagate.EF.BC.89" id="希捷（Seagate）"><span id=".E5.B8.8C.E6.8D.B7.EF.BC.88Seagate.EF.BC.89"></span>希捷（Seagate）</h4></div>
+<p>对于希捷可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/openseachest/">openseachest</a></span><sup><small>AUR</small></sup></span>。
+</p><p>扫描所有硬盘来找到要修改的硬盘，然后输出对应硬盘的相关信息：
+</p>
+<pre># openSeaChest_Basics --scan
+# openSeaChest_Basics -d /dev/sd<i>X</i> -i
+</pre>
+<p>应该可以看到硬盘的详细信息了。请确保序列号与修改目标匹配。
+</p><p>通过以下命令检查硬盘支持的逻辑区块大小：
+</p>
+<pre># openSeaChest_Format -d /dev/sd<i>X</i> --showSupportedFormats
+</pre>
+<p>如果其中包含 4096，你可以使用以下命令将逻辑扇区大小修改为对应值：
+</p>
+<pre># openSeaChest_Format -d /dev/sd<i>X</i> --setSectorSize=4096 --confirm this-will-erase-data
+</pre>
+<p>修改需要数分钟，完成后你的硬盘扇区就是 4 KiB 原生大小了。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1e179f17182c_.E5.88.86.E5.8C.BA.E5.AF.B9.E9.BD.90" id="分区对齐"><span id=".E5.88.86.E5.8C.BA.E5.AF.B9.E9.BD.90"></span>分区对齐</h2></div>
+<p>正确的分区对齐可避免过多的读写操作。对于个人电脑而言，通常建议将各分区的起始端和大小对齐到 1 MiB（1 048 576 bytes）位置。这一操作涵盖了多数常见的页和块大小场景（通常的有 1 MiB，512 KiB，128 KiB，4 KiB 和 512 B）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>分区对齐错误将造成无法在 dm-crypt/LUKS 上使用 4096 字节扇区大小，参见 <a href="https://lore.kernel.org/dm-crypt/fe8cd3b4-6d50-66d3-375c-254e278a6443@gmail.com/">[9]</a>。</div>
+<ul><li><a href="#pgc1328f332dd1">fdisk，cfdisk 和 sfdisk</a> 会自动处理分区对齐。</li>
+<li><a href="#pg382036d37a2d">gdisk 和 cgdisk</a> 会自动处理分区对齐。
+<ul><li><i>sgdisk</i> 默认只对齐分区的起始端。可以通过 <code>-I</code>/<code>--align-end</code> 选项额外启用分区大小和末端对齐。</li></ul></li>
+<li><a href="#pgfba87229acd8">Parted</a> 只对齐分区起始端，而不对齐分区大小和末端。在创建分区时，请确保使用 mebibytes 或是更大的 IEC 二进制单位指定分区末端。</li></ul>
+<p>可以通过 <a href="https://github.com/crysman/check-partitions-alignment">checkpartitionsalignment.sh</a> bash 脚本来使用 <a href="#pgfba87229acd8">Parted</a> 和 awk 检查对齐。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1e179f17182c_dm_crypt" id="dm-crypt">dm-crypt</h2></div>
+
+<p>从 <a href="#pg30ab431721fb">Cryptsetup</a> 2.4.0开始，<code>luksFormat</code>会自动检测 LUKS2 格式的最佳加密扇区大小<a href="https://mirrors.edge.kernel.org/pub/linux/utils/cryptsetup/v2.4/v2.4.0-ReleaseNotes">[10]</a>。
+</p><p>但要实现这一点，需要设备报告正确的默认扇区大小，详情请参考#修改扇区大小。
+</p><p>执行 <code>cryptsetup luksFormat</code> 后，你可以使用如下命令确认 LUKS2 卷所使用的扇区大小：
+</p>
+<pre># cryptsetup luksDump <i>device</i> | grep sector
+</pre>
+<p>如果默认扇区大小不正确，可以使用默认选项并强制创建一个扇区大小为 4 KiB 的 LUKS2 容器：
+</p>
+<pre># cryptsetup luksFormat --sector-size=4096 <i>device</i>
+</pre>
+<p>如果请求的大小与设备不匹配，命令会出现报错并终止：
+</p>
+<pre># cryptsetup luksFormat --sector-size 4096 <i>device</i>
+(...)
+Verify passphrase: 
+Device size is not aligned to requested sector size.
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>参阅 <a href="https://gitlab.com/cryptsetup/cryptsetup/-/issues/585">cryptsetup issue 585</a> 来了解在硬盘确实使用 4 KiB 物理扇区的情况下，命令仍可能失败的原因。</div>
+<p>如果您使用了错误的扇区大小对设备进行加密，可以使用如下命令重新加密设备：
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>所包含的文件系统的块大小必须是 4096 字节或其倍数，否则就会崩溃。</div>
+<pre># cryptsetup reencrypt --sector-size=4096 <i>device</i>
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1e179f17182c_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="文件系统"><span id=".E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>文件系统</h2></div>
+
+<p>在 4Kn（物理和逻辑扇区大小为 4096 字节）硬盘上，所有 <i>mkfs</i> 工具都会使用 4096 字节块大小。在 512e（4096 字节物理扇区大小，512 字节逻辑扇区大小）及 512n（物理和逻辑扇区大小为 512 字节）硬盘上，不同的 <i>mkfs</i> 工具会使用不同的值。
+</p>
+<table class="wikitable">
+<caption>非 4Kn 硬盘的文件系统块大小（字节）
+</caption>
+<tbody><tr>
+<th><i>mkfs</i> 工具</th>
+<th>512e 硬盘</th>
+<th>512n 硬盘
+</th></tr>
+<tr>
+<td><i>mkfs.bcachefs</i></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096</td>
+<td class="archwiki-table-cell-background-orange" data-sort-value="2" style="vertical-align: middle; text-align: center;"><a href="https://github.com/koverstreet/bcachefs/issues/765">512</a>
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.btrfs"><a href="https://man.archlinux.org/man/mkfs.btrfs.8">mkfs.btrfs(8)</a></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.exfat"><a href="https://man.archlinux.org/man/mkfs.exfat.8">mkfs.exfat(8)</a></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096</td>
+<td class="archwiki-table-cell-background-orange" data-sort-value="2" style="vertical-align: middle; text-align: center;">512
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.ext4"><a href="https://man.archlinux.org/man/mkfs.ext4.8">mkfs.ext4(8)</a></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096<sup>1</sup></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096<sup>1</sup>
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.fat"><a href="https://man.archlinux.org/man/mkfs.fat.8">mkfs.fat(8)</a></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">512</td>
+<td class="archwiki-table-cell-background-orange" data-sort-value="2" style="vertical-align: middle; text-align: center;">512
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.f2fs"><a href="https://man.archlinux.org/man/mkfs.f2fs.8">mkfs.f2fs(8)</a></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.jfs"><a href="https://man.archlinux.org/man/mkfs.jfs.8">mkfs.jfs(8)</a></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.nilfs2"><a href="https://man.archlinux.org/man/mkfs.nilfs2.8">mkfs.nilfs2(8)</a></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.ntfs"><a href="https://man.archlinux.org/man/mkfs.ntfs.8">mkfs.ntfs(8)</a></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/tuxera/ntfs-3g/issues/133">512</a></td>
+<td class="archwiki-table-cell-background-orange" data-sort-value="2" style="vertical-align: middle; text-align: center;">512
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.reiserfs"><a href="https://manpages.debian.org/unstable/reiserfsprogs/mkfs.reiserfs.8.en.html">mkfs.reiserfs(8)</a></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.udf"><a href="https://man.archlinux.org/man/mkfs.udf.8">mkfs.udf(8)</a></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">512</td>
+<td class="archwiki-table-cell-background-orange" data-sort-value="2" style="vertical-align: middle; text-align: center;">512
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.xfs"><a href="https://man.archlinux.org/man/mkfs.xfs.8">mkfs.xfs(8)</a></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096</td>
+<td class="archwiki-table-cell-background-orange" data-sort-value="2" style="vertical-align: middle; text-align: center;">512
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkswap"><a href="https://man.archlinux.org/man/mkswap.8">mkswap(8)</a></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">4096
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 zpool-create">zpool-create(8)</span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">512</td>
+<td class="archwiki-table-cell-background-orange" data-sort-value="2" style="vertical-align: middle; text-align: center;">512
+</td></tr></tbody></table>
+<ol><li><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.ext4"><a href="https://man.archlinux.org/man/mkfs.ext4.8">mkfs.ext4(8)</a></span> 默认为小于 512 MiB 的文件系统使用 1024 字节块大小，为 512MiB 及以上的使用 4096 字节大小。</li></ol>
+<p>如果存储设备没有汇报正确的扇区大小，你可以手动将分区按照物理扇区大小进行格式化。
+</p><p>特别是对于由固件管理的<i>叠瓦式磁记录</i>（SMR）硬盘，例如在物理扇区大小为 4096 字节的设备上使用了 512 字节逻辑扇区大小，它们将受到严重影响。这类磁盘有不同的写入性能区间，且在空闲时会进行重映射和重分配。但是当出现大量写入活动时（例如 RAID resilvering，备份，写入大量小文件，rsync 等），由于高性能写入区被耗尽且叠瓦区会拖慢扇区转换层，文件系统扇区与物理扇区大小不一致可能导致写入速度降到每秒个位数兆字节。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在 x86_64 系统上，Linux 无法挂载扇区大于 4 KiB 的文件系统。具体细节和当前进度可参考 <a href="https://kernelnewbies.org/KernelProjects/large-block-size">Large block sizes (LBS)</a>。</div>
+<p>以下为一些将扇区显式设为 4096 字节大小的命令示例：
+</p>
+<ul><li><a href="#pgd0b81baa1ee5">Bcachefs</a>: <pre># bcachefs format --block_size=4096 /dev/<i>device0</i> /dev/<i>deviceN</i> --replicas=<i>n</i></pre></li>
+<li>exFAT: <pre># mkfs.exfat -s 4096 /dev/<i>device</i></pre></li>
+<li><a href="#pgb5dd09f37b3e">ext4</a>: <pre># mkfs.ext4 -b 4096 /dev/<i>device</i></pre></li>
+<li><a href="#pg30cebfcdd710">FAT</a>: <pre># mkfs.fat -S 4096 /dev/<i>device</i></pre></li>
+<li><a href="#pg50f8f3d23b2e">NTFS-3G</a>: <pre># mkfs.ntfs -Q -s 4096 /dev/<i>device</i></pre></li>
+<li>UDF: <pre># mkfs.udf -b 4096 /dev/<i>device</i></pre></li>
+<li><a href="#pg97815ebb0436">XFS</a>: <pre># mkfs.xfs -s size=4096 /dev/<i>device</i></pre></li>
+<li><a href="https://openzfs.github.io/openzfs-docs/Project%20and%20Community/FAQ.html#advanced-format-disks">ZFS</a>: <pre># zpool create -o ashift=12 <i>poolname</i> raidz <i>device0</i> … <i>deviceN</i></pre></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1e179f17182c_.E5.B7.B2.E7.9F.A5.E9.97.AE.E9.A2.98" id="已知问题"><span id=".E5.B7.B2.E7.9F.A5.E9.97.AE.E9.A2.98"></span>已知问题</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1e179f17182c_Syslinux_.E4.B8.8E_FAT" id="Syslinux_与_FAT"><span id="Syslinux_.E4.B8.8E_FAT"></span>Syslinux 与 FAT</h3></div>
+<p><a href="#pg0ca06688075c">Syslinux</a> 不支持除 512 字节扇区大小外的 FAT 文件系统。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1e179f17182c_systemd_homed" id="systemd-homed">systemd-homed</h3></div>
+<p><a href="#pg70e8fdf88586">systemd-homed</a> 不支持 4Kn 硬盘和 4096 字节扇区大小的 LUKS。具体信息请查看 systemd issue <a href="https://github.com/systemd/systemd/issues/30393">30393</a> 和 <a href="https://github.com/systemd/systemd/issues/30394">30394</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1e179f17182c_.E5.8F.82.E8.80.83" id="参考"><span id=".E5.8F.82.E8.80.83"></span>参考</h2></div>
+<ul><li><a href="https://www.anandtech.com/Show/Index/2888">Western Digital’s Advanced Format: The 4K Sector Transition Begins</a></li>
+<li><a href="https://www.wdc.com/wdproducts/library/WhitePapers/ENG/2579-771430.pdf">White paper entitled "Advanced Format Technology."</a></li>
+<li>Failure to align one's HDD results in poor read/write performance.  See <a href="https://linuxconfig.org/linux-wd-ears-advanced-format">[11]</a> for specific examples.</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807022125
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.329 seconds
+Real time usage: 0.355 seconds
+Preprocessor visited node count: 1616/1000000
+Revision size: 18030/2097152 bytes
+Post‐expand include size: 25376/2097152 bytes
+Template argument size: 11396/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  197.333      1 -total
+ 40.68%   80.270      1 Template:翻译状态
+  8.88%   17.514      1 Template:Move
+  7.52%   14.836     17 Template:G
+  5.96%   11.761      7 Template:O
+  5.72%   11.287     28 Template:META_Table_cell
+  4.23%    8.354     14 Template:Man
+  4.04%    7.964      2 Template:Accuracy
+  3.61%    7.127      5 Template:META_Message
+  2.44%    4.818      4 Template:R
+-->
+<!-- Render ID b0458c8e-9206-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7649:|#|:idhash:canonical!zh-cn and timestamp 20260807022125 and revision id 33706. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

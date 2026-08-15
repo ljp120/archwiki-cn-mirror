@@ -1,0 +1,53 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg3afd91a15e45">联想 IdeaPad y530</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Lenovo_IdeaPad_y530">Lenovo IdeaPad y530</a>，最近一次同步于 2020-05-04，若英文版本有所<a href="https://wiki.archlinux.org/title/Lenovo_IdeaPad_y530?diff=0&amp;oldid=610393">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Lenovo_IdeaPad_y530_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3afd91a15e45_.E4.BD.BF.E8.AE.A1.E7.AE.97.E6.9C.BA.E5.8F.AF.E4.BB.A5.E5.B7.A5.E4.BD.9C" id="使计算机可以工作"><span id=".E4.BD.BF.E8.AE.A1.E7.AE.97.E6.9C.BA.E5.8F.AF.E4.BB.A5.E5.B7.A5.E4.BD.9C"></span>使计算机可以工作</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3afd91a15e45_.E5.90.AF.E7.94.A8.E6.89.80.E6.9C.89.E6.89.AC.E5.A3.B0.E5.99.A8" id="启用所有扬声器"><span id=".E5.90.AF.E7.94.A8.E6.89.80.E6.9C.89.E6.89.AC.E5.A3.B0.E5.99.A8"></span>启用所有扬声器</h3></div>
+<pre>echo "options snd_hda_intel model=lenovo-sky" &gt;&gt; /etc/modprobe.d/modprobe.conf
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3afd91a15e45_.E4.BA.AE.E5.BA.A6.E9.94.99.E8.AF.AF.E7.9A.84.E8.A7.A3.E5.86.B3.E6.96.B9.E6.B3.95" id="亮度错误的解决方法"><span id=".E4.BA.AE.E5.BA.A6.E9.94.99.E8.AF.AF.E7.9A.84.E8.A7.A3.E5.86.B3.E6.96.B9.E6.B3.95"></span>亮度错误的解决方法</h3></div>
+<p>Lenovo Ideapad Y530 具有 ACPI 系统的非常规实现。正在开发内核补丁（2.6.29）。在其发布之前，以下解决方法应能帮助控制显示亮度，使其超出键盘快捷键的有限功能。
+</p><p>要查看可用选项列表：
+</p>
+<pre>cat /proc/acpi/video/VGA/LCDD/brightness
+</pre>
+<p>将以下命令中的 XX 替换为所需的显示亮度。
+</p>
+<pre>echo XX &gt; /proc/acpi/video/VGA/LCDD/brightness
+</pre>
+<p>显示最高亮度：
+</p>
+<pre>echo 65 &gt; /proc/acpi/video/VGA/LCDD/brightness
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3afd91a15e45_.E5.B7.A5.E4.BD.9C.E6.9C.9F.E9.97.B4.E6.89.93.E5.BC.80.2F.E5.85.B3.E9.97.AD_wifi" id="工作期间打开/关闭_wifi"><span id=".E5.B7.A5.E4.BD.9C.E6.9C.9F.E9.97.B4.E6.89.93.E5.BC.80.2F.E5.85.B3.E9.97.AD_wifi"></span>工作期间打开/关闭 wifi</h3></div>
+<p>有任何想法吗？目前，您必须重新启动才能使其正常运行。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808041347
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.037 seconds
+Real time usage: 0.039 seconds
+Preprocessor visited node count: 36/1000000
+Revision size: 913/2097152 bytes
+Post‐expand include size: 864/2097152 bytes
+Template argument size: 92/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%    3.433      1 Template:翻译状态
+100.00%    3.433      1 -total
+-->
+<!-- Render ID 8d3adb8e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3387:|#|:idhash:canonical!zh-cn and timestamp 20260808041347 and revision id 33844. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

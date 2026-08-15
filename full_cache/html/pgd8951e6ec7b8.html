@@ -1,0 +1,141 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgd8951e6ec7b8">核心转储</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Core_dump">Core dump</a>，最近一次同步于 2025-1-28，若英文版本有所<a href="https://wiki.archlinux.org/title/Core_dump?diff=0&amp;oldid=826053">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Core_dump_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p><a href="https://en.wikipedia.org/wiki/Core_dump">核心转储</a>是进程意外终止时包含进程地址空间（内存）的文件。核心转储可以按需生成（例如由 debugger 生成），也可以在进程终止时自动生成。核心转储由内核在程序崩溃时触发，并可能传递给辅助程序（如 <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-coredump"><a href="https://man.archlinux.org/man/systemd-coredump.8">systemd-coredump(8)</a></span>）进行进一步处理。普通用户通常不会使用核心转储，但开发人员可以将其用作程序崩溃时的状态快照，尤其是在故障难以可靠重现的情况下。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>核心转储可能包含敏感数据（如密码或加密密钥），因此只能与受信方共享。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd8951e6ec7b8_.E7.A6.81.E7.94.A8.E8.87.AA.E5.8A.A8.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8" id="禁用自动核心转储"><span id=".E7.A6.81.E7.94.A8.E8.87.AA.E5.8A.A8.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8"></span>禁用自动核心转储</h2></div>
+<p>出于多种原因，用户可能希望禁用自动核心转储：
+</p>
+<ul><li>性能：为占用内存大的进程生成核心转储会浪费系统资源并延迟内存清理。</li>
+<li>磁盘空间：如果不压缩，占用内存大的进程的核心转储占用的磁盘空间可能等于甚至大于该进程的内存占用空间。</li>
+<li>安全性：核心转储虽然通常只有 root 可读，但敏感数据（如密码或加密密钥）会在崩溃后写入磁盘。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd8951e6ec7b8_.E4.BD.BF.E7.94.A8_sysctl" id="使用_sysctl"><span id=".E4.BD.BF.E7.94.A8_sysctl"></span>使用 sysctl</h3></div>
+<p>可以将 <code>kernel.core_pattern</code> 设置为空值以使 <a href="#pg7b7cc2bbe79a">sysctl</a> 不处理核心转储。请创建以下文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/50-coredump.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">kernel.core_pattern=|/bin/false</pre>
+<p>要立即应用设置，请执行以下命令：
+</p>
+<pre># sysctl -p /etc/sysctl.d/50-coredump.conf
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd8951e6ec7b8_.E4.BD.BF.E7.94.A8_systemd" id="使用_systemd"><span id=".E4.BD.BF.E7.94.A8_systemd"></span>使用 systemd</h3></div>
+<p><code>/usr/lib/sysctl.d/50-coredump.conf</code> 文件定义了 <a href="#pgac06dd8bfe95">systemd</a> 的默认行为，该文件将<code>kernel.core_pattern</code> 设置为调用 <code>systemd-coredump</code>，并在 <code>/var/lib/systemd/coredump</code> 为所有进程生成核心转储。请在 <code>/etc/systemd/coredump.conf.d/</code> 目录中创建包含以下内容的配置以覆盖 <code>systemd-coredump</code> 行为（参见 <span class="plainlinks archwiki-template-man" title="$ man 5 coredump.conf"><a href="https://man.archlinux.org/man/coredump.conf.5#DESCRIPTION">coredump.conf(5) § DESCRIPTION</a></span>, <a href="https://bbs.archlinux.org/viewtopic.php?id=214207">[1]</a>）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/coredump.conf.d/custom.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Coredump]
+Storage=none
+ProcessSizeMax=0</pre>
+<p><br/>
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>记得包含 <code>[Coredump]</code> 部分名称，否则该选项将被忽略。</div>
+<p>之后用 <a href="#pg16fc2566d30b">daemon-reload</a> 重新加载 systemd 配置文件。
+</p><p>参见 <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-coredump"><a href="https://man.archlinux.org/man/systemd-coredump.8#Disabling_coredump_processing">systemd-coredump(8) § Disabling coredump processing</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd8951e6ec7b8_.E4.BD.BF.E7.94.A8_PAM_.E9.99.90.E5.88.B6" id="使用_PAM_限制"><span id=".E4.BD.BF.E7.94.A8_PAM_.E9.99.90.E5.88.B6"></span>使用 PAM 限制</h3></div>
+
+<p><br/>
+通过 <a href="#pgdacf2e1d6f91">PAM</a> 登录的用户，其最大核心转储大小由 <a href="#pgcee3162a56bb">limits.conf</a> 定义的。用户将其设置为零将完全禁用核心转储。<a href="https://www.cyberciti.biz/faq/linux-disable-core-dumps/">[2]</a>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/security/limits.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">* hard core 0</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd8951e6ec7b8_.E4.BD.BF.E7.94.A8_ulimit" id="使用_ulimit"><span id=".E4.BD.BF.E7.94.A8_ulimit"></span>使用 ulimit</h3></div>
+<p>像是<i>bash</i>，<i>zsh</i>这样的<a href="#pg34c9d748f55e">命令行解释器</a>中提供了内置的 <i>ulimit</i> 命令，这条命令可用于报告或设置 shell 和由 shell 启动的进程的资源限制。详见 <span class="plainlinks archwiki-template-man" title="$ man 1 bash"><a href="https://man.archlinux.org/man/bash.1#SHELL_BUILTIN_COMMANDS">bash(1) § SHELL BUILTIN COMMANDS</a></span> 或 <span class="plainlinks archwiki-template-man" title="$ man 1 zshbuiltins"><a href="https://man.archlinux.org/man/zshbuiltins.1">zshbuiltins(1)</a></span> 。
+</p><p>在当前shell禁用核心转储：
+</p>
+<pre>$ ulimit -c 0
+</pre>
+<p>如果系统设置为使用 <code>kernel.core_pattern</code> 将核心转储通过管道传递到诸如 <i>systemd-coredump</i> 之类的程序中，那么 Linux 内核本身会忽略 <i>ulimit</i> 设置（参见 <span class="plainlinks archwiki-template-man" title="$ man 5 core"><a href="https://man.archlinux.org/man/core.5">core(5)</a></span>）。因此，是否遵循该设置取决于接收转储的程序（<i>systemd-coredump</i> 仍会遵循此设置）。
+</p><p>对于未使用 <i>ulimit</i> 设置的崩溃进程的程序，可以使用 <code>dumpable</code> 和 <span class="plainlinks archwiki-template-man" title="$ man 2 prctl"><a href="https://man.archlinux.org/man/prctl.2">prctl(2)</a></span> 来禁用特定进程的核心转储处理。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd8951e6ec7b8_.E7.94.9F.E6.88.90.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8" id="生成核心转储"><span id=".E7.94.9F.E6.88.90.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8"></span>生成核心转储</h2></div>
+
+<p><br/>
+要生成任意进程的核心转储，首先要<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gdb">gdb</a></span><sup><small>包</small></sup></span> 软件包。然后查找正在运行的进程的 PID，例如使用“‘pgrep’”：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ pgrep -f <i>firefox</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">2071 firefox
+</pre>
+<p>关联进程：
+</p>
+<pre>$ gdb -p 2071
+</pre>
+<p>在 <code>(gdb)</code> 提示下：
+</p>
+<pre>(gdb) generate-core-file
+Saved corefile core.2071
+(gdb) quit
+</pre>
+<p>现在您有了一个名为 <code>core.2071</code> 的 coredump 文件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd8951e6ec7b8_.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8.E6.96.87.E4.BB.B6.E5.8E.BB.E5.93.AA.E5.84.BF.E4.BA.86.EF.BC.9F" id="核心转储文件去哪儿了？"><span id=".E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8.E6.96.87.E4.BB.B6.E5.8E.BB.E5.93.AA.E5.84.BF.E4.BA.86.EF.BC.9F"></span>核心转储文件去哪儿了？</h3></div>
+<p><code>kernel.core_pattern</code> 内核模式 <a href="#pg7b7cc2bbe79a">sysctl</a> 决定自动核心转储的位置。默认情况下，核心转储将被发送到 <i>systemd-coredump</i> ，可以使用 <code>/etc/systemd/coredump.conf</code> 来定义其行为。默认下，所有的核心转储文件储存在 <code>/var/lib/systemd/coredump</code> （因为配置了 <code>Storage=external</code>），它们被 <code>zstd</code> 压缩（因为配置了 <code>Compress=yes</code>）。此外，还可以配置存储的各种大小限制。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>/usr/lib/sysctl.d/50-coredump.conf</code> 中配置了 <code>kernel.core_pattern</code> 的默认值，
+ 如果遵循默认的 <span class="plainlinks archwiki-template-man" title="$ man 5 sysctl.d"><a href="https://man.archlinux.org/man/sysctl.d.5">sysctl.d(5)</a></span> 规则，该文件可能会被屏蔽或覆盖。</div>
+<p>要从日志中获取核心转储，请参见 <span class="plainlinks archwiki-template-man" title="$ man 1 coredumpctl"><a href="https://man.archlinux.org/man/coredumpctl.1">coredumpctl(1)</a></span> 。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd8951e6ec7b8_.E7.AE.A1.E7.90.86.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8" id="管理核心转储"><span id=".E7.AE.A1.E7.90.86.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8"></span>管理核心转储</h2></div>
+<p>使用 <i>coredumpctl</i> 查找相应的转储文件。请注意，普通用户无需特殊权限即可运行 <i>coredumpctl</i> 来管理其进程的核心转储。
+</p>
+<pre># coredumpctl list
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd8951e6ec7b8_.E6.B8.85.E7.90.86.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8" id="清理核心转储"><span id=".E6.B8.85.E7.90.86.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8"></span>清理核心转储</h3></div>
+<p>存储在 <code>/var/lib/systemd/coredump/</code> 中的核心转储文件会被 <code>systemd-tmpfiles --clean</code> 自动清理，该命令由 <code>systemd-tmpfiles-clean.timer</code>  每天触发。核心转储文件的默认保留时间为至少 3 天，具体配置可通过运行 <code>systemd-tmpfiles --cat-config</code> 查看。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd8951e6ec7b8_.E5.88.86.E6.9E.90.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8" id="分析核心转储"><span id=".E5.88.86.E6.9E.90.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8"></span>分析核心转储</h2></div>
+<p>首先，您需要找到需要相关转储。可通过指定 <code>PID</code>、可执行文件名称、可执行文件路径或 <a href="#pg95a389d97781">journalctl</a> 谓词来实现（详见 <span class="plainlinks archwiki-template-man" title="$ man 1 coredumpctl"><a href="https://man.archlinux.org/man/coredumpctl.1">coredumpctl(1)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 1 journalctl"><a href="https://man.archlinux.org/man/journalctl.1">journalctl(1)</a></span> ）。
+要查看核心转储的详细信息：
+</p>
+<pre># coredumpctl info <i>match</i>
+</pre>
+<p>注意 “Signal” 行，它有助于确定崩溃原因。分析时，通常使用调试器（默认为 <span class="plainlinks archwiki-template-man" title="$ man 1 gdb"><a href="https://man.archlinux.org/man/gdb.1">gdb(1)</a></span> ）检查回溯：
+</p>
+<pre># coredumpctl debug <i>match</i>
+</pre>
+<p>启动 <i>gdb</i> 后，使用 <code>bt</code> 命令打印完整的回溯：
+</p>
+<pre>(gdb) thread apply all backtrace full
+</pre>
+<p>在许多情况下，输出将包含问号作为缺失调试符号的占位符。如何获取这些符号，请参阅<a href="#pgd3ea58bac98d">调试/获取跟踪数据</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd8951e6ec7b8_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://lcamtuf.coredump.cx/afl/">american fuzzy lop</a> - 一个自动测试内核和程序的工具</li>
+<li><a href="https://lwn.net/Articles/637151/">Filesystem fuzzing</a> - LWN 有关测试文件系统错误的文章</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807130744
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.157 seconds
+Real time usage: 0.165 seconds
+Preprocessor visited node count: 717/1000000
+Revision size: 6536/2097152 bytes
+Post‐expand include size: 9318/2097152 bytes
+Template argument size: 2833/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 62/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   46.024      1 -total
+ 19.33%    8.898     12 Template:Man
+ 11.29%    5.198      1 Template:Accuracy
+  9.04%    4.160      2 Template:Note
+  8.73%    4.017     27 Template:Ic
+  7.73%    3.557      1 Template:翻译状态
+  6.09%    2.805      1 Template:Style
+  5.71%    2.627      2 Template:META_Message
+  4.36%    2.006      4 Template:Hc
+  4.32%    1.989      1 Template:Warning
+-->
+<!-- Render ID fa5b5c0e-9260-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8111:|#|:idhash:canonical!zh-cn and timestamp 20260807130744 and revision id 34241. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,285 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgb3b4b5c595bd">专业音频</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg3eb5b92e41d9">/示例</a></li>
+<li><a href="#pgc72d2bd25455">/开发</a></li>
+<li><a href="#pg090eb87c35b6">/硬件</a></li>
+<li><a href="#pga90a06607c35">音频系统</a></li>
+<li><a href="#pgd4e8cda1ef34">JACK</a></li>
+<li><a href="#pgfd2dc6e44edd">PipeWire</a></li>
+<li><a href="#pga3a0aaf4b772">实时内核</a></li>
+<li><a href="#pgfb44596f1471">envy24control</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Professional_audio">Professional audio</a>，最近一次同步于 2025-11-18，若英文版本有所<a href="https://wiki.archlinux.org/title/Professional_audio?diff=0&amp;oldid=849875">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Professional_audio_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>该文章描述了如何将你的系统针对<a href="https://en.wikipedia.org/wiki/Multitrack_recording#With_computers">多轨录音</a>，混音，回放或是合成音频应用进行配置。
+这类活动通常使用术语“<a href="https://en.wikipedia.org/wiki/Professional_audio">专业音频</a>”进行描述，并相对需要较低的<a href="https://en.wikipedia.org/wiki/Latency_(audio)">延迟</a>。
+</p><p>相对于视频剪辑或游戏，该类应用通常不需要高端硬件。更多信息请参考 <a href="https://manual.ardour.org/setting-up-your-system/the-right-computer-system-for-digital-audio/">The Right Computer System for Digital Audio</a> 一文。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果你在找的是 <a href="https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy">GNU/Linux</a> 作曲指南，可前往 <a href="https://linuxmusicians.com">LinuxMusicians</a> 论坛进行查找。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3b4b5c595bd_.E5.BC.80.E5.A7.8B" id="开始"><span id=".E5.BC.80.E5.A7.8B"></span>开始</h2></div>
+<p>高级 Linux 声音体系（<a href="#pgb16dfd48462f">ALSA</a>）是 Linux <a href="#pg3473491e6a48">内核</a>的一部分，并在 <a href="#pg83506eae4ba0">Arch Linux</a> 的<a href="#pga90a06607c35">驱动及接口</a>中是默认的<a href="#pga90a06607c35">音频系统</a>。ALSA 在完成默认的 Arch Linux 安装流程后应当可以开箱即用。如果出现异常，你需要在进行下一步前先排清问题。
+</p><p><b>我已正确配置好声音系统了吗？</b>
+</p>
+<pre>$ speaker-test
+</pre>
+<dl><dd>进一步排障可参考 <a href="#pgb16dfd48462f">ALSA</a>。</dd></dl>
+<p>在多数情况下，默认的 Arch Linux 内核已能满足低延迟应用。只有在你遇到了音频丢失，或是你确实需要/想要极低延迟的情况下再尝试优化系统配置。
+</p><p>为了完成优化工作，你可能需要配置一个实时内核。
+</p><p>尽管有些专业音频软件可以直接使用 ALSA，但该文章提到的大多数软件都属于 JACK Audio Connection Kit（又称 <a href="#pgd4e8cda1ef34">JACK</a>）客户端。因此，你需要根据下方描述安装并配置一个可用的<a href="#pg3f746ac9b0b0">音频服务器</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果你刚开始使用 Arch Linux，完成了<a href="#pgbdbcbed611fc">安装指南</a>且想要立刻开始作曲，可以<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/pro-audio/">pro-audio</a></span><sup><small>包组</small></sup></span> 软件包组及 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/realtime-generic-setup/">realtime-generic-setup</a></span><sup><small>AUR</small></sup></span> 并重启。参考 #仅使用 PipeWire 一节进行快速配置并查找适合你的音乐制作#软件。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3b4b5c595bd_.E9.80.89.E6.8B.A9.E9.9F.B3.E9.A2.91.E6.9C.8D.E5.8A.A1.E5.99.A8" id="选择音频服务器"><span id=".E9.80.89.E6.8B.A9.E9.9F.B3.E9.A2.91.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>选择音频服务器</h2></div>
+<p>音频硬件无法同时播放来自多个应用的声音。虽然理论上 <a href="#pgb16dfd48462f">ALSA</a> 可以被配置为<a href="#pgb16dfd48462f">混合来自多个应用的声音</a>，但这方面的工作通常会交由<a href="#pg3f746ac9b0b0">音频服务器</a>来处理。
+</p><p>单独使用 ALSA 时难以实现低延迟，无法协调多个音频应用的实时播放、同时播放以及维持同一速率等，并且无法简单通过连接客户端的方式在多个应用间传输音频流，因此在这一场景下，你需要一个专业音频级的音频服务器：
+</p>
+<ul><li><a href="#pgfd2dc6e44edd">PipeWire</a> 在音频方面同时取代了 <a href="#pgd4e8cda1ef34">JACK</a> 和 <a href="#pga942ba974b3d">PulseAudio</a>。除本文涉及内容外，它同时可以处理视频路由。</li></ul>
+<dl><dd><div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>目前尚不明确是否应将 PipeWire 视为仅适于日常使用，<a href="https://linuxmusicians.com/viewtopic.php?p=154049&amp;sid=3fdd50d4d87c966adeaabc644c9547be#p154049">而非在专业场景中使用</a>。</div></dd></dl>
+<ul><li>JACK Audio Connection Kit（<a href="#pgd4e8cda1ef34">JACK</a>）专门针对专业音频的需要进行开发，并已在全球范围内获得长期应用，因此其非常成熟和稳定。大部分专业音频应用都针对 JACK API 进行开发。</li></ul>
+<p>音频服务器的配置很大程度上由使用场景、工作流及应用交互限制所决定。JACK 设计为在不同应用间传输音频，并在维持低延迟下通过客户端的同步执行来同时访问同一音频硬件。它对应的 PipeWire 替代品提供了适用于大多数情况的服务器。
+</p><p>以下为将要介绍的音频服务器配置的模型：
+</p>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;">    #仅使用 PipeWire          #PipeWire 作为 JACK 的客户端          #仅使用 JACK
+┌──────────┐        ┌──────────┐        ┌──────────┐
+│    Applications    │        │    Applications    │        │    Applications    │
+├──────────┤        ├──────────┤        ├──────────┤
+│      PipeWire      │        │    PipeWire+JACK   │        │        JACK        │
+├──────────┤        ├──────────┤        ├──────────┤
+│        ALSA        │        │        ALSA        │        │        ALSA        │
+└──────────┘        └──────────┘        └──────────┘
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3b4b5c595bd_.E4.BB.85.E4.BD.BF.E7.94.A8_PipeWire" id="仅使用_PipeWire"><span id=".E4.BB.85.E4.BD.BF.E7.94.A8_PipeWire"></span>仅使用 PipeWire</h3></div>
+<p>新的 <a href="#pgfd2dc6e44edd">PipeWire</a> 框架通过更优秀的简洁性取代了 JACK 及其它音频服务器。因此，建议先尝试在默认 Arch Linux 内核下使用仅 PipeWire 配置，并通过安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pipewire-jack">pipewire-jack</a></span><sup><small>包</small></sup></span> 为 <a href="#pgfd2dc6e44edd">JACK 客户端</a>提供支持。
+</p><p>对于专业音频应用，你同时需要使用 <a href="#pgfd2dc6e44edd">Pro Audio profile</a> 及 PulseAudio 的混音器 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pavucontrol">pavucontrol</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3b4b5c595bd_PipeWire_.E4.BD.9C.E4.B8.BA_JACK_.E7.9A.84.E5.AE.A2.E6.88.B7.E7.AB.AF" id="PipeWire_作为_JACK_的客户端"><span id="PipeWire_.E4.BD.9C.E4.B8.BA_JACK_.E7.9A.84.E5.AE.A2.E6.88.B7.E7.AB.AF"></span>PipeWire 作为 JACK 的客户端</h3></div>
+<p>通过安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pipewire-jack-client">pipewire-jack-client</a></span><sup><small>包</small></sup></span>，<a href="#pgfd2dc6e44edd">PipeWire</a> 也可以被用作 JACK 的客户端。详细内容请参考 <a href="#pgfd2dc6e44edd">PipeWire</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3b4b5c595bd_.E4.BB.85.E4.BD.BF.E7.94.A8_JACK" id="仅使用_JACK"><span id=".E4.BB.85.E4.BD.BF.E7.94.A8_JACK"></span>仅使用 JACK</h3></div>
+<p>在<a href="#pg83506eae4ba0">通用性</a>的原则下，你可以将 JACK 与实时内核搭配系统配置以达到进阶应用所需的低延迟。使用 JACK 作为唯一的音频服务器时，需要所有音频交互应用都作为 JACK 客户端运行。
+</p><p>不幸的是，一些流行的桌面应用（例如<a href="#pg11a76da100e0">火狐</a>）以及大多数游戏都取消了或是根本不支持 JACK。因此，该配置只适合作为专业音频系统的独立设备，此时不支持 JACK 的软件影响可以忽略不计。如果你仍需使用到不支持 JACK 的软件，可以在完成下列设置后参考<a href="#pg3eb5b92e41d9">专业音频/示例#高级音频服务器配置</a>。在安装和运行 JACK 前，请确保它可以访问到你的音频设备。
+</p><p><b>PulseAudio 或者其它软件在占用我的设备吗？</b>
+</p>
+<pre>$ lsof +c 0 /dev/snd/pcm* /dev/dsp*
+</pre>
+<p>或者
+</p>
+<pre>$ fuser -fv /dev/snd/pcm* /dev/dsp*}}
+</pre>
+<p>如果你的音频设备没有显示出来，它可能是在被 PulseAudio 占用（可能是由其它软件作为需求包安装）。如果你不打算使用<a href="#pg3eb5b92e41d9">专业音频/示例#PulseAudio+JACK</a>，可以将 PulseAudio 连带其它软件一起移除，以使其释放音频设备。 
+</p><p>JACK 版本 1 已处于 “逐渐淘汰”<a href="https://github.com/jackaudio/jackaudio.github.com/wiki/Differences-between-jack1-and-jack2#which-one-should-i-choose">[1]</a> 阶段中，其不支持<a href="https://en.wikipedia.org/wiki/Symmetric_multiprocessing">对称多处理（SMP）</a>，缺乏 <a href="#pg05349798cdb5">D-Bus</a> 及 <a href="#pgac06dd8bfe95">Systemd</a> 整合，因此建议使用官方软件源中的版本 2 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=jack2">jack2</a></span><sup><small>包</small></sup></span>。若你准备用一个 <a href="#pg9fd97b0c6a8a">JACK 图形控制界面</a>或是 <a href="#pg71f5edcc580c">Systemd 用户服务</a> 来 <a href="#pg9fd97b0c6a8a">启动 audio graph</a>，也请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=jack2-dbus">jack2-dbus</a></span><sup><small>包</small></sup></span>。 
+</p>
+<dl><dd><i>更多细节参见 <a href="#pg9fd97b0c6a8a">JACK Audio Connection Kit#Comparison of JACK implementations</a></i></dd></dl>
+<p>JACK 的文章中包含了一个<a href="#pg9fd97b0c6a8a">图形化的</a>和一个<a href="#pg9fd97b0c6a8a">命令行的</a>示例，可供你根据情况进行参考。 JACK 的参数值可参考下方的 #JACK 参数一节，还可以同时参考下方#优化系统配置一节中提到的其他系统因素。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3b4b5c595bd_JACK_.E5.8F.82.E6.95.B0" id="JACK_参数"><span id="JACK_.E5.8F.82.E6.95.B0"></span>JACK 参数</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>以下指南用于在运行#仅使用 JACK或 <a href="#pg3eb5b92e41d9">/示例#PulseAudio+JACK</a> 声音服务器的环境下，找到在使用 JACK 的同时不出现音频中断（<a href="https://alsa.opensrc.org/Xruns">xruns</a>）的最佳参数。鉴于具体参数会随着硬件不同，是否使用了#实时内核，是否应用了某些#优化系统配置等条件更改，因此不能将下文参数作为通用配置。</div>
+<p>此处的目标为根据你当前使用的硬件，找到缓冲区大小和处理周期数的最佳搭配，可以先从 
+<b>Frames/Period = 256</b> 开始。对于板载和 USB 设备，在降低这两者前先试试 <b>Periods/Buffer = 3</b>。常用的值有：256/3, 256/2, 128/3, 128/2。
+</p><p>另外，采样率也需要与硬件设备匹配，你可以通过以下命令查看设备支持的采样率选项：
+</p>
+<pre>$ cat /proc/asound/card0/codec#0
+</pre>
+<p>将 <i>card0</i> 和 <i>codec#0</i> 替换为你的设备对应的值；在输出结果中，在 <b>Extended ID</b> 中找到 <b>rates</b> 和 <b>VRA</b> 的值。目前常见的采样率值为 <b>48000 Hz</b>，另外比较常见的值有 44100 Hz,96000 Hz 和 192000 Hz。
+</p><p>在重点关注录制或与外部设备进行调度的情况下，基本上必须使用 <b>realtime</b> 参数。另外，你可能会有需要设置最大优先级（至少比 <code>/etc/security/limits.d/99-realtime-privileges.conf</code> 中设定的系统限制低 10；最大值是预留给设备自己的）。
+</p><p>使用你找到的参数启动 jack，如下所示：
+</p>
+<pre>$ /usr/bin/jackd -R -P89 -dalsa -dhw:0 -r48000 -p128 -n2
+</pre>
+<p>可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=qjackctl">qjackctl</a></span><sup><small>包</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cadence/">cadence</a></span><sup><small>AUR</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/patchage/">patchage</a></span><sup><small>AUR</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/studio-controls-git/">studio-controls-git</a></span><sup><small>AUR</small></sup></span> 通过图形界面来监控 JACK 的状态和修改配置。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>配置好 JACK 后，建议使用多个不同的音频软件来验证你的配置。例如，假设 JACK 在 <a href="#pg52a515a00d18">LMMS</a> 上出现 xrun 问题，当问题出在后者上时不要花费过多时间排障。</div>
+<dl><dd><i>建议阅读 <a href="https://www.linux-magazine.com/content/download/63041/486886/version/1/file/JACK_Audio_Server.pdf">Linux Magazine article (2006)</a> 来理解 JACK 参数调优</i></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3b4b5c595bd_.E9.AA.8C.E8.AF.81.E5.BB.B6.E8.BF.9F" id="验证延迟"><span id=".E9.AA.8C.E8.AF.81.E5.BB.B6.E8.BF.9F"></span>验证延迟</h2></div>
+<p>JACK 参数在很大程度上影响着<a href="https://en.wikipedia.org/wiki/Round-trip_delay">往返延迟</a>（RTD）。在本文中，这表示音频信号从录制，处理到回放这一过程的总耗时。下一部分将介绍影响 RTD 的各个来源相关背景，如果你已了解这一概念，可直接跳到 #测量延迟一节，或是完全跳过该部分。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3b4b5c595bd_.E5.BB.B6.E8.BF.9F.E6.9D.A5.E6.BA.90" id="延迟来源"><span id=".E5.BB.B6.E8.BF.9F.E6.9D.A5.E6.BA.90"></span>延迟来源</h3></div>
+<p>假设有一标准的歌手录音场景。歌手的声音以<a href="https://en.wikipedia.org/wiki/Speed_of_sound">声速</a>通过空气传播到麦克风并被捕获。接下来，通过<a href="https://en.wikipedia.org/wiki/Analog-to-digital_conversion">模数转换</a>使得捕获的电信号可以被计算机进行<a href="https://en.wikipedia.org/wiki/Digital_signal_processing">数字信号处理</a>。最后，通过<a href="https://en.wikipedia.org/wiki/Digital-to-analog_conversion">数模转换</a>将信号传到歌手的耳机进行回放监听，与<a href="https://en.wikipedia.org/wiki/Stage_monitor_system">舞台监听系统</a>的使用场景类似。
+</p><p>在这一场景中，有五个对 RTD 影响最大的<a href="https://wiki.linuxaudio.org/wiki/jack_latency_tests#latency_sources">延迟源</a>，并按如下顺序出现：
+</p>
+<ol><li>声音从歌手的嘴通过空气进行传播</li>
+<li>模数转换</li>
+<li>数字信号处理</li>
+<li>数模转换</li>
+<li>声音通过空气传播到歌手的耳朵</li></ol>
+<p>由于在技术上，必须在录音及回放过程中保持特定距离才能获得理想的声音，因此很难对第一个及最后一个延迟源进行改善。另外，在近距离进行录制并使用耳机进行回放时，由声音传播造成的延迟通常在个位数毫秒范围内，对人类而言难以察觉。所以，需要通过优化其它延迟源来降低 RTD。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3b4b5c595bd_.E8.BD.AC.E6.8D.A2.E5.BB.B6.E8.BF.9F" id="转换延迟"><span id=".E8.BD.AC.E6.8D.A2.E5.BB.B6.E8.BF.9F"></span>转换延迟</h3></div>
+<p>理论上，JACK 通过在<a href="https://en.wikipedia.org/wiki/Sampling_(signal_processing)">采样</a>过程中使用固定值（包括帧，周期及采样率）并对模数转换过程中的音频数据进行<a href="https://en.wikipedia.org/wiki/Sampling_(signal_processing)">缓存</a>来保持低延迟，反之亦然。采样过程中的延迟可以用以下公式描述：
+</p>
+<dl><dd><b>Lc = n / f</b></dd></dl>
+<p><b>Lc</b>：毫秒（ms）为单位的采样延迟，<b>n</b>：帧或缓冲大小（从 16 开始的 2 的倍数），<b>f</b>：赫兹（Hz）为单位的采样率。
+</p><p>回放延迟同时用到了周期值：
+</p>
+<dl><dd><b>Lp = n * p / f</b></dd></dl>
+<p><b>Lp</b>：毫秒（ms）为单位的回放延迟，<b>n</b>：帧或缓冲大小（从 16 开始的 2 的倍数），<b>p</b>: 周期值，<b>f</b>：赫兹（Hz）为单位的采样率。
+</p><p>如之前所说，音频接口的性能决定了可用的参数搭配，具体的配置需要你进行试错。虽然需要在防止 xrun 及低延迟间进行取舍，但现在的音频接口基本都可以通过高采样率（通常到 192 KHz）来满足该需求。在数字域中，JACK 客户端之间的音频流延迟几乎为零，因此在测量延迟时可忽略不计<a href="https://man.archlinux.org/man/jackd.1">[2]</a>。
+</p>
+<dl><dd>更多信息可参考 ALSA 维基的<a href="https://www.alsa-project.org/main/index.php/FramesPeriods">FramesPeriods</a> 一节。</dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3b4b5c595bd_.E6.B5.8B.E9.87.8F.E5.BB.B6.E8.BF.9F" id="测量延迟"><span id=".E6.B5.8B.E9.87.8F.E5.BB.B6.E8.BF.9F"></span>测量延迟</h3></div>
+<p>在完成#JACK 参数配置后，你可能会想验证下当前 RTD。例如，在帧或缓存大小 <b>n = 128</b>，周期值 <b>p = 2</b>，采样率 <b>f = 48000</b> 时，采样延迟大约为 <b>Lc = 2,666... ms</b>，回放延迟大约为 <b>Lp = 5,333... ms</b>，加起来总往返延迟 <b>RTD = 8 ms</b>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>根据<a href="https://en.wikipedia.org/wiki/Speed_of_sound#Speed_of_sound_in_ideal_gases_and_air">声速</a>可计算出该延迟值与舞台上使用距表演者耳朵距离在 2 m 到 3 m 之间的扬声器的典型监听情况相当。有过舞台经历的表演家通常已习惯该延迟。</div>
+<p>由 Fons Adriaensen 编写的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=jack_delay">jack_delay</a></span><sup><small>包</small></sup></span> 工具可以在单个回放通道播放一个测试音，并在单个录制通道上进行捕获来，通过测量信号的相位差来估计整个链的往返延迟。建议使用合适的线缆将音频接口的输入和输出通道连一起，或是参照 <a href="https://wiki.linuxaudio.org/wiki/jack_latency_tests#measuring_roundtrip_latency_with_jack_delay">JACK 延迟测试</a>将音响和麦克风靠近放一起。
+</p><p>例如，在一台仅配置 JACK 的设备上，将 <b>playback_1</b> 和 <b>capture_1</b> （名称根据设备不同可能会改变）用线缆连接起来运行 <code>jack_delay</code>，并根据上文描述的参数得到以下输出：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ jack_delay -O system:playback_1 -I system:capture_1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">capture latency  = 128
+playback_latency = 256
+Signal below threshold...
+Signal below threshold...
+Signal below threshold...
+  422.507 frames      8.802 ms total roundtrip latency
+       extra loopback latency: 38 frames
+       use 19 for the backend arguments -I and -O
+  422.507 frames      8.802 ms total roundtrip latency
+       extra loopback latency: 38 frames
+       use 19 for the backend arguments -I and -O
+  422.506 frames      8.802 ms total roundtrip latency
+       extra loopback latency: 38 frames
+       use 19 for the backend arguments -I and -O
+  422.507 frames      8.802 ms total roundtrip latency
+       extra loopback latency: 38 frames
+       use 19 for the backend arguments -I and -O
+&lt;output omitted&gt;</pre>
+<p>根据输出的提示，可以使用 <code>-I 19</code> 和 <code>-O 19</code> 参数对 JACK 进行进一步优化，以补偿链中额外的回环延迟：
+</p>
+<pre>$ /usr/bin/jackd -R -P89 -dalsa -dhw:0 -r48000 -p128 -n2 -I19 -O19   
+</pre>
+<dl><dd><i>更多信息可参考 Ardour 文档中的 <a href="https://manual.ardour.org/synchronization/latency-and-latency-compensation/">延迟与延迟补偿</a>一节。</i></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3b4b5c595bd_.E5.AE.9E.E6.97.B6.E5.86.85.E6.A0.B8" id="实时内核"><span id=".E5.AE.9E.E6.97.B6.E5.86.85.E6.A0.B8"></span>实时内核</h2></div>
+
+<p>"<a href="https://en.wikipedia.org/wiki/Real-time">实时</a>" 这一概念在操作系统中的<a href="https://www.iso.org/obp/ui/#iso:std:iso-iec:2382:ed-1:v1:en">定义</a>为：操作的结果可以在固定时间内得出，只有在更广的意义上才是“与现实时间同步”，例如：用户在输入后可以立即产生相应的声音。这个案例称为“低延迟”，而达成它的操作这篇文章的主要目标之一。
+</p><p>从一段时间前开始，默认的 Linux 内核（Arch Linux 的初始内核<a href="https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/blob/main/config">默认</a>带有 <code>CONFIG_PREEMPT=y</code> 选项）已被证明适用于低延迟操作。操作系统中对延迟的定义为：从硬件中断的开始，到对应的中断线程开始运行的时间。不幸的是，某些硬件的驱动会导致更高的延迟。因此，根据你的硬件、驱动和需求，你可能需要一个满足<a href="https://en.wikipedia.org/wiki/Real-time_computing#Criteria_for_real-time_computing">实时计算标准</a>的内核。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3b4b5c595bd_.E4.BC.98.E5.8A.BF.E4.B8.8E.E5.8A.A3.E5.8A.BF" id="优势与劣势"><span id=".E4.BC.98.E5.8A.BF.E4.B8.8E.E5.8A.A3.E5.8A.BF"></span>优势与劣势</h3></div>
+<p>Ingo Molnar 和 Thomas Gleixner 创造的 <a href="https://wiki.linuxfoundation.org/realtime/documentation/technical_details/start">RT_PREEMPT</a> 补丁集是对于软/硬实时应用而言非常有意思的选项，涵盖了从专业音频到工业控制等范围。大多数专注于音频的 Linux 发行版都启用了该补丁集。一个可实时抢占的内核也将使调整 IRQ 处理线程的优先级成为可能，并有助于确保几乎不受负载影响的流畅音频。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>目前，在实时内核上使用某些应用会有些<a href="https://wiki.linuxfoundation.org/realtime/documentation/known_limitations">已知限制</a>，通常与<a href="#pg0f30285d4dc6">虚拟化</a>（例如 <a href="#pgd1e005f2258d">Xen</a> 和 <a href="#pg0c58b0bfaab8">KVM</a>）相关。如果你同时需要使用这类功能，可以考虑在默认 Arch Linux 内核外同时安装实时内核，并在 <a href="#pgee8f2050088a">引导加载程序</a> 创建另一个入口以按需启动到对应的内核。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3b4b5c595bd_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h3></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-rt">linux-rt</a></span><sup><small>包</small></sup></span> 或是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-rt-lts">linux-rt-lts</a></span><sup><small>包</small></sup></span> 包。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3b4b5c595bd_.E7.BC.96.E8.AF.91" id="编译"><span id=".E7.BC.96.E8.AF.91"></span>编译</h3></div>
+<p>如果你要将自己的内核<a href="#pg3473491e6a48">编译</a>为<a href="#pg9743197ff846">实时内核</a>，请记住，移除模块或选项并不等同于精简内核。虽然内核映像的体积会减小，但现代的计算机系统以不再像 1995 年那时对大小敏感了。
+</p>
+<dl><dd>更多信息可参考<a href="https://wiki.linuxfoundation.org/realtime/documentation/howto/applications/preemptrt_setup">如何正确配置带 PREEMPT_RT 的 Linux</a> 。</dd></dl>
+<p>不论如何，你必须要确保：
+</p>
+<ul><li><b>Timer Frequency</b> 设为 <b>1000Hz（</b><code>CONFIG_HZ_1000=y</code>；不使用 <i>MIDI</i> 可以无视该项）</li>
+<li><b>禁用 APM</b>（<code>CONFIG_APM=n</code>；在某些硬件上会产生问题 - 在 x86_64 中为默认配置）</li></ul>
+<p>如果你真的想要一个轻量的系统，我们建议你用你自己的方法通过 <i>static /devs</i> 部署。无论如何，你都该设置你的 CPU 架构。为合适的硬件选择 "Core 2 Duo" 可以得到较好的优化，但对于较差的硬件就不是很明显了。 
+</p><p>（实时）内核的常见问题： 
+</p>
+<ul><li>超线程（如果怀疑是它导致的问题，可以在 <a href="#pg46c3147defaf">UEFI</a> 设置中将其禁用）</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3b4b5c595bd_.E4.BC.98.E5.8C.96.E7.B3.BB.E7.BB.9F.E9.85.8D.E7.BD.AE" id="优化系统配置"><span id=".E4.BC.98.E5.8C.96.E7.B3.BB.E7.BB.9F.E9.85.8D.E7.BD.AE"></span>优化系统配置</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>优化不是万能的 —— 其效果很大程度上取决于你的环境：对某些系统，优化是必需的，而对大多数用户而言是不需要的。首先尝试使用标准的 Arch Linux 内核，如果你对结果不满意，认为延迟或是系统稳定性可以进一步改善，则再考虑优化。</li>
+<li>发挥下创造性，尝试些不同的设置。</li>
+<li>实践是唯一标准 —— <b>在应用设置前后都要衡量性能</b></li></ul>
+</div>
+<p>你可以参考下列常见的系统优化方式：
+</p>
+<ul><li>将 <a href="#pg170b536fb37a">CPU 调频</a>调速器设至 <i>performance</i></li>
+<li><a href="#pg649305a2d783">配置 pam_limits</a>（例如安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=realtime-privileges">realtime-privileges</a></span><sup><small>包</small></sup></span> 并将用户添加至 <code>realtime</code> 组）</li>
+<li>使用 <code>threadirqs</code> <a href="#pgec0856954f1c">内核参数</a>（参考 <a href="https://docs.kernel.org/admin-guide/kernel-parameters.html">[3]</a>）- <a href="#pg9743197ff846">实时内核</a>已默认启用该参数</li>
+<li>使用<a href="#pg9743197ff846">实时内核</a></li>
+<li>添加 <code>noatime</code> 至 <a href="#pgced0cc449f44">fstab</a>（参考<a href="#pg5f7223c277dc">性能优化#挂载选项</a>）</li>
+<li>通过<a href="#pg157af4510f93">在启动阶段执行下列命令</a>来提高最大 RTC 中断请求频率（默认为 64 Hz）：</li></ul>
+<pre># echo 2048 &gt; /sys/class/rtc/rtc0/max_user_freq
+# echo 2048 &gt; /proc/sys/dev/hpet/max-user-freq
+</pre>
+<ul><li>降低系统的 <a href="https://en.wikipedia.org/wiki/Paging#Swappiness">swappiness</a> 值（即交换频率，默认为 <code>60</code>），例如：将该值设为 <code>10</code> 可让系统在试图交换到硬盘前等待更长时间。More precisely, it makes the kernel to prefer keeping all applications in RAM instead of swapping <i>background</i> applications out. 该值可通过执行 <code>sysctl vm.swappiness=10</code> 实时更改（详情请参考 <span class="plainlinks archwiki-template-man" title="$ man 8 sysctl"><a href="https://man.archlinux.org/man/sysctl.8">sysctl(8)</a></span>），或是通过修改配置文件将设置持久化（参考 <span class="plainlinks archwiki-template-man" title="$ man 5 sysctl.d"><a href="https://man.archlinux.org/man/sysctl.d.5">sysctl.d(5)</a></span>），具体如下：</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/90-swappiness.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">vm.swappiness = 10</pre>
+<ul><li>将 <i>inotify</i> 跟踪用户的最大文件数量（默认为 <code>524288</code>）提升到如 <code>600000</code> 有助于同时需要处理大量文件的程序（例如 <a href="#pga59ba9915999">DAW</a>）。该值可通过执行 <code>sysctl fs.inotify.max_user_watches=600000</code> 临时更改，或是通过单独的配置文件将设置持久化：</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/90-max_user_watches.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">fs.inotify.max_user_watches = 600000</pre>
+<p>你可能也会想最大化 PCI 声卡的 PCI 延迟计时器，并为所有 PCI 外设提高延迟计时器（默认为 64）：
+</p>
+<pre>$ setpci -v -d *:* latency_timer=<b>b0</b>
+# setpci -v -s <i>$SOUND_CARD_PCI_ID</i> latency_timer=<b>ff</b>
+</pre>
+<p>例如 <code>SOUND_CARD_PCI_ID=03:00.0</code>。
+</p><p>可通过以下方式获取 SOUND_CARD_PCI_ID：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lspci -nnd ::04xx</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"><b>03:00.0</b> Multimedia audio controller [0401]: Creative Labs SB Audigy [1102:0004] (rev 05)
+<b>03:01.0</b> Multimedia audio controller [0401]: VIA Technologies Inc. VT1720/24 [Envy24PT/HT] PCI Multi-Channel Audio Controller [1412:1724] (rev 01)
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3b4b5c595bd_.E5.B0.8F.E6.8A.80.E5.B7.A7" id="小技巧"><span id=".E5.B0.8F.E6.8A.80.E5.B7.A7"></span>小技巧</h2></div>
+<ul><li>在录制时禁用 Wi-Fi，并关闭如浏览器等不需要的应用。很多人报告称禁用 Wi-Fi 可提高 JACK 的性能稳定性。</li></ul>
+<ul><li>有些 USB 音频硬件在 USB 3 接口下工作会出现问题，在该情况下请尝试 USB 2/1 接口。</li></ul>
+<ul><li>IRQ 有可能会导致问题出现。举个例子，如果显示硬件占用了总线，就会导致系统 I/O 路径被不必要地中断。具体内容请参考 <a href="https://web.archive.org/web/20231010103345/http://subversion.ffado.org/wiki/IrqPriorities">FFADO IRQ Priorities How-To</a>。如果你在使用实时或较新的内核，那可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rtirq">rtirq</a></span><sup><small>包</small></sup></span> 来调整 IRQ 处理线程的优先级。</li></ul>
+<ul><li>不要或谨慎使用 <b>irqbalance</b> 守护进程 <a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_for_real_time/7/html/tuning_guide/interrupt_and_process_binding">[4]</a>。</li></ul>
+<ul><li>如果你要在 JACK 2 上使用多个音频设备，<b>alsa_in</b> 和 <b>alsa_out</b> 可将额外设备涵盖在一起，并在 JACK 接线面板上作为多个输出显示。</li></ul>
+<ul><li>有些（守护）进程会导致 <b>xruns</b> 出现。如果你不需要该进程，直接杀掉就行，无需多问。</li></ul>
+<pre>$ ls /var/run/daemons
+$ top # or htop, ps aux, whatever you are comfortable with
+$ killall -9 $processname
+# systemctl stop $daemonname
+</pre>
+<ul><li>如果你碰到了大量 <i>xruns</i> 问题，尤其是使用了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia">nvidia</a></span><sup><small>包</small></sup></span> 的情况下，请禁用 GPU 节流。这一步可通过显卡控制面板或英伟达的“prefer maximum performance”选项（感谢 Frank Kober 在 LAU 发布的文章 <a href="http://lalists.stanford.edu/lau/2009/10/0467.html">[5]</a>）解决。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3b4b5c595bd_.E8.BD.AF.E4.BB.B6" id="软件"><span id=".E8.BD.AF.E4.BB.B6"></span>软件</h2></div>
+<p>Arch Linux 提供了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/pro-audio/">pro-audio</a></span><sup><small>包组</small></sup></span> 软件包组，其中包含了所有（准）专业音频相关应用。pro-audio 包组中的软件都属于 JACK 客户端，另外 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/lv2-plugins/">lv2-plugins</a></span><sup><small>包组</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/ladspa-plugins/">ladspa-plugins</a></span><sup><small>包组</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/dssi-plugins/">dssi-plugins</a></span><sup><small>包组</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/vst-plugins/">vst-plugins</a></span><sup><small>包组</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/clap-plugins/">clap-plugins</a></span><sup><small>包组</small></sup></span> 也是 pro-audio 的子包组。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>参考 <a href="#pg2749aa4d6728">Pacman/提示和技巧#查询软件包</a> 来列出包组成员，以及 <a href="#pg9ef105bf1e3c">Pacman#安装包组</a> 来安装包组。</div>
+<p>部分软件包的信息及简介可于<a href="#pga59ba9915999">应用程序列表/多媒体#音频</a>获取。特别是<a href="#pga59ba9915999">数字音频工作站</a>、<a href="#pga59ba9915999">声音特效</a>、<a href="#pga59ba9915999">音乐 Tracker</a>、<a href="#pga59ba9915999">音频合成环境</a>和<a href="#pga59ba9915999">音频生成器</a>几类，它们提供了用于录制、混音、母带及音频设计的一系列工具示例。其它类别包括<a href="#pga59ba9915999">作谱工具</a>、<a href="#pga59ba9915999">音频编辑器</a>、<a href="#pga59ba9915999">音频转换器</a>及 <a href="#pga59ba9915999">DJ</a> 软件。
+</p><p>（尚）未包含在官方仓库的软件可通过 <a href="#pgef9a589efc8b">proaudio</a> 获取。浏览<a href="https://arch.osamc.de/#packages">软件包列表</a>来查找你需要的应用，或是通过 <a href="https://github.com/osam-cologne/archlinux-proaudio">GitHub</a> 提出你的软件需求。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3b4b5c595bd_.E7.A1.AC.E4.BB.B6" id="硬件"><span id=".E7.A1.AC.E4.BB.B6"></span>硬件</h2></div>
+<p>多数声卡和音频硬件都不需要安装特殊软件包或进行额外设置，只需将 JACK 配置到目标硬件即可。
+</p><p>并不是所有硬件都这样，针对特殊硬件请查阅<a href="#pgcdf127693a83">分类:声音</a>，<a href="#pg090eb87c35b6">/硬件</a>以及 <a href="#pgfb44596f1471">Envy24control#Supported cards</a> 来获取更多信息。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3b4b5c595bd_.E8.8E.B7.E5.8F.96.E5.B8.AE.E5.8A.A9" id="获取帮助"><span id=".E8.8E.B7.E5.8F.96.E5.B8.AE.E5.8A.A9"></span>获取帮助</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3b4b5c595bd_.E9.82.AE.E4.BB.B6.E5.88.97.E8.A1.A8" id="邮件列表"><span id=".E9.82.AE.E4.BB.B6.E5.88.97.E8.A1.A8"></span>邮件列表</h3></div>
+<ul><li><a href="https://lists.archlinux.org/mailman3/lists/arch-proaudio.lists.archlinux.org/">Arch Linux Pro-audio</a> 关于实时多媒体相关的讨论，其中包括（准）专业音频及视频。</li>
+<li><a href="https://lists.linuxaudio.org/listinfo/linux-audio-user">Linux Audio User</a> 与 Linux 专业音频相关的邮件列表，有更高的活跃度及大规模的用户和开发者群体关注。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3b4b5c595bd_IRC" id="IRC">IRC</h3></div>
+<ul><li>#archlinux-proaudio - Arch Linux 专业音频频道</li>
+<li>#lau - Linux 音频相关用户频道</li>
+<li>#jack - JACK 音频系统相关的开发及支持</li>
+<li>#lv2 - LV2 插件格式相关的开发及支持</li>
+<li>#ardour - Ardour DAW 相关的讨论及支持</li>
+<li>#opensourcemusicians - 开源软件音乐家的大型讨论频道</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3b4b5c595bd_.E5.8F.82.E8.80.83" id="参考"><span id=".E5.8F.82.E8.80.83"></span>参考</h2></div>
+<ul><li><a href="https://this.ven.uber.space/docs/computer/pro-audio/">专业音频</a> - 配置基于 Arch Linux 的专业音频环境指南</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lv2-plugins-aur-meta/">lv2-plugins-aur-meta</a></span><sup><small>AUR</small></sup></span> — 提供许多 LV2 插件</li>
+<li><a href="https://github.com/nodiscc/awesome-linuxaudio">awesome-linuxaudio</a> - 适用于 Linux 平台的专业音/视频及现场制作环境的软件和资源清单</li>
+<li><a href="https://bbs.archlinux.org/viewforum.php?id=32">多媒体及游戏 / Arch Linux 论坛</a></li>
+<li><a href="https://wiki.linuxfoundation.org/realtime/start">实时</a> - Linux 基金会的 PREEMPT_RT 补丁维基</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807060917
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.239 seconds
+Real time usage: 0.248 seconds
+Preprocessor visited node count: 750/1000000
+Revision size: 26916/2097152 bytes
+Post‐expand include size: 13698/2097152 bytes
+Template argument size: 5923/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 848/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   56.364      1 -total
+ 11.08%    6.247      3 Template:Tip
+  7.65%    4.311     12 Template:Pkg
+  7.03%    3.960      1 Template:Expansion
+  5.85%    3.295      7 Template:Grp
+  5.58%    3.143      1 Template:翻译状态
+  5.23%    2.949     17 Template:Ic
+  5.20%    2.933      1 Template:相关文章开始
+  5.00%    2.821      8 Template:Related
+  4.14%    2.336      2 Template:Man
+-->
+<!-- Render ID 856b308e-9226-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7504:|#|:idhash:canonical!zh-cn and timestamp 20260807060917 and revision id 35034. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

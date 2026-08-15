@@ -1,0 +1,141 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg8d559a1b1a4f">Arch 构建系统</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Arch_Build_System">Arch Build System</a>，最近一次同步于 2026-01-19，若英文版本有所<a href="https://wiki.archlinux.org/title/Arch_Build_System?diff=0&amp;oldid=851311">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Arch_Build_System_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg604525fe585e">Arch 打包准则</a></li>
+<li><a href="#pg5a197ea84860">Arch 用户软件仓库</a></li>
+<li><a href="#pgf054312e26a1">创建软件包</a></li>
+<li><a href="#pg4d320abd2187">内核/Arch 构建系统</a></li>
+<li><a href="#pg15c7e809c461">官方仓库</a></li>
+<li><a href="#pg66d85d5f8d1e">软件包补丁</a></li>
+</ul></div>
+<p>Arch 构建系统（<a href="https://zh.wikipedia.org/wiki/Arch_Linux#Arch_.E7.BC.96.E8.AF.91.E7.B3.BB.E7.BB.9F">Arch build system</a>，ABS）是一套从源码构建并打包软件包的系统。在 Arch 中，<a href="#pg9ef105bf1e3c">pacman</a> 专门管理二进制软件包（包括那些由 ABS 创建的）；而 ABS 则是一系列工具，负责把源代码编译成可安装的 <i>.pkg.tar.zst</i> 软件包。
+</p><p>Arch 构建系统类似于 *BSD 上的 <a href="https://zh.wikipedia.org/wiki/Ports">ports</a>，其用于自动化从源码构建软件包的过程。<i>Port</i> 可以自动下载源代码、解压缩、打补丁、编译和安装软件。一个 <i>port</i> 仅仅是指用户电脑上的一个目录，该目录根据即将安装的软件来命名，它包含一些能指导源码的下载和编译安装的文件。Port 系统让你只需在 port 目录下运行 <code>make</code> 或 <code>make install clean</code> 就能安装你想要的软件。
+</p><p>ABS 的概念与 Ports 相似。它由为每个 Arch Linux 可用软件包提供的 git 仓库组成。每个目录中并不包含二进制包或源代码，而是包含一个 <a href="#pgf9d748a7b27b">PKGBUILD</a> 文件（有时也会有其它文件）。在有 <code>PKGBUILD</code> 文件的目录里运行 <a href="#pg7edcce763396">makepkg</a> 命令，系统就会在目录中下载软件的源代码、编译并打包在构建文件夹里。然后就可以通过 <i>pacman</i> 进行安装或升级了。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8d559a1b1a4f_.E5.B7.A5.E5.85.B7.E9.93.BE" id="工具链"><span id=".E5.B7.A5.E5.85.B7.E9.93.BE"></span>工具链</h2></div>
+<p>'ABS' 可以作为一个总括性术语来使用，因为它包含并依赖于若干其他部件。因此，尽管从严格意义上来讲并不精确，ABS可指代包含以下工具的完整工具集：
+</p><p>Arch 构建系统包含并依赖于数个组件和工具，分别用于从源码到构建出软件包的各个步骤中：
+</p>
+<dl><dt>仓库树</dt>
+<dd>目录树包含构建所有官方软件包所需的文件，但不包括软件包本身和源代码。这些仓库以 <a href="#pg0d34da84b694">Git</a> 仓库的形式托管在 <a href="https://gitlab.archlinux.org/archlinux/packaging/packages">gitlab.archlinux.org</a> 上。更多详细信息请参阅#仓库结构。</dd></dl>
+<dl><dt><a href="#pgf9d748a7b27b">PKGBUILD</a></dt>
+<dd><a href="#pg1ca1e15827ff">Bash</a> 脚本，包含软件的源代码的 URL 和编译打包指令。</dd></dl>
+<dl><dt><a href="#pg7edcce763396">makepkg</a></dt>
+<dd>一个 shell 命令工具，会读取 PKGBUILD，自动下载源码、编译并创建 <i>.pkg.tar*</i> 包（拓展名由 <code>makepkg.conf</code> 中的 <code>PKGEXT</code> 指定）。makepkg 也可以用来从 <a href="#pg89cb7b475cfb">AUR</a> 或第三方代码构建你自己的自定义软件包，具体细节请参考<a href="#pgf054312e26a1">创建软件包</a>。</dd></dl>
+<dl><dt><a href="#pg9ef105bf1e3c">pacman</a></dt>
+<dd>pacman 是完全独立的一个系统，但是它在通过 makepkg 或手动安装或移除软件包、解决依赖关系时都是必需的。</dd></dl>
+<dl><dt><code>pkgctl</code>/<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=devtools">devtools</a></span><sup><small>包</small></sup></span></dt>
+<dd><code>devtools</code> 是用于为 Arch Linux 发行版构建和维护官方仓库软件包的一系列工具。<span class="plainlinks archwiki-template-man" title="$ man 1 pkgctl"><a href="https://man.archlinux.org/man/pkgctl.1">pkgctl(1)</a></span> 是一个高层级工具，用于帮助从软件源码仓库构建 Arch Linux 软件包并发布到二进制软件仓库中。</dd></dl>
+<dl><dt><a href="#pg89cb7b475cfb">AUR</a></dt>
+<dd>Arch 用户软件仓库（AUR）的 PKGBUILD 独立于官方仓库，但其中的软件包同样可以使用 ABS 的工具进行打包构建。它包含成千上万的用户贡献的 PKGBUILD，来提供 Arch 官方仓库中没有的软件。如果需要编译官方 Arch 树之外的软件包，AUR 中已经存在的可能性非常大。</dd></dl>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>官方 PKGBUILD 假定包是<a href="https://wiki.archlinux.org/title/DeveloperWiki:Building_in_a_clean_chroot">在干净的 chroot 环境中构建</a>的。在“脏”的环境中构建可能会失败或者在运行时有意外行为。因为如果编译系统动态检查依赖的话，编译结果会受到当前系统可用包的影响。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8d559a1b1a4f_.E4.BB.93.E5.BA.93.E7.BB.93.E6.9E.84" id="仓库结构"><span id=".E4.BB.93.E5.BA.93.E7.BB.93.E6.9E.84"></span>仓库结构</h3></div>
+<p>每个软件包在 <a href="https://gitlab.archlinux.org/">Arch Linux GitLab 服务器</a>的 <a href="https://gitlab.archlinux.org/archlinux/packaging/packages">archlinux/packaging/packages</a> 命名空间下都有其独立的<i>源码</i>仓库。每个仓库都包含了官方打包所使用的 PKGBUILD 等文件。另外，这里还存放了开发者在打包过程中所使用的一些文件。
+</p><p>例如，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=acl">acl</a></span><sup><small>包</small></sup></span> 的目录结构是这样的：
+</p>
+<pre>acl
+├── keys
+│   └── pgp
+│       ├── 259B3792B3D6D319212CC4DCD5BF9FEB0313653A.asc
+│       ├── 600CD204FBCEA418BD2CA74F154343260542DF34.asc
+│       └── B902B5271325F892AC251AD441633B9FE837F581.asc
+├── PKGBUILD
+└── .SRCINFO
+</pre>
+<p>源代码并不直接包含在ABS目录中，而是构建时从 <code>PKGBUILD</code> 里指定的源代码 URL 下载。
+</p><p>在构建完官方软件包后，它会被发布到<a href="#pg15c7e809c461">官方仓库</a>之一：<i>core</i>，<i>extra</i>，<i>multilib</i> 或是先放到测试仓库中。这些仓库存放着<i>二进制文件</i>，并不存放在 GitLab 上，而是由<a href="#pg162da9020ecd">镜像源</a>进行分发。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8d559a1b1a4f_.E7.94.A8.E4.BE.8B" id="用例"><span id=".E7.94.A8.E4.BE.8B"></span>用例</h2></div>
+<p>Arch 构建系统可以将从源码构建出软件包的一些工作自动化，常见用法包括：
+</p>
+<ul><li>需要编译或重新编译软件包</li>
+<li>由开发者和打包人员为 Arch Linux 构建官方二进制软件包</li>
+<li>从源代码编译并安装 Arch 官方源里没有的软件（详情请参照<a href="#pgf054312e26a1">创建软件包</a>）</li>
+<li>定制现有的软件包以满足你的特定需求（比如开启或禁用相关选项、打补丁）</li>
+<li>用你的编译器的 flags 重新构建整个系统，“就像 FreeBSD 那样”</li>
+<li>干净地编译安装你自己定制的内核。（参照<a href="#pg3473491e6a48">内核编译</a>）</li>
+<li>使内核模块（比如某些显卡驱动）在你定制的内核下正常工作</li>
+<li>修改 PKGBUILD 中的版本就能方便地编译和安装新的、老的、beta 或者开发版本的 Arch 软件包</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8d559a1b1a4f_.E7.94.A8.E6.B3.95" id="用法"><span id=".E7.94.A8.E6.B3.95"></span>用法</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8d559a1b1a4f_.E8.8E.B7.E5.8F.96_PKGBUILD_.E6.BA.90.E7.A0.81" id="获取_PKGBUILD_源码"><span id=".E8.8E.B7.E5.8F.96_PKGBUILD_.E6.BA.90.E7.A0.81"></span>获取 PKGBUILD 源码</h3></div>
+<p>要想获取从源代码构建特定软件包所需的 <a href="#pgf9d748a7b27b">PKGBUILD</a> 文件，可以使用 <i>pkgctl</i> 工具，或者直接使用 <a href="#pg0d34da84b694">Git</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8d559a1b1a4f_.E4.BD.BF.E7.94.A8_pkgctl_.E5.B7.A5.E5.85.B7" id="使用_pkgctl_工具"><span id=".E4.BD.BF.E7.94.A8_pkgctl_.E5.B7.A5.E5.85.B7"></span>使用 pkgctl 工具</h4></div>
+<p>如需使用 <i>pkgctl</i>，请先<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=devtools">devtools</a></span><sup><small>包</small></sup></span>。<i>pkgctl</i> 是一个帮助为 Arch Linux 构建软件包源文件的工具。
+</p><p>要使用 <i>pkgctl</i> 获取包含软件包 <i>pkgname</i> 最新构建文件的 git 仓库，请使用以下命令：
+</p>
+<pre>$ pkgctl repo clone <i>pkgname</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>默认情况下通过 SSH 获取，如果没有在 Arch GitLab 账户中设置 SSH 密钥，则需要通过 HTTPS 获取：<code>pkgctl repo clone --protocol=https <i>pkgname</i></code></div>
+<p>请注意，这里所说的构建文件是指 <a href="#pgf9d748a7b27b">PKGBUILD</a>，可能还包括一些其他必要的文件，如密钥。也就是说，是 ABS 所需的基本文件，而不是由包的开发团队编写的源代码文件，例如 C 或 Python 文件。
+</p><p>该命令不仅会提供当前的构建文件，还会提供它的历史版本。此外，还可以使用其他 <a href="#pg0d34da84b694">git</a> 命令来签出旧版本或跟踪更改。
+</p><p>如果想获取特定版本，可以使用以下命令：
+</p>
+<pre>$ pkgctl repo clone --switch="2:1.19.5-1" go
+</pre>
+<p>如需获取更多详细信息以及其他可用命令，请阅读 <span class="plainlinks archwiki-template-man" title="$ man 1 pkgctl-repo-clone"><a href="https://man.archlinux.org/man/pkgctl-repo-clone.1">pkgctl-repo-clone(1)</a></span>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8d559a1b1a4f_.E7.9B.B4.E6.8E.A5.E4.BD.BF.E7.94.A8_git" id="直接使用_git"><span id=".E7.9B.B4.E6.8E.A5.E4.BD.BF.E7.94.A8_git"></span>直接使用 git</h4></div>
+<p>使用以下命令来获取软件包：
+</p>
+<pre>$ git clone https://gitlab.archlinux.org/archlinux/packaging/packages/<i>pkgname</i>.git
+</pre>
+<p>例如获取 Apache 的构建文件：
+</p>
+<pre>$ git clone https://gitlab.archlinux.org/archlinux/packaging/packages/apache.git
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8d559a1b1a4f_.E6.9E.84.E5.BB.BA.E8.BD.AF.E4.BB.B6.E5.8C.85" id="构建软件包"><span id=".E6.9E.84.E5.BB.BA.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>构建软件包</h3></div>
+<p>关于如何配置 <i>makepkg</i> 来从 <a href="#pgf9d748a7b27b">PKGBUILD</a> 构建软件包，请参考 <a href="#pg7edcce763396">makepkg#配置</a>。
+</p><p>然后把 <a href="#pgf9d748a7b27b">PKGBUILD</a> 所在目录复制到新的位置。在新目录按需要进行修改。 并按照 <a href="#pg7edcce763396">makepkg#使用</a>来构建和安装软件包。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8d559a1b1a4f_.E6.8A.80.E5.B7.A7" id="技巧"><span id=".E6.8A.80.E5.B7.A7"></span>技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8d559a1b1a4f_.E4.BF.9D.E7.95.99.E4.BF.AE.E6.94.B9.E8.BF.87.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85" id="保留修改过的软件包"><span id=".E4.BF.9D.E7.95.99.E4.BF.AE.E6.94.B9.E8.BF.87.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>保留修改过的软件包</h3></div>
+<p><a href="#pg9ef105bf1e3c">pacman</a> 进行升级时会将修改后的软件包升级到仓库中的最新版本，可以通过下面方式避免这个行为：
+</p><p>在 <a href="#pgf9d748a7b27b">PKGBUILD</a> 中将软件包加入 <code>modified</code> 组：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PKGBUILD</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">groups=('modified')</pre>
+<p>然后将此组加入 <code>/etc/pacman.conf</code> 的 <code>IgnoreGroup</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">IgnoreGroup = modified</pre>
+<p>当系统升级发现官方仓库中有新版本时，pacman 会显示软件包因为在 <i>IgnoreGroup</i> 中而被忽略的提示，这时需要从 ABS 编译更新的软件包以防止<a href="#pg6dc71ab03a8f">部分升级</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807031057
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.118 seconds
+Real time usage: 0.124 seconds
+Preprocessor visited node count: 324/1000000
+Revision size: 8384/2097152 bytes
+Post‐expand include size: 3616/2097152 bytes
+Template argument size: 1048/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 126/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   29.471      1 -total
+ 12.40%    3.653      1 Template:翻译状态
+  9.20%    2.710     12 Template:Ic
+  8.89%    2.619      6 Template:Related
+  8.80%    2.593      3 Template:Pkg
+  8.05%    2.371      2 Template:Man
+  7.77%    2.290      1 Template:相关文章开始
+  5.27%    1.553      1 Template:提示
+  4.59%    1.354      2 Template:Hc
+  3.20%    0.942      1 Template:警告
+-->
+<!-- Render ID 9bb8c28e-920d-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2756:|#|:idhash:canonical!zh-cn and timestamp 20260807031057 and revision id 34732. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

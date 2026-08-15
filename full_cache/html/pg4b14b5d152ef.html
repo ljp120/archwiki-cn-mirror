@@ -1,0 +1,103 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg4b14b5d152ef">微信</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p>微信（WeChat）是腾讯公司于 2011 年 1 月 21 日推出的一个为智能终端提供即时通讯服务的免费专有应用程序。
+</p><p>目前微信官方适配了部分 Linux 发行版（见下），如有兴趣可测试补充其他发行版上的兼容情况。
+</p><p>除安装原生版本外，本文还将介绍如何通过其他方法安装微信，以满足不同的需求。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b14b5d152ef_Linux_.E7.89.88" id="Linux_版"><span id="Linux_.E7.89.88"></span>Linux 版</h2></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>✅这是当前比较好的解决方案。</div>
+<p>2024年3月，腾讯推出了基于原生跨平台方案的微信（Universal），旨在逐步实现微信 Windows、Mac 和 Linux 版本在功能和更新节奏上的一致性。腾讯官方提供了 rpm、deb 和 appimage 格式的安装包，但目前尚未实现更新源，因此 deb 和 rpm 用户无法通过包管理器实现自动更新。
+</p><p>微信原版打包于 <i><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wechat-bin/">wechat-bin</a></span><sup><small>AUR</small></sup></span></i>, 并有包 <i><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wechat/">wechat</a></span><sup><small>AUR</small></sup></span></i> 提供功能增强和修复。后者有进程管理，沙盒（可选），输入法及 HiDPI 修复等功能。也可以使用 <a href="#pge822df3d71e0">Flatpak</a> 从 Flathub 安装 <code>com.tencent.WeChat</code>。
+</p><p><i><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wechat-universal-bwrap/">wechat-universal-bwrap</a></span><sup><small>AUR</small></sup></span></i>提供了基本沙盒封装的微信，它最初是基于现已不存在的 <i><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wechat-uos-qt/">wechat-uos-qt</a></span><sup><small>AUR</small></sup></span></i>，因此它不依赖于<i><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wechat-bin/">wechat-bin</a></span><sup><small>AUR</small></sup></span></i>。其使用<a href="#pg351d995f478c">Bubblewrap</a>沙盒而非<a href="https://github.com/Kraftland/portable">portable</a> 沙盒，不具备 D-Bus 过滤等功能，<b>有沙盒逃逸风险</b>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b14b5d152ef_.E6.B2.99.E7.9B.92" id="沙盒"><span id=".E6.B2.99.E7.9B.92"></span>沙盒</h3></div>
+<p><i><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wechat/">wechat</a></span><sup><small>AUR</small></sup></span></i> 可选启用 <a href="https://github.com/Kraftland/portable">portable</a> 沙盒. 它有一些独特功能:
+</p>
+<ul><li>支持 GNOME 后台监视</li>
+<li>简易的文件分享</li>
+<li>D-Bus 安全过滤
+<ul><li>请注意: 截图功能仅在 GNOME 桌面环境可用, 因为一些桌面实现无须用户授权即可截图</li></ul></li>
+<li>为双显卡用户隐藏独立显卡, 避免唤醒耗电</li>
+<li>自动输入法配置</li>
+<li>隐藏一些系统和硬件信息</li></ul>
+<p>右键任务栏图标以访问实用功能:
+</p>
+<ul><li>打开或关闭沙盒</li>
+<li>向沙盒发送文件 (位于沙盒家目录内的 Shared 文件夹. 向沙盒发送的文件并不是持久性的, 重启程序即会删除)</li>
+<li>彻底退出微信</li></ul>
+<p>同时, 还可以使用环境变量 <code>bwBindPar</code>向沙盒暴露某个路径, 请注意这将会授予微信完全的读写权限.
+</p><p><i><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wechat/">wechat</a></span><sup><small>AUR</small></sup></span></i> 的沙盒需要 <a href="#pg51601653c6c9">XDG 桌面门户</a>正常工作. 正常来说, 使用桌面环境 (DE) 时应无须特别处理, 窗口管理器用户可能需要根据文档自行选择实现。
+</p><p><i><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wechat-universal-bwrap/">wechat-universal-bwrap</a></span><sup><small>AUR</small></sup></span></i>使用<a href="#pg351d995f478c">Bubblewrap</a>沙盒，以<code>~/Documents/WeChat_Data/home</code>为家目录，可以编写<code>~/.config/wechat-universal/binds.list</code>来设置更多的被暴露到容器内的文件/文件夹，每行一个路径，要将微信文件的主要路径修改至<code>~/Documents/WeChat_Data</code>外的其他路径，请设置环境变量 <code>WECHAT_DATA_DIR</code>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b14b5d152ef_.E8.BE.93.E5.85.A5.E6.B3.95.E4.B8.8E_HiDPI" id="输入法与_HiDPI"><span id=".E8.BE.93.E5.85.A5.E6.B3.95.E4.B8.8E_HiDPI"></span>输入法与 HiDPI</h3></div>
+<p><i><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wechat/">wechat</a></span><sup><small>AUR</small></sup></span></i> 将会自动设置环境变量以绕过此类问题. 未设置<code>XMODIFIERS</code> 变量可能导致探测错误.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b14b5d152ef_Emoji_.E5.AD.97.E4.BD.93.E6.98.BE.E7.A4.BA.E9.97.AE.E9.A2.98" id="Emoji_字体显示问题"><span id="Emoji_.E5.AD.97.E4.BD.93.E6.98.BE.E7.A4.BA.E9.97.AE.E9.A2.98"></span>Emoji 字体显示问题</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-twemoji/">ttf-twemoji</a></span><sup><small>AUR</small></sup></span>，并升级 <i><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wechat/">wechat</a></span><sup><small>AUR</small></sup></span></i> 到 1.0.0.241-27 及以上版本。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b14b5d152ef_.E8.99.9A.E6.8B.9F.E6.9C.BA" id="虚拟机"><span id=".E8.99.9A.E6.8B.9F.E6.9C.BA"></span>虚拟机</h2></div>
+<p>可以在 <a href="#pg01acf2ac5c98">VMware</a> 或 <a href="#pgbedf72352aa7">VirtualBox</a> 等虚拟机里安装 Windows 系统来使用微信。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b14b5d152ef_Wine" id="Wine">Wine</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong> 目前 Wine-based 微信小程序功能全部不可用，大于一定尺寸的图片无法发送。详情请参阅 <a href="https://github.com/countstarlight/deepin-wine-wechat-arch/issues/42">这里</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b14b5d152ef_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h3></div>
+<p>兼容层 <a href="#pg39e5cd9380ff">Wine</a> 可用于在 Linux 中运行微信。
+</p><p>此外，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/deepin-wine-wechat/">deepin-wine-wechat</a></span><sup><small>AUR</small></sup></span>（无补丁）也提供了它，这是一个为 Arch 配置的 Wine 容器。版本为最新官方版本。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b14b5d152ef_.E4.BD.BF.E7.94.A8_archlinuxcn_.E4.BB.93.E5.BA.93.E7.9A.84_wine-for-wechat" id="使用_archlinuxcn_仓库的_wine-for-wechat"><span id=".E4.BD.BF.E7.94.A8_archlinuxcn_.E4.BB.93.E5.BA.93.E7.9A.84_wine-for-wechat"></span>使用 archlinuxcn 仓库的 wine-for-wechat</h4></div>
+<p>如果微信在使用过程中在其他窗口之上有窗口阴影，可以尝试使用 <a href="#pg89d12f7bfda9">archlinuxcn</a> 仓库中的 <i>wine-for-wechat</i>。 此版本的 Wine 使用<a href="https://github.com/archlinuxcn/repo/blob/master/archlinuxcn/wine-for-wechat/wine-wechat.patch">这个补丁</a>修复微信窗口阴影。
+</p><p>另外，建议安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/wine-wechat-setup">wine-wechat-setup</a></span><sup><small><a href="#pgc6e2daf482c3">CNRepo</a></small></sup></span> 包来安装，运行和配置微信（微信的 Windows 安装包需要自行下载）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b14b5d152ef_deepin-wine_.E5.BE.AE.E4.BF.A1" id="deepin-wine_微信"><span id="deepin-wine_.E5.BE.AE.E4.BF.A1"></span>deepin-wine 微信</h4></div>
+<p>可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/com.qq.weixin.deepin/">com.qq.weixin.deepin</a></span><sup><small>AUR</small></sup></span>软件包，这是 Deepin 官方配置的 Wine 化应用，但版本较旧 (3.2.1)。该版本的小程序功能不可用。
+</p><p>若需要更新的版本可选择安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/com.qq.weixin.spark/">com.qq.weixin.spark</a></span><sup><small>AUR</small></sup></span>或<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/deepin-wine-wechat/">deepin-wine-wechat</a></span><sup><small>AUR</small></sup></span>。基本保持与官方 Windows 版本更新同步，且可以使用小程序。
+</p><p><a href="#pgb050dec5f94b">Deepin-wine</a> 还提供了其他的相关软件包，比如企业微信<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/com.qq.weixin.work.deepin/">com.qq.weixin.work.deepin</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b14b5d152ef_.E5.9C.A8.E5.AE.B9.E5.99.A8.E4.B8.AD.E8.BF.90.E8.A1.8C" id="在容器中运行"><span id=".E5.9C.A8.E5.AE.B9.E5.99.A8.E4.B8.AD.E8.BF.90.E8.A1.8C"></span>在容器中运行</h4></div>
+<p><a href="https://github.com/huan/docker-wechat">docker-wechat</a> 在一个 <a href="#pg06238a3e6183">Docker</a> 容器中运行 Wine wechat。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b14b5d152ef_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b14b5d152ef_.E9.AB.98.E5.88.86.E8.BE.A8.E7.8E.87.E5.B1.8F.E5.B9.95" id="高分辨率屏幕"><span id=".E9.AB.98.E5.88.86.E8.BE.A8.E7.8E.87.E5.B1.8F.E5.B9.95"></span>高分辨率屏幕</h4></div>
+<p>如果屏幕 DPI 比较高，界面和字体会比较小。需要通过如下方式配置 wine 的屏幕分辨率 DPI:
+</p>
+<ol><li>打开对应的 winecfg, 下面的是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/deepin-wine-wechat/">deepin-wine-wechat</a></span><sup><small>AUR</small></sup></span> 的示例，请按实际情况修改 <code>WINEPREFIX</code> 和 <code>deepin-wine6-stable</code>: <pre>$ WINEPREFIX=~/.deepinwine/Deepin-WeChat/ deepin-wine6-stable winecfg</pre></li>
+<li>点击显示，调整<i>屏幕分辨率</i>为合适的数值。</li>
+<li>微信中，启用<code>适配系统缩放比例</code>选项(设置--&gt;通用设置--&gt;适配系统缩放比例)</li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b14b5d152ef_.E7.BB.9F.E4.BF.A1_UOS_.E9.AD.94.E6.94.B9.E7.89.88" id="统信_UOS_魔改版"><span id=".E7.BB.9F.E4.BF.A1_UOS_.E9.AD.94.E6.94.B9.E7.89.88"></span>统信 UOS 魔改版</h2></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wechat-uos/">wechat-uos</a></span><sup><small>AUR</small></sup></span> 软件包即可。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>原统信 UOS 软件包会验证运行环境是否是统信 UOS 专业版，在非 UOS 专业版的环境下会工作异常。
+<p>本解决方案通过使用 <a href="#pg351d995f478c">bubblewrap</a> 替换 <code>os-release</code> 和 <code>lsb-release</code>，在没有修改其分发的二进制文件的前提下，实现模拟 UOS 专业版运行环境，使其能正常运行。
+</p>
+此包功能较少，基本是微信网页版套壳，建议使用原生版本。</div>
+<!-- 
+NewPP limit report
+Cached time: 20260807035512
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.096 seconds
+Real time usage: 0.099 seconds
+Preprocessor visited node count: 287/1000000
+Revision size: 5996/2097152 bytes
+Post‐expand include size: 5072/2097152 bytes
+Template argument size: 1447/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   18.244      1 -total
+ 20.87%    3.808     18 Template:AUR
+ 10.23%    1.866      9 Template:Ic
+  9.25%    1.688      2 Template:注意
+  6.31%    1.152      1 Template:提示
+  5.51%    1.006      1 Template:Bc
+  5.41%    0.987      1 Template:Cnrepo
+-->
+<!-- Render ID ca399c0e-9213-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3974:|#|:idhash:canonical!zh-cn and timestamp 20260807035512 and revision id 34140. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

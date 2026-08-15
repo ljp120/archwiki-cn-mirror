@@ -1,0 +1,178 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg269f17a1a0fd">博通无线网卡</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p>这篇文章详细地介绍了如何安装和设置博通（Broadcom）无线网卡。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg269f17a1a0fd_1_.E5.8E.86.E5.8F.B2" id="1_历史"><span id="1_.E5.8E.86.E5.8F.B2"></span>1 历史</h2></div>
+<p>博通（Broadcom）对于 GNU/Linux 的 Wi-Fi 设备支持方面有着悠久的历史。在它最开始一段历史的大部分时间里，博通的设备要么完全就不支持，要么就得让用户修改固件才能用。有一些无线设备可以通过使用通过逆向工程的驱动程序来获得支持。
+</p><p>2008年8月，博通官方发布了 <a href="https://www.broadcom.com/support/802.11/linux_sta.php">802.11 Linux STA 驱动程序</a>以在 GNU/Linux 上提供无线设备的驱动程序。尽管这是一个限制许可的驱动程序，也不适用于隐藏的 ESSID，但博通承诺未来将使用更开放的方法。
+</p><p>2010年9月，博通发布了完全开源的无线网卡<a href="https://lwn.net/Articles/404248/">硬件驱动</a>。这个名为 <a href="https://wireless.wiki.kernel.org/en/users/Drivers/brcm80211">brcm80211</a> 的驱动程序已被列入到自2.6.37之后的内核中。随着 Linux 内核 2.6.39 发布，这些驱动程以下是可用的驱动程序列表：序已被重新命名为<code> brcmsmac</code>和<code> brcmfmac</code>。
+</p><p>一
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>驱动</th>
+<th>描述
+</th></tr>
+<tr>
+<td>bcrm80211</td>
+<td>n
+</td></tr>
+<tr>
+<td>主线（推荐使用）版本ub43</td>
+<td>逆向工程内核驱动
+</td></tr>
+<tr>
+<td>broadcom-wl</td>
+<td>限制许可的 Broadcom STA 驱动
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg269f17a1a0fd_.E6.9F.A5.E7.9C.8B.E4.BD.A0.E5.8F.AF.E4.BB.A5.E4.BD.BF.E7.94.A8.E4.BD.95.E7.A7.8D.E9.A9.B1.E5.8A.A8" id="查看你可以使用何种驱动"><span id=".E6.9F.A5.E7.9C.8B.E4.BD.A0.E5.8F.AF.E4.BB.A5.E4.BD.BF.E7.94.A8.E4.BD.95.E7.A7.8D.E9.A9.B1.E5.8A.A8"></span>查看你可以使用何种驱动</h2></div>
+<p>首先，向你的终端输入以下内容来检测网卡的 <a href="https://en.wikipedia.org/wiki/PCI_configuration_space">PCI-ID</a>:
+</p>
+<pre>$ lspci -vnn | grep 14e4:
+</pre>
+<p>然后在以下列表中检查 <a href="https://wireless.wiki.kernel.org/en/users/Drivers/b43">b43的支持设备列表</a>以及 <a href="https://wireless.wiki.kernel.org/en/users/Drivers/brcm80211">brcm80211的支持设备列表</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg269f17a1a0fd_.E8.8E.B7.E5.8F.96.E9.A9.B1.E5.8A.A8" id="获取驱动"><span id=".E8.8E.B7.E5.8F.96.E9.A9.B1.E5.8A.A8"></span>获取驱动</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg269f17a1a0fd_brcm80211" id="brcm80211">brcm80211</h3></div>
+<p>Kernel内建了两个开源驱动: <b>brcmfmac</b> 提供原生硬MAC支持， <b>brcmsmac</b> 提供基于mac80211的软MAC支持。 它们应该会在启动时自行加载。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li><b>brcmfmac</b> 提供较新的芯片支持，并且支持AP模式，P2P模式，高级加密。</li>
+<li><b>brcmsmac</b> 仅提供对于较老芯片的支持，例如BCM4313, BCM43224, BCM43225。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg269f17a1a0fd_b43.2Fb43legacy" id="b43/b43legacy"><span id="b43.2Fb43legacy"></span>b43/b43legacy</h3></div>
+<p><b>b43</b> 以及 <b>b43legacy</b>两个逆向工程驱动已经被内建在Kernel中。b43支持大部分的博通无线芯片组，而b43legacy驱动仅支持早期的BCM4301以及BCM4306 rev.2 芯片组。为了避免与别的驱动造成冲突，请 <a href="#pgcc718f543a72">blacklist</a> 未使用的驱动。
+</p><p>这些驱动的运行都需要安装闭源固件，请从<a href="#pg89cb7b475cfb">AUR</a>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/b43-firmware/">b43-firmware</a></span><sup><small>AUR</small></sup></span>， <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/b43-firmware-classic/">b43-firmware-classic</a></span><sup><small>AUR</small></sup></span> 或者 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/b43-firmware-legacy/">b43-firmware-legacy</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> 。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>BCM4306 rev.3, BCM4311, BCM4312 与 <b>b43-firmware</b>  固件不能良好的工作。对于这些芯片组请使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/b43-firmware-classic/">b43-firmware-classic</a></span><sup><small>AUR</small></sup></span> 代替。</li>
+<li>BCM4331 与 <b>b43-firmware-classic</b> 固件不能良好的工作。 对于这些芯片组请使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/b43-firmware/">b43-firmware</a></span><sup><small>AUR</small></sup></span> 代替。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg269f17a1a0fd_broadcom_wl" id="broadcom-wl">broadcom-wl</h3></div>
+<p><a href="#pg89cb7b475cfb">AUR</a> 中有两个版本的Broadcom STA闭源驱动：
+</p>
+<ul><li>通常的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=broadcom-wl">broadcom-wl</a></span><sup><small>包</small></sup></span></li>
+<li>以及 <a href="#pgeae7d2a5f976">DKMS</a> 版本 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=broadcom-wl-dkms">broadcom-wl-dkms</a></span><sup><small>包</small></sup></span></li></ul>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>DKMS版本 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=broadcom-wl-dkms">broadcom-wl-dkms</a></span><sup><small>包</small></sup></span>
+<ul><li>可以在不同的Kernel中工作 (例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-ck/">linux-ck</a></span><sup><small>AUR</small></sup></span>).</li>
+<li>每次安装新的Kernel时，dkms都会重新构建驱动，如果你使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=broadcom-wl">broadcom-wl</a></span><sup><small>包</small></sup></span> 或者其他依赖于单个Kernel版本的驱动 (例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/broadcom-wl-ck/">broadcom-wl-ck</a></span><sup><small>AUR</small></sup></span>), 那么在更新Kernel或者使用新的Kernel时都有可能使驱动崩溃。</li></ul></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg269f17a1a0fd_.E5.8A.A0.E8.BD.BDbroadcom-wl.E7.9A.84.E5.86.85.E6.A0.B8.E6.A8.A1.E5.9D.97" id="加载broadcom-wl的内核模块"><span id=".E5.8A.A0.E8.BD.BDbroadcom-wl.E7.9A.84.E5.86.85.E6.A0.B8.E6.A8.A1.E5.9D.97"></span>加载broadcom-wl的内核模块</h4></div>
+<p><code>wl</code> 模块可能会与其他模块冲突而无法加载。加载<code>wl</code>模块之前， 请移除<code>b43</code>或者其他可能造成冲突的模块：
+</p>
+<pre># rmmod b43
+</pre>
+<p>如果 <code>ssb</code> 加载了，也请一并移除:
+</p>
+<pre># rmmod ssb
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>错误的加载 <code>ssb</code> 可能导致无线界面无法被创建。</div>
+<p>加载 <code>wl</code> 模块：
+</p>
+<pre># modprobe wl
+</pre>
+<p>加载 <code>wl</code> 模块的同时 <code>lib80211</code> 或者 <code>lib80211_crypt_tkip</code> 应该也会被自动加载。 使用 <code>lsmod</code> 来进行检查，如果没有，请手动加载二者之一；
+</p>
+<pre># modprobe lib80211
+</pre>
+<p>或
+</p>
+<pre># modprobe lib80211_crypt_tkip
+</pre>
+<p>如果你直接从博通官方网站下载驱动并安装，你可能同时需要更新依赖模块:
+</p>
+<pre># depmod -a
+</pre>
+<p>如果模块无法在启动时加载，请将 <code>wl</code> (以及 <code>lib80211</code>/<code>lib80211_crypt_tkip</code>如果需要) 到 <code>/etc/rc.conf</code>的MODULES列：
+</p>
+<pre># MODULES=(... wl...)
+</pre>
+<p>你也可以Blacklist掉可能冲突的模块，在 <code>/etc/modprobe.d/modprobe.conf</code>中加入:
+</p>
+<pre># blacklist b43
+# blacklist ssb
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>Broadcom Corporation BCM4311 802.11b/g WLAN [14e4:4311] 在Blacklist <code>b43</code> 以及 <code>ssb</code>后可能不工作。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg269f17a1a0fd_.E5.8A.A0.E8.BD.BD.E5.A4.9A.E5.8D.9A.E9.80.9A.E7.BD.91.E5.8D.A1.E7.9A.84.E5.86.85.E6.A0.B8.E9.A9.B1.E5.8A.A8.E6.A8.A1.E5.9D.97" id="加载多博通网卡的内核驱动模块"><span id=".E5.8A.A0.E8.BD.BD.E5.A4.9A.E5.8D.9A.E9.80.9A.E7.BD.91.E5.8D.A1.E7.9A.84.E5.86.85.E6.A0.B8.E9.A9.B1.E5.8A.A8.E6.A8.A1.E5.9D.97"></span>加载多博通网卡的内核驱动模块</h2></div>
+<p><b>b43</b>的博通无线网卡驱动与<b>b44</b>博通有线网卡驱动可能产生冲突，因此建议您使用<b>broadcom-wl</b>驱动
+</p>
+<ul><li>Put "lib80211_crypt_tkip" and "wl" at the BEFORE b44 (if you have it) position in MODULES= 在 /etc/rc.conf 模块部分，b44(如果你需要这个驱动的话)之前加入lib80211_crypt_tkip wl</li>
+<li>不要忘记把 b43 模块加入黑名单</li>
+<li>您的无线网卡设备为eth0</li>
+<li>您的有线网卡设备为eth1</li>
+<li>两者能同时正常工作</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg269f17a1a0fd_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<p>各种可以纠正的错误。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg269f17a1a0fd_.E6.9B.B4.E6.96.B0_Kernel_.E5.90.8E.E8.AE.BE.E5.A4.87.E6.97.A0.E6.B3.95.E8.AE.BF.E9.97.AE" id="更新_Kernel_后设备无法访问"><span id=".E6.9B.B4.E6.96.B0_Kernel_.E5.90.8E.E8.AE.BE.E5.A4.87.E6.97.A0.E6.B3.95.E8.AE.BF.E9.97.AE"></span>更新 Kernel 后设备无法访问</h3></div>
+<p>如果您使用 <b>brcm80211</b> 请确保没有被 <a href="#pg446fdafcb30b">blacklisted</a>。如果你使用 <b>b43</b> 驱动确保它在工作。如果你使用<b>Broadcom STA</b>驱动的<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=broadcom-wl">broadcom-wl</a></span><sup><small>包</small></sup></span>包，请重新安装或一劳永逸地切换成<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=broadcom-wl-dkms">broadcom-wl-dkms</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg269f17a1a0fd_.E4.BD.BF.E7.94.A8_broadcom-wl_.E9.A9.B1.E5.8A.A8.E7.9A.84.E8.AE.BE.E5.A4.87.E4.B8.8D.E5.B7.A5.E4.BD.9C.2F.E4.B8.8D.E6.98.BE.E7.A4.BA" id="使用_broadcom-wl_驱动的设备不工作/不显示"><span id=".E4.BD.BF.E7.94.A8_broadcom-wl_.E9.A9.B1.E5.8A.A8.E7.9A.84.E8.AE.BE.E5.A4.87.E4.B8.8D.E5.B7.A5.E4.BD.9C.2F.E4.B8.8D.E6.98.BE.E7.A4.BA"></span>使用 broadcom-wl 驱动的设备不工作/不显示</h3></div>
+<p>请查看dmesg是否存在报错信息，<b>broadcom-wl</b>经常发生奇怪的问题，重新加载Kernel模块或者重启一般能解决问题
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg269f17a1a0fd_.E4.BD.BF.E7.94.A8_broadcom-wl_.E9.A9.B1.E5.8A.A8.E6.97.B6.E6.8E.A5.E5.8F.A3.E4.BA.A4.E6.8D.A2" id="使用_broadcom-wl_驱动时接口交换"><span id=".E4.BD.BF.E7.94.A8_broadcom-wl_.E9.A9.B1.E5.8A.A8.E6.97.B6.E6.8E.A5.E5.8F.A3.E4.BA.A4.E6.8D.A2"></span>使用 broadcom-wl 驱动时接口交换</h3></div>
+<p>使用 broadcom-wl 驱动也许会发现它们的以太网和 Wi-Fi 接口交换了。查看这里（<a href="#pgf42a74f3af9c">reverting to traditional interface names</a>）的解决方案。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg269f17a1a0fd_.E6.8E.A5.E5.8F.A3.E6.98.BE.E7.A4.BA.E6.AD.A3.E5.B8.B8.E4.BD.86.E6.98.AF.E4.B8.8D.E8.83.BD.E8.BF.9E.E6.8E.A5" id="接口显示正常但是不能连接"><span id=".E6.8E.A5.E5.8F.A3.E6.98.BE.E7.A4.BA.E6.AD.A3.E5.B8.B8.E4.BD.86.E6.98.AF.E4.B8.8D.E8.83.BD.E8.BF.9E.E6.8E.A5"></span>接口显示正常但是不能连接</h3></div>
+<p>加入以下<a href="#pgec0856954f1c">内核参数</a>:
+</p>
+<pre>b43.allhwsupport=1
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg269f17a1a0fd_.E5.A5.87.E6.80.AA.E7.9A.84.E6.8A.A5.E9.94.99.E4.BF.A1.E6.81.AF" id="奇怪的报错信息"><span id=".E5.A5.87.E6.80.AA.E7.9A.84.E6.8A.A5.E9.94.99.E4.BF.A1.E6.81.AF"></span>奇怪的报错信息</h3></div>
+<p>你可能会在启动时接收到奇怪的报错信息，类似于：
+</p>
+<pre>phy0: brcms_ops_bss_info_changed: arp filtering: enabled true, count 0 (implement)
+phy0: brcms_ops_bss_info_changed: qos enabled: false (implement)
+phy0: brcms_ops_bss_info_changed: arp filtering: enabled true, count 1 (implement)
+enabled, active
+</pre>
+<p>一般情况下这并不影响驱动的正常工作，如果你想不想收到这些信息，可以提高printk的日志级别。
+</p><p>在<code>/etc/sysctl.d/</code>中创建一个<code>printk.conf</code>或者类似的配置文件:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">printk.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+kernel.printk = 3 3 3 3
+
+</pre>
+<p>最后<code>sysctl -p</code>确保配置被成功写入。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg269f17a1a0fd_.E4.B8.8D.E8.83.BD.E6.A3.80.E6.B5.8B.E5.88.B0.E8.AE.BE.E5.A4.87_BCM43241" id="不能检测到设备_BCM43241"><span id=".E4.B8.8D.E8.83.BD.E6.A3.80.E6.B5.8B.E5.88.B0.E8.AE.BE.E5.A4.87_BCM43241"></span>不能检测到设备 BCM43241</h3></div>
+<p>无论是 <code>lspci</code> 还是 <code>lsusb</code> 都不能检测到设备。这个问题目前无法解决。 请在解决后删除此部分。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg269f17a1a0fd_.E5.9C.A8.E8.BF.9E.E6.8E.A5.E5.88.B0.E6.9F.90.E4.BA.9B.E8.B7.AF.E7.94.B1.E5.99.A8.E6.97.B6.E5.8F.AF.E8.83.BD.E4.B8.8D.E7.A8.B3.E5.AE.9A" id="在连接到某些路由器时可能不稳定"><span id=".E5.9C.A8.E8.BF.9E.E6.8E.A5.E5.88.B0.E6.9F.90.E4.BA.9B.E8.B7.AF.E7.94.B1.E5.99.A8.E6.97.B6.E5.8F.AF.E8.83.BD.E4.B8.8D.E7.A8.B3.E5.AE.9A"></span>在连接到某些路由器时可能不稳定</h3></div>
+<p>如果没有其他的解决方法，安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-lts">linux-lts</a></span><sup><small>包</small></sup></span>，或者使用<a href="#pg09c32999a0a8">低版本的驱动</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807034647
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.120 seconds
+Real time usage: 0.127 seconds
+Preprocessor visited node count: 378/1000000
+Revision size: 7371/2097152 bytes
+Post‐expand include size: 6253/2097152 bytes
+Template argument size: 2642/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 27/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   32.362      1 -total
+ 11.92%    3.857     24 Template:Ic
+ 11.21%    3.628      1 Template:Tip_(简体中文)
+ 11.15%    3.608      1 Template:Broken_package_link
+ 10.25%    3.317      7 Template:Pkg
+  9.09%    2.941      5 Template:Aur
+  8.06%    2.609      1 Template:Warning_(简体中文)
+  7.17%    2.321      3 Template:注意
+  3.85%    1.246      1 Template:Hc
+  0.97%    0.314      2 Template:AUR
+-->
+<!-- Render ID 9d38b98f-9212-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2873:|#|:idhash:canonical!zh-cn and timestamp 20260807034647 and revision id 34223. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

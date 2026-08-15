@@ -1,0 +1,136 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg2ce18142b976">Rust 软件打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><br/>
+</p>
+<div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – Rust – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Rust_package_guidelines">Rust package guidelines</a>，最近一次同步于 2023-05-25，若英文版本有所<a href="https://wiki.archlinux.org/title/Rust_package_guidelines?diff=0&amp;oldid=779462">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Rust_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文档涵盖了为 <a href="#pg802f2550cda0">Rust</a> 软件编写 <a href="#pgf9d748a7b27b">PKGBUILD</a> 的标准和指南。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2ce18142b976_.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.91.BD.E5.90.8D" id="软件包命名"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E5.91.BD.E5.90.8D"></span>软件包命名</h2></div>
+<p>打包 <a href="#pg802f2550cda0">Rust</a> 项目时，软件包的名称应基本与生成的二进制文件名一致。请注意，打包库单元包 (library crate) 没有任何意义，只有带二进制文件的单元包 (crate) 才需要打包。对于生成多个二进制文件的包，通常使用上游单元包 (crate) 的名称较为合适。在任何情况下软件包的名称都应该小写。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2ce18142b976_.E6.BA.90.E7.A0.81" id="源码"><span id=".E6.BA.90.E7.A0.81"></span>源码</h2></div>
+<p>大多数 Rust 项目可以从 tarball、源归档文件（例如 GitHub Release 上的源链接）或其他已发布的源构建。另外，许多项目发布在 <a href="https://crates.io">crates.io</a> 上，该网站给 <a href="#pgabdf2a5ec4b6">cargo</a> 提供了稳定的 URL 下载方案。如果需要，<a href="#pgf9d748a7b27b">PKGBUILD#source</a> 可使用以下模板：
+</p>
+<pre>source=("$pkgname-$pkgver.tar.gz::https://static.crates.io/crates/$pkgname/$pkgname-$pkgver.crate")
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2ce18142b976_.E4.BE.9D.E8.B5.96.E5.85.B3.E7.B3.BB" id="依赖关系"><span id=".E4.BE.9D.E8.B5.96.E5.85.B3.E7.B3.BB"></span>依赖关系</h2></div>
+<p>虽然有些 Rust 项目有外部依赖，但大多数项目只使用在最终二进制文件中静态链接的 Rust 生态系统库。因此，大多数项目不需要指定很多 <code>depends</code> (依赖)，只需要 <code>makedepends</code> (构建依赖)。绝大多数 Rust 项目都使用 <a href="#pgabdf2a5ec4b6">cargo</a> 依赖管理器构建，它会协调下载库以满足编译时的依赖关系，并执行所有必要的调用，使用真正的 Rust 编译器 <code>rustc</code> 进行编译。目前 <i>cargo</i> 和 <i>rustc</i> 都由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rust">rust</a></span><sup><small>包</small></sup></span> 提供，但也有其他方法可同时获取或单独获取这两个包，包括 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rustup">rustup</a></span><sup><small>包</small></sup></span>。因此，大多数 PKGBUILD 都会调用 <i>cargo</i> 工具，应该直接依赖它。
+</p>
+<pre>makedepends=(cargo)
+</pre>
+<p>如果项目需要使用开发版 Rust 工具链，请使用：
+</p>
+<pre>makedepends=(cargo-nightly)
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2ce18142b976_.E5.87.86.E5.A4.87.E5.B7.A5.E4.BD.9C" id="准备工作"><span id=".E5.87.86.E5.A4.87.E5.B7.A5.E4.BD.9C"></span>准备工作</h2></div>
+<p>Rust 依赖管理器 <a href="#pgabdf2a5ec4b6">cargo</a> 能提前下载构建项目所需的所有库。在 <code>prepare()</code> 阶段进行下载，能使后续的 <code>build()</code> 和其他阶段完全离线运行。
+</p>
+<pre>prepare() {
+    export RUSTUP_TOOLCHAIN=stable
+    cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
+}
+</pre>
+<p>其中：
+</p>
+<ul><li><code>RUSTUP_TOOLCHAIN=stable</code> 确保默认工具链被设置为稳定版，以防用户改变默认值。当然，如果在上游项目有特殊要求，则应被设置为开发版。此操作可避免在未使用 chroot 环境构建时受用户配置影响。另外，如果上游项目的源代码中有 <code>rust-toolchain</code> 文件或 <code>rust-toolchain.toml</code> 文件可实现此目的，则无需此步骤。</li></ul>
+<ul><li><code>--locked</code> 确保严格遵守 <code>Cargo.lock</code> 文件中指定的版本，防止其更新依赖关系。这对<a href="https://reproducible-builds.org/">可重现构建</a>很重要。</li></ul>
+<ul><li><code> --target "$CARCH-unknown-linux-gnu"</code> 确保只获取正在构建的特定目标平台所需的依赖项，从而减少下载量（参见 <a href="#pgf9d748a7b27b">PKGBUILD#arch</a> 和 <a href="https://doc.rust-lang.org/nightly/rustc/platform-support.html">Rust 平台支持</a>）。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在为上游源项目构建 VCS 软件包时，如果该项目在发布周期之间未保持 <code>Cargo.lock</code> 文件与 <code>Cargo.toml</code> 同步，请在运行 <code>cargo fetch</code> 之前添加 <code>cargo update</code> 。尽管结果并非完全可重现，但有关构建的其他所有方面都应符合上述内容，因为依赖关系将在构建时得到解决。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2ce18142b976_.E6.9E.84.E5.BB.BA" id="构建"><span id=".E6.9E.84.E5.BB.BA"></span>构建</h2></div>
+<p>构建 Rust 软件包。
+</p>
+<pre>build() {
+    export RUSTUP_TOOLCHAIN=stable
+    export CARGO_TARGET_DIR=target
+    cargo build --frozen --release --all-features
+}
+</pre>
+<p>其中：
+</p>
+<ul><li><code>--release</code> 确保使用发布模式编译 (默认使用调试模式编译)</li>
+<li><code>--frozen</code> 确保 <i>cargo</i> 保持离线状态，只使用 <code>Cargo.lock</code> 文件中指定的版本和 <code>prepare()</code> 阶段缓存的版本。这在功能上与 <code>--locked --offline</code> 一致。这对<a href="https://reproducible-builds.org/">可重现构建</a>很重要。</li>
+<li><code>--all-features</code> 确保编译时启用软件包的所有特性。另外，如果只需启用指定特性，可使用 <code>--features <i>FEATURE1</i>, <i>FEATURE2</i> </code>。</li>
+<li><code>CARGO_TARGET_DIR=target</code> 指定输出路径为当前目录下的 <i>target</i> 目录，以防未使用 chroot 环境构建时受用户配置影响。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>对于 Arch 仓库的软件包来说不需要这两个环境变量，因为 Arch 仓库的软件包总是在 chroot 环境下使用默认设置下构建。但为了方便 AUR 用户，此处仍提到了上述环境变量，因为 AUR 用户可能没有意识到改变用户默认设置和在构建软件包时不使用 chroot 的后果。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2ce18142b976_.E6.A3.80.E6.9F.A5" id="检查"><span id=".E6.A3.80.E6.9F.A5"></span>检查</h2></div>
+<p>大多数 Rust 项目提供了运行测试的简单方法。
+</p>
+<pre>check() {
+    export RUSTUP_TOOLCHAIN=stable
+    cargo test --frozen --all-features
+}
+</pre>
+<p>还应该检查仓库是否是 <a href="https://doc.rust-lang.org/cargo/reference/workspaces.html">cargo 工作空间</a>。只需打开 <code>/Cargo.toml</code>，检查是否包含 <code>[workspace]</code> 部分。如果包含 <code>[workspace]</code>，则应当在 <code>cargo test</code> 后添加 <code>--workspace</code>，以确保所有工作区成员的测试都能运行。
+</p><p>运行测试时应避免使用 <code>--release</code> 标志，否则二进制文件将会使用 <a href="https://doc.rust-lang.org/cargo/reference/profiles.html#bench"><i>bench</i> 参数</a>重新编译，并覆盖 <code>build()</code> 生成的文件。或者也可以保留 <code>--release</code> 标志，但使用不同的 <code>CARGO_TARGET_DIR</code>。但需要注意的是，使用发布模式也会启用编译器优化，并禁用一些功能，如整数溢出检查和 <code>debug_assert!()</code> 宏，所以理论上可能最终问题会更少。这两种方法都会重新编译依赖项，从而使总编译时间略微增加。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2ce18142b976_.E6.89.93.E5.8C.85" id="打包"><span id=".E6.89.93.E5.8C.85"></span>打包</h2></div>
+<p>Rust 在 <code>target/release</code> 目录内构建二进制文件，将二进制文件安装到 <code>/usr/bin</code> 很容易。
+</p>
+<pre>package() {
+    install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/$pkgname"
+}
+</pre>
+<p>如果一个软件包在 <code>/usr/bin</code> 内有多个可执行文件，可使用 find 命令：
+</p>
+<pre>package() {
+    find target/release \
+        -maxdepth 1 \
+        -executable \
+        -type f \
+        -exec install -Dm0755 -t "$pkgdir/usr/bin/" {} +
+}
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2ce18142b976_.E4.BD.BF.E7.94.A8_cargo_install_.E7.9A.84.E6.B3.A8.E6.84.8F.E4.BA.8B.E9.A1.B9" id="使用_cargo_install_的注意事项"><span id=".E4.BD.BF.E7.94.A8_cargo_install_.E7.9A.84.E6.B3.A8.E6.84.8F.E4.BA.8B.E9.A1.B9"></span>使用 cargo install 的注意事项</h3></div>
+<p>有些软件包需要安装更多的文件，如手册页面或其他必要的文件。如果没有其他方式来安装这些文件，可使用 <code>cargo install</code>。在这种情况下不必使用 <code>build()</code>，因为即使该软件包已通过 <code>cargo build</code> 构建，<code>cargo install</code> 仍会强制重新构建。但仍然可使用 <code>prepare()</code> 提前获取源代码：
+</p>
+<pre>package() {
+    cd "$pkgname-$pkgver"
+    export RUSTUP_TOOLCHAIN=stable 
+    cargo install --no-track --frozen --all-features --root "$pkgdir/usr/" --path .
+}
+</pre>
+<p>应始终使用 <code>--no-track</code> 参数，否则 <code>cargo install</code> 将创建不必要的文件，如 <code>/usr/.crates.toml</code> 或 <code>/usr/.crates2.json</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2ce18142b976_.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.A4.BA.E4.BE.8B" id="软件包示例"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E7.A4.BA.E4.BE.8B"></span>软件包示例</h2></div>
+<p>PKGBUILD 样例请参阅软件包页面上的 <i>Package Actions &gt; Source Files</i>。
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cbindgen">cbindgen</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ripgrep">ripgrep</a></span><sup><small>包</small></sup></span></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807083948
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.135 seconds
+Real time usage: 0.140 seconds
+Preprocessor visited node count: 417/1000000
+Revision size: 7288/2097152 bytes
+Post‐expand include size: 5223/2097152 bytes
+Template argument size: 1471/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 99/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   30.389      1 -total
+ 24.84%    7.547     45 Template:Ic
+ 12.91%    3.924      1 Template:Package_guidelines
+  9.30%    2.825      4 Template:Pkg
+  7.97%    2.421      2 Template:注意
+  6.74%    2.047      1 Template:翻译状态
+-->
+<!-- Render ID 8c506e0e-923b-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7573:|#|:idhash:canonical!zh-cn and timestamp 20260807083948 and revision id 33664. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

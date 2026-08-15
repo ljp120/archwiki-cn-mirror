@@ -1,0 +1,209 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgd837be4f2142">MPD/故障排除</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Music_Player_Daemon/Troubleshooting">Music Player Daemon/Troubleshooting</a>，最近一次同步于 2024-10-02，若英文版本有所<a href="https://wiki.archlinux.org/title/Music_Player_Daemon/Troubleshooting?diff=0&amp;oldid=800332">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Music_Player_Daemon_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Troubleshooting_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd837be4f2142_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这篇文章中的某些解决方法可能已经过时，请谨慎参考。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd837be4f2142_.E8.87.AA.E6.A3.80.E5.A4.B1.E8.B4.A5" id="自检失败"><span id=".E8.87.AA.E6.A3.80.E5.A4.B1.E8.B4.A5"></span>自检失败</h3></div>
+<p>MPD 启动时会自动检测用户的启动配置，并以此配置输出与音量控制。虽然启动流程一般不会有问题，但在某些系统上会失败。手动为 MPD 指定输出设备和混音器控制或许能解决。若配置文件 <code>/etc/mpd.conf</code> 是从 <code>/etc/mpd.conf.example</code> 复制而来，仅需要取消注释以下内容：
+</p><p>ALSA 输出类型和 ALSA 混音器示例：
+</p>
+<pre>audio_output {
+	type			"alsa"
+	name			"My ALSA Device"
+	device			"hw:0,0"	# 可选
+	format			"44100:16:2"	# 可选
+	mixer_type		"hardware"
+	mixer_device		"default"
+	mixer_control		"PCM"
+}
+</pre>
+<p><b>注意：</b>当同时使用 ESD 与 MPD 时，为防止权限问题，请以 root 身份运行下列命令：
+</p>
+<pre># chsh -s /bin/true mpd
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd837be4f2142_.E9.A6.96.E6.AC.A1.E5.90.AF.E5.8A.A8_MPD_.E6.97.B6.E5.81.87.E6.AD.BB" id="首次启动_MPD_时假死"><span id=".E9.A6.96.E6.AC.A1.E5.90.AF.E5.8A.A8_MPD_.E6.97.B6.E5.81.87.E6.AD.BB"></span>首次启动 MPD 时假死</h3></div>
+<p>这是一个由损坏的 mp3 标签引起的常见问题。
+以下是一个实验性的解决方案。
+所需工具：
+</p>
+<ul><li>kid3</li>
+<li>easytag</li></ul>
+<p>这个解决方案非常繁琐，尤其在修复含有大量数据的数据库时。修复一个 16GB 大小的数据库所需要的基准时间大约是 2.5 小时。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd837be4f2142_EasyTAG" id="EasyTAG">EasyTAG</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=easytag">easytag</a></span><sup><small>包</small></sup></span> 的作用是搜索错误的标签，但可能会和 MPD 一样（在遇到 mp3 标签问题时）假死或卡死。此处使用的技巧附加配置片段 是让 easytag 在状态栏上显示引起问题的文件。
+启动 easytag 前请确保手边有可用的终端以随时准备在 easytag 假死时将其终止。准备好后，在 easytag 的树形图窗口中选择存放音乐的文件夹。默认情况下，easytag 会开始搜索该文件夹及其所有子文件夹下的 mp3 文件。一旦发现 easytag 停止搜索歌曲，记下那个出问题的文件并终止 easytag。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>上述过程也可以通过编辑 MPD 的配置文件，将“日志等级”（log_level）从“默认”（default）更改至“详细”（verbose）实现，编辑好 MPD 的配置后，重启 MPD 并检查 MPD 挂起后的最新日志条目。调试结束后，建议将“日志等级”重新改回“默认”，“详细”的日志等级会导致日志文件大小迅速增长。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd837be4f2142_Kid3" id="Kid3">Kid3</h4></div>
+<p>这时候 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kid3">kid3</a></span><sup><small>包</small></sup></span> 就派上了用场。找到有问题的歌曲，用 kid3 重写标签然后保存文件，kid3 应该会强制重写整个标签，解决导致 MPD 和 easytag 假死的问题。
+</p><p>重复这个过程，直到修复完音乐目录中所有有问题的文件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd837be4f2142_Cannot_connect_to_mpd:_host_.22localhost.22_not_found:_Temporary_failure_in_name_resolution" id='Cannot_connect_to_mpd:_host_"localhost"_not_found:_Temporary_failure_in_name_resolution'><span id="Cannot_connect_to_mpd:_host_.22localhost.22_not_found:_Temporary_failure_in_name_resolution"></span>Cannot connect to mpd: host "localhost" not found: Temporary failure in name resolution</h3></div>
+<p>没有网络连接的情况下，无法通过 ncmpcpp 连接至 MPD。解决方法是<a href="#pg8f9147d5b2cb">禁用 IPv6</a>，或在 /etc/hosts 中添加一行：
+</p>
+<pre>::1 localhost.localdomain localhost
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd837be4f2142_.E5.B0.9D.E8.AF.95.E4.BD.BF.E7.94.A8.E5.AE.A2.E6.88.B7.E7.AB.AF.E8.BF.9E.E6.8E.A5.E5.88.B0_MPD_.E6.97.B6.E7.9A.84.E5.85.B6.E4.BB.96.E9.97.AE.E9.A2.98" id="尝试使用客户端连接到_MPD_时的其他问题"><span id=".E5.B0.9D.E8.AF.95.E4.BD.BF.E7.94.A8.E5.AE.A2.E6.88.B7.E7.AB.AF.E8.BF.9E.E6.8E.A5.E5.88.B0_MPD_.E6.97.B6.E7.9A.84.E5.85.B6.E4.BB.96.E9.97.AE.E9.A2.98"></span>尝试使用客户端连接到 MPD 时的其他问题</h3></div>
+<p>已有关于多个客户端无法连接到 MPD 的报告，类似下列情况：
+</p>
+<pre>$ ncmpcpp
+Cannot connect to mpd: Connection closed by the server
+$ sonata
+2011-02-13 18:33:05  Connection lost while reading MPD hello
+2011-02-13 18:33:05  Not connected
+2011-02-13 18:33:05  Not connected
+</pre>
+<p>请访问 Arch 论坛上有关 ncmpcpp 的帖子，例如<a href="https://bbs.archlinux.org/viewtopic.php?id=109962">这个链接</a>和<a href="https://bbs.archlinux.org/viewtopic.php?id=113493">这个链接</a>。另见 <a href="https://bugs.archlinux.org/task/22071">FS#22071</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd837be4f2142_.E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88.E4.B8.80" id="解决方案一"><span id=".E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88.E4.B8.80"></span>解决方案一</h4></div>
+<p>检查 <code>mpd.conf</code> 中有无如 <code>mpd.error</code> 中的示例并移除错误配置。MPD 的错误配置示例已经过时，且已被移除。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd837be4f2142_.E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88.E4.BA.8C" id="解决方案二"><span id=".E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88.E4.BA.8C"></span>解决方案二</h4></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>无法确定这个解决方法是否合适。更改 mpd.conf 中默认绑定的地址会得到一个警告。如果此方式无效，请注释掉更改的内容。</div>
+<p>如果没有解决问题，请在 <code>mpd.conf</code> 中添加以下内容：
+</p>
+<pre> bind_to_address "127.0.0.1"
+ port "6600"
+</pre>
+<p>添加完成后，请让客户端连接到 127.0.0.1。例如，将以下内容添加到 ncmpcpp 的配置文件中：
+</p>
+<pre> mpd_host "127.0.0.1"
+ mpd_port "6600"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd837be4f2142_IPv6_.E5.85.88.E4.BA.8E_IPv4_.E7.BB.91.E5.AE.9A" id="IPv6_先于_IPv4_绑定"><span id="IPv6_.E5.85.88.E4.BA.8E_IPv4_.E7.BB.91.E5.AE.9A"></span>IPv6 先于 IPv4 绑定</h3></div>
+<p>如果 MPD 启动时显示如下信息：
+</p>
+<pre>listen: bind to '0.0.0.0:6600' failed: Address already in use (continuing anyway, because binding to '[::]:6600' succeeded)
+</pre>
+<p>这意味着 MPD 在绑定 IPv4 的地址之前已经绑定了 IPv6 地址。若希望使用 IPv4 接口，请将其硬编码到 <code>mpd.conf</code> 中，比如：
+</p>
+<pre>bind_to_address "0.0.0.0"
+</pre>
+<p>可以指定多个绑定地址，例如，按照下列配置让 MPD 同时监听本地和本设备网卡的外部地址：
+</p>
+<pre>bind_to_address "127.0.0.1"
+bind_to_address "192.168.1.13"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd837be4f2142_daemon:_cannot_setgid_for_user_.22mpd.22:_Operation_not_permitted" id='daemon:_cannot_setgid_for_user_"mpd":_Operation_not_permitted'><span id="daemon:_cannot_setgid_for_user_.22mpd.22:_Operation_not_permitted"></span>daemon: cannot setgid for user "mpd": Operation not permitted</h3></div>
+<p>这个错误表明用户所启动的进程没有权限按照配置将其更改为另一个用户（mpd）的进程。
+</p><p>要解决该问题，请以 <a href="#pg09ac28aa217b">root 用户</a><a href="#pg6ec215b93a06">启动</a> <code>mpd.service</code>，不要以<a href="#pg983913bfd458">用户单元</a>启动。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd837be4f2142_daemon__fatal_error__Failed_to_set_group" id="daemon:_fatal_error:_Failed_to_set_group_NN:_Operation_not_permitted">daemon: fatal_error: Failed to set group NN: Operation not permitted</h3></div>
+<p>这个错误表明 MPD 不能设置用户组。原因 <code>/etc/mpd.conf</code> 中设置了除默认组 mpd 以外的其他用户组。此时默认的 <code>mpd.service</code> 文件以 mpd 的用户身份启动 MPD（并且，如果没有在 <code>/etc/passwd</code> 中指定 mpd 用户的默认用户组）但没有权限更改用户组。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd837be4f2142_.E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88.E4.B8.80_2" id="解决方案一_2"><span id=".E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88.E4.B8.80_2"></span>解决方案一</h4></div>
+<p>注释掉 <code>/etc/mpd.conf</code> 中的 <code>group=</code> 部分或者将其更改为 <code>group=mpd</code>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd837be4f2142_.E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88.E4.BA.8C_2" id="解决方案二_2"><span id=".E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88.E4.BA.8C_2"></span>解决方案二</h4></div>
+<p><a href="#pg8c0a8dbf9b36">附加配置片段</a> <code>mpd.service</code> 并添加用户组。例如，以“audio”用户组运行 MPD：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/mpd.service.d/group.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+Group=audio</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd837be4f2142_.E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88.E4.B8.89" id="解决方案三"><span id=".E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88.E4.B8.89"></span>解决方案三</h4></div>
+<p>在 <code>/etc/passwd</code> 中修改 mpd 用户的默认用户组。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd837be4f2142_MPD_.26_ALSA" id="MPD_&amp;_ALSA"><span id="MPD_.26_ALSA"></span>MPD &amp; ALSA</h3></div>
+<p>用其他音频输出时（例如某些网页含有 Flash 小程序），MPD 可能会显示为无法播放（重启后解决）。此问题在 MPD 的日志中表现为：
+</p>
+<pre>Error opening alsa device "hw:0,0": Device or resource busy
+</pre>
+<p>出现这个问题的可能原因：
+</p>
+<ul><li>声卡不支持硬件混音（使用 <b>dmix</b> 插件）</li>
+<li>应用程序在 ALSA 的默认设置下无法工作</li></ul>
+<p>详情请参考<a href="https://mpd.wikia.com/wiki/Alsa">这个链接</a>。
+</p><p>在 <code>mpd.conf</code> 中添加如下内容可以解决这个问题：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">mpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">audio_output {
+        type                    "alsa"
+        name                    "Sound Card"
+        options                 "dev=dmixer"
+        device                  "plug:dmix"
+}</pre>
+<p><a href="#pgaa5af66d88c3">重启</a> <code>mpd.service</code> 以令上述修改生效。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd837be4f2142_.E4.B8.8E_ALSA_.E4.B8.80.E8.B5.B7.E4.BD.BF.E7.94.A8.E6.97.B6_CPU_.E5.8D.A0.E7.94.A8.E8.BE.83.E9.AB.98" id="与_ALSA_一起使用时_CPU_占用较高"><span id=".E4.B8.8E_ALSA_.E4.B8.80.E8.B5.B7.E4.BD.BF.E7.94.A8.E6.97.B6_CPU_.E5.8D.A0.E7.94.A8.E8.BE.83.E9.AB.98"></span>与 ALSA 一起使用时 CPU 占用较高</h4></div>
+<p>当 MPD 与 ALSA 一起使用时，可能会发现 MPD 占用大量 CPU（大约 20% 到 30%）。这是因为大多数声卡支持 48KHz 采样率而大多数音乐使用 44.1KHz，MPD 会强制重采样。重采样操作使用了大量的 CPU 时间，导致了高 CPU 占用率。
+</p><p>对于大多数用户而言，应该能通过在 <code>/etc/mpd.conf</code> 中的 <i>audio_output</i> 部分中添加 <code>auto_resample "no"</code>，让 MPD 不再对音频重采样以解决该问题：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">mpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">audio_output {
+   type			"alsa"
+   name			"My ALSA Device"
+   auto_resample	"no"
+}</pre>
+<p>虽然不明显，但启用 mmap 仍然能够提升速度：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">mpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">audio_output {
+   type			"alsa"
+   name			"My ALSA Device"
+   use_mmap		"yes"
+}</pre>
+<p>某些用户可能需要同时配置 dmix，让 dmix 也使用 44KHz。有关调整 MPD 性能的相关信息请参考 <a href="https://mpd.wikia.com/wiki/Tuning">MPD wiki</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd837be4f2142_Playing_audio_files_with_different_rate_.28works_for_EMU_0202.2F0204.2F0404.29" id="Playing_audio_files_with_different_rate_(works_for_EMU_0202/0204/0404)"><span id="Playing_audio_files_with_different_rate_.28works_for_EMU_0202.2F0204.2F0404.29"></span>Playing audio files with different rate (works for EMU 0202/0204/0404)</h4></div>
+<p>To play audio files of different rate with automatic card rate change install pulseaudio and pulseaudio-alsa and keep using ALSA as output:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">mpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">audio_output {
+    type          "alsa"
+    name          "Emu 0202 USB"
+    device        "hw:2,0"
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd837be4f2142_.E6.9B.B4.E6.94.B9.E7.94.A8.E6.88.B7" id="更改用户"><span id=".E6.9B.B4.E6.94.B9.E7.94.A8.E6.88.B7"></span>更改用户</h3></div>
+<p>更改 MPD 的默认运行用户可能会导致如下错误：
+</p>
+<pre>output: Failed to open "My ALSA Device"
+</pre>
+<pre>[alsa]: Failed to open ALSA device "default": No such file or directory
+</pre>
+<p>或
+</p>
+<pre>player_thread: problems opening audio device while playing "Song Name.mp3"
+</pre>
+<p>这是因为 mpd 的用户需要在 <i>audio</i> 用户组，才能访问 <code>/dev/snd/</code> 下的声音设备。让 mpd 用户成为 <i>audio</i> 用户组的成员即可解决这个问题：
+</p>
+<pre># gpasswd -a 'mpd' audio
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd837be4f2142_MPD_.E6.B7.BB.E5.8A.A0.E4.BA.86.E6.9D.A5.E8.87.AA.E6.95.B0.E6.8D.AE.E5.BA.93.E7.9A.84.E9.9A.90.E8.97.8F.E7.9B.AE.E5.BD.95" id="MPD_添加了来自数据库的隐藏目录"><span id="MPD_.E6.B7.BB.E5.8A.A0.E4.BA.86.E6.9D.A5.E8.87.AA.E6.95.B0.E6.8D.AE.E5.BA.93.E7.9A.84.E9.9A.90.E8.97.8F.E7.9B.AE.E5.BD.95"></span>MPD 添加了来自数据库的隐藏目录</h3></div>
+<p>如果 MPD 包含了来自数据库的隐藏目录（例如由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=syncthing">syncthing</a></span><sup><small>包</small></sup></span> 创建的 <code>.stfolder</code> 重复音乐备份），请在该目录下创建 <code>.mpdignore</code> 文件，文件内的每一行表示需要忽略的文件夹和文件，详情请参见 <a href="https://www.musicpd.org/doc/html/user.html#the-music-directory-and-the-database">mpd 文档</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808040055
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.106 seconds
+Real time usage: 0.110 seconds
+Preprocessor visited node count: 358/1000000
+Revision size: 9024/2097152 bytes
+Post‐expand include size: 4655/2097152 bytes
+Template argument size: 1707/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   25.224      1 -total
+ 13.63%    3.437     22 Template:Ic
+ 13.47%    3.398      1 Template:翻译状态
+ 10.21%    2.576      3 Template:Pkg
+  7.80%    1.969      5 Template:Hc
+  4.72%    1.191      2 Template:Bc
+  4.47%    1.128      3 Template:注意
+  4.20%    1.059      1 Template:Bug
+-->
+<!-- Render ID c115018e-92dd-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7950:|#|:idhash:canonical!zh-cn and timestamp 20260808040055 and revision id 33648. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

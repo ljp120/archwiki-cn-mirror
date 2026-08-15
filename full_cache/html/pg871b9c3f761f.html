@@ -1,0 +1,298 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg871b9c3f761f">Project:沙盒</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><br/>
+<a href="https://en.wikipedia.org/wiki/GPGPU">通用图形处理单元计算</a>（GPGPU）API包括与设备制造商无关的OpenCL、SYCL、HIP、OpenMP和Vulkan计算着色器;以及NVIDIA 的CUDA。每个API可以有多种硬件或软件的实现：GPU、CPU、NPU、FPGA，或者是不同的GPGPU API（shim/transpiler）。 
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg871b9c3f761f_OpenCL" id="OpenCL">OpenCL</h2></div>
+<p><a href="https://en.wikipedia.org/wiki/OpenCL">OpenCL</a> （ Open Computing Language ）是由非营利联盟Khronos Group开发的一种开放、免版税的并行编程规范。 
+</p><p>OpenCL 规范描述了一种基于 C 的编程语言、一个必须存在的通用环境，以及一个使程序员能够调用该环境的C API 。还有绑定允许其他语言调用该环境，以及编写 OpenCL 计算内核的替代语言。 （question?）
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=clinfo">clinfo</a></span><sup><small>包</small></sup></span> 可用于列出 OpenCL 平台、设备及 ICD 加载器属性。</div>
+<p><br/>
+OpenCL 环境至少满足以下任意一项要求：
+</p>
+<ul><li><i>libOpenCL.so</i>, ICD加载器呈现完整的OpenCL API接口。</li>
+<li>由ICD加载器加载的平台相关驱动程序。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_ICD_loader_.28libOpenCL.so.29" id="ICD_loader_(libOpenCL.so)"><span id="ICD_loader_.28libOpenCL.so.29"></span>ICD loader (libOpenCL.so)</h3></div>
+<p>It is very common for a system to have multiple OpenCL-capable hardware and hence multiple OpenCL runtime implementations. A component called the "OpenCL ICD loader" is supposed to be a platform-agnostic library that provides the means to load device-specific drivers through the OpenCL API.
+Most OpenCL vendors provide their own implementation of an OpenCL ICD loader, and these should all work with the other vendors' OpenCL implementations. Unfortunately, most vendors do not provide completely up-to-date ICD loaders, and therefore Arch Linux has decided to provide this library from a separate project (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ocl-icd">ocl-icd</a></span><sup><small>包</small></sup></span>) which provides a functioning implementation of the current OpenCL API. As of 2025, the current OpenCL version is 3.0.
+</p><p>The other ICD loader libraries are installed as part of each vendor's SDK. If you want to ensure the ICD loader from the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ocl-icd">ocl-icd</a></span><sup><small>包</small></sup></span> package is used, you can create a file in <code>/etc/ld.so.conf.d</code> which adds <code>/usr/lib</code> to the dynamic program loader's search directories:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ld.so.conf.d/00-usrlib.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/usr/lib
+</pre>
+<p>This is necessary because all the SDKs add their runtime's lib directories to the search path through <code>ld.so.conf.d</code> files.
+</p><p>The available packages containing various OpenCL ICDs are:
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ocl-icd">ocl-icd</a></span><sup><small>包</small></sup></span>: recommended, most up-to-date</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/intel-opencl/">intel-opencl</a></span><sup><small>AUR</small></sup></span> by Intel. Provides OpenCL 2.0, deprecated in favour of <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-compute-runtime">intel-compute-runtime</a></span><sup><small>包</small></sup></span>.</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>An ICD Loader's vendor is functionally irrelevant: they should be vendor-agnostic and may be used interchangeably as long as they are implemented correctly. The vendor is only useful for the purpose to identify them from each other.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_Managing_implementations" id="Managing_implementations">Managing implementations</h3></div>
+<p>To see which OpenCL implementations are currently active on your system, use the following command:
+</p>
+<pre>$ ls /etc/OpenCL/vendors
+</pre>
+<p>To find out all possible (known) properties of the OpenCL platform and devices available on the system, <a href="#pg54c3351b3e3b">install</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=clinfo">clinfo</a></span><sup><small>包</small></sup></span>.
+</p>
+
+<p><br/>
+You can specify which implementations should your application see using <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ocl-icd-choose/">ocl-icd-choose</a></span><sup><small>AUR</small></sup></span>. For example:
+</p>
+<pre>$ ocl-icd-choose amdocl64.icd:mesa.icd davinci-resolve-checker
+</pre>
+<p><code>ocl-icd-choose</code> is a simple wrapper script that sets the <code>OCL_ICD_FILENAMES</code> environment variable. It would not be needed if <code>OCL_ICD_VENDORS</code> could handle single icd files like the manual suggests; this is a known bug being tracked as <a href="https://github.com/OCL-dev/ocl-icd/issues/7#issuecomment-1522941979">OCL-dev/ocl-icd#7</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_Runtime" id="Runtime">Runtime</h3></div>
+<p>To <b>execute</b> programs that use OpenCL, a runtime that can be loaded by <i>libOpenCL.so</i> needs to be installed.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg871b9c3f761f_OpenCL_on_generic_GPU" id="OpenCL_on_generic_GPU">OpenCL on generic GPU</h4></div>
+<p>For <i>any</i> GPU supported by <a href="#pg2094b73e58de">Mesa</a>, you can use rusticl by installing <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=opencl-mesa">opencl-mesa</a></span><sup><small>包</small></sup></span>. It can be enabled by using the <a href="#pg18ad99d88887">environment variable</a> <code>RUSTICL_ENABLE=<i>driver</i></code>, where <code><i>driver</i></code> is a Gallium driver, such as <code>radeonsi</code> or <code>iris</code>. It works on the broadest set of hardware but does not necessarily provide the best performance. If you have trouble setting up other drivers, try using it: it takes a very small amount of configuration to enable.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg871b9c3f761f_OpenCL_on_AMD.2FATI_GPU" id="OpenCL_on_AMD/ATI_GPU"><span id="OpenCL_on_AMD.2FATI_GPU"></span>OpenCL on AMD/ATI GPU</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rocm-opencl-runtime">rocm-opencl-runtime</a></span><sup><small>包</small></sup></span>: Part of AMD's ROCm GPU compute stack, officially supporting <a href="https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html">a small range of GPU models</a> (other cards may work with unofficial or partial support). To support cards older than Vega, you need to set the runtime variable <code>ROC_ENABLE_PRE_VEGA=1</code>. This is similar, but not quite equivalent to <a href="https://amdgpu-install.readthedocs.io/en/latest/install-script.html#specifying-an-opencl-implementation">specifying</a> <code>opencl=rocr</code> in ubuntu's amdgpu-install, because this package's rocm version differs from ubuntu's installer version.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/opencl-legacy-amdgpu-pro/">opencl-legacy-amdgpu-pro</a></span><sup><small>AUR</small></sup></span>: Legacy Orca OpenCL repackaged from AMD's ubuntu releases. Equivalent to <a href="https://amdgpu-install.readthedocs.io/en/latest/install-script.html#specifying-an-opencl-implementation">specifying</a> <code>opencl=legacy</code> in ubuntu's amdgpu-install.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/opencl-amd/">opencl-amd</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/opencl-amd-dev/">opencl-amd-dev</a></span><sup><small>AUR</small></sup></span>: ROCm components repackaged from AMD's Ubuntu releases. Equivalent to <a href="https://rocm.docs.amd.com/projects/install-on-linux/en/latest/how-to/amdgpu-install.html">specifying</a> <code>opencl=rocr,legacy</code> in ubuntu's amdgpu-install.</li></ul>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg871b9c3f761f_OpenCL_image_support" id="OpenCL_image_support">OpenCL image support</h5></div>
+<p>The latest ROCm versions now includes OpenCL Image Support used by GPGPU accelerated software such as Darktable. ROCm with the <a href="#pg4a4bc5e5df24">AMDGPU</a> open source graphics driver are all that is required. AMDGPU PRO is not required.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ /opt/rocm/bin/clinfo | grep -i "image support"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Image support                                   Yes</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg871b9c3f761f_OpenCL_on_NVIDIA_GPU" id="OpenCL_on_NVIDIA_GPU">OpenCL on NVIDIA GPU</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=opencl-nvidia">opencl-nvidia</a></span><sup><small>包</small></sup></span>: official <a href="#pge12579b7d4ac">NVIDIA</a> runtime</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg871b9c3f761f_OpenCL_on_Intel_GPU" id="OpenCL_on_Intel_GPU">OpenCL on Intel GPU</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-compute-runtime">intel-compute-runtime</a></span><sup><small>包</small></sup></span>: a.k.a. the "NEO" runtime, the open-source OpenCL (and oneAPI Level Zero) implementation for Intel Gen12 (Rocket/Tiger Lake) Integrated Graphics and above (includes all discrete Intel GPUs).</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/intel-compute-runtime-legacy/">intel-compute-runtime-legacy</a></span><sup><small>AUR</small></sup></span>: same as above (with partial oneAPI Level Zero support), only for Intel Gen8 (Broadwell), Gen9 (Skylake and variants), and Gen11 (Ice/Elkhart Lake) Graphics. The OpenCL ICD provided for legacy platforms has the suffix "legacy1".</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/beignet/">beignet</a></span><sup><small>AUR</small></sup></span>: the open-source OpenCL implementation for Intel Gen7 (Ivy Bridge) Graphics and above, deprecated by Intel in favour of the NEO OpenCL runtime, remains recommended solution for legacy hardware platforms (e.g. Ivy Bridge, Haswell).</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/intel-opencl/">intel-opencl</a></span><sup><small>AUR</small></sup></span>: the proprietary OpenCL implementation for Intel Gen7 (Ivy Bridge) Graphics and above, deprecated by Intel in favour of the NEO OpenCL runtime, remains recommended solution for legacy hardware platforms (e.g. Ivy Bridge, Haswell).</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg871b9c3f761f_OpenCL_on_CPU" id="OpenCL_on_CPU">OpenCL on CPU</h4></div>
+<p>The following allow OpenCL to be run on a CPU:
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/intel-opencl-runtime/">intel-opencl-runtime</a></span><sup><small>AUR</small></sup></span>: Intel's LLVM and oneAPI-based implementation for x86_64 processors. Officially intended for Intel Core and Xeon processors, it actually works on all x86_64 processors with SSE4.1. Even on AMD Zen processors it outperforms pocl.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pocl">pocl</a></span><sup><small>包</small></sup></span>: LLVM-based OpenCL implementation, works for all CPU architectures supported by LLVM and some GPUs (Nvidia through libCUDA, Intel through Level Zero) as well as OpenASIP. Despite this broad coverage, its performance leaves a lot to be desired.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/amdapp-sdk/">amdapp-sdk</a></span><sup><small>AUR</small></sup></span>: AMD CPU runtime, abandoned</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg871b9c3f761f_OpenCL_on_Vulkan" id="OpenCL_on_Vulkan">OpenCL on Vulkan</h4></div>
+<p>The following allow OpenCL to be run on top of a Vulkan runtime:
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clspv-git/">clspv-git</a></span><sup><small>AUR</small></sup></span>: Clspv is a prototype compiler for a subset of OpenCL C to Vulkan compute shaders.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clvk-git/">clvk-git</a></span><sup><small>AUR</small></sup></span>: clvk is a prototype implementation of OpenCL 3.0 on top of Vulkan using clspv as the compiler.</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg871b9c3f761f_OpenCL_on_FPGA" id="OpenCL_on_FPGA">OpenCL on FPGA</h4></div>
+<ul><li>pocl for OpenASIP, see above.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xrt-bin/">xrt-bin</a></span><sup><small>AUR</small></sup></span>: Xilinx Run Time for FPGA <a href="https://github.com/Xilinx/XRT">xrt</a></li>
+<li><a href="https://github.com/intel/fpga-runtime-for-opencl">fpga-runtime-for-opencl</a>: Intel FPGA Runtime</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_32_bit_runtime" id="32-bit_runtime">32-bit runtime</h3></div>
+<p>To <b>execute</b> 32-bit programs that use OpenCL, a compatible hardware 32-bit runtime needs to be installed.
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>The <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=clinfo">clinfo</a></span><sup><small>包</small></sup></span> utility can only be used to list 64-bit OpenCL platforms, devices present and ICD loader properties.
+for 32-bit you need to compile clinfo for 32-bit or use the 32-bit <a href="https://www.archlinux32.org/packages/i686/extra/clinfo/">clinfo</a> from the archlinux32 project.</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg871b9c3f761f_OpenCL_on_generic_GPU_.2832-bit.29" id="OpenCL_on_generic_GPU_(32-bit)"><span id="OpenCL_on_generic_GPU_.2832-bit.29"></span>OpenCL on generic GPU (32-bit)</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-opencl-mesa">lib32-opencl-mesa</a></span><sup><small>包</small></sup></span>: OpenCL support for Mesa drivers (32-bit)</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg871b9c3f761f_OpenCL_on_NVIDIA_GPU_.2832-bit.29" id="OpenCL_on_NVIDIA_GPU_(32-bit)"><span id="OpenCL_on_NVIDIA_GPU_.2832-bit.29"></span>OpenCL on NVIDIA GPU (32-bit)</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-opencl-nvidia">lib32-opencl-nvidia</a></span><sup><small>包</small></sup></span>: OpenCL implemention for NVIDIA (32-bit)</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_Development" id="Development">Development</h3></div>
+<p>For OpenCL <b>development</b>, the bare minimum additional packages required, are:
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ocl-icd">ocl-icd</a></span><sup><small>包</small></sup></span>: OpenCL ICD loader implementation, up to date with the latest OpenCL specification.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=opencl-headers">opencl-headers</a></span><sup><small>包</small></sup></span>: OpenCL C/C++ API headers.</li></ul>
+<p>The vendors' SDKs provide a multitude of tools and support libraries:
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/intel-opencl-sdk/">intel-opencl-sdk</a></span><sup><small>AUR</small></sup></span>: <a href="https://software.intel.com/en-us/articles/opencl-sdk/">Intel OpenCL SDK</a> (old version, new OpenCL SDKs are included in the INDE and Intel Media Server Studio)</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/amdapp-sdk/">amdapp-sdk</a></span><sup><small>AUR</small></sup></span>: This package is installed as <code>/opt/AMDAPP</code> and apart from SDK files it also contains a number of code samples (<code>/opt/AMDAPP/SDK/samples/</code>). It also provides the <code>clinfo</code> utility which lists OpenCL platforms and devices present in the system and displays detailed information about them. As the SDK itself contains a CPU OpenCL driver, no extra driver is needed to execute OpenCL on CPU devices (regardless of its vendor).</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rocm-opencl-sdk">rocm-opencl-sdk</a></span><sup><small>包</small></sup></span>: Develop OpenCL-based applications for AMD platforms.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cuda">cuda</a></span><sup><small>包</small></sup></span>: Nvidia's GPU SDK which includes support for OpenCL 3.0.</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_Language_bindings" id="Language_bindings">Language bindings</h3></div>
+<p>These bindings allow other languages to call into the OpenCL environment. They generally do not alter the requirement to write the kernel in OpenCL C.
+</p>
+<ul><li><b>JavaScript/HTML5</b>: <a href="https://www.khronos.org/webcl/">WebCL</a></li>
+<li><a href="#pgf6d3de5ccfac">Python</a>: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-pyopencl">python-pyopencl</a></span><sup><small>包</small></sup></span></li>
+<li><a href="#pg6c201f714a67">D</a>: <a href="https://github.com/Trass3r/cl4d">cl4d</a> or <a href="https://github.com/libmir/dcompute">DCompute</a></li>
+<li><a href="#pgf5cd65505569">Java</a>: <a href="https://git.qoto.org/aparapi/aparapi">Aparapi</a> or <a href="https://jogamp.org/jocl/www/">JOCL</a> (a part of <a href="https://jogamp.org/">JogAmp</a>)</li>
+<li><a href="#pg7508f51deda4">Mono/.NET</a>: <a href="https://sourceforge.net/projects/opentk/">Open Toolkit</a></li>
+<li><a href="#pg4e0d9cc683d6">Go</a>: <a href="https://github.com/samuel/go-opencl">OpenCL bindings for Go</a></li>
+<li><b>Racket</b>: Racket has a native interface <a href="http://planet.racket-lang.org/display.ss?owner=jaymccarthy&amp;package=opencl.plt">on PLaneT</a> that can be installed via raco.</li>
+<li><a href="#pg802f2550cda0">Rust</a>: <a href="https://github.com/cogciprocate/ocl">ocl</a></li>
+<li><a href="#pg41794fb1b9b3">Julia</a>: <a href="https://github.com/JuliaGPU/OpenCL.jl">OpenCL.jl</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg871b9c3f761f_SYCL" id="SYCL">SYCL</h2></div>
+<p>According to <a href="https://en.wikipedia.org/wiki/SYCL">Wikipedia:SYCL</a>:
+</p>
+<blockquote>
+<p>SYCL is a higher-level programming model to improve programming productivity on various hardware accelerators. It is a single-source embedded domain-specific language (eDSL) based on pure C++17. 
+</p><p>SYCL is [...] inspired by OpenCL that enables code for heterogeneous processors to be written in a “single-source” style using completely standard C++. SYCL enables single-source development where C++ template functions can contain both host and device code to construct complex algorithms that use hardware accelerators, and then re-use them throughout their source code on different types of data.
+</p><p>While the SYCL standard started as the higher-level programming model sub-group of the OpenCL working group and was originally developed for use with OpenCL and SPIR, SYCL is a Khronos Group workgroup independent from the OpenCL working group [...] starting with SYCL 2020, SYCL has been generalized as a more general heterogeneous framework able to target other systems. This is now possible with the concept of a generic backend to target any acceleration API while enabling full interoperability with the target API, like using existing native libraries to reach the maximum performance along with simplifying the programming effort. For example, the OpenSYCL implementation targets ROCm and CUDA via AMD's cross-vendor HIP.
+</p>
+</blockquote>
+<p>In other words, the SYCL defines a programming environment based on C++17. This environment is intended to be combined with compilers that produce code for both CPUs and GPGPUs. The language intended for the GPGPU side used to be SPIR, but compilers that target other intermediate representations also exist.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_Implementations" id="Implementations">Implementations</h3></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/trisycl-git/">trisycl-git</a></span><sup><small>AUR</small></sup></span>: Open source implementation mainly driven by Xilinx.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/adaptivecpp/">adaptivecpp</a></span><sup><small>AUR</small></sup></span>: Compiler for multiple programming models (SYCL, C++ standard parallelism, HIP/CUDA) for CPUs and GPUs from all vendors.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-oneapi-dpcpp-cpp">intel-oneapi-dpcpp-cpp</a></span><sup><small>包</small></sup></span>: Intel's Data Parallel C++: the LLVM/oneAPI Implementation of SYCL.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/computecpp/">computecpp</a></span><sup><small>AUR</small></sup></span> Codeplay's proprietary implementation of SYCL 1.2.1. Can target SPIR, SPIR-V and experimentally PTX (NVIDIA) as device targets (ends of support on 1st september 2023, will get merged into intel llvm implementation <a href="https://codeplay.com/portal/news/2023/07/07/the-future-of-computecpp">Source</a>).</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg871b9c3f761f_oneAPI" id="oneAPI">oneAPI</h4></div>
+<p>oneAPI is a marketing name used by many of Intel's high-performance computing libraries. The package <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-oneapi-dpcpp-cpp">intel-oneapi-dpcpp-cpp</a></span><sup><small>包</small></sup></span> provides <code>/opt/intel/oneapi/setvars.sh</code> that can be used to set up the environment for compilation and linking of SYCL programs. Some parts of the components like the compiler are open-sourced by Intel on GitHub while others are not.
+</p><p>Some packages can be installed for additional functionality. For example, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-oneapi-mkl-sycl">intel-oneapi-mkl-sycl</a></span><sup><small>包</small></sup></span> enables GPU offloading of the Math Kernel Library (MKL) to be supported.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg871b9c3f761f_Checking_for_SPIR_support" id="Checking_for_SPIR_support">Checking for SPIR support</h4></div>
+<p>SYCL was originally intended to be compiled to <a href="https://en.wikipedia.org/wiki/Standard_Portable_Intermediate_Representation">SPIR or SPIR-V</a>. Both are intermediate languages designed by Khronos that can be consumed by an OpenCL driver. SPIR is included as a OpenCL 1.0 or 2.0 extension while SPIR-V is included in OpenCL core from version 2.1 onwards (<code>clCreateProgramWithIL</code>). To check whether SPIR or SPIR-V are supported <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=clinfo">clinfo</a></span><sup><small>包</small></sup></span> can be used:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ clinfo | grep -i spir</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Platform Extensions                             cl_khr_icd cl_khr_global_int32_base_atomics cl_khr_global_int32_extended_atomics cl_khr_local_int32_base_atomics cl_khr_local_int32_extended_atomics cl_khr_byte_addressable_store cl_khr_depth_images cl_khr_3d_image_writes cl_intel_exec_by_local_thread cl_khr_<b>spir</b> cl_khr_fp64 cl_khr_image2d_from_buffer cl_intel_vec_len_hint 
+  IL version                                    <b>SPIR</b>-V_1.0
+  <b>SPIR</b> versions                                 1.2</pre>
+<p>ComputeCpp additionally ships with a tool that summarizes the relevant system information:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ computecpp_info</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Device 0:
+
+  Device is supported                     : UNTESTED - Untested OS
+  CL_DEVICE_NAME                          : Intel(R) Core(TM) i7-4770K CPU @ 3.50GHz
+  CL_DEVICE_VENDOR                        : Intel(R) Corporation
+  CL_DRIVER_VERSION                       : 18.1.0.0920
+  CL_DEVICE_TYPE                          : CL_DEVICE_TYPE_CPU 
+
+</pre>
+<p>Drivers known to at least partially support SPIR or SPIR-V include <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-compute-runtime">intel-compute-runtime</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/intel-opencl-runtime/">intel-opencl-runtime</a></span><sup><small>AUR</small></sup></span>, and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pocl">pocl</a></span><sup><small>包</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg871b9c3f761f_Other_uses_of_SPIR.2FSPIR-V" id="Other_uses_of_SPIR/SPIR-V"><span id="Other_uses_of_SPIR.2FSPIR-V"></span>Other uses of SPIR/SPIR-V</h5></div>
+<p>SPIR-V covers not only compute kernels, but also graphics shaders. It is able to serve as a shader intermediate language for OpenGL and Vulkan as well as a compute intermediate language for OpenCL, Vulkan, and SYCL. It can also be decompiled as a way to convert a kernel or shader from one language to another.
+</p><p>The C++ for OpenCL language (not to be confused with the short-lived "OpenCL C++") combines C++17 with OpenCL C. A handful of OpenCL drivers support loading it directly with <code>clBuildProgram()</code> like one would do with OpenCL C, but the main expected usage is through <code>clang</code> converting it to SPIR-V first. It can be an option for programmers who want to use C++17 in writing OpenCL kernels but do not want to embrace the whole model of SYCL.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_Development" id="Development_2">Development</h3></div>
+<p>SYCL requires a working C++11 environment to be set up.
+</p><p>There are a few open source libraries available for making use of the parallel capabilities in SYCL from its C++17 language:
+</p>
+<ul><li><a href="https://github.com/codeplaysoftware/computecpp-sdk/">ComputeCpp SDK</a>: Collection of code examples, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cmake">cmake</a></span><sup><small>包</small></sup></span> integration for ComputeCpp</li>
+<li><a href="https://github.com/codeplaysoftware/SYCL-DNN">SYCL-DNN</a>: Neural network performance primitives</li>
+<li><a href="https://github.com/codeplaysoftware/SYCL-BLAS">SYCL-BLAS</a>: Linear algebra performance primitives</li>
+<li><a href="https://github.com/codeplaysoftware/visioncpp">VisionCpp</a>: Computer Vision library</li>
+<li><a href="https://github.com/KhronosGroup/SyclParallelSTL">SYCL Parallel STL</a>: GPU implementation of the C++17 parallel algorithms</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg871b9c3f761f_CUDA" id="CUDA">CUDA</h2></div>
+<p><a href="https://en.wikipedia.org/wiki/CUDA">CUDA</a> (Compute Unified Device Architecture) is <a href="#pge12579b7d4ac">NVIDIA</a>'s proprietary, closed-source parallel computing architecture and framework. It requires an NVIDIA GPU, and consists of several components:
+</p>
+<ul><li>Required:
+<ul><li>NVIDIA kernel module</li>
+<li>CUDA "driver" and "runtime" libraries</li></ul></li>
+<li>Optional:
+<ul><li>Additional libraries: CUBLAS, CUFFT, CUSPARSE, etc.</li>
+<li>CUDA toolkit, including the <code>nvcc</code> compiler</li>
+<li>CUDA SDK, which contains many code samples and examples of CUDA and OpenCL programs</li></ul></li></ul>
+<p>The kernel module and CUDA "driver" library are shipped in <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-open">nvidia-open</a></span><sup><small>包</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=opencl-nvidia">opencl-nvidia</a></span><sup><small>包</small></sup></span>. The "runtime" library and the rest of the CUDA toolkit are available in <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cuda">cuda</a></span><sup><small>包</small></sup></span>. <code>cuda-gdb</code> needs <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ncurses5-compat-libs/">ncurses5-compat-libs</a></span><sup><small>AUR</small></sup></span> to be installed, see <a href="https://bugs.archlinux.org/task/46598">FS#46598</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_Development" id="Development_3">Development</h3></div>
+<p>The <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cuda">cuda</a></span><sup><small>包</small></sup></span> package installs all components in the directory <code>/opt/cuda</code>. The script in <code>/etc/profile.d/cuda.sh</code> sets the relevant environment variables so all build systems that support CUDA can find it.
+</p><p>To find whether the installation was successful and whether CUDA is up and running, you can compile the <a href="https://github.com/nvidia/cuda-samples">CUDA samples</a>. One way to check the installation is to run the <code>deviceQuery</code> sample.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_Language_bindings" id="Language_bindings_2">Language bindings</h3></div>
+<ul><li><b>Fortran</b>: <a href="https://www.pgroup.com/resources/cudafortran.htm">PGI CUDA Fortran Compiler</a></li>
+<li><a href="#pgccd29da0297b">Haskell</a>: The <a href="https://hackage.haskell.org/package/accelerate">accelerate package</a> lists available CUDA backends</li>
+<li><a href="#pgf5cd65505569">Java</a>: <a href="http://www.jcuda.org/jcuda/JCuda.html">JCuda</a></li>
+<li><a href="#pgd4cebc0c4528">Mathematica</a>: <a href="https://reference.wolfram.com/mathematica/CUDALink/tutorial/Overview.html">CUDAlink</a></li>
+<li><a href="#pg7508f51deda4">Mono/.NET</a>: <a href="https://github.com/rapiddev/CUDAfy.NET">CUDAfy.NET</a>, <a href="https://github.com/kunzmi/managedCuda">managedCuda</a></li>
+<li><a href="#pg81319c47b698">Perl</a>: <a href="https://metacpan.org/pod/KappaCUDA">KappaCUDA</a>, <a href="https://github.com/run4flat/perl-CUDA-Minimal">CUDA-Minimal</a></li>
+<li><a href="#pgf6d3de5ccfac">Python</a>: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-pycuda">python-pycuda</a></span><sup><small>包</small></sup></span></li>
+<li><a href="#pg3be4e2138bda">Ruby</a>: <a href="https://github.com/SciRuby/rbcuda">rbcuda</a></li>
+<li><a href="#pg802f2550cda0">Rust</a>: <a href="https://github.com/Rust-GPU/Rust-CUDA">Rust-CUDA</a>. Unmaintained: <a href="https://github.com/rust-cuda/cuda-sys">cuda-sys</a> (bindings), <a href="https://github.com/bheisler/rustacuda">RustaCUDA</a> (high-level wrapper).</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg871b9c3f761f_ROCm" id="ROCm">ROCm</h2></div>
+<p>ROCm <a href="https://rocm.docs.amd.com/en/latest/">ROCm</a> (Radeon Open Compute Platform) is AMD's answer to CUDA. It includes many pieces of software from driver (AMDGPU) to compiler and runtime library, much like CUDA. Some parts are specific to select AMD GPUs, other parts completely hardware-agnostic. See the <a href="https://github.com/rocm-arch/rocm-arch">ROCm for Arch Linux repository</a> for more information.
+</p><p>ROCm includes a singular software stack for implementing compute capabilities on the AMDGPU driver. On top of this stack, it implements HIP, OpenMP, and OpenCL. It also includes some parts built on top of HIP as well as an implementation of HIP using NVIDIA's CUDA stack.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_ROCm_enabled_models" id="ROCm-enabled_models">ROCm-enabled models</h3></div>
+<p>ROCm should support AMD GPUs from the Polaris architecture (RX 500 series) and above. The official <a href="https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html">list of GPU models</a> is very short, consisting of mostly profession models. However, consumer GPUs and APUs of the equivalent generations are known to work. Other generations may work with unofficial or partial support. To support Polaris, you need to set the runtime variable <code>ROC_ENABLE_PRE_VEGA=1</code>.
+</p><p>It takes some time for newer AMD GPU architectures to be added to ROCm; see <a href="https://en.wikipedia.org/wiki/ROCm#Consumer-grade_GPUs">Wikipedia:ROCm#Consumer-grade GPUs</a> for an up-to-date support matrix. Also see #OpenCL on AMD/ATI GPU from before.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_HIP" id="HIP">HIP</h3></div>
+<p>The <a href="https://rocm.docs.amd.com/projects/HIP/en/latest/">Heterogeneous Interface for Portability (HIP)</a> is AMD's dedicated GPU programming environment for designing high performance kernels on GPU hardware. HIP is a C++ runtime API and programming language that allows developers to create portable applications on different platforms.
+</p><p>HIP's specification is managed in the <a href="https://github.com/ROCm/rocm-systems">rocm-systems repository</a>, but HIP itself is  hardware-agnostic.
+</p><p>HIP runtime library packages:
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rocm-hip-runtime">rocm-hip-runtime</a></span><sup><small>包</small></sup></span>: The high-level runtime library, analogous to the OpenCL ICD loader.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hip-runtime-amd">hip-runtime-amd</a></span><sup><small>包</small></sup></span>: Implementation of HIP for AMD GPUs.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hip-runtime-nvidia">hip-runtime-nvidia</a></span><sup><small>包</small></sup></span>: The Heterogeneous Interface for NVIDIA GPUs in ROCm. This is really just a bunch of header files for the CUDA C++ compiler mostly consisting of <code>#define</code> renames.</li></ul>
+<p>The <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rocm-hip-sdk">rocm-hip-sdk</a></span><sup><small>包</small></sup></span> package includes the HIP SDK. All components are installed in the directory <code>/opt/rocm</code>. The script that sets the relevant environment variables is provided in <code>/etc/profile.d/rocm.sh</code>. Some software might also check for <code>HIP_PATH</code>, which can be manually set to the same value as <code>ROCM_PATH</code>.
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=miopen-hip">miopen-hip</a></span><sup><small>包</small></sup></span> is the HIP backend for AMD's open source deep learning library.
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_ROCm_troubleshooting" id="ROCm_troubleshooting">ROCm troubleshooting</h3></div>
+<p>First check if your GPU shows up in <code>/opt/rocm/bin/rocminfo</code>. If it does not, it might mean that ROCm does not support your GPU or it is built without support for your GPU.
+</p><p>Also check the <a href="https://rocm.docs.amd.com/en/latest/conceptual/gpu-isolation.html">ROCm HIP environment variables</a> for debugging, GPU isolation, etc.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg871b9c3f761f_OpenMP_and_OpenACC" id="OpenMP_and_OpenACC">OpenMP and OpenACC</h2></div>
+<p>OpenMP is better-known for its use in CPU multiprocessing, but it also supports some offloading for moving some work to GPGPUs. OpenACC is in a similar position: both are based on inserting pragmas into ordinary C/C++/Fortran code and having the compiler split out the marked part for offloading or multiprocessing.
+</p>
+<ul><li>AMD provides an implementation of OpenMP for ROCm-capable AMD GPUs. The <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/openmp-extras/">openmp-extras</a></span><sup><small>AUR</small></sup></span> package provides <a href="https://github.com/ROCm-Developer-Tools/aomp">AOMP</a> - an open source Clang/LLVM based compiler with added support for the OpenMP API on AMD GPUs.</li>
+<li>Nvidia's <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvhpc">nvhpc</a></span><sup><small>包</small></sup></span> provides OpenMP implementation with GPU offloading on their GPUs. <a href="https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-user-guide/index.html#using-openmp">[1]</a></li>
+<li>GCC can generate Nvidia (nvptx) and AMD (gfx9, gfx10, gfx11) code for offloading OpenMP and OpenACC <a href="https://gcc.gnu.org/wiki/Offloading">[2]</a>.</li>
+<li>Clang/LLVM can generate Nvidia (nvptx) and AMD (amdgpu) code for offloading OpenMP and OpenACC <a href="https://clang.llvm.org/docs/OffloadingDesign.html">[3]</a> <a href="https://clang.llvm.org/docs/ClangOffloadBundler.html">[4]</a>.</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg871b9c3f761f_List_of_GPGPU_accelerated_software" id="List_of_GPGPU_accelerated_software">List of GPGPU accelerated software</h2></div>
+
+<ul><li><a href="#pg0fada5f3d7c1">Bitcoin</a></li>
+<li><a href="#pgfcf9fea1590e">Blender</a> – CUDA support for Nvidia GPUs and HIP support for AMD GPUs. More information in <a href="https://docs.blender.org/manual/en/latest/render/cycles/gpu_rendering.html">[5]</a>.</li>
+<li><a href="#pg5be63b878d16">BOINC</a> – some projects provide OpenCL and/or CUDA programs</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cuda_memtest/">cuda_memtest</a></span><sup><small>AUR</small></sup></span> – a GPU memtest. Despite its name, is supports both CUDA and OpenCL.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=darktable">darktable</a></span><sup><small>包</small></sup></span> – OpenCL feature requires at least 1 GB RAM on GPU and <i>Image support</i> (check output of clinfo command).</li>
+<li><a href="#pg64ea0381df25">DaVinci Resolve</a> - a non-linear video editor. Can use both OpenCL and CUDA.</li>
+<li><a href="#pgd5cab245336d">FFmpeg</a> – more information in <a href="https://trac.ffmpeg.org/wiki/HWAccelIntro#OpenCL">[6]</a>.
+<ul><li><a href="#pg2e51984ad326">HandBrake</a></li></ul></li>
+<li><a href="#pgad5919ced696">Folding@home</a> – uses OpenCL and CUDA versions of the molecular simulation software GROMACS</li>
+<li><a href="#pg4ddbe8a586a4">GIMP</a> – experimental – more information in <a href="https://www.h-online.com/open/news/item/GIMP-2-8-RC-1-arrives-with-GPU-acceleration-1518417.html">[7]</a>.</li>
+<li><a href="#pg991610cc9bef">Hashcat</a></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=imagemagick">imagemagick</a></span><sup><small>包</small></sup></span></li>
+<li><a href="#pgaa27357d651e">LibreOffice</a> Calc – more information in <a href="https://help.libreoffice.org/Calc/OpenCL_Options">[8]</a>.</li>
+<li><a href="#pg110f55dc83f2">mpv</a> - See <a href="#pg110f55dc83f2">mpv#Hardware video acceleration</a>.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lc0/">lc0</a></span><sup><small>AUR</small></sup></span> - Used for searching the neural network (supports tensorflow, OpenCL, CUDA, and openblas)</li>
+<li><a href="https://github.com/ProjectPhysX/OpenCL-Benchmark">opencl-benchmark</a> - simple FP64/FP32/FP16/INT64/INT32/INT16/INT8 and memory/PCIe bandwidth benchmarking tool for OpenCL</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=opencv">opencv</a></span><sup><small>包</small></sup></span></li>
+<li><a href="#pg5c15325194e4">Ollama</a> - LLM inference software</li>
+<li><a href="#pgd86277805640">llama.cpp</a> - LLM inference in C/C++</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pyrit/">pyrit</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-pytorch-cuda">python-pytorch-cuda</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-pytorch-rocm">python-pytorch-rocm</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tensorflow-cuda">tensorflow-cuda</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tensorflow-computecpp/">tensorflow-computecpp</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xmrig">xmrig</a></span><sup><small>包</small></sup></span> - High Perf CryptoNote CPU and GPU (OpenCL, CUDA) miner</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg871b9c3f761f_PyTorch_on_ROCm" id="PyTorch_on_ROCm">PyTorch on ROCm</h3></div>
+<p>To use PyTorch with ROCm install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-pytorch-rocm">python-pytorch-rocm</a></span><sup><small>包</small></sup></span>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ python -c 'import torch; print(torch.cuda.is_available())'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">True
+</pre>
+<p>ROCm pretends to be CUDA so this should return <code>True</code>. If it does not, either it is not compiled with your GPU support or you might have conflicting dependencies. You can verify those by looking at <code>ldd /usr/lib/libtorch.so</code> - there should not be any missing <code>.so</code> files nor multiple versions of same <code>.so</code>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg871b9c3f761f_See_also" id="See_also">See also</h2></div>
+<ul><li><a href="https://www.khronos.org/opencl/">OpenCL official homepage</a></li>
+<li><a href="https://www.khronos.org/sycl/">SYCL official homepage</a></li>
+<li><a href="https://www.khronos.org/spir/">SPIR official homepage</a></li>
+<li><a href="https://developer.nvidia.com/cuda-toolkit">CUDA Toolkit homepage</a></li>
+<li><a href="https://software.intel.com/en-us/intel-opencl">Intel SDK for OpenCL Applications homepage</a></li>
+<li><a href="https://gitlab.com/illwieckz/i-love-compute">List of OpenCL frameworks applicable for different GPUs</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807172039
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.271 seconds
+Real time usage: 0.280 seconds
+Preprocessor visited node count: 1128/1000000
+Revision size: 26418/2097152 bytes
+Post‐expand include size: 20403/2097152 bytes
+Template argument size: 5580/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   69.800      1 -total
+ 15.10%   10.542     46 Template:Pkg
+  9.83%    6.862      2 Template:Tip
+  9.19%    6.418      1 Template:Accuracy
+  8.23%    5.744     40 Template:Ic
+  7.00%    4.888     24 Template:AUR
+  5.40%    3.766      2 Template:META_Message
+  3.87%    2.702      1 Template:Expansion
+  2.83%    1.977      5 Template:Hc
+  2.67%    1.864      1 Template:Note
+-->
+<!-- Render ID 4f5c998e-9284-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7234:|#|:idhash:canonical!zh-cn and timestamp 20260807172039 and revision id 35193. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

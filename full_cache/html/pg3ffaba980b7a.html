@@ -1,0 +1,436 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg3ffaba980b7a">字体配置</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Font_configuration">Font_configuration</a>，最近一次同步于 2025-07-31，若英文版本有所<a href="https://wiki.archlinux.org/title/Font_configuration?diff=0&amp;oldid=840582">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Font_configuration_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg09673ef0d876">字体配置/中文</a></li>
+<li><a href="#pg608726ec6d26">字体配置/示例</a></li>
+<li><a href="#pgb8e819c27b39">字体</a></li>
+<li><a href="#pge1381418960a">Java 运行环境字体配置</a></li>
+<li><a href="#pg3e5d1d3436ab">公制兼容字体</a></li>
+<li><a href="#pg40371f3dc11a">微软字体</a></li>
+</ul></div>
+<p><a href="https://en.wikipedia.org/wiki/Fontconfig">Fontconfig</a> 是一个用于向应用程序提供可用<a href="#pgb8e819c27b39">字体</a>列表，以及字体渲染配置的库。
+</p><p><a href="https://en.wikipedia.org/wiki/FreeType">FreeType</a> 库依此配置渲染字体。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=freetype2">freetype2</a></span><sup><small>包</small></sup></span> 字体渲染包启用了字节码解释器（bytecode interpreter，BCI）以优化字体渲染，尤其是在 LCD 屏幕上。参见#Fontconfig 配置和<a href="#pg608726ec6d26">字体配置/示例</a>。
+</p><p>尽管<a href="https://www.freedesktop.org/wiki/Software/fontconfig/">Fontconfig</a>在现代类Unix系统中广泛使用，但部分应用程序仍在使用原始的<a href="#pgee37e74b8f6f">X Logical Font Description</a>（XLFD）作为字体选择与显示方法。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3ffaba980b7a_.E5.AD.97.E4.BD.93.E8.B7.AF.E5.BE.84" id="字体路径"><span id=".E5.AD.97.E4.BD.93.E8.B7.AF.E5.BE.84"></span>字体路径</h2></div>
+<p>为了使字体能够被应用程序发现，必须对它们进行编目，以便快速访问。
+</p><p>Fontconfig 的默认字体路径是 <code>/usr/share/fonts/</code> 和 <code>~/.local/share/fonts</code>（以及过时的 <code>~/.fonts/</code>）。Fontconfig 将在这些路径下递归查找字体。为了便于安装与管理，在<a href="#pg7830c089a224">安装字体</a>时，建议使用这些路径。
+</p><p>以下命令列出 Fontconfig 已知的字体文件：
+</p>
+<pre>$ fc-list ':' file
+</pre>
+<p><span class="plainlinks archwiki-template-man" title="$ man 1 fc-list"><a href="https://man.archlinux.org/man/fc-list.1">fc-list(1)</a></span> 中有更多的输出格式。
+</p><p><a href="#pga36c0aff60be">Xorg</a> 已知的字体路径可通过其日志了解：
+</p>
+<pre>$ grep /fonts ~/.local/share/xorg/Xorg.0.log
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>也可使用 <code>xset q</code> 命令查看 <a href="#pga36c0aff60be">Xorg</a> 的已知字体。</li>
+<li>若 Xorg 以根用户权限运行，应查看 <code>/var/log/Xorg.0.log</code>。</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<p>Xorg 不像 Fontconfig 一样递归查找 <code>/usr/local/share/fonts</code>。添加路径时，必须像这样添加绝对路径：
+</p>
+<pre>Section "Files"
+    FontPath     "/usr/share/fonts/local/"
+EndSection
+</pre>
+</div>
+<p>有关 Xorg 读取配置的更多细节，请阅读<a href="#pga36c0aff60be">Xorg#配置</a>。如果要为用户单独配置字体路径，可以像这样修改对应的 <code>~/.xinitrc</code> 来添加或移除默认的字体路径：
+</p>
+<pre>xset +fp /usr/share/fonts/local/           # 将一个自定义字体路径添加到 Xorg 的已知字体路径列表开头
+xset -fp /usr/share/fonts/sucky_fonts/     # 从 Xorg 的已知字体路径列表中移除指定路径
+</pre>
+<p>要查看 Xorg 已知的字体列表，可使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xlsfonts">xorg-xlsfonts</a></span><sup><small>包</small></sup></span> 软件包中的 <code>xlsfonts</code> 命令。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3ffaba980b7a_Fontconfig_.E9.85.8D.E7.BD.AE" id="Fontconfig_配置"><span id="Fontconfig_.E9.85.8D.E7.BD.AE"></span>Fontconfig 配置</h2></div>
+<p>Fontconfig 的配置文档见 <span class="plainlinks archwiki-template-man" title="$ man 5 fonts-conf"><a href="https://man.archlinux.org/man/fonts-conf.5">fonts-conf(5)</a></span>。
+</p><p>用户配置文件位于<code>$XDG_CONFIG_HOME/fontconfig/fonts.conf</code>（通常是<code>$HOME/.config/fontconfig/fonts.conf</code>）。全局配置文件位于<code>/etc/fonts/local.conf</code>。
+用户配置优先级高于全局配置。两个文件使用相同的语法。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>需要启用 <code>50-user.conf</code> 预设才能让用户配置生效，启用 <code>51-local.conf</code> 预设才能让全局配置生效。阅读#预设一节了解如何启用这些预设。</li>
+<li><code>~/.fonts.conf/</code>、<code>~/.fonts.conf.d/</code> 和 <code>~/.fontconfig/*.cache-*</code> 已过时，以后的包将不再读取这些路径和文件。对应的新路径分别是 <code>$XDG_CONFIG_HOME/fontconfig/fonts.conf</code>、<code>$XDG_CONFIG_HOME/fontconfig/conf.d/NN-name.conf</code> 和 <code>$XDG_CACHE_HOME/fontconfig/*.cache-*</code>。如果使用第二个路径，确保文件命名正确（<code>NN</code> 是两位数，如 <code>00</code>、<code>10</code> 和 <code>99</code>）。</li></ul>
+</div>
+<p>Fontconfig 把所有配置集中到一个单独的中心文件（<code>/etc/fonts/fonts.conf</code>）中。Fontconfig 升级时会替换这个文件，因此不应当直接修改它。支持 Fontconfig 的程序查看这个文件以获取可用的字体及如何渲染之；重启这类程序即可载入新的配置。该文件是全局配置（<code>/etc/fonts/local.conf</code>）、预设配置（<code>/etc/fonts/conf.d/</code>）、用户配置（<code>$XDG_CONFIG_HOME/fontconfig/fonts.conf</code>）的组合。使用 <code>fc-cache</code> 命令重建 Fontconfig 的配置，但只有新运行的程序会使用新的配置。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>某些桌面环境（如 <a href="#pg1e095fe2c2a6">GNOME</a> 和 <a href="#pg778f2bb029c6">KDE Plasma</a>）的字体设置界面会自动创建或覆盖用户的字体配置文件。对于此类桌面环境，最好让设置界面中的字体设置和配置文件相符合。同时请确定桌面的<i>区域设置</i>或 <a href="#pgbf65db42be1c">locale</a> 受配置好的字体支持，否则字体配置可能被覆盖。
+</div>
+<p>Fontconfig 配置文件使用 <a href="https://zh.wikipedia.org/wiki/XML">XML</a> 格式，其需要的头部如下：
+</p>
+<pre>&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd"&gt;
+&lt;fontconfig&gt;
+
+  &lt;!-- settings go here --&gt;
+
+&lt;/fontconfig&gt;
+</pre>
+<p>文中的配置示例省略了这些标签。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E9.A2.84.E8.AE.BE" id="预设"><span id=".E9.A2.84.E8.AE.BE"></span>预设</h3></div>
+<p>预设存放在 <code>/usr/share/fontconfig/conf.avail</code>。可以通过创建<a href="https://zh.wikipedia.org/wiki/%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5">符号链接</a>到此处来启用，无论是单用户配置还是全局配置。这些预设会覆盖各自配置文件中的对应设置。
+</p><p>例如，以下命令启用全局次像素 RGB 渲染：
+</p>
+<pre># ln -s /usr/share/fontconfig/conf.avail/10-sub-pixel-rgb.conf /etc/fonts/conf.d/
+</pre>
+<p>以下命令启用用户级次像素 RGB 渲染：
+</p>
+<pre>$ mkdir $XDG_CONFIG_HOME/fontconfig/conf.d
+$ ln -s /usr/share/fontconfig/conf.avail/10-sub-pixel-rgb.conf $XDG_CONFIG_HOME/fontconfig/conf.d
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E6.8A.97.E9.94.AF.E9.BD.BF.EF.BC.88Anti_aliasing.EF.BC.89" id="抗锯齿（Anti_aliasing）"><span id=".E6.8A.97.E9.94.AF.E9.BD.BF.EF.BC.88Anti_aliasing.EF.BC.89"></span>抗锯齿（Anti aliasing）</h3></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E5%AD%97%E4%BD%93%E5%85%89%E6%A0%85%E5%8C%96">字体光栅化</a>将字体从向量数据（比如一个TrueType字体）转换为光栅或者位图数据。由于<a href="https://zh.wikipedia.org/wiki/%E6%B7%B7%E5%8F%A0">混叠</a>现象，转换后的字体可能会出现锯齿状边缘。<a href="https://zh.wikipedia.org/wiki/%E6%8A%97%E9%94%AF%E9%BD%BF">抗锯齿</a>技术可以使边缘看起来更平滑。
+</p><p>Fontconfig<b>默认启用</b>抗锯齿，如要禁用：
+</p>
+<pre>  &lt;match target="font"&gt;
+    &lt;edit name="antialias" mode="assign"&gt;
+      &lt;bool&gt;false&lt;/bool&gt;
+    &lt;/edit&gt;
+  &lt;/match&gt;</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>某些程序可能会覆盖默认的抗锯齿设置。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E5.AD.97.E4.BD.93.E5.BE.AE.E8.B0.83.EF.BC.88hinting.EF.BC.89" id="字体微调（hinting）"><span id=".E5.AD.97.E4.BD.93.E5.BE.AE.E8.B0.83.EF.BC.88hinting.EF.BC.89"></span>字体微调（hinting）</h3></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E5%AD%97%E4%BD%93%E5%BE%AE%E8%B0%83">字体微调</a>使用数学指令来调整轮廓字体的显示，使其与光栅化网格（如显示器上的像素网格）对齐。它的预期效果是使字体看起来更清晰，从而使它们更容易阅读。当显示器拥有 300 左右的 <a href="https://zh.wikipedia.org/wiki/%E6%AF%8F%E8%8B%B1%E5%AF%B8%E7%82%B9%E6%95%B0">DPI</a> 时，字体即使不经微调也能正确排列。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg3ffaba980b7a_.E5.AD.97.E8.8A.82.E7.A0.81.E8.A7.A3.E9.87.8A.E5.99.A8.EF.BC.88BCI.EF.BC.89" id="字节码解释器（BCI）"><span id=".E5.AD.97.E8.8A.82.E7.A0.81.E8.A7.A3.E9.87.8A.E5.99.A8.EF.BC.88BCI.EF.BC.89"></span>字节码解释器（BCI）</h4></div>
+<p>TrueType 字体的微调指令由 FreeType 的解释器使用 BCI 微调渲染。通常来说，微调指令完备的字体使用 BCI 微调效果很好。
+</p><p>微调是<b>默认启用</b>的，如要禁用：
+</p>
+<pre>  &lt;match target="font"&gt;
+    &lt;edit name="hinting" mode="assign"&gt;
+      &lt;bool&gt;false&lt;/bool&gt;
+    &lt;/edit&gt;
+  &lt;/match&gt;</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>具体的 BCI 实现可以在脚本 <code>/etc/profile.d/freetype2.sh</code> 中修改，通过传递参数 <code>truetype:interpreter-version=<i>NN</i></code> 设置解释器。<i>NN</i> 对应所选择的版本，传递给脚本中的 <code>FREETYPE_PROPERTIES</code> 变量。一些流行的选项如下：
+<ul><li>35 - 经典模式，模拟 Windows 98</li>
+<li><b>40</b> - <a href="https://freetype.org/freetype2/docs/hinting/subpixel-hinting.html">最小模式</a>（精简版的无穷模式，默认值）</li></ul>
+次像素渲染应该使用次像素 BCI。详见 <a href="https://freetype.org/freetype2/docs/reference/ft2-properties.html#tt_interpreter_version_xxx">[1]</a>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg3ffaba980b7a_.E8.87.AA.E5.8A.A8.E5.BE.AE.E8.B0.83.EF.BC.88autohint.EF.BC.89" id="自动微调（autohint）"><span id=".E8.87.AA.E5.8A.A8.E5.BE.AE.E8.B0.83.EF.BC.88autohint.EF.BC.89"></span>自动微调（autohint）</h4></div>
+<p>自动微调依自己的算法尝试微调，无视字体内所有的微调指令。以前这是默认选项，因为 TrueType2 字体受专利保护，但现在专利已过期，基本不需要使用它。如果字体的微调指令很少或没有，它的效果会更好，否则效果是不如 BCI 的。常见字体都有完备的微调指令，因此自动微调用处不大，现在是<b>默认关闭</b>的。如要启用：
+</p>
+<pre>  &lt;match target="font"&gt;
+    &lt;edit name="autohint" mode="assign"&gt;
+      &lt;bool&gt;true&lt;/bool&gt;
+    &lt;/edit&gt;
+  &lt;/match&gt;</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg3ffaba980b7a_.E5.BE.AE.E8.B0.83.E9.A3.8E.E6.A0.BC.EF.BC.88hint_style.EF.BC.89" id="微调风格（hint_style）"><span id=".E5.BE.AE.E8.B0.83.E9.A3.8E.E6.A0.BC.EF.BC.88hint_style.EF.BC.89"></span>微调风格（hint style）</h4></div>
+<p>微调风格是指对字体进行调整显示、使其与光栅化网格对齐的调整量。支持的值有 <code>hintnone</code>、<code>hintslight</code>、<code>hintmedium</code> 和 <code>hintfull</code>，微调程度依次加深，即字形变得更扭曲、更清晰——<code>hintslight</code> 会使字体更模糊，无法与网格对齐，但在保留字体形状方面会更好（参见 <a href="https://www.freetype.org/freetype2/docs/hinting/text-rendering-general.html">[2]</a>。），而 <code>hintfull</code> 会使字体更清晰，能很好地与像素网格对齐，但会让字体严重变形。对于非 CFF（.otf）字体，<code>hintslight</code> 设置会在竖直方向上隐式使用自动微调，以支持这类字体的原生字体信息。
+</p><p><b>默认选项是 <code>hintslight</code></b>，如要更改：
+</p>
+<pre>  &lt;match target="font"&gt;
+    &lt;edit name="hintstyle" mode="assign"&gt;
+      &lt;const&gt;hintnone&lt;/const&gt;
+    &lt;/edit&gt;
+  &lt;/match&gt;</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>有些程序会覆盖默认的微调设置。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E6.AC.A1.E5.83.8F.E7.B4.A0.E6.8E.92.E5.B8.83" id="次像素排布"><span id=".E6.AC.A1.E5.83.8F.E7.B4.A0.E6.8E.92.E5.B8.83"></span>次像素排布</h3></div>
+<p>Fontconfig 需要知道你的<a href="https://en.wikipedia.org/wiki/Subpixel_rendering#Characteristics">次像素排布</a>才能正确显示字体。使用<a href="http://www.lagom.nl/lcd-test/subpixel.php">次像素排布</a>显示器测试（<a href="http://www.lagom.nl/lcd-test/">The Lagom LCD 显示器测试页面</a>的一部分）来找出你的次像素排列。
+</p><p>次像素几何通过 <code>rgba</code> 属性配置，可以是：
+</p>
+<ul><li><code>rgb</code>——<i>红</i>、<i>绿</i>、<i>蓝</i>——最常见，大多数现代显示器使用</li>
+<li><code>bgr</code></li>
+<li><code>vrgb</code>——纵向</li>
+<li><code>vbgr</code></li>
+<li><code>none</code>——无次像素渲染</li></ul>
+<pre>  &lt;match target="font"&gt;
+    &lt;edit name="rgba" mode="assign"&gt;
+      &lt;const&gt;rgb&lt;/const&gt;
+    &lt;/edit&gt;
+  &lt;/match&gt;</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果不开启#次像素渲染，freetype 将只关心子像素方向，不关心像素排布。例如 <b>RGB</b> 和 <b>BGR</b> 没有区别。</div>
+<p>不支持 "Pentile" 和 "RGBY" 等不常见的次像素排布，这些排布偶尔出现在电视、OLED 和移动屏幕上。对于这些设备，最好放弃次像素渲染，使用 <code>none</code> 选项依赖灰度。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E6.AC.A1.E5.83.8F.E7.B4.A0.E6.B8.B2.E6.9F.93" id="次像素渲染"><span id=".E6.AC.A1.E5.83.8F.E7.B4.A0.E6.B8.B2.E6.9F.93"></span>次像素渲染</h3></div>
+<p>次像素渲染（<a href="https://en.wikipedia.org/wiki/Subpixel_rendering">英文维基百科页面</a>）通过单独控制一个像素的三个分色，在一个方向上获得三倍分辨率，以使得字体看看起来更锐利。在 Windows 上，这项技术叫做 <a href="https://zh.wikipedia.org/wiki/ClearType">zhwp:ClearType</a>。
+</p><p>FreeType2 提供两种次像素渲染方式（<code>FT_CONFIG_OPTION_SUBPIXEL_RENDERING</code>），Harmony 和 ClearType <a href="https://freetype.org/freetype2/docs/reference/ft2-lcd_rendering.html">[3]</a>。从 FreeType 2.10.3 起，Arch 默认启用 ClearType 次像素渲染 <a href="https://gitlab.archlinux.org/archlinux/packaging/packages/freetype2/-/commit/35e925e946da41b7a2d7c297ee43c4cab386048c">[4]</a>。
+</p><p>启用 ClearType 次像素渲染时建议使用 LCD 滤镜。Harmony 次像素渲染<b>不需要</b>设置 LCD 滤镜，在默认 LCD 几何下，它等同于 ClearType 使用 <code>lcdlight</code> 滤镜 <a href="https://freetype.org/freetype2/docs/reference/ft2-lcd_rendering.html">[5]</a>。参见下一节了解如何启用 LCD 滤镜及其好处。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_LCD_.E6.BB.A4.E9.95.9C.EF.BC.88LCD_filter.EF.BC.89" id="LCD_滤镜（LCD_filter）"><span id="LCD_.E6.BB.A4.E9.95.9C.EF.BC.88LCD_filter.EF.BC.89"></span>LCD 滤镜（LCD filter）</h3></div>
+<p>LCD 滤镜是用来减轻 ClearType 次像素渲染的色边现象的。<a href="https://www.freetype.org/freetype2/docs/reference/ft2-lcd_rendering.html">这是</a> FreeType 2 API 文档对其的描述，其中 <a href="https://www.freetype.org/freetype2/docs/reference/ft2-lcd_rendering.html#ft_lcdfilter">FT_LcdFilter</a> 一节解释了各个选项。<a href="http://www.spasche.net/files/lcdfiltering/">这个网页</a>展示了各个 LCD 滤镜的测试效果。
+</p><p>大多数用户可使用 <code>lcddefault</code>。其他选项包括：适合太粗或模糊的字体使用的滤镜 <code>lcdlight</code>、原始的 Cairo 滤镜 <code>lcdlegacy</code> 、完全关闭 LCD 滤镜的选项 <code>lcdnone</code>。
+</p>
+<pre>  &lt;match target="font"&gt;
+    &lt;edit name="lcdfilter" mode="assign"&gt;
+      &lt;const&gt;lcddefault&lt;/const&gt;
+    &lt;/edit&gt;
+  &lt;/match&gt;</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg3ffaba980b7a_.E9.AB.98.E7.BA.A7_LCD_.E6.BB.A4.E9.95.9C.E9.80.89.E9.A1.B9" id="高级_LCD_滤镜选项"><span id=".E9.AB.98.E7.BA.A7_LCD_.E6.BB.A4.E9.95.9C.E9.80.89.E9.A1.B9"></span>高级 LCD 滤镜选项</h4></div>
+<p>如果对内置的 LCD 过滤器不满意，可以通过构建一个自定义的 freetype2 软件包并修改硬编码的过滤器的方式，来非常具体地调整字体的渲染。<a href="#pg8d559a1b1a4f">Arch 构建系统</a>可用于从源代码构建和安装软件包。
+</p><p>查看 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=freetype2">freetype2</a></span><sup><small>包</small></sup></span> 的 PKGBUILD 并下载/解压构建文件。<a href="#pg8d559a1b1a4f">Arch 构建系统#通过 Git 获取 PKGBUILD 源码</a>列出了一些方法。
+</p><p>编辑文件 <code>src/freetype-VERSION/include/freetype/config/ftoption.h</code> 并取消对 <code>FT_CONFIG_OPTION_SUBPIXEL_RENDERING</code> 宏的注释，启用 ClearType 次像素渲染。
+</p><p>然后，编辑文件 <code>src/freetype-VERSION/src/base/ftlcdfil.c</code> 并查找常量 <code>default_weights</code> 的定义：
+</p>
+<pre> static const FT_LcdFiveTapFilter  default_weights =
+    { 0x10, 0x40, 0x70, 0x40, 0x10 };
+</pre>
+<p>这个常量定义了一个应用于渲染的字形的低通滤波器。根据需要对其进行修改。(参考 <a href="https://lists.nongnu.org/archive/html/freetype/2006-09/msg00069.html">freetype 邮件列表的讨论</a>）
+</p><p>最后，保存文件，构建并安装自定义软件包：
+</p>
+<pre>$ makepkg --noextract
+# pacman --remove --nodeps freetype2
+# pacman --upgrade freetype2-<i>VERSION</i>-<i>ARCH</i>.pkg.tar.zstd
+</pre>
+<p>重启 X。现在，lcddefault 过滤器应该会以不同方式渲染字体。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E6.9F.90.E4.BA.9B.E5.AD.97.E4.BD.93.2F.E5.AD.97.E5.BD.A2.E7.9A.84.E5.8D.95.E7.8B.AC.E8.AE.BE.E7.BD.AE" id="某些字体/字形的单独设置"><span id=".E6.9F.90.E4.BA.9B.E5.AD.97.E4.BD.93.2F.E5.AD.97.E5.BD.A2.E7.9A.84.E5.8D.95.E7.8B.AC.E8.AE.BE.E7.BD.AE"></span>某些字体/字形的单独设置</h3></div>
+<p>一些字体也许在 BCI 自动微调下外观不佳。可以为这些字体禁用微调：
+</p>
+<pre>...
+&lt;match target="font"&gt;
+    &lt;test name="family" qual="any"&gt;
+        &lt;string&gt;My Font&lt;/string&gt;
+    &lt;/test&gt;
+    &lt;edit name="hinting" mode="assign"&gt;
+        &lt;bool&gt;false&lt;/bool&gt;
+    &lt;/edit&gt;
+&lt;/match&gt;
+...
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E8.AE.BE.E7.BD.AE.E9.BB.98.E8.AE.A4.E5.92.8C.E5.90.8E.E5.A4.87.E5.AD.97.E4.BD.93" id="设置默认和后备字体"><span id=".E8.AE.BE.E7.BD.AE.E9.BB.98.E8.AE.A4.E5.92.8C.E5.90.8E.E5.A4.87.E5.AD.97.E4.BD.93"></span>设置默认和后备字体</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg3ffaba980b7a_.E5.8C.B9.E9.85.8D.E6.B5.8B.E8.AF.95" id="匹配测试"><span id=".E5.8C.B9.E9.85.8D.E6.B5.8B.E8.AF.95"></span>匹配测试</h4></div>
+<p>设置默认或后备字体的一个可靠方法是添加一个 XML 片段来进行匹配测试。例如，通过设置 "binding" 属性，下面的设置将使 <i>Georgia</i> 回退到 <i>Gentium</i>。
+</p>
+<pre>...
+&lt;match target="pattern"&gt;
+  &lt;test qual="any" name="family" compare="eq"&gt;&lt;string&gt;Georgia&lt;/string&gt;&lt;/test&gt;
+  &lt;edit name="family" mode="assign" binding="same"&gt;&lt;string&gt;Gentium Book Plus&lt;/string&gt;&lt;/edit&gt;
+&lt;/match&gt;
+...</pre>
+<p>在上面的例子中，"compare" 属性可以是 "eq"（即完全等于 <i>Georgia</i>）、"contains"（例如，匹配 <i>Georgia</i> 或 <i>Georgia Pro</i>），或其他值。参见 <span class="plainlinks archwiki-template-man" title="$ man 5 fonts-conf"><a href="https://man.archlinux.org/man/fonts-conf.5">fonts-conf(5)</a></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg3ffaba980b7a_.E5.88.AB.E5.90.8D" id="别名"><span id=".E5.88.AB.E5.90.8D"></span>别名</h4></div>
+<p>另一种方法是使用 <i>&lt;alias&gt;</i> 来设置“首选”字体。<i>&lt;family&gt;</i> 元素指定的字体在匹配到实际字体前，会被修改为 <i>&lt;prefer&gt;</i> 字体列表中的一个字体，顺序由上至下。下面的例子使 <i>Helvetica</i> 回退到 <i>Bitstream Vera Sans</i>：
+</p>
+<pre>...
+&lt;alias&gt;
+    &lt;family&gt;Helvetica&lt;/family&gt;
+    &lt;prefer&gt;
+        &lt;family&gt;Bitstream Vera Sans&lt;/family&gt;
+    &lt;/prefer&gt;
+&lt;/alias&gt;
+...
+</pre>
+<p><i>&lt;alias&gt;</i> 也可以用来指定当缺少某些字形时使用的后备字体。例如，一个用户将 <i>Noto Sans</i> 设置为默认的无衬线字体后，安装了 <i>Helvetica Neue</i>，想用它书写拉丁文字。由于很多版本的 <i>Helvetica Neue</i> 并不包括希腊字符，这位用户希望使用 <i>FreeSans</i> 来书写希腊文字，因为它与 <i>Helvetica</i> 很像。但事实上，希腊文字将会回退到用户设置的默认字体 <b>Noto Sans</b>，而使用下面的方法则可以实现：
+</p>
+<pre>...
+&lt;alias&gt;
+    &lt;family&gt;Helvetica Neue LT Pro&lt;/family&gt;
+    &lt;prefer&gt;
+        &lt;family&gt;Helvetica Neue LT Pro&lt;/family&gt;
+        &lt;family&gt;FreeSans&lt;/family&gt;
+    &lt;/prefer&gt;
+&lt;/alias&gt;
+...
+</pre>
+<p>如果用户只是想在使用的字体缺少相应字形时，回退到默认字体，则不需要上述设置。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E5.AD.97.E4.BD.93.E7.99.BD.E5.90.8D.E5.8D.95.2F.E9.BB.91.E5.90.8D.E5.8D.95" id="字体白名单/黑名单"><span id=".E5.AD.97.E4.BD.93.E7.99.BD.E5.90.8D.E5.8D.95.2F.E9.BB.91.E5.90.8D.E5.8D.95"></span>字体白名单/黑名单</h3></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E7.A6.81.E7.94.A8.E4.BD.8D.E5.9B.BE.E5.AD.97.E4.BD.93" id="禁用位图字体"><span id=".E7.A6.81.E7.94.A8.E4.BD.8D.E5.9B.BE.E5.AD.97.E4.BD.93"></span>禁用位图字体</h3></div>
+<p>位图字体有时会作为缺失字体的后备字体，可能导致文本渲染为像素化或过大。使用 <code>70-no-bitmaps-except-emoji.conf</code> #预设来禁用此行为。
+</p><p>要禁用所有字体的嵌入式位图：
+</p>
+<pre>...
+ &lt;match target="font"&gt;
+   &lt;edit name="embeddedbitmap" mode="assign"&gt;
+     &lt;bool&gt;false&lt;/bool&gt;
+   &lt;/edit&gt;
+ &lt;/match&gt;
+...</pre>
+<p>如果要禁用所有字体的嵌入式位图，仍可以为特定字体启用它们，以防该字体在没有嵌入式位图时无法正常工作。例如，对于 Noto Color Emoji：
+</p>
+<pre>&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd"&gt;
+&lt;fontconfig&gt;
+  &lt;match target="font"&gt;
+    &lt;edit name="embeddedbitmap" mode="assign"&gt;
+      &lt;bool&gt;false&lt;/bool&gt;
+    &lt;/edit&gt;
+  &lt;/match&gt;
+  &lt;match target="font"&gt;
+    &lt;test name="family" qual="any"&gt;
+      &lt;string&gt;Noto Color Emoji&lt;/string&gt;
+    &lt;/test&gt;
+    &lt;edit name="embeddedbitmap"&gt;
+      &lt;bool&gt;true&lt;/bool&gt;
+    &lt;/edit&gt;
+  &lt;/match&gt;
+&lt;/fontconfig&gt;
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E7.A6.81.E7.94.A8.E4.BD.8D.E5.9B.BE.E5.AD.97.E4.BD.93.E7.BC.A9.E6.94.BE" id="禁用位图字体缩放"><span id=".E7.A6.81.E7.94.A8.E4.BD.8D.E5.9B.BE.E5.AD.97.E4.BD.93.E7.BC.A9.E6.94.BE"></span>禁用位图字体缩放</h3></div>
+<p>要禁用位图字体的缩放（这通常会使它们模糊），删除 <code>/etc/fonts/conf.d/10-scale-bitmap-fonts.conf</code>。
+注意这可能会破坏 Segoe UI Emoji 等表情符号字体的缩放，使它们变得巨大。
+</p><p>要重新启用位图字体的缩放，重新创建符号链接：
+</p>
+<pre># ln -s /usr/share/fontconfig/conf.avail/10-scale-bitmap-fonts.conf /etc/fonts/conf.d/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E8.87.AA.E5.8A.A8.E7.94.9F.E6.88.90.E7.B2.97.E4.BD.93.E5.92.8C.E6.96.9C.E4.BD.93" id="自动生成粗体和斜体"><span id=".E8.87.AA.E5.8A.A8.E7.94.9F.E6.88.90.E7.B2.97.E4.BD.93.E5.92.8C.E6.96.9C.E4.BD.93"></span>自动生成粗体和斜体</h3></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E8.A7.84.E5.88.99.E4.BC.98.E5.85.88.E7.BA.A7" id="规则优先级"><span id=".E8.A7.84.E5.88.99.E4.BC.98.E5.85.88.E7.BA.A7"></span>规则优先级</h3></div>
+<p>Fontconfig 按数字顺序处理 <code>/etc/fonts/conf.d</code> 中的文件。因此，<code>01-aaa.conf</code> 和 <code>02-bbb.conf</code> 的规则将与单个 <code>01-aaabbb.conf</code> 文件具有相同的效果——首先包含 <code>01-aaa</code> 的规则，然后是 <code>02-bbb</code> 的规则。
+</p><p>通常来说，这意味着前缀较小文件将具有较高的优先级。但是，Fontconfig 的语法很灵活，允许新规则优先于现有规则。因此，建议#查看当前设置来测试规则相互作用的结果。
+</p>
+
+<p><br/>
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在 <code>$XDG_CONFIG_HOME/fontconfig/fonts.conf</code> 和目录 <code>$XDG_CONFIG_HOME/fontconfig/conf.d</code> 中定义的用户规则是通过文件 <code>/etc/fonts/conf.d/50-user.conf</code> 载入的，并且通常优先于以较大数字开头的文件中定义的规则。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E6.9F.A5.E7.9C.8B.E5.BD.93.E5.89.8D.E8.AE.BE.E7.BD.AE" id="查看当前设置"><span id=".E6.9F.A5.E7.9C.8B.E5.BD.93.E5.89.8D.E8.AE.BE.E7.BD.AE"></span>查看当前设置</h3></div>
+<p>要查看当前生效的设置，可使用 <code>fc-match --verbose</code>。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ fc-match --verbose Sans</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">family: "DejaVu Sans"(s)
+hintstyle: 3(i)(s)
+hinting: True(s)
+...
+</pre>
+<p>可在 <span class="plainlinks archwiki-template-man" title="$ man 5 font-config"><a href="https://man.archlinux.org/man/font-config.5">font-config(5)</a></span> 中查询数字的意义。例如，<i>hintstyle: 3</i> 代表 <i>hintfull</i>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3ffaba980b7a_.E4.B8.8D.E6.94.AF.E6.8C.81_Fontconfig_.E7.9A.84.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="不支持_Fontconfig_的应用程序"><span id=".E4.B8.8D.E6.94.AF.E6.8C.81_Fontconfig_.E7.9A.84.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>不支持 Fontconfig 的应用程序</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong> 至少在使用 xcb 后端的 Qt 6.8 中，X11 资源优先级高于 fontconfig，因此这些设置将成为 Qt 6 客户端的权威配置，尽管它们完全支持 fontconfig。</div>
+<p>某些应用程序如 <a href="#pg91bc82decefe">URxvt</a> 会忽略 Fontconfig 设置。你可以通过使用 <code>~/.Xresources</code> 来解决这个问题，但它不如 Fontconfig 灵活。示例（选项说明见 #Fontconfig 配置）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.Xresources</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Xft.autohint: 0
+Xft.lcdfilter: lcddefault
+Xft.hintstyle: hintslight
+Xft.hinting: 1
+Xft.antialias: 1
+Xft.rgba: rgb
+</pre>
+<p>确保 X 启动时使用 <code>xrdb -q</code> 正确加载这些设置（更多信息请参阅 <a href="#pgfdfac14ad1cb">X 资源</a>）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3ffaba980b7a_.E7.96.91.E9.9A.BE.E9.97.AE.E9.A2.98" id="疑难问题"><span id=".E7.96.91.E9.9A.BE.E9.97.AE.E9.A2.98"></span>疑难问题</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E5.AD.97.E4.BD.93.E6.A8.A1.E7.B3.8A" id="字体模糊"><span id=".E5.AD.97.E4.BD.93.E6.A8.A1.E7.B3.8A"></span>字体模糊</h3></div>
+<p>系统 DPI 设置与显示器的硬件 DPI 不匹配会导致字体显示模糊不清；关于处理高 DPI 或混合 DPI 显示器的说明，请参见<a href="#pg1f5bbda7ab0a">HiDPI</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E4.B8.80.E4.BA.9B.E5.AD.97.E4.BD.93.E5.9C.A8.E5.B0.8F.E5.B0.BA.E5.AF.B8.E4.B8.8B.E6.98.BE.E7.A4.BA.E4.B8.8D.E6.AD.A3.E7.A1.AE.EF.BC.88.E5.A6.82_Calibri.2C_Cambria.2C_Monaco_.E7.AD.89.EF.BC.89" id="一些字体在小尺寸下显示不正确（如_Calibri,_Cambria,_Monaco_等）"><span id=".E4.B8.80.E4.BA.9B.E5.AD.97.E4.BD.93.E5.9C.A8.E5.B0.8F.E5.B0.BA.E5.AF.B8.E4.B8.8B.E6.98.BE.E7.A4.BA.E4.B8.8D.E6.AD.A3.E7.A1.AE.EF.BC.88.E5.A6.82_Calibri.2C_Cambria.2C_Monaco_.E7.AD.89.EF.BC.89"></span>一些字体在小尺寸下显示不正确（如 Calibri, Cambria, Monaco 等）</h3></div>
+<p>一些矢量字体内嵌有位图版本，这些位图字体主要用于在较小的尺寸下渲染。在这种情况下，使用<a href="#pg3e5d1d3436ab">公制兼容字体</a>作为替代可以改善渲染效果。
+</p><p>你也可以通过禁用字体的嵌入式位图来强制在所有尺寸下使用矢量字体，但会牺牲一些渲染质量。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E6.97.A0.E8.A7.86_Fontconfig_.E7.9A.84.E5.BE.AE.E8.B0.83.E6.88.96.E6.8A.97.E9.94.AF.E9.BD.BF.E8.AE.BE.E7.BD.AE" id="应用程序无视_Fontconfig_的微调或抗锯齿设置"><span id=".E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E6.97.A0.E8.A7.86_Fontconfig_.E7.9A.84.E5.BE.AE.E8.B0.83.E6.88.96.E6.8A.97.E9.94.AF.E9.BD.BF.E8.AE.BE.E7.BD.AE"></span>应用程序无视 Fontconfig 的微调或抗锯齿设置</h3></div>
+<p>一些应用程序或桌面环境可能会覆盖默认的 Fontconfig 微调和抗锯齿设置。这种情况可能发生在 <a href="#pg1e095fe2c2a6">GNOME</a> 上，例如，当你使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vlc">vlc</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=smplayer">smplayer</a></span><sup><small>包</small></sup></span> 等 Qt 应用程序时。在这种情况下，请使用该应用程序特定的配置程序。对于 GNOME，请尝试使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-tweaks">gnome-tweaks</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E6.97.A0.E8.A7.86_GNOME_.E7.9A.84.E5.BE.AE.E8.B0.83.E8.AE.BE.E7.BD.AE" id="应用程序无视_GNOME_的微调设置"><span id=".E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E6.97.A0.E8.A7.86_GNOME_.E7.9A.84.E5.BE.AE.E8.B0.83.E8.AE.BE.E7.BD.AE"></span>应用程序无视 GNOME 的微调设置</h3></div>
+<p>在 GNOME 下，有时会发生这样的情况：即使在 GNOME 设置中将微调设置为"无"，Firefox 之类的应用也会使用"完全"微调设置渲染字体，导致字体变得宽而锐利。在这种情况下，你必须在你的 <code>fonts.conf</code> 文件中添加微调设置：
+</p>
+<pre>&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd"&gt;
+&lt;fontconfig&gt;
+ &lt;match target="font"&gt;
+  &lt;edit mode="assign" name="hinting"&gt;
+   &lt;bool&gt;false&lt;/bool&gt;
+  &lt;/edit&gt;
+ &lt;/match&gt;
+&lt;/fontconfig&gt;
+</pre>
+<p>在上面的例子中，微调级别被设置为了 <code>grayscale</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_GTK_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E7.9A.84.E5.AD.97.E4.BD.93.E5.BE.AE.E8.B0.83.E4.B8.8D.E6.AD.A3.E7.A1.AE" id="GTK_应用程序的字体微调不正确"><span id="GTK_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E7.9A.84.E5.AD.97.E4.BD.93.E5.BE.AE.E8.B0.83.E4.B8.8D.E6.AD.A3.E7.A1.AE"></span>GTK 应用程序的字体微调不正确</h3></div>
+<p>在某些桌面环境（尤其是 <a href="#pg1e095fe2c2a6">GNOME</a> 和 <a href="#pgb8d7c68cf276">Plasma</a> 之外的）中，一些 GTK 应用程序无法正确读取字体配置。为了解决这个问题，请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xsettingsd">xsettingsd</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xsettingsd-git/">xsettingsd-git</a></span><sup><small>AUR</small></sup></span> 并在每次系统启动时运行它。更多信息请参见 <a href="#pg1117221b5a13">Xsettingsd</a> 和<a href="https://github.com/derat/xsettingsd/wiki/Settings">xsettingsd wiki</a>。
+</p><p>对于此问题，可以使用以下配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xsettingsd</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Xft/Hinting 1
+Xft/HintStyle "hintslight"
+Xft/Antialias 1
+Xft/RGBA "rgb"
+</pre>
+<p>如果这在一些应用程序中依然不起作用，可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xrdb">xorg-xrdb</a></span><sup><small>包</small></sup></span> 并使用以下配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.Xresources</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Xft.hinting: 1
+Xft.hintstyle: hintslight
+Xft.antialias: 1
+Xft.rgba: rgb 
+</pre>
+<p>然后在每次系统启动时执行脚本 <code>xrdb -merge ~/.Xresources</code> 来应用这些设置。参见 <a href="#pg4c36b893db9d">X resources</a> 和 #不支持 Fontconfig 的程序。
+</p><p>此外，使用 GTK4 和 libadwaita 的程序会忽略字体微调设置。可以创建或修改以下配置来修正：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/gtk-4.0/settings.ini</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Settings]
+gtk-hint-font-metrics=true</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E7.94.9F.E6.88.90.E7.9A.84_PDF_.E6.96.87.E4.BB.B6.E4.B8.AD.E7.9A.84_Helvetica_.E5.AD.97.E4.BD.93.E6.A8.A1.E7.B3.8A" id="生成的_PDF_文件中的_Helvetica_字体模糊"><span id=".E7.94.9F.E6.88.90.E7.9A.84_PDF_.E6.96.87.E4.BB.B6.E4.B8.AD.E7.9A.84_Helvetica_.E5.AD.97.E4.BD.93.E6.A8.A1.E7.B3.8A"></span>生成的 PDF 文件中的 Helvetica 字体模糊</h3></div>
+<p>如果执行如下命令
+</p>
+<pre> fc-match helvetica
+</pre>
+<p>返回
+</p>
+<pre> helvR12-ISO8859-1.pcf.gz: "Helvetica" "Regular"
+</pre>
+<p>那么由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-fonts-75dpi">xorg-fonts-75dpi</a></span><sup><small>包</small></sup></span> 提供的位图字体就有可能被嵌入到各种应用程序的"打印到文件"或"导出"功能所生成的 PDF 文件中。该位图字体可能是在安装整个 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/xorg/">xorg</a></span><sup><small>包组</small></sup></span> 包组的时候安装的（通常不推荐这样做）。要解决这个问题，可以卸载该软件包，并安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gsfonts">gsfonts</a></span><sup><small>包</small></sup></span>（Type 1）或<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tex-gyre-fonts">tex-gyre-fonts</a></span><sup><small>包</small></sup></span>（OpenType）字体，以获得 Helvetica（以及其他 PostScript/PDF 基本字体）的自由替代品。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_FreeType_.E7.A0.B4.E5.9D.8F.E4.BA.86.E4.BD.8D.E5.9B.BE.E5.AD.97.E4.BD.93" id="FreeType_破坏了位图字体"><span id="FreeType_.E7.A0.B4.E5.9D.8F.E4.BA.86.E4.BD.8D.E5.9B.BE.E5.AD.97.E4.BD.93"></span>FreeType 破坏了位图字体</h3></div>
+<p>一些用户报告说，在将 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=freetype2">freetype2</a></span><sup><small>包</small></sup></span> 升级到 2.7.1 版本后，各个位图字体的名称发生了变化，导致终端模拟器和其他一些程序（如 <a href="#pgd927e4187724">dwm</a> 或 <a href="#pge7090ebee131">dmenu</a>）的字体混乱，因为它们会回退到另一种不同的字体进行显示。该问题是由 PCF 字体族格式的改变造成的，这在他们的<i>发布说明</i><a href="https://sourceforge.net/projects/freetype/files/freetype2/2.7.1/">[6]</a>中有所描述。从旧格式过渡到新格式的用户可以通过创建<i>字体别名</i>来解决这个问题，就像<a href="https://forum.manjaro.org/t/terminus-font-name-fix-after-freetype2-update-to-2-7-1-1/15530">[7]</a>中描述的解决方案一样；该方案同时在下面给出：
+</p><p>假设我们想为<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=terminus-font">terminus-font</a></span><sup><small>包</small></sup></span>创建一个别名，在之前提到的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=freetype2">freetype2</a></span><sup><small>包</small></sup></span> 更新中，它从{ {ic|Terminus}} 被改名为 <code>xos4 Terminus</code>，那么在 <code>/etc/fonts/conf.d/</code> 中创建一个文件，用于设置字体别名：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fonts/conf.d/99-TerminusPCFFont.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">&lt;?xml version="1.0"?&gt;
+ &lt;!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd"&gt;
+ &lt;fontconfig&gt;
+     &lt;alias&gt;
+         &lt;family&gt;Terminus&lt;/family&gt;
+         &lt;prefer&gt;&lt;family&gt;xos4 Terminus&lt;/family&gt;&lt;/prefer&gt;
+         &lt;default&gt;&lt;family&gt;fixed&lt;/family&gt;&lt;/default&gt;
+     &lt;/alias&gt;
+ &lt;/fontconfig&gt;
+</pre>
+<p>现在，一切都应该能够像之前一样正常工作，但务必重新加载 <code>.Xresources</code> 或重启显示服务器，以便使受影响的程序能够使用字体别名。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_DejaVu_.E7.9A.84.E7.AD.89.E5.AE.BD.E5.AD.97.E4.BD.93.E4.B8.8D.E8.83.BD.E6.98.BE.E7.A4.BA.E4.B8.8B.E5.88.92.E7.BA.BF" id="DejaVu_的等宽字体不能显示下划线"><span id="DejaVu_.E7.9A.84.E7.AD.89.E5.AE.BD.E5.AD.97.E4.BD.93.E4.B8.8D.E8.83.BD.E6.98.BE.E7.A4.BA.E4.B8.8B.E5.88.92.E7.BA.BF"></span>DejaVu 的等宽字体不能显示下划线</h3></div>
+<p><a href="https://gitlab.gnome.org/GNOME/pango/issues/392">自 Pango 1.44 起</a>，在以某些字号使用 DejaVu Sans Mono 字体时，下划线会消失。一种解决办法是使用 Liberation Mono 作为等宽字体，见#设置默认或后备字体。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E8.B0.83.E8.AF.95_FreeType_.E5.AD.97.E4.BD.93" id="调试_FreeType_字体"><span id=".E8.B0.83.E8.AF.95_FreeType_.E5.AD.97.E4.BD.93"></span>调试 FreeType 字体</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=freetype2-demos">freetype2-demos</a></span><sup><small>包</small></sup></span> 提供用于调试 FreeType 字体配置的工具。<code>ftview</code> 是它的一个 GUI，你可以在其中实时预览字体的渲染设置。比如：
+</p>
+<pre>$ ftview -e unic -d 1024x768x24 -r 96 10 /usr/share/fonts/noto/NotoSans-Regular.ttf
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_.E6.96.87.E5.AD.97.E6.A8.A1.E7.B3.8A" id="文字模糊"><span id=".E6.96.87.E5.AD.97.E6.A8.A1.E7.B3.8A"></span>文字模糊</h3></div>
+<p>某些应用程序（如 Chromium/Electron）没有正确应用伽马校正，有些在特定场景（灰度）下禁用了伽马校正，这会导致深色背景上的小文字模糊不清，在 &lt;=1080p 的屏幕上出现难以阅读的文字。这是 Chromium/Electron 的一个<a href="https://bugs.chromium.org/p/chromium/issues/detail?id=1443720">长期存在的问题</a>，一个解决方法是使用 <code>FREETYPE_PROPERTIES="cff:no-stem-darkening=0 autofitter:no-stem-darkening=0"</code> <a href="#pg4989d4f46056">环境变量</a>来<a href="https://freetype.org/freetype2/docs/reference/ft2-properties.html#no-stem-darkening">启用 stem darkerning</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3ffaba980b7a_font_config_info" id="font-config-info">font-config-info</h3></div>
+<p>你可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/font-config-info-git/">font-config-info-git</a></span><sup><small>AUR</small></sup></span> 收集有效的字体配置信息。它会从<a href="https://codeberg.org/derat/font-config-info/">多个</a> <a href="#pg6438c4cbb62c">GTK</a> 源、<a href="#pg4c36b893db9d">X resources</a>、<a href="#pg1117221b5a13">XSETTINGS</a> 协议和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fontconfig">fontconfig</a></span><sup><small>包</small></sup></span> 查询信息。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3ffaba980b7a_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://keithp.com/~keithp/render/Xft.tutorial">Xft 教程</a> by Keith Packard</li>
+<li><a href="https://www.x.org/releases/current/doc/xorg-docs/fonts/fonts.html">X11 中的字体</a></li>
+<li><a href="https://freetype.sourceforge.net/freetype2/">FreeType 2</a></li>
+<li><a href="https://www.freetype.org/freetype2/docs/reference/index.html#controlling-freetype-modules">FreeType 2 API 参考：控制 FreeType 模块</a></li>
+<li><a href="https://forums.gentoo.org/viewtopic-t-723341.html">Gentoo 字体渲染讨论</a></li>
+<li><a href="https://www.freetype.org/freetype2/docs/hinting/text-rendering-general.html">关于轻微提示</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807022244
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.288 seconds
+Real time usage: 0.298 seconds
+Preprocessor visited node count: 1285/1000000
+Revision size: 26250/2097152 bytes
+Post‐expand include size: 16080/2097152 bytes
+Template argument size: 7199/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 1919/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   90.827      1 -total
+ 14.33%   13.019      9 Template:注意
+ 13.50%   12.264     79 Template:Ic
+  5.44%    4.941     16 Template:Pkg
+  4.13%    3.751      1 Template:翻译状态
+  4.08%    3.702      1 Template:准确性
+  3.80%    3.451      4 Template:Man
+  3.66%    3.320     13 Template:Bc
+  3.15%    2.861      6 Template:Related
+  3.00%    2.723      1 Template:相关文章开始
+-->
+<!-- Render ID df5bfe0e-9206-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3112:|#|:idhash:canonical!zh-cn and timestamp 20260807022244 and revision id 34830. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

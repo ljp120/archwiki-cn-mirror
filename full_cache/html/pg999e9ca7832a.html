@@ -1,0 +1,424 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg999e9ca7832a">MPD/提示与技巧</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Music_Player_Daemon/Tips_and_tricks">Music Player Daemon/Tips and tricks</a>，最近一次同步于 2026-07-29，若英文版本有所<a href="https://wiki.archlinux.org/title/Music_Player_Daemon/Tips_and_tricks?diff=0&amp;oldid=860336">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Music_Player_Daemon_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Tips_and_tricks_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_.E7.BB.84.E7.BB.87.E5.92.8C.E7.AE.A1.E7.90.86.E9.9F.B3.E4.B9.90.E5.BA.93" id="组织和管理音乐库"><span id=".E7.BB.84.E7.BB.87.E5.92.8C.E7.AE.A1.E7.90.86.E9.9F.B3.E4.B9.90.E5.BA.93"></span>组织和管理音乐库</h2></div>
+<p>MPD 不负责管理用户的音乐库。想要管理功能，请查看 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=beets">beets</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=picard">picard</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_.E5.90.8C.E6.AD.A5.E6.92.AD.E6.94.BE.E8.AE.B0.E5.BD.95.E8.87.B3_Last.fm.2FLibre.fm" id="同步播放记录至_Last.fm/Libre.fm"><span id=".E5.90.8C.E6.AD.A5.E6.92.AD.E6.94.BE.E8.AE.B0.E5.BD.95.E8.87.B3_Last.fm.2FLibre.fm"></span>同步播放记录至 Last.fm/Libre.fm</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>0.18 版本的 MPD 移除了 Last.fm <a href="http://git.musicpd.org/cgit/master/mpd.git/tree/NEWS">相关支持</a>。不过,一些客户端提供了独立于 MPD 的记录功能。</div>
+<p>下面有一些方法用于将 MPD 的歌曲播放记录同步至 <a href="https://www.last.fm">Last.fm</a> 或 <a href="https://libre.fm">Libre.fm</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_mpdas" id="mpdas">mpdas</h3></div>
+<p><a href="http://50hz.ws/mpdas/">mpdas</a> 是一款支持 MPD 的音频记录器客户端，使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=curl">curl</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libmpd">libmpd</a></span><sup><small>包</small></sup></span> 并由 C++ 编写而成。mpdas 支持最新的音频记录器协议（2.0），同时能在无网络连接的情况下，将未同步的播放记录缓存至 <code>~/.mpdascache</code>。
+</p><p>可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mpdas/">mpdas</a></span><sup><small>AUR</small></sup></span> 软件包。
+</p><p>Mpdas 配置简单，请参考官方的<a href="https://github.com/hrkfdn/mpdas/blob/master/README.md">说明</a>。<code>/etc/mpdasrc</code> 本身就是一份非常基础的配置示例。
+</p><p>要让 <i>mpdas</i> 随 <i>mpd</i> 一同启动，请在启动 <i>mpd</i> 的文件中增加 <i>mpdas</i> 的启动条目（例如 <a href="#pg05a4704b29d5">xinitrc</a>）：
+</p>
+<pre>[[ -z $(pgrep -xU $UID mpdas) ]] &amp;&amp; mpdas &amp;</pre>
+<p>若 <i>mpd</i> 是<a href="#pg1c26b1ba043d">以 systemd 用户服务启动</a>，最好也将 <i>mpdas</i> 作为一个<a href="#pg983913bfd458">用户单元</a><a href="#pg6ec215b93a06">启动</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若在系统启动后遇 <code>mpdas.service</code> 启动失败，请考虑使用 <code>mpd.socket</code>，即<a href="#pg1c26b1ba043d">套接字启动</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_mpdscribble" id="mpdscribble">mpdscribble</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mpdscribble">mpdscribble</a></span><sup><small>包</small></sup></span> 是一个守护进程，它因为作为一个半官方的 MPD 记录器，并且使用了 MPD 中新的“idle”功能，记录更精确，可以说是同步播放记录的最佳方案。由于不需要更改任何 <code>/etc</code> 目录下的文件，因此无需 root 权限即可进行配置。详情请访问<a href="https://www.musicpd.org/clients/mpdscribble/">官方网站</a>。
+</p><p>Mpdscribble 自带一份配置示例：<code>/usr/share/mpdscribble/mpdscribble.conf.example</code>，将其复制到 <code>~/.mpdscribble/mpdscribble.conf</code> 然后按需编辑。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Mpdscribble 解释器不支持行尾注释，请将注释写在单独的行中。</div>
+<p>用户密码也可以使用 md5hash 形式： 
+</p>
+<pre>echo -n "<i>password</i>" | md5sum | cut -f 1 -d " "
+</pre>
+<p>可以在 systemd 用户实例下使用 <code>mpdscribble.service</code> 让 <i>mpdscribble</i> 自动启动。详情请参考 <a href="#pg88cdcc283b9b">systemd/用户</a>。
+</p><p>同样可以让 <i>mpdscribble</i> 与 <i>mpd</i> 一同自动启动，请在启动 <i>mpd</i> 的文件中增加一条启动条目（例如 <code>~/.xinitrc</code>）：
+</p>
+<pre>[[ -z $(pgrep -xU $UID mpdscribble) ]] &amp;&amp; mpdscribble &amp;
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>若遇到 <code>[last.fm] handshake failed, username or password incorrect (BADAUTH)</code> 错误，请确保用户名和密码都是正确的，且密码不应是 <a href="https://bugs.musicpd.org/view.php?id=3836">32 字符长度</a><sup title="最后检查状态：SSL error">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2025-08-16 ⓘ]</sup>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_Sonata" id="Sonata">Sonata</h3></div>
+<p>Sonata 内置了歌曲记录功能，尽管该功能需要程序全程处于运行状态。此外，如果播放时未能成功将记录转发至 Last.fm，Sonata 也不会缓存这些记录，这意味着这些记录不会被计入统计数据。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_YAMS" id="YAMS">YAMS</h3></div>
+<p><a href="https://github.com/Berulacks/yams/">YAMS</a> 是一个 MPD 的 Last.FM 歌曲记录守护进程，用 Python 编写而成。 
+</p><p>由于 YAMS 是针对 2.0 版本的 Last.FM <a href="https://www.last.fm/api/scrobbling">记录接口</a>编写的，YAMS 不会将用户名和密码信息存储至本地，而是使用一个 cookie。与其他的记录器类似，YAMS 可以保存失败的记录上传并之后将其重新上传。YAMS 也提供了很多的配置选项，这些选项可以定义何时或如何创建歌曲记录（包括忽略掉一首曲子的重复播放记录）。
+</p><p>可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/python-yams/">python-yams</a></span><sup><small>AUR</small></sup></span> 软件包。
+</p><p><b>必须</b>在交互式终端内运行 <code>yams</code> 命令（至少需要运行一次）并跟随指示操作，才能完成身份认证。
+</p><p>身份验证完成后，可通过二进制文件启动 YAMS：
+</p><p><code>yams</code> 默认以守护进程运行（<code>yams -N</code> 将以前台进程运行 YAMS）。
+</p><p><code>yams -k</code> 将终止当前运行的实例。
+</p><p><code>yams -a</code> 将附加上当前运行的实例的日志文件，此时用户可以观察运行输出。
+</p><p><code>yams -h</code> 将输出所有命令行选项。
+</p><p>YAMS 自带一个 systemd 服务文件，可在身份认证完成后，通过 <code>yams.service</code> <a href="#pg983913bfd458">用户单元</a><a href="#pg6ec215b93a06">启动</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_.E7.A6.81.E7.94.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E6.81.A2.E5.A4.8D.E6.92.AD.E6.94.BE.E7.9A.84.E5.8A.9F.E8.83.BD" id="禁用启动时恢复播放的功能"><span id=".E7.A6.81.E7.94.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E6.81.A2.E5.A4.8D.E6.92.AD.E6.94.BE.E7.9A.84.E5.8A.9F.E8.83.BD"></span>禁用启动时恢复播放的功能</h2></div>
+<p><i>mpd</i> 0.16.2 开始有“恢复播放”功能。当该功能启用时，<i>mpd</i> 总是（即使停止时 mpd 正在播放音乐）以“暂停”状态启动。添加下面这一行以启用这个功能：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">mpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"> restore_paused "yes"
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_.E9.85.8D.E7.BD.AE.E7.A4.BA.E4.BE.8B.EF.BC.9A.E4.BB.A5_44.1_KHz_.E5.92.8C_16_bit_.E4.BD.8D.E6.B7.B1.E5.BA.A6.E8.BE.93.E5.87.BA.E8.87.B3.E5.A4.9A.E4.B8.AA.E7.A8.8B.E5.BA.8F" id="配置示例：以_44.1_KHz_和_16_bit_位深度输出至多个程序"><span id=".E9.85.8D.E7.BD.AE.E7.A4.BA.E4.BE.8B.EF.BC.9A.E4.BB.A5_44.1_KHz_.E5.92.8C_16_bit_.E4.BD.8D.E6.B7.B1.E5.BA.A6.E8.BE.93.E5.87.BA.E8.87.B3.E5.A4.9A.E4.B8.AA.E7.A8.8B.E5.BA.8F"></span>配置示例：以 44.1 KHz 和 16 bit 位深度输出至多个程序</h2></div>
+<dl><dt>为什么要选择这样的格式？</dt>
+<dd>因为这是 CD 音频的标准格式，ALSA 本身也允许多个程序仅通过 dmix（dmix 默认的使用低质量的重采样算法）播放声音，而 dmix 默认会将所有音频重采样至 48 KHz（或是正在播放的音频的格式的采样率）以下。而且，若不这么配置，至少对于 <code>mpd.conf</code> 而言，如果不进行更改，一些用户可能会遇到播放时的咔哒声（clicking sounds）。</dd></dl>
+<dl><dt>这么做有什么缺点？</dt>
+<dd>这些设置将导致“所有”音频（若有必要）被重采样至此格式（44.1 KHz 16 bit），例如实际上是 48 KHz 采样率的 DVD 或电视素材。但是目前没有方法让 ALSA 动态改变格式，不过对于经常听、且次数远多于其他音频的 CD 用户而言，偶尔将 48 KHz 降采样至 44.1 KHz 也不算是太大的采样率损失。</dd></dl>
+<p>下面的示例假定没有其他已知设置与之冲突或会覆盖它。这尤其适用于当前用户潜在的 <code>~/.asoundrc</code> 设置。MPD 通常会忽略该设置，因此,下面的示例应当转入 <code>/etc/asound.conf</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/asound.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">defaults.pcm.dmix.rate 44100 # 强制使用 44.1 KHz
+defaults.pcm.dmix.format S16_LE # 强制使用 16 bits
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">audio_output {
+        type                    "alsa" # 使用 ALSA 输出插件。
+	name			"your_custom_name" # 必须存在，但不必与实际的声卡名一致，例如 /etc/asound.conf 中的此项。
+        options                 "dev=dmixer"
+        device                  "plug:dmix" # 这两行让 MPD 输出至 dmix。
+	format	        	"44100:16:2" # 实际格式。
+	auto_resample		"no" # 用于绕过 ALSA 自身的算法（通常会更低）。请查看下面的内容以了解如何选择。
+}</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>MPD 会对 mp3 格式进行特殊处理：永远使其输出为 24 bit。由 <i>format</i> 行所指定的强制转换会在此特殊处理之后进行。</div>
+<p>若希望让 ALSA resp. 决定 MPD 使用的位深度，注释掉 resp. 并省略 <i>dimx.format</i> 这一行，同时将 mpd 的 <i>format</i> 更改为 "44100:*:2"。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在以两种不同位深度解码的文件（例如，一个 mp3 和一个 16 位 flac）之间进行“交叉淡入淡出”（<i>Crossfading</i>）时，除非转换处于激活状态，否则不起作用。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_.E7.94.A8_LIRC_.E6.8E.A7.E5.88.B6_MPD" id="用_LIRC_控制_MPD"><span id=".E7.94.A8_LIRC_.E6.8E.A7.E5.88.B6_MPD"></span>用 LIRC 控制 MPD</h2></div>
+<p>已有一些客户端被设计用于在 lircd 与 MPD 之间进行通信，然而在实际使用过程中，这些客户端由于功能限制，并不实用。
+</p><p>建议将 mpc 与 irexec 一同使用。mpc 是一个命令行播放器，它仅仅能够将命令发送至 MPD，随后立即退出（这一点与 irexec 配合极佳），命令执行器已经包含在 lirc 中了。irexec 会在接收到一个远程控制按钮的消息时执行特定的命令。
+</p><p>首先，请根据 <span class="ilh-all" data-foreign-title="LIRC" data-lang-code="en" data-lang-name="英语" data-orig-title="LIRC"><span class="ilh-page"><a href="#pg1127f8f9f271">LIRC</a></span></span> 文章设置好远程控制。
+</p><p>编辑 lirc 启动配置文件，默认位置位于 <code>~/.lircrc</code>。
+</p><p>将下面的内容写入文件：
+</p>
+<pre>begin
+     prog = irexec
+     button = &lt;按钮名称&gt;
+     config = &lt;要执行的命令&gt;
+     repeat = &lt;0 或 1&gt;
+end
+</pre>
+<p>示例：
+</p>
+<pre>## irexec
+begin
+     prog = irexec
+     button = play_pause
+     config = mpc toggle
+     repeat = 0
+end
+
+begin
+     prog = irexec
+     button = stop
+     config = mpc stop
+     repeat = 0
+end
+begin
+     prog = irexec
+     button = previous
+     config = mpc prev
+     repeat = 0
+end
+begin
+     prog = irexec
+     button = next
+     config = mpc next
+     repeat = 0
+end
+begin
+     prog = irexec
+     button = volup
+     config = mpc volume +2
+     repeat = 1
+end
+begin
+     prog = irexec
+     button = voldown
+     config = mpc volume -2
+     repeat = 1
+end
+begin
+     prog = irexec
+     button = pbc
+     config = mpc random
+     repeat = 0
+end
+begin
+     prog = irexec
+     button = pdvd
+     config = mpc update
+     repeat = 0
+end
+begin
+     prog = irexec
+     button = right
+     config = mpc seek +00:00:05
+     repeat = 0
+end
+begin
+     prog = irexec
+     button = left
+     config = mpc seek -00:00:05
+     repeat = 0
+end
+begin
+     prog = irexec
+     button = up
+     config = mpc seek +1%
+     repeat = 0
+end
+begin
+     prog = irexec
+     button = down
+     config = mpc seek -1%
+     repeat = 0
+end
+</pre>
+<p>请运行 <span class="plainlinks archwiki-template-man" title="$ man 1 mpc"><a href="https://man.archlinux.org/man/mpc.1">mpc(1)</a></span> 查看更多的 mpc 功能及其详细信息。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_PulseAudio" id="PulseAudio">PulseAudio</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_.E6.9C.AC.E5.9C.B0.EF.BC.88.E5.8D.95.E7.94.A8.E6.88.B7.EF.BC.89" id="本地（单用户）"><span id=".E6.9C.AC.E5.9C.B0.EF.BC.88.E5.8D.95.E7.94.A8.E6.88.B7.EF.BC.89"></span>本地（单用户）</h3></div>
+<p>无需任何特殊选项，只需要按照 MPD 配置文件中的注释说明，添加一个 PulseAudio 输出即可。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_.E6.9C.AC.E5.9C.B0.EF.BC.88.E5.A4.9A.E7.94.A8.E6.88.B7.EF.BC.89" id="本地（多用户）"><span id=".E6.9C.AC.E5.9C.B0.EF.BC.88.E5.A4.9A.E7.94.A8.E6.88.B7.EF.BC.89"></span>本地（多用户）</h3></div>
+<p>以单用户运行 MPD 时，声音是无法发送到其他用户的 PulseAudio 服务上的。解决方法：要么让 PulseAudio 作为全系统范围的守护进程运行（然而这是上游极其不推荐的做法），要么配置 MPD，让 MPD 使用 PulseAudio 的 TCP 模块，从而将声音发送到本地：
+</p><p>首先，编辑 PulseAudio 的配置，使用 <code>$XDG_CONFIG_HOME/pulse/default.pa</code> 这一用户配置（特指 <code>~/.config/pulse/default.pa</code> 这一配置文件），或者在全系统范围的配置文件 <code>/etc/pulse/default.pa</code> 中取消注释 TCP 模块相关内容并将 127.0.0.1 设置为允许的 IP 地址，如下所示：
+</p>
+<pre>### Network access (may be configured with paprefs, so leave this commented
+### here if you plan to use paprefs)
+#load-module module-esound-protocol-tcp
+load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1
+#load-module module-zeroconf-publish
+</pre>
+<p>可以用 <code>;</code> 作为 CIDR 表示法的分隔符表示其他范围的 IP 地址。配置完成后，<a href="https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/Running">重启 PulseAudio</a>。
+</p><p>接下来编辑 <code>/etc/mpd.conf</code>，添加一个新的 pulse 类型的输出，指向 127.0.0.1 “远程”服务器：
+</p>
+<pre>audio_output {
+       type		"pulse"
+       name		"Local Music Player Daemon"
+       server		"127.0.0.1"
+}
+</pre>
+<p>添加完毕后，请重启 MPD。
+</p><p>现在，本地的 MPD 应该已经能够使用，所有使用 PulseAudio 的用户都能通过 127.0.0.1 接收到声音。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_.E8.BF.9C.E7.A8.8B" id="远程"><span id=".E8.BF.9C.E7.A8.8B"></span>远程</h3></div>
+<p>MPD 可以通过网络将声音发送到任何使用了 PulseAudio 的程序。完整的 PulseAudio 系统并不需要在一个运行着 MPD 的服务端上，只需要使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libpulse">libpulse</a></span><sup><small>包</small></sup></span> 作为发送源，该软件包已经是 MPD 的依赖项。
+</p><p>要让 MPD 把音频发送到另一台计算机上，请参照上述指引，在运行了 MPD 的服务端上，编辑 <code>/etc/mpd.conf</code>，将 IP 地址设置成目标计算机的，同时在目标计算机上，编辑 <code>/etc/pulse/default.pa</code> 或 <code>$XDG_CONFIG_HOME/default.pa</code>（或 <code>~/.config/pulse/default.pa</code>），在配置中设置好服务端的 IP 地址。
+</p><p>完成配置后，在服务端播放音频时，目标计算机上会显示服务端的源，并且可以像普通的播放源那样控制。MPD 停止后，目标计算机上将没有可用的源。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_Cue_.E6.96.87.E4.BB.B6" id="Cue_文件"><span id="Cue_.E6.96.87.E4.BB.B6"></span>Cue 文件</h2></div>
+<p>由于 0.17 版本的 MPD 已经集成了能够处理外部或嵌入式 cue 脚本的解释器，无需额外操作即可支持 cue 文件。
+例如，<code>$ mpc load albumx/x.cue</code> 命令将 <code><i>music_directory</i>/albumx/x.cue</code> 文件加载为播放列表，若文件是例如 <code>$ mpc load albumx/x.flac</code>，则加载为 CUESHEET 标签。
+</p><p>支持 cue 文件的客户端较为有限。有两个支持 cue 文件的程序，分别是：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cantata/">cantata</a></span><sup><small>AUR</small></sup></span> 和 <a href="#pg4aaefb978420">ncmpcpp</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_HTTP_.E4.B8.B2.E6.B5.81" id="HTTP_串流"><span id="HTTP_.E4.B8.B2.E6.B5.81"></span>HTTP 串流</h2></div>
+<p>自 0.15 版本起，MPD 内置了 HTTP 串流守护程序（服务端）。这让 MPD 可以将音乐广播至 HTTP 客户端。
+</p><p>但这并不意味着把这个功能直接作为一个串流方案使用（例如替代 Spotify、Deezer 等）。首先，它只允许播放一个音频流，所以多个用户无法同时收听多个不同音频流。其次，MPD 会对音频做大量缓冲，因此，即使客户端离线了一段时间也依然能够播放，但也是因为这个原因，切换歌曲时会有非常明显的延迟。若要将 MPD 作为串流方案使用，请参考 #以卫星模式串流音乐。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h3></div>
+<p>在 mpd.conf 中将其设置为一个输出设备即可激活 HTTP 串流服务：
+</p>
+<pre>audio_output {
+	type		"httpd"
+	name		"My HTTP Stream"
+	encoder		"opus"		# 可选
+	port		"8000"
+#	quality		"5.0"			# 若 bitrate 已设置，请勿设置此项
+	bitrate		"128000"			# 若 quality 以设置，请勿设置此项
+	format		"48000:16:1"
+	always_on       "yes"			# 阻止 MPD 停止播放时中断与所有监听器的连接。
+	tags            "yes"			# httpd 支持发送标签至播放流。
+}
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg999e9ca7832a_.E6.A0.BC.E5.BC.8F" id="格式"><span id=".E6.A0.BC.E5.BC.8F"></span>格式</h4></div>
+<p>MPD 支持一些编码格式，请使用如下的命令查看 MPD 支持的编码格式：
+</p>
+<pre>$ mpd --version
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_.E4.BD.BF.E7.94.A8" id="使用"><span id=".E4.BD.BF.E7.94.A8"></span>使用</h3></div>
+<p>只需要在音乐播放器内打开 mpd 服务端的 URL（以及指定的端口号）即可收听配置完毕的音频流。注意：可能需要在 URL 中使用合适的文件扩展名以指定文件格式。例如在使用 Winamp 5.5 时，应使用 http://192.168.1.2:8000/mpd.ogg，不要使用 http://192.168.1.2:8000/。
+</p><p>从另一台计算机上使用 mpd 连接到音频流：
+</p>
+<pre> mpc add http://192.168.1.2:8000
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_.E4.BB.A5.E5.8D.AB.E6.98.9F.E6.A8.A1.E5.BC.8F.E4.B8.B2.E6.B5.81.E9.9F.B3.E4.B9.90" id="以卫星模式串流音乐"><span id=".E4.BB.A5.E5.8D.AB.E6.98.9F.E6.A8.A1.E5.BC.8F.E4.B8.B2.E6.B5.81.E9.9F.B3.E4.B9.90"></span>以卫星模式串流音乐</h2></div>
+<p>虽然 #HTTP 串流能够让用户通过 HTTP 广播音乐，卫星模式能够让多个用户在多个设备上，同时收听不同的歌曲。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_.E6.8B.93.E6.89.91.E7.BB.93.E6.9E.84" id="拓扑结构"><span id=".E6.8B.93.E6.89.91.E7.BB.93.E6.9E.84"></span>拓扑结构</h3></div>
+<p>设置卫星模式需要两个或更多的设备：一个“服务端”和多个“客户端”。“服务端”通常是拥有音乐文件的那台设备，它运行 MPD 实例，扫描音乐文件并建立数据库。“客户端”是实际播放音乐的设备（例如用户的手机或笔记本电脑），它们同样运行 MPD 实例，从服务端的 MPD 数据库中获取并播放音乐。虽然服务端上的 MPD 实例并非必要，但它极大地提升了客户端获取歌曲的速度，因为客户端无需远程扫描服务端上的音乐文件。
+</p><p>同时，还需要一种方法让服务端把音乐文件分享给客户端。MPD 支持多种<a href="https://www.musicpd.org/doc/html/plugins.html#storage-plugins">存储插件</a>用于获取文件。例如，如果选择了 curl 插件，服务端需要一个 <a href="#pge0b92766527e">WebDAV</a> 服务。
+</p><p>最后，服务端和客户端之间需要一个安全的通信隧道。这是因为控制 MPD 的协议不会加密传输信息，也不提供身份验证功能。此时 <a href="#pgcaffe945b309">VPN</a> 或 SSH 隧道将是一个不错的选择。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_.E9.85.8D.E7.BD.AE_2" id="配置_2"><span id=".E9.85.8D.E7.BD.AE_2"></span>配置</h3></div>
+<p>在服务端的配置文件中添加 MPD 构建数据库的相关配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">pid_file            "/run/mpd/mpd.pid"
+playlist_directory  "/var/lib/mpd/playlists"
+music_directory     "音乐文件的路径"
+
+database {
+    plugin           "simple"
+    path             "/var/lib/mpd/mpd.db"
+    cache_directory  "/var/lib/mpd/cache"
+}
+
+audio_output {
+    type  "null"
+    name  "<i>This server does not need to play music, but it can</i>"
+}
+</pre>
+<p>添加好配置后，请继续配置 <a href="#pge0b92766527e">WebDAV</a> 服务、<a href="#pg09db98375319">NFS</a> 服务或是 <a href="#pg3a2ac70f3f85">Samba</a> 共享。
+</p><p>在每个客户端的配置文件中添加 MPD 播放音乐的相关配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">pid_file            "/run/mpd/mpd.pid"
+playlist_directory  "/var/lib/mpd/playlists"
+
+# WebDAV 配置
+music_directory     "https://<i>optional_user:optional_password@example.com/path/to/your/music/</i>"
+
+# NFS 配置
+music_directory     "nfs://<i>example.com/path/to/your/music/</i>"
+
+# Samba 配置
+music_directory     "smb://<i>example.com/path/to/your/music/</i>"
+
+# 注意这里的代理设置
+database {
+    plugin  "proxy"
+    host    "<i>example.com</i>"
+    port    "6600"
+}
+
+audio_output {
+    type  "alsa"
+    name  "<i>Some output name</i>"
+}
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>libsmbclient 有一个会导致 MPD 崩溃的<a href="https://bugzilla.samba.org/show_bug.cgi?id=11413">严重缺陷</a><sup title="最后检查状态：426">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2025-08-16 ⓘ]</sup>，因此该插件默认是禁用状态，在该缺陷被修复之前请不要尝试使用。</li>
+<li>Android 设备上的配置文件需要存放在用户存储的根目录下，与 <code>Android</code> 目录一起。同时，MPD 写入的文件需要位于应用程序目录，通常位于 <code>/data</code>。例如：</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/storage/emulated/0/mpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">music_directory  "http://<i>example.com/Music</i>"
+log_file         "/data/user/0/org.musicpd/cache/log"
+state_file       "/data/user/0/org.musicpd/cache/state"
+
+audio_output {
+    type  "sles"
+    name  "<i>Android only supports OpenSL ES</i>"
+}
+</pre></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_MPRIS_.E6.94.AF.E6.8C.81" id="MPRIS_支持"><span id="MPRIS_.E6.94.AF.E6.8C.81"></span>MPRIS 支持</h2></div>
+<p>另请参见 <a href="#pg0a9b2cc841d1">MPRIS</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_mpDris2" id="mpDris2">mpDris2</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mpdris2/">mpdris2</a></span><sup><small>AUR</small></sup></span> 软件包。mpDris2 运行在当前用户会话内，监控 MPD 服务的运行状态。
+</p><p>将默认的配置文件 <code>/usr/share/doc/mpdris2/mpDris2.conf</code> 复制到 <code>~/.config/mpDris2/mpDris2.conf</code>，按需编辑配置内容。
+</p><p>安装完成后，<a href="#pg75b0ec583607">启动或启用</a> <code>mpDris2.service</code> <a href="#pg983913bfd458">用户单元</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_mpd_mpris" id="mpd-mpris">mpd-mpris</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mpd-mpris">mpd-mpris</a></span><sup><small>包</small></sup></span> 软件包。
+</p><p>安装完成后，<a href="#pg75b0ec583607">启动或启用</a> <code>mpd-mpris.service</code> <a href="#pg983913bfd458">用户单元</a>。
+</p><p>mpd-mpris 默认连接到 <code>localhost:6600</code>（同时也是 <a href="#pg1c26b1ba043d">MPD</a> 的默认主机、端口）。将 <code>/usr/lib/systemd/user/mpd-mpris.service</code> 复制到 <code>~/.config/systemd/user/</code> 并编辑运行参数即可更改这个默认连接地址。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_.E6.B6.88.E6.81.AF.E9.80.9A.E7.9F.A5" id="消息通知"><span id=".E6.B6.88.E6.81.AF.E9.80.9A.E7.9F.A5"></span>消息通知</h2></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mpdris2/">mpdris2</a></span><sup><small>AUR</small></sup></span> 软件包可以支持显示图形化的消息通知。
+若想要一些更“轻量”或“具体”的方案，而不需要 <a href="https://specifications.freedesktop.org/mpris-spec/latest/">mpris</a> 支持，请参考下列替代方案：
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_musnify_mpd" id="musnify-mpd">musnify-mpd</h3></div>
+<p><a href="https://github.com/felipemarinho97/musnify-mpd">musnify-mpd</a> 是一个简单的 <a href="#pgf6d3de5ccfac">python</a> 脚本，使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span> 为 <a href="#pg1c26b1ba043d">Music Player Daemon</a> 提供消息通知功能的支持。
+它也可以显示从 <i>last.fm</i> 或用户本地音乐库加载到的专辑封面。
+</p><p>可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/musnify-mpd/">musnify-mpd</a></span><sup><small>AUR</small></sup></span> 软件包。
+</p><p>安装完成后可能需要配置 MPD 的“主机”和“端口号”。请先将“.example”文件复制到 <code>~/.config/musnify-mpd</code> 然后编辑：
+</p>
+<pre>$ mkdir ~/.config/musnify-mpd 
+$ cp /usr/share/doc/musnify-mpd/musnify-mpdconfig.example ~/.config/musnify-mpd/musnify-mpd.config
+</pre>
+<p>配置示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/musnify-mpd/musnify-mpd.config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[mpd]
+host = localhost
+port = 6600
+
+# musnify-mpd 将从如下的位置搜索本地专辑封面。
+musiclibrary = ~/Music
+#
+
+[apiKey]
+# 若希望从 LastFm 获取专辑封面，
+# 请启用下面的选项并提供一个 apiKey。
+# 可以从此处获取 apiKey：<a href="https://www.last.fm/api/account/create">https://www.last.fm/api/account/create</a>
+#
+# lastfm = YOUR_LASTFM_API_KEY</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg999e9ca7832a_mpd_notification" id="mpd-notification">mpd-notification</h3></div>
+<p>mpd-notification 用于提示 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mpd">mpd</a></span><sup><small>包</small></sup></span> 所播放的歌曲信息。它运行于后台，并在 MPD 产生事件时（例如：开始、暂停或停止播放一首歌曲）发送通知。对于本地或 <code>.mp3</code> 专辑作品集同样支持。
+</p><p>可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mpd-notification/">mpd-notification</a></span><sup><small>AUR</small></sup></span> 软件包。
+</p><p>安装完成后，只需要运行一次 <code>mpd-notification</code>。也可以选择<a href="#pg3ef6532bc644">启用</a> <code>mpd-notification.service</code> <a href="#pg983913bfd458">用户单元</a>使其自动启动。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_.E6.B7.BB.E5.8A.A0.E4.B8.80.E4.B8.AA.E7.8B.AC.E7.AB.8B.E7.9A.84_ALSA_.E9.9F.B3.E9.87.8F.E6.8E.A7.E5.88.B6" id="添加一个独立的_ALSA_音量控制"><span id=".E6.B7.BB.E5.8A.A0.E4.B8.80.E4.B8.AA.E7.8B.AC.E7.AB.8B.E7.9A.84_ALSA_.E9.9F.B3.E9.87.8F.E6.8E.A7.E5.88.B6"></span>添加一个独立的 ALSA 音量控制</h2></div>
+<p>虽然 MPD 默认不允许用户调整它自己的音量（<code>mpc volume</code> 会影响全局音量），用户仍然可以通过 <a href="#pgb16dfd48462f">ALSA</a> 的“softvol”模块制作一个控制 MPD 的音量滑条。请将下面的内容添加到 <code>asound.conf</code>：
+</p>
+<pre>pcm.mpd {
+    type softvol
+    slave.pcm "default"
+    control.name "MPD Playback Volume"
+    control.card 0
+}
+</pre>
+<p>同时链接到 MPD：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">mpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">audio_output {
+    type "alsa"
+    name "ALSA"
+    device "mpd"
+    mixer_control "MPD"
+}
+</pre>
+<p>配置完成后就应该可以通过 <code>mpc</code> 和 <code>amixer</code> 控制歌曲音量（也可能需要重启才能控制音量）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg999e9ca7832a_.E6.8E.A7.E5.88.B6.E8.BF.9C.E7.A8.8B_MPD_.E6.9C.8D.E5.8A.A1.E7.AB.AF" id="控制远程_MPD_服务端"><span id=".E6.8E.A7.E5.88.B6.E8.BF.9C.E7.A8.8B_MPD_.E6.9C.8D.E5.8A.A1.E7.AB.AF"></span>控制远程 MPD 服务端</h2></div>
+<p>如果 MPD 服务端设备上有 ssh 服务，可以通过 ssh 登录并使用 <a href="#pg4aaefb978420">ncmpcpp</a> 控制 MPD。
+</p><p>而如果 MPD 服务端监听了一个可用的接口或端口（例如，在运行 MPD 的设备上使用 <code>$ ss -p -l -t</code> 能观察到 MPD 正在监听 0.0.0.0），此时设置 MPD_HOST 环境变量可以让本地客户端如 mpc 等指向运行着 MPD 服务的远程服务器。
+</p>
+<pre>$ export MPD_HOST=ip.of.server
+$ export MPD_PORT=6600      # 可选
+$ mpc play
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260808040053
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.216 seconds
+Real time usage: 0.221 seconds
+Preprocessor visited node count: 884/1000000
+Revision size: 21482/2097152 bytes
+Post‐expand include size: 14125/2097152 bytes
+Template argument size: 6283/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 193/5000000 bytes
+Lua time usage: 0.010/7.000 seconds
+Lua memory usage: 540728/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   82.418      1 -total
+ 35.01%   28.851      1 Template:Link-en
+  8.57%    7.064      5 Template:注意
+  8.23%    6.786     51 Template:Ic
+  4.59%    3.782      9 Template:Pkg
+  4.33%    3.568      1 Template:翻译状态
+  4.21%    3.468      2 Template:Dead_link_(简体中文)
+  2.90%    2.390      8 Template:Hc
+  2.39%    1.968      7 Template:AUR
+  2.29%    1.885      1 Template:Man
+-->
+<!-- Render ID bfe3d48e-92dd-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7940:|#|:idhash:canonical!zh-cn and timestamp 20260808040053 and revision id 35498. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

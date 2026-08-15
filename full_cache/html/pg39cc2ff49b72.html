@@ -1,0 +1,147 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg39cc2ff49b72">Node.js 打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Node.js_package_guidelines">Node.js package guidelines</a>，最近一次同步于 2021-03-12，若英文版本有所<a href="https://wiki.archlinux.org/title/Node.js_package_guidelines?diff=0&amp;oldid=721278">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Node.js_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – Node.js – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<p>本文档包含了给 <a href="#pg666c71b26604">Node.js</a> 软件包编写 <a href="#pgf9d748a7b27b">PKGBUILD</a> 的规范与指导。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg39cc2ff49b72_.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.91.BD.E5.90.8D" id="软件包命名"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E5.91.BD.E5.90.8D"></span>软件包命名</h2></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可以用自定义变量 <code>_pkgname</code> 代替 <code>pkgname</code>，一般这个变量可以这样定义： <code>_pkgname=${pkgname#nodejs-}</code></div>
+<p>Node.js 库的软件包名应该以 <code>nodejs-</code> 开头。对于独立的应用，只使用程序名。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg39cc2ff49b72_.E6.BA.90.E4.BB.A3.E7.A0.81" id="源代码"><span id=".E6.BA.90.E4.BB.A3.E7.A0.81"></span>源代码</h2></div>
+<p><a href="#pgdd2b372eab5d">npm</a> 提供了可靠的命名规范和下载 URL。<a href="#pgf9d748a7b27b">PKGBUILD#source</a> <code>source=()</code> 列表可以使用下面的 URL 模板：
+</p>
+<pre>https://registry.npmjs.org/$_pkgname/-/$_pkgname-$pkgver.tgz
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg39cc2ff49b72_.E4.BD.BF.E7.94.A8_npm" id="使用_npm"><span id=".E4.BD.BF.E7.94.A8_npm"></span>使用 npm</h2></div>
+<p>使用 <a href="#pgdd2b372eab5d">npm</a> 安装时，应当将其添加为构建时依赖。
+</p>
+<pre>makedepends=('npm')
+</pre>
+<p>不需要解压压缩包：
+</p>
+<pre>noextract=("${_pkgname}-${pkgver}.tgz")
+</pre>
+<p>这是一个最小的 <a href="#pgca951d402f98">package</a> 函数：
+</p>
+<pre>package() {
+    npm install -g --prefix "${pkgdir}/usr" "${srcdir}/${_pkgname}-${pkgver}.tgz"
+
+    # npm 会把所有文件的所有权交给构建用户
+    # https://bugs.archlinux.org/task/63396
+    chown -R root:root "${pkgdir}"
+}
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg39cc2ff49b72_.E8.AE.BE.E7.BD.AE.E4.B8.B4.E6.97.B6.E7.BC.93.E5.AD.98" id="设置临时缓存"><span id=".E8.AE.BE.E7.BD.AE.E4.B8.B4.E6.97.B6.E7.BC.93.E5.AD.98"></span>设置临时缓存</h3></div>
+<p>当 <i>npm</i> 处理 <code>package.json</code> 时，npm 会为了构建软件包，下载依赖到默认的缓存目录 <code>$HOME/.npm</code>。为了避免污染用户的 home 目录，可以用 <code>--cache</code> 选项，将缓存目录临时设为其他目录。
+</p><p>下载依赖到 <code>${srcdir}/npm-cache</code>，然后安装它们到打包目录：
+</p>
+<pre>npm install --cache "${srcdir}/npm-cache" 
+</pre>
+<p>继续正常打包：
+</p>
+<pre>npm run packager
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg39cc2ff49b72_.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.8C.85.E5.90.AB.E5.90.91_.24srcdir.2F.24pkgdir_.E7.9A.84.E5.BC.95.E7.94.A8" id="软件包包含向_$srcdir/$pkgdir_的引用"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E5.8C.85.E5.90.AB.E5.90.91_.24srcdir.2F.24pkgdir_.E7.9A.84.E5.BC.95.E7.94.A8"></span>软件包包含向 $srcdir/$pkgdir 的引用</h3></div>
+<p>很不幸，<i>npm</i> 会创建指向 <code>$srcdir</code> 和 <code>$pkgdir </code> 的引用。这是一个<a href="https://github.com/npm/cli/issues/3828">已知问题</a>。但你可以手动删除这些引用，反正也不会用到它们。
+</p><p>所有依赖都会在 <code>_where</code> 属性里，包含指向 <code>$pkgdir</code> 的引用，你通常可以用一点 <i>sed</i> 魔法删除它们：
+</p>
+<pre>find "$pkgdir" -name package.json -print0 | xargs -r -0 sed -i '/_where/d'
+</pre>
+<p>你的主软件包也会包含一些其他引用，删除它们最简单的办法就删除所有有下划线的属性，但用 <i>sed</i> 不是很方便。你可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=jq">jq</a></span><sup><small>包</small></sup></span> 得到想要的结果：
+</p>
+<pre>local tmppackage="$(mktemp)"
+local pkgjson="$pkgdir/usr/lib/node_modules/$_pkgname/package.json"
+jq '.|=with_entries(select(.key|test("_.+")|not))' "$pkgjson" &gt; "$tmppackage"
+mv "$tmppackage" "$pkgjson"
+chmod 644 "$pkgjson"
+</pre>
+<p>另一个你会找到对 <code>$pkgdir</code> 引用的地方，是软件包的 <code>man</code> 属性。如果你不在乎 man 页面（反正它们不会被作为依赖安装），你可以像这样删除它们：
+</p>
+<pre>find "$pkgdir" -type f -name package.json | while read pkgjson; do
+    local tmppackage="$(mktemp)"
+    jq 'del(.man)' "$pkgjson" &gt; "$tmppackage"
+    mv "$tmppackage" "$pkgjson"
+    chmod 644 "$pkgjson"
+done
+</pre>
+<p>一个使用了上面全部三个技巧的例子：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/readability-cli/">readability-cli</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg39cc2ff49b72_.E4.BD.BF.E7.94.A8_nvm" id="使用_nvm"><span id=".E4.BD.BF.E7.94.A8_nvm"></span>使用 nvm</h2></div>
+<p>当一个基于 <a href="#pg666c71b26604">node.js</a> 的应用需要<b>构建</b>或<b>打包</b>使用不同的 node.js 版本时，可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvm/">nvm</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>这只适用于应用的构建 / 打包时依赖，不影响运行时依赖.</div>
+<p>把它加入构建时依赖：
+</p>
+<pre>makedepends=('npm' 'nvm')
+</pre>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvm/">nvm</a></span><sup><small>AUR</small></sup></span> 使用 <code>NVM_DIR</code> <a href="#pg18ad99d88887">环境变量</a>来查找前缀（译注：指 nvm 的安装路径，下同）。如果不在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvm/">nvm</a></span><sup><small>AUR</small></sup></span> 初始化前指定，前缀就会被设置为 <code>$HOME/.nvm</code>。
+</p><p>你可以用下面的函数创建自定义前缀，并将用户目录和前缀隔离开：
+</p>
+<pre>_ensure_local_nvm() {
+    # let's be sure we are starting clean
+    which nvm &gt;/dev/null 2&gt;&amp;1 &amp;&amp; nvm deactivate &amp;&amp; nvm unload
+    export NVM_DIR="${srcdir}/.nvm"
+
+    # The init script returns 3 if version specified
+    # in ./.nvrc is not (yet) installed in $NVM_DIR
+    # but nvm itself still gets loaded ok
+    source /usr/share/nvm/init-nvm.sh || [[ $? != 1 ]]
+}
+</pre>
+<p>应该在使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvm/">nvm</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=npm">npm</a></span><sup><small>包</small></sup></span> 或其他基于特定版本 <a href="#pg666c71b26604">Node.js</a> 的程序前，调用这个函数。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg39cc2ff49b72_.E7.A4.BA.E4.BE.8B_PKGBUILD_.E7.94.A8.E6.B3.95" id="示例_PKGBUILD_用法"><span id=".E7.A4.BA.E4.BE.8B_PKGBUILD_.E7.94.A8.E6.B3.95"></span>示例 <a href="#pgf9d748a7b27b">PKGBUILD</a> 用法</h3></div>
+<pre>prepare() {
+    _ensure_local_nvm
+    nvm install 14.15.0
+}
+
+build() {
+    _ensure_local_nvm
+    npm install
+}
+</pre>
+<p>或者，执行不带参数的 <code>nvm install</code>，会在当前目录的 <code>.nvrc</code> 文件中查找版本字符串。
+</p><p>这个用法的一个例子可以在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/insomnia/">insomnia</a></span><sup><small>AUR</small></sup></span> 找到。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808040220
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.101 seconds
+Real time usage: 0.105 seconds
+Preprocessor visited node count: 311/1000000
+Revision size: 4734/2097152 bytes
+Post‐expand include size: 4805/2097152 bytes
+Template argument size: 792/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 1227/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   26.532      1 -total
+ 13.04%    3.460      1 Template:翻译状态
+ 11.72%    3.109      1 Template:提示
+ 11.38%    3.019     19 Template:Ic
+  9.06%    2.404      2 Template:Pkg
+  7.31%    1.939      1 Template:Package_guidelines
+  6.88%    1.826      6 Template:AUR
+  6.40%    1.699      5 Template:Bc
+  3.71%    0.984      1 Template:警告
+-->
+<!-- Render ID f3befa0e-92dd-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3590:|#|:idhash:canonical!zh-cn and timestamp 20260808040220 and revision id 33649. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

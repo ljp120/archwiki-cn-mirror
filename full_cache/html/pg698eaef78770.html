@@ -1,0 +1,134 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg698eaef78770">静默启动</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg23e524bc1b67">Plymouth</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Silent_boot">Silent boot</a>，最近一次同步于 2023-7-2，若英文版本有所<a href="https://wiki.archlinux.org/title/Silent_boot?diff=0&amp;oldid=775048">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Silent_boot_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本页适用于那些出于美观或其他原因而倾向于将其系统启动的记录严格限制在最低限度的人。遵循本指南将删除启动过程中的所有文本。<a href="https://www.youtube.com/watch?v=tuqhsqrhXk0">演示视频</a>
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg698eaef78770_.E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0" id="内核参数"><span id=".E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0"></span>内核参数</h2></div>
+<p>在你的<a href="#pgee8f2050088a">引导加载程序</a>配置选项中更改<a href="#pgec0856954f1c">内核参数</a>，以包括以下参数：
+</p>
+<pre>quiet
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>将 <code>vga=current</code> 添加到内核参数可以避免类似 <a href="https://bugs.archlinux.org/task/32309">FS#32309</a> 的奇怪行为。请记住，这与<a href="#pg82edce9c2d36">KMS</a>相冲突，因此只有当您受到上述错误的影响时才应使用此参数。</div>
+<p>如果您仍发现消息被打印到控制台，则可能是<a href="#pgcfe31b67199d">dmesg</a>向您发送了它认为重要的消息。您可以使用 <code>quiet loglevel=<i>level</i></code> 来更改打印这些消息的级别，其中 <code><i>level</i></code> 是0到7之间的任意数字，其中0代表只有最关键的，7代表打印的调试级别（debug levels）。
+</p>
+<pre>quiet loglevel=3
+</pre>
+<p>请注意，只有同时使用 <code>quiet</code> 和 <code>loglevel=<i>level</i></code> 且 quiet 在前才应当有效。loglevel 参数只会更改打印到控制台的内容，<i>dmesg</i> 本身的级别不会受到影响，并且仍然可以通过日志（journal）和 <i>dmesg</i> 使用。有关详细信息，请见<a href="https://docs.kernel.org/admin-guide/kernel-parameters.html">内核参数</a>。
+</p><p>如果您还想在引导时阻止 systemd 打印其版本号，您还应该将 <code>udev.log_level=3</code> 附加到内核参数中。如果在 <a href="#pg5409190f7704">initramfs</a> 中使用 systemd，请改为附加 <code>rd.udev.log_level=3</code> 。见 <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-udevd.service"><a href="https://man.archlinux.org/man/systemd-udevd.service.8#KERNEL_COMMAND_LINE">systemd-udevd.service(8) § KERNEL COMMAND LINE</a></span> 获取详细信息。
+</p><p>如果您在 <a href="#pg5409190f7704">initramfs</a> 中使用 <code>systemd</code> 钩子，则可能会在 initramfs 初始化期间获得 systemd 消息。您可以传递 <code>systemd.show_status=false</code> 来禁用它们，或者传递 <code>systemd.show_status=auto</code> 只阻止成功的消息（因此在出现错误时，您仍然可以看到它们）。事实上，当使用 <code>quiet</code> 时，<code>auto</code> 已经被传递给了 <code>systemd.show_status=auto</code>，但是出于某些原因，有时 initramfs 中的 systemd 无法获得它。以下是您需要传递给内核的参数，以便在 <a href="#pg5409190f7704">initramfs</a> 中使用 systemd 进行完全干净的启动：
+</p>
+<pre>quiet loglevel=3 systemd.show_status=auto rd.udev.log_level=3
+</pre>
+<p>还可以用 <code>touch ~/.hushlogin</code> 删除最后登录消息。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg698eaef78770_.E7.A7.BB.E9.99.A4.E6.8E.A7.E5.88.B6.E5.8F.B0.E5.85.89.E6.A0.87.E9.97.AA.E7.83.81" id="移除控制台光标闪烁"><span id=".E7.A7.BB.E9.99.A4.E6.8E.A7.E5.88.B6.E5.8F.B0.E5.85.89.E6.A0.87.E9.97.AA.E7.83.81"></span>移除控制台光标闪烁</h2></div>
+<p>如果按照以上说明，启动时的控制台光标会一直闪烁。这可以通过向内核传递 <code>vt.global_cursor_default=0</code> 来解决 <a href="http://www.friendlyarm.net/forum/topic/2998">[1]</a>。
+</p><p>要恢复 TTY 中的光标，请运行：
+</p>
+<pre># setterm -cursor on &gt;&gt; /etc/issue
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg698eaef78770_sysctl" id="sysctl">sysctl</h2></div>
+<p>要从控制台隐藏任何内核消息，请根据 <a href="https://unix.stackexchange.com/a/45525">[2]</a> 添加或修改 <code>kernel.printk</code> 行：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/20-quiet-printk.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">kernel.printk = 3 3 3 3</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg698eaef78770_agetty" id="agetty">agetty</h2></div>
+<p>要从控制台隐藏 agetty 打印的问题（issue）和“login:”提示行 <a href="https://github.com/karelzak/util-linux/commit/933956cb499e12d0d0e5228b6de34ffa5c9a9e08">[3]</a>，创建 <code>getty@tty1.service</code> 的<a href="#pg1096da1169ca">附加片段</a>。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/getty@tty1.service.d/skip-prompt.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+ExecStart=
+ExecStart=-/usr/bin/agetty <b>--skip-login</b> --nonewline --noissue --autologin <i>username</i> --noclear %I $TERM</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg698eaef78770_startx" id="startx">startx</h2></div>
+<p>要隐藏 <code>startx</code> 消息，您可以在你的 <a href="https://github.com/kaihendry/Kai-s--HOME/blob/master/.bash_profile">.bash_profile</a> 中重定向它的输出到 <code>/dev/null</code>，类似于这样：
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>无根（rootless）登录导致重定向中断。见 <a href="#pga36c0aff60be">Xorg#重定向Xorg会话日志</a>。</div>
+<pre>$ [[ $(fgconsole 2&gt;/dev/null) == 1 ]] &amp;&amp; exec startx -- vt1 &amp;&gt; /dev/null
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg698eaef78770_fsck" id="fsck">fsck</h2></div>
+<p>要在引导期间隐藏 fsck 消息，请让 systemd 检查根文件系统。为此，请将 <i>udev</i> 钩子替换为 <i>systemd</i>：
+</p>
+<pre>HOOKS=( base systemd fsck ) 
+</pre>
+<p>在 <code>/etc/mkinitcpio.conf</code> 中并<a href="#pg82461695094b">重新生成 initramfs</a>。
+</p><p>现在<a href="#pg965c4680152b">编辑</a> <code>systemd-fsck-root.service</code> 和 <code>systemd-fsck@.service</code> 并配置 <code>StandardOutput</code> 和 <code>StandardError</code> 类似于这样：
+</p>
+<pre>[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/systemd/systemd-fsck
+StandardOutput=null
+StandardError=journal+console
+TimeoutSec=0
+</pre>
+<p>见 <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-fsck@.service"><a href="https://man.archlinux.org/man/systemd-fsck%40.service.8">systemd-fsck@.service(8)</a></span> 获得可以传递给 <code>systemd-fsck</code> 的选项的更多信息，您可以更改服务检查（或不检查）文件系统的频率。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg698eaef78770_.E4.BD.BF_GRUB_.E9.9D.99.E9.BB.98" id="使_GRUB_静默"><span id=".E4.BD.BF_GRUB_.E9.9D.99.E9.BB.98"></span>使 GRUB 静默</h2></div>
+<p>要隐藏 GRUB 欢迎和引导消息，您可以安装非官方的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/grub-silent/">grub-silent</a></span><sup><small>AUR</small></sup></span> 包。
+</p><p>安装完成后，需要先将 <a href="#pgca9c4017f7ad">GRUB</a> 重新安装到必要的分区中。
+</p><p>然后，以 <code>/etc/default/grub.silent</code> 为例，对 <code>/etc/default/grub</code> 进行必要的更改。
+</p><p>以下三行是必要的：
+</p>
+<pre>GRUB_DEFAULT=0
+GRUB_TIMEOUT=0
+GRUB_RECORDFAIL_TIMEOUT=$GRUB_TIMEOUT
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果设置了 <code>GRUB_TIMEOUT=0</code> 和 <code>GRUB_HIDDEN_TIMEOUT=1</code>（或任何正值），请设置 <code>GRUB_RECORDFAIL_TIMEOUT=$GRUB_HIDDEN_TIMEOUT</code>，而不是 <code>GRUB_RECORDFAIL_TIMEOUT=$GRUB_TIMEOUT</code>。否则，在启动时按 <code>Esc</code> 以显示 GRUB 菜单将无法工作。</div>
+<p>最后，重新构建 <code>grub.cfg</code> 文件。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg698eaef78770_.E4.BF.9D.E7.95.99.E6.88.96.E7.A6.81.E7.94.A8_BIOS_.E4.B8.AD.E7.9A.84.E4.BE.9B.E5.BA.94.E5.95.86.E5.BE.BD.E6.A0.87" id="保留或禁用_BIOS_中的供应商徽标"><span id=".E4.BF.9D.E7.95.99.E6.88.96.E7.A6.81.E7.94.A8_BIOS_.E4.B8.AD.E7.9A.84.E4.BE.9B.E5.BA.94.E5.95.86.E5.BE.BD.E6.A0.87"></span>保留或禁用 BIOS 中的供应商徽标</h2></div>
+<p>现代 UEFI 系统在启动时显示供应商标志，直到将控制权移交给引导加载程序；例如，联想笔记本电脑上显示一个鲜红色的联想标志。这个供应商标志通常被引导加载程序（如果使用标准 GRUB）或内核覆盖。
+</p><p>为了避免内核覆盖供应商徽标，Linux 4.19 引入了一个新的配置选项 <code>FRAMEBUFFER_CONSOLE_DEFERRED_TAKEOVER</code>，该选项将保留帧缓冲区的内容，直到需要在帧缓冲区控制台上打印文本为止。截至2018年11月（Linux 4.19.1），官方的 Arch Linux 内核使用 <code>CONFIG_FRAMEBUFFER_CONSOLE_DEFERRED_TAKEOVER=y</code> 编译。
+</p><p>当与低日志级别相结合（以防止打印文本）时，可以在系统初始化时保留供应商徽标。请注意，标准配置中的 GRUB 会清空屏幕；考虑使用 <span class="ilh-all ilh-blue" data-foreign-title="EFISTUB" data-lang-code="en" data-lang-name="英语" data-orig-title="EFISTUB"><span class="ilh-page"><a href="#pgae292a1994d8">EFISTUB</a></span></span> 引导来直接引导到内核中，从而利用延迟接管（deferred takeover）。
+</p><p><a href="https://www.youtube.com/watch?v=5DW2JgJmsuY">视频演示</a>
+</p><p>内核命令行应该使用上面提到的 <code>loglevel=3</code> 或 <code>rd.udev.log_level=3</code>。请注意，如果您经常在内核日志中收到 <code>Core temperature above threshold, cpu clock throttled</code> 消息，则需要使用日志级别2在启动时使这些消息静音。或者，如果您编译自己的内核，请调整 <code>arch/x86/kernel/cpu/mcheck/therm_throt.c</code> 中消息的日志级别。
+</p><p>如果你使用 <a href="#pg9800307f9050">Intel 图形处理器</a>，另见 <a href="#pg9800307f9050">Intel 图形处理器#Fastboot</a>。
+</p><p>延伸阅读：
+</p>
+<ul><li><a href="https://www.phoronix.com/scan.php?page=news_item&amp;px=Linux-4.19-FBDEV-Defer-Console">Phoronix: Linux 4.19 Adds Deferred Console Takeover Support For FBDEV - Cleaner Boot Process</a></li>
+<li><a href="https://lists.fedoraproject.org/archives/list/kernel@lists.fedoraproject.org/thread/3MWCKJ2DVJPC4INXPKB4ECFZLA7X5RTI/">Hans de Goede: Adding deferred fbcon console takeover to the Fedora kernels</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg698eaef78770_.E7.A6.81.E7.94.A8.E5.BB.B6.E8.BF.9F.E6.8E.A5.E7.AE.A1.EF.BC.88deferred_takeover.EF.BC.89" id="禁用延迟接管（deferred_takeover）"><span id=".E7.A6.81.E7.94.A8.E5.BB.B6.E8.BF.9F.E6.8E.A5.E7.AE.A1.EF.BC.88deferred_takeover.EF.BC.89"></span>禁用延迟接管（deferred takeover）</h3></div>
+<p>如果新行为导致问题，可以使用 <code>fbcon=nodefer</code> <a href="#pgec0856954f1c">内核参数</a>禁用延迟接管。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807093719
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.153 seconds
+Real time usage: 0.161 seconds
+Preprocessor visited node count: 501/1000000
+Revision size: 7602/2097152 bytes
+Post‐expand include size: 5563/2097152 bytes
+Template argument size: 2030/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 19/5000000 bytes
+Lua time usage: 0.010/7.000 seconds
+Lua memory usage: 540343/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   71.229      1 -total
+ 43.18%   30.757      1 Template:Link-en
+  8.86%    6.309      3 Template:注意
+  8.83%    6.286     40 Template:Ic
+  6.82%    4.861      1 Template:Related_articles_start
+  3.80%    2.710      2 Template:Man
+  2.80%    1.992      1 Template:Related_articles_end
+  2.65%    1.889      1 Template:翻译状态
+  2.56%    1.823      1 Template:Related
+  1.95%    1.388      2 Template:Hc
+-->
+<!-- Render ID 95453d8e-9243-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7605:|#|:idhash:canonical!zh-cn and timestamp 20260807093719 and revision id 34379. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

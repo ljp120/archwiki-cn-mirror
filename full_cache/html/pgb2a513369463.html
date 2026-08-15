@@ -1,0 +1,110 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgb2a513369463">iPhone 网络共享</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/iPhone_tethering">iPhone tethering</a>，最近一次同步于 2026-06-28，若英文版本有所<a href="https://wiki.archlinux.org/title/iPhone_tethering?diff=0&amp;oldid=859557">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/iPhone_tethering_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>您可以通过 <b>Wi-Fi</b>、<b>USB</b> 或<b>蓝牙</b>来在设备上共享您的 iPhone 的移动数据连接，除非您的服务提供商（运营商）禁用了此功能：
+</p>
+<ul><li>只要您的电脑能够连接无线网络，Wi-Fi 就不需要其他额外配置，</li>
+<li>下文提供使用 USB 与蓝牙的操作指南。</li></ul>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2a513369463_.E9.80.9A.E8.BF.87_USB_.E8.BF.9B.E8.A1.8C.E5.85.B1.E4.BA.AB" id="通过_USB_进行共享"><span id=".E9.80.9A.E8.BF.87_USB_.E8.BF.9B.E8.A1.8C.E5.85.B1.E4.BA.AB"></span>通过 USB 进行共享</h2></div>
+<p>通过原生的 USB 进行共享是最理想的方式，因为其可以提供更加稳定的连接，且较蓝牙和 Wi-Fi 共享消耗的电量较少。
+</p><p>要使用 USB 进行 iPhone 网络共享，您需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libimobiledevice">libimobiledevice</a></span><sup><small>包</small></sup></span> 与 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=usbmuxd">usbmuxd</a></span><sup><small>包</small></sup></span>。<b>usbmuxd</b> 依赖于 <b>libimobiledevice</b> ，其中 usbmuxd 负责系统与 iOS 设备间的底层连接。<b>usbmuxd</b> 包也包含了一条 udev 规则，使其能够在设备连接或断开连接时自动启动与停止该守护进程。相关内容详见 <a href="#pg32a95535060e">iOS</a>。
+</p><p>连接 iOS 设备，并确保 <code>usbmuxd.service</code> 已经自动启动。 
+</p><p>下一步，在您的 iPhone 上启用<i>个人热点</i>（<i>Personal Hotspot）</i>，并将其用数据线连接至您的电脑。这时您应该会多出一个可用的以太网连接，并能够使用任意<a href="#pg3d6df3561234">网络管理器</a>通过新加入的 iPhone 以太网设备连接到 Internet，与使用其他普通的以太网连接没有什么区别。
+</p><p>如果您在使用 <a href="#pgcf8355f66f1c">MAC 地址伪装</a>，您可能需要将不支持 MAC 复制的 <code>ipheth</code> 驱动程序列为例外。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/NetworkManager/conf.d/your-file-here.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[your-section]
+match-device=*,except:driver:ipheth</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2a513369463_.E4.BD.BF.E7.94.A8_systemd-networkd" id="使用_systemd-networkd"><span id=".E4.BD.BF.E7.94.A8_systemd-networkd"></span>使用 systemd-networkd</h3></div>
+<p>如果您使用 <a href="#pg30593d9cf652">systemd-networkd</a> 进行网络管理，您能轻易将其配置为通过 iPhone 连接 Internet，与使用其他普通网络适配器时别无二致。
+</p><p>假设 <i>enp0s26u1u2c4i2</i> 是运行 <code>networkctl list</code> 命令时展示的 iPhone 创建的网络设备的名称，创建下面的 <i>.network</i> 文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/network/30-tethering.network</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Match]
+Name=enp0s26u1u2c4i2
+
+[Network]
+DHCP=yes</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2a513369463_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h3></div>
+<p>若设备列表中有 iPhone 但无法连接，您有可能需要在使用网络共享之前先将 iPhone 与您的电脑连接并进行配对。过程中，使用 PIN 的 iPhone 需要解锁。 
+</p>
+<pre># idevicepair pair
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb2a513369463_.E7.BC.BA.E5.B0.91.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F" id="缺少驱动程序"><span id=".E7.BC.BA.E5.B0.91.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F"></span>缺少驱动程序</h4></div><p>
+如果您按照上面的步骤操作，但 <code>networkctl list</code> 命令仍无法检测到 iPhone，您可能缺少了<a href="https://github.com/dgiagio/ipheth">ipheth</a> 驱动。您可以运行  <code>modprobe ipheth</code> 命令来检查您是否安装了该驱动程序。如果出现了错误消息，可能是您自行编译内核时发生的问题。请在编译内核时设置 <code>ipheth</code> flag。</p><pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">.config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">CONFIG_USB_IPHETH=y</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2a513369463_.E9.80.9A.E8.BF.87.E8.93.9D.E7.89.99.E8.BF.9B.E8.A1.8C.E5.85.B1.E4.BA.AB" id="通过蓝牙进行共享"><span id=".E9.80.9A.E8.BF.87.E8.93.9D.E7.89.99.E8.BF.9B.E8.A1.8C.E5.85.B1.E4.BA.AB"></span>通过蓝牙进行共享</h2></div>
+<p>使用蓝牙进行网络共享会相对较快地将电池耗尽。如果您同时连接了 USB 电源供应器，情况可能会稍好一些。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2a513369463_.E7.A1.AC.E4.BB.B6.E8.A6.81.E6.B1.82" id="硬件要求"><span id=".E7.A1.AC.E4.BB.B6.E8.A6.81.E6.B1.82"></span>硬件要求</h3></div>
+<ul><li>运行 iPhone OS 3.0 及以上的开启了网络共享的 iPhone。在<i>设置 ＞ 通用 ＞ 网络</i>中开启网络共享选项。</li>
+<li>蓝牙控制器或类似的硬件设备，最好支持 EDR (<i>Enhanced Data Rate</i>) 以便获得相对较好的速度。在 <i>Belkin F8T016NE</i> 上经过了测试。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2a513369463_.E8.AE.BE.E7.BD.AE" id="设置"><span id=".E8.AE.BE.E7.BD.AE"></span>设置</h3></div>
+<p>参考主文章<a href="#pg0379b52c0e22">蓝牙</a>并设置好蓝牙守护程序。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb2a513369463_Gnome.2FXFCE" id="Gnome/XFCE"><span id="Gnome.2FXFCE"></span>Gnome/XFCE</h4></div>
+<p>安装 <a href="#pg05adf739722a">Blueman</a> GTK 蓝牙管理器。
+</p><p>您的通知区域中应该会出现一个蓝牙图标（注意：如果在开机时未启用蓝牙，图标可能不会出现）。点击该图标，并搜索附近的设备，添加您的 iPhone。（注意，要使 iPhone 可以被发现，您可能需要在 iPhone 上打开设置中的蓝牙页面。）
+</p><p>一旦 iPhone 被添加到了设备列表中，打开设备菜单并选择 配对 。通常这需要先在电脑后在 iPhone 上输入 PIN 码。连接好后，再次打开设备菜单，选择<i>网络访问 ＞ 网络访问点</i>。如果一切正常的话，blueman 会报告成功，您的 iPhone 上的状态栏也会变为蓝色，表示成功建立了网络共享。
+</p><p>Blueman 将会创建一个新的网络设备，一般为 bnep0。要连接到该设备，以 root 身份运行以下命令：
+</p>
+<pre># dhcpcd bnep0
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb2a513369463_netcfg" id="netcfg">netcfg</h4></div>
+
+<p>您也可以创建一个 <a href="#pg401076114df9">netcfg</a> 网络档案，以便在命令行界面中就可以轻松地进行网络共享而不需要使用 <a href="#pg05adf739722a">Blueman</a> 或 Gnome。假设您有一部地址为 '00:00:DE:AD:BE:EF' 的已经配对好的 iPhone，只需要在 <code>/etc/network.d called</code> 中创建一个档案，例如  'tether' ：
+</p>
+<pre> CONNECTION="ethernet"
+ DESCRIPTION="Ethernet via pand tethering to iPhone"
+ INTERFACE="bnep0"
+ IPHONE="00:00:DE:AD:BE:EF"
+ PRE_UP="pand -E -S -c ${IPHONE} -e ${INTERFACE} -n 2&gt;/dev/null"
+ POST_DOWN="pand -k ${IPHONE}"
+ IP="dhcp"
+</pre>
+<p>接下来执行：
+</p>
+<pre># netcfg tether
+</pre>
+<p>要关闭网络连接并停止网络共享：
+</p>
+<pre># netcfg down tether
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807081928
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.094 seconds
+Real time usage: 0.097 seconds
+Preprocessor visited node count: 188/1000000
+Revision size: 5166/2097152 bytes
+Post‐expand include size: 3145/2097152 bytes
+Template argument size: 715/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   19.815      1 -total
+ 16.16%    3.203      1 Template:翻译状态
+ 15.85%    3.140      1 Template:过时
+ 15.81%    3.133      1 Template:Lowercase_title
+ 12.65%    2.507      2 Template:Pkg
+  8.29%    1.643      1 Template:META_Message
+  8.00%    1.585      7 Template:Ic
+  7.73%    1.531      3 Template:Hc
+-->
+<!-- Render ID b523340e-9238-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7700:|#|:idhash:canonical!zh-cn and timestamp 20260807081928 and revision id 35283. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

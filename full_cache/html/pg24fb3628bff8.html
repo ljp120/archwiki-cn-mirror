@@ -1,0 +1,475 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg24fb3628bff8">邮件服务器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgd45a14fa3823">ClamAV</a></li>
+<li><a href="#pg4d3f4432804e">SpamAssassin</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Mail_Server">Mail Server</a>，最近一次同步于 2024-10-20，若英文版本有所<a href="https://wiki.archlinux.org/title/Mail_Server?diff=0&amp;oldid=819188">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Mail_Server_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>邮件服务器由多个组件组成。<a href="https://en.wikipedia.org/wiki/Message_transfer_agent">邮件传送代理</a>（MTA）通过 <a href="https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol">SMTP</a> 接收和发送电子邮件。收到和接收的邮件会被传递给<a href="https://en.wikipedia.org/wiki/Mail_delivery_agent">邮件投递代理</a>（MDA），后者会将邮件存储在邮箱中（通常为 <a href="https://en.wikipedia.org/wiki/mbox">mbox</a> 或 <a href="https://en.wikipedia.org/wiki/Maildir">Maildir</a> 格式）。如果想让用户使用<a href="#pg9133d4e1f58c">电子邮件客户端</a>（MUA）远程访问邮件，则需要运行 <a href="https://en.wikipedia.org/wiki/Post_Office_Protocol">POP3</a> 和/或 <a href="https://en.wikipedia.org/wiki/IMAP">IMAP</a> 服务器。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24fb3628bff8_.E8.BD.AF.E4.BB.B6" id="软件"><span id=".E8.BD.AF.E4.BB.B6"></span>软件</h2></div>
+
+<p>下表列出了所有邮件服务器及其支持的功能。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在大多数情况下，本表中的任何一个程序都无法提供所需的全套支持；postfix 等 MTA 需要与 dovecot 等 MDA 搭配使用。</div>
+<table class="wikitable sortable">
+<tbody><tr>
+<th rowspan="2">名称
+</th>
+<th colspan="2">邮件传送代理
+</th>
+<th colspan="2">邮件投递代理
+</th>
+<th rowspan="2">发送邮件
+</th>
+<th rowspan="2">邮件列表
+</th>
+<th rowspan="2"><a href="https://en.wikipedia.org/wiki/JMAP">JMAP</a>
+</th>
+<th rowspan="2">提示
+</th></tr>
+<tr>
+<th>发送</th>
+<th>接收
+</th>
+<th>POP3</th>
+<th>IMAP
+</th></tr>
+<tr>
+<th><a href="#pg084ff0665816">dma</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td>不支持电子邮件域名（email domains）；MTA 接收受限（请参阅<a href="#pg084ff0665816">使用 Google SMTP</a>）.
+</td></tr>
+<tr>
+<th><a href="#pg8904a41f88b7">Exim</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<th><a href="#pg235046eff6cd">OpenSMTPD</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<th><a href="#pg3a5d9c944c85">Postfix</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">部分，通过别名功能
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<th><a href="#pg62ab597ef67c">Courier</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td>包含一个网络客户端
+</td></tr>
+<tr>
+<th><a href="https://en.wikipedia.org/wiki/Cyrus_IMAP_server">Cyrus IMAP</a>
+</th>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://www.cyrusimap.org/dev/imap/developer/jmap.html">是</a>
+</td>
+<td>可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cyrus-imapd/">cyrus-imapd</a></span><sup><small>AUR</small></sup></span> 安装
+</td></tr>
+<tr>
+<th><a href="#pg3f0a285f0014">Dovecot</a>
+</th>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否, <a href="https://dovecot.org/pipermail/dovecot/2016-November/106262.html">已请求</a>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<th><a href="#pg04ee98577cd5">UW IMAP</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是 ，使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/c-client/">c-client</a></span><sup><small>AUR</small></sup></span></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是 ，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/c-client/">c-client</a></span><sup><small>AUR</small></sup></span> 具有相同功能
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td>项目已被放弃
+</td></tr>
+<tr>
+<th><a href="#pg71b3af8a28a9">msmtp</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是 ，msmtp 具有相同功能
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<th><a href="#pga5713eb23fcf">Sendmail</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td>Sendmail 实现已过时
+</td></tr>
+<tr>
+<th><a href="#pg37ea49bf8bc6">sSMTP</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<th><a href="#pg0377af129630">fdm</a>
+</th>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td>还可以从标准输入（stdin）中获取邮件
+</td></tr>
+<tr>
+<th><a href="#pg36b4423d6509">Procmail</a>
+</th>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">部分，参见模块 <a href="https://pm-doc.sourceforge.net/doc/#procmail_module_library_project">[1]</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td>仅通过标准输入（stdin）读取邮件，上游未维护
+</td></tr>
+<tr>
+<th><a href="#pg325fb5486baf">Maildrop</a>
+</th>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td>仅支持通过标准输入（stdin）接收电子邮件
+</td></tr>
+<tr>
+<th><a href="https://stalw.art/">Stalwart</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>Sendmail 可执行程序是一种命令行工具，可通过 SMTP 发送电子邮件。</li>
+<li>"发送 "和 "接收 "栏指的是通过 SMTP 发送邮件和通过 SMTP 接收邮件的功能。</li>
+<li>"邮件列表"软件允许创建邮件列表，参见<a href="https://en.wikipedia.org/wiki/Mailing_list">邮件列表</a>。</li></ul>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24fb3628bff8_.E7.AB.AF.E5.8F.A3" id="端口"><span id=".E7.AB.AF.E5.8F.A3"></span>端口</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>用途</th>
+<th>端口</th>
+<th>协议</th>
+<th>加密
+</th></tr>
+<tr>
+<td>接受来自其他 MTA 的邮件。</td>
+<td>25</td>
+<td><a href="https://en.wikipedia.org/wiki/#Simple_Mail_Transfer_Protocol">SMTP</a></td>
+<td>STARTTLS
+</td></tr>
+<tr>
+<td rowspan="2">接受 MUA 的 submissions。</td>
+<td>587</td>
+<td><a href="https://en.wikipedia.org/wiki/#Simple_Mail_Transfer_Protocol">SMTP</a></td>
+<td>STARTTLS
+</td></tr>
+<tr>
+<td>465</td>
+<td><a href="https://en.wikipedia.org/wiki/SMTPS">SMTPS</a></td>
+<td>implicit TLS
+</td></tr>
+<tr>
+<td rowspan="4">允许 MUA 访问邮件。
+</td>
+<td>110</td>
+<td><a href="https://en.wikipedia.org/wiki/Post_Office_Protocol">POP3</a></td>
+<td>STARTTLS
+</td></tr>
+<tr>
+<td>995</td>
+<td><a href="https://en.wikipedia.org/wiki/Post_Office_Protocol#STARTLS">POP3S</a></td>
+<td>Implicit TLS
+</td></tr>
+<tr>
+<td>143</td>
+<td>IMAP</td>
+<td>STARTTLS
+</td></tr>
+<tr>
+<td>993</td>
+<td>IMAPS</td>
+<td>implicit TLS
+</td></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>Implicit TLS 比 <a href="https://en.wikipedia.org/wiki/Opportunistic_TLS">STARTTLS</a> 更安全，因为后者容易受到 <a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">中间人攻击</a>。更多信息，请参阅 <a href="https://serverfault.com/questions/523804/is-starttls-less-safe-than-tls-ssl">[2]</a> 和 <a href="https://tools.ietf.org/html/rfc8314">RFC:8314</a>。</li>
+<li>上表包含了要使用的通用端口，但邮件服务器可能会使用其他端口，请与邮件提供商确认端口是否正确。唯一不变的端口是 25 端口，中继端口必须打开，否则邮件将无法通过特定服务器进行中继（不过有些软件支持设置自定义中继端口）。</li></ul>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24fb3628bff8_MX_record" id="MX_record">MX record</h2></div>
+<p>Hosting a mail server requires a <a href="https://en.wikipedia.org/wiki/Domain_name">domain name</a> with an <a href="https://en.wikipedia.org/wiki/MX_record">MX record</a> pointing to the domain name of your mail transfer agent. 
+The domain name used as the value of the MX record must map to at least one <a href="https://en.wikipedia.org/wiki/A_record">address record</a> (A, AAAA) and must not have a <a href="https://en.wikipedia.org/wiki/CNAME_record">CNAME record</a> to conform with <a href="https://tools.ietf.org/html/rfc2181#section-10.3">RFC 2181</a>, otherwise you may not get mail from some mail servers. Configuring DNS records is usually done from the configuration interface of your <a href="https://en.wikipedia.org/wiki/Domain_name_registrar">domain name registrar</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24fb3628bff8_.E8.BA.AB.E4.BB.BD.E9.AA.8C.E8.AF.81" id="身份验证"><span id=".E8.BA.AB.E4.BB.BD.E9.AA.8C.E8.AF.81"></span>身份验证</h2></div>
+
+<p><br/>
+有多种<a href="https://en.wikipedia.org/wiki/Email_authentication">电子邮件验证</a>技术。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24fb3628bff8_Sender_Policy_Framework" id="Sender_Policy_Framework">Sender Policy Framework</h3></div>
+<p>摘自 <a href="https://en.wikipedia.org/wiki/Sender_Policy_Framework">Wikipedia</a>；
+</p>
+<dl><dd><b>Sender Policy Framework</b> (<b>SPF</b>) 是一种电子邮件验证协议，旨在通过提供一种机制，使接收邮件的邮件交换者能够验证来自某个域的传入邮件是否来自该域管理员授权的 IP 地址，从而检测和阻止电子邮件欺骗行为。</dd></dl>
+<p>要允许其他邮件交换器验证明显从您的域名发送的邮件，您需要设置 DNS TXT 记录，如 <a href="https://en.wikipedia.org/wiki/Sender_Policy_Framework">Wikipedia 文章</a>所述（也有<a href="https://www.spfwizard.net/">一个在线向导</a>）。要使用 SPF 验证收到的邮件，您需要将邮件传输代理配置为使用 SPF 实现。有多种 SPF 实现可供选择： <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libspf2">libspf2</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perl-mail-spf">perl-mail-spf</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perl-mail-spf-query">perl-mail-spf-query</a></span><sup><small>包</small></sup></span>。
+</p>
+<table class="wikitable sortable">
+<caption>SPF 验证支持
+</caption>
+<tbody><tr>
+<th><a href="#pg62ab597ef67c">Courier</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是, 内置
+</td></tr>
+<tr>
+<th><a href="#pg3a5d9c944c85">Postfix</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="#pg3a5d9c944c85">是</a>
+</td></tr>
+<tr>
+<th><a href="#pga5713eb23fcf">Sendmail</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">通过 <a href="https://en.wikipedia.org/wiki/Milter">Milter</a> 与 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/spfmilter-acme/">spfmilter-acme</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<th><a href="#pg8904a41f88b7">Exim</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/Exim/exim/wiki/SPF">是</a>, 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libspf2">libspf2</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<th><a href="#pg235046eff6cd">OpenSMTPD</a>
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr></tbody></table>
+<p>通过以下网站，您可以验证 SPF 记录：
+</p>
+<ul><li><a href="https://www.kitterman.com/spf/validate.html">SPF Record Checker</a></li>
+<li><a href="https://www.appmaildev.com/en/spf">SPF Email test</a></li></ul>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>SPF 甚至对不用于发送电子邮件的域名也有帮助。发布类似 <code>v=spf1 -all</code> 这样的策略可使任何执行 SPF 的邮件服务器拒绝来自您域名的电子邮件，从而防止滥用。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24fb3628bff8_Sender_Rewriting_Scheme" id="Sender_Rewriting_Scheme">Sender Rewriting Scheme</h3></div>
+<p>The <a href="https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme">Sender Rewriting Scheme</a> (SRS) is a secure scheme to allow forwardable bounces for server-side forwarded emails without breaking the <a href="#pg24fb3628bff8_Sender_Policy_Framework">Sender Policy Framework</a>.
+</p><p>关于 <a href="#pg3a5d9c944c85">Postfix</a>，请参阅<a href="#pg3a5d9c944c85">Postfix#Sender Rewriting Scheme</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24fb3628bff8_DKIM" id="DKIM">DKIM</h3></div>
+<p><a href="https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail">DomainKeys Identified Mail</a>（DKIM）是一种域名级电子邮件验证方法，旨在检测电子邮件欺骗行为。
+</p><p>可用的 DKIM 实现有 <a href="#pg708d7242dbcf">OpenDKIM</a> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perl-mail-dkim">perl-mail-dkim</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24fb3628bff8_ARC" id="ARC">ARC</h3></div>
+<p>ARC 是一个实验性标准，即 <a href="https://en.wikipedia.org/wiki/Authenticated_Received_Chain">Authenticated Received Chain (ARC)</a> 电子邮件验证系统。它允许中间邮件服务器（如邮件列表或转发服务）签署电子邮件的原始验证结果。谷歌、微软、ProtonMail、Fastmail 等公司都采用了 ARC 系统。
+</p><p>可用的 ARC 实现有 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rspamd">rspamd</a></span><sup><small>包</small></sup></span> （作为 rspamd 模块）和 <a href="#pgcb9c642ab01c">OpenARC</a> （独立）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24fb3628bff8_.E6.B5.8B.E8.AF.95" id="测试"><span id=".E6.B5.8B.E8.AF.95"></span>测试</h2></div>
+<p>有多个选项可帮助您测试 DNS 记录、传送能力和加密支持。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24fb3628bff8_.E4.B8.93.E7.94.A8.E5.B7.A5.E5.85.B7" id="专用工具"><span id=".E4.B8.93.E7.94.A8.E5.B7.A5.E5.85.B7"></span>专用工具</h3></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=swaks">swaks</a></span><sup><small>包</small></sup></span></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24fb3628bff8_.E4.B8.93.E7.94.A8.E7.BD.91.E7.AB.99" id="专用网站"><span id=".E4.B8.93.E7.94.A8.E7.BD.91.E7.AB.99"></span>专用网站</h3></div>
+<p>有几个方便的网站可以帮助您进行测试。
+</p>
+<ul><li><a href="https://mxtoolbox.com/">https://mxtoolbox.com/</a></li>
+<li><a href="https://ismyemailworking.com/">https://ismyemailworking.com/</a></li>
+<li><a href="https://www.mail-tester.com/">https://www.mail-tester.com/</a> （仅 3 次免费使用）</li>
+<li><a href="https://www.checktls.com/">https://www.checktls.com/</a></li>
+<li><a href="https://pingability.com/zoneinfo.jsp">https://pingability.com/zoneinfo.jsp</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24fb3628bff8_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24fb3628bff8_.E7.A7.BB.E9.99.A4.E7.94.B5.E5.AD.90.E9.82.AE.E4.BB.B6.E4.B8.AD.E7.9A.84_IP_.E5.9C.B0.E5.9D.80" id="移除电子邮件中的_IP_地址"><span id=".E7.A7.BB.E9.99.A4.E7.94.B5.E5.AD.90.E9.82.AE.E4.BB.B6.E4.B8.AD.E7.9A.84_IP_.E5.9C.B0.E5.9D.80"></span>移除电子邮件中的 IP 地址</h3></div>
+<p>大多数邮件服务器都可以通过配置从外发邮件中删除用户的 IP 地址和<a href="https://en.wikipedia.org/wiki/User_agent">用户代理</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24fb3628bff8_.E6.89.AB.E6.8F.8F.E7.94.B5.E5.AD.90.E9.82.AE.E4.BB.B6.E4.BB.A5.E5.8F.91.E7.8E.B0.E7.97.85.E6.AF.92" id="扫描电子邮件以发现病毒"><span id=".E6.89.AB.E6.8F.8F.E7.94.B5.E5.AD.90.E9.82.AE.E4.BB.B6.E4.BB.A5.E5.8F.91.E7.8E.B0.E7.97.85.E6.AF.92"></span>扫描电子邮件以发现病毒</h3></div>
+<p>有关电子邮件防病毒扫描，请参阅<a href="#pgd45a14fa3823">ClamAV</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24fb3628bff8_.E5.9E.83.E5.9C.BE.E8.BF.87.E6.BB.A4" id="垃圾过滤"><span id=".E5.9E.83.E5.9C.BE.E8.BF.87.E6.BB.A4"></span>垃圾过滤</h3></div>
+<p>有关垃圾邮件的过滤，请参阅<a href="#pg4d3f4432804e">SpamAssassin</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24fb3628bff8_Webmail" id="Webmail">Webmail</h3></div>
+<p>有关网络邮件的设置，请参阅 <a href="#pg47612de52f9d">Roundcube</a> 和 <a href="#pg651079b2ac6c">Squirrelmail</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24fb3628bff8_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://en.wikipedia.org/wiki/Comparison_of_e-mail_servers">邮件服务器比较</a> - 进一步比较邮件服务器，包括 Arch Linux 不支持的服务器</li>
+<li><a href="https://en.wikipedia.org/wiki/Sieve_(mail_filtering_language)">Sieve</a> – 一种邮件过滤编程语言</li>
+<li><a href="https://en.wikipedia.org/wiki/Webmail">Webmail</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807123000
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.272 seconds
+Real time usage: 0.280 seconds
+Preprocessor visited node count: 870/1000000
+Revision size: 9734/2097152 bytes
+Post‐expand include size: 24052/2097152 bytes
+Template argument size: 5141/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  103.774      1 -total
+  9.29%    9.644      5 Template:G
+  8.04%    8.342     39 Template:Yes
+  6.92%    7.183      9 Template:META_Table_cell
+  6.48%    6.724      1 Template:Expansion
+  5.97%    6.195      1 Template:Merge
+  5.45%    5.659      9 Template:No
+  5.06%    5.246      2 Template:META_Message
+  4.61%    4.781      1 Template:Related_articles_start
+  4.50%    4.674      1 Template:Tip
+-->
+<!-- Render ID b4e8600e-925b-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7870:|#|:idhash:canonical!zh-cn and timestamp 20260807123000 and revision id 33885. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

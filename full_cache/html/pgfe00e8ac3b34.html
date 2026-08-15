@@ -1,0 +1,247 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgfe00e8ac3b34">代理服务器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Proxy_server">Proxy server</a>，最近一次同步于 2020-12-28，若英文版本有所<a href="https://wiki.archlinux.org/title/Proxy_server?diff=0&amp;oldid=646541">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Proxy_server_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg856ffbb9093e">HTTP tunneling</a></li>
+</ul></div>
+<p>根据维基百科 <a href="https://en.wikipedia.org/wiki/Proxy_server">Wikipedia</a>:
+</p>
+<dl><dd>在计算机网络中，代理服务器是一个作为客户从其他服务器请求资源的中介的服务器。</dd></dl>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe00e8ac3b34_HTTPS_MITM.E4.BB.A3.E7.90.86" id="HTTPS_MITM代理"><span id="HTTPS_MITM.E4.BB.A3.E7.90.86"></span>HTTPS MITM代理</h2></div>
+<p>当调试HTTPS连接时，在浏览器之外进行拦截是很有用的。为了让TLS MITM工作，你需要信任浏览器或系统范围内的代理<a href="#pga71bf02341bf">certificate authority</a>。
+</p>
+<ul><li><b>Charles</b> — 用Java编写的图形化试用软件。</li></ul>
+<dl><dd><a href="https://www.charlesproxy.com/">https://www.charlesproxy.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/charles/">charles</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Fiddler</b> — 在Mono上运行的专有图形化软件。</li></ul>
+<dl><dd><a href="https://www.telerik.com/fiddler">https://www.telerik.com/fiddler</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fiddler/">fiddler</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>mitmproxy</b> — 命令行和网页界面的软件，用Python编写，也提供API。</li></ul>
+<dl><dd><a href="https://mitmproxy.org/">https://mitmproxy.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mitmproxy">mitmproxy</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>sslsplit</b> — 适用于任何TLS连接，但不能作为浏览器中的HTTP代理，用C语言编写。</li></ul>
+<dl><dd><a href="https://www.roe.ch/SSLsplit">https://www.roe.ch/SSLsplit</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sslsplit">sslsplit</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><i>mitmproxy</i> 创建可被所有用户读取的私钥。<a href="https://github.com/mitmproxy/mitmproxy/pull/3356">[1]</a></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe00e8ac3b34_.E7.8E.AF.E5.A2.83.E5.8F.98.E9.87.8F" id="环境变量"><span id=".E7.8E.AF.E5.A2.83.E5.8F.98.E9.87.8F"></span>环境变量</h2></div>
+<p>一些程序，例如 <a href="#pga40a00ceba19">wget</a> 还有 (<a href="#pg9ef105bf1e3c">pacman</a>基于此) <i>curl</i>, 使用 <code><i>protocol</i>_proxy</code> 形式的环境变量来确定一个给定网络协议 (例如 HTTP, FTP, 等等)。
+</p><p>下面是一个在shell中设置这些变量的例子:
+</p>
+<pre>export http_proxy=http://10.203.0.1:5187/
+export https_proxy=$http_proxy
+export ftp_proxy=$http_proxy
+export rsync_proxy=$http_proxy
+export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
+</pre>
+<p>有些程序会寻找环境变量为大写字母版本。
+</p><p>如果代理环境变量要提供给所有的用户和所有的应用程序，上述的导出命令可以添加到一个脚本中，比如说在 <code>/etc/profile.d/</code>中的<code>proxy.sh</code> . 脚本必须被设置成可执行的<a href="#pgf46977f5f342">executable</a>. 当使用像<a href="#pg361394ab1daf">Xfce</a>这样不提供代理配置选项的桌面环境时，这种方法很有帮助。例如，<a href="#pgad69d7c7a814">Chromium</a>浏览器将在运行XFCE时使用此方法设置的变量。
+</p><p>另外，还有一个名为<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/proxyman-git/">proxyman-git</a></span><sup><small>AUR</small></sup></span>的工具，这个工具声称可以轻松配置全系统的代理设置。它还可以处理其他软件的代理配置，比如<a href="#pg0d34da84b694">git</a>、<a href="#pgdd2b372eab5d">npm</a>、<a href="#pgab9532d5f09f">Dropbox</a>等。这个项目的灵感来源于Alan Pope制作脚本。
+</p><p>另外，您也可以通过在<code>.bashrc</code>中添加一个函数来自动切换变量。
+</p>
+<pre>function proxy_on() {
+    export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
+
+    if (( $# &gt; 0 )); then
+        valid=$(echo $@ | sed -n 's/\([0-9]\{1,3\}.\?\)\{4\}:\([0-9]\+\)/&amp;/p')
+        if [[ $valid != $@ ]]; then
+            &gt;&amp;2 echo "Invalid address"
+            return 1
+        fi
+        local proxy=$1
+        export http_proxy="$proxy" \
+               https_proxy=$proxy \
+               ftp_proxy=$proxy \
+               rsync_proxy=$proxy
+        echo "Proxy environment variable set."
+        return 0
+    fi
+
+    echo -n "username: "; read username
+    if [[ $username != "" ]]; then
+        echo -n "password: "
+        read -es password
+        local pre="$username:$password@"
+    fi
+
+    echo -n "server: "; read server
+    echo -n "port: "; read port
+    local proxy=$pre$server:$port
+    export http_proxy="$proxy" \
+           https_proxy=$proxy \
+           ftp_proxy=$proxy \
+           rsync_proxy=$proxy \
+           HTTP_PROXY=$proxy \
+           HTTPS_PROXY=$proxy \
+           FTP_PROXY=$proxy \
+           RSYNC_PROXY=$proxy
+}
+
+function proxy_off(){
+    unset http_proxy https_proxy ftp_proxy rsync_proxy \
+          HTTP_PROXY HTTPS_PROXY FTP_PROXY RSYNC_PROXY
+    echo -e "Proxy environment variable removed."
+}
+</pre>
+<p>如果不需要用户名和密码可以设置为缺省值。
+</p><p>作为一个替代方案，你可能想使用以下脚本。
+修改字符串<code>YourUserName</code>、<code>ProxyServerAddress:Port</code>、<code>LocalAddress</code>和<code>LocalDomain</code>来匹配你自己的数据，然后编辑你的<code>~/.bashrc</code>来包含编辑过的函数。任何新的bash窗口都会有新的函数。在现有的bash窗口中，输入<code>source ~/.bashrc</code>。
+你也可以把函数定义放在一个单独的文件中，比如<code>functions</code>，然后把<code>source functions</code>添加到<code>.bashrc</code>中，而不是把所有内容都放在<code>.bashrc</code>中。 "myProxy "这个名字改成一个简短易写的名字也是可以的。
+</p>
+<pre>#!/bin/bash
+
+assignProxy(){
+   PROXY_ENV="http_proxy ftp_proxy https_proxy all_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY ALL_PROXY"
+   for envar in $PROXY_ENV
+   do
+      export $envar=$1
+   done
+   for envar in "no_proxy NO_PROXY"
+   do
+      export $envar=$2
+   done
+}
+
+clrProxy(){
+    PROXY_ENV="http_proxy ftp_proxy https_proxy all_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY ALL_PROXY"
+    for envar in $PROXY_ENV
+    do
+       unset $envar
+    done
+}
+
+myProxy(){
+   user=YourUserName
+   read -p "Password: " -s pass &amp;&amp;  echo -e " "
+   proxy_value="http://$user:$pass@ProxyServerAddress:Port"
+   no_proxy_value="localhost,127.0.0.1,LocalAddress,LocalDomain.com"
+   assignProxy $proxy_value $no_proxy_value
+}
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe00e8ac3b34_.E9.80.9A.E8.BF.87sudo.E4.BF.9D.E6.8C.81.E4.BB.A3.E7.90.86" id="通过sudo保持代理"><span id=".E9.80.9A.E8.BF.87sudo.E4.BF.9D.E6.8C.81.E4.BB.A3.E7.90.86"></span>通过sudo保持代理</h3></div>
+<p>如果代理环境变量<a href="#pge575f3f9cef9">environment variables</a>只为一般用户设置，那么当使用<a href="#pg023562413be7">sudo</a>运行命令时（或者当程序在内部使用sudo时）无法获取代理。
+</p><p>防止这种情况发生的方法是在<a href="#pg023562413be7">sudo</a>配置文件中添加以下一行。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sudoers.d/05_proxy</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Defaults env_keep += "*_proxy *_PROXY"</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe00e8ac3b34_network_managers.E7.9A.84.E8.87.AA.E5.8A.A8.E5.8C.96" id="network_managers的自动化"><span id="network_managers.E7.9A.84.E8.87.AA.E5.8A.A8.E5.8C.96"></span>network managers的自动化</h3></div>
+<ul><li><a href="#pg5e6298ca298f">NetworkManager</a> 不会改变环境变量.</li>
+<li><a href="#pgab24d2b1ec71">netctl</a> 可以设置环境变量，但它们不会被其他应用程序应用，因为它们不是netctl的子程序。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe00e8ac3b34_.E5.85.B3.E4.BA.8Elibproxy" id="关于libproxy"><span id=".E5.85.B3.E4.BA.8Elibproxy"></span>关于libproxy</h2></div>
+<p><a href="https://libproxy.github.io/libproxy/">libproxy</a> (在额外的仓库中可以找到）是一个抽象库，所有想要访问网络资源的应用程序都应该使用它。这个项目仍在开发中，但如果被广泛采用的话，可能会在GNU/Linux中实现对代理的统一和自动化处理。
+</p><p>libproxy的作用是从不同的源头读取代理设置，并将它们提供给使用该库的应用程序。libproxy的有趣之处在于，它提供了一个实现了 <a href="https://en.wikipedia.org/wiki/Web_Proxy_Autodiscovery_Protocol">Web Proxy Autodiscovery Protocol</a> 和 <a href="https://en.wikipedia.org/wiki/Proxy_auto-config">Proxy Auto-Config</a> 的实现。
+</p><p><code>/usr/bin/proxy</code> 以URL作为参数，并返回可用于获取这些网络资源的代理。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>0.4.11 版本 不支持 <code>http_proxy='wpad:'</code> 因为 <code>{ pkg-config 'mozjs185 &gt;= 1.8.5'; }</code> 会产生错误。</div>
+<p>从2009年4月6日开始，libproxy被libsoup依赖，也被<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=midori">midori</a></span><sup><small>包</small></sup></span>浏览器间接使用。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe00e8ac3b34_.E7.BD.91.E7.BB.9C.E4.BB.A3.E7.90.86.E9.80.89.E9.A1.B9" id="网络代理选项"><span id=".E7.BD.91.E7.BB.9C.E4.BB.A3.E7.90.86.E9.80.89.E9.A1.B9"></span>网络代理选项</h2></div>
+<ul><li><a href="#pg78fbeb65acbc">Squid</a> 是一个非常流行的缓存/优化代理。</li>
+<li><a href="#pgc6a332fcd4b6">Privoxy</a> 是一个匿名和广告屏蔽的代理。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tinyproxy">tinyproxy</a></span><sup><small>包</small></sup></span> 是一个小型、高效的HTTP/SSL代理守护进程。</li>
+<li>对于一个简单的代理，可以使用带端口转发的ssh。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe00e8ac3b34_.E7.AE.80.E5.8D.95.E7.9A.84ssh.E4.BB.A3.E7.90.86" id="简单的ssh代理"><span id=".E7.AE.80.E5.8D.95.E7.9A.84ssh.E4.BB.A3.E7.90.86"></span>简单的ssh代理</h3></div>
+<p>ssh连接到服务器，如下所示。
+</p>
+<pre>$ ssh -D <i>PORT</i> <i>USER</i>@<i>HOST</i>
+</pre>
+<p>对于 PORT，选择一些非 IANA 注册端口的数字。ssh将作为<a href="https://en.wikipedia.org/wiki/SOCKS">SOCKS</a>的服务器，支持SOCKS代理服务器的软件可以简单地配置连接到localhost上的<i>PORT</i>。支持SOCKS代理服务器的软件可以简单地配置为连接到localhost的<i>PORT</i>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe00e8ac3b34_.E9.80.9A.E8.BF.87socks.E4.BB.A3.E7.90.86" id="通过socks代理"><span id=".E9.80.9A.E8.BF.87socks.E4.BB.A3.E7.90.86"></span>通过socks代理</h2></div>
+<p>有如下两种情形:
+</p>
+<ul><li>想使用的应用程序处理<a href="https://en.wikipedia.org/wiki/SOCKS#SOCKS5">SOCKS5</a>代理（例如<a href="#pg9b5d7fec8088">Firefox</a>），那么你只需要配置它来使用代理。</li>
+<li>要使用的应用程序不处理 SOCKS 代理，那么可以尝试使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tsocks">tsocks</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=proxychains-ng">proxychains-ng</a></span><sup><small>包</small></sup></span>。</li></ul>
+<p>在Firefox中，你可以在菜单<i>偏好 &gt; 网络 &gt; 设置</i>中使用SOCKS代理。选择<i>Manual Proxy Configuration</i>，然后设置SOCKS Host（只有这个，确保其他字段，如HTTP Proxy或SSL Proxy为空）。例如，如果SOCKS5代理运行在localhost 8080端口上，则在SOCKS Host字段输入<code>127.0.0.1</code>，在Port字段输入<code>8080</code>，然后验证。
+</p><p>如果使用<i>proxychains-ng</i>，配置将在<code>/etc/proxychains.conf</code>中进行。只需要取消最后一行的注释（默认设置为使用<a href="#pg12649b06cc0f">Tor</a>），并将其替换为SOCKS代理的参数。例如，如果你使用的是和上面一样的SOCKS5代理，你就必须用以下方式替换最后一行：
+</p>
+<pre>socks5 127.0.0.1 8080
+</pre>
+<p>然后可以通过<i>proxychains-ng</i> 启动程序 
+</p>
+<pre>$ proxychains <i>program</i>
+</pre>
+<p>其中<code><i>program</i></code>可以是您系统中已经安装的任何程序（例如xterm、gnome-terminal等）。
+</p><p>如果使用<i>tsocks</i>，配置将在<code>/etc/tsocks.conf</code>中进行。参见<span class="plainlinks archwiki-template-man" title="$ man 5 tsocks.conf"><a href="https://man.archlinux.org/man/tsocks.conf.5">tsocks.conf(5)</a></span>中的选项。一个最少参数配置的例子是这样的。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tsocks.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">server = 127.0.0.1
+server_port = 8080
+server_type = 5
+default_user = ""
+default_pass = ""</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe00e8ac3b34_curl_.E5.92.8C_pacman" id="curl_和_pacman"><span id="curl_.E5.92.8C_pacman"></span>curl 和 pacman</h3></div>
+<p>你可以设置 <code>all_proxy</code> 环境变量，让 curl 和 pacman (使用 curl) 使用你的 socks5 代理。
+</p>
+<pre>$ export all_proxy="socks5://your.proxy:1080"
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe00e8ac3b34_GNOME3.E8.AE.BE.E7.BD.AE.E4.BB.A3.E7.90.86" id="GNOME3设置代理"><span id="GNOME3.E8.AE.BE.E7.BD.AE.E4.BB.A3.E7.90.86"></span>GNOME3设置代理</h2></div>
+<p>一些程序，如<a href="#pgad69d7c7a814">Chromium</a>和<a href="#pg9b5d7fec8088">Firefox</a>可以使用GNOME存储的设置。这些设置可以通过 gnome-control-center 前端和<i>gsettings</i>来修改。
+</p>
+<pre>gsettings set org.gnome.system.proxy mode 'manual' 
+gsettings set org.gnome.system.proxy.http host 'proxy.localdomain.com'
+gsettings set org.gnome.system.proxy.http port 8080
+gsettings set org.gnome.system.proxy.ftp host 'proxy.localdomain.com'
+gsettings set org.gnome.system.proxy.ftp port 8080
+gsettings set org.gnome.system.proxy.https host 'proxy.localdomain.com'
+gsettings set org.gnome.system.proxy.https port 8080
+gsettings set org.gnome.system.proxy.socks host 'proxy.localdomain.com'
+gsettings set org.gnome.system.proxy.socks port 8080
+gsettings set org.gnome.system.proxy ignore-hosts "['localhost', '127.0.0.0/8', '10.0.0.0/8', '192.168.0.0/16', '172.16.0.0/12' , '*.localdomain.com' ]"
+</pre>
+<p>这个配置也可以通过<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/proxydriver/">proxydriver</a></span><sup><small>AUR</small></sup></span>包设置成在<a href="#pg5e6298ca298f">NetworkManager</a>连接到特定网络时自动执行。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe00e8ac3b34_Microsoft_NTLM_.E4.BB.A3.E7.90.86" id="Microsoft_NTLM_代理"><span id="Microsoft_NTLM_.E4.BB.A3.E7.90.86"></span>Microsoft NTLM 代理</h2></div>
+<p>在Windows网络中，NT LAN Manager (NTLM)是一套微软安全协议，它为用户提供认证、完整性和保密性。 
+</p><p>来自<a href="#pg89cb7b475cfb">AUR</a>的<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cntlm/">cntlm</a></span><sup><small>AUR</small></sup></span>站在您的应用程序和NTLM代理之间，即时添加NTLM认证。你可以指定几个 "父"代理，Cntlm会一个接一个地尝试，直到有一个成功为止。所有经过认证的连接都会被缓存和重用，以实现高效率。
+</p>
+<pre>(NTLM PROXY IP:PORT + CREDENTIALS + OTHER INFO) -----&gt; <b>(127.0.0.1:PORT)</b>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe00e8ac3b34_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h3></div>
+<p>根据需要更改<code>/etc/cntlm.conf</code>中的设置，除了密码。然后运行。
+</p>
+<pre>$ cntlm -H
+</pre>
+<p>这将根据您的代理主机名、用户名和密码生成加密的密码哈希。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ettercap">ettercap</a></span><sup><small>包</small></sup></span> 当使用纯文本密码而不是加密哈希时，可以很容易地通过局域网嗅探你的密码。</div>
+<p>再次编辑<code>/etc/cntlm.conf</code>并包含所有三个生成的哈希值，然后启用<a href="#pg6d077e523b0e">enabled</a>。<code>cntlm.service</code>。
+</p><p>测试配置可使用一下指令:
+</p>
+<pre>$ cntlm -v
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe00e8ac3b34_.E4.BD.BF.E7.94.A8.E6.96.B9.E6.B3.95" id="使用方法"><span id=".E4.BD.BF.E7.94.A8.E6.96.B9.E6.B3.95"></span>使用方法</h3></div>
+<p>使用 <code>127.0.0.1:<i>port</i></code> 或 <code>localhost:<i>port</i></code> 作为代理地址。<code><i>port</i></code>匹配<code>/etc/cntlm.conf</code>中的<code>Listen</code>参数，默认为<code>3128</code>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807072827
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.145 seconds
+Real time usage: 0.151 seconds
+Preprocessor visited node count: 551/1000000
+Revision size: 11557/2097152 bytes
+Post‐expand include size: 6904/2097152 bytes
+Template argument size: 2584/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 2178/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   45.360      1 -total
+ 16.53%    7.497      4 Template:App
+ 10.03%    4.548     32 Template:Ic
+  8.06%    3.656      1 Template:翻译状态
+  7.05%    3.199      7 Template:Pkg
+  5.79%    2.626      2 Template:Warning_(简体中文)
+  4.92%    2.233      1 Template:相关文章开始
+  4.08%    1.851      1 Template:Related
+  3.88%    1.759      1 Template:Man
+  3.81%    1.727      5 Template:AUR
+-->
+<!-- Render ID 94a3ab8e-9231-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3704:|#|:idhash:canonical!zh-cn and timestamp 20260807072827 and revision id 33700. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

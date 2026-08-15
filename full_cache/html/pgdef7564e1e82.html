@@ -1,0 +1,127 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgdef7564e1e82">dm-crypt/加密非root文件系统</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Dm-crypt/Encrypting_a_non-root_file_system">Dm-crypt/Encrypting a non-root file system</a>，最近一次同步于 2025-07-30，若英文版本有所<a href="https://wiki.archlinux.org/title/Dm-crypt/Encrypting_a_non-root_file_system?diff=0&amp;oldid=841239">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Dm-crypt_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Encrypting_a_non-root_file_system_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>以下是一些用 dm-crypt 加密辅助（secondary）文件系统（即，非根文件系统）的例子。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgdef7564e1e82_.E6.80.BB.E8.A7.88" id="总览"><span id=".E6.80.BB.E8.A7.88"></span>总览</h2></div>
+<p>加密辅助文件系统不会对操作系统、程序文件进行加密，因此通常只用于单独保护敏感数据。对于USB驱动器等外部介质，进行加密可确保在不同计算机上使用时，数据安全不受威胁。此外，也可按照数据访问人员将数据分类，分别使用不同的密钥加密。
+</p><p>dm-crypt 是<a href="#pg812206bba43d">块级别加密</a>层，其将加密整个块设备（例如，分区和回环设备）。
+</p><p>若要加密单个文件，需要使用文件系统层级的加密。例如使用<a href="#pg8fbdf5e296d7">eCryptfs</a> 或 <a href="#pgd12167fb0e6f">EncFS</a>。有关保护隐私数据的更多信息，参见<a href="#pg812206bba43d">静态数据加密</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgdef7564e1e82_.E5.88.86.E5.8C.BA" id="分区"><span id=".E5.88.86.E5.8C.BA"></span>分区</h2></div>
+<p>本例介绍的是对 <code>/home</code> 分区的加密，但相关方法也可以应用到其它包含用户数据的非根分区。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可以为每个用户的<code>/home</code>目录单独分配一个分区，也可以所有用户的<code>/home</code>目录共享一个分区。</div>
+<p>下文假定用于<code>/home</code>目录的<a href="#pg8edad8d1135b">分区已经创建</a>。若该分区曾用于其它用途，因而包含了数据，可能需要<a href="#pg7159ef654a5d">使用dm-crypt专用方案安全擦除分区</a>。注意，只擦除一个分区，而不擦除整个磁盘，可能仍会泄露一些数据。
+</p><p>建立 LUKS 头：
+</p>
+<pre># cryptsetup <i>options</i> luksFormat <i>device</i>
+</pre>
+<p><code><i>device</i></code>应对应已创建的分区。<code><i>options</i></code>的取值参见<a href="#pg88d6e7a842ae">Dm-crypt/设备加密#LUKS_模式的加密选项</a>。
+</p><p>使用设备映射器对设备进行解密，以对加密的分区进行操作：
+</p>
+<pre># cryptsetup open <i>device</i> <i>name</i>
+</pre>
+<p>分区解密之后，会被映射成块设备 <code>/dev/mapper/<i>name</i></code>。之后，建立<a href="#pg6c70b7fdfa57">文件系统</a>：
+</p>
+<pre># mkfs.<i>fstype</i> /dev/mapper/<i>name</i>
+</pre>
+<p>若所有用户共享<code>/home</code>目录，则可将创建好的文件系统挂载到<code>/home</code>；若该文件系统是某个用户专用的，则挂载到<code>/home/<i>username</i></code>。参见 #手动挂载和卸载。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>卸载并再挂载一次文件系统，可确定映射有无问题。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgdef7564e1e82_.E6.89.8B.E5.8A.A8.E6.8C.82.E8.BD.BD.E5.92.8C.E5.8D.B8.E8.BD.BD" id="手动挂载和卸载"><span id=".E6.89.8B.E5.8A.A8.E6.8C.82.E8.BD.BD.E5.92.8C.E5.8D.B8.E8.BD.BD"></span>手动挂载和卸载</h3></div>
+<p>挂载分区：
+</p>
+<pre># cryptsetup open <i>device</i> <i>name</i>
+# mount /dev/mapper/<i>name</i> /mnt/home
+</pre>
+<p>卸载：
+</p>
+<pre># umount /mnt/home
+# cryptsetup close <i>name</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><a href="#pgfd588d8d2005">GVFS</a> 也可以挂载加密的分区。若使用支持 gvfs 的文件管理器（例如，<a href="#pgc3ce5bd2b24c">Thunar</a>）挂载加密分区，则会弹出密码输入框。对于其他桌面环境，可使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zulucrypt/">zulucrypt</a></span><sup><small>AUR</small></sup></span>进行图形化挂载。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgdef7564e1e82_.E8.87.AA.E5.8A.A8.E8.A7.A3.E9.94.81.E5.B9.B6.E6.8C.82.E8.BD.BD" id="自动解锁并挂载"><span id=".E8.87.AA.E5.8A.A8.E8.A7.A3.E9.94.81.E5.B9.B6.E6.8C.82.E8.BD.BD"></span>自动解锁并挂载</h3></div>
+<p>有三种不同方法来自动化解锁分区并挂载文件系统。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgdef7564e1e82_.E5.90.AF.E5.8A.A8.E6.97.B6.E8.A7.A3.E9.94.81" id="启动时解锁"><span id=".E5.90.AF.E5.8A.A8.E6.97.B6.E8.A7.A3.E9.94.81"></span>启动时解锁</h4></div>
+<p>配置 <code>/etc/crypttab</code> 文件，systemd会在系统启动过程中自动解析该文件，并以此解密相应设备。若要挂载所有用户共用的home分区，或要自动挂载其它加密的块设备，推荐使用本方法。
+</p><p>可参考<a href="#pg52b00790fb44">Dm-crypt/系统配置#crypttab</a>。此外，<a href="#pg52b00790fb44">Dm-crypt/系统配置#在启动时挂载</a>中提供了示例配置。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgdef7564e1e82_.E7.94.A8.E6.88.B7.E7.99.BB.E5.BD.95.E6.97.B6.E8.A7.A3.E9.94.81" id="用户登录时解锁"><span id=".E7.94.A8.E6.88.B7.E7.99.BB.E5.BD.95.E6.97.B6.E8.A7.A3.E9.94.81"></span>用户登录时解锁</h4></div>
+<ul><li>使用<a href="#pg852086df1b74">pam_exec</a>：若需要为每个用户挂载单独的加密home分区，推荐使用该方式。</li>
+<li>使用<a href="#pge531ea909d00">pam_mount</a>。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgdef7564e1e82_.E6.96.87.E4.BB.B6.E5.AE.B9.E5.99.A8" id="文件容器"><span id=".E6.96.87.E4.BB.B6.E5.AE.B9.E5.99.A8"></span>文件容器</h2></div>
+<p>Cryptsetup 对设备进行操作。因此，若要使用文件容器，需要配置回环设备。好在，在后台，cryptsetup可自动管理回环设备(请见 <a href="https://wiki.gentoo.org/wiki/Custom_Initramfs#Encrypted_keyfile">Gentoo:Custom_Initramfs#Encrypted_keyfile</a>)，无需手动调用 <code>losetup</code>。
+</p><p>首先，使用恰当的<a href="#pg5307fe842182">随机数生成器</a>用 <a href="#pge09a1da9829f">dd</a> 创建一个加密容器：
+</p>
+<pre>$ dd if=/dev/urandom of=bigsecret.img bs=100M count=1 iflag=fullblock
+</pre>
+<p>这会创建大小为 100 MiB 的 <code>bigsecret.img</code> 文件。
+</p><p>注意，不要遗漏<code>iflag=fullblock</code>选项。否则，可能出现“部分读”问题。详见<a href="#pge09a1da9829f">Dd#部分读取：复制的数据量小于要求的大小</a>。
+</p><p>要避免之后<a href="#pg8ad7aef74953">调整</a>容器大小的麻烦，在创建文件容器时，确保其大小大于要加密的文件的总大小、文件系统内部数据/元数据开销和LUKS头的总和。若使用LUKS，则仅其元数据就可能需要多达16MiB的空间。创建一个小于 LUKS头（16MiB）大小的文件容器会在打开设备时报错<code>Requested offset is beyond real size of device bigsecret.img</code>。
+</p><p>之后的操作和#分区中的相同，但要将 <code>device</code> 替换为 <code>bigsecret.img</code>。
+</p><p>cryptsetup 会自动寻找可用的回环设备设备并将文件附加到设备上。在卸载之后，文件容器应该相应地关闭，cryptsetup之后会分离使用的回环设备。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>使用dm-crypt加密容器非常灵活。可查看<a href="#pg5806364b079a">Tomb</a>的功能和文档详细了解。<a href="#pg5806364b079a">Tomb</a>提供了一系列dm-crypt脚本，以便快速灵活地处理加解密操作。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgdef7564e1e82_.E4.BD.BF.E7.94.A8_losetup_.E6.89.8B.E5.8A.A8.E6.8C.82.E8.BD.BD.E5.92.8C.E5.8D.B8.E8.BD.BD" id="使用_losetup_手动挂载和卸载"><span id=".E4.BD.BF.E7.94.A8_losetup_.E6.89.8B.E5.8A.A8.E6.8C.82.E8.BD.BD.E5.92.8C.E5.8D.B8.E8.BD.BD"></span>使用 losetup 手动挂载和卸载</h3></div>
+<p>首先，查找未使用的回环设备：
+</p>
+<pre># losetup --find
+</pre>
+<p>然后，将文件容器附加到回环设备，例如，要附加到<code>loop0</code>：
+</p>
+<pre># losetup /dev/loop0 bigsecret.img
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果出现<code>/dev/loop0: No such file or directory</code>错误，需要先以 root 用户执行命令<code>modprobe loop</code>以加载内核模块。较新的内核中（内核版本3.2及更高），回环设备是按需创建的。可通过以 root 用户执行 <code>losetup -f</code> 命令请求创建新的回环设备。</div>
+<p>之后，按照常规方式进行cryptsetup设置即可：
+</p>
+<pre># cryptsetup open /dev/loop0 secret
+# mount -t ext4 /dev/mapper/secret /mnt/secret
+</pre>
+<p>卸载容器时，需要以相反的顺序执行对应的操作：
+</p>
+<pre> # umount /mnt/secret
+ # cryptsetup close secret
+</pre>
+<p>若要分离使用的回环设备:
+</p>
+<pre> # losetup --detach /dev/loop0
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807030322
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.086 seconds
+Real time usage: 0.091 seconds
+Preprocessor visited node count: 249/1000000
+Revision size: 6089/2097152 bytes
+Post‐expand include size: 3615/2097152 bytes
+Template argument size: 1616/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   20.720      1 -total
+ 17.07%    3.537      4 Template:提示
+ 16.05%    3.325     21 Template:Ic
+ 15.26%    3.161      1 Template:翻译状态
+ 13.61%    2.821      1 Template:小写标题
+  9.85%    2.041      1 Template:注意
+  5.20%    1.078      1 Template:AUR
+-->
+<!-- Render ID 8c85450e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3030:|#|:idhash:canonical!zh-cn and timestamp 20260807030322 and revision id 33602. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

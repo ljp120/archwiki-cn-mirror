@@ -1,0 +1,73 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg5307fe842182">随机数生成</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><br/>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Random_number_generation">Random_number_generation</a>，最近一次同步于 2025-08-01，若英文版本有所<a href="https://wiki.archlinux.org/title/Random_number_generation?diff=0&amp;oldid=786165">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Random_number_generation_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>根据<a href="https://en.wikipedia.org/wiki/Random_number_generation">wikipedia:Random number generation</a>条目的定义：
+</p>
+<dl><dd>随机数生成器（random number generator, RNG）是用于生成数字/符号序列的计算设备或物理设备。其生成的序列应当看起来是随机的，不含任何规律性特征。</dd></dl>
+<p>生成随机数据对某些应用至关重要。随机数据可用于生成密码学密钥（密钥可用于<a href="#pg812206bba43d">静态数据加密</a>）、<a href="#pg8e3f3779e38c">安全地擦除磁盘</a>、运行<a href="#pgd0ace5495820">软件接入点</a>等用途。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5307fe842182_.E5.86.85.E6.A0.B8.E5.86.85.E7.BD.AE.E9.9A.8F.E6.9C.BA.E6.95.B0.E7.94.9F.E6.88.90.E5.99.A8" id="内核内置随机数生成器"><span id=".E5.86.85.E6.A0.B8.E5.86.85.E7.BD.AE.E9.9A.8F.E6.9C.BA.E6.95.B0.E7.94.9F.E6.88.90.E5.99.A8"></span>内核内置随机数生成器</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>近年来，在4.x和5.x内核版本中，内核内置的随机数生成器有了重大改进。因此，现存的许多信息都已过时。本文介绍的是当前内核版本的实现方式与行为，内容适用于Arch Linux<a href="#pg3473491e6a48">官方支持的内核</a>以及其它较新版本的内核。</div>
+<p><a href="https://github.com/torvalds/linux/blob/master/drivers/char/random.c">Linux内核内置的随机数生成器</a>可生成密码学安全的伪随机数据。其从多种来源搜集<a href="https://en.wikipedia.org/wiki/Entropy_(information_theory)">熵</a>，用于随机数生成。熵的来源包括硬件随机数生成器、中断、CPU抖动熵（CPU-based jitterentropy），不依赖单一来源。熵将通过<a href="https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2">BLAKE2s 密码学哈希函数</a>提取，并用作一组<a href="https://en.wikipedia.org/wiki/Salsa20#ChaCha_variant">ChaCha20</a>密码学随机数生成器（Cryptographic Random Number Generator， CRNG）的种子。最终的随机数据由ChaCha20密码学随机数生成器生成。内核在运行时将不断搜集熵值，并周期性地更新随机数生成器的种子。
+</p><p>若要在用户空间访问内核内置随机数生成器，可使用内核提供的三个接口：
+</p>
+<ul><li><span class="plainlinks archwiki-template-man" title="$ man 2 getrandom"><a href="https://man.archlinux.org/man/getrandom.2">getrandom(2)</a></span>系统调用</li>
+<li><code>/dev/random</code></li>
+<li><code>/dev/urandom</code></li></ul>
+<p>在过去，一般认为<code>/dev/random</code>生成的随机数随机性比<code>/dev/urandom</code>的好。然而，随着内核的更新，<code>/dev/random</code>和<code>/dev/urandom</code>的行为越来越相似。甚至，在目前的x86-64系统上，它们的行为是完全相同的。由于Arch Linux只支持x86-64架构，因此可以说在Arch Linux中，两者的行为是相同的。（这是由于所有x86-64 CPU都支持<a href="https://en.wikipedia.org/wiki/Time_Stamp_Counter">RDTSC 指令</a>，因而总是可以使用<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/char/random.c?h=v6.1#n1205">CPU抖动熵算法</a>搜集熵值；此外，大多数x86-64 CPU还支持<a href="https://en.wikipedia.org/wiki/RDRAND">RDRAND指令</a>，可用于随机数生成。）
+</p><p>对于其它架构（特别是不支持快速周期计数器（fast cycle counter）的架构），<code>/dev/random</code>与<code>/dev/urandom</code>仍有区别：在内核认为密码学随机数生成器完成初始化之前，<code>/dev/random</code>将阻塞，而<code>/dev/urandom</code>不阻塞。因此，在通常情况下，应用若要生成长期使用的密码学密钥，仍应当依照传统，使用<code>/dev/random</code>，或直接使用<span class="plainlinks archwiki-template-man" title="$ man 2 getrandom"><a href="https://man.archlinux.org/man/getrandom.2">getrandom(2)</a></span>系统调用（其默认行为与<code>/dev/random</code>相似）。
+</p><p>注意，由于<code>/dev/random</code>只保证生成密码学安全的随机数据（已经能满足所有现实需求），而不再保证生成“真”随机数据，从其中读取数据不再会消耗内核熵池中的熵，<code>/proc/sys/kernel/random/entropy_avail</code>的内容应当始终是256（ChaCha20密钥的比特长度）。因此，若看到认为256“太低”，需要手动提高该值的过时文档，不必采取相应操作。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5307fe842182_.E6.9B.BF.E4.BB.A3.E6.96.B9.E6.A1.88" id="替代方案"><span id=".E6.9B.BF.E4.BB.A3.E6.96.B9.E6.A1.88"></span>替代方案</h2></div>
+<p>不需要密码学安全随机数的应用程序可以使用非密码学随机数生成器，例如<span class="plainlinks archwiki-template-man" title="$ man 3 random"><a href="https://man.archlinux.org/man/random.3">random(3)</a></span>。
+</p><p>对于需要密码学安全随机数的应用程序，在现在，使用内核内置的随机数生成器即可，一般无需使用其它方式。曾经，内核的随机数生成器生成速度较慢，且没有使用许多本可以使用的熵源。但现在，经过改进，其使用了更多的熵源，在x86-64架构上吞吐量能达到大约400 MB/s。即使在需要非常高吞吐量的场景中（例如，<a href="#pg8e3f3779e38c">安全地擦除磁盘</a>），也可以直接使用<code>/dev/urandom</code>。
+</p><p>对于如下情况，可能需要使用其它方式，而不是直接使用内核随机数生成器：
+</p>
+<ul><li>在某些特定情况下，应用程序需要获取密码学安全随机数，且要求<b>非常高</b>的吞吐量/非常低的延迟（以至于不能容忍系统调用的开销）。此时可以使用运行在用户空间密码学安全随机数生成器。要保证安全性，应当使用内核随机数生成器生成的随机数作为用户空间生成器的种子， 并考虑种子的更新问题。</li></ul>
+<ul><li>某些应用的工作环境中已有用户空间密码学安全随机数生成器，且提供了完善的使用该生成器生成随机数的API。例如，若应用程序使用了<a href="#pgb4be337c4999">OpenSSL</a>，则可以使用其<span class="plainlinks archwiki-template-man" title="$ man 3 RAND_bytes"><a href="https://man.archlinux.org/man/RAND_bytes.3">RAND_bytes(3)</a></span>函数；若应用程序使用Java编写，则可以使用<a href="https://docs.oracle.com/javase/8/docs/api/java/security/SecureRandom.html"><code>java.security.SecureRandom</code></a>。一般而言，这些API底层的用户空间密码学安全随机数生成器将自动使用内核随机数生成器生成的随机数作为种子。</li></ul>
+<ul><li>需要使用内核未包含的额外熵源。例如，<a href="#pg3b5009cc5f71">Haveged</a>可通过抖动熵（jitterentropy）生成随机数。若可能，不应使用额外的熵源完全替代内核的随机数生成器，而应当与内核随机数生成器共同使用，为用户空间密码学安全随机数生成器提供种子。此外，也可以将高熵数据写入<code>/dev/random</code>，写入的数据最终将影响内核随机数生成器（由于内核密码学安全随机数生成器的更新机制，可能需要至多60秒才能生效）。需要注意，内核默认已经使用<a href="https://en.wikipedia.org/wiki/RDRAND">RDSEED</a>等其它硬件随机数源作为熵源。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5307fe842182_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li>Kernel RNG improvements:
+<ul><li><a href="https://git.kernel.org/linus/e192be9d9a30555a">random: replace non-blocking pool with a Chacha20-based CRNG</a> - introduced the ChaCha20 CRNG (2016)</li>
+<li><a href="https://git.kernel.org/linus/50ee7529ec4500c8">random: try to actively add entropy rather than passively wait for it</a> - made CPU-based jitterentropy be used as a fallback (2019)</li>
+<li><a href="https://lwn.net/Articles/808575/">Removing the Linux /dev/random blocking pool</a> - made <code>/dev/random</code> use a CRNG, just like <code>/dev/urandom</code>, and not try to provide "true" randomness (2020)</li>
+<li><a href="https://www.zx2c4.com/projects/linux-rng-5.17-5.18/">Random number generator enhancements for Linux 5.17 and 5.18</a> (2022)</li>
+<li><a href="https://git.kernel.org/linus/186873c549df11b6">random: use simpler fast key erasure flow on per-cpu keys</a> - simplified and optimized the CRNG design (2022)</li>
+<li><a href="https://git.kernel.org/linus/e85c0fc1d94c5248">random: do not pretend to handle premature next security model</a> - made new entropy be used more quickly (2022)</li>
+<li><a href="https://git.kernel.org/linus/48bff1053c172e6c">random: opportunistically initialize on /dev/urandom reads</a> - made <code>/dev/urandom</code> as safe as <code>/dev/random</code> on x86 (2022)</li></ul></li>
+<li><a href="https://www.random.org/randomness/">Randomness</a> - A popular science article explaining different RNGs</li>
+<li><a href="https://www.fourmilab.ch/random/">ENT</a> - A simple program for testing random sequences (entropy, Chi square test, Monte Carlo, correlation, etc.)</li>
+<li><a href="https://eprint.iacr.org/2016/367">An Analysis of OpenSSL's Random Number Generator</a> - Paper on RNG reseeding risks in OpenSSL functionality</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807131310
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.080 seconds
+Real time usage: 0.083 seconds
+Preprocessor visited node count: 295/1000000
+Revision size: 7596/2097152 bytes
+Post‐expand include size: 2741/2097152 bytes
+Template argument size: 825/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   19.321      1 -total
+ 18.66%    3.606      1 Template:翻译状态
+ 18.33%    3.542      4 Template:Man
+ 18.31%    3.538     21 Template:Ic
+  5.17%    0.999      1 Template:注意
+-->
+<!-- Render ID bcab030f-9261-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8380:|#|:idhash:canonical!zh-cn and timestamp 20260807131310 and revision id 34306. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

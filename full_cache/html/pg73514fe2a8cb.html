@@ -1,0 +1,626 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg73514fe2a8cb">Steam/疑难解答</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Steam/Troubleshooting">Steam/Troubleshooting</a>，最近一次同步于 2025-01-19，若英文版本有所<a href="https://wiki.archlinux.org/title/Steam/Troubleshooting?diff=0&amp;oldid=825415">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Steam_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Troubleshooting_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<ol><li>确保您遵循了 <a href="#pg95e65bdea0f3">Steam#安装</a>。</li>
+<li>若 Steam 客户端或某个游戏不启动，亦或是您拥有某个库的错误信息，请阅读 <a href="#pg73514fe2a8cb_Steam_runtime">#Steam runtime</a> 和 <a href="#pg73514fe2a8cb_Debugging_shared_libraries">#Debugging shared libraries</a>。</li>
+<li>若是关于网络的问题，确保您遵循了 <a href="https://help.steampowered.com/en/faqs/view/2EA8-4D75-DA21-31EB">Steam需要的端口</a>。</li>
+<li>若是关于游戏的问题，请移步<a href="#pgf0adeb0bd037">Steam/游戏疑难解答</a>。</li></ol>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg73514fe2a8cb_Steam_runtime" id="Steam_runtime">Steam runtime</h2></div>
+<p>Steam for Linux ships with its own set of libraries called the <a href="https://github.com/ValveSoftware/steam-runtime">Steam runtime</a>. By default Steam launches all Steam Applications within the runtime environment. The Steam runtime is located at <code>~/.steam/root/ubuntu12_32/steam-runtime/</code>.
+</p><p>If you mix the Steam runtime libraries with system libraries you will run into binary incompatibility issues, see <a href="https://github.com/ValveSoftware/steam-for-linux/issues/4768">steam-for-linux issue #4768</a>. Binary incompatibility can lead to the Steam client and games not starting (manifesting as a crash, as hanging or silently returning), audio issues and various other problems.
+</p><p>The <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=steam">steam</a></span><sup><small>包</small></sup></span> package offers two ways to launch Steam:
+</p>
+<ul><li><code>steam-runtime</code> (alias <code>steam</code>), which overrides runtime libraries known to cause problems via the <code>LD_PRELOAD</code> <a href="#pg18ad99d88887">environment variable</a> (see <span class="plainlinks archwiki-template-man" title="$ man 8 ld.so"><a href="https://man.archlinux.org/man/ld.so.8">ld.so(8)</a></span>).</li>
+<li><code>/usr/lib/steam/steam</code>, the default Steam launch script</li></ul>
+<p>As the Steam runtime libraries are older they can lack newer features, e.g. the OpenAL version of the Steam runtime lacks <a href="#pg94f32a2e73db">HRTF</a> and surround71 support.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam_native_runtime" id="Steam_native_runtime">Steam native runtime</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>Using the Steam native runtime is not recommended as it might break some games due to binary incompatibility and it might miss some libraries present in the Steam runtime.</div>
+<p>The <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/steam-native-runtime/">steam-native-runtime</a></span><sup><small>AUR</small></sup></span> package depends on over 130 packages to pose a native replacement of the Steam runtime, some games may however still require additional packages.
+</p><p>This package provides the <code>steam-native</code> script, which launches Steam with the <code>STEAM_RUNTIME=0</code> environment variable making it ignore its runtime and only use system libraries.
+</p><p>You can also use the Steam native runtime without <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/steam-native-runtime/">steam-native-runtime</a></span><sup><small>AUR</small></sup></span> by manually installing just the packages you need. See <a href="#pg73514fe2a8cb_Finding_missing_runtime_libraries">#Finding missing runtime libraries</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg73514fe2a8cb_Debugging_shared_libraries" id="Debugging_shared_libraries">Debugging shared libraries</h2></div>
+<p>To see the shared libraries required by a program or a shared library run the <code>ldd</code> command on it, see <span class="plainlinks archwiki-template-man" title="$ man 1 ldd"><a href="https://man.archlinux.org/man/ldd.1">ldd(1)</a></span>. The <code>LD_LIBRARY_PATH</code> and <code>LD_PRELOAD</code> <a href="#pge575f3f9cef9">environment variables</a> can alter which shared libraries are loaded, see <span class="plainlinks archwiki-template-man" title="$ man 8 ld.so"><a href="https://man.archlinux.org/man/ld.so.8">ld.so(8)</a></span>. To correctly debug a program or shared library it is therefore important that these environment variables in your debug environment match the environment you wish to debug.
+</p><p>If you figure out a missing library you can use <a href="#pg9ef105bf1e3c">pacman</a> or <a href="#pgca6ca9243a91">pkgfile</a> to search for packages that contain the missing library.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Finding_missing_game_libraries" id="Finding_missing_game_libraries">Finding missing game libraries</h3></div>
+<p>If a game fails to start, a possible reason is that it is missing required libraries. You can find out what libraries it requests by running <code>ldd <i>game_executable</i></code>. <code><i>game_executable</i></code> is likely located somewhere in <code>~/.steam/root/steamapps/common/</code>. Please note that most of these "missing" libraries are actually already included with Steam, and do not need to be installed globally.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Finding_missing_runtime_libraries" id="Finding_missing_runtime_libraries">Finding missing runtime libraries</h3></div>
+<p>If individual games or Steam itself is failing to launch when using <code>steam-native</code> you are probably missing libraries. To find the required libraries run:
+</p>
+<pre>$ cd ~/.steam/root/ubuntu12_32
+$ file * | grep ELF | cut -d: -f1 | LD_LIBRARY_PATH=. xargs ldd | grep 'not found' | sort | uniq
+</pre>
+<p>Alternatively, run Steam with <code>steam-runtime</code> and use the following command to see which non-system libraries Steam is using (not all of these are part of the Steam runtime):
+</p>
+<pre>$ for i in $(pgrep steam); do sed '/\.local/!d;s/.*  //g' /proc/$i/maps; done | sort | uniq
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg73514fe2a8cb_Debugging_Steam" id="Debugging_Steam">Debugging Steam</h2></div>
+
+<p>The Steam launcher redirects its stdout and stderr to <code>/tmp/dumps/<i>USER</i>_stdout.txt</code>. This means you do not have to run Steam from the command-line to see that output.
+s
+It is possible to debug Steam to gain more information which could be useful to find out why something does not work.
+</p><p>You can set <code>DEBUGGER</code> environment variable with one of <code>gdb</code>, <code>cgdb</code>, <code>valgrind</code>, <code>callgrind</code>, <code>strace</code> and then start <code>steam</code>.
+</p><p>For example with <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gdb">gdb</a></span><sup><small>包</small></sup></span>
+</p>
+<pre>$ DEBUGGER=gdb steam
+</pre>
+<p><code>gdb</code> will open, then type <code>run</code> which will start <code>steam</code> and once crash happens you can type <code>backtrace</code> to see call stack.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg73514fe2a8cb_Runtime_issues" id="Runtime_issues">Runtime issues</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_.27GLBCXX_3.X.XX.27_not_found_when_using_Bumblebee" id="'GLBCXX_3.X.XX'_not_found_when_using_Bumblebee"><span id=".27GLBCXX_3.X.XX.27_not_found_when_using_Bumblebee"></span>'GLBCXX_3.X.XX' not found when using Bumblebee</h3></div>
+<p>This error is likely caused because Steam packages its own out of date <code>libstdc++.so.6</code>. See <a href="#pg73514fe2a8cb_Finding_missing_runtime_libraries">#Finding missing runtime libraries</a> about working around the bad library. See also <a href="https://github.com/ValveSoftware/steam-for-linux/issues/3773">steam-for-linux issue 3773</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam.3EWarning:_failed_to_init_SDL_thread_priority_manager:_SDL_not_found" id="Steam&gt;Warning:_failed_to_init_SDL_thread_priority_manager:_SDL_not_found"><span id="Steam.3EWarning:_failed_to_init_SDL_thread_priority_manager:_SDL_not_found"></span>Steam&gt;Warning: failed to init SDL thread priority manager: SDL not found</h3></div>
+<p>Solution: <a href="#pg54c3351b3e3b">install</a> the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lib32-sdl2/">lib32-sdl2</a></span><sup><small>AUR</small></sup></span> package.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Game_crashes_immediately" id="Game_crashes_immediately">Game crashes immediately</h3></div>
+<p>This is likely due to <a href="#pg73514fe2a8cb_Steam_runtime">#Steam runtime</a> issues, see <a href="#pg73514fe2a8cb_Debugging_shared_libraries">#Debugging shared libraries</a>.
+</p><p>Disabling the in-game Steam Overlay in the game properties might help.
+</p><p>And finally, if those do not work, you should check Steam's output for any error from the game. You may encounter the following:
+</p>
+<ul><li><code>munmap_chunk(): invalid pointer</code></li>
+<li><code>free(): invalid pointer</code></li></ul>
+<p>In these cases, try replacing the <code>libsteam_api.so</code> file from the problematic game with one of a game that works. This error usually happens for games that were not updated recently when Steam runtime is disabled. This error has been encountered with AYIM, Bastion and Monaco.
+</p><p>If the game crashes with
+<code>terminate called after throwing an instance of 'dxvk::DxvkError'</code>
+it's likely that conflicting versions of vulkan are <a href="https://www.reddit.com/r/archlinux/comments/s1vjjg/comment/hsb10ac/?context=3">installed</a>. <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lib32-amdvlk/">lib32-amdvlk</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-vulkan-intel">lib32-vulkan-intel</a></span><sup><small>包</small></sup></span> and Nvidia vulkan drivers are mutually exclusive. This is solved by uninstalling the unneeded driver. To obtain information about the chipset vendor one can run:
+</p>
+<pre># lshw -C display | grep vendor
+</pre>
+<p>To get a list of installed packages
+</p>
+<pre># pacman -Qs vulkan
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Game_and_Steam_crashes_after_game_start" id="Game_and_Steam_crashes_after_game_start">Game and Steam crashes after game start</h3></div>
+<p>If the following error is output:
+</p>
+<pre>failed to dlopen engine.so error=/home/<i>GAMEPATH</i>/bin/libgcc_s.so.1: version `GCC_7.0.0' not found (required by /usr/lib32/libopenal.so.1)
+</pre>
+<p>moving the incompatible lib can be a workaround.
+</p>
+<pre>mv .local/share/Steam/steamapps/common/<i>GAME</i>/bin/libgcc_s.so.1 .local/share/Steam/steamapps/common/<i>GAME</i>/bin/libgcc_s.so.1.b
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Some_games_freeze_at_start_when_in_focus" id="Some_games_freeze_at_start_when_in_focus">Some games freeze at start when in focus</h3></div>
+<p>A combination of using <code>ForceFullCompositionPipeline</code>, specific Proton versions and Nvidia driver version 535 is known <a href="https://github.com/ValveSoftware/Proton/issues/6869">to freeze some games</a> <a href="https://github.com/doitsujin/dxvk/issues/3670">using DXVK/Vulkan</a> at launch under Xorg. Using Alt+Tab allows bringing Steam in focus, and the game seems to run properly in the background. Solution: disable <code>ForceFullCompositionPipeline</code> or downgrade Nvidia drivers.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Version_.60CURL_OPENSSL_3.60_not_found" id="Version_`CURL_OPENSSL_3`_not_found"><span id="Version_.60CURL_OPENSSL_3.60_not_found"></span>Version `CURL_OPENSSL_3` not found</h3></div>
+<p>This is because <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=curl">curl</a></span><sup><small>包</small></sup></span> alone is not compatible with previous versions. You need to install the compatibility libraries:
+</p><p>One of the following messages may show up:
+</p>
+<pre># Nuclear Throne
+./nuclearthrone: /usr/lib32/libcurl.so.4: version `CURL_OPENSSL_3' not found (required by ./nuclearthrone)
+
+# Devil Daggers
+./devildaggers: /usr/lib/libcurl.so.4: version `CURL_OPENSSL_3' not found (required by ./devildaggers)
+</pre>
+<p>You need to install either <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libcurl-compat">libcurl-compat</a></span><sup><small>包</small></sup></span> or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-libcurl-compat">lib32-libcurl-compat</a></span><sup><small>包</small></sup></span> and link the compatibility library manually:
+</p>
+<pre># Nuclear Throne
+$ ln -s /usr/lib32/libcurl-compat.so.4.4.0 "<i>LIBRARY</i>/steamapps/common/Nuclear Throne/lib/libcurl.so.4"
+
+# Devil Daggers
+$ ln -s /usr/lib/libcurl-compat.so.4.4.0 <i>LIBRARY</i>/steamapps/common/devildaggers/lib64/libcurl.so.4
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam_webview.2Fgame_browser_not_working_in_native_runtime_.28Black_screen.29" id="Steam_webview/game_browser_not_working_in_native_runtime_(Black_screen)"><span id="Steam_webview.2Fgame_browser_not_working_in_native_runtime_.28Black_screen.29"></span>Steam webview/game browser not working in native runtime (Black screen)</h3></div>
+<p>Since the new Steam Friends UI update, the client webview is not working correctly with the native-runtime.
+</p>
+<pre>./steamwebhelper: error while loading shared libraries: libpcre.so.3: cannot open shared object file: No such file or directory
+</pre>
+<p>It can be solved preloading glib libraries; Those do not require libpcre and selinux to work.
+</p>
+<pre>$ LD_PRELOAD="/usr/lib/libgio-2.0.so.0 /usr/lib/libglib-2.0.so.0" steam-native
+</pre>
+<p>Alternatively, you may create a symbolic link to the native Arch libpcre library.
+</p>
+<pre># ln -s /usr/lib/libpcre.so /usr/lib64/libpcre.so.3
+</pre>
+<p>Since update from around 3/3/2022, there are some reports of black screen still persisting after applying above workaround.
+</p><p>The workaround for now is to run Steam with the <code>-no-cef-sandbox</code> option. More information can be found in Github Steam-For-Linux repository Issue <a href="https://github.com/ValveSoftware/steam-for-linux/issues/8451">#8451</a> and <a href="https://github.com/ValveSoftware/steam-for-linux/issues/8420">#8420</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam__An_X_Error_occurred" id="Steam:_An_X_Error_occurred">Steam: An X Error occurred</h3></div>
+<p>When using an NVidia GPU and proprietary drivers, Steam may fail to start and (if run from the terminal) produce errors of the form:
+</p>
+<pre>Steam: An X Error occurred
+X Error of failed request:  GLXBadContext
+Major opcode of failed request:  151
+Serial number of failed request:  51
+xerror_handler: X failed, continuing
+</pre>
+<p>Install the package <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-nvidia-utils">lib32-nvidia-utils</a></span><sup><small>包</small></sup></span> (or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lib32-nvidia-390xx-utils/">lib32-nvidia-390xx-utils</a></span><sup><small>AUR</small></sup></span> if using an old GPU).
+</p><p>If <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-nvidia-utils">lib32-nvidia-utils</a></span><sup><small>包</small></sup></span> is installed, ensure that the package version matches <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-open">nvidia-open</a></span><sup><small>包</small></sup></span> with
+</p>
+<pre># pacman -Qs nvidia-open
+</pre>
+<p>You may need to change which <a href="#pg61db3d3fc575">mirrors</a> you are using to install the drivers if they do not match.
+</p><p>If you are using AMD, have enabled 10-bit color depth, and are having this problem. You will likely need to disable 10-bit color depth.
+</p><p>Another issue that causes this error message can be <a href="https://github.com/ValveSoftware/steam-for-linux/issues/4340#issuecomment-258593713">solved by removing the config.vdf file</a>:
+</p>
+<pre>$ rm ~/.local/share/Steam/config/config.vdf
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam__Compatibility_tool_configuration_" id="Steam:_Compatibility_tool_configuration_failed">Steam: Compatibility tool configuration failed</h3></div>
+<p>If you are trying to run a native game using Proton but get a Steam compatibility tool error immediately after starting the game, you might have to reinstall the runtime.
+</p>
+<ol><li>Navigate to your Steam library.</li>
+<li>In the dropdown above your game list check the <i>Tools</i> option to make them visible.</li>
+<li>Search for <i>Proton</i>, right click on each installed tool, visit <i>Properties</i>, open the <i>Local files</i> tab and click <i>Verify integrity of tool files</i> for each entry.</li>
+<li>Search for <i>Steam Linux Runtime</i> and repeat the same procedure. If none are available, install the latest <i>Steam Linux Runtime - Soldier</i>.</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Game_starts_but_closes_immediately_with_" id="Game_starts_but_closes_immediately_with_custom_kernel">Game starts but closes immediately with custom kernel</h3></div>
+<p>Make sure that you have enabled <i>User namespace</i> in <i>General setup -&gt; Namespaces support</i>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam_Library_won.27t_start" id="Steam_Library_won't_start"><span id="Steam_Library_won.27t_start"></span>Steam Library won't start</h3></div>
+<p>Opening the steam library either displays nothing, or a brief splash, but no window appears. Running <code>/usr/bin/steam-runtime</code> in a terminal window gives this error:
+</p>
+<pre>Assertion 'device' failed at src/libsystemd/sd-device/device-private.c:103, function device_get_tags_generation(). Aborting.
+</pre>
+<p>Bugs reports are filed: <a href="https://bugs.archlinux.org/task/79006">#79006</a>
+</p><p>See also discussion at: <a href="https://bbs.archlinux.org/viewtopic.php?id=287033">Steam failing to launch since systemd 253.5-2 update</a>
+</p><p>A workaround is to install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-libnm">lib32-libnm</a></span><sup><small>包</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg73514fe2a8cb_Graphical_issues" id="Graphical_issues">Graphical issues</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Xwayland_.E5.92.8C_HiDPI_.E4.B8.8B.E6.96.87.E6.9C.AC.E5.8F.8A.E5.9B.BE.E5.BD.A2.E6.A8.A1.E7.B3.8A" id="Xwayland_和_HiDPI_下文本及图形模糊"><span id="Xwayland_.E5.92.8C_HiDPI_.E4.B8.8B.E6.96.87.E6.9C.AC.E5.8F.8A.E5.9B.BE.E5.BD.A2.E6.A8.A1.E7.B3.8A"></span>Xwayland 和 HiDPI 下文本及图形模糊</h3></div>
+<p>当 Steam 在 <a href="#pg3bfae67062a7">Xwayland</a> 上运行且 Wayland 混成器启用了 <a href="#pg1f5bbda7ab0a">HiDPI</a> 缩放时，您会发现 Steam 和游戏以更低分辨率渲染并进行缩放以适应 HiDPI 屏幕，这就导致了模糊。
+</p><p>一个选择是在嵌套的 <a href="#pg873bd3c6e9b8">gamescope</a> 混成器内运行 Steam。安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gamescope">gamescope</a></span><sup><small>包</small></sup></span> 并执行以下命令：
+</p>
+<pre>$ gamescope -f -m 1 -e -- steam -gamepadui
+</pre>
+<p>这会以大屏幕模式（实际上是 Steam Deck 模式）全屏无缩放运行 Steam，相同配置也应该会在 Steam 启动的游戏中生效。
+</p><p>另外一种选择是将混成器配置为禁止 Xwayland 缩放应用程序。例如 <a href="#pgc1bca245b144">Hyprland</a> 用户可以在配置文件 <code>hyprland.conf</code> 中添加以下配置：
+</p>
+<pre>xwayland {
+  force_zero_scaling = true
+}
+</pre>
+<p>参见 <a href="https://wiki.hyprland.org/Configuring/XWayland/">Hyprland 官方 wiki</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>该配置仅会阻止<b>所有</b>使用 XWayland 的应用缩放，其它则不受影响。在 <a href="#pg1f5bbda7ab0a">HiDPI</a> 屏幕下这可能会导致文本和其它元素显示过小难以舒适阅读。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam_flicker.2Fblink_with_black_screen_not_loading_Store.2FLibrary_or_other_pages" id="Steam_flicker/blink_with_black_screen_not_loading_Store/Library_or_other_pages"><span id="Steam_flicker.2Fblink_with_black_screen_not_loading_Store.2FLibrary_or_other_pages"></span>Steam flicker/blink with black screen not loading Store/Library or other pages</h3></div>
+<p>When Steam is started on Wayland (not confirmed X11) with dual graphics in some cases Steam client is unstable display black screen and flicker/blink. This is due to option PrefersNonDefaultGPU set to true in steam.desktop file.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg73514fe2a8cb_Method_1___Edit_steam_desktop_file" id="Method_1_-_Edit_steam.desktop_file">Method 1 - Edit steam.desktop file</h4></div>
+<p>Locate .desktop file you are starting from your Application Launcher, and change line:
+From: PrefersNonDefaultGPU=true To: PrefersNonDefaultGPU=false
+Usually located at ~/.local/share/applications/steam.desktop
+</p><p>If opened close steam and relaunch. 
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg73514fe2a8cb_Method_2___KDE_Plasma___edit_menu_option" id="Method_2_-_KDE_Plasma_-_edit_menu_option_in_GUI">Method 2 - KDE Plasma - edit menu option in GUI</h4></div>
+<p>.Right click on .desktop file &gt; Edit application... &gt; select tab "Application" &gt; Advanced Options &gt; Uncheck option "Run using dedicated graphics card" &gt; save changes, and relaunch Steam
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg73514fe2a8cb_Workaround_1___run_steam_from_terminal" id="Workaround_1_-_run_steam_from_terminal">Workaround 1 - run steam from terminal</h4></div>
+<p>It has been noted that starting steam from terminal is not affected so it is a known workaround. 
+</p>
+<pre>$ steam &amp;
+</pre>
+<p>Ampersand (&amp;) at the end is to run steam in background, terminal can be closed after Steam starts.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg73514fe2a8cb_Audio_issues" id="Audio_issues">Audio issues</h2></div>
+<p>If the sections below do not address the issue, using the <a href="#pg73514fe2a8cb_Steam_native_runtime">#Steam native runtime</a> might help.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Configure_PulseAudio" id="Configure_PulseAudio">Configure PulseAudio</h3></div>
+<p>Games that explicitly depend on ALSA can break PulseAudio. Follow the directions for <a href="#pga942ba974b3d">PulseAudio#ALSA</a> to make these games use PulseAudio instead.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_No_audio_or_756_Segmentation_fault" id="No_audio_or_756_Segmentation_fault">No audio or 756 Segmentation fault</h3></div>
+<p>First <a href="#pg73514fe2a8cb_Configure_PulseAudio">#Configure PulseAudio</a> and see if that resolves the issue. If you do not have audio in the videos which play within the Steam client, it is possible that the ALSA libraries packaged with Steam are not working.
+</p><p>Attempting to playback a video within the steam client results in an error similar to:
+</p>
+<pre>ALSA lib pcm_dmix.c:1018:(snd_pcm_dmix_open) unable to open slave
+</pre>
+<p>A workaround is to rename or delete the <code>alsa-lib</code> folder and the <code>libasound.so.*</code> files. They can be found at:
+</p>
+<pre>~/.steam/steam/ubuntu12_32/steam-runtime/i386/usr/lib/i386-linux-gnu/
+</pre>
+<p>An alternative workaround is to add the <code>libasound.so.*</code> library to the <code>LD_PRELOAD</code> environment variable:
+</p>
+<pre>$ LD_PRELOAD='/usr/$LIB/libasound.so.2 '${LD_PRELOAD} steam
+</pre>
+<p>If audio still will not work, adding the Pulseaudio-libs to the <code>LD_PRELOAD</code> variable may help:
+</p>
+<pre>$ LD_PRELOAD='/usr/$LIB/libpulse.so.0 /usr/$LIB/libpulse-simple.so.0 '${LD_PRELOAD} steam
+</pre>
+<p>Be advised that their names may change over time. If so, it is necessary to take a look in
+</p>
+<pre>~/.steam/ubuntu12_32/steam-runtime/i386/usr/lib/i386-linux-gnu
+</pre>
+<p>and find the new libraries and their versions.
+</p><p>Bugs reports have been filed: <a href="https://github.com/ValveSoftware/steam-for-linux/issues/3376">#3376</a> and <a href="https://github.com/ValveSoftware/steam-for-linux/issues/3504">#3504</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_FMOD_sound_engine" id="FMOD_sound_engine">FMOD sound engine</h3></div>
+
+<p><br/>
+The <a href="https://www.fmod.com/">FMOD</a> audio middleware package is a bit buggy, and as a result games using it may have sound problems.
+</p><p>It usually occurs when an unused sound device is used as default for ALSA. See <a href="#pge3bd6ffc74f5">Advanced Linux Sound Architecture#Set the default sound card</a>.
+</p>
+<dl><dd>Affected games: Hotline Miami, Hotline Miami 2, Transistor</dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_PulseAudio_.26_OpenAL:_Audio_streams_cannot_be_moved_between_devices" id="PulseAudio_&amp;_OpenAL:_Audio_streams_cannot_be_moved_between_devices"><span id="PulseAudio_.26_OpenAL:_Audio_streams_cannot_be_moved_between_devices"></span>PulseAudio &amp; OpenAL: Audio streams cannot be moved between devices</h3></div>
+<p>If you use <a href="#pga942ba974b3d">PulseAudio</a> and cannot move an audio stream between sinks, it might be because recent OpenAL versions default to disallow audio streams from being moved. Try to add the following to your <code>~/.alsoftrc</code>:
+</p>
+<pre>[pulse]
+allow-moves=true
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Cracking_Microphone_in_Steam_Voice_and_G" id="Cracking_Microphone_in_Steam_Voice_and_Games">Cracking Microphone in Steam Voice and Games</h3></div>
+<p>If you experience cracking with your audio input while using Steam Voice or in games, you can try to launch steam with the environmental variable <code>PULSE_LATENCY_MSEC=30</code>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg73514fe2a8cb_Steam_client_issues" id="Steam_client_issues">Steam client issues</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Cannot_browse_filesystem_to_add_a_librar" id="Cannot_browse_filesystem_to_add_a_library_folder_or_library_folder_appears_as_empty">Cannot browse filesystem to add a library folder or library folder appears as empty</h3></div>
+<p>If the file chooser is empty when trying add a library folder, or if a previously set up folder now appears with 0 games installed, this can be the result of an incorrect timestamp on the root directory or in the library folder. Timestamps can be checked with <i>stat</i>:
+</p>
+<pre>$ stat <i>path</i>
+</pre>
+<p>If the timestamp is in the future, run
+</p>
+<pre>$ touch <i>path</i>
+</pre>
+<p>to reinitialize it to the current date, then re-run Steam.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Cannot_add_library_folder_because_of_mis" id="Cannot_add_library_folder_because_of_missing_execute_permissions">Cannot add library folder because of missing execute permissions</h3></div>
+<p>If you add another Steam library folder on another drive, you might get the error message:
+</p>
+<pre>New Steam library folder must be on a filesystem mounted with execute permissions
+</pre>
+<p>Make sure you are mounting the filesystem with the correct flags in your <code>/etc/fstab</code>, usually by adding <code>exec</code> to the list of mount parameter. The parameter must occur after any <code>user</code> or <code>users</code> parameter since these can imply <code>noexec</code>.
+</p><p>This error might also occur if your library folder does not contain a <code>steamapps</code> directory. Previous versions used <code>SteamApps</code> instead, so ensure the name is fully lowercase.
+</p><p>This error can also occur because of Steam runtime issues and may be fixed following the <a href="#pg73514fe2a8cb_Finding_missing_runtime_libraries">#Finding missing runtime libraries</a> section or due to no space being left on the device. For debugging purposes it might be useful to run Steam from the console and observe the log.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Unusually_slow_download_speed" id="Unusually_slow_download_speed">Unusually slow download speed</h3></div>
+<p>If your Steam (games, software…) download speed through the client is unusually slow, but browsing the Steam store and streaming videos is unaffected, installing a DNS cache program, such as <a href="#pg72acb6a2ac2c">dnsmasq</a> can help <a href="https://steamcommunity.com/app/221410/discussions/2/616189106498372437/">[1]</a>.
+</p><p>Something else that might help would be disabling <a href="#pg8f9147d5b2cb">IPv6</a>. See <a href="https://github.com/ValveSoftware/steam-for-linux/issues/6126">[2]</a> for more information.
+</p><p>Another potential fix is to disable HTTP2 <a href="https://github.com/ValveSoftware/steam-for-linux/issues/10248">[3]</a> by creating ~/.steam/steam/steam_dev.cfg with the line 
+</p>
+<pre>@nClientDownloadEnableHTTP2PlatformLinux 0
+</pre>
+<p>Adding the following line to the steam_dev.cfg file to increase the server connections may improve but may also negatively affect speeds
+</p>
+<pre>@fDownloadRateImprovementToAddAnotherConnection 1.0
+</pre>
+<p>You can also try running `steam` instead of `steam-runtime`.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_.22Needs_to_be_online.22_error" id='"Needs_to_be_online"_error'><span id=".22Needs_to_be_online.22_error"></span>"Needs to be online" error</h3></div>
+
+
+<p>If the Steam launcher refuses to start and you get an error saying: "<i>Fatal Error: Steam needs to be online to update</i>" while you are online, then there might be issues with name resolving.
+</p><p>Try installing <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-systemd">lib32-systemd</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-libcurl-compat">lib32-libcurl-compat</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nss-mdns">nss-mdns</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-nss">lib32-nss</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-glu">lib32-glu</a></span><sup><small>包</small></sup></span> or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-dbus">lib32-dbus</a></span><sup><small>包</small></sup></span>.
+</p><p>This may also be as simple as DNS resolution not correctly working and is not always obvious since modern browsers will use their own DNS servers. Follow <a href="#pg5e90005cb568">Domain name resolution</a>.
+</p><p>Steam may have issues if <i>systemd-resolved</i> is providing DNS resolution. Make sure <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-systemd">lib32-systemd</a></span><sup><small>包</small></sup></span> is present to resolve this.
+</p><p>If DNS resolution works but the Steam launcher still shows the same error message, <a href="#pg39cfcbf5721d">enabling</a> DNS caching e.g. via the "Name Service Caching Daemon", <code>nscd.service</code>, has shown to work around this issue.
+</p><p>It is unclear what exactly running <code>nscd</code> does to make it work again though. Please check the <a href="#pg62b1ef4c6beb">talk page</a> for more info.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam_forgets_password" id="Steam_forgets_password">Steam forgets password</h3></div>
+<dl><dd>Related: <a href="https://github.com/ValveSoftware/steam-for-linux/issues/5030">steam-for-linux#5030</a></dd></dl>
+<p>Steam for Linux has a bug which causes it to forget the password of some users.
+</p><p>As a workaround, after logging in to Steam, run
+</p>
+<pre># chattr +i ~/.steam/registry.vdf
+</pre>
+<p>This will set the file's immutable bit so Steam cannot modify, delete, or rename it and thus not log you out.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Preventing_crash_memory_dumps" id="Preventing_crash_memory_dumps">Preventing crash memory dumps</h3></div>
+<p>Every time Steam crashes, it writes a memory dump to <code>/tmp/dumps/</code>. If Steam falls into a crash loop, the dump files can become quite large. When <code>/tmp</code> is mounted as <a href="#pg96f7efa88158">tmpfs</a>, memory and swap file can be consumed needlessly.
+</p><p>To prevent this, link <code>/tmp/dumps/</code> to <code>/dev/null</code>:
+</p>
+<pre># ln -s /dev/null /tmp/dumps
+</pre>
+<p>Or alternatively, create and modify permissions on <code>/tmp/dumps</code>. Then Steam will be unable to write dump files to the directory.
+</p>
+<pre># mkdir /tmp/dumps
+# chmod 600 /tmp/dumps
+</pre>
+<p>This also has the added benefit of Steam not uploading these dumps to Valve's servers.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam_license_problem_with_playing_video" id="Steam_license_problem_with_playing_videos">Steam license problem with playing videos</h3></div>
+<p>Steam uses <a href="https://en.wikipedia.org/wiki/Widevine">Google's Widevine DRM</a> for some videos. If it is not installed you will get the following error:
+</p>
+<pre>This video requires a license to play which cannot be retrieved. This may be a temporary network condition. Please restart the video to try again.
+</pre>
+<p>To solve this issue follow the <a href="https://help.steampowered.com/en/faqs/view/2FC3-54BF-465F-E556#15"><i>Streaming Videos on Steam</i> support page</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_No_context_menu_for_joining.2Finviting_friends" id="No_context_menu_for_joining/inviting_friends"><span id="No_context_menu_for_joining.2Finviting_friends"></span>No context menu for joining/inviting friends</h3></div>
+<p>Since the new Steam Friends UI update, it may be the case that in the right-click menu the entries for "Join Game", "Invite to Game" and "View Game Info" are missing.
+</p><p>In order to fix this, it maybe be necessary to install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lsof">lsof</a></span><sup><small>包</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Slow_and_unresponsive_user_interface" id="Slow_and_unresponsive_user_interface">Slow and unresponsive user interface</h3></div>
+<p>If you experience extremely slow and sluggish performance when using the Steam client it might help to disable the <i>Enable GPU accelerated rendering in web views</i> option under the <i>Interface</i> tab in the Steam client settings.
+</p><p>The friends list can also cause this problem. Two workarounds are mentioned in <a href="https://github.com/ValveSoftware/steam-for-linux/issues/7245">https://github.com/ValveSoftware/steam-for-linux/issues/7245</a>:
+</p>
+<ul><li>Moving the friends list to another monitor <a href="https://github.com/ValveSoftware/steam-for-linux/issues/7245#issuecomment-663629964">[4]</a>.</li>
+<li>Disabling animated avatars. Open Settings and navigate to Friends &amp; Chat. Set <i> Enable Animated Avatars &amp; Animated Avatar Frames in your Friends List and Chat &gt; OFF</i> <a href="https://github.com/ValveSoftware/steam-for-linux/issues/7245#issuecomment-813443906">[5]</a>.</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam_fails_to_start_correctly" id="Steam_fails_to_start_correctly">Steam fails to start correctly</h3></div>
+<p>One troubleshooting step is to run
+</p>
+<pre>$ steam-runtime --reset
+</pre>
+<p>This can fix various issues that come with a broken install.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Missing_taskbar_menu" id="Missing_taskbar_menu">Missing taskbar menu</h3></div>
+<p>If clicking your steam taskbar icon does not give you a menu, it may be necessary to install the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libappindicator-gtk2/">libappindicator-gtk2</a></span><sup><small>AUR</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lib32-libappindicator-gtk2/">lib32-libappindicator-gtk2</a></span><sup><small>AUR</small></sup></span> packages and restart steam.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_.22Your_browser_does_not_support_the_minimum_set_of_features_required_to_watch_this_broadcast.22_error" id='"Your_browser_does_not_support_the_minimum_set_of_features_required_to_watch_this_broadcast"_error'><span id=".22Your_browser_does_not_support_the_minimum_set_of_features_required_to_watch_this_broadcast.22_error"></span>"Your browser does not support the minimum set of features required to watch this broadcast" error</h3></div>
+<p>See <a href="https://github.com/ValveSoftware/steam-for-linux/issues/6780">steam-for-linux issue 6780</a>
+</p><p>If you get an error stating "<i>Your browser does not support the minimum set of features required to watch this broadcast</i>" when attempting to watch a stream/broadcast try the following two troubleshooting steps:
+</p>
+<ol><li>Navigate to <i>Community &gt; Broadcasts</i>. If the page displays "<i>Updating Steam</i>" wait a few minutes to see if the process completes and cancel it after a while in case it does not. Now test if you are able to watch broadcasts, e.g. by clicking on one of the ones display under <i>Community &gt; Broadcasts</i>.</li>
+<li>Start a broadcast while in Big Picture mode (<i>View &gt; Big Picture Mode</i>). If a broadcast starts fine while in Big Picture mode check if it still works after switching back to the main interface.</li>
+<li>Trigger the Steam client to directly unlock H.264 decoding using the following command: <code>steam-runtime steam://unlockh264/</code>. The Steam client should start headless and run the unlock command. Wait a minute to be sure the process completes, then close and relaunch the Steam client.</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Using_system_titlebar_and_frame" id="Using_system_titlebar_and_frame">Using system titlebar and frame</h3></div>
+<p>Currently steam client tries to manage its windows itself, but it does it improperly, see <a href="https://github.com/ValveSoftware/steam-for-linux/issues/1040">steam-for-linux#1040</a>. As a workaround you can use <a href="https://github.com/dscharrer/steamwm">steamwm</a> project. Run steam like this: <code>./steamwm.cpp steam</code>. Also the project provides a skin that removes unnative control buttons and frame, but leaves default skin decorations.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_More_selective_DPMS_inhibition" id="More_selective_DPMS_inhibition">More selective DPMS inhibition</h3></div>
+<p>By default, the Steam client totally disables screensaving when it is running, whether a game is launched or not. 
+</p><p>A workaround to this issue is provided by <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/steam-screensaver-fix/">steam-screensaver-fix</a></span><sup><small>AUR</small></sup></span>: run <code>steam-screensaver-fix-native</code> or <code>steam-screensaver-fix-runtime</code>. 
+</p><p>This will allow your screen to turn off if Steam is running, but will keep inhibiting the screensaver if a game is launched.
+</p><p>See <a href="https://github.com/ValveSoftware/steam-for-linux/issues/5607">Issue 5607</a> at Valve's GitHub for the details.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam_window_does_not_show_on_Nvidia_GPUs_after_the_June_14.2C_2023_update" id="Steam_window_does_not_show_on_Nvidia_GPUs_after_the_June_14,_2023_update"><span id="Steam_window_does_not_show_on_Nvidia_GPUs_after_the_June_14.2C_2023_update"></span>Steam window does not show on Nvidia GPUs after the June 14, 2023 update</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>This issue is a recent issue and might be fixed sooner or later making this section obsolete or inaccurate</div>
+<p>See <a href="https://github.com/ValveSoftware/steam-for-linux/issues/9577">steam-for-linux 9577</a>
+</p><p>This issue seems to be caused by an Nvidia driver update that coincided with the release of the new Steam UI to stable channels. Currently there are four ways that appear to work around this issue. The first is to downgrade the Nvidia drivers to 530.41.03 using a tool like <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/downgrade/">downgrade</a></span><sup><small>AUR</small></sup></span>, which should work around the issue until Nvidia or Valve fix this issue. The second workaround is to delete the GLCache directory  at <code>~/.cache/nvidia/GLCache/</code>. After starting Steam, delete that directory using <code>rm -r ~/.config/nvidia/GLCache</code>. After running this command, Steam should appear. A third, temporary workaround is to run the <code>steam --reset</code> command, which resets the steam installation and logs the user out. This should work for one session, or until the system is rebooted. A fourth workaround is to revert to the old UI using <code>steam -vgui</code>. This UI may get broken as time goes, for now only the friends menu seems to be broken, but more functionality may be broken as time goes on.
+</p><p>When downgrading, ensure the same version is used for all components (kernel module <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-open">nvidia-open</a></span><sup><small>包</small></sup></span>/<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-open-dkms">nvidia-open-dkms</a></span><sup><small>包</small></sup></span>, 64bit userspace <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span><sup><small>包</small></sup></span> and 32bit userspace <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-nvidia-utils">lib32-nvidia-utils</a></span><sup><small>包</small></sup></span>) and you have booted into the updated your initrd.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Enabling_fractional_scaling" id="Enabling_fractional_scaling">Enabling fractional scaling</h3></div>
+<p>If the text and icons in the Steam client window are too small to read on your display, it may be beneficial to enable fractional scaling. The Steam client has a settings option to enable it, at <i>Settings &gt; Interface &gt; Scale text and icons to match monitor settings</i>. Enabling this should tell the client to use the system's fractional scaling settings.
+</p><p>However, if this does not automatically work, there is a command line parameter to force fractional scaling. Running Steam with the <code>-forcedesktopscaling 1.5</code> flag will scale the client to 1.5x size. This value can be changed to the correct scaling factor for your monitor. If you wish to make this change permanent, you can edit the <code>Exec</code> field in the <code>steam.desktop</code> file.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam_Beta_crashes" id="Steam_Beta_crashes">Steam Beta crashes</h3></div>
+<p>If you are using Steam Beta (which can be confirmed with the presence of <code>You are in the 'publicbeta' client beta</code> in the logs) and encounter breaking bugs, manually switch back to non-Beta:
+</p>
+<pre>$ rm -f ~/.local/share/Steam/package/beta
+</pre>
+<p>Report the issue after looking for duplicates at <a href="https://github.com/ValveSoftware/steam-for-linux">https://github.com/ValveSoftware/steam-for-linux</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg73514fe2a8cb_Steam_Remote_Play_issues" id="Steam_Remote_Play_issues">Steam Remote Play issues</h2></div>
+<p>See <a href="#pg95e65bdea0f3">Steam#Steam Remote Play</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Remote_Play_does_not_work_from_Arch_Linu" id="Remote_Play_does_not_work_from_Arch_Linux_host_to_Arch_Linux_guest">Remote Play does not work from Arch Linux host to Arch Linux guest</h3></div>
+<p>Chances are you are missing <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-libcanberra">lib32-libcanberra</a></span><sup><small>包</small></sup></span>. Once you <a href="#pg54c3351b3e3b">install</a> that, it should work as expected.
+</p><p>With that, Steam should no longer crash when trying to launch a game through Remote Play.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Hardware_decoding_not_available" id="Hardware_decoding_not_available">Hardware decoding not available</h3></div>
+<p>Remote Play hardware decoding uses <code>vaapi</code>, but steam requires <code>libva2_32bit</code>, where as Arch defaults to 64bit.
+</p><p>As a basic set, this is <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva">libva</a></span><sup><small>包</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-libva">lib32-libva</a></span><sup><small>包</small></sup></span>. Intel graphics users will also require both <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva-intel-driver">libva-intel-driver</a></span><sup><small>包</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-libva-intel-driver">lib32-libva-intel-driver</a></span><sup><small>包</small></sup></span>.
+</p><p>For more information about vaapi see <a href="#pge1e061b4fab9">hardware video acceleration</a>.
+</p><p>It may also be necessary to remove the steam runtime version of libva, in order to force it to use system libraries. The current library in use can be found by using:
+</p>
+<pre>$ pgrep steam | xargs -I {} cat /proc/{}/maps | grep libva
+</pre>
+<p>If this shows locations in <code>~/.local/Share/steam</code> steam is still using its packaged version of libva. This can be rectified by deleting the libva library files at <code>~/.local/share/Steam/ubuntu12_32/steam-runtime/i386/usr/lib/i386-linux-gnu/libva*</code>, so that steam falls back to the system libraries.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Big_Picture_Mode_minimizes_itself_after_" id="Big_Picture_Mode_minimizes_itself_after_losing_focus">Big Picture Mode minimizes itself after losing focus</h3></div>
+<p>This can occur when you play a game via Remote Play or if you have a multi-monitor setup and move the mouse outside of BPM's window. To prevent this, set the <code>SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS=0</code> environment variable and restart Steam.
+</p><p>See also the <a href="https://github.com/ValveSoftware/steam-for-linux/issues/4769">steam-for-linux issue 4769</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg73514fe2a8cb_Other_issues" id="Other_issues">Other issues</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_.E4.BD.8D.E4.BA.8E_NTFS_.E5.88.86.E5.8C.BA.E7.9A.84_Steam_.E5.AD.98.E5.82.A8.E5.BA.93" id="位于_NTFS_分区的_Steam_存储库"><span id=".E4.BD.8D.E4.BA.8E_NTFS_.E5.88.86.E5.8C.BA.E7.9A.84_Steam_.E5.AD.98.E5.82.A8.E5.BA.93"></span>位于 NTFS 分区的 Steam 存储库</h3></div>
+<p>若您的 Steam 存储库位于 NTFS 分区，则其中的游戏可能无法启动。
+</p><p>问题在于，Wine 在其 <code>$WINEPREFIX/dosdevices</code> 目录中使用了冒号，而以 <code>windows_names</code> 选项挂载文件系统的 NTFS-3G 不会创建这类可能干扰 Windows 含冒号名称。不过不添加该选项也并非意味着不安全，除了无法打开符号链接，Windows 一切如常（反正它原本也不需要打开符号链接）。<code>chkdsk</code> 可能会删除这类链接，不过要重新创建也很简单。
+</p><p>更好的解决方案：不以 <code>windows_names</code> 选项挂载。该选项经常被 GUI 文件管理器出于谨慎通过 <a href="#pgfb208edb391c">udisks</a>2 添加，但是在 <a href="#pgced0cc449f44">fstab</a> 中创建相应条目是更合适的方法。
+</p>
+<ol><li>Run <code>genfstab -U /</code> and extract the line containing the ntfs partition, e.g. <code>UUID=12345678ABCDEF00 /run/media/user/Gamez ntfs {options_omitted} 0 0</code>. Note the options are inaccurate because of fuse; if you want to see what <i>really</i> is in use, use <code>ps aux|grep ntfs</code> as root.</li>
+<li>Write the line into <code>/etc/fstab</code>, editing it to use the proper options without <code>windows_names</code>. With the earlier example, we would write <code>UUID=12345678ABCDEF00 /run/media/user/Gamez ntfs rw,allow_other,user_id=1000,big_writes 0 0</code> – assuming you are UID 1000.</li>
+<li>Unmount the partition, then remount.</li></ol>
+<p>Alternatively, disable udisks use of <code>windows_names</code> globally following instructions in <a href="#pgfb208edb391c">udisks#NTFS file creation failing (filename-dependent)</a>.
+</p><p>Other workaround: move the <code>steamapps/common/Proton <i>x</i>.<i>y</i></code> and <code>steamapps/compatdata</code> to a non-NTFS drive, then create symbolic link in their original locations. You may be wasting some space on your otherwise important Linux drive, however.
+</p>
+<pre>$ mv <i>SteamLibrary</i>/steamapps/common/Proton\ <i>x</i>.<i>y</i> /home/<i>user</i>/dir/
+$ mv <i>SteamLibrary</i>/steamapps/compatdata /home/<i>user</i>/dir/
+$ ln -s /home/<i>user</i>/dir/Proton\ <i>x</i>.<i>y</i>/ <i>SteamLibrary</i>/steamapps/common/Proton\ <i>x</i>.<i>y</i>
+$ ln -s /home/<i>user</i>/dir/compatdata/ <i>SteamLibrary</i>/steamapps/compatdata
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Wrong_ELF_class" id="Wrong_ELF_class">Wrong ELF class</h3></div>
+<p>If you see this message in Steam's console output
+</p>
+<pre>ERROR: ld.so: object '~/.local/share/Steam/ubuntu12_32/gameoverlayrenderer.so' from LD_PRELOAD cannot be preloaded (wrong ELF class: ELFCLASS32): ignored.
+</pre>
+<p>you can safely ignore it. It is not really any error: Steam includes both 64- and 32-bit versions of some libraries and only one version will load successfully. This "error" is displayed even when Steam (and the in-game overlay) is working perfectly.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Multiple_monitors_setup" id="Multiple_monitors_setup">Multiple monitors setup</h3></div>
+
+<p>A setup with multiple monitors may prevent games from starting. Try to disable all additional displays, and then run a game. You can enable them after the game successfully started.
+</p><p>Also you can try running Steam with this environment variable set:
+</p>
+<pre>$ export LD_LIBRARY_PATH=/usr/lib32/nvidia:/usr/lib/nvidia:$LD_LIBRARY_PATH
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Text_is_corrupt_or_missing" id="Text_is_corrupt_or_missing">Text is corrupt or missing</h3></div>
+<p>Try installing <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-fontconfig">lib32-fontconfig</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-liberation">ttf-liberation</a></span><sup><small>包</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wqy-zenhei">wqy-zenhei</a></span><sup><small>包</small></sup></span> (for Asian characters), then restart Steam to see whether the problem is solved.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>Steam for Linux does not follow system-level font configurations.<a href="https://github.com/ValveSoftware/steam-for-linux/issues/10422#issuecomment-1944396010">[6]</a> Thus, modify user-level configuration if you want change fontconfig for steam.</li>
+<li>When Steam cannot find the Arial font, font-config likes to fall back onto the Helvetica bitmap font. Steam does not render this and possibly other bitmap fonts correctly, so either removing problematic fonts or <a href="#pg5f4c7de3e275">disabling bitmap fonts</a> will most likely fix the issue without installing the Arial or ArialBold fonts. The font being used in place of Arial can be found with the command: <pre>$ fc-match -v Arial</pre></li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_SetLocale.28.27en_US.UTF-8.27.29_fails_at_game_startup_or_typing_non-ASCII_characters_does_not_work_in_the_Steam_client" id="SetLocale('en_US.UTF-8')_fails_at_game_startup_or_typing_non-ASCII_characters_does_not_work_in_the_Steam_client"><span id="SetLocale.28.27en_US.UTF-8.27.29_fails_at_game_startup_or_typing_non-ASCII_characters_does_not_work_in_the_Steam_client"></span>SetLocale('en_US.UTF-8') fails at game startup or typing non-ASCII characters does not work in the Steam client</h3></div>
+<p>You need to generate the <code>en_US.UTF-8 UTF-8</code> locale. See <a href="#pgbf65db42be1c">Locale#Generating locales</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Missing_libc" id="Missing_libc">Missing libc</h3></div>
+
+<p><br/>
+This could be due to a corrupt Steam executable. Check the output of:
+</p>
+<pre>$ ldd ~/.local/share/Steam/ubuntu12_32/steam
+</pre>
+<p>Should <code>ldd</code> claim that it is not a dynamic executable, then Steam likely corrupted the binary during an update. The following should fix the issue:
+</p>
+<pre>$ cd ~/.local/share/Steam/
+$ ./steam.sh --reset
+</pre>
+<p>If it does not, try to delete the <code>~/.local/share/Steam/</code> directory and launch Steam again, telling it to reinstall itself.
+</p><p>This error message can also occur due to a bug in Steam which occurs when your <code>$HOME</code> directory ends in a slash (Valve GitHub <a href="https://github.com/ValveSoftware/steam-for-linux/issues/3730">issue 3730</a>). This can be fixed by editing <code>/etc/passwd</code> and changing <code>/home/<i>username</i>/</code> to <code>/home/<i>username</i></code>, then logging out and in again. Afterwards, Steam should repair itself automatically.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Games_do_not_launch_on_older_Intel_hardw" id="Games_do_not_launch_on_older_Intel_hardware">Games do not launch on older Intel hardware</h3></div>
+<dl><dd><a href="https://steamcommunity.com/app/8930/discussions/1/540744299927655197/">source</a></dd></dl>
+<p>On older Intel hardware which does not support OpenGL 3, such as Intel GMA chips or Westmere CPUs, games may immediately crash when run. It appears as a <code>gameoverlayrenderer.so</code> error in <code>/tmp/dumps/mobile_stdout.txt</code>, but looking in <code>/tmp/gameoverlayrenderer.log</code> it shows a GLXBadFBConfig error.
+</p><p>This can be fixed, by forcing the game to use a later version of OpenGL than it wants. Add <code>MESA_GL_VERSION_OVERRIDE=3.1 MESA_GLSL_VERSION_OVERRIDE=140</code> to your <a href="#pg2a86e9dce5d6">launch option</a>s.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Mesa:_Game_does_not_launch.2C_complaining_about_OpenGL_version_supported_by_the_card" id="Mesa:_Game_does_not_launch,_complaining_about_OpenGL_version_supported_by_the_card"><span id="Mesa:_Game_does_not_launch.2C_complaining_about_OpenGL_version_supported_by_the_card"></span>Mesa: Game does not launch, complaining about OpenGL version supported by the card</h3></div>
+<p>Some games are badly programmed, to use any OpenGL version above 3.0. With Mesa, an application has to request a specific core profile. If it does not make such a request, only OpenGL 3.0 and lower are available.
+</p><p>This can be fixed, by forcing the game to use a version of OpenGL it actually needs. Add <code>MESA_GL_VERSION_OVERRIDE=4.1 MESA_GLSL_VERSION_OVERRIDE=410</code> to your <a href="#pg2a86e9dce5d6">launch option</a>s.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_2K_games_do_not_run_on_XFS_partitions" id="2K_games_do_not_run_on_XFS_partitions">2K games do not run on XFS partitions</h3></div>
+
+<p>If you are running 2K games such as Civilization 5 on <a href="#pg97815ebb0436">XFS</a> partitions, then the game may not start or run properly due to how the game loads files as it starts. <a href="https://bbs.archlinux.org/viewtopic.php?id=185222">[8]</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam_controller_not_being_detected_corr" id="Steam_controller_not_being_detected_correctly">Steam controller not being detected correctly</h3></div>
+<p>See <a href="#pg85cb2c411b99">Gamepad#Steam Controller</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam_controller_makes_a_game_crash" id="Steam_controller_makes_a_game_crash">Steam controller makes a game crash</h3></div>
+<p>See <a href="#pg85cb2c411b99">Gamepad#Steam Controller makes a game crash or not recognized</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Steam_hangs_on_.22Installing_breakpad_exception_handler....22" id='Steam_hangs_on_"Installing_breakpad_exception_handler..."'><span id="Steam_hangs_on_.22Installing_breakpad_exception_handler....22"></span>Steam hangs on "Installing breakpad exception handler..."</h3></div>
+<p><a href="https://bbs.archlinux.org/viewtopic.php?id=177245">BBS#177245</a>
+</p><p>You have an Nvidia GPU and Steam has the following output:
+</p>
+<pre>Running Steam on arch rolling 64-bit
+STEAM_RUNTIME is enabled automatically
+Installing breakpad exception handler for appid(steam)/version(0_client)
+</pre>
+<p>Then nothing else happens. Ensure you have the correct drivers installed as well as their 32-bit versions (the 64-bit and 32-bit variants have to have the same versions): see <a href="#pge12579b7d4ac">NVIDIA#Installation</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Killing_standalone_compositors_when_laun" id="Killing_standalone_compositors_when_launching_games">Killing standalone compositors when launching games</h3></div>
+<p>Utilizing the <code>%command%</code> switch, you can kill standalone compositors (such as <a href="#pgf2fb99e65319">Xcompmgr</a> or <a href="#pg4156611a6f7e">picom</a>) - which can cause lag and tearing in some games on some systems - and relaunch them after the game ends by adding the following to your game's launch options.
+</p>
+<pre>killall <i>compositor</i> &amp;&amp; %command%; nohup <i>compositor</i> &amp;
+</pre>
+<p>You can also add -options to <code>%command%</code> or <code><i>compositor</i></code>, of course.
+</p><p>Steam will latch on to any processes launched after <code>%command%</code> and your Steam status will show as in game. So in this example, we run the compositor through <code>nohup</code> so it is not attached to Steam (it will keep running if you close Steam) and follow it with an ampersand so that the line of commands ends, clearing your Steam status.
+</p><p>If your compositor supports running in daemon mode, you can use it instead. For example, <span class="plainlinks archwiki-template-man" title="$ man 1 picom"><a href="https://man.archlinux.org/man/picom.1">picom(1)</a></span> has the <code>--daemon</code> / <code>-b</code> option to daemonize its process:
+</p>
+<pre>killall picom &amp;&amp; %command%; picom -b
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Symbol_lookup_error_using_DRI3" id="Symbol_lookup_error_using_DRI3">Symbol lookup error using DRI3</h3></div>
+<p>Steam outputs this error and exits.
+</p>
+<pre>symbol lookup error: /usr/lib/libxcb-dri3.so.0: undefined symbol: xcb_send_request_with_fds
+</pre>
+<p>To work around this, run Steam with <code>LIBGL_DRI3_DISABLE=1</code>, disabling DRI3 for Steam.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Launching_games_on_Nvidia_optimus_laptop" id="Launching_games_on_Nvidia_optimus_laptops">Launching games on Nvidia optimus laptops</h3></div>
+
+<p>To be able to play games which require using Nvidia GPU (for example, Hitman 2016) on optimus enabled laptop, you should start game with <i>primusrun</i> prefix in launch options. Otherwise, game will not work.
+</p><p>Right click the game in your steam library and select <i>Properties &gt; GENERAL &gt; LAUNCH OPTIONS</i>. Change options to
+</p>
+<pre>primusrun %command%
+</pre>
+<p>Running steam with <i>primusrun</i> used to work. While steam has changed some behavior that now running steam with <i>primusrun</i> would not have effect on launching games. As a result, you need to set launch options for each game (and you do NOT have to run steam with <i>primusrun</i>).
+</p><p>For <i>primusrun</i>, VSYNC is enabled by default it could result in a mouse input delay lag, slightly decrease performance and in-game FPS might be locked to a refresh rate of a monitor/display. In order to disable VSYNC for primusrun default value of option <code>vblank_mode</code> needs to be overridden by environment variable.
+</p>
+<pre>vblank_mode=0 primusrun %command%
+</pre>
+<p>Same with optirun that uses primus as a bridge.
+</p>
+<pre>vblank_mode=0 optirun -b primus %command%
+</pre>
+<p>If that did not work try:
+</p>
+<pre>LD_PRELOAD="libpthread.so.0 libGL.so.1" __GL_THREADED_OPTIMIZATIONS=1 optirun %command%
+</pre>
+<p>For more details see <a href="#pg0f53b4421948">Bumblebee#Primusrun mouse delay (disable VSYNC)</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_HiDPI" id="HiDPI">HiDPI</h3></div>
+<p><a href="#pg1f5bbda7ab0a">HiDPI</a> support should work out of the box, although on some systems it is necessary to <a href="#pg1f5bbda7ab0a">force it</a> setting the <code>-forcedesktopscaling <i>factor</i></code> cli option or the <code>STEAM_FORCE_DESKTOPUI_SCALING</code> environment variable to set the desired scale factor.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Protocol_support_under_KDE_Plasma" id="Protocol_support_under_KDE_Plasma">Protocol support under KDE Plasma</h3></div>
+<p>If you are getting an error after running a game through web browser <i>(or executing the link through xdg-open)</i>
+</p>
+<pre>Error — KIOExec
+File not found: steam://run/440
+</pre>
+<p>Go to <i>System Settings -&gt; Applications -&gt; File Associations</i>, add new, select <code>inode</code> group and name it <code>vnd.kde.service.steam</code>, then under <i>Application Preference Order</i> you have to add Steam. Apply changes, It should be working now.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_The_game_crashes_when_using_Steam_Linux_" id="The_game_crashes_when_using_Steam_Linux_Runtime_-_Soldier">The game crashes when using Steam Linux Runtime - Soldier</h3></div>
+
+<p>Since Proton 5.13 Steam uses the Steam Linux Runtime - Soldier by default. Some games crash when using it.
+</p><p>To bypass it, you can:
+</p>
+<ul><li>Manually <a href="https://github.com/ValveSoftware/Proton#alternative-building-without-the-steam-runtime">build</a> a proton without the Steam Runtime</li>
+<li>Replace the Soldier entry point script:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.steam/steam/steamapps/common/SteamLinuxRuntime_soldier/_v2-entry-point</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+
+shift 2
+exec "${@}"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Games_running_with_Proton_5.13.2B_have_no_Internet_connectivity" id="Games_running_with_Proton_5.13+_have_no_Internet_connectivity"><span id="Games_running_with_Proton_5.13.2B_have_no_Internet_connectivity"></span>Games running with Proton 5.13+ have no Internet connectivity</h3></div>
+<p>If you are using <a href="#pg2aac0c15b133">systemd-resolved</a> as your DNS resolver, ensure you have created the <code>resolv.conf</code> symlink as described in <a href="#pg2aac0c15b133">systemd-resolved#DNS</a>.
+</p><p>The file should contain something similar to:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/resolv.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># This is /run/systemd/resolve/stub-resolv.conf managed by man:systemd-resolved(8).
+# Do not edit.</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_.22could_not_determine_32.2F64_bit_of_java.22" id='"could_not_determine_32/64_bit_of_java"'><span id=".22could_not_determine_32.2F64_bit_of_java.22"></span>"could not determine 32/64 bit of java"</h3></div>
+<p>A forgotten install of the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-steam-integration/">linux-steam-integration</a></span><sup><small>AUR</small></sup></span> package caused this with at least one game. Early on there were conflicts between the system and the steam runtime versions of some libraries, and that package helped resolve some of them. It is unclear whether it is still helpful, but uninstalling it resolved the above error message for Project Zomboid. The solution was discovered by noticing that running the <code>projectzomboid.sh</code> command from the command line worked, but switching the launch options to <code>sh -xc 'echo %command%; declare -p'</code> showed Steam was trying to run the exact same command, but there were a lot of <code>lsi-</code>-prefixed libraries inserted in the preload and path.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Stuttering_with_Vulkan" id="Stuttering_with_Vulkan">Stuttering with Vulkan</h3></div>
+<p>If you notice a constant intense stutter every 1-2 seconds, there may be conflicts in your vsync settings. Manually configuring vsync in the parameters will possibly fix it.
+</p><p>Go to the game properties and configure it in Launch Options:
+</p>
+<pre>DXVK_FRAME_RATE=60 %command%
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Force_OpenGL_emulation" id="Force_OpenGL_emulation">Force OpenGL emulation</h3></div>
+<p>Some, especially older games might not work with the default Vulkan (<a href="#pg7ee679542be7">DXVK</a>) wrapper Proton uses. Try running the application with WineD3D OpenGL wrapper instead:
+</p>
+<pre>PROTON_USE_WINED3D=1 %command%
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_File_picker_does_not_see_anything_but_st" id="File_picker_does_not_see_anything_but_steam_library">File picker does not see anything but steam library</h3></div>
+<p>See <a href="https://bugs.archlinux.org/task/78625">FS#78625</a>. You need to install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal">xdg-desktop-portal</a></span><sup><small>包</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_DirectX_errors_on_hybrid_graphics" id="DirectX_errors_on_hybrid_graphics">DirectX errors on hybrid graphics</h3></div>
+<p>For laptop with Intel/Nvidia <a href="#pg236e07734567">Hybrid graphics</a> encountering the following error:
+</p>
+<pre>A d3d11-compatible gpu (feature level 11.0, shader model 5.0) is required to run the engine.
+</pre>
+<p>It's probably because your game is running on the iGPU instead of the dedicated GPU and you need to configure <a href="#pgb7ad5a571901">PRIME</a>. If it's still not doing it, try using <a href="#pg73514fe2a8cb_Force_OpenGL_emulation">Direct3D instead of DXVK</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_No_Internet_Connection_when_downloading" id="No_Internet_Connection_when_downloading">No Internet Connection when downloading</h3></div>
+<p>If you see <i>No Internet Connection</i> while downloading games, a possible solution is clearing the download cache (<i>Steam &gt; Settings &gt; Downloads &gt; Clear Download Cache</i>).
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Poor_performance_or_stuttering_after_lau" id="Poor_performance_or_stuttering_after_launching_Steam">Poor performance or stuttering after launching Steam</h3></div>
+<p>If you experience reduced performance or stuttering, lasting anywhere from a few seconds to a couple of minutes after launching Steam, it may be cased by bugged or outdated Proton installations.
+</p><p>Remove bugged Proton installed under app ID 0: <code>~/.steam/root/steamapps/compatdata/0</code>. You may also need to remove outdated and problematic Proton versions, including custom ones like GE-Proton, especially <code>5.21-GE-1</code>.
+</p><p>For more details, see <a href="https://github.com/ValveSoftware/steam-for-linux/issues/8114">steam-for-linux#8114</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg73514fe2a8cb_Very_long_startup_and_slow_user_interfac" id="Very_long_startup_and_slow_user_interface_response">Very long startup and slow user interface response</h3></div>
+<p>Steam's use of <code>steamloopback.host</code> in its Chromium backend to refer to itself. Due to the way <i>systemd-resolvd</i> attempts to resolve this host (via <code>mdns</code> by default for some users) this issue can hang the interface. This causes very long startups (if it ever starts) and a slow-responding (or not at all) user interface. This issue can temporary be addressed by editing <code>/etc/nsswitch.conf</code> to change <code>mdns</code> to <code>mdns_minimal</code> and restarting systemd-resolvd. For more details, see <a href="https://github.com/ValveSoftware/steam-for-linux/issues/10879">[9]</a>.
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg73514fe2a8cb_See_also" id="See_also">See also</h2></div>
+<ul><li><a href="https://bbs.archlinux.org/viewforum.php?id=32">Multimedia and Games / Arch Linux Forums</a></li>
+<li><a href="https://github.com/ValveSoftware/steam-for-linux">ValveSoftware/steam-for-linux</a> – Issue tracking for the Steam for Linux client</li>
+<li><a href="https://steamcommunity.com/">Steam Community discussions of the game</a></li>
+<li><a href="https://help.steampowered.com/en/">Steam Support FAQ</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807035954
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.395 seconds
+Real time usage: 0.410 seconds
+Preprocessor visited node count: 2009/1000000
+Revision size: 46205/2097152 bytes
+Post‐expand include size: 27331/2097152 bytes
+Template argument size: 9200/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  105.343      1 -total
+ 14.55%   15.327    127 Template:Ic
+  7.11%    7.487     32 Template:Pkg
+  7.09%    7.468     10 Template:META_Message
+  6.05%    6.375      4 Template:Out_of_date
+  5.42%    5.705      2 Template:Accuracy
+  4.34%    4.577      3 Template:Expansion
+  3.24%    3.413      1 Template:翻译状态
+  3.20%    3.370      4 Template:Man
+  3.10%    3.271      1 Template:需要翻译
+-->
+<!-- Render ID 724f650e-9214-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8083:|#|:idhash:canonical!zh-cn and timestamp 20260807035954 and revision id 34770. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

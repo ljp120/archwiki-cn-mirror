@@ -1,0 +1,559 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pga6e29fecd7a5">电源管理</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Power_management">Power management</a>，最近一次同步于 2025-04-09，若英文版本有所<a href="https://wiki.archlinux.org/title/Power_management?diff=0&amp;oldid=831129">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Power_management_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg146ac4b0e523">/挂起与休眠</a></li>
+<li><a href="#pgb0e48b0a2dc6">/唤醒触发器</a></li>
+<li><a href="#pg170b536fb37a">CPU 调频</a></li>
+<li><a href="#pg48e1c701563b">Display Power Management Signaling</a></li>
+<li><a href="#pg9955d7f4115a">混合图形技术</a></li>
+<li><a href="#pg6dbfce2ea89d">内核模块</a></li>
+<li><a href="#pg7b7cc2bbe79a">sysctl</a></li>
+<li><a href="#pge009209061ac">udev</a></li>
+</ul></div>
+<p><a href="https://en.wikipedia.org/wiki/Power_management">电源管理</a>这个功能可以在系统组件不工作时切断其电源或将其切换到低耗电模式。
+</p><p>Arch 中的电源管理包含两个主要部分：
+</p>
+<ol><li>配置与硬件交互的 Linux <a href="#pg3473491e6a48">内核</a>：
+<ul><li><a href="#pgec0856954f1c">内核参数</a></li>
+<li><a href="#pg6dbfce2ea89d">内核模块</a></li>
+<li><a href="#pge009209061ac">udev</a> 规则</li></ul></li>
+<li>配置用户空间工具，这些工具与内核交互并对其事件作出反应。许多用户空间工具还允许以“用户友好”的方式修改内核配置。有关选项，参见#用户空间工具。</li></ol>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6e29fecd7a5_.E7.94.A8.E6.88.B7.E7.A9.BA.E9.97.B4.E5.B7.A5.E5.85.B7" id="用户空间工具"><span id=".E7.94.A8.E6.88.B7.E7.A9.BA.E9.97.B4.E5.B7.A5.E5.85.B7"></span>用户空间工具</h2></div>
+<p>这些工具允许你更改许多设置，而无需手动编辑配置文件。请勿同时运行多个程序，以避免冲突，因为它们的工作方式基本类似。更多电源管理选项请参考<a href="#pg3039ff0f45f6">电源管理分类</a>。
+</p><p>下面是一些比较流行的节能工具：
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E5.91.BD.E4.BB.A4.E8.A1.8C.E5.B7.A5.E5.85.B7" id="命令行工具"><span id=".E5.91.BD.E4.BB.A4.E8.A1.8C.E5.B7.A5.E5.85.B7"></span>命令行工具</h3></div>
+<ul><li><b><a href="#pg2b172a4074ba">acpid</a></b> — 一个支持 netlink 的 ACPI 电源管理事件分发进程。</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/acpid2/">https://sourceforge.net/projects/acpid2/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=acpid">acpid</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pga426d657903e">Laptop Mode Tools</a></b> — 配置笔记本电源设置的工具，很多人将其视为省电标准工具，需要的配置比较多。</li></ul>
+<dl><dd><a href="https://github.com/rickysarraf/laptop-mode-tools">https://github.com/rickysarraf/laptop-mode-tools</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/laptop-mode-tools/">laptop-mode-tools</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>libsmbios</b> — 和 Dell SMBIOS tables 交互的库和工具.</li></ul>
+<dl><dd><a href="https://github.com/dell/libsmbios">https://github.com/dell/libsmbios</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libsmbios">libsmbios</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg844c346c2853">powertop</a></b> — 检查电源消耗和电源管理的工具，可以协助省电模式的配置。</li></ul>
+<dl><dd><a href="https://github.com/fenrus75/powertop">https://github.com/fenrus75/powertop</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=powertop">powertop</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>powerstat</b> — 使用 ACPI 或 Intel RAPL 接口测量功耗的工具。</li></ul>
+<dl><dd><a href="https://github.com/ColinIanKing/powerstat">https://github.com/ColinIanKing/powerstat</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/powerstat/">powerstat</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgac06dd8bfe95">systemd</a></b> — 一个系统和服务管理器。</li></ul>
+<dl><dd><a href="https://systemd.io/">https://systemd.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd">systemd</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg10f1d5521407">TLP</a></b> — Linux 高级电源管理</li></ul>
+<dl><dd><a href="https://linrunner.de/tlp">https://linrunner.de/tlp</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tlp">tlp</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>TuneD</b> — 执行设备监控和自适应配置的守护进程。</li></ul>
+<dl><dd><a href="https://tuned-project.org">https://tuned-project.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tuned">tuned</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/UPower">UPower</a></b> — 用于枚举电源设备、监听设备事件以及查询历史和统计信息的抽象层。</li></ul>
+<dl><dd><a href="https://upower.freedesktop.org">https://upower.freedesktop.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=upower">upower</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgb62d85212eec">power-profiles-daemon</a></b> — 通过 D-Bus 提供电源配置文件处理功能。</li></ul>
+<dl><dd><a href="https://gitlab.freedesktop.org/upower/power-profiles-daemon">https://gitlab.freedesktop.org/upower/power-profiles-daemon</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=power-profiles-daemon">power-profiles-daemon</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E5.9B.BE.E5.BD.A2.E5.8C.96.E7.95.8C.E9.9D.A2" id="图形化界面"><span id=".E5.9B.BE.E5.BD.A2.E5.8C.96.E7.95.8C.E9.9D.A2"></span>图形化界面</h3></div>
+<ul><li><b>batsignal</b> — 轻量级电池监视器，使用libnotify来警告电池电量不足。</li></ul>
+<dl><dd><a href="https://github.com/electrickite/batsignal">https://github.com/electrickite/batsignal</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=batsignal">batsignal</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>cbatticon</b> — 一款在系统托盘中的轻量且快速的电池图标。</li></ul>
+<dl><dd><a href="https://github.com/valr/cbatticon">https://github.com/valr/cbatticon</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cbatticon">cbatticon</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>GNOME Power Statistics</b> — GNOME的电源信息统计工具。</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/GNOME/gnome-power-manager">https://gitlab.gnome.org/GNOME/gnome-power-manager</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-power-manager">gnome-power-manager</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>KDE Power Devil</b> — Plasma的电源管理模块。</li></ul>
+<dl><dd><a href="https://invent.kde.org/plasma/powerdevil">https://invent.kde.org/plasma/powerdevil</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=powerdevil">powerdevil</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>LXQt Power Management</b> — LXQt的电源管理模块。</li></ul>
+<dl><dd><a href="https://github.com/lxqt/lxqt-powermanagement">https://github.com/lxqt/lxqt-powermanagement</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lxqt-powermanagement">lxqt-powermanagement</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>MATE Power Management</b> — MATE的电源管理工具。</li></ul>
+<dl><dd><a href="https://github.com/mate-desktop/mate-power-manager">https://github.com/mate-desktop/mate-power-manager</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mate-power-manager">mate-power-manager</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>MATE Power Statistics</b> — MATE的电源信息统计工具。</li></ul>
+<dl><dd><a href="https://github.com/mate-desktop/mate-power-manager">https://github.com/mate-desktop/mate-power-manager</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mate-power-manager">mate-power-manager</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>poweralertd</b> — 用于传递 UPower 通知的守护进程。</li></ul>
+<dl><dd><a href="https://git.sr.ht/~kennylevinsen/poweralertd">https://git.sr.ht/~kennylevinsen/poweralertd</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/poweralertd/">poweralertd</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>powerkit</b> — 一个独立于桌面的轻量级全功能电源管理器。</li></ul>
+<dl><dd><a href="https://github.com/rodlie/powerkit">https://github.com/rodlie/powerkit</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/powerkit/">powerkit</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Xfce Power Manager</b> — Xfce的电源管理工具。</li></ul>
+<dl><dd><a href="https://docs.xfce.org/xfce/xfce4-power-manager/start">https://docs.xfce.org/xfce/xfce4-power-manager/start</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xfce4-power-manager">xfce4-power-manager</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>vattery</b> — 用Vala编写的电池监控应用程序，它将在系统托盘中显示笔记本电脑电池的状态。</li></ul>
+<dl><dd><a href="https://www.jezra.net/projects/vattery.html">https://www.jezra.net/projects/vattery.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vattery/">vattery</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6e29fecd7a5_ACPI_.E4.BA.8B.E4.BB.B6" id="ACPI_事件"><span id="ACPI_.E4.BA.8B.E4.BB.B6"></span>ACPI 事件</h2></div>
+<p><i>systemd</i> 处理一些与电源相关的 <a href="https://en.wikipedia.org/wiki/Advanced_Configuration_and_Power_Interface">ACPI</a> 事件，这些事件的操作可以在 <code>/etc/systemd/logind.conf</code> 或 <code>/etc/systemd/logind.conf.d/*.conf</code> 中配置——参见 <span class="plainlinks archwiki-template-man" title="$ man 5 logind.conf"><a href="https://man.archlinux.org/man/logind.conf.5">logind.conf(5)</a></span>。在没有专用电源管理器的系统上，这可能会取代通常用于响应这些 ACPI 事件的 <a href="#pg2b172a4074ba">acpid</a> 守护进程。
+</p><p>每个事件的指定操作可以是 <code>ignore</code>、<code>poweroff</code>、<code>reboot</code>、<code>halt</code>、<code>suspend</code>、<code>hibernate</code>、<code>hybrid-sleep</code>、<code>suspend-then-hibernate</code>、<code>lock</code> 或 <code>kexec</code>。在休眠和挂起的情况下，必须正确<a href="#pgf74f0234a0f8">设置</a>。如果事件未配置，<i>systemd</i> 将使用默认操作。
+</p>
+<table class="wikitable sortable">
+<tbody><tr>
+<th>事件处理器
+</th>
+<th>描述
+</th>
+<th>默认操作
+</th></tr>
+<tr>
+<td><code>HandlePowerKey</code>
+</td>
+<td>当电源键/按钮被按下时触发。
+</td>
+<td><code>poweroff</code>
+</td></tr>
+<tr>
+<td><code>HandleSuspendKey</code>
+</td>
+<td>当挂起键/按钮被按下时触发。
+</td>
+<td><code>suspend</code>
+</td></tr>
+<tr>
+<td><code>HandleHibernateKey</code>
+</td>
+<td>当休眠键/按钮被按下时触发。
+</td>
+<td><code>hibernate</code>
+</td></tr>
+<tr>
+<td><code>HandleLidSwitch</code>
+</td>
+<td>当盖子关闭时触发，以下情况除外。
+</td>
+<td><code>suspend</code>
+</td></tr>
+<tr>
+<td><code>HandleLidSwitchDocked</code>
+</td>
+<td>当系统插入扩展坞或连接了多个显示器时，盖子关闭时触发。
+</td>
+<td><code>ignore</code>
+</td></tr>
+<tr>
+<td><code>HandleLidSwitchExternalPower</code>
+</td>
+<td>当系统连接到外部电源时，盖子关闭时触发。
+</td>
+<td><code>HandleLidSwitch</code> 设置的操作
+</td></tr></tbody></table>
+<p>要应用更改，请 <a href="#pgd732b403250d">reload</a> <code>systemd-logind.service</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li><i>systemd</i> 无法处理 AC 和电池 ACPI 事件，因此如果你使用 <a href="#pga426d657903e">Laptop Mode Tools</a> 或其他类似工具，仍然需要 <a href="#pg2b172a4074ba">acpid</a>。</li>
+<li>当连续快速进行盖子开关操作时，<i>logind</i> 会延迟挂起操作最多 90 秒以检测可能的扩展坞。<a href="https://lists.freedesktop.org/archives/systemd-devel/2015-January/027131.html">[1]</a> 从 systemd v220 开始，此延迟可配置。<a href="https://github.com/systemd/systemd/commit/9d10cbee89ca7f82d29b9cb27bef11e23e3803ba">[2]</a> 你可以在 <code>logind.conf</code> 或其 drop-in 文件中使用例如 <code>HoldoffTimeoutSec=30s</code>。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86.E5.99.A8" id="电源管理器"><span id=".E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86.E5.99.A8"></span>电源管理器</h3></div>
+<p>一些<a href="#pg712e4adaddad">桌面环境</a>包含电源管理器，这些管理器会<a href="https://systemd.io/INHIBITOR_LOCKS/">抑制</a>（临时关闭）部分或所有 <i>systemd</i> ACPI 设置。如果此类电源管理器正在运行，则 ACPI 事件的操作可以仅在电源管理器中配置。只有在你想配置未被电源管理器抑制的特定事件的行为时，才需要更改 <code>/etc/systemd/logind.conf</code> 或 <code>/etc/systemd/logind.conf.d/*.conf</code>。
+</p><p>请注意，如果电源管理器没有为适当的事件抑制 <i>systemd</i>，你可能会遇到 <i>systemd</i> 挂起系统，然后在系统唤醒时，另一个电源管理器再次挂起它的情况。<a href="#pg1e095fe2c2a6">GNOME</a>、<a href="#pg374a7df9dfd3">MATE</a>、<a href="#pgb8d7c68cf276">Plasma</a> 和 <a href="#pg361394ab1daf">Xfce</a> 的电源管理器会发出必要的 <i>inhibited</i> 命令。如果没有发出 <i>inhibited</i> 命令，例如在使用 <a href="#pg2b172a4074ba">acpid</a> 或其他工具处理 ACPI 事件时，请将 <code>Handle</code> 选项设置为 <code>ignore</code>。另见 <span class="plainlinks archwiki-template-man" title="$ man 1 systemd-inhibit"><a href="https://man.archlinux.org/man/systemd-inhibit.1">systemd-inhibit(1)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_xss_lock" id="xss-lock">xss-lock</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xss-lock">xss-lock</a></span><sup><small>包</small></sup></span> 订阅 systemd 事件 <code>suspend</code>、<code>hibernate</code>、<code>lock-session</code> 和 <code>unlock-session</code>，并执行适当的操作（运行锁屏程序并等待用户解锁或终止锁屏程序）。<i>xss-lock</i> 还会响应 <a href="#pgd7fdec19bc95">DPMS</a> 事件，并根据需要运行或终止锁屏程序。
+</p><p>例如，<a href="#pg780df292faff">Autostart</a> 以下内容：
+</p>
+<pre>$ xss-lock -- i3lock -n -i <i>background_image.png</i> &amp;
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6e29fecd7a5_.E8.8A.82.E8.83.BD" id="节能"><span id=".E8.8A.82.E8.83.BD"></span>节能</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>参见 <a href="#pge7666ea64560">笔记本电脑#电源管理</a> 了解特定于笔记本电脑的电源管理，如电池监控。另见特定于 CPU 和 GPU 的页面（例如，<a href="#pg8b8645fab7f7">Ryzen</a>, <a href="#pg4a4bc5e5df24">AMDGPU</a>）。</div>
+<p>本节是创建自定义脚本和节能设置（如 udev 规则）的参考资料。确保设置不由其他实用程序管理，以避免冲突。
+</p><p>这里列出的几乎所有特性都值得使用，无论计算机使用交流电还是电池电源。其中大多数对性能的影响可以忽略不计，只是由于通常的硬件/驱动程序故障而在默认情况下没有启用。减少能源使用意味着减少热量，由于<a href="https://en.wikipedia.org/wiki/Intel_Turbo_Boost">动态超频</a>，在现代英特尔或 AMD CPU 上甚至可以获得更高的性能。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E6.89.93.E5.8D.B0.E7.94.B5.E6.BA.90.E8.AE.BE.E7.BD.AE" id="打印电源设置"><span id=".E6.89.93.E5.8D.B0.E7.94.B5.E6.BA.90.E8.AE.BE.E7.BD.AE"></span>打印电源设置</h3></div>
+<p>此脚本打印 USB 和 PCI 设备的电源设置以及各种其他属性。请注意，需要 root 权限才能查看所有设置。
+</p>
+<pre>#!/bin/bash
+
+for i in $(find /sys/devices/ -name "bMaxPower")
+do
+	busdir=${i%/*}
+	busnum=$(&lt;$busdir/busnum)
+	devnum=$(&lt;$busdir/devnum)
+	title=$(lsusb -s $busnum:$devnum)
+
+	printf "\n\n+++ %s\n  -%s\n" "$title" "$busdir"
+
+	for ff in $(find $busdir/power/ -type f ! -empty 2&gt;/dev/null)
+	do
+		v=$(cat $ff 2&gt;/dev/null|tr -d "\n")
+		[[ ${#v} -gt 0 ]] &amp;&amp; echo -e " ${ff##*/}=$v";
+		v=;
+	done | sort -g;
+done;
+
+printf "\n\n\n+++ %s\n" "内核模块"
+for mod in $(lspci -k | sed -n '/in use:/s,^.*: ,,p' | sort -u)
+do
+	echo "+ $mod";
+	systool -v -m $mod 2&gt; /dev/null | sed -n "/Parameters:/,/^$/p";
+done</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E6.94.AF.E6.8C.81_Intel_HWP_.28Intel_Hardware_P-state.29_.E7.9A.84.E5.A4.84.E7.90.86.E5.99.A8" id="支持_Intel_HWP_(Intel_Hardware_P-state)_的处理器"><span id=".E6.94.AF.E6.8C.81_Intel_HWP_.28Intel_Hardware_P-state.29_.E7.9A.84.E5.A4.84.E7.90.86.E5.99.A8"></span>支持 Intel HWP (Intel Hardware P-state) 的处理器</h3></div>
+
+<p>支持 HWP 的处理器的可用能源首选项有 <code>default</code>, <code>performance</code>,  <code>balance_performance</code>, <code>balance_power</code>, <code>power</code>。
+</p><p>这可以通过运行
+</p>
+<pre>$ cat /sys/devices/system/cpu/cpufreq/policy*/energy_performance_available_preferences
+</pre>
+<p>为了节省更多的能源，您可以通过创建以下文件进行配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tmpfiles.d/energy_performance_preference.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">w /sys/devices/system/cpu/cpufreq/policy*/energy_performance_preference - - - - balance_power
+</pre>
+<p>参见 <span class="plainlinks archwiki-template-man" title="$ man 8 x86_energy_perf_policy"><a href="https://man.archlinux.org/man/x86_energy_perf_policy.8">x86_energy_perf_policy(8)</a></span> 手册页获取关于 Intel 处理器能源性能策略的更多信息。另见 <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-tmpfiles"><a href="https://man.archlinux.org/man/systemd-tmpfiles.8">systemd-tmpfiles(8)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 5 tmpfiles.d"><a href="https://man.archlinux.org/man/tmpfiles.d.5">tmpfiles.d(5)</a></span> 手册页获取临时文件/目录的详细信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E9.9F.B3.E9.A2.91" id="音频"><span id=".E9.9F.B3.E9.A2.91"></span>音频</h3></div>
+<p>默认情况下，音频节能功能是否开启取决于驱动程序，例如 HD Audio 默认开启。<a href="#pge3bd6ffc74f5">识别</a>正在使用的模块，然后运行
+</p>
+<pre>$ modinfo --field=parm <i>模块名称</i> | column --separator=':' --table --table-columns-limit=2
+</pre>
+<p>并查找调整或禁用节能功能的<a href="#pg575dea0b2198">内核模块参数</a>（如 <code>power_save</code>）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>节能功能可能会导致可听见的点击声（爆裂声）和其他问题。请参见相关页面的解决方案：
+<ul><li><a href="#pgbf526a42611c">Advanced Linux Sound Architecture/Troubleshooting#Power saving</a></li>
+<li><a href="#pgfd2dc6e44edd">PipeWire#Noticeable audio delay or audible pop/crack when starting playback</a></li>
+<li><a href="#pga1af3ff81178">PulseAudio/Troubleshooting#Pops when starting and stopping playback</a></li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E8.83.8C.E5.85.89" id="背光"><span id=".E8.83.8C.E5.85.89"></span>背光</h3></div>
+<p>见<a href="#pga0bdbde91ee9">背光</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E8.93.9D.E7.89.99" id="蓝牙"><span id=".E8.93.9D.E7.89.99"></span>蓝牙</h3></div>
+<p>要完全禁用蓝牙，请将 <code>btusb</code> 和 <code>bluetooth</code> 模块列入<a href="#pg9a7fe4327732">黑名单</a>。
+</p><p>或者，创建以下 udev 规则：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/50-bluetooth.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># 禁用蓝牙
+SUBSYSTEM=="rfkill", ATTR{type}=="bluetooth", ATTR{state}="0"</pre>
+<p>要仅暂时关闭蓝牙，使用 <span class="plainlinks archwiki-template-man" title="$ man 8 rfkill"><a href="https://man.archlinux.org/man/rfkill.8">rfkill(8)</a></span>：
+</p>
+<pre># rfkill block bluetooth
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E7.BD.91.E7.BB.9C.E6.91.84.E5.83.8F.E5.A4.B4" id="网络摄像头"><span id=".E7.BD.91.E7.BB.9C.E6.91.84.E5.83.8F.E5.A4.B4"></span>网络摄像头</h3></div>
+<p>如果你不使用集成的网络摄像头，将 <code>uvcvideo</code> 模块加入<a href="#pg9a7fe4327732">黑名单</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0" id="内核参数"><span id=".E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0"></span>内核参数</h3></div>
+<p>本节使用 <code>/etc/sysctl.d/</code> 中的配置，它是<i>“内核 sysctl 参数的插入式目录”</i>。有关更多信息，参见 <a href="http://0pointer.de/blog/projects/the-new-configuration-files">The New Configuration Files</a> 和更具体的 <span class="plainlinks archwiki-template-man" title="$ man 5 sysctl.d"><a href="https://man.archlinux.org/man/sysctl.d.5">sysctl.d(5)</a></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6e29fecd7a5_.E7.A6.81.E7.94.A8_NMI_.E7.9C.8B.E9.97.A8.E7.8B.97" id="禁用_NMI_看门狗"><span id=".E7.A6.81.E7.94.A8_NMI_.E7.9C.8B.E9.97.A8.E7.8B.97"></span>禁用 NMI 看门狗</h4></div>
+
+<p><a href="https://en.wikipedia.org/wiki/Non-maskable_interrupt">NMI（不可屏蔽中断）</a>看门狗是一个调试特性，用于捕捉导致内核 panic 的硬件中断。在某些系统上，它会产生大量的中断，导致用电量明显增加。要列出自上次启动以来每个 CPU 核心的中断，可以使用：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ grep NMI /proc/interrupts</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NMI:     22     58     24     23     24     39     22     30   Non-maskable interrupts
+</pre>
+<p>要关闭硬锁检测器，请使用：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/disable_watchdog.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">kernel.nmi_watchdog = 0</pre>
+<p>或者在<a href="#pgec0856954f1c">内核参数</a>中添加 <code>nmi_watchdog=0</code>。
+</p><p>或者，在<a href="#pgec0856954f1c">内核参数</a>中添加 <code>nowatchdog</code> 以禁用硬锁和软锁检测器。参见 <a href="https://docs.kernel.org/admin-guide/kernel-parameters.html">[3]</a>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6e29fecd7a5_.E5.86.99.E5.9B.9E.E6.97.B6.E9.97.B4" id="写回时间"><span id=".E5.86.99.E5.9B.9E.E6.97.B6.E9.97.B4"></span>写回时间</h4></div>
+<p>增加虚拟内存脏写回时间有助于将硬盘 I/O 聚合在一起，从而减少跨硬盘写操作，并提高节能。要将值设置为60秒（默认值为5秒）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/dirty.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">vm.dirty_writeback_centisecs = 6000</pre>
+<p>要对支持的文件系统（例如ext4, btrfs...）上的日志提交执行同样的操作，请在 <a href="#pgced0cc449f44">fstab</a> 中使用 <code>commit=60</code> 作为选项。
+</p><p>注意，这个值是作为下面笔记本模式设置的副作用而修改的。另请参阅 <a href="#pg7b7cc2bbe79a">Sysctl#虚拟内存</a>了解其他影响 I/O 性能和节能的参数。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6e29fecd7a5_.E7.AC.94.E8.AE.B0.E6.9C.AC.E7.94.B5.E8.84.91.E6.A8.A1.E5.BC.8F" id="笔记本电脑模式"><span id=".E7.AC.94.E8.AE.B0.E6.9C.AC.E7.94.B5.E8.84.91.E6.A8.A1.E5.BC.8F"></span>笔记本电脑模式</h4></div>
+<p>参见笔记本电脑模式“旋钮”的<a href="https://docs.kernel.org/admin-guide/laptops/laptop-mode.html">内核文档</a>-“旋钮的合理值为5秒”。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/laptop.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">vm.laptop_mode = 5</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此设置主要与自旋磁盘驱动器有关。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E7.BD.91.E7.BB.9C.E6.8E.A5.E5.8F.A3" id="网络接口"><span id=".E7.BD.91.E7.BB.9C.E6.8E.A5.E5.8F.A3"></span>网络接口</h3></div>
+<p><span class="ilh-all" data-foreign-title="Wake-on-LAN" data-lang-code="en" data-lang-name="英语" data-orig-title="网络唤醒"><span class="ilh-page"><a href="#pg0cfcb9e943e6">网络唤醒</a></span></span>可能是一个有用的功能，但如果你不使用它，那么在挂起时等待魔术包只会消耗额外的电量。您可以调整<span class="ilh-all" data-foreign-title="Wake-on-LAN#udev" data-lang-code="en" data-lang-name="英语" data-orig-title="网络唤醒#udev"><span class="ilh-page"><a href="#pg0cfcb9e943e6">网络唤醒#udev</a></span></span>规则，以禁用所有以太网接口的功能。要在所有无线接口上用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iw">iw</a></span><sup><small>包</small></sup></span> 启用节能，请执行以下操作：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/<b>81</b>-wifi-powersave.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", SUBSYSTEM=="net", KERNEL=="wl*", RUN+="/usr/bin/iw dev $name set power_save on"</pre>
+<p>配置文件的名称很重要。通过在 systemd 中使用<a href="#pgf42a74f3af9c">持久设备名称</a>，在设备重命名为持久名称（例如，<code>wlan0</code> 重命名为 <code>wlp3s0</code>）<b>后</b>，将应用上述网络规则（以 <code>80-net-setup-link.rules</code> 的字典命名）。请注意，在处理完所有规则之后，将执行 <code>RUN</code> 命令，并且无论如何都必须使用持久化名称，可在 <code>$name</code> 中为匹配的设备使用。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6e29fecd7a5_Intel_.E6.97.A0.E7.BA.BF.E7.BD.91.E5.8D.A1.EF.BC.88iwlwifi.EF.BC.89" id="Intel_无线网卡（iwlwifi）"><span id="Intel_.E6.97.A0.E7.BA.BF.E7.BD.91.E5.8D.A1.EF.BC.88iwlwifi.EF.BC.89"></span>Intel 无线网卡（iwlwifi）</h4></div>
+<p>通过向内核模块传递正确的参数，可以启用带有 <code>iwlwifi</code> 驱动程序的 Intel 无线网卡的其他节能功能。通过将以下行添加到 <code>/etc/modprobe.d/iwlwifi.conf</code> 文件中来实现持久化：
+</p>
+<pre>options iwlwifi power_save=1
+</pre>
+<p>此选项可能会增加延迟中值：
+</p>
+<pre>options iwlwifi uapsd_disable=0
+</pre>
+<p>在低于5.4的内核上，您可以使用此选项，但它可能会降低您的最大吞吐量：
+</p>
+<pre>options iwlwifi d0i3_disable=0
+</pre>
+<p>根据您的无线网卡，这两个选项之一将适用。
+</p>
+<pre>options iwlmvm power_scheme=3
+</pre>
+<pre>options iwldvm force_cam=0
+</pre>
+<p>您可以通过使用下列命令检查这些模块中的哪个模块正在运行来检查哪个模块是相关模块
+</p>
+<pre># lsmod | grep '^iwl.vm'
+</pre>
+<p>请记住，这些节能选项是试验性的，可能会导致系统不稳定。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E6.80.BB.E7.BA.BF.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86" id="总线电源管理"><span id=".E6.80.BB.E7.BA.BF.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86"></span>总线电源管理</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6e29fecd7a5_.E6.B4.BB.E5.8A.A8.E7.8A.B6.E6.80.81.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86" id="活动状态电源管理"><span id=".E6.B4.BB.E5.8A.A8.E7.8A.B6.E6.80.81.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86"></span>活动状态电源管理</h4></div>
+<p>来自<a href="https://en.wikipedia.org/wiki/Active_State_Power_Management">维基百科</a>：
+</p>
+<dl><dd><b>活动状态电源管理</b>（<b>ASPM</b>）是 PCI Express 设备在完全活动状态下节省电源的一种机制。主要是通过活动状态链路电源管理实现的；即，当没有流量通过时，PCI Express 串行链路会关闭电源。它通常用于笔记本电脑和其他移动互联网设备以延长电池寿命。</dd></dl>
+<p>在启动时，BIOS 根据硬件支持启用或禁用 ASPM。要检查支持情况：
+</p>
+<pre># lspci -vv | grep 'ASPM.*abled;'
+</pre>
+<p>获取可用的 ASPM 策略和当前系统默认值：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /sys/module/pcie_aspm/parameters/policy</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[default] performance powersave powersupersave
+</pre>
+<p>ASPM 可能由于以下原因被禁用 <a href="https://wireless.docs.kernel.org/en/latest/en/users/documentation/aspm.html#why-is-aspm-disabled-for-my-device">[4]</a>：
+</p>
+<ol><li>BIOS 确定需要这样做。</li>
+<li>PCIE 需要 ASPM，但 L0s 是可选的，因此您可能禁用了 L0s 而仅启用了 L1。</li>
+<li>您有一个有问题的 BIOS。</li>
+<li>您没有 BIOS，并且您的系统程序员尚未处理 ASPM。</li></ol>
+<p>如果您认为您的硬件支持 ASPM，尽管有上述情况，可以通过 <code>pcie_aspm=force</code> <a href="#pgec0856954f1c">内核参数</a>强制启用它。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>在不支持的系统上强制启用 ASPM 可能会导致功耗增加。此外，它可能会导致系统冻结或内核 panic，因此请确保如果该选项不合适，您有办法撤消它。</li>
+<li>强制启用 ASPM 是在内核中进行的，因此它可能仍然在硬件中保持禁用状态并且不起作用。要检查是否是这种情况，请以 root 身份运行 <code>dmesg | grep ASPM</code>。如果可能，请查阅特定于硬件的 Wiki 文章以获取更多信息。</li></ul>
+</div>
+<p>只要 ASPM 支持并启用，就可以为当前会话选择所需的策略。例如，切换到 <code>powersupersave</code> 作为当前会话的策略：
+</p>
+<pre># echo powersupersave &gt; /sys/module/pcie_aspm/parameters/policy
+</pre>
+<p>要在系统启动时配置特定的 ASPM 状态（以 <code>powersupersave</code> 为例），请添加 <code>pcie_aspm.policy=powersupersave</code> 作为<a href="#pgec0856954f1c">内核参数</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6e29fecd7a5_PCI_.E8.BF.90.E8.A1.8C.E6.97.B6.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86" id="PCI_运行时电源管理"><span id="PCI_.E8.BF.90.E8.A1.8C.E6.97.B6.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86"></span>PCI 运行时电源管理</h4></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/pci_pm.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SUBSYSTEM=="pci", ATTR{power/control}="auto"
+SUBSYSTEM=="ata_port", KERNEL=="ata*", ATTR{device/power/control}="auto"</pre>
+<p>上述规则会关闭所有未使用的设备。
+</p><p>某些设备不会再次唤醒。要仅对已知可以工作的设备进行运行时电源管理，请使用对应供应商和设备ID的简单匹配（使用 <code>lspci -nn</code> 获取这些值）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/pci_pm.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># PCI 自动挂起的白名单
+SUBSYSTEM=="pci", ATTR{vendor}=="0x1234", ATTR{device}=="0x1234", ATTR{power/control}="auto"</pre>
+<p>或者，将不能使用 PCI 运行时电源管理的设备列入黑名单，并为所有其他设备启用：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/pci_pm.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># PCI 运行时电源管理的黑名单
+SUBSYSTEM=="pci", ATTR{vendor}=="0x1234", ATTR{device}=="0x1234", ATTR{power/control}="on", GOTO="pci_pm_end"
+
+SUBSYSTEM=="pci", ATTR{power/control}="auto"
+LABEL="pci_pm_end"</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6e29fecd7a5_USB_.E8.87.AA.E5.8A.A8.E6.8C.82.E8.B5.B7" id="USB_自动挂起"><span id="USB_.E8.87.AA.E5.8A.A8.E6.8C.82.E8.B5.B7"></span>USB 自动挂起</h4></div>
+<p>当 USB 设备不使用时，Linux 内核可以自动挂起它们。这有时可以节省相当多的电量，但某些 USB 设备与 USB 节能不兼容，并开始出现错误行为（USB 鼠标/键盘常见）。基于白名单或黑名单过滤的 <a href="#pge009209061ac">udev</a> 规则可以帮助缓解问题。
+</p><p>以下示例为所有 USB 设备启用自动挂起，但键盘和鼠标除外：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/50-usb_power_save.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", SUBSYSTEM=="usb", ATTR{product}!="*Mouse", ATTR{product}!="*Keyboard", TEST=="power/control", ATTR{power/control}="auto"</pre>
+<p>要仅允许已知可以工作的设备进行自动挂起，请使用对应供应商和产品 ID 的简单匹配（使用 <i>lsusb</i> 获取这些值）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/50-usb_power_save.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># USB 自动挂起的白名单
+ACTION=="add", SUBSYSTEM=="usb", TEST=="power/control", ATTR{idVendor}=="05c6", ATTR{idProduct}=="9205", ATTR{power/control}="auto"</pre>
+<p>或者，将不能使用 USB 自动挂起的设备列入黑名单，并为所有其他设备启用它：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/50-usb_power_save.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># USB 自动挂起的黑名单
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="05c6", ATTR{idProduct}=="9205", GOTO="power_usb_rules_end"
+
+ACTION=="add", SUBSYSTEM=="usb", TEST=="power/control", ATTR{power/control}="auto"
+LABEL="power_usb_rules_end"</pre>
+<p>默认的自动挂起空闲延迟时间由 <code>usbcore</code> 内建<a href="#pg6dbfce2ea89d">内核模块</a>的 <code>autosuspend</code> 参数控制。要将延迟设置为5秒而不是默认的2秒，请为引导加载程序添加以下<a href="#pgec0856954f1c">内核参数</a>。
+</p>
+<pre>usbcore.autosuspend=5
+</pre>
+<p>与 <code>power/control</code> 类似，可以通过设置 <code>power/autosuspend</code> 属性来微调每个设备的延迟时间。这意味着，也可以通过将 <code>power/autosuspend</code> 设置为-1（即从不自动挂起）来禁用自动挂起：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/50-usb_power_save.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="05c6", ATTR{idProduct}=="9205", ATTR{power/autosuspend}="-1"</pre>
+<p>参见 <a href="https://docs.kernel.org/driver-api/usb/power-management.html">Linux 内核文档</a>获取关于 USB 电源管理的更多信息。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6e29fecd7a5_SATA_.E6.B4.BB.E5.8A.A8.E9.93.BE.E8.B7.AF.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86" id="SATA_活动链路电源管理"><span id="SATA_.E6.B4.BB.E5.8A.A8.E9.93.BE.E8.B7.AF.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86"></span>SATA 活动链路电源管理</h4></div>
+<p>当前设置可以从 <code>/sys/class/scsi_host/host*/link_power_management_policy</code> 读取或写入：
+</p>
+<pre>$ grep . /sys/class/scsi_host/host*/link_power_management_policy
+$ echo "med_power_with_dipm" &gt;/sys/class/scsi_host/host<i>N</i>/link_power_management_policy
+</pre>
+<table class="wikitable">
+<caption>可用的 ALPM 设置
+</caption>
+<tbody><tr>
+<th>设置
+</th>
+<th>说明
+</th>
+<th>节能
+</th></tr>
+<tr>
+<td>max_performance
+</td>
+<td>当前默认值
+</td>
+<td>无
+</td></tr>
+<tr>
+<td>medium_power
+</td>
+<td>-
+</td>
+<td>~1.0瓦
+</td></tr>
+<tr>
+<td>med_power_with_dipm
+</td>
+<td>推荐设置<sup>1</sup>
+</td>
+<td>~1.5瓦
+</td></tr>
+<tr>
+<td>min_power
+</td>
+<td><b>警告：可能丢失数据</b><sup>2</sup>
+</td>
+<td>~1.5瓦
+</td></tr></tbody></table>
+<ol><li>自 Linux 4.15 起，有一个名为 <code>med_power_with_dipm</code> 的<a href="https://hansdegoede.livejournal.com/18412.html">设置</a>，它与 Windows IRST 驱动程序设置的行为相匹配，并且不应导致最近的 SSD 或 HDD 数据丢失。节能效果显著，范围<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=ebb82e3c79d2a956366d0848304a53648bd6350b">从1.0瓦到1.5瓦（空闲时）</a>。它已成为 Linux 4.16 中基于 Intel 的笔记本电脑的默认设置 <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=ebb82e3c79d2a956366d0848304a53648bd6350b">[5]</a>。在 Linux 6.11 中，它成为默认设置 <a href="https://www.phoronix.com/news/SATA-Link-Power-Linux-6.11">[6]</a>。</li>
+<li><div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><code>min_power</code> SATA 活动链路电源管理设置可能会导致某些设备上的数据丢失。除非经常备份，否则不要启用此设置。</div></li></ol>
+<p>您可以通过添加 <a href="#pge009209061ac">udev</a> 规则文件来持久化配置 <code>link_power_management_policy</code> 设置，例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/hd_power_save.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", SUBSYSTEM=="scsi_host", KERNEL=="host*", ATTR{link_power_management_policy}="med_power_with_dipm"</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>这会增加访问闲置驱动器时的延迟，因此这是少数几个值得根据您是否使用交流电源进行切换的设置之一。</li>
+<li>并非所有 SATA 主机控制器和存储设备的组合都能与默认的 <code>med_power_with_dipm</code> 设置良好配合。例如：
+<ul><li>截至 linux-6.8.1，Intel 7 系列芯片组控制器在访问 Crucial M550 SSD（固件 MU02）时会出现超时和链路退化。</li>
+<li>截至 linux-6.9.6，AMD 600 系列芯片组 SATA 控制器与 HL-DT-ST BDDVDRW GGC-H20L 光盘驱动器一起使用时，会产生令人讨厌的效果，即每隔几分钟就会重新初始化光盘驱动器。</li></ul></li></ul>
+<dl><dd><dl><dd>在这种情况下，使用 <code>medium_power</code> 设置可以解决问题。</dd></dl></dd></dl>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E7.A1.AC.E7.9B.98.E9.A9.B1.E5.8A.A8.E5.99.A8" id="硬盘驱动器"><span id=".E7.A1.AC.E7.9B.98.E9.A9.B1.E5.8A.A8.E5.99.A8"></span>硬盘驱动器</h3></div>
+<p>有关可以设置的驱动器参数，请参见<a href="#pg62a34c92338a">hdparm#电源管理配置</a>。
+</p><p>当有太多程序频繁写入硬盘时，节能效果不佳。跟踪所有程序，获取它们如何以及何时写入硬盘以限制磁盘使用。使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iotop">iotop</a></span><sup><small>包</small></sup></span> 查看哪些程序经常使用磁盘。有关其他提示，请参见<a href="#pg5f7223c277dc">性能优化#存储设备</a>。
+</p><p>诸如设置 <a href="#pgced0cc449f44">noatime</a> 选项之类的小事情也会有所帮助。如果有足够的 RAM 可用，请考虑禁用或限制<a href="#pgad14227759fd">交换值</a>，因为它可能会限制大量的磁盘写操作。
+</p><p>对于具有 <a href="https://www.seagate.com/files/docs/pdf/en-GB/whitepaper/tp608-powerchoice-tech-provides-gb.pdf">PowerChoice</a> 技术的希捷驱动器，通过 <a href="#pg62a34c92338a">hdparm</a> 设置 APM 的技巧将不起作用，因为 <i>EPC</i>（扩展电源条件）功能。与其设置 APM，您可以<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/openseachest/">openseachest</a></span><sup><small>AUR</small></sup></span> 并完全禁用 EPC，如下所示（将 <i>X</i> 替换为实际驱动器字母）：
+</p>
+<pre># openSeaChest_PowerControl --scan
+# openSeaChest_PowerControl -d /dev/sd<i>X</i> -i
+# openSeaChest_PowerControl -d /dev/sd<i>X</i> --showEPCSettings
+# openSeaChest_PowerControl -d /dev/sd<i>X</i> --EPCfeature disable
+# openSeaChest_PowerControl -d /dev/sd<i>X</i> --showEPCSettings
+</pre>
+<p>最后一次调用将给出以下摘要：
+</p>
+<pre>==========================================================================================
+ openSeaChest_PowerControl - openSeaChest drive utilities - NVMe Enabled
+ Copyright (c) 2014-2023 Seagate Technology LLC and/or its Affiliates, All Rights Reserved
+ openSeaChest_PowerControl Version: 3.3.1-4_1_1 X86_64
+ Build Date: Jul  4 2023
+ Today: Tue Jul  4 17:49:36 2023        User: root
+==========================================================================================
+
+/dev/sd<i>X</i> - ST1000NM0008-2F2100 - ZFA19JG2 - SN02 - ATA
+
+
+===EPC Settings===
+        * = timer is enabled
+        C column = Changeable
+        S column = Savable
+        All times are in 100 milliseconds
+
+Name       Current Timer Default Timer Saved Timer   Recovery Time C S
+Idle A      0            *10           *10           1             Y Y
+Idle B      0            *1200         *1200         3             Y Y
+Idle C      0             6000          6000         16            Y Y
+Standby Z   0             9000          9000         46            Y Y
+</pre>
+<p>Zeroes in the first column confirm that parking and spindown were disabled successfully
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6e29fecd7a5_.E5.B7.A5.E5.85.B7.E5.92.8C.E8.84.9A.E6.9C.AC" id="工具和脚本"><span id=".E5.B7.A5.E5.85.B7.E5.92.8C.E8.84.9A.E6.9C.AC"></span>工具和脚本</h2></div>
+
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E4.BD.BF.E7.94.A8.E8.84.9A.E6.9C.AC.E5.92.8C_udev_.E8.A7.84.E5.88.99" id="使用脚本和_udev_规则"><span id=".E4.BD.BF.E7.94.A8.E8.84.9A.E6.9C.AC.E5.92.8C_udev_.E8.A7.84.E5.88.99"></span>使用脚本和 udev 规则</h3></div>
+
+<p>由于 systemd 用户可以通过 <code>systemctl suspend</code> 或 <code>systemctl hibernate</code> 来挂起和休眠，并能使用 <code>/etc/systemd/logind.conf</code> 处理 acpi 事件，因此删除 <i>pm-utils</i> 和 <a href="#pg2b172a4074ba">acpid</a> 可能会很具吸引力。只有一件事 systemd 不能做（自 systemd-204）：电源管理取决于系统是运行在交流电还是电池上。为了填补这个空白，您可以创建一个 <a href="#pge009209061ac">udev</a> 规则，在电源适配器被插入和拔出时运行一个脚本：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/powersave.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SUBSYSTEM=="power_supply", ATTR{online}=="0", RUN+="/path/to/your/script true"
+SUBSYSTEM=="power_supply", ATTR{online}=="1", RUN+="/path/to/your/script false"</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>您可以使用 <i>pm-powersave</i> 所用的相同脚本。您只需要将其设置为可执行并放置在其他地方（例如 <code>/usr/local/bin/</code>）。</div>
+<p>节能脚本示例：
+</p>
+<ul><li><a href="https://github.com/supplantr/ftw">ftw</a>, 包：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ftw-git/">ftw-git</a></span><sup><small>AUR</small></sup></span></li>
+<li><a href="https://github.com/Unia/powersave">powersave</a></li>
+<li><a href="https://bbs.archlinux.org/viewtopic.php?id=180762">throttlectl</a>，来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/throttlectl/">throttlectl</a></span><sup><small>AUR</small></sup></span></li></ul>
+<p>上述 udev 规则应按预期工作，但如果在挂起或休眠周期后未更新电源设置，则应在 <code>/usr/lib/systemd/system-sleep/</code> 中添加一个脚本，其中包含以下内容：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/systemd/system-sleep/00powersave</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+
+case $1 in
+    pre) /path/to/your/script false ;;
+    post)
+	if cat /sys/class/power_supply/AC0/online | grep 0 &gt; /dev/null 2&gt;&amp;1
+	then
+    		/path/to/your/script true
+	else
+    		/path/to/your/script false
+	fi
+    ;;
+esac
+exit 0
+</pre>
+<p>不要忘记使它可执行！
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>请注意，AC0 可能与您的笔记本电脑不同，如果是这样，请更改它。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6e29fecd7a5_.E5.85.81.E8.AE.B8.E7.94.A8.E6.88.B7.E5.85.B3.E6.9C.BA" id="允许用户关机"><span id=".E5.85.81.E8.AE.B8.E7.94.A8.E6.88.B7.E5.85.B3.E6.9C.BA"></span>允许用户关机</h2></div>
+
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E6.8C.89.E9.92.AE.E5.92.8C.E7.AC.94.E8.AE.B0.E6.9C.AC.E7.9B.96.E4.BA.8B.E4.BB.B6" id="按钮和笔记本盖事件"><span id=".E6.8C.89.E9.92.AE.E5.92.8C.E7.AC.94.E8.AE.B0.E6.9C.AC.E7.9B.96.E4.BA.8B.E4.BB.B6"></span>按钮和笔记本盖事件</h3></div>
+<p>按挂起、关机、休眠按钮以及笔记本盖关闭事件由 <i>logind</i> 处理，请参考 #ACPI events。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E4.BD.BF.E7.94.A8_systemd-logind" id="使用_systemd-logind"><span id=".E4.BD.BF.E7.94.A8_systemd-logind"></span>使用 systemd-logind</h3></div>
+<p>如果正在使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=polkit">polkit</a></span><sup><small>包</small></sup></span>，只要<a href="#pga57cd4863e73">会话未中断</a>，具有非远程会话的用户就可以发出与电源相关的命令。
+</p><p>检查会话是否处于活动状态：
+</p>
+<pre>$ loginctl show-session $XDG_SESSION_ID --property=Active
+</pre>
+<p>然后，用户可以在命令行中使用 <i>systemctl</i> 命令，或者将它们添加到菜单中：
+</p>
+<pre>$ systemctl poweroff
+$ systemctl reboot
+</pre>
+<p>也可以使用 <code>systemctl suspend</code> 和 <code>systemctl hibernate</code> 等其它命令。请参见 <span class="plainlinks archwiki-template-man" title="$ man 1 systemctl"><a href="https://man.archlinux.org/man/systemctl.1.zh_CN">systemctl(1)</a></span> 中的<b>系统命令</b>章节。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6e29fecd7a5_.E4.BD.BF.E7.94.A8_sudo" id="使用_sudo"><span id=".E4.BD.BF.E7.94.A8_sudo"></span>使用 sudo</h3></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sudo">sudo</a></span><sup><small>包</small></sup></span>，并授予用户 <a href="#pg023562413be7">sudo 权限</a>。用户就能够使用 <code>sudo systemctl</code> 命令（例如， <code>sudo systemctl poweroff</code>, <code>sudo systemctl reboot</code>, <code>sudo systemctl suspend</code> 和 <code>sudo systemctl hibernate</code>）。请参见 <span class="plainlinks archwiki-template-man" title="$ man 1 systemctl"><a href="https://man.archlinux.org/man/systemctl.1.zh_CN">systemctl(1)</a></span> 中的<b>系统命令</b>章节。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6e29fecd7a5_.E6.B2.A1.E6.9C.89_sudo_.E6.9D.83.E9.99.90.E7.9A.84.E7.94.A8.E6.88.B7" id="没有_sudo_权限的用户"><span id=".E6.B2.A1.E6.9C.89_sudo_.E6.9D.83.E9.99.90.E7.9A.84.E7.94.A8.E6.88.B7"></span>没有 sudo 权限的用户</h4></div>
+<p>如果只允许用户使用关闭命令，而不允许用户拥有其他 sudo 权限，那么作为 root 用户，使用 <code>visudo</code> 命令将以下内容添加到 <code>/etc/sudoers</code> 的末尾。用你的用户名代替 <i>user</i>，用机器的主机名代替 <i>hostname</i>。
+</p>
+<pre><i>user</i> <i>hostname</i> =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot
+</pre>
+<p>现在你的用户可以使用 <code>sudo systemctl poweroff</code> 来关机，与使用 <code>sudo systemctl reboot</code> 来重启。用户想要将系统断电也能使用 <code>sudo systemctl halt</code>。仅当你不想被提示输入密码时使用 <code>NOPASSWD:</code> 标签。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6e29fecd7a5_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://www.thinkwiki.org/wiki/How_to_reduce_power_consumption">ThinkWiki:如何降低功耗</a></li>
+<li><a href="https://ivanvojtko.blogspot.sk/2016/04/how-to-get-longer-battery-life-on-linux.html">如何在 Linux 上获得更长的电池寿命</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807022715
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.523 seconds
+Real time usage: 0.544 seconds
+Preprocessor visited node count: 1982/1000000
+Revision size: 30024/2097152 bytes
+Post‐expand include size: 34807/2097152 bytes
+Template argument size: 16558/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.013/7.000 seconds
+Lua memory usage: 629394/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  173.183      1 -total
+ 20.49%   35.484      2 Template:Link-en
+ 10.20%   17.659     21 Template:App
+  8.50%   14.728     90 Template:Ic
+  4.22%    7.310      2 Template:Merge
+  4.20%    7.269      9 Template:Man
+  3.73%    6.465     21 Template:Pkg
+  3.39%    5.864     18 Template:Hc
+  3.19%    5.530      2 Template:Style
+  2.33%    4.033      5 Template:META_Message
+-->
+<!-- Render ID 80e34f8f-9207-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3697:|#|:idhash:canonical!zh-cn and timestamp 20260807022715 and revision id 34293. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

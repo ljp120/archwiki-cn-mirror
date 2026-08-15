@@ -1,0 +1,97 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pge066cdacda79">指点杆</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/TrackPoint">TrackPoint</a>，最近一次同步于 2016-06-08，若英文版本有所<a href="https://wiki.archlinux.org/title/TrackPoint?diff=0&amp;oldid=437637">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/TrackPoint_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>小红点(TrackPoint)是联想所有的键盘中间的指点杆的商标。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-evdev">xf86-input-evdev</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-libinput">xf86-input-libinput</a></span><sup><small>包</small></sup></span> 都支持它。evdev是 <a href="#pga36c0aff60be">Xorg</a> 的默认驱动。 
+</p><p>在默认设置中，<a href="#pga36c0aff60be">Xorg</a> 支持点击和指点, 但是用中键做滚轮需要更多的配置。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge066cdacda79_GUI_.E9.85.8D.E7.BD.AE" id="GUI_配置"><span id="GUI_.E9.85.8D.E7.BD.AE"></span>GUI 配置</h2></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gpointing-device-settings/">gpointing-device-settings</a></span><sup><small>AUR</small></sup></span> 软件包。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge066cdacda79_.E7.94.A8.E4.B8.AD.E9.94.AE.E4.BD.9C.E6.BB.9A.E8.BD.AE" id="用中键作滚轮"><span id=".E7.94.A8.E4.B8.AD.E9.94.AE.E4.BD.9C.E6.BB.9A.E8.BD.AE"></span>用中键作滚轮</h2></div>
+<p>使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-libinput">xf86-input-libinput</a></span><sup><small>包</small></sup></span> 时，用中键作滚轮的功能默认启用。
+</p><p>使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-evdev">xf86-input-evdev</a></span><sup><small>包</small></sup></span> 时，用中键作滚轮的功能由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xinput">xorg-xinput</a></span><sup><small>包</small></sup></span> 软件包的 <i>xinput</i> 支持。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xinitrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">tpset() { xinput set-prop "<i>TPPS/2 IBM TrackPoint</i>" "$@"; }
+
+tpset "Evdev Wheel Emulation" 1
+tpset "Evdev Wheel Emulation Button" 2
+tpset "Evdev Wheel Emulation Timeout" 200
+tpset "Evdev Wheel Emulation Axes" 6 7 4 5
+tpset "Device Accel Constant Deceleration" 0.95
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>可以用 <code>xinput --list</code> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hwinfo">hwinfo</a></span><sup><small>包</small></sup></span> 列出设备名。</li>
+<li><code>"Device Accel Constant Deceleration"</code> 一行配置小红点的敏感度。</li></ul>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge066cdacda79_.E6.8C.89.E5.8E.8B.E9.80.89.E6.8B.A9" id="按压选择"><span id=".E6.8C.89.E5.8E.8B.E9.80.89.E6.8B.A9"></span>按压选择</h2></div>
+<p>小红点和很多触摸板一样支持按压选择功能。要手工打开此功能：
+</p>
+<pre># echo -n 1 &gt; /sys/devices/platform/i8042/serio1/press_to_select
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>press_to_select</code> 文件的位置可能会因为你使用的设备而有所不同。同时带有小红点和触摸板的系统会用 <code>/sys/devices/platform/i8042/serio1/serio2/</code> 路径，而只有小红点的设备会用 <code>/sys/devices/platform/i8042/serio1/</code> 路径。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge066cdacda79_udev.E8.A7.84.E5.88.99" id="udev规则"><span id="udev.E8.A7.84.E5.88.99"></span>udev规则</h2></div>
+<p>这条规则增大小红点的<b>速度</b>并在启动时打开<b>按压选择</b>功能（如上所述）。
+随便改变这些数值并添加其他修改到 /sys/devices/platform/i8042/serio1/serio2/ 的文件中。这个规则也使用于只有小红点的设备。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/10-trackpoint.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", SUBSYSTEM=="input", ATTR{name}=="TPPS/2 IBM TrackPoint", ATTR{device/sensitivity}="240", ATTR{device/press_to_select}="1"</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge066cdacda79_Xorg.E9.85.8D.E7.BD.AE" id="Xorg配置"><span id="Xorg.E9.85.8D.E7.BD.AE"></span>Xorg配置</h2></div>
+<p>要打开按下中键时用小红点作滚轮的功能，创建 <code>/etc/X11/xorg.conf.d/20-thinkpad.conf</code>，用<i>xinput</i>给的设备名字替换 <code>TPPS/2 IBM TrackPoint</code>:
+</p>
+<pre>Section "InputClass"
+    Identifier	"Trackpoint Wheel Emulation"
+    MatchProduct	"<i>TPPS/2 IBM TrackPoint</i>"
+    MatchDevicePath	"/dev/input/event*"
+    Option		"EmulateWheel"		"true"
+    Option		"EmulateWheelButton"	"2"
+    Option		"Emulate3Buttons"	"false"
+    Option		"XAxisMapping"		"6 7"
+    Option		"YAxisMapping"		"4 5"
+EndSection
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge066cdacda79_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge066cdacda79_.E5.B0.8F.E7.BA.A2.E7.82.B9.E6.B2.A1.E8.A2.AB.E6.A3.80.E6.B5.8B.E5.88.B0.E6.88.96.E8.80.85.E5.9C.A8X.E5.88.86.E9.92.9F.E5.90.8E.E8.A2.AB.E6.A3.80.E6.B5.8B.E5.88.B0" id="小红点没被检测到或者在X分钟后被检测到"><span id=".E5.B0.8F.E7.BA.A2.E7.82.B9.E6.B2.A1.E8.A2.AB.E6.A3.80.E6.B5.8B.E5.88.B0.E6.88.96.E8.80.85.E5.9C.A8X.E5.88.86.E9.92.9F.E5.90.8E.E8.A2.AB.E6.A3.80.E6.B5.8B.E5.88.B0"></span>小红点没被检测到或者在X分钟后被检测到</h3></div>
+<p>这看起来是个内核的bug: <a href="https://bugzilla.kernel.org/show_bug.cgi?id=33292">https://bugzilla.kernel.org/show_bug.cgi?id=33292</a>
+</p><p>一个方案是往 psmouse 模块传入 proto=bare 参数。但是这会禁止触摸板的滚动功能和两指中键点击功能。
+</p>
+<pre>modprobe psmouse proto=bare
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge066cdacda79_.E5.8F.82.E8.80.83" id="参考"><span id=".E5.8F.82.E8.80.83"></span>参考</h2></div>
+<ul><li><a href="https://www.thinkwiki.org/wiki/How_to_configure_the_TrackPoint">How to configure the TrackPoint - ThinkWiki</a></li>
+<li><a href="https://gist.githubusercontent.com/noromanba/11261595/raw/478cf4c4d9b63f1e59364a6f427ffccd63db5e1e/thinkpad-trackpoint-speed.mkd">Trackpoint speed</a></li>
+<li><a href="https://askubuntu.com/questions/37824/what-is-the-best-way-to-configure-a-thinkpads-trackpoint/553926">What is the best way to configure a Thinkpad's TrackPoint?</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807043858
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.082 seconds
+Real time usage: 0.087 seconds
+Preprocessor visited node count: 175/1000000
+Revision size: 3438/2097152 bytes
+Post‐expand include size: 4129/2097152 bytes
+Template argument size: 1568/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   17.844      1 -total
+ 24.48%    4.369      2 Template:注意
+ 19.74%    3.522      1 Template:翻译状态
+ 19.31%    3.445      6 Template:Pkg
+  9.45%    1.687      7 Template:Ic
+  8.08%    1.442      2 Template:Hc
+  6.27%    1.119      1 Template:AUR
+-->
+<!-- Render ID e771690e-9219-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3894:|#|:idhash:canonical!zh-cn and timestamp 20260807043858 and revision id 34385. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

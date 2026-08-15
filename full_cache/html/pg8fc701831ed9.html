@@ -1,0 +1,132 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg8fc701831ed9">设备文件</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Device_file">Device file</a>，最近一次同步于 2023-03-13，若英文版本有所<a href="https://wiki.archlinux.org/title/Device_file?diff=0&amp;oldid=772442">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Device_file_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgd2fddf50b50f">块设备持久化命名</a></li>
+</ul></div>
+
+<p>根据<a href="https://zh.wikipedia.org/wiki/%E8%AE%BE%E5%A4%87%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">维基百科</a>：设备文件在类 Unix 系统中是一个设备驱动程序的接口，并如常规文件一样出现在文件系统中。
+</p><p>根据<a href="https://zh.wikipedia.org/wiki/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84%E6%A0%87%E5%87%86">文件系统层次结构标准 (FHS)</a>，设备文件在 <code>/dev</code> 目录中。
+</p><p>在 Arch Linux 上设备节点由 <a href="#pge009209061ac">udev</a> 管理。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8fc701831ed9_.E5.9D.97.E8.AE.BE.E5.A4.87" id="块设备"><span id=".E5.9D.97.E8.AE.BE.E5.A4.87"></span>块设备</h2></div>
+<p>块设备是一种特殊文件，能通过缓冲区访问硬件设备。有关详细说明和虚拟文件系统设备之间的比较，请参阅<a href="https://zh.wikipedia.org/wiki/%E8%AE%BE%E5%A4%87%E6%96%87%E4%BB%B6#.E5.9D.97.E8.AE.BE.E5.A4.87">维基百科</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fc701831ed9_.E5.9D.97.E8.AE.BE.E5.A4.87.E5.90.8D" id="块设备名"><span id=".E5.9D.97.E8.AE.BE.E5.A4.87.E5.90.8D"></span>块设备名</h3></div>
+<p>设备名的开头指定了内核操作块设备时使用的驱动子系统。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>块设备的内核名称描述符不<a href="#pgd2fddf50b50f">固定</a>，在每次启动时可能会变化。不应在配置文件里使用块设备名。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8fc701831ed9_SCSI" id="SCSI">SCSI</h4></div>
+<p>支持 <a href="https://zh.wikipedia.org/wiki/SCSI_%E5%91%BD%E4%BB%A4">SCSI 命令</a> (<a href="https://zh.wikipedia.org/wiki/%E5%B0%8F%E5%9E%8B%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%8E%A5%E5%8F%A3">SCSI</a>、<a href="https://zh.wikipedia.org/wiki/%E4%B8%B2%E5%88%97SCSI">SAS</a>、<a href="https://en.wikipedia.org/wiki/USB_Attached_SCSI">UASP</a>)、ATA (<a href="https://zh.wikipedia.org/wiki/%E9%AB%98%E6%8A%80%E6%9C%AF%E9%85%8D%E7%BD%AE">PATA</a>、<a href="https://zh.wikipedia.org/wiki/SATA">SATA</a>) 的存储设备或 <a href="https://zh.wikipedia.org/wiki/USB%E5%A4%A7%E5%AE%B9%E9%87%8F%E5%AD%98%E5%82%A8%E8%AE%BE%E5%A4%87">USB 大容量存储设备</a>，比如机械硬盘、<a href="#pgcb28ba980ed7">固态硬盘</a>和闪存驱动器，均由内核 SCSI 驱动子系统处理。这些设备的命名规范一致。
+</p><p>这些设备的名称以 <code>sd</code> 开头。之后是一个从 <code>a</code> 开始的小写字母，<code>a</code> 表示第一个发现的设备，<code>b</code> 表示第二个发现的设备，以此类推。
+</p><p>例如：
+</p>
+<ul><li><code>/dev/sda</code> - 设备 <code>a</code>，第一个发现的设备。</li>
+<li><code>/dev/sde</code> - 设备 <code>e</code>，第五个发现的设备。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8fc701831ed9_NVMe" id="NVMe">NVMe</h4></div>
+<p>通过 NVM Express(<a href="#pgfabce5fffaa5">NVMe</a>) 连接的设备，比如<a href="#pgcb28ba980ed7">固态硬盘</a>，名称以 <code>nvme</code> 开头。之后是一个从 <code>0</code> 开始的数字，表示设备控制器号。<code>nvme0</code> 表示第一个发现的 NVMe 控制器，<code>nvme1</code> 表示第二个发现的，以此类推。然后是字母 "n" 和一个从 <code>1</code> 开始的数字，表示控制器上的设备号。比如 <code>nvme0n1</code> 表示第一个控制器上第一个发现的设备，<code>nvme0n2</code> 表示第一个控制器上第二个发现的设备，以此类推。
+</p><p>例如：
+</p>
+<ul><li><code>/dev/nvme0n1</code> - 控制器 <code>0</code> 上的设备 <code>1</code>，第一个控制器上第一个发现的设备。</li>
+<li><code>/dev/nvme2n5</code> - 控制器 <code>2</code> 上的设备 <code>5</code>，第三个控制器上第五个发现的设备。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8fc701831ed9_MMC" id="MMC">MMC</h4></div>
+
+<p><a href="https://zh.wikipedia.org/wiki/SD%E5%8D%A1">SD 卡</a>、<a href="https://zh.wikipedia.org/wiki/%E5%A4%9A%E5%AA%92%E4%BD%93%E5%AD%98%E5%82%A8%E5%8D%A1">多媒体存储卡 (MMC 卡)</a> 和 <a href="https://zh.wikipedia.org/wiki/%E5%A4%9A%E5%AA%92%E4%BD%93%E5%AD%98%E5%82%A8%E5%8D%A1#eMMC">eMMC 存储设备</a>由内核的 <code>mmc</code> 驱动处理。这些设备的名称以 <code>mmcblk</code> 开头，之后是一个从 <code>0</code> 开始的数字表示设备号。比如 <code>mmcblk0</code> 表示第一个发现的设备，<code>mmcblk1</code> 表示第二个发现的设备，以此类推。
+</p><p>例如：
+</p>
+<ul><li><code>/dev/mmcblk0</code> - 设备 <code>0</code>，第一个发现的设备。</li>
+<li><code>/dev/mmcblk4</code> - 设备 <code>4</code>，第五个发现的设备。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8fc701831ed9_SCSI_.E5.85.89.E7.9B.98.E9.A9.B1.E5.8A.A8.E5.99.A8" id="SCSI_光盘驱动器"><span id="SCSI_.E5.85.89.E7.9B.98.E9.A9.B1.E5.8A.A8.E5.99.A8"></span>SCSI 光盘驱动器</h4></div>
+<p>通过受 <a href="#pg8fc701831ed9_SCSI">SCSI</a> 驱动子系统支持的接口连接的<a href="#pg00ff68993b08">光盘驱动器</a>，其名称以 <code>sr</code> 开头。之后是一个从 <code>0</code> 开始的数字，表示设备号。比如 <code>sr0</code> 表示第一个发现的设备, <code>sr1</code> 表示第二个发现的设备，以此类推。
+</p><p><a href="#pge009209061ac">Udev</a> 也提供到 <code>/dev/sr0</code> 的符号链接，名为 <code>/dev/cdrom</code>。符号链接的名称 <code>/dev/cdrom</code> 与驱动器支持的光盘类型和插入的介质无关。
+</p><p>例如：
+</p>
+<ul><li><code>/dev/sr0</code> - 光盘驱动器 <code>0</code>，第一个发现的光盘驱动器。</li>
+<li><code>/dev/sr4</code> -  光盘驱动器 <code>4</code>，第五个发现的光盘驱动器。</li>
+<li><code>/dev/cdrom</code> - 到 <code>/dev/sr0</code> 的符号链接。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8fc701831ed9_virtio_blk" id="virtio-blk">virtio-blk</h4></div>
+<p>连接到 virtio 块设备 (virtio-blk) 接口的驱动器，其名称以 <code>vd</code> 开头。之后是一个从 <code>a</code> 开始的小写字母，<code>a</code> 表示第一个发现的设备 (<code>vda</code>)，<code>b</code> 表示第二个发现的设备 (<code>vdb</code>)，以此类推。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>不要将 virtio-blk 与 virtio-scsi 混淆。后者模拟 SCSI 控制器，因此遵循 <a href="#pg8fc701831ed9_SCSI">SCSI 命名规则</a>。</div>
+<p>例如：
+</p>
+<ul><li><code>/dev/vda</code> - 设备 <code>a</code>，第一个发现的设备。</li>
+<li><code>/dev/vde</code> - 设备 <code>e</code>，第五个发现的设备。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8fc701831ed9_.E5.88.86.E5.8C.BA" id="分区"><span id=".E5.88.86.E5.8C.BA"></span>分区</h4></div>
+<p>分区设备名是驱动器设备名与在分区表中分配的分区编号的组合 (可表示为 <code>/dev/<i>drivepartition</i></code>) 。对于设备名以数字结尾的驱动器，需要用字母 "p" 分隔驱动器名和分区编号 (可表示为 <code>/dev/<i>drive</i><b>p</b><i>partition</i></code>)。
+</p><p>例如：
+</p>
+<ul><li><code>/dev/sda1</code> - <code>/dev/sda</code> 上的分区 <code>1</code>。</li>
+<li><code>/dev/nvme2n5p3</code> - <code>/dev/nvme2n5</code> 上的分区 <code>3</code>。</li>
+<li><code>/dev/mmcblk3p4</code> - <code>/dev/mmcblk3</code> 上的分区 <code>4</code>。</li>
+<li><code>/dev/vda1</code> - <code>/dev/vda</code> 上的分区 <code>1</code>。</li>
+<li><code>/dev/loop0p2</code> - <code>/dev/loop0</code> 上的分区 <code>2</code>。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fc701831ed9_.E5.AE.9E.E7.94.A8.E5.B7.A5.E5.85.B7" id="实用工具"><span id=".E5.AE.9E.E7.94.A8.E5.B7.A5.E5.85.B7"></span>实用工具</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8fc701831ed9_lsblk" id="lsblk">lsblk</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=util-linux">util-linux</a></span><sup><small>包</small></sup></span> 软件包提供了列出块设备的实用工具 <span class="plainlinks archwiki-template-man" title="$ man 8 lsblk"><a href="https://man.archlinux.org/man/lsblk.8">lsblk(8)</a></span>，例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk --fs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME   FSTYPE   LABEL       UUID                                 MOUNTPOINT
+sda
+├─sda1 vfat                 C4DA-2C4D                            /boot
+├─sda2 swap                 5b1564b2-2e2c-452c-bcfa-d1f572ae99f2 [SWAP]
+└─sda3 ext4                 56adc99b-a61e-46af-aab7-a6d07e504652 /
+</pre>
+<p>在上述例子中，只有一个设备可用 (<code>sda</code>)。此设备有 3 个分区 (从 <code>sda1</code> 到 <code>sda3</code>)，每个分区都有不同的<a href="#pg6c70b7fdfa57">文件系统</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8fc701831ed9_wipefs" id="wipefs">wipefs</h4></div>
+
+<p><i>wipefs</i> 能列出或擦除指定设备上的<a href="#pg6c70b7fdfa57">文件系统</a>、<a href="#pg1b71ce42139c">RAID</a> 或<a href="#pg8edad8d1135b">分区表</a>签名 (魔术字符串)，从而使签名对 <span class="plainlinks archwiki-template-man" title="$ man 3 libblkid"><a href="https://man.archlinux.org/man/libblkid.3">libblkid(3)</a></span> 不可见。它不会擦除文件系统自身，也不会擦除设备上的任何其他数据。
+</p><p>更多信息请参阅 <span class="plainlinks archwiki-template-man" title="$ man 8 wipefs"><a href="https://man.archlinux.org/man/wipefs.8">wipefs(8)</a></span> 。
+</p><p>例如，以下命令将擦除设备 <code>/dev/sdb</code> 的所有签名，并给每个签名创建签名备份文件 <code>~/wipefs-sdb-<i>offset</i>.bak</code>：
+</p>
+<pre># wipefs --all --backup /dev/sdb
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8fc701831ed9_.E4.BC.AA.E8.AE.BE.E5.A4.87" id="伪设备"><span id=".E4.BC.AA.E8.AE.BE.E5.A4.87"></span>伪设备</h2></div>
+<p>无物理设备的设备节点。
+</p>
+<ul><li><a href="#pg1672a1f79ce9">/dev/random</a>，参见 <span class="plainlinks archwiki-template-man" title="$ man 4 random"><a href="https://man.archlinux.org/man/random.4">random(4)</a></span></li>
+<li><a href="#pg4f8dfbc9e8de">/dev/shm</a></li>
+<li><a href="https://zh.wikipedia.org/wiki//dev/null">/dev/null</a>，参见 <a href="https://zh.wikipedia.org/wiki//dev/zero">/dev/zero</a> 和 <span class="plainlinks archwiki-template-man" title="$ man 4 null"><a href="https://man.archlinux.org/man/null.4">null(4)</a></span></li>
+<li><a href="https://zh.wikipedia.org/wiki//dev/full">/dev/full</a>，参见 <span class="plainlinks archwiki-template-man" title="$ man 4 full"><a href="https://man.archlinux.org/man/full.4">full(4)</a></span></li>
+<li><a href="#pg1a0e36e7a9e0">/dev/ttyX</a> (其中 X 是一个数字)</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8fc701831ed9_.E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85" id="另请参阅"><span id=".E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85"></span>另请参阅</h2></div>
+<ul><li><a href="https://docs.kernel.org/admin-guide/devices.html">Linux 内核文档 - Linux 已分配的设备 (English)</a></li>
+<li><a href="https://wiki.gentoo.org/wiki/Device_file">Gentoo：设备文件 (English)</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807031749
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.176 seconds
+Real time usage: 0.184 seconds
+Preprocessor visited node count: 920/1000000
+Revision size: 7204/2097152 bytes
+Post‐expand include size: 8162/2097152 bytes
+Template argument size: 2725/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 5/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   53.930      1 -total
+ 17.35%    9.355     78 Template:Ic
+ 11.81%    6.372      3 Template:Expansion
+  7.87%    4.245      6 Template:Man
+  6.19%    3.340      3 Template:META_Message
+  6.01%    3.240      1 Template:翻译状态
+  3.81%    2.053      1 Template:相关文章开始
+  3.51%    1.893      1 Template:Pkg
+  3.25%    1.752      1 Template:Related
+  2.18%    1.178      1 Template:Hc
+-->
+<!-- Render ID 914af88e-920e-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7548:|#|:idhash:canonical!zh-cn and timestamp 20260807031749 and revision id 33864. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

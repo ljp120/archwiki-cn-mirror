@@ -1,0 +1,258 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgaa59341f7e53">Emacs/提示与技巧</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg9de7470c4ea9">Emacs</a></li>
+<li><a href="#pgafc953581baa">Emacs/运行</a></li>
+<li><a href="#pg66450fb8afdd">Emacs/使用</a></li>
+<li><a href="#pgdff090deed5f">Emacs/疑难解答</a></li>
+<li><a href="#pg14c40a837223">Emacs/软件包</a></li>
+<li><a href="#pg581be9986cc0">文本编辑器</a></li>
+<li><a href="#pg74a2a3e4814c">Vim</a></li>
+</ul></div>
+<p>本文主要讲解了 <a href="#pg9de7470c4ea9">Emacs</a> 的使用技巧和高效方法，包括各方面的实用提示。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa59341f7e53_TRAMP" id="TRAMP">TRAMP</h2></div>
+<p>TRAMP（Transparent Remote Access, Multiple Protocols）是一个扩展名，顾名思义，它可以通过多种协议对远程文件进行透明访问。当提示输入文件名时，输入一个特定的表单就会调用 TRAMP。举几个例子：
+</p><p>以根权限打开 <code>/etc/hosts</code> 前提示输入根密码：
+</p>
+<pre>C-x C-f /sudo::/etc/hosts
+</pre>
+<p>以“你”的身份通过 <a href="#pg81569eb76dc7">SSH</a> 连接到 “remotehost”，并打开文件 <code>~/example.txt</code>：
+</p>
+<pre>C-x C-f /ssh:you@remotehost:~/example.txt
+</pre>
+<p>TRAMP 的路径形式通常为"/[协议]:[[用户@]主机]:&lt;文件&gt;"。
+</p><p>以“你”的身份连接“myhost”，并使用 <i> sudo</i> 编辑 <code>/etc/hosts</code>：
+</p><p><br/>
+</p>
+<pre>/ssh:you@remotehost|sudo:remotehost:/etc/hosts
+</pre>
+<p>TRAMP 支持的功能远不止上面的例子。欲了解更多信息，请参阅随 Emacs 一起发布的 TRAMP info 手册。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa59341f7e53_.E5.B0.86_Emacs_.E7.94.A8.E4.BD.9C_git_.E5.90.88.E5.B9.B6.E5.B7.A5.E5.85.B7" id="将_Emacs_用作_git_合并工具"><span id=".E5.B0.86_Emacs_.E7.94.A8.E4.BD.9C_git_.E5.90.88.E5.B9.B6.E5.B7.A5.E5.85.B7"></span>将 Emacs 用作 git 合并工具</h2></div>
+<p><a href="#pg0d34da84b694">Git</a> 默认支持使用 Emacs 的 <i>Emerge</i> 模式作为合并工具。不过，你可能更喜欢 <i>Ediff</i> 模式。遗憾的是，由于技术原因，git 并不支持这种模式。但还是有办法在调用 emacs 时评估一些 elisp 代码来使用它。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">.gitconfig</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[mergetool.ediff]
+    cmd = emacs --eval \" (progn (defun ediff-write-merge-buffer () (let ((file ediff-merge-store-file)) (set-buffer ediff-buffer-C) (write-region (point-min) (point-max) file) (message \\\"Merge buffer saved in: %s\\\" file) (set-buffer-modified-p nil) (sit-for 1))) (setq ediff-quit-hook 'kill-emacs ediff-quit-merge-hook 'ediff-write-merge-buffer) (ediff-merge-files-with-ancestor \\\"$LOCAL\\\" \\\"$REMOTE\\\" \\\"$BASE\\\" nil \\\"$MERGED\\\"))\" 
+
+[merge]
+	tool = ediff
+</pre>
+<p>注意，命令必须在一行中。
+在上例中，我们启动了一个新的 Emacs 实例。你可能想使用 emacsclient 更快地启动 Emacs，但不建议这样做，因为 Ediff 调用并不干净：它可能会扰乱你当前的 Emacs 会话。
+</p><p>如果想立即启动，可以使用 <code>-q</code> 参数。如果想快速启动 Emacs，同时至少保留部分配置，可以使用：
+</p>
+<pre>emacs -q -l ~/.emacs-light
+</pre>
+<p>其中的轻量配置文件只加载 Ediff 所需的内容。
+</p><p>有关此技巧和 Ediff 问题的更多详情，请参阅 <a href="https://web.archive.org/web/20090210145607/http://kerneltrap.org/mailarchive/git/2007/7/1/250424">kerneltrap.org</a> 和 <a href="https://stackoverflow.com/questions/1817370/using-ediff-as-git-mergetool">stackoverflow</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa59341f7e53_.E5.B0.86.E5.A4.A7.E5.86.99.E9.94.81.E5.AE.9A.E9.94.AE.E7.94.A8.E4.BD.9C_Control_.E9.94.AE" id="将大写锁定键用作_Control_键"><span id=".E5.B0.86.E5.A4.A7.E5.86.99.E9.94.81.E5.AE.9A.E9.94.AE.E7.94.A8.E4.BD.9C_Control_.E9.94.AE"></span>将大写锁定键用作 Control 键</h2></div>
+<p>有些用户喜欢这种行为，以避免出现所谓的 “emacs 小指”。 在图形用户界面桌面（<a href="#pga36c0aff60be">Xorg</a> 或 <a href="#pga21a6be8b605">Wayland</a>）、终端甚至控制台中实现这一功能的好方法是使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=keyd">keyd</a></span><sup><small>包</small></sup></span>。<a href="#pg811194d6beaa">安装</a>此软件包并创建此配置文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/keyd/main.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[ids]	
+*
+
+[main]
+capslock = overload(control, noop)
+</pre>
+<p>然后<a href="#pg5a37de39c354">启用/启动</a> keyd 服务。
+</p><p>这样大写锁定键就会启 Control 键之作用。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa59341f7e53_.E5.A4.8D.E7.94.A8_emacs_.E5.92.8C_emacsclient" id="复用_emacs_和_emacsclient"><span id=".E5.A4.8D.E7.94.A8_emacs_.E5.92.8C_emacsclient"></span>复用 emacs 和 emacsclient</h2></div>
+<p>在同一个 <code>emacs-session</code> 中打开新文件，需要使用 <code>emacsclient</code>。如果会话存在，<code>emacs</code> 命令本身也可以进行封装，以更智能地打开文件。
+</p><p>要启动会话，需要使用 <code>start-server</code>。该代码段将在 emacs 的第一个会话中创建服务器。将其添加到 <code>emacs</code> 配置文件中。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">.emacs or .emacs.d/init.el</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">(require 'server)
+(unless (server-running-p)
+  (server-start))
+</pre>
+<p>Shell 别名方法并不能满足要求，因为你还需要传递变量或启动自己的独立会话。在 shell 的 <code>.bashrc</code> 或任何 rc 文件中添加此选项。这样，如果参数被传递，<code>emacs</code> 命令就会像 emacsclient 一样运行。
+</p>
+<pre>function emacs {
+    if [[ $# -eq 0 ]]; then
+        /usr/bin/emacs # "emacs" is function, will cause recursion
+        return
+    fi
+    args=($*)
+    for ((i=0; i &lt;= ${#args}; i++)); do
+        local a=${args[i]}
+        # NOTE: -c for creating new frame
+        if [[ ${a:0:1} == '-' &amp;&amp; ${a} != '-c' &amp;&amp; ${a} != '--' ]]; then
+            /usr/bin/emacs ${args[*]}
+            return
+        fi
+    done
+    setsid emacsclient -n -a /usr/bin/emacs ${args[*]}
+}
+</pre>
+<p>如果要在新会话中运行，只需执行 <code>emacs <i>file</i> -</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa59341f7e53_.E5.A4.9A.E7.A7.8D.E9.85.8D.E7.BD.AE" id="多种配置"><span id=".E5.A4.9A.E7.A7.8D.E9.85.8D.E7.BD.AE"></span>多种配置</h2></div>
+<p>您可以使用多种配置，并告诉 Emacs 加载其中一种或另一种。
+</p><p>例如，让我们定义两种配置文件。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">.emacs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">(load "~/.emacs.d/main" nil t)
+(load "~/.emacs.d/functions" nil t)
+(load "~/.emacs.d/modes" nil t)
+(load "~/.emacs.d/plugins" nil t)
+(load "~/.emacs.d/theme" nil t)
+</pre>
+<p>这是我们针对守护进程加载的全部配置。但 <i>plugins</i> 文件很大，加载速度也很慢。如果我们想生成一个不需要 <i>plugins</i> 功能的新 Emacs 实例，那么从长远来看，每次加载都会很麻烦。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">.emacs-light</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">(load "~/.emacs.d/main" nil t)
+(load "~/.emacs.d/functions" nil t)
+(load "~/.emacs.d/modes" nil t)
+(load "~/.emacs.d/theme" nil t)
+</pre>
+<p>现在我们用：
+</p>
+<pre>emacs -q -l ~/.emacs-light
+</pre>
+<p>您可以创建一个<a href="#pgb2db5e40b019">别名</a>（如 <code>emacs-light</code>），以便调用。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa59341f7e53_.E5.B1.80.E9.83.A8.E5.8F.98.E9.87.8F.E5.92.8C.E8.87.AA.E5.AE.9A.E4.B9.89.E5.8F.98.E9.87.8F" id="局部变量和自定义变量"><span id=".E5.B1.80.E9.83.A8.E5.8F.98.E9.87.8F.E5.92.8C.E8.87.AA.E5.AE.9A.E4.B9.89.E5.8F.98.E9.87.8F"></span>局部变量和自定义变量</h2></div>
+<p>您可以在配置文件中定义变量，以后可以在本地对文件进行修改。
+</p>
+<pre>(defcustom my-compiler "gcc" "Some documentation")
+</pre>
+<p>现在，在任何文件中都可以通过两种方式定义局部变量，详见<a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-File-Variables.html">手册</a>。
+</p>
+<ul><li>使用 <code> M-x add-file-local-variable-prop-line</code> 可以在开头添加一行注释，类似于：</li></ul>
+<pre>// -*- my-compiler:g++; mode:c++ -*-
+</pre>
+<ul><li>或者使用 <code> M-x add-file-local-variable</code> 在文件末尾添加行：</li></ul>
+<pre>// Local Variables:
+// my-compiler: g++
+// mode: c++
+// End:
+</pre>
+<p>请注意，要使这些值生效，您需要调用 <code>M-x revert-buffer</code>。
+</p><p>默认情况下，自定义变量被认为是不安全的。如果你试图打开一个包含重新定义自定义变量的局部变量的文件，Emacs 会要求你确认。
+</p><p>您可以将变量声明为安全变量，从而消除 Emacs 的确认提示。您需要指定一个谓词，任何新值都必须经过该谓词的验证，这样才能被认为是安全的。
+</p>
+<pre>(defcustom my-compiler "gcc" "Some documentation" :safe 'stringp)
+</pre>
+<p>在上例中，如果您试图设置字符串以外的内容，Emacs 会认为这是不安全的。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa59341f7e53_.E8.87.AA.E5.AE.9A.E4.B9.89.E8.89.B2.E5.BD.A9.E5.92.8C.E4.B8.BB.E9.A2.98" id="自定义色彩和主题"><span id=".E8.87.AA.E5.AE.9A.E4.B9.89.E8.89.B2.E5.BD.A9.E5.92.8C.E4.B8.BB.E9.A2.98"></span>自定义色彩和主题</h2></div>
+<p>可以使用 <i>face</i> 工具轻松定制颜色。
+</p><p><br/>
+</p>
+<pre>(set-face-background  'region                 "color-17")
+(set-face-foreground  'region                 "white")
+(set-face-bold-p      'font-lock-builtin-face t ) 
+</pre>
+<p>您可以让 Emacs 告诉您点所在的 face 的名称。为此，请使用 <i>customize-face</i> 功能。该功能会告诉你如何设置颜色、粗体、下划线等。
+</p><p>控制台中的 Emacs 可以处理 256 种颜色，但必须使用合适的终端。例如，URxvt 支持 256 种颜色。你可以使用 <i>list-colors-display</i> 查看支持颜色的完整列表。这在很大程度上取决于终端。
+</p><p>参见：
+</p>
+<ul><li><a href="https://www.emacswiki.org/emacs/ColorThemes">https://www.emacswiki.org/emacs/ColorThemes</a></li>
+<li><a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Custom-Themes.html">https://www.gnu.org/software/emacs/manual/html_node/emacs/Custom-Themes.html</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa59341f7e53_SyncTeX_.E6.94.AF.E6.8C.81" id="SyncTeX_支持"><span id="SyncTeX_.E6.94.AF.E6.8C.81"></span>SyncTeX 支持</h2></div>
+<p>Emacs 是一款功能强大的 LaTeX 编辑器。这主要是因为你可以调整或创建最适合自己需要的 LaTeX 模式。
+</p><p>不过，也可能会遇到一些挑战，比如 SyncTeX 支持。首先，你需要确保你的 TeX 发行版支持 SyncTeX。如果你手动安装了 <a href="#pg85046d840409">TeX Live</a>，可能需要安装 <i>synctex</i> 软件包。
+</p>
+<pre># umask 022 &amp;&amp; tlmgr install synctex
+</pre>
+<p>SyncTeX 支持与阅读器有关。在此，我们将以 Zathura 为例，因此如果您想使用其他 <a href="#pge347621d1e64">PDF</a> 阅读器，则需要对代码进行调整。
+</p>
+<pre>(defcustom tex-my-viewer "zathura --fork -s -x \"emacsclient --eval '(progn (switch-to-buffer  (file-name-nondirectory \"'\"'\"%{input}\"'\"'\")) (goto-line %{line}))'\"" 
+  "PDF Viewer for TeX documents. You may want to fork the viewer
+so that it detects when the same document is launched twice, and
+persists when Emacs gets closed.
+
+Simple command:
+
+  zathura --fork
+
+We can use
+
+  emacsclient --eval '(progn (switch-to-buffer  (file-name-nondirectory \"%{input}\")) (goto-line %{line}))'
+
+to reverse-search a pdf using SyncTeX. Note that the quotes and double-quotes matter and must be escaped appropriately."
+:safe 'stringp)
+</pre>
+<p>在这里，我们定义了自定义变量。如果您使用的是 AucTeX 或 Emacs 默认的 LaTeX 模式，则必须相应地设置查看器。
+</p><p>现在用 Emacs 打开一个 LaTeX 源文件，编译文档，然后启动查看器。Zathura 进程会自动创建。如果按下 <code>Ctrl+Left click</code> 键，Emacs 就会将点放在相应的位置。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa59341f7e53_systemd_.E6.96.87.E4.BB.B6.E7.9A.84.E8.AF.AD.E6.B3.95.E9.AB.98.E4.BA.AE.E6.98.BE.E7.A4.BA" id="systemd_文件的语法高亮显示"><span id="systemd_.E6.96.87.E4.BB.B6.E7.9A.84.E8.AF.AD.E6.B3.95.E9.AB.98.E4.BA.AE.E6.98.BE.E7.A4.BA"></span>systemd 文件的语法高亮显示</h2></div>
+<p>您可以使用 <a href="https://elpa.nongnu.org/nongnu/systemd.html">systemd-mode</a>。
+</p><p>或者，你也可以在 init 文件中添加以下内容，让 emacs 为 systemd 文件（服务、定时器等）着色：
+</p><p><br/>
+</p>
+<pre> (add-to-list 'auto-mode-alist '("\\.service\\'" . conf-unix-mode))
+ (add-to-list 'auto-mode-alist '("\\.timer\\'" . conf-unix-mode))
+ (add-to-list 'auto-mode-alist '("\\.target\\'" . conf-unix-mode))
+ (add-to-list 'auto-mode-alist '("\\.mount\\'" . conf-unix-mode))
+ (add-to-list 'auto-mode-alist '("\\.automount\\'" . conf-unix-mode))
+ (add-to-list 'auto-mode-alist '("\\.slice\\'" . conf-unix-mode))
+ (add-to-list 'auto-mode-alist '("\\.socket\\'" . conf-unix-mode))
+ (add-to-list 'auto-mode-alist '("\\.path\\'" . conf-unix-mode))
+ (add-to-list 'auto-mode-alist '("\\.netdev\\'" . conf-unix-mode))
+ (add-to-list 'auto-mode-alist '("\\.network\\'" . conf-unix-mode))
+ (add-to-list 'auto-mode-alist '("\\.link\\'" . conf-unix-mode))
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa59341f7e53_.E4.B8.BA_emacs-nox_.E6.8F.90.E4.BE.9B.E5.89.AA.E8.B4.B4.E6.9D.BF.E6.94.AF.E6.8C.81" id="为_emacs-nox_提供剪贴板支持"><span id=".E4.B8.BA_emacs-nox_.E6.8F.90.E4.BE.9B.E5.89.AA.E8.B4.B4.E6.9D.BF.E6.94.AF.E6.8C.81"></span>为 emacs-nox 提供剪贴板支持</h2></div>
+<p>要在 emacs-nox 中使用 <a href="#pga36c0aff60be">Xorg</a> 剪贴板，请<a href="#pg811194d6beaa">安装</a>。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xclip">xclip</a></span><sup><small>包</small></sup></span> 并在 <code>~/.emacs</code> 中添加以下函数<a href="https://lists.gnu.org/archive/html/help-gnu-emacs/2014-08/msg00189.html">[1]</a>：
+</p>
+<pre>;; use xclip to copy/paste in emacs-nox
+(unless window-system
+  (when (getenv "DISPLAY")
+    (defun xclip-cut-function (text &amp;optional push)
+      (with-temp-buffer
+	(insert text)
+	(call-process-region (point-min) (point-max) "xclip" nil 0 nil "-i" "-selection" "clipboard")))
+    (defun xclip-paste-function()
+      (let ((xclip-output (shell-command-to-string "xclip -o -selection clipboard")))
+	(unless (string= (car kill-ring) xclip-output)
+	  xclip-output )))
+    (setq interprogram-cut-function 'xclip-cut-function)
+    (setq interprogram-paste-function 'xclip-paste-function)
+    ))</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>您还可以通过添加以下内容来启用终端鼠标支持：
+<pre>;; xterm mouse support
+(require 'mouse)
+(xterm-mouse-mode t)</pre>
+<p>参见 <a href="https://www.opensource.apple.com/source/emacs/emacs-51/emacs/lisp/mwheel.el">mwheel.el</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2024-11-05 ⓘ]</sup>。
+</p>
+</div>
+<!-- 
+NewPP limit report
+Cached time: 20260808035621
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.101 seconds
+Real time usage: 0.105 seconds
+Preprocessor visited node count: 346/1000000
+Revision size: 11285/2097152 bytes
+Post‐expand include size: 5555/2097152 bytes
+Template argument size: 3389/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 964/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   30.868      1 -total
+ 20.68%    6.383      1 Template:Tip
+  9.50%    2.931     18 Template:Ic
+  8.27%    2.553      1 Template:相关文章开始
+  8.02%    2.477      2 Template:Pkg
+  7.88%    2.433      1 Template:Dead_link
+  6.60%    2.038      5 Template:Hc
+  5.19%    1.601      5 Template:Bc
+  4.91%    1.516      7 Template:相关
+  3.14%    0.969      1 Template:META_Related_articles_start
+-->
+<!-- Render ID 1dc3ec8e-92dd-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8151:|#|:idhash:canonical!zh-cn and timestamp 20260808035621 and revision id 33612. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

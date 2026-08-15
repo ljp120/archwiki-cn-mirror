@@ -1,0 +1,219 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg4955543b232e">内核级显示模式设置</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN">
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Kernel_mode_setting">Kernel mode setting</a>，最近一次同步于 2019-10-29，若英文版本有所<a href="https://wiki.archlinux.org/title/Kernel_mode_setting?diff=0&amp;oldid=586589">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Kernel_mode_setting_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgedfe18626036">ATI</a></li>
+<li><a href="#pg3cbdfef0b3d0">Intel</a></li>
+<li><a href="#pg172970a5f8dd">Nouveau</a></li>
+</ul></div>
+
+<p>内核级<a href="https://en.wikipedia.org/wiki/Mode-setting">显示模式设置</a> (KMS) ，作用是可以在内核级别而不是最终用户级别切换显示分辨率和颜色深度。
+</p><p>Linux 内核的 KMS 实现支持在 framebuffer 中使用原生分辨率和即时终端(tty)切换。KMS 使用了更新的技术(例如 DRI2)，可以减少失真、增强3D性能，甚至使用内核空间节能功能。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><a href="#pge12579b7d4ac">NVIDIA</a> 闭源驱动从 364.12 开始也实现了 KMS，但是没有利用 linux 内核的实现，缺少高分辨率终端的 fbdev 驱动。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4955543b232e_.E8.83.8C.E6.99.AF" id="背景"><span id=".E8.83.8C.E6.99.AF"></span>背景</h2></div>
+<p>以前，设定显卡是 X 服务器的工作。所以虚拟终端不可能提供漂亮的图像效果。同时，每次使用<code>Ctrl+Alt+F1~7</code>从X切换到虚拟终端时，x服务器必须将显卡的控制权交给内核，这个流程显得低效并且会导致闪烁。将控制权切回到X服务器同样是一个“痛苦”的过程。
+</p><p>使用内核模式设置后，内核可以设定显卡的模式。这样开机启动即可看到漂亮的显示画面，在 X 图形界面 和 终端 之间也可以快速切换，还有其他的一些优点。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4955543b232e_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>不管使用什么方法，都需要先“禁用”下列项：
+</p>
+<ul><li>所有启动加载器中的 "vga=" 选项，这个选项与 KMS 的原生分辨率设置冲突。</li>
+<li>所有 "video=" 选项，这个选项会启动帧缓冲，导致驱动冲突。</li>
+<li>所有帧缓冲驱动(例如 <a href="#pg6bc3d4c637e4">uvesafb</a>)。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4955543b232e_KMS_.E6.99.9A.E5.90.AF.E5.8A.A8" id="KMS_晚启动"><span id="KMS_.E6.99.9A.E5.90.AF.E5.8A.A8"></span>KMS 晚启动</h3></div>
+<p><a href="#pg7b57f700d367">Intel</a>, <a href="#pg172970a5f8dd">Nouveau</a>, <a href="#pgedfe18626036">ATI</a> 和 <a href="#pg4a4bc5e5df24">AMDGPU</a> 驱动已经为所有芯片组提供了 KMS 支持。这些驱动也会自动启用 KMS。
+</p><p>闭源的 <a href="#pge12579b7d4ac">NVIDIA</a> 驱动从 364.12 开始支持 KMS，但是需要<a href="#pge12579b7d4ac">手动启用</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4955543b232e_KMS_.E6.97.A9.E5.90.AF.E5.8A.A8" id="KMS_早启动"><span id="KMS_.E6.97.A9.E5.90.AF.E5.8A.A8"></span>KMS 早启动</h3></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果你有分辨率方面的问题，可以参考一下 强设模式 ，也许会有帮助。</div>
+<p>KMS通常是在<a href="#pg2be54bdacb4c">initramfs stage</a>之后开始初始化，但是你也可以在initramfs的阶段启用KMS:
+</p><p>将<a href="#pga36c0aff60be">视频驱动</a>模块加入<code>/etc/mkinitcpio.conf</code>的 MODULES 行。
+</p>
+<ul><li><a href="#pg4a4bc5e5df24">AMDGPU</a> 驱动加入 <code>amdgpu</code>; 老的 <a href="#pgedfe18626036">ATI</a> 驱动加入 <code>radeon</code></li>
+<li><a href="#pg7b57f700d367">Intel</a> 卡加入<code>i915</code></li>
+<li>开源的 <a href="#pg172970a5f8dd">Nouveau</a> 驱动加入<code>nouveau</code></li>
+<li>Matrox 卡加入 <code>mgag200</code>.</li></ul>
+<ul><li>对于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia">nvidia</a></span><sup><small>包</small></sup></span> 驱动的 <code>nvidia nvidia_modeset nvidia_uvm nvidia_drm</code> 。见 <a href="#pge12579b7d4ac">NVIDIA#DRM kernel mode setting</a> 以获取详细信息。</li></ul>
+<p><br/>
+</p>
+<ul><li>Matrox 显卡加入 <code>mgag200</code>。</li></ul>
+<ul><li><a href="#pg434f3f4063b1">QEMU</a> 显卡使用（<i>qemu</i> 选项 {{ic|-vga <i>type</i>）或 <a href="#pga1576f554ae5">libvirt</a> <code>&lt;video&gt;&lt;model type='<i>type</i>'&gt;</code><a href="https://libvirt.org/formatdomain.html#video-devices">[1]</a>):</li></ul>
+<ul><li><ul><li><code>bochs</code> 予 <code>std</code> (<i>qemu</i>) 和 <code>vga</code>/<code>bochs</code> (<i>libvirt</i>),</li></ul></li></ul>
+<ul><li><ul><li><code>virtio-gpu</code> 予 <code>virtio</code>,</li></ul></li></ul>
+<ul><li><ul><li><code>qxl</code> 予 <code>qxl</code>,</li></ul></li></ul>
+<ul><li><ul><li><code>vmwgfx</code> 予 <code>vmware</code> (<i>qemu</i>) and <code>vmvga</code> (<i>libvirt</i>),</li></ul></li></ul>
+<ul><li><ul><li><code>cirrus</code> 予 <code>cirrus</code>.</li></ul></li></ul>
+<ul><li><a href="#pgbedf72352aa7">VirtualBox</a> 显示控制器:</li></ul>
+<ul><li><ul><li><code>vmwgfx</code> 予 VMSVGA,</li></ul></li></ul>
+<ul><li><ul><li><code>vboxvideo</code> 予 VBoxVGA or VBoxSVGA.</li></ul></li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4955543b232e_mkinitcpio" id="mkinitcpio">mkinitcpio</h4></div>
+<p>使用树内模块时，将 <code>kms</code> 加入到 <code>/etc/mkinitcpio.conf</code> 的 HOOKS 数组中。
+</p><p>对于树外模块，将模块的名字加入到 MODULES 数组中。例如，启动 NVIDIA 图形驱动的早启动 KMS 功能时：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">MODULES=(... nvidia nvidia_modeset nvidia_uvm nvidia_drm ...)</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果你使用 <a href="#pgb7ad5a571901">PRIME</a> GPU，并且主要的 GPU 是英特尔核显，而 AMD 显卡是独立显卡。<code>intel_agp</code> 可能会在从显示器无信号状态恢复时造成麻烦。详见 <a href="https://bbs.archlinux.org/viewtopic.php?id=262043">[2]</a>。</div>
+<p>如果你在使用 #强制设置显示模式与 EDID 的方法，则也需要将选定的文件集成到 <a href="#pg5409190f7704">initramfs</a> 去：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">FILES=(/usr/lib/firmware/edid/<i>your_edid</i>.bin)</pre>
+<p>完成这一切后，<a href="#pg82461695094b">重新生成 initramfs</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4955543b232e_Booster" id="Booster">Booster</h4></div>
+<p>如果您在使用 <a href="#pg375fc9bbcc64">Booster</a>，可通过以下的方式改变设置来加载需要的模块。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/booster.yaml</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">modules_force_load: i915
+</pre>
+<p>如果您在使用 #强制设置显示模式与 EDID 的方法，则也需要将选定的文件集成到 <a href="#pg5409190f7704">initramfs</a> 去：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">FILES=(/usr/lib/firmware/edid/<i>your_edid</i>.bin)</pre>
+<p>之后， <a href="#pg375fc9bbcc64">重新生成</a> 一份 Booster 镜像。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4955543b232e_.E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3" id="问题解决"><span id=".E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3"></span>问题解决</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4955543b232e_.E5.AD.97.E4.BD.93.E5.A4.AA.E5.B0.8F" id="字体太小"><span id=".E5.AD.97.E4.BD.93.E5.A4.AA.E5.B0.8F"></span>字体太小</h3></div>
+<p><a href="#pg4100810d190d">Linux console#Fonts</a>介绍了如何在终端中使用大字体。软件仓库中的 (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=terminus-font">terminus-font</a></span><sup><small>包</small></sup></span>) 字体提供了很多字号，比如更大一些的 <code>ter-132n</code>。
+或者，可以#禁用 KMS 以切换为更低的分辨率，使得字体外观显得更大一些。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4955543b232e_.E5.90.AF.E5.8A.A8.E9.94.99.E8.AF.AF.E4.BF.A1.E6.81.AF" id="启动错误信息"><span id=".E5.90.AF.E5.8A.A8.E9.94.99.E8.AF.AF.E4.BF.A1.E6.81.AF"></span>启动错误信息</h3></div>
+
+<p>在比较老的系统上轮询已连接的显示设备的开销很大。在不同的硬件上甚至可能每几百毫秒就轮询一次。这会导致在视频播放等场景中可见的显示延迟，即使视频具有<a href="https://en.wikipedia.org/wiki/Debug_port#Hardware_debug_ports">HDP</a>输出，若硬件设置为其他非HDP输出仍会出现延迟。如果每10秒延迟一次，则应禁用轮询。
+</p><p>如果启动时看到 0x00000010 (2) 错误码，(应该有 10 行文字，最后一行是错误码)，请使用
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/modprobe.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options drm_kms_helper poll=0</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4955543b232e_.E5.BC.BA.E5.88.B6.E8.AE.BE.E7.BD.AE.E6.98.BE.E7.A4.BA.E6.A8.A1.E5.BC.8F.E4.B8.8E_EDID" id="强制设置显示模式与_EDID"><span id=".E5.BC.BA.E5.88.B6.E8.AE.BE.E7.BD.AE.E6.98.BE.E7.A4.BA.E6.A8.A1.E5.BC.8F.E4.B8.8E_EDID"></span>强制设置显示模式与 EDID</h2></div>
+<p>如果无法自动配置您本机的分辨率，或者根本无法侦测到显示器；您的显示器很有可能没有或发送了破损的 <a href="https://en.wikipedia.org/wiki/EDID">EDID</a> 文件。内核将尝试捕获这种情况并设置为某一通用分辨率。
+</p><p>如果您拥有贵显示器的 EDID 文件，您只需明确地强制设置即可(详见下文)。但是，您在大多数情况下可能无法直接取得一个健全的 EDID 文件。您可能需要提取现有 EDID 文件中的信息并试图修复它，从而获得了一个新的 EDID 文件。
+</p><p>在内核编译期间，可以通过遵循 <a href="https://docs.kernel.org/admin-guide/edid.html">上游文档</a> 来生成用于各种分辨率和配置的新EDID二进制文件（另请参见 <a href="https://www.osadl.org/Single-View.111+M5315d29dd12.0.html">此处</a> 的简短指南）。 <a href="https://kodi.wiki/view/Archive:Creating_and_using_edid.bin_via_xorg.conf">这篇文章</a> 也详细概述了其他解决方案。在大多数情况下，提取现有文件比较容易。例如从Windows下的驱动程序中提取EDID，如果您的显示器在那里运行良好。或者您可以使用来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=read-edid">read-edid</a></span><sup><small>包</small></sup></span> 包的 <code>get-edid</code> 命令，从具有相同设置的类似显示器中提取。可以从 <code>/sys/class/drm/*/edid</code> 中查找一下。
+</p><p>在您的EDID准备就绪后，请将它放置于特定的文件夹。例如一个在 <code>/usr/lib/firmware</code> 下名为 <code>edid</code> 的文件夹，您可以将您的二进制文件放入其中。
+</p><p>请在<a href="#pgec0856954f1c">内核参数</a>中设置下述参数来在启动时加载：
+</p>
+<pre>drm.edid_firmware=edid/你的edid.bin
+</pre>
+<p>4.13 版本前的内核使用下述参数：
+</p>
+<pre>drm_kms_helper.edid_firmware=edid/你的edid.bin
+</pre>
+<p>用下述参数来设定特定的连接器：
+</p>
+<pre>drm.edid_firmware=VGA-1:edid/你的edid.bin
+</pre>
+<p>如果你希望设置多个 edid 文件，用下面的参数：
+</p>
+<pre>drm.edid_firmware=VGA-1:edid/你的edid.bin,VGA-2:edid/你的另一个edid.bin
+</pre>
+<p>您可以从下表找到内置的分辨率。<b>名称</b>列指定了为了强制使用该分辨率而应该使用的名称。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<td><b>分辨率</b></td>
+<td><b>名称</b>
+</td></tr>
+<tr>
+<td>800x600</td>
+<td>edid/800x600.bin
+</td></tr>
+<tr>
+<td>1024x768</td>
+<td>edid/1024x768.bin
+</td></tr>
+<tr>
+<td>1280x1024</td>
+<td>edid/1280x1024.bin
+</td></tr>
+<tr>
+<td>1600x1200 (kernel 3.10 or higher)</td>
+<td>edid/1600x1200.bin
+</td></tr>
+<tr>
+<td>1680x1050</td>
+<td>edid/1680x1050.bin
+</td></tr>
+<tr>
+<td>1920x1080</td>
+<td>edid/1920x1080.bin
+</td></tr></tbody></table>
+<p>如果您要进行KMS早启动，则必须在initramfs中包含自定义EDID文件，否则可能会遇到问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4955543b232e_Forcing_modes" id="Forcing_modes">Forcing modes</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>下面描述的方法并不完整，e.g. Xorg does not take into account the resolution specified, so users are encouraged to use the method described above; however, specifying resolution with <code>video=</code> command line may be useful in some scenarios</div>
+<p>来自 <a href="https://nouveau.freedesktop.org/wiki/KernelModeSetting">nouveau wiki</a>:
+</p><p>用内核命令行可以强制设置使用的模式。但是 DRM 内核选项的文档很少，使用的方法位于：
+</p>
+<ul><li><a href="https://docs.kernel.org/fb/modedb.html">https://docs.kernel.org/fb/modedb.html</a></li>
+<li><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/gpu/drm/drm_fb_helper.c">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/gpu/drm/drm_fb_helper.c</a></li></ul>
+<p>格式: 
+</p>
+<pre>video=&lt;conn&gt;:&lt;xres&gt;x&lt;yres&gt;[M][R][-&lt;bpp&gt;][@&lt;refresh&gt;][i][m][eDd]
+</pre>
+<ul><li>&lt;conn&gt;: Connector, e.g. DVI-I-1, 查看 <code>/sys/class/drm/</code> .</li>
+<li>&lt;xres&gt; x &lt;yres&gt;: resolution</li>
+<li>M: compute a CVT mode?</li>
+<li>R: reduced blanking?</li>
+<li>-&lt;bpp&gt;: color depth</li>
+<li>@&lt;refresh&gt;: refresh rate</li>
+<li>i: interlaced (non-CVT mode)</li>
+<li>m: margins?</li>
+<li>e: output forced to on</li>
+<li>d: output forced to off</li>
+<li>D: digital output forced to on (e.g. DVI-I connector)</li></ul>
+<p>可以使用多个 "video" 设置不同输出的分辨率，例如要强制 DVI 使用 1024x768 85 Hz ，同时禁用 TV-out : 
+</p>
+<pre>video=DVI-I-1:1024x768@85 video=TV-1:d
+</pre>
+<p>要获取当前连接器的状态，使用下面命令：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ for p in /sys/class/drm/*/status; do con=${p%/status}; echo -n "${con#*/card?-}: "; cat $p; done</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">                                                                                         
+DVI-I-1: connected
+HDMI-A-1: disconnected
+VGA-1: disconnected
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4955543b232e_.E7.A6.81.E7.94.A8_KMS" id="禁用_KMS"><span id=".E7.A6.81.E7.94.A8_KMS"></span>禁用 KMS</h2></div>
+<p>有时需要禁用 KMS，例如使用 catalyst 驱动时. 只需在内核参数中加入 <b>nomodeset</b> 即可，设置方法请阅读<a href="#pgec0856954f1c">内核参数</a>页面。
+</p><p>使用 <code>nomodeset</code> 内核参数的同时，Intel 卡需要添加 <code>i915.modeset=0</code>， Nvidia 卡需要添加 <code>nouveau.modeset=0</code>. Nvidia Optimus 双显卡系统，需要添加三个内核参数：
+</p>
+<pre>"nomodeset i915.modeset=0 nouveau.modeset=0"
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>有些 <a href="#pga36c0aff60be">Xorg</a> 驱动必须启用 KMS 才能工作，参阅所用驱动的页面。</div>
+<!-- 
+NewPP limit report
+Cached time: 20260807023517
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.160 seconds
+Real time usage: 0.167 seconds
+Preprocessor visited node count: 580/1000000
+Revision size: 10648/2097152 bytes
+Post‐expand include size: 9235/2097152 bytes
+Template argument size: 3263/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 98/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   45.554      1 -total
+ 11.21%    5.106     38 Template:Ic
+  7.19%    3.274      1 Template:过时
+  6.32%    2.879      1 Template:翻译状态
+  6.13%    2.790      3 Template:META_Message
+  5.59%    2.546      1 Template:Expansion
+  5.40%    2.462      3 Template:Related2
+  5.34%    2.434      3 Template:Pkg
+  4.67%    2.128      1 Template:Out_of_date
+  4.61%    2.099      6 Template:Hc
+-->
+<!-- Render ID a02eac8f-9208-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3352:|#|:idhash:canonical!zh-cn and timestamp 20260807023517 and revision id 33716. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

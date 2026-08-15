@@ -1,0 +1,258 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg604525fe585e">Arch 打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b>Arch 打包准则</b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgfe5f6c29d8b8">/安全</a></li>
+<li><a href="#pg8d559a1b1a4f">Arch 构建系统</a></li>
+<li><a href="#pgf054312e26a1">创建软件包</a></li>
+<li><a href="#pg7edcce763396">makepkg</a></li>
+<li><a href="#pgf9d748a7b27b">PKGBUILD</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Arch_packaging_standards">Arch packaging standards</a>，最近一次同步于 2026-01-19，若英文版本有所<a href="https://wiki.archlinux.org/title/Arch_packaging_standards?diff=0&amp;oldid=860943">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Arch_packaging_standards_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>在为 <a href="#pg83506eae4ba0">Arch Linux</a> 构建软件包时，您应该遵循以下的<b>软件包指导原则</b>，尤其是当打算贡献新软件包至 Arch Linux 时。同时需要阅读 <span class="plainlinks archwiki-template-man" title="$ man 5 PKGBUILD"><a href="https://man.archlinux.org/man/PKGBUILD.5">PKGBUILD(5)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 8 makepkg"><a href="https://man.archlinux.org/man/makepkg.8">makepkg(8)</a></span> <a href="#pg49a53c288b70">man 手册</a>。
+</p><p>本页中列出的重要项将不再于其它软件包指导页中指出，这些指导页将作为以下准则的附加内容。
+</p><p>提交到 <a href="#pg6a9e963f286f">Arch 用户软件仓库 (AUR)</a> 的软件包需要额外遵守 <a href="#pge327f4597f76">AUR 提交准则</a>。
+</p><p>可在 <code>/usr/share/pacman/</code> <a href="https://gitlab.archlinux.org/pacman/pacman/-/tree/master/proto">目录</a>下的 <i>.proto</i> 文件中查看更多 <code>PKGBUILD</code> 示例。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg604525fe585e_.E6.89.93.E5.8C.85.E8.A7.84.E5.88.99" id="打包规则"><span id=".E6.89.93.E5.8C.85.E8.A7.84.E5.88.99"></span>打包规则</h2></div>
+<ul><li><b>永远别</b>将软件包安装至 <code>/usr/local/</code></li></ul>
+<ul><li><b>除非非用不可，否则绝对不要在 <code>PKGBUILD</code> 中自定义和使用新的变量</b>，以避免和 <i>makepkg</i> 本身的变量<b>冲突</b>。</li></ul>
+<ul><li>在非用不可的情况下，需要<b>给自定义变量名前加上下划线</b> (<code>_</code>)。例如：<pre>_customvariable=</pre></li></ul>
+<ul><li>任何情况下都要<b>避免</b>使用 <code>/usr/libexec/</code>，应该使用 <code>/usr/lib/${pkgname}/</code>。</li></ul>
+<ul><li>包信息文件中的 <code>packager</code> 字段可以通过修改 <code>/etc/makepkg.conf</code> 文件由编译者进行<b>自定义</b>。使用 <code>~/.makepkg.conf</code>也可以达到此目的。</li></ul>
+<ul><li><b>不要使用 makepkg 子程序</b>（例如 <code>error</code>，<code>msg</code>，<code>msg2</code>，<code>plain</code> 和 <code>warning</code>），这些随时都可能会更改。请使用 <code>printf</code> 或 <code>echo</code> 来输出内容。</li></ul>
+<ul><li>所有安装过程中所需输出的重要的信息，都要放到 <b>.install 文件中</b>。比如说如果某软件包需要扩展的安装步骤才能正常运行，你可以将这些步骤的介绍包含在 .install 文件中。</li></ul>
+<ul><li><b>依赖包</b>是最容易出现错误的地方。请花时间仔细核对，例如对动态可执行文件执行 <code>ldd</code> 或 <code>readelf</code>，检查脚本需要的工具，查看软件文档等。<a href="#pg00c132d82a07">namcap</a> 可以帮助你，它可以解析 PKGBUILD 和生成的打包文件，报告权限错误、缺少依赖、过多依赖等常见问题。</li></ul>
+<ul><li>任何运行该软件包不需要，或者该软件包的通用功能不需要的<b>可选依赖</b>不要加入到 <b>depends</b> 中。这些信息应该加入 <b>optdepends</b> 数组，例如：</li></ul>
+<dl><dd><pre>optdepends=('cups: printing support'
+            'sane: scanners support'
+            'libgphoto2: digital cameras support'
+            'alsa-lib: sound support'
+            'giflib: GIF images support'
+            'libjpeg: JPEG images support'
+            'libpng: PNG images support')
+</pre></dd>
+<dd>例子取自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wine">wine</a></span><sup><small>包</small></sup></span> 软件包。这些信息在安装和升级时会自动打印，所以<b>不要</b>将这些信息加入 .install 文件。</dd></dl>
+<ul><li>在填写<b>软件包描述（description）</b>时，请不要使用下定义的方式描述包名称。比如说，“Nedit is a text editor for X11” 应当简写为 "A text editor for X11"。顺便注意保持描述在 80 个字符以内.</li></ul>
+<ul><li>尽量保持 <code>PKGBUILD</code> 文件中<b>每行</b>不超过100字符。</li></ul>
+<ul><li>如果可能的话，从 <code>PKGBUILD</code> 文件中<b>去掉空行</b>（没有设置变量值的行）(如 <code>provides</code>、<code>replaces</code> 等)</li></ul>
+<ul><li>通常实践建议按照 <a href="#pgf9d748a7b27b">PKGBUILD</a> 一文中的示例<b>安排 <code>PKGBUILD</code> 各变量顺序</b>。当然这不是强制性的，这里唯一强制要求的是满足<b>正确的 Bash 语法</b>。</li></ul>
+<ul><li>变量名可能包含空格时，请使用<b>引号</b>，例如 <code>"$pkgdir"</code> 和 <code>"$srcdir"</code>。</li></ul>
+<ul><li>请确保软件包的<b>完整性</b>，确保<a href="#pgf9d748a7b27b">校验变量</a>包含正确的数值，可以通过 <code>updpkgsums</code> 工具进行更新。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg604525fe585e_.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.91.BD.E5.90.8D" id="软件包命名"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E5.91.BD.E5.90.8D"></span>软件包命名</h2></div>
+<ul><li>软件包应当仅包含<b>字母或数字</b>以及 <code>@</code>，<code>.</code>，<code>_</code>，<code>+</code>，<code>-</code>，不能以 <code>-</code> 和 <code>.</code> 开头，所有的字母应当保持<b>小写</b>。</li></ul>
+<ul><li>软件包的名称不应该包含上游的主版本号，例如如果上游软件包是 libfoo v2.3.4，不应该命名为 libfoo2。这样在上游发布新的大版本时，就可以保留软件包名和依赖可以保持不变。只有个别软件包是例外，例如图形库 GTK 和 Qt。这些软件升级后，应用程序需要花很长时间和经历才能移植完成，所以系统需要同时安装多个版本，软件包名应该包含大版本号，比如 gtk3、gtk4、qt5、qt6。如果出现大部分软件包都可以同步升级，只有个别软件没有被移植的情况，可以把老的软件包命名为 libfoo1，而新的软件包继续使用 libfoo。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg604525fe585e_.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.89.88.E6.9C.AC.E5.8F.B7" id="软件包版本号"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E7.89.88.E6.9C.AC.E5.8F.B7"></span>软件包版本号</h2></div>
+<ul><li>软件包<a href="#pgf9d748a7b27b">版本号</a>（即 <code>pkgver</code>）应当<b>和作者发行版号保持一致。</b></li>
+<li>如果需要的话，版本号可以包含字母（例如 <code>2.54BETA32</code>）。</li>
+<li><b>版本号里不能包含连字符</b>，只能允许字母、数字、下划线、点号。如果上游版本号中出现了连字符，需要将其替换为下划线。</li></ul>
+<p><br/>
+</p>
+<ul><li>软件包<a href="#pgf9d748a7b27b">发行号</a>（即 <code>pkgrel</code>）<b>仅和 Arch 相关</b>. 这样用户就可以区分不同的编译版本。<b>发布号从1开始</b>，软件包被<b>重新（打包）</b>发布时 ，<b>发行号将增加1</b>。</li>
+<li>当新版本发布的时候，发行号（release）自动回到1。</li>
+<li>软件包发布标记和软件包版本标记<b>遵从同样的规则</b>。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg604525fe585e_.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.BE.9D.E8.B5.96" id="软件包依赖"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E4.BE.9D.E8.B5.96"></span>软件包依赖</h2></div>
+<ul><li><b>不要依赖 <a href="#pgf9d748a7b27b">PKGBUILD#依赖关系</a> 中的<a href="https://en.wikipedia.org/wiki/Transitive_dependency">传递依存关系</a></b>，因为依赖更新可能会导致关系中断。</li>
+<li>列出所有直接依赖库，可以通过 <span class="plainlinks archwiki-template-man" title="$ man 1 find-libdeps"><a href="https://man.archlinux.org/man/find-libdeps.1">find-libdeps(1)</a></span>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=devtools">devtools</a></span><sup><small>包</small></sup></span> 的组件）来完成。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg604525fe585e_.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.85.B3.E8.81.94" id="软件包关联"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E5.85.B3.E8.81.94"></span>软件包关联</h2></div>
+<ul><li>不要将 <code>$pkgname</code> 添加到 <a href="#pgf9d748a7b27b">PKGBUILD#provides</a>，软件包无法与自身冲突。</li>
+<li>在 <a href="#pgf9d748a7b27b">PKGBUILD#provides</a> 中列出所有外部共享库（如 <code>'libsomething.so'</code>），可通过 <span class="plainlinks archwiki-template-man" title="$ man 1 find-libprovides"><a href="https://man.archlinux.org/man/find-libprovides.1">find-libprovides(1)</a></span>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=devtools">devtools</a></span><sup><small>包</small></sup></span> 的组件）来完成。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg604525fe585e_.E8.BD.AF.E4.BB.B6.E6.BA.90" id="软件源"><span id=".E8.BD.AF.E4.BB.B6.E6.BA.90"></span>软件源</h2></div>
+<ul><li>尽可能使用 HTTPS 源：压缩包使用 <code>https://</code>，git 源使用 <code>git+https://</code></li>
+<li>尽可能使用 PGP 签名对源进行验证（如果上游对提交进行了签名，但没有对压缩包签名，可能需要使用 git 标签而不是源码压缩包进行构建。）</li></ul>
+
+<ul><li>使用 git 标签进行构建时，不要使用标签名，要使用 <code>git rev-parse</code> 获取到的对象哈希值</li></ul>
+<dl><dd><pre>_tag=1234567890123456789012345678901234567890 # git rev-parse "v$pkgver"
+source=(git+https://$url.git?signed#tag=$_tag)
+
+pkgver() {
+    cd "$pkgname"
+    git describe
+}
+</pre></dd>
+<dd>具体案例可参考 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gitea">gitea</a></span><sup><small>包</small></sup></span> 包。该操作的原因是，标签可以被强制推送改变指向到的提交，从而导致构建出的包产生变化。强制推送会改变标签的哈希值，从而使用标签的对象哈希值可以确保源的完整性。使用 <code>pkgver()</code> 函数可避免在没有更新 <code>_tag</code> 的情况下不小心修改掉 <code>pkgver</code>。关于 VCS 源格式的更多信息请参考 <a href="#pg2e95a0584036">VCS 软件打包准则#VCS 源</a>。</dd></dl>
+<ul><li><b>Do not diminish the security or validity of a package</b> (e.g. by removing a checksum check or by removing PGP signature verification), because an upstream release is broken or suddenly lacks a certain feature (e.g. PGP signature missing for a new release)</li>
+<li>源在 <code>srcdir</code> 下的名称不能相同（可能需要在下载时进行重命名，例如 <code>"${pkgname}-${pkgver}.tar.gz::https://${pkgname}.tld/download/${pkgver}.tar.gz"</code>）</li>
+<li>避免对如 sourceforge 等平台的链接使用特定镜像源进行下载，因为它们有可能会变得不可用</li>
+<li>使用 SSH 密钥签名的 Git 对象（例如标签和提交等）可以使用 git 命令进行验证，用法为通过 <code>gpg.ssh.allowedSignersFile</code> 指定包含可能的签名密钥的文件。具体用例请参考 <a href="https://gitlab.archlinux.org/archlinux/packaging/packages/python-structlog/-/blob/main/PKGBUILD">[2]</a>。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg604525fe585e_.E4.B8.8E.E4.B8.8A.E6.B8.B8.E5.8D.8F.E4.BD.9C" id="与上游协作"><span id=".E4.B8.8E.E4.B8.8A.E6.B8.B8.E5.8D.8F.E4.BD.9C"></span>与上游协作</h2></div>
+<p>It is considered best-practice to work closely with upstream wherever possible. This entails reporting problems about building and testing a package.
+</p>
+<ul><li>Report problems to upstream right away.</li>
+<li>Upstream patches wherever possible.</li>
+<li>Add comments with links to relevant (upstream) bug tracker tickets in the <a href="#pgf9d748a7b27b">PKGBUILD</a> (this is particularly important, as it ensures, that other packagers can understand changes and work with a package as well).</li></ul>
+<p>It is recommended to track upstream with tools such as <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvchecker">nvchecker</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvrs/">nvrs</a></span><sup><small>AUR</small></sup></span> or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=urlwatch">urlwatch</a></span><sup><small>包</small></sup></span> to be informed about new stable releases.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg604525fe585e_.E7.9B.AE.E5.BD.95" id="目录"><span id=".E7.9B.AE.E5.BD.95"></span>目录</h2></div>
+<ul><li><b>配置文件</b>应该放置到 <code>/etc</code> 目录。如果有多个配置文件，可以使用<b>子目录</b>，以保持 <code>/etc</code> 简洁。例如，如果包名是 <code><i>pkg</i></code>，那就应使用 <code>/etc/<i>pkg</i></code>（或者其他合适的名称，比如apache使用的就是 <code>/etc/httpd/</code>）。</li></ul>
+<ul><li>软件包文件应该安装在下列<b>常用目录</b>：</li></ul>
+<dl><dd><table class="wikitable">
+<tbody><tr>
+<td><code>/etc</code>
+</td>
+<td><b>系统关键</b>配置文件
+</td></tr>
+<tr>
+<td><code>/usr/bin</code>
+</td>
+<td>二进制文件
+</td></tr>
+<tr>
+<td><code>/usr/lib</code>
+</td>
+<td>库
+</td></tr>
+<tr>
+<td><code>/usr/include</code>
+</td>
+<td>头文件
+</td></tr>
+<tr>
+<td><code>/usr/lib/<i>pkg</i></code>
+</td>
+<td>模块，插件等
+</td></tr>
+<tr>
+<td><code>/usr/share/doc/<i>pkg</i></code>
+</td>
+<td>应用程序文档
+</td></tr>
+<tr>
+<td><code>/usr/share/info</code>
+</td>
+<td>GNU Info 系统文件
+</td></tr>
+<tr>
+<td><code>/usr/share/licenses/<i>pkg</i></code>
+</td>
+<td>Application licenses
+</td></tr>
+<tr>
+<td><code>/usr/share/man</code>
+</td>
+<td>手册
+</td></tr>
+<tr>
+<td><code>/usr/share/<i>pkg</i></code>
+</td>
+<td>程序数据
+</td></tr>
+<tr>
+<td><code>/var/lib/<i>pkg</i></code>
+</td>
+<td>应用持久数据
+</td></tr>
+<tr>
+<td><code>/etc/<i>pkg</i></code>
+</td>
+<td><i>pkg</i> 应用的配置文件
+</td></tr>
+<tr>
+<td><code>/opt/<i>pkg</i></code>
+</td>
+<td>大的独立程序，例如 Java
+</td></tr></tbody></table></dd></dl>
+<ul><li>软件包不应该在下面目录添加任何文件:
+<ul><li><code>/bin</code></li>
+<li><code>/sbin</code></li>
+<li><code>/dev</code></li>
+<li><code>/home</code></li>
+<li><code>/srv</code></li>
+<li><code>/media</code></li>
+<li><code>/mnt</code></li>
+<li><code>/proc</code></li>
+<li><code>/root</code></li>
+<li><code>/selinux</code></li>
+<li><code>/sys</code></li>
+<li><code>/tmp</code></li>
+<li><code>/var/tmp</code></li>
+<li><code>/run</code></li></ul></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg604525fe585e_Makepkg_.E7.9A.84.E4.BB.BB.E5.8A.A1" id="Makepkg_的任务"><span id="Makepkg_.E7.9A.84.E4.BB.BB.E5.8A.A1"></span><a href="#pg7edcce763396">Makepkg</a> 的任务</h2></div>
+<p>当您使用 makepkg 构建软件包时，makepkg 会自动执行如下功能:
+</p>
+<ul><li>检查软件包的<b>依赖</b>和<b>构建依赖</b>是否已安装</li>
+<li>从服务器中<b>下载源文件</b></li>
+<li><b>校验</b>源文件的完整性</li>
+<li><b>解压</b>源文件</li>
+<li>打上必要的<b>补丁（patch）</b></li>
+<li><b>构建</b>软件并安装到 fake root</li>
+<li>从可执行文件中<b>去掉</b>符号标记</li>
+<li>从库文件中<b>去掉</b>调试标记</li>
+<li><b>压缩</b>手册页和/或 info 页</li>
+<li>生成<b>包信息文件</b>（包含软件包的基本信息）</li>
+<li><b>压缩</b> fake root 成为软件包文件（*.pkg.tar.xz）</li>
+<li>生成的软件包文件<b>保存</b>在指定的目录中（默认在<span style="border-bottom:1px dotted" title="Current Working Directory">当前目录</span>）</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg604525fe585e_.E6.9E.B6.E6.9E.84" id="架构"><span id=".E6.9E.B6.E6.9E.84"></span>架构</h2></div>
+<p>如果该软件包是针对特定架构编译的，那么 <code>arch</code> 数组应该包含 <code>'x86_64'</code>，否则使用 <code>'any'</code> 生成架构无关的包。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg604525fe585e_.E6.8E.88.E6.9D.83.E5.8D.8F.E8.AE.AE" id="授权协议"><span id=".E6.8E.88.E6.9D.83.E5.8D.8F.E8.AE.AE"></span>授权协议</h2></div>
+<p>有两种与 Arch 软件包相关的许可证：
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg604525fe585e_PKGBUILD_.E7.9A.84.E8.AE.B8.E5.8F.AF.E8.AF.81.E5.AD.97.E6.AE.B5" id="PKGBUILD_的许可证字段"><span id="PKGBUILD_.E7.9A.84.E8.AE.B8.E5.8F.AF.E8.AF.81.E5.AD.97.E6.AE.B5"></span>PKGBUILD 的许可证字段</h3></div>
+<p><code>PKGBUILD</code> 中的 <code>license</code> 字段列出了被打包软件的上游许可证，注意这不是软件打包代码的许可证。该字段必须遵循 <a href="https://spdx.org/licenses/">SPDX 许可证格式</a>，更多信息请参考  <a href="#pgf9d748a7b27b">PKGBUILD#license</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg604525fe585e_.E8.BD.AF.E4.BB.B6.E6.89.93.E5.8C.85.E4.BB.A3.E7.A0.81.E8.AE.B8.E5.8F.AF.E8.AF.81" id="软件打包代码许可证"><span id=".E8.BD.AF.E4.BB.B6.E6.89.93.E5.8C.85.E4.BB.A3.E7.A0.81.E8.AE.B8.E5.8F.AF.E8.AF.81"></span>软件打包代码许可证</h3></div>
+<p>软件打包代码的许可证。根据 <a href="https://rfc.archlinux.page/0040-license-package-sources/">RFC40</a>，Arch Linux 指定了软件打包代码需以 <code>0BSD</code> 许可证进行授权，并参照 <a href="https://rfc.archlinux.page/0052-reuse/">RFC52</a> 使用 <a href="https://reuse.software/">REUSE</a> 来执行这一点。
+</p><p>总结一下就是：
+</p>
+<ol><li>在软件包源码的根目录下添加一个 <code>LICENSE</code> 文件，其内容与<a href="https://gitlab.archlinux.org/archlinux/devtools/-/blob/master/data/LICENSE?ref_type=heads">该文件</a>完全一致，即 Arch Linux 用于软件包的 <code>0BSD</code> 许可证。</li>
+<li>在软件包源码的根目录下添加一个 <code>REUSE.toml</code> 文件，可以使用 <code>pkgctl license setup</code> 生成一个后在其上进行修改。</li>
+<li>确保执行 <code>pkgctl license check</code> 命令时不会有任何报错。</li></ol>
+<p>如果有其它需要配置授权的文件，你需要为它们选择一个合理的许可证。方法通常很简单：
+</p>
+<ul><li>如果文件（例如类似 <code>launcher.sh</code> 的启动脚本或类似 <code>myunit.service</code> 的 systemd 服务文件）是完全由你或其他 Arch 人员创建的，则需使用 <code>0BSD</code> 许可证。<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果你编写了该补丁，同时也将其提交到了上游，那可以其针对 Arch 将其以 <code>0BSD</code> 许可证分发，并在提交到上游时让他们应用自己的许可证。</div></li></ul>
+<ul><li>如果文件时从上游获取的（例如类似 <code>tool.png</code> 的图标或类似 <code>fix.patch</code> 的补丁），那需要应用上游的许可证。</li></ul>
+<p>另请参考介绍了 <span class="plainlinks archwiki-template-man" title="$ man 1 pkgctl-license"><a href="https://man.archlinux.org/man/pkgctl-license.1">pkgctl-license(1)</a></span> 的<a href="https://devblog.archlinux.page/2025/pkgctl-license/">这篇 Arch Linux 开发博客文章</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg604525fe585e_.E5.8F.AF.E5.A4.8D.E7.8E.B0.E6.9E.84.E5.BB.BA" id="可复现构建"><span id=".E5.8F.AF.E5.A4.8D.E7.8E.B0.E6.9E.84.E5.BB.BA"></span>可复现构建</h2></div>
+<p>Arch 正努力使所有软件包具有<a href="#pg938573003179">可复现性</a>。打包人员可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=devtools">devtools</a></span><sup><small>包</small></sup></span> 的 <code>makerepropkg</code> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=archlinux-repro">archlinux-repro</a></span><sup><small>包</small></sup></span> 的 <code>repro</code> 来检查包是否有可复现性：
+</p>
+<pre>$ makerepropkg $pkgname-1-1-any.pkg.tar.zst
+</pre>
+<p>或
+</p>
+<pre>$ repro -f $pkgname-1-1-any.pkg.tar.zst
+</pre>
+<p>如果在构建时需要使用时间戳，可以使用 <code>SOURCE_DATE_EPOCH</code> 环境变量，具体格式可参考<a href="https://reproducible-builds.org/docs/source-date-epoch/">上游文档</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807115640
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.239 seconds
+Real time usage: 0.246 seconds
+Preprocessor visited node count: 1095/1000000
+Revision size: 14160/2097152 bytes
+Post‐expand include size: 9850/2097152 bytes
+Template argument size: 2375/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 543/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   79.358      1 -total
+ 17.08%   13.556    100 Template:Ic
+  6.00%    4.758      1 Template:Accuracy
+  5.29%    4.197      5 Template:Man
+  4.49%    3.565      1 Template:Package_guidelines
+  4.47%    3.550      8 Template:Pkg
+  4.07%    3.233      1 Template:Related_articles_start
+  3.22%    2.556      5 Template:Related
+  2.95%    2.340      1 Template:Note
+  2.50%    1.986      1 Template:Aur
+-->
+<!-- Render ID 0cd0980e-9257-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2793:|#|:idhash:canonical!zh-cn and timestamp 20260807115640 and revision id 34728. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

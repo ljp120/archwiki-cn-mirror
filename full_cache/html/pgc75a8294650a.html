@@ -1,0 +1,232 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgc75a8294650a">内核/传统编译</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Kernel/Traditional_compilation">Kernel/Traditional compilation</a>，最近一次同步于 2026-03-14，若英文版本有所<a href="https://wiki.archlinux.org/title/Kernel/Traditional_compilation?diff=0&amp;oldid=868360">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Kernel_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Traditional_compilation_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文介绍从 <b>kernel.org 的源代码</b>编译自己的内核。这是一种对所有发行版均适用的传统方法。取决于你的背景，这也可能比<a href="#pg4d320abd2187">用 ABS 工具编译内核</a>更复杂。请考虑使用 <a href="#pg8d559a1b1a4f">Arch 构建系统</a>以使重复的编译任务更加有效和安全。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc75a8294650a_.E5.87.86.E5.A4.87" id="准备"><span id=".E5.87.86.E5.A4.87"></span>准备</h2></div>
+<p>准备编译时，不需要也不建议使用 root 账号或用 <a href="#pg023562413be7">sudo</a> 等工具获取 root 权限。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc75a8294650a_.E5.AE.89.E8.A3.85.E6.A0.B8.E5.BF.83.E8.BD.AF.E4.BB.B6.E5.8C.85" id="安装核心软件包"><span id=".E5.AE.89.E8.A3.85.E6.A0.B8.E5.BF.83.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>安装核心软件包</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base-devel">base-devel</a></span><sup><small>包</small></sup></span> 元软件包，这个组包含了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=make">make</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gcc">gcc</a></span><sup><small>包</small></sup></span> 等我们需要的软件包。参考 Arch 默认内核的 <a href="https://github.com/archlinux/svntogit-packages/blob/packages/linux/trunk/PKGBUILD">PKGBUILD</a>，同时建议安装以下软件包：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xmlto">xmlto</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kmod">kmod</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=inetutils">inetutils</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bc">bc</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libelf">libelf</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=git">git</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cpio">cpio</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perl">perl</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tar">tar</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xz">xz</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc75a8294650a_.E5.88.9B.E5.BB.BA.E5.86.85.E6.A0.B8.E7.BC.96.E8.AF.91.E7.9B.AE.E5.BD.95" id="创建内核编译目录"><span id=".E5.88.9B.E5.BB.BA.E5.86.85.E6.A0.B8.E7.BC.96.E8.AF.91.E7.9B.AE.E5.BD.95"></span>创建内核编译目录</h3></div>
+<p>建议创建单独的内核编译目录，本文使用 <code>home</code> 下的 <code>kernelbuild</code> 目录。
+</p>
+<pre>$ mkdir ~/kernelbuild
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc75a8294650a_.E8.8E.B7.E5.8F.96.E6.BA.90.E7.A0.81" id="获取源码"><span id=".E8.8E.B7.E5.8F.96.E6.BA.90.E7.A0.81"></span>获取源码</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong> <a href="#pgac06dd8bfe95">systemd</a> 需要至少 3.12 版本的内核（<a href="#pgaf57e242338f">cgroups</a> 支持需要 4.2 及以上的版本）。参考 <code>/usr/share/doc/systemd/README</code>。</div>
+<p>从 <a href="https://www.kernel.org">https://www.kernel.org</a> 下载源码，得到你所选的内核版本对应的 <a href="https://en.wikipedia.org/wiki/Tar_(computing)">tarball</a> (<code>tar.xz</code>) 文件。
+</p><p>可以在浏览器中简单地右键 <code>tar.xz</code> 链接并选择 <code>保存链接为</code> 下载；也可以通过 HTTP、<a href="#pg0e1c8c6cdc7b">TFTP</a>、<a href="#pg4bb0ada72a54">Rsync</a> 或者 <a href="#pg0d34da84b694">Git</a> 的各种图形化或命令行工具下载。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>验证下载到的任何内核 tarball 文件的 PGP 签名总是好的做法。这样可以确保它是合法的，并有助于建立信任网络。参见 <a href="https://kernel.org/signature.html#using-gnupg-to-verify-kernel-signatures">kernel.org/signature</a>。</li></ul>
+<ul><li>对于某些版本（例如 <code>-rc</code> 版本），下载的存档和生成的目录不会严格遵循本页示例中使用的 <code><i>A</i>.<i>B</i>.<i>C</i></code> 命名，请根据你的需要进行调整。</li></ul>
+</div>
+<p>下面例子中使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wget">wget</a></span><sup><small>包</small></sup></span> 下载 <i>A.B.C</i> 内核到 <code>~/kernelbuild</code> 目录:
+</p>
+<pre>$ cd ~/kernelbuild
+$ wget https://cdn.kernel.org/pub/linux/kernel/v<i>A</i>.x/linux-<i>A</i>.<i>B</i>.<i>C</i>.tar.xz
+</pre>
+<p>在信任下载的压缩包之前，你还得验证下载的正确性。 首先抓取签名，然后用它来抓取签名密钥的指纹，然后使用指纹来获取实际的签名密钥：
+</p>
+<pre>$ wget https://cdn.kernel.org/pub/linux/kernel/v<i>A</i>.x/linux-<i>A</i>.<i>B</i>.<i>C</i>.tar.sign
+$ gpg --list-packets linux-<i>A</i>.<i>B</i>.<i>C</i>.tar.sign | grep -i keyid | awk '{print $NF}' | xargs gpg --recv-keys
+</pre>
+<p>注意签名是为 <code>tar</code> 存档（即扩展名 <code>.tar</code>）生成的，而不是为下载的压缩 <code>.tar.xz</code> 文件生成的。 你需要解压后者而不解压它。 检查你是否已安装 <code>xz</code>，然后这样继续：
+</p>
+<pre>$ unxz linux-<i>A</i>.<i>B</i>.<i>C</i>.tar.xz
+$ gpg --verify linux-<i>A</i>.<i>B</i>.<i>C</i>.tar.sign linux-<i>A</i>.<i>B</i>.<i>C</i>.tar
+</pre>
+<p>如果没看到"Good signature"就别继续。
+</p><p>如果在构建目录中没使用<code>wget</code>，就需要手动将压缩包移入其中，例如：
+</p>
+<pre>$ mv /path/to/linux-<i>A</i>.<i>B</i>.<i>C</i>.tar.xz ~/kernelbuild/
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc75a8294650a_.E5.8D.8A.E5.AE.98.E6.96.B9.E5.86.85.E6.A0.B8.E9.95.9C.E5.83.8F" id="半官方内核镜像"><span id=".E5.8D.8A.E5.AE.98.E6.96.B9.E5.86.85.E6.A0.B8.E9.95.9C.E5.83.8F"></span>半官方内核镜像</h4></div>
+<p>一些 kernel.org Git 存储库的半官方镜像由其各自的维护者提供。这些通常比 kernel.org 的版本更新。
+</p>
+<ul><li>Linus Torvalds 放在 GitHub 上的主线内核</li></ul>
+<p><a href="https://github.com/torvalds/linux.git">https://github.com/torvalds/linux.git</a>.
+</p>
+<ul><li>Greg Kroah-Hartman 放在 GitHub 上的稳定分支</li></ul>
+<p><a href="https://github.com/gregkh/linux">https://github.com/gregkh/linux</a>. <a href="http://kroah.com/log/blog/2019/06/15/linux-stable-tree-mirror-at-github/">[1]</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc75a8294650a_.E8.A7.A3.E5.8E.8B.E5.86.85.E6.A0.B8.E4.BB.A3.E7.A0.81" id="解压内核代码"><span id=".E8.A7.A3.E5.8E.8B.E5.86.85.E6.A0.B8.E4.BB.A3.E7.A0.81"></span>解压内核代码</h3></div>
+<ul><li>将其解压后进入源码目录:</li></ul>
+<pre>$ tar -xvf linux-<i>A</i>.<i>B</i>.<i>C</i>.tar
+</pre>
+<p>为了绝对确保不发生权限错误，需要运行 <a href="https://en.wikipedia.org/wiki/Chown">chown</a> 将文件夹的所有权转移给当前用户。
+</p><p>要将包含其中每个文件的文件夹的所有权转移，运行 <code>chown</code> 命令。
+</p>
+<pre>$ chown -R $USER:$USER linux-<i>A</i>.<i>B</i>.<i>C</i> 
+</pre>
+<p>文件夹中每个文件的所有权转移给你了，所以不会遇到任何与权限相关的错误。
+</p><p>为了完成准备工作，内核树需要绝对干净；不要觉得解压后源代码树是干净的。所以，切换到创建的新内核源目录，然后运行 <code>make mrproper</code> 命令：
+</p>
+<pre>$ cd linux-<i>A</i>.<i>B</i>.<i>C</i>
+$ make mrproper
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>make mrproper</code> 的目标依赖于 <code>make clean</code> 的目标，所以没必要同时执行两者。参考<a href="https://unix.stackexchange.com/q/387640">[2]</a>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc75a8294650a_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<p>这是自定义内核以适应计算机的精确规格的最关键步骤。内核配置在 <code>.config</code> 文件中设置，其中包括 <a href="#pg446fdafcb30b">Kernel modules</a> 的使用情况。正确设置 <code>.config</code> 中的选项，你的计算机会获得最高的运行效率。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>现阶段无需使用 root 帐户或 root 权限。</div>
+<p>参考使用下面内容可以节省时间：
+</p>
+<ul><li>使用 Arch 官方内核的设置(推荐)</li>
+<li>生成正在运行内核的配置文件和设置（手动，适用于高级用户但不推荐）</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc75a8294650a_.E5.AF.BC.E5.87.BA.E5.BD.93.E5.89.8D.E5.86.85.E6.A0.B8.E8.AE.BE.E7.BD.AE" id="导出当前内核设置"><span id=".E5.AF.BC.E5.87.BA.E5.BD.93.E5.89.8D.E5.86.85.E6.A0.B8.E8.AE.BE.E7.BD.AE"></span>导出当前内核设置</h3></div>
+<p>这个命令将使用默认的 Arch 内核设置为自定义内核创建一个 <code>.config</code> 文件。如果正在运行官方 Arch 内核，你可以在内核源码目录中使用以下命令：
+</p>
+<pre>$ zcat /proc/config.gz &gt; .config
+</pre>
+<p>也可以在 <a href="https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/blob/main/config">official Arch Linux kernel</a> 中找到默认配置。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>如果你在升级内核，一些选项可能改了或被删掉了。在这种情况下，在 #Compilation 下运行 <code>make</code> 时，它会要求你提供版本之间更改的每个配置选项的答案。要使用默认值而不用一直按Enter，请运行 <code>make olddefconfig</code>。</li></ul>
+<ul><li><a href="#pg735803738b44">modprobed-db</a> 可用于从默认 Arch <code>.config</code> 中删除不需要的模块。获得 <a href="#pg735803738b44">properly populated database</a> 后，运行 <code>make LSMOD=$HOME/.config/modprobed.db localmodconfig</code> 从 <code>modprobed.db</code> 中删除所有不存在的模块。</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>如果你用当前的 <code>.config</code> 文件编译内核，别忘了在新的 <code>.config</code> 中的重命名内核版本，就是"CONFIG_LOCALVERSION"这项。或者用#高级配置中列出的用户界面之一中的"General Setup &gt; Local version - append to kernel release"更改。如果跳过这一步，就有把当前内核覆盖的风险。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc75a8294650a_.E9.AB.98.E7.BA.A7.E9.85.8D.E7.BD.AE" id="高级配置"><span id=".E9.AB.98.E7.BA.A7.E9.85.8D.E7.BD.AE"></span>高级配置</h3></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果不想在启动和关闭时看到很多内核输出，可以禁用相关的调试选项。</div>
+<p>有多种方式可以协助配置内核：
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>下面列出的工具提供每个内核功能的三个配置选项：<code>y</code> 表示启用，<code>n</code> 表示禁用，<code>m</code> 表示启用作为内核模块（必要时加载）。</div>
+<ul><li><code>make nconfig</code>: 新的命令行 ncurses 界面，用来代替 <code>menuconfig</code>。</li>
+<li><code>make xconfig</code>: 用户友好的图形界面，需要安装 <a href="#pg5016907af879">Qt</a>。这是推荐的方法，尤其对于没有经验的用户，因为它更容易导航，并且还会显示每个选项的信息。</li>
+<li><code>make gconfig</code>: 和 xconfig 类似的图形界面，使用 <a href="#pg6438c4cbb62c">GTK</a>.</li></ul>
+<p>在内核源代码目录执行选择的方法，将生成一个全新的<code>.config</code>，可选参数默认是选中的，但是如果有老内核的 <code>.config</code> 文件，这些参数不一定会被选中。
+</p><p>改变配置文件并保存。建议在源代码目录外备份<code>.config</code>,因为你可能需要编译多次，直到所有的选项都配置正确。如果不确定每个选项的影响，每次编译只改变少量选项。如果无法启动新构建的内核，参见<a href="https://archlinux.org/news/users-of-unofficial-kernels-must-enable-devtmpfs-support/">这里</a>查看必须的配置项列表。从liveCD运行<code>$ lspci -k #</code>以列出使用中的内核模块的名字。最重要的是，你必须保留 <a href="#pgac06dd8bfe95">systemd</a> 需要的 CGROUPS 支持。
+</p><p>从live media运行 <code>lspci -k #</code> 会列出正在使用内核模块的名称。重中之重，你必须保留<a href="#pgb3f3c5c80dbd">cgroup</a>支持，这是<a href="#pgac06dd8bfe95">systemd</a>的依赖。参阅 <a href="https://wiki.gentoo.org/wiki/Kernel/Gentoo_Kernel_Configuration_Guide">Gentoo:Kernel/Gentoo Kernel Configuration Guide</a> 和 <a href="https://wiki.gentoo.org/wiki/Intel#Kernel">Gentoo:Intel#Kernel</a> 或 <a href="https://wiki.gentoo.org/wiki/Ryzen#Kernel">Gentoo:Ryzen#Kernel</a>（适用于 Intel 或 AMD Ryzen CPU）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc75a8294650a_.E7.BC.96.E8.AF.91" id="编译"><span id=".E7.BC.96.E8.AF.91"></span>编译</h2></div>
+<p>如果希望 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gcc">gcc</a></span><sup><small>包</small></sup></span> 根据处理器指令集进行优化， 编辑内核目录下的 <code>arch/x86/Makefile</code> (i686) 或 <code>arch/x86_64/Makefile</code> (86_64)文件：
+</p>
+<ul><li>查找 <code>Processor type and features &gt; Processor Family</code> 中设置的处理器系列 <code>CONFIG_MK8,CONFIG_MPSC,CONFIG_MCORE2,CONFIG_MATOM,CONFIG_GENERIC_CPU</code></li>
+<li>将 cc 调用选项设置为 <code>-march=native</code>，例如 <code>cflags-$(CONFIG_MK8) += $(call cc-option,-march=native)</code>.</li></ul>
+<p>对 32bit 内核，需要编辑 <code>arch/x86/Makefile_32.cpu</code> 并设置处理器的 <code>-march=native</code>。
+</p><p>编译时间将从15分钟到超过一小时不等。这很大程度依赖于选择了多少选项/模块和处理器性能。详情参考 <a href="#pg7edcce763396">Makeflags</a>。<code>.config</code> 配置好之后，在内核目录运行：
+</p>
+<pre>$ make
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>为了更快地编译，可以使用 <code>-j<i>X</i></code> 参数运行 <i>make</i> 以并行编译，其中 <code><i>X</i></code> 是整数。最快的编译通常是通过使用机器中 CPU 核心的数量来实现的； 例如，对于双核处理器，运行 <code>make -j2</code>。 参阅 <a href="#pg7edcce763396">Makepkg#减少编译时间</a>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc75a8294650a_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc75a8294650a_.E5.AE.89.E8.A3.85.E6.A8.A1.E5.9D.97" id="安装模块"><span id=".E5.AE.89.E8.A3.85.E6.A8.A1.E5.9D.97"></span>安装模块</h3></div>
+<p>内核编译了，它的模块也随之而来。首先构建模块：
+</p>
+<pre>$ make modules
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>从这里开始，需要 root 权限执行命令，否则会失败.</div>
+<p>编译完内核后编译模块:
+</p>
+<pre># make modules_install
+</pre>
+<p>这会将编译后的模块复制到 <code>/lib/modules/<i>A</i>.<i>B</i>.<i>C</i>/</code> 中。 这使得单独使用的各个内核的模块保持分离。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果系统需要正常 Linux 内核外的模块，需要在定制内核安装完成之后重新编译它们。Nvidia 显卡模块可以参考 <a href="#pge12579b7d4ac">NVIDIA#Custom kernel</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc75a8294650a_.E6.8B.B7.E8.B4.9D.E5.86.85.E6.A0.B8.E5.88.B0_.2Fboot_.E7.9B.AE.E5.BD.95" id="拷贝内核到_/boot_目录"><span id=".E6.8B.B7.E8.B4.9D.E5.86.85.E6.A0.B8.E5.88.B0_.2Fboot_.E7.9B.AE.E5.BD.95"></span>拷贝内核到 /boot 目录</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>确保已从你的系统架构的目录复制 <code>bzImage</code> 内核文件。见下文。</div>
+<p>内核编译过程将生成该内核的压缩 <code>bzImage</code>，如果没有，运行：
+</p>
+<pre>make bzImage
+</pre>
+<p>必须将这个 bzImage 复制到 <code>/boot</code> 目录并重命名。只要名称带有 <code>vmlinuz-</code> 前缀，你就可以根据需要命名内核。 在下面的示例中，已安装并编译的 <i>A</i>.<i>B</i>.<i>C</i> 内核已被复制并重命名为 <code>vmlinuz-linux<i>AB</i></code>：
+</p>
+<pre># cp -v arch/x86/boot/bzImage /boot/vmlinuz-linux<i>AB</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc75a8294650a_.E5.88.B6.E4.BD.9C.E5.88.9D.E5.A7.8B.E5.8C.96.E5.86.85.E5.AD.98.E7.9B.98" id="制作初始化内存盘"><span id=".E5.88.B6.E4.BD.9C.E5.88.9D.E5.A7.8B.E5.8C.96.E5.86.85.E5.AD.98.E7.9B.98"></span>制作初始化内存盘</h3></div>
+<p>初始化内存盘，是一个在真正的根文件系统可访问之前被挂载的初始化根目录文件系统。初始化内存盘（initrd）被绑定到对应的内核，且作为内核启动过程的一部分被载入。内核将该初始化内存盘（initrd）作为两阶段启动过程的一部分挂载起来，以载入模块使得真正的文件系统可用，然后得到真正的根文件系统。初始化内存盘包含实现以上过程的目录和可执行文件的最小集合，例如用来将内核模块安装到内核的insmod工具。对桌面或服务器Linux系统来说，初始化内存盘(initrd)就是一个临时的文件系统。其生命周期短暂，仅作为到真正的根文件系统的桥梁。在没有可变存储的嵌入式系统中，初始化内存盘就是永久的根文件系统。参考 <a href="https://en.wikipedia.org/wiki/Initrd">Initramfs on Wikipedia</a> 和 <a href="#pgbd0f46fbac92">mkinitcpio</a>。
+</p><p>/boot 中的文件可以取任何名字。然而，为了方便区分，建议采取统一的命名规范，例如使用 <code>linux&lt;major revision&gt;&lt;minor revision&gt;</code>。
+</p><p>如果你使用了 LILO <a href="#pgee8f2050088a">引导加载程序</a>且其无法与内核设备映射器驱动连通，你可能需要先运行<code>modprobe dm-mod</code>命令。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc75a8294650a_.E8.87.AA.E5.8A.A8.E7.94.9F.E6.88.90" id="自动生成"><span id=".E8.87.AA.E5.8A.A8.E7.94.9F.E6.88.90"></span>自动生成</h4></div>
+<p>可以复制和修改现有的 <a href="#pgbd0f46fbac92">mkinitcpio preset</a>，以便可以按照与官方内核相同的方式生成自定义内核 initramfs image。 这在重新编译内核（例如更新时）时会节省很多时间。 在下面的示例中，将为上面安装的内核<i>A.B.C</i>复制并修改库存 Arch 内核的预设文件。
+</p><p><br/>
+首先，复制现有的预设文件，将其重命名为与复制 <code>bzImage</code> 时指定为 <code>/boot/vmlinuz-</code> 后缀的自定义内核的名称相匹配：
+</p>
+<pre># cp /etc/mkinitcpio.d/linux.preset /etc/mkinitcpio.d/linux<i>AB</i>.preset
+</pre>
+<p>其次，编辑文件并针对自定义内核进行修改。注意 <code>ALL_kver=</code> 参数也与复制 <code>bzImage</code> 时指定的自定义内核的名称匹配：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.d/linux<i>AB</i>.preset</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+ALL_kver="/boot/vmlinuz-linux<i>AB</i>"
+...
+default_image="/boot/initramfs-linux<i>AB</i>.img"
+...
+fallback_image="/boot/initramfs-linux<i>AB</i>-fallback.img"</pre>
+<p>最后，生成 initramfs 映像：
+</p>
+<pre># mkinitcpio -p linux<i>AB</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc75a8294650a_.E6.89.8B.E5.8A.A8.E6.96.B9.E6.B3.95" id="手动方法"><span id=".E6.89.8B.E5.8A.A8.E6.96.B9.E6.B3.95"></span>手动方法</h4></div>
+<p>不使用 preset 文件，可以用 mkinitcpio 手动生成：
+</p>
+<pre># mkinitcpio -k &lt;kernelversion&gt; -g /boot/initramfs-&lt;file name&gt;.img
+</pre>
+<ul><li><code>-k</code> (--kernel &lt;kernelversion&gt;): 生成 initramfs image 的内核版本. <code>&lt;kernelversion&gt;</code> 需要和内核源代码目录和<code>/usr/lib/modules/</code>下的模块目录一致.</li>
+<li><code>-g</code> (--generate &lt;filename&gt;): 要生成的 initramfs 文件。</li></ul>
+<p>例如，上面安装的<i>A</i>.<i>B</i>.<i>C</i>自定义内核的命令为：
+</p>
+<pre># mkinitcpio -k <i>A</i>.<i>B</i>.<i>C</i> -g /boot/initramfs-linux<i>AB</i>.img
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc75a8294650a_.E6.8B.B7.E8.B4.9D_System.map" id="拷贝_System.map"><span id=".E6.8B.B7.E8.B4.9D_System.map"></span>拷贝 System.map</h3></div>
+<p><code>System.map</code> 文件并非 Linux 启动所必须的。它包含一张该次构建的内核的标识符之列表（例如函数名，变量名等等）和它们相应的地址。该“标识符到地址的映射”是用于：
+</p>
+<ul><li>某些进程，像 klogd, ksymoops 等</li>
+<li>OOPS 处理程序，当内核崩溃出错信息释放到屏幕时（例如类似于内核在某个函数中崩溃了的信息）。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>UEFI 分区使用 FAT32 文件系统，不支持软链接。</div>
+<p>如果 <code>/boot</code> 支持软链接（即不是 FAT32），将 <code>System.map</code> 复制到 <code>/boot</code>, 然后创建 <code>/boot/System.map</code> 软链接到 <code>/boot/System.map-YourKernelName</code>:
+</p>
+<pre># cp System.map /boot/System.map-YourKernelName
+# ln -sf /boot/System.map-YourKernelName /boot/System.map
+</pre>
+<p>如果 <code>/boot</code> 是不支持软链接的 FAT32，则需要将第二条命令换成 cp 来复制文件。
+</p><p>完成以上所有步骤之后，你的/boot目录中应该多出以下三个文件和一个软链接：
+</p>
+<ul><li>Kernel: <code>vmlinuz-YourKernelName</code></li>
+<li>Initramfs: <code>Initramfs-YourKernelName.img</code></li>
+<li>System Map: <code>System.map-YourKernelName</code></li>
+<li>System.map 软链接（或者复件）</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc75a8294650a_.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F.E8.AE.BE.E7.BD.AE" id="引导加载程序设置"><span id=".E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F.E8.AE.BE.E7.BD.AE"></span>引导加载程序设置</h2></div>
+<p>在你的<a href="#pgee8f2050088a">引导加载程序</a>（bootloader）配置文件中为你神奇的新内核添加一个入口。范例见<a href="#pgca9c4017f7ad">GRUB</a>, <a href="#pg789c0f6ec01c">LILO</a>, <a href="#pg0c6e4a08491e">GRUB2</a> 或 <a href="#pg0ca06688075c">Syslinux</a>。 
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>内核源码包含一个用于自动化 LILO 安装过程的脚本：如果你正在使用其他引导加载程序，可以安全地忽略它。</div>
+<!-- 
+NewPP limit report
+Cached time: 20260807040528
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.181 seconds
+Real time usage: 0.188 seconds
+Preprocessor visited node count: 845/1000000
+Revision size: 15393/2097152 bytes
+Post‐expand include size: 10732/2097152 bytes
+Template argument size: 4676/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 85/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   53.867      1 -total
+ 18.43%    9.927     78 Template:Ic
+  8.39%    4.522     15 Template:Pkg
+  7.36%    3.965      5 Template:注意
+  7.31%    3.936      3 Template:Tip
+  6.86%    3.694      1 Template:翻译状态
+  4.11%    2.215      1 Template:Warning_(简体中文)
+  2.13%    1.145      1 Template:Hc
+  1.98%    1.066      2 Template:Tip_(简体中文)
+  1.89%    1.019      1 Template:警告
+-->
+<!-- Render ID 3963c00e-9215-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3342:|#|:idhash:canonical!zh-cn and timestamp 20260807040528 and revision id 34942. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,157 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgd8ca5d9e5e23">小米 Redmibook Pro 15 2022 锐龙版</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Xiaomi_RedmiBook_Pro_15_2022_Ryzen">Xiaomi RedmiBook Pro 15 2022 Ryzen</a>，最近一次同步于 2025-06-22，若英文版本有所<a href="https://wiki.archlinux.org/title/Xiaomi_RedmiBook_Pro_15_2022_Ryzen?diff=0&amp;oldid=838407">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Xiaomi_RedmiBook_Pro_15_2022_Ryzen_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<table class="wikitable archwiki-table-laptop">
+<tbody><tr>
+<th>硬件</th>
+<th>PCI/USB ID</th>
+<th>是否正常工作
+</th></tr>
+<tr>
+<td>触摸板</td>
+<td><code>27C6:01E0</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>键盘</td>
+<td></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>显卡 (AMD)</td>
+<td><code>1002:1681</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>无线网卡</td>
+<td><code>10ec:b852</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>蓝牙</td>
+<td><code>0cb8:c559</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>摄像头</td>
+<td><code>2b7e:b557</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>声卡</td>
+<td><code>1002:1640</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>SD 读卡器</td>
+<td><code>10ec:525a</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>指纹识别</td>
+<td><code>27c6:589a</code></td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">未测试
+</td></tr></tbody></table>
+<p>此笔记本有两个变种，一个有 NVIDIA 独立显卡，一个没有。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd8ca5d9e5e23_Installation" id="Installation">Installation</h2></div>
+<p>See <a href="#pgd8ca5d9e5e23_Firmware">#Firmware</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd8ca5d9e5e23_Accessibility" id="Accessibility">Accessibility</h2></div>
+<p>The appearance of the UEFI is pretty simple and not very colorful, so it might work well with OCR software. 
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Blind users should request the help of a sighted person to change UEFI settings</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd8ca5d9e5e23_Firmware" id="Firmware">Firmware</h2></div>
+<p>This UEFI setup interface has very limited options available. You can disable/enable <a href="#pgf5f38183c9dc">Secure Boot</a>, set/unset password, change the size of shared VRAM, change boot order, or change the date/time. But that is about what all you can do in it. Pressing <code>F12</code> during booting to select the boot device.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>This device does not have a BIOS speaker.</div>
+<p><a href="#pg8f5df3654778">fwupd</a> does not support this device yet.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd8ca5d9e5e23_Secure_Boot" id="Secure_Boot">Secure Boot</h3></div>
+<p>在启动画面按 <code>F2</code> 键进入 UEFI 设置界面，按如下方式禁用<a href="#pg4b4af9f551f6">UEFI/安全启动</a>。
+</p>
+<ul><li>安全 → 设置密码，设置一个临时的密码</li>
+<li>安全 → 禁用安全启动</li>
+<li>再次设置密码，但在提示新密码时可以使用空白密码，这样即可以在不使用密码的同时禁用安全启动。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd8ca5d9e5e23_.E8.AF.9D.E7.AD.92.E6.A3.80.E6.B5.8B.E9.97.AE.E9.A2.98" id="话筒检测问题"><span id=".E8.AF.9D.E7.AD.92.E6.A3.80.E6.B5.8B.E9.97.AE.E9.A2.98"></span>话筒检测问题</h2></div>
+<p>此笔记本使用了深蕾科技(SenaryTech) SN6140 声卡芯片。外部话筒插入 3.5mm 接口时，有可能没有被检测到。
+</p><p>它只会在插入的耳麦(4段式 TRRS 插头)的话筒阻抗较小时发生。比如我的安克声阔 (Anker Soundcore) Q35 耳机自带的话筒线的阻抗大约为 1000Ω，而我的其他两个耳机的话筒的阻抗约为 2000Ω。
+这很可能芯片在探测插入的是四段式 OMTP/CTIA (俗称诺基亚/苹果式或国标/美标) 耳麦还是普通的3段式耳机时存在 bug。由于耳机喇叭的阻抗一般都比话筒的小得多，声卡可能依靠探测它们的阻抗来区分二者，但是遇到阻抗较小的话筒时就将它判断错误了。
+</p><p>明白了这个原因，你就可以从下面几种方法里面选择一种来解决或绕过这个问题了。（或者换一个其他的话筒）
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd8ca5d9e5e23_.E6.94.B9.E5.8F.98.E9.98.BB.E6.8A.97" id="改变阻抗"><span id=".E6.94.B9.E5.8F.98.E9.98.BB.E6.8A.97"></span>改变阻抗</h3></div>
+<p>改变话筒的阻抗就可以使它被识别到，例如将它串联一个合适阻值的电阻。当然这需要你手动更改电路的能力。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd8ca5d9e5e23_.E4.BD.BF.E7.94.A8_-.7B.7D-hda-verb_.E5.91.BD.E4.BB.A4.E6.9D.A5.E9.87.8D.E6.96.B0.E9.85.8D.E7.BD.AE.E5.A3.B0.E5.8D.A1.E8.8A.AF.E7.89.87" id="使用_-{}-hda-verb_命令来重新配置声卡芯片"><span id=".E4.BD.BF.E7.94.A8_-.7B.7D-hda-verb_.E5.91.BD.E4.BB.A4.E6.9D.A5.E9.87.8D.E6.96.B0.E9.85.8D.E7.BD.AE.E5.A3.B0.E5.8D.A1.E8.8A.AF.E7.89.87"></span>使用 <code>hda-verb</code> 命令来重新配置声卡芯片</h3></div>
+<p>使用这种方法，你可以正常地插入耳麦，也不需要手动改变电路。然而，我不知道这些命令实际上都对声卡做了什么事情，请确保自己足够自信和勇于冒险再尝试。
+</p><p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=alsa-tools">alsa-tools</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>所有这些命令都是我根据这两行源码 <a href="https://github.com/torvalds/linux/blob/780d569e6c4b422290f5cba319eb904b355d64be/sound/hda/codecs/conexant.c#L167">https://github.com/torvalds/linux/blob/780d569e6c4b422290f5cba319eb904b355d64be/sound/hda/codecs/conexant.c#L167</a> 和自己的实验得出的，因为我找不到 SN6140 或相近型号的芯片的数据手册或文档。</div>
+<p>首先，检查和保存你的(大概是)<a href="https://github.com/torvalds/linux/blob/780d569e6c4b422290f5cba319eb904b355d64be/sound/hda/codecs/conexant.c#L167">话筒偏置电流检查阈值寄存器</a>的初始值。这里 <code>/dev/snd/hwC1D0</code> 是我的设备路径，<code>0xb20</code> 是查询动词 (hda verb)，对应于设置动词 <code>0x320</code> 的。<code>0</code> 是无用但必须写出的参数。
+</p>
+<pre># hda-verb /dev/snd/hwC1D0 0x1c 0xb20 0
+nid = 0x1c, verb = 0xb20, param = 0x0
+value = 0x10
+</pre>
+<p>这里 <code>0x10</code> 就是阈值寄存器的初始值。现在我们来更改一下：
+</p>
+<pre># hda-verb /dev/snd/hwC1D0 0x1c 0x320 0x08
+</pre>
+<p>这句命令将改寄存器设置为 <code>0x08</code>。在我的系统上它大约使检测阈值降低了500Ω，你的效果可能略有区别。你也可以其他可能有用的值例如 <code>0x0</code>、<code>0x18</code>、<code>0x20</code> 或 <code>0x30</code>。它们似乎有不同的改变阈值的功效，但我完全不明白为什么这样会有用。
+</p><p>使用这些值你的话筒应该就可以正常识别和使用了。它似乎在重启后仍然有效，甚至重启到 Windows 后似乎仍然有效（可以在那边修复同样的问题）。如果你感到长期使用被更改的值不太舒服，也可以在使话筒用完毕后将它复原到初始值：
+</p>
+<pre># hda-verb /dev/snd/hwC1D0 0x1c 0x320 0x10
+</pre>
+<p>如果你的初始值不同，可将 <code>0x10</code> 换成你保存的初始值。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd8ca5d9e5e23_.E4.BD.BF.E7.94.A8.E4.B8.A4.E6.AE.B5.E5.BC.8F.E6.8F.92.E5.85.A5.E6.B3.95" id="使用两段式插入法"><span id=".E4.BD.BF.E7.94.A8.E4.B8.A4.E6.AE.B5.E5.BC.8F.E6.8F.92.E5.85.A5.E6.B3.95"></span>使用两段式插入法</h3></div>
+<p>在插入耳麦的插头时，请缓慢插入并盯着音频输入设备的列表看（比如 KDE 的声音设置界面）。如果你在某个特定位置暂停，就可以看到它正确识别到了话筒，然后你就可以继续插入，话筒就可以正常使用了。这种方法避免了运行未知命令可能带来的后果，但是需要每次插入时都使用这样的奇怪插入方法。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd8ca5d9e5e23_.E6.8C.87.E7.BA.B9.E8.AF.86.E5.88.AB" id="指纹识别"><span id=".E6.8C.87.E7.BA.B9.E8.AF.86.E5.88.AB"></span>指纹识别</h2></div>
+<p>有一个<a href="https://github.com/vrolife/modern_laptop/tree/main/drivers/fingerprint">第三方仓库</a>中含有此指纹识别器的驱动，未经测试是否能正常使用。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd8ca5d9e5e23_.E5.A2.9E.E5.8A.A0.E5.86.85.E7.BD.AE.E9.94.AE.E7.9B.98.E6.98.A0.E5.B0.84.E7.9A.84.E9.94.AE.E7.A0.81" id="增加内置键盘映射的键码"><span id=".E5.A2.9E.E5.8A.A0.E5.86.85.E7.BD.AE.E9.94.AE.E7.9B.98.E6.98.A0.E5.B0.84.E7.9A.84.E9.94.AE.E7.A0.81"></span>增加内置键盘映射的键码</h2></div>
+<p>默认情况下，键盘右上角的小爱键没有映射。如果你想把它映射为 Insert 键，可以安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/redmibook-hwdb-git/">redmibook-hwdb-git</a></span><sup><small>AUR</small></sup></span>来使用<a href="https://github.com/oldherl/redmibook-hwdb">一个自定义的硬件数据库规则补丁</a>。
+</p><p>回车键和右 Ctrl 键的修正已经进入 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd">systemd</a></span><sup><small>包</small></sup></span> v257-rc1 及后续版本，无需另外配置。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd8ca5d9e5e23_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li>一个第三方仓库，提供了一些 Redmibook 的 Linux 支持: <a href="https://github.com/vrolife/modern_laptop/">https://github.com/vrolife/modern_laptop/</a></li>
+<li>小米网站上的驱动下载 (仅限 Windows 系统): <a href="https://www.mi.com/service/notebook/drivers/A39S">https://www.mi.com/service/notebook/drivers/A39S</a></li>
+<li>此笔记本的一个 <a href="#pg01a8fd6784a4">Hardware probe</a>，注意它的蓝牙/无线网卡和 SSD 都被用户替换掉了。<a href="https://linux-hardware.org/?probe=3428364c49">https://linux-hardware.org/?probe=3428364c49</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807122957
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.101 seconds
+Real time usage: 0.105 seconds
+Preprocessor visited node count: 325/1000000
+Revision size: 6281/2097152 bytes
+Post‐expand include size: 4225/2097152 bytes
+Template argument size: 992/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   32.582      1 -total
+ 19.83%    6.461      8 Template:Yes
+ 11.49%    3.744      1 Template:G
+ 10.54%    3.435     22 Template:Ic
+ 10.54%    3.434      1 Template:翻译状态
+  7.39%    2.409      2 Template:Pkg
+  6.96%    2.267      2 Template:Note
+  5.80%    1.891      1 Template:Aur
+  5.58%    1.817      2 Template:META_Table_cell
+  4.63%    1.510      1 Template:Y
+-->
+<!-- Render ID b31e9c8e-925b-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8329:|#|:idhash:canonical!zh-cn and timestamp 20260807122957 and revision id 35284. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

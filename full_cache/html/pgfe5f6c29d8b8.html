@@ -1,0 +1,186 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgfe5f6c29d8b8">Arch 打包准则/安全</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – 安全 – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Arch_package_guidelines/Security">Arch package guidelines/Security</a>，最近一次同步于 2026-01-21，若英文版本有所<a href="https://wiki.archlinux.org/title/Arch_package_guidelines/Security?diff=0&amp;oldid=850335">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Arch_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Security_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文描述了适用于 Arch Linux 软件包的打包安全指引。对于 C/C++ 项目，可以为编译器和链接器应用安全加固选项。Arch Linux 默认会启用 <a href="https://en.wikipedia.org/wiki/Position-independent_code#PIE">PIE</a>、<a href="https://www.redhat.com/en/blog/enhance-application-security-fortifysource">FORTIFY_SOURCE</a>、栈保护、<a href="https://en.wikipedia.org/wiki/NX_bit">nx</a> 和 <a href="https://www.redhat.com/en/blog/hardening-elf-binaries-using-relocation-read-only-relro">relro</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe5f6c29d8b8_.E7.94.A8.E6.B3.95" id="用法"><span id=".E7.94.A8.E6.B3.95"></span>用法</h2></div>
+<p>可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=checksec">checksec</a></span><sup><small>包</small></sup></span> 检查强化加固保护选项：
+</p>
+<pre>$ checksec --file=/usr/bin/cat
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><a href="#pg00c132d82a07">Namcap</a> 也可以报告本文描述的一些安全问题。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe5f6c29d8b8_RELRO" id="RELRO">RELRO</h2></div>
+<p>RELRO 是用于加固 ELF 二进制文件和进程的一种通用缓解技术。在程序加载时，链接器需要写入几个 ELF 内存区段，但在将控制权交给程序前，可以将这些区段设为只读，由此防止攻击者覆盖掉部分 ELF 区段。有两种 RELRO 模式：
+</p>
+<ul><li>部分 RELRO（<code>-Wl,-z,relro</code>）：程序加载后部分区段被设为只读，但 GOT（<code>.got.plt</code>）仍为可写。</li>
+<li>完全 RELRO（<code>-Wl,-z,now</code>）：程序加载时解析所有动态符号，使得整个 GOT 都可被设为只读。</li></ul>
+<p>如果应用汇报使用了部分 RELRO，需检查构建工具是否使用了我们传递的 LDFLAGS，以及是否允许覆写 LDFLAGS。对于 Go 软件包，需检查构建方法是否将 <code>build.go</code> 作为了纯 golang Makefile 替代使用，该方法不允许传递 LDFLAGS。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe5f6c29d8b8_Haskell" id="Haskell">Haskell</h3></div>
+<p>暂不清楚如何为 Haskell 实现完全 RELRO。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe5f6c29d8b8_Go" id="Go">Go</h3></div>
+<p>参见 <a href="#pg25eee26160c7">Go 语言软件打包准则#Flags and build options</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe5f6c29d8b8_Stack_canary" id="Stack_canary">Stack canary</h2></div>
+<p><a href="https://en.wikipedia.org/wiki/Stack_canary">Stack canary</a>（又称栈警惕标志）由编译器添加在栈的缓冲区和控制数据之间。如果该已知值被破坏，就代表出现了缓冲区溢出，运行中的程序就会报出段错误（segfaults），以防止执行潜在的错误代码。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gcc">gcc</a></span><sup><small>包</small></sup></span> 包默认通过 <a href="https://gitlab.archlinux.org/archlinux/packaging/packages/gcc/-/blob/main/PKGBUILD#L91">--enable-default-ssp</a> 编译选项启用了栈保护。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe5f6c29d8b8_NX" id="NX">NX</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe5f6c29d8b8_C.2FC.2B.2B" id="C/C++"><span id="C.2FC.2B.2B"></span>C/C++</h3></div>
+<p>可执行空间保护会将内存区域标记为非可执行，使得在该区域执行机器码时会出现报错。该功能使用了类似 NX 位（No-eXecute bit，禁止执行位）的硬件功能，有时也会使用软件模拟这些特性。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe5f6c29d8b8_PIE" id="PIE">PIE</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe5f6c29d8b8_C.2FC.2B.2B_2" id="C/C++_2"><span id="C.2FC.2B.2B_2"></span>C/C++</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gcc">gcc</a></span><sup><small>包</small></sup></span> 包默认通过 <a href="https://gitlab.archlinux.org/archlinux/packaging/packages/gcc/-/blob/main/PKGBUILD#L90">--enable-default-pie</a> 选项为 C/C++ 启用了该特性。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe5f6c29d8b8_Golang" id="Golang">Golang</h3></div>
+<p>将以下标志传递给 <code>go build</code>：
+</p>
+<pre>export GOFLAGS='-buildmode=pie'
+export CGO_CPPFLAGS="-D_FORTIFY_SOURCE=3"
+export CGO_LDFLAGS="-Wl,-z,relro,-z,now"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe5f6c29d8b8_Haskell" id="Haskell_2">Haskell</h3></div>
+<p>将以下标志传递给 <code>runhaskell Setup.hs configure</code>：
+</p>
+<pre>--ghc-option='-pie'
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe5f6c29d8b8_RPATH.2FRUNPATH" id="RPATH/RUNPATH"><span id="RPATH.2FRUNPATH"></span>RPATH/RUNPATH</h2></div>
+<p>RUNPATH/RPATH 为包含该参数的对象提供了更多的搜索路径（适用于可执行文件和共享对象）：
+</p>
+<pre>$ objdump -x /usr/bin/perl | grep -E 'RPATH|RUNPATH'
+</pre>
+<p>如果 RPATH 的值包含了攻击者可控制的路径，那就有可能通过对应目录下的恶意库执行代码（例如 <a href="https://nvd.nist.gov/vuln/detail/CVE-2006-1566">CVE-2006-1566</a> 和 <a href="https://www.cvedetails.com/cve/CVE-2005-4280/">CVE-2005-4280</a>）。更多信息请参考 <a href="https://wiki.debian.org/RpathIssue">Debian:RpathIssue</a>。
+</p><p>RPATH 是通过向 LDFLAGS 传递类似 <code>-Wl,-rpath -Wl,/usr/local/lib</code> 的参数，然后由链接器负责设置的。如果要设置 RUNPATH，请将 <code>--enable-new-dtags</code> 添加到链接器标志中。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe5f6c29d8b8_FORTIFY" id="FORTIFY">FORTIFY</h2></div>
+<p>Fortify source 是一个宏，可以为执行内存和字符串操作的函数添加缓冲区溢出保护。它会检测是否有攻击者尝试通过负责更多的字节来溢出缓冲区，并停止程序的运行。该保护项已在默认 <code>CPPFLAGS</code> 中启用：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">makepkg.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">CPPFLAGS="-D_FORTIFY_SOURCE=3"</pre>
+<p>更多信息请参考 <a href="#pg7edcce763396">makepkg#配置</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfe5f6c29d8b8_systemd_.E6.9C.8D.E5.8A.A1" id="systemd_服务"><span id="systemd_.E6.9C.8D.E5.8A.A1"></span>systemd 服务</h2></div>
+
+<p><br/>
+如果上游不提供 <a href="#pgac06dd8bfe95">systemd</a> 服务文件，使得需随软件包附带，请检查是否需要使用以下 systemd 服务加固功能。Systemd 提供并为服务启用了分析安全特性的方法：
+</p>
+<pre>$ systemd-analyze security reflector.service
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe5f6c29d8b8_.E6.96.87.E4.BB.B6.E8.AE.BF.E9.97.AE" id="文件访问"><span id=".E6.96.87.E4.BB.B6.E8.AE.BF.E9.97.AE"></span>文件访问</h3></div>
+<p>可以通过限制文件系统访问来加固服务。
+</p><p>为执行的进程配置一个新的文件系统命名空间，并在内部挂载私有 <code>/tmp</code> 和 <code>var/tmp</code> 目录，使得其不与命名空间外部的进程共享。该方法适用于会向 <code>/tmp</code> 目录写入数据的程序：
+</p>
+<pre>PrivateTmp=true
+</pre>
+<p>ProtectSystem 参数对于执行中进程有三种只读挂载方式，其中 “full” 选项会将 <code>/usr</code>、<code>/boot</code> 和 <code>/etc</code> 目录挂载为只读。ProtectHome 会使进程无法访问 <code>/home</code>、<code>/root</code> 和 <code>/run/user</code> 目录：
+</p>
+<pre>ProtectSystem=strict
+ProtectHome=true
+</pre>
+<p>PrivateDevices 会为执行中的进程配置新的 <code>/dev</code> 命名空间，其中只包含类似 <code>/dev/null</code>、<code>/dev/zero</code> 和 <code>/dev/random</code> 的 API 伪设备，不包含任何物理设备、系统内存、系统端口和其它设备。该选项可以防止进程直接向物理设备进行写入，systemd 还会为 <code>@raw-io</code> 集添加系统调用过滤器：
+</p>
+<pre>PrivateDevices=true
+</pre>
+<p>以下选项会使执行中进程无法修改可通过 <code>/proc/sys</code> 和 <code>/sys</code> 等路径访问的内核变量。ProtectControlGroups 会使 <code>/sys/fs/cgroup</code> 层次结构变为只读：
+</p>
+<pre>ProtectKernelTunables=true
+ProtectControlGroups=true
+</pre>
+<p>以下方法可禁止访问部分文件路径：
+</p>
+<pre>InaccessiblePaths=/etc
+</pre>
+<p>更多信息请参考 <span class="plainlinks archwiki-template-man" title="$ man 5 systemd.exec"><a href="https://man.archlinux.org/man/systemd.exec.5">systemd.exec(5)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe5f6c29d8b8_.E7.94.A8.E6.88.B7" id="用户"><span id=".E7.94.A8.E6.88.B7"></span>用户</h3></div>
+<p>确保执行中的进程和其子进程无法通过 <span class="plainlinks archwiki-template-man" title="$ man 2 execve"><a href="https://man.archlinux.org/man/execve.2">execve(2)</a></span> 获得新权限：
+</p>
+<pre>NoNewPrivileges=true
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe5f6c29d8b8_.E5.86.85.E5.AD.98" id="内存"><span id=".E5.86.85.E5.AD.98"></span>内存</h3></div>
+<p>禁止创建同时为可写和可执行的内存映射、将映射修改为可执行和创建可执行共享内存。该方法会将进程沙箱化，防止攻击者向可执行的内存部分写入数据。注意，该方法与使用 <a href="https://en.wikipedia.org/wiki/JIT_(computing)">JIT</a> 的应用不兼容：
+</p>
+<pre>MemoryDenyWriteExecute=true
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe5f6c29d8b8_.E7.B3.BB.E7.BB.9F.E8.B0.83.E7.94.A8" id="系统调用"><span id=".E7.B3.BB.E7.BB.9F.E8.B0.83.E7.94.A8"></span>系统调用</h3></div>
+<p>锁定 <span class="plainlinks archwiki-template-man" title="$ man 2 personality"><a href="https://man.archlinux.org/man/personality.2">personality(2)</a></span> 系统调用，使内核执行域无法被修改：
+</p>
+<pre>LockPersonality=true
+</pre>
+<p>还可以限制服务的系统调用，以下命令将显示 systemd 可以过滤的系统调用：
+</p>
+<pre>$ systemd-analyze syscall-filter
+</pre>
+<p>可以使用预定义组，以下示例为使用推荐的系统服务调用白名单配置起点：
+</p>
+<pre>SystemCallFilter=@system-service
+</pre>
+<p>还可以按架构来限制系统调用，例如限制在 64 位设备上执行 32 位二进制文件（即非原生架构二进制文件）：
+</p>
+<pre>SystemCallArchitectures=native
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe5f6c29d8b8_.E7.BD.91.E7.BB.9C" id="网络"><span id=".E7.BD.91.E7.BB.9C"></span>网络</h3></div>
+<p>如果进程不需要访问网络，可以为进程配置一个新的网络命名空间，并只配置回环接口，以此完全禁用网络访问：
+</p>
+<pre>PrivateNetwork=true
+</pre>
+<p>如果需要网络，还可以限制 <span class="plainlinks archwiki-template-man" title="$ man 2 socket"><a href="https://man.archlinux.org/man/socket.2">socket(2)</a></span> 系统调用可使用的地址族类型，以只允许 UNIX socket 为例：
+</p>
+<pre>RestrictAddressFamilies=AF_UNIX
+</pre>
+<p>也可以对只需连接到 localhost（本机）或特定 IP 段的情况进行限制，以只允许 localhost 为例：
+</p>
+<pre>IPAddressAllow=localhost
+IPAddressDeny=any
+</pre>
+<p>更多网络过滤相关的信息请参考 <span class="plainlinks archwiki-template-man" title="$ man 5 systemd.resource-control"><a href="https://man.archlinux.org/man/systemd.resource-control.5">systemd.resource-control(5)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfe5f6c29d8b8_.E5.85.B6.E5.AE.83" id="其它"><span id=".E5.85.B6.E5.AE.83"></span>其它</h3></div>
+<p>为执行的进程配置新的 UTS 命名空间，并禁止修改主机名或域名：
+</p>
+<pre>ProtectHostname=true
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807124659
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.241 seconds
+Real time usage: 0.250 seconds
+Preprocessor visited node count: 487/1000000
+Revision size: 7925/2097152 bytes
+Post‐expand include size: 6285/2097152 bytes
+Template argument size: 1340/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  129.554      1 -total
+ 71.42%   92.525      1 Template:Package_guidelines
+  4.54%    5.876      1 Template:Move
+  4.00%    5.179      5 Template:Man
+  3.35%    4.336     26 Template:Ic
+  2.23%    2.890      3 Template:Pkg
+  1.86%    2.414      1 Template:翻译状态
+  1.55%    2.013      1 Template:Tip
+  1.09%    1.412      1 Template:META_Message
+  1.05%    1.357      1 Template:Hc
+-->
+<!-- Render ID 14476f8e-925e-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8458:|#|:idhash:canonical!zh-cn and timestamp 20260807124659 and revision id 34747. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,133 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg6d29f10552c4">Project:贡献</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/ArchWiki:Contributing">ArchWiki:Contributing</a>，最近一次同步于 2022-03-20，若英文版本有所<a href="https://wiki.archlinux.org/title/ArchWiki:Contributing?diff=0&amp;oldid=719811">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/ArchWiki:Contributing_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>Arch Linux <a href="#pg7417fe8a72f6">行为准则</a>管理着所有 Arch 项目。
+</p><p>ArchWiki 致力于成为一个清晰、全面、专业的文档。为了达到这一目的，我们将工作划分为不同的任务。本文主要介绍你可以帮助完善 ArchWiki 的主要任务。
+</p><p>这是一个来自社区、服务社区的工作。如果想更进一步，可以申请成为<a href="#pg34585a2d7640">wiki 维护者</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6d29f10552c4_.E4.B8.89.E4.B8.AA.E5.9F.BA.E6.9C.AC.E5.8E.9F.E5.88.99" id="三个基本原则"><span id=".E4.B8.89.E4.B8.AA.E5.9F.BA.E6.9C.AC.E5.8E.9F.E5.88.99"></span>三个基本原则</h2></div>
+<p>有三个基本的原则需要贡献者遵守，不管您是新手还是老用户。这是对其它用户的<a href="#pgbbab0d3afce0">尊重</a>：
+</p>
+<ul><li>#总是正确使用编辑摘要</li>
+<li>#不要一次进行大量的改动</li>
+<li>#进行页面重排前进行讨论</li></ul>
+<p>每个 Wiki 贡献者都必须明白，你的编辑早晚会被其它用户检查和编辑，遵循此建议可以方便其它用户理解您的编辑。若你参加过软件合作项目，应能理解维基编辑摘要和git提交说明（commit message）、维基编辑差异和git diff的相似性。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不遵守此规则的编辑可能会被直接回退，而且回退前不会再另行通知。访问量高的页面尤其如此。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6d29f10552c4_.E6.80.BB.E6.98.AF.E6.AD.A3.E7.A1.AE.E4.BD.BF.E7.94.A8.E7.BC.96.E8.BE.91.E6.91.98.E8.A6.81" id="总是正确使用编辑摘要"><span id=".E6.80.BB.E6.98.AF.E6.AD.A3.E7.A1.AE.E4.BD.BF.E7.94.A8.E7.BC.96.E8.BE.91.E6.91.98.E8.A6.81"></span>总是正确使用编辑摘要</h3></div>
+<p><a href="https://meta.wikimedia.org/wiki/Help:Edit_summary">编辑摘要</a>（或称变更摘要）是编辑页面的编辑区域下方、保存按钮上方的文本框。每次编辑，都需要有充足且简洁的信息说明“做了什么”和“为什么”。内部链接在编辑摘要中也生效，可以链接到相关的讨论或文章；也可以贴上链接到编辑差异、或是外部的论坛帖子或者邮件列表的URL。
+</p><p>只有当编辑是<a href="https://en.wikipedia.org/wiki/Help:Minor_edit">小编辑</a>（小改动），例如语法或词句的修改时，可以忽略“为什么”。类似地，向<a href="#pg81d01de35e6c">讨论页面</a>中加入内容或回复已有内容，并不需要重复讨论信息。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在点击章节标题旁的<b>编辑</b>按钮时，摘要栏中将预先填入<code>/* 章节标题 */</code>。<b>这不是</b>一段注释，<code>/*</code>和<code>*/</code>之间的文本将被转换为到该节的链接。请在其后填写编辑摘要。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>查看<a href="#pg7f2d23997ef9">最近更改</a>中的摘要可以学习其他人是如何做的，但是请注意并不是所有人都遵循这些准则。</li>
+<li>使用类似<a href="#pga25dc014a868">Special:Diff/359881/next</a>的链接以生成可点击的差异对比链接，详细语法可参考<a href="https://www.mediawiki.org/wiki/Help:Diff">MediaWiki的说明</a>.</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6d29f10552c4_.E4.B8.8D.E8.A6.81.E4.B8.80.E6.AC.A1.E8.BF.9B.E8.A1.8C.E5.A4.A7.E9.87.8F.E7.9A.84.E6.94.B9.E5.8A.A8" id="不要一次进行大量的改动"><span id=".E4.B8.8D.E8.A6.81.E4.B8.80.E6.AC.A1.E8.BF.9B.E8.A1.8C.E5.A4.A7.E9.87.8F.E7.9A.84.E6.94.B9.E5.8A.A8"></span>不要一次进行大量的改动</h3></div>
+<p>执行大的改动时，无论是对条目还是讨论页，最好将其分到多个编辑操作中，比如可根据逻辑步骤一步一步完成。如果有疑问，通过“显示差异”按钮查看<a href="https://en.wikipedia.org/wiki/Help:Diff">diff</a>，看看其它用户能否理解您的编辑变化。例举一些会造成令人困惑的差异的操作： 
+</p>
+<ul><li>移动段落的同时编辑了内容。解决方法：移动段落，保存，再次打开进行编辑。</li>
+<li>在同一个编辑中改变多个段落的顺序。解决方法：一次仅移动一个段落。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这个方式会增加<a href="#pg7f2d23997ef9">最近修改</a>中的日志次数，不必担心，用户可以通过启用“参数设置 &gt; 最近更改 &gt; 高级选项”中的“按页面分组最近更改和监视列表中的更改”进行过滤。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6d29f10552c4_.E8.BF.9B.E8.A1.8C.E9.A1.B5.E9.9D.A2.E9.87.8D.E6.8E.92.E5.89.8D.E8.BF.9B.E8.A1.8C.E8.AE.A8.E8.AE.BA" id="进行页面重排前进行讨论"><span id=".E8.BF.9B.E8.A1.8C.E9.A1.B5.E9.9D.A2.E9.87.8D.E6.8E.92.E5.89.8D.E8.BF.9B.E8.A1.8C.E8.AE.A8.E8.AE.BA"></span>进行页面重排前进行讨论</h3></div>
+<p>如果您要大规模的修改文章结构或者重写段落，请在讨论页面提前通知，并解释目的和方式。等待一段时间以便其它用户有时间回复和提出自己的看法。
+</p><p>注意，即使经过提前的讨论，仍然需要注意#总是正确使用编辑摘要和#不要一次进行大量的改动。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6d29f10552c4_.E6.9C.80.E9.87.8D.E8.A6.81.E7.9A.84.E4.BB.BB.E5.8A.A1" id="最重要的任务"><span id=".E6.9C.80.E9.87.8D.E8.A6.81.E7.9A.84.E4.BB.BB.E5.8A.A1"></span>最重要的任务</h2></div>
+<p>接下来，本文将介绍多种可为本维基做贡献的方式。其中最重要的一点是：<b>将您最感兴趣的页面添加到监视列表</b>，并保护它们不受低质量编辑的影响。
+</p><p>ArchWiki 每天都收到来自许多不同用户的<a href="#pgd5ff6679a347">大量</a>编辑修改。大部分修改都是实际上的改进，但是一个不小心的修改（哪怕经常出自善意）就可能产生不良后果，包括不准确的信息和内容丢失。如果没有人注意，就会毁掉你和其他用户之前贡献的宝贵内容。这样的编辑其实很容易发生，频率也许超出你的想象，所以 Wiki 维护者和管理员花费了大量时间对这类低质量编辑进行修复。但是您不能完全依赖管理员，因为他们和你一样，能够花在 wiki 中的时间也是有限的，而且您对某些特定领域的了解还会比管理员更专业。所以如果用户只专注于添加新内容，而不注重保护已有内容，您的贡献可能会被破坏，维基也不可能正常工作。
+</p><p>幸运的是，wiki 提供了有用的功能避免此类事情的发生。只需要点击页面顶部的监视链接，就可以将页面加入你的<a href="#pga5bcd261ce28">编辑监视列表</a>。这样就可以在<a href="#pg7c0d440cac78">监视列表</a>查看改动，或在参数设置页面的<a href="#pgee7b332787ed">电子邮件选项</a>下选择在监视页面发生变动时收到电邮通知。在<a href="#pg7f2d23997ef9">最近更改</a>页面，监视的页面会被高亮显示。最后，可以在<a href="#pgee7b332787ed">监视首选项</a>中修改设置，包括自动将修改过的页面加入监视列表。
+</p><p>如果发现监视页面的改动有问题，或者不明白为什么被编辑，建议立即修正它，或在相应条目的<a href="#pg81d01de35e6c">讨论页面</a>、或编辑作者的讨论页面询问。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6d29f10552c4_.E5.8F.82.E8.80.83.E8.B5.84.E6.96.99" id="参考资料"><span id=".E5.8F.82.E8.80.83.E8.B5.84.E6.96.99"></span>参考资料</h2></div>
+<p>做贡献前，需要了解的内容：
+</p>
+<ul><li><a href="#pg678fb336b1c7">命名规范</a>讨论有效的文章命名策略和原因，以确保它们的可读性和可检索性。创建页面前请先阅读此文。</li>
+<li><a href="#pg5f6701580706">编辑帮助</a>是一个简短的 ArchWiki 编辑指南。描述了 MediaWiki 的格式语法和 ArchWiki 的相关规范。是 ArchWiki 贡献者的必读文章。</li>
+<li><a href="#pg09a9c4ad5ce5">讨论帮助</a>页面说明如何通过讨论页面与其他人交流。</li>
+<li><a href="#pg52795714602d">文章样式规范</a>提供了一个 ArchWiki 使用的标准风格指导。</li>
+<li><a href="#pgb70041c731c2">页面分类</a>介绍如何设置页面分类，创建缺失的分类，如何将页面移动到另外的分类。</li>
+<li><a href="#pg7ac214170eda">Project:翻译团队</a>有一个创建新翻译的详细步骤，翻译文章时请按照此步骤进行。</li>
+<li><a href="#pg3e7523a22232">Help:i18n (简体中文)</a>是 ArchWiki 国际化和本地化的全面指引。</li>
+<li><a href="#pg47ae282ef1e8">Help:Procedures (简体中文)</a>介绍了一些常用的编辑动作。</li></ul>
+<p><a href="#pg7afaed343623">帮助分类</a>包含了所有的帮助页面。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6d29f10552c4_.E5.88.9B.E5.BB.BA" id="创建"><span id=".E5.88.9B.E5.BB.BA"></span>创建</h2></div>
+<p>先确保你已经理解了 ArchWiki 的哲学并考虑别人想读什么（参见<a href="#pg54e2cf94ebae">需求</a>）。正如前面所说，wiki 的范围很广。
+</p><p>请联系<a href="#pg48c58c749f38">管理员</a>获得主要项目的协调帮助。
+</p><p><a href="#pg5f6701580706">创建页面</a>包含在主命名空间创建页面的步骤。 
+</p><p>Wiki 的子页面功能同样可用于你的用户页。可用于创建空白页面的草稿。注意用户页面不能分类，但其他特性均可用。草稿完成之后，简单地将子页面移动到新的名称下即可。请在移动后再添加条目的相关状态模板。状态模板的理由描述越详尽，就越方便维护维基的用户与你合作。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6d29f10552c4_.E5.AE.8C.E5.96.84" id="完善"><span id=".E5.AE.8C.E5.96.84"></span>完善</h2></div>
+<p>在任何 Wiki 中，内容编辑、完善和更新都是永不停息的持续过程。如果希望提供帮助，请<a href="#pg338c8628f4c3">注册一个用户</a>并开始进行：
+</p>
+<ul><li>帮助实现<a href="#pgb155990a00dc">需求</a>。</li>
+<li>扩展<a href="#pg06b35469c4c5">未完成</a>的页面、改进<a href="#pgb998e0999c80">书写质量差</a>的页面。</li>
+<li>修正<a href="#pg3fc2f32aa536">不准确</a>或<a href="#pg405fea27d9fc">过期</a>的内容、错误字、语法和<a href="#pg52795714602d">样式</a>。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6d29f10552c4_.E9.9D.9E_Arch_.E7.94.A8.E6.88.B7" id="非_Arch_用户"><span id=".E9.9D.9E_Arch_.E7.94.A8.E6.88.B7"></span>非 Arch 用户</h3></div>
+<p>任何人都可以<a href="#pg62f54da992f8">注册账号</a>。欢迎非 Arch 用户贡献适用于其他 Linux 发行版或其他操作系统的内容，只要能确定它同样适用于 Arch Linux。需要指出，条目是为 Arch 用户编写的，因此：
+</p>
+<ul><li>不要添加仅仅与其他 Linux 发行版或者操作系统相关的内容。例如，Fedora 用户同样可以向 <a href="#pgac06dd8bfe95">systemd</a> 页面作出贡献，但若提及新内容在仅在 Fedora 有效，后者将视为无关内容而被删除。</li>
+<li>不要将 Arch 专有的约定、术语或工具替换为适用于更大范围操作系统的版本。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6d29f10552c4_.E7.BB.B4.E6.8A.A4" id="维护"><span id=".E7.BB.B4.E6.8A.A4"></span>维护</h2></div>
+<ul><li>巡查<a href="#pg7f2d23997ef9">最近更改</a>, 报告和修正<a href="#pg7426ff0f918f">有问题的编辑</a>.</li>
+<li>为页面打上适当的<a href="#pg798f9ed1c056">页面状态模板</a>，例如： 删除<code>{{Remove}}</code>, 过期<code>{{Out of date}}</code>, 待翻译<code>{{Translateme}}</code>，不准确<code>{{Accuracy}}</code>,归档<code>{{Archive}}</code>。</li>
+<li>将一些页面加入你的监视列表，以防止文章被低质量更改破坏。这是#最重要的任务。</li>
+<li>参加讨论页面中的讨论：大部分用户可以通过<a href="https://wiki.archlinux.org/index.php?namespace=1&amp;title=Special%3ARecentChanges">此链接</a>查看讨论页的最新更改。和维护直接相关的讨论位于<a href="https://wiki.archlinux.org/index.php?namespace=13&amp;title=Special%3ARecentChanges">[1]</a>, <a href="https://wiki.archlinux.org/index.php?namespace=11&amp;title=Special%3ARecentChanges">[2]</a>, <a href="https://wiki.archlinux.org/index.php?namespace=5&amp;title=Special%3ARecentChanges">[3]</a> 和 <a href="https://wiki.archlinux.org/index.php?namespace=15&amp;title=Special%3ARecentChanges">[4]</a>; 此外 <a href="#pgb155990a00dc">ArchWiki:Requests</a> 也是一个讨论页面。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6d29f10552c4_.E7.BB.84.E7.BB.87" id="组织"><span id=".E7.BB.84.E7.BB.87"></span>组织</h2></div>
+<p>整理、归类和移动页面是所有 Wiki 维护者的主要任务。
+</p>
+<ul><li><a href="#pgf9186176e265">合并</a>重复页面。</li>
+<li>完善<a href="#pg57f51e043498">导航</a>。</li>
+<li>将<a href="#pg49740bc04d90">未分类页面</a>、<a href="#pg0c6c94c3833b">无类别的分类</a>进行分类，增加<a href="#pg9c32192c10c4">缺少的分类</a>。参见风格指引的<a href="#pg63b9575be805">分类</a>和<a href="#pg63b9575be805">分类页面</a>章节。</li>
+<li>修正<a href="#pg67c4641fc157">破损重定向</a>和<a href="#pg01d4e0b75071">双重重定向</a>。讨论或实现<a href="#pg979c0c80d0ec">重定向提议</a>。</li>
+<li><a href="#pg845d4d538b60">特殊页面</a>还有一些清理工具。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6d29f10552c4_.E7.BF.BB.E8.AF.91" id="翻译"><span id=".E7.BF.BB.E8.AF.91"></span>翻译</h2></div>
+<p>简体中文维基是外部 wiki 站点。我们欢迎您帮助翻译 ArchWiki 的其他语种页面到本 wiki 以丰富其内容，但要注意一一对应的翻译不是必须的。请阅读<a href="#pgbec17c48c855">帮助:翻译</a>以开始翻译。
+</p><p>关于 Arch Linux 官方 wiki 的翻译团队，请参见 <a href="https://wiki.archlinux.org/title/ArchWiki:Contributing#Translating">arch:ArchWiki:Contributing#Translating</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6d29f10552c4_.E5.A4.B4.E8.84.91.E9.A3.8E.E6.9A.B4" id="头脑风暴"><span id=".E5.A4.B4.E8.84.91.E9.A3.8E.E6.9A.B4"></span>头脑风暴</h2></div>
+<p>为了同其他用户实时协调贡献，可以使用 Arch Linux 官方专用的 <a href="#pgb7448ed660b1">#archlinux-wiki</a> IRC 频道。而对于 Arch Linux 中文维基，则可以使用 <a href="#pge3ba7532b82c">Telegram 或者 Matrix 群天群组</a>。
+</p><p>如果不确定从哪里开始，或者觉得编辑别人的文章很别扭，你也可以在 <a href="https://bbs.archlinux.org/">Arch Linux 论坛</a>、<a href="https://bbs.archlinux.org/viewforum.php?id=13">论坛和 Wiki 讨论</a>和<a href="https://bbs.archlinuxcn.org/viewforum.php?id=23&amp;p=1">中文论坛</a>中提出主意和建议。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6d29f10552c4_.E5.90.8E.E5.8F.B0.E7.BB.B4.E6.8A.A4" id="后台维护"><span id=".E5.90.8E.E5.8F.B0.E7.BB.B4.E6.8A.A4"></span>后台维护</h2></div>
+<p>使用 <a href="https://bugs.archlinux.org/">Arch Linux Bugtracker</a> 贡献修复并完善 MediaWiki 代码。可参阅关于 ArchWiki 后端的<a href="https://bugs.archlinux.org/index.php?string={wiki}&amp;project=0">已报告的 bug 列表</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6d29f10552c4_.E6.8A.B1.E6.80.A8" id="抱怨"><span id=".E6.8A.B1.E6.80.A8"></span>抱怨</h2></div>
+<p>是的，只要表达方式合理，即使是普通的抱怨我们也接受，这也是提高 Wiki 的一种方式。有抱怨，请前往 <a href="#pg02ed25ecec83">ArchWiki talk:Administrators</a> 页面。当然，应该不用特别说明，请尽可能用文明的和尊重的语气来抱怨一些事 :）
+</p><p>抱怨或评论的所有合适的位置和方法都在页面 <a href="#pg34585a2d7640">ArchWiki:维护团队#使用什么方式联系到责任人</a>中被概述。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807133018
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.114 seconds
+Real time usage: 0.119 seconds
+Preprocessor visited node count: 220/1000000
+Revision size: 12603/2097152 bytes
+Post‐expand include size: 2544/2097152 bytes
+Template argument size: 1246/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 63/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   15.014      1 -total
+ 23.14%    3.474      1 Template:翻译状态
+ 22.81%    3.424      1 Template:注意
+ 14.16%    2.126      8 Template:Ic
+ 12.74%    1.913      1 Template:小贴士
+  7.46%    1.120      1 Template:Note_(简体中文)
+  6.38%    0.958      1 Template:警告
+-->
+<!-- Render ID 21675d0e-9264-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:5873:|#|:idhash:userlang=zh-cn!zh-cn and timestamp 20260807133018 and revision id 33920. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

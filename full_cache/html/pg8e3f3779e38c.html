@@ -1,0 +1,295 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg8e3f3779e38c">安全地擦除磁盘</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><br/>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Securely_wipe_disk">Securely wipe disk</a>，最近一次同步于 2025-08-08，若英文版本有所<a href="https://wiki.archlinux.org/title/Securely_wipe_disk?diff=0&amp;oldid=843129">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Securely_wipe_disk_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg15a57ebf5e5b">安全地擦除磁盘/提示和技巧</a></li>
+<li><a href="#pg7c173bce547a">文件恢复</a></li>
+<li><a href="#pgc0dfc4406ccb">Benchmarking/Data storage devices</a></li>
+<li><a href="#pg812206bba43d">静态数据加密#准备磁盘</a></li>
+<li><a href="#pg8e3a9446707a">dm-crypt</a></li>
+</ul></div>
+<p>擦除磁盘是通过向磁盘写入新数据，直至将旧数据完全覆盖完成的。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>本文中“磁盘”的概念可拓展到回环设备。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8e3f3779e38c_.E5.B8.B8.E8.A7.81.E7.94.A8.E9.80.94" id="常见用途"><span id=".E5.B8.B8.E8.A7.81.E7.94.A8.E9.80.94"></span>常见用途</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_.E6.B8.85.E9.99.A4.E8.AE.BE.E5.A4.87.E4.B8.8A.E7.9A.84.E6.95.B0.E6.8D.AE" id="清除设备上的数据"><span id=".E6.B8.85.E9.99.A4.E8.AE.BE.E5.A4.87.E4.B8.8A.E7.9A.84.E6.95.B0.E6.8D.AE"></span>清除设备上的数据</h3></div>
+<p>完全擦除磁盘最常见的应用是，在需要丢弃或出售设备时，清除磁盘上可能仍存在的未加密敏感数据。擦除数据后，可抵御使用简单<a href="#pg7c173bce547a">文件恢复</a>软件恢复敏感数据的尝试。
+</p><p>若追求擦除速度，可以向设备写入<code>/dev/zero</code>产生的全零数据，或其它通过简单模式生成数据。不过，在某些情况下，使用具有一定随机性的数据可能更好，详见#数据残留。
+</p><p>对于设备已经被擦除的部分，不可能使用常规的系统功能（例如，标准ATA/SCSI命令）和硬件接口获取到擦除前的数据。若文件恢复软件需要尝试从被擦除的部分恢复数据，则其必须使用依设备而异的专有功能。
+</p><p>对于机械硬盘，要从被擦除的部分恢复数据，至少需要使用非公开的设备指令，或修改设备控制器/固件，以从设备通常不可访问的部分读取信息。例如，可能可以从被重映射的扇区（记录在<a href="#pg371a829a96af">S.M.A.R.T.</a>中的设备损坏的扇区）读取到擦除前的数据。
+</p><p>在擦除数据方面，不同的物理存储技术存在不同问题。其中最值得注意的是基于闪存的设备和老式磁存储设备（机械硬盘硬盘、软盘、磁带）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_.E4.B8.BA.E5.9D.97.E8.AE.BE.E5.A4.87.E5.8A.A0.E5.AF.86.E5.81.9A.E5.87.86.E5.A4.87" id="为块设备加密做准备"><span id=".E4.B8.BA.E5.9D.97.E8.AE.BE.E5.A4.87.E5.8A.A0.E5.AF.86.E5.81.9A.E5.87.86.E5.A4.87"></span>为块设备加密做准备</h3></div>
+<p>若要将磁盘某部分用于存储<a href="#pg812206bba43d">块设备加密</a>数据，建议使用密码学随机数生成器（下文中简称为RNG）生成的#随机数据进行擦除。
+</p><p>另见<a href="https://zh.wikipedia.org/wiki/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90">随机数生成</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>若将某个分区作为块设备加密的容器，且该分区之前存储的是非加密/随机性低的数据，则可能可以通过数据特征分析出加密分区的使用情况，使得块设备加密的强度被削弱到文件系统加密级别。因此，若重视加密强度，不应当使用全零、简单模式生成的数据或其它非随机的数据擦除分区。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8e3f3779e38c_.E6.95.B0.E6.8D.AE.E6.AE.8B.E7.95.99" id="数据残留"><span id=".E6.95.B0.E6.8D.AE.E6.AE.8B.E7.95.99"></span>数据残留</h2></div>
+<p>即使有意移除/擦除了磁盘上的数据，数据的表示可能仍然存在于设备中，详见<a href="https://en.wikipedia.org/wiki/Data_remanence">Wikipedia:Data remanence</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.E3.80.81.E7.A8.8B.E5.BA.8F.E3.80.81.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E7.9A.84.E5.BD.B1.E5.93.8D" id="操作系统、程序、文件系统的影响"><span id=".E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.E3.80.81.E7.A8.8B.E5.BA.8F.E3.80.81.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E7.9A.84.E5.BD.B1.E5.93.8D"></span>操作系统、程序、文件系统的影响</h3></div>
+<p>操作系统、运行中的程序或<a href="https://zh.wikipedia.org/wiki/%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">日志文件系统</a>，可能会在你不知情的情况下隐式将未加密数据分散拷贝到磁盘的任意角落。不过，只有当需要执行像前文提到的那种高级操作（例如为出售设备而彻底销毁数据，或为全盘加密做准备）并直接操作整个磁盘时，这个潜在的风险才显得至关重要。
+</p><p>若能准确地确定数据在磁盘上的位置，且能确定其并没有被显式或隐式地复制其它地方，可以通过向对应位置写入伪随机数据来快速、彻底地擦除数据。
+</p><p>例如，在<a href="#pg88d6e7a842ae">擦除LUKS密钥槽位</a>时，cryptsetup就将向槽位所在位置写入<code>/dev/urandom</code>产生的伪随机数据。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_.E7.A1.AC.E4.BB.B6.E7.9B.B8.E5.85.B3.E9.97.AE.E9.A2.98" id="硬件相关问题"><span id=".E7.A1.AC.E4.BB.B6.E7.9B.B8.E5.85.B3.E9.97.AE.E9.A2.98"></span>硬件相关问题</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8e3f3779e38c_.E9.97.AA.E5.AD.98" id="闪存"><span id=".E9.97.AA.E5.AD.98"></span>闪存</h4></div>
+<p>由于闪存（包括固态硬盘）的<a href="https://zh.wikipedia.org/wiki/%E5%86%99%E5%85%A5%E6%94%BE%E5%A4%A7">写入放大</a>等特性，可靠的擦除较为困难。
+</p><p>由于硬件控制器和操作系统之间的透明抽象层，在操作系统层面对数据的操作和控制器实际的操作可能完全不同。操作系统层面对数据的覆写不会实际覆盖闪存中的数据，因而难以可靠地擦除文件或设备上的特定数据块。
+</p><p>此外，设备可能还提供其它功能，例如所有SandForce固态硬盘都启用了透明压缩。若使用全零或简单重复性模式擦除，则设备可能将写入压缩。若发现擦除的速度远超预期，可能是透明压缩的作用。
+</p><p>使用<a href="http://www.flash-extractor.com/manual/reader_models/">较简单的设备</a>即可拆解闪存设备，直接不经设备控制器地读取闪存上的数据，从而进行数据恢复。许多数据恢复公司都以较低价格提供对闪存的数据恢复服务。
+</p><p>更多信息详见：
+</p>
+<ul><li><a href="#pg80f72e0236ed">固态硬盘/存储单元擦除</a></li>
+<li><a href="https://www.usenix.org/events/fast11/tech/full_papers/Wei.pdf">可靠地擦除基于闪存技术的固态硬盘中的数据</a></li>
+<li>#选择擦除目标</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8e3f3779e38c_.E5.B7.B2.E8.AF.86.E5.88.AB.E5.9D.8F.E6.89.87.E5.8C.BA" id="已识别坏扇区"><span id=".E5.B7.B2.E8.AF.86.E5.88.AB.E5.9D.8F.E6.89.87.E5.8C.BA"></span>已识别坏扇区</h4></div>
+<p>若硬盘将某一扇区标记为坏扇区，则其将隔离该扇区，使得不可能再通过软件写入该扇区。因此，即使在软件层面进行了全盘写入，该扇区的数据也不会被覆盖。好在，由于扇区大小所限，坏扇区中理论可恢复的数据一般只有几KiB。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8e3f3779e38c_.E7.A3.81.E6.80.A7.E6.AE.8B.E7.95.99" id="磁性残留"><span id=".E7.A3.81.E6.80.A7.E6.AE.8B.E7.95.99"></span>磁性残留</h4></div>
+<p>对于现代高密度磁存储设备，使用全零或随机数据进行一次全盘写入后，设备上就不再有任何有恢复意义的数据。因而，在如今，无需再进行多次擦除<a href="https://www.howtogeek.com/115573/htg-explains-why-you-only-have-to-wipe-a-disk-once-to-erase-it/">[1]</a>。 虽然在磁盘上可能留下单个比特的磁性残留痕迹，但将这些残留痕迹组合成有意义的字节基本上是不可行的<a href="https://web.archive.org/web/20120102004746/http://www.h-online.com/newsticker/news/item/Secure-deletion-a-single-overwrite-will-do-it-739699.html">[2]</a>。 另见<a href="https://www.google.com/search?tbs=bks:1&amp;q=isbn:9783540898610">[3]</a>、<a href="https://security.stackexchange.com/questions/26132/is-data-remanence-a-myth/26134#26134">[4]</a>、<a href="https://www.nber.org/sys-admin/overwritten-data-guttman.html">[5]</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8e3f3779e38c_.E9.80.89.E6.8B.A9.E6.93.A6.E9.99.A4.E7.9B.AE.E6.A0.87" id="选择擦除目标"><span id=".E9.80.89.E6.8B.A9.E6.93.A6.E9.99.A4.E7.9B.AE.E6.A0.87"></span>选择擦除目标</h2></div>
+<p>使用<a href="#pgc1328f332dd1">fdisk</a>查找用户具有读取权限的所有设备。
+</p><p>在输出中留意以<code>/dev/sd<i>X</i></code>开头的行。
+</p><p>例如，对于一个安装了Linux系统的机械硬盘，输出如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># fdisk -l</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Disk /dev/sda: 250.1 GB, 250059350016 bytes, 488397168 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x00ff784a
+
+   Device Boot      Start         End      Blocks   Id  System
+/dev/sda1   *        2048      206847      102400   83  Linux
+/dev/sda2          206848   488397167   244095160   83  Linux
+</pre>
+<p>对于写入了Arch Linux引导镜像的4GB U盘，输出如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># fdisk -l</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Disk /dev/sdb: 4075 MB, 4075290624 bytes, 7959552 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x526e236e
+
+   Device Boot      Start         End      Blocks   Id  System
+/dev/sdb1   *           0      802815      401408   17  Hidden HPFS/NTFS
+</pre>
+<p>若担心不小心损坏了计算机上的其它重要数据，可以考虑使用隔离的环境进行操作。例如，可以将要擦除的硬盘连接到虚拟环境（VirtualBox，VMWare，QEMU等），在虚拟环境中进行操作；或使用只连接了需要擦除的硬盘的单独的计算机，并使用<a href="#pg2da385a25e75">Live 介质</a>（USB，CD，PXE等）启动；也可使用脚本<a href="#pg15a57ebf5e5b">避免不小心擦除已挂载的设备</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8e3f3779e38c_.E9.80.89.E6.8B.A9.E6.93.A6.E9.99.A4.E6.95.B0.E6.8D.AE.E6.BA.90" id="选择擦除数据源"><span id=".E9.80.89.E6.8B.A9.E6.93.A6.E9.99.A4.E6.95.B0.E6.8D.AE.E6.BA.90"></span>选择擦除数据源</h2></div>
+<p>在擦除敏感数据时，擦除数据源的数据模式应当符合要求。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_.E5.85.A8.E9.9B.B6.E6.95.B0.E6.8D.AE" id="全零数据"><span id=".E5.85.A8.E9.9B.B6.E6.95.B0.E6.8D.AE"></span>全零数据</h3></div>
+<p>在大多数情况下，使用<code>/dev/zero</code>或其它简单数据模式擦除设备都是安全的。特别是对于现代机械硬盘，这是一种快速且恰当的擦除方式。
+</p><p>然而，若使用全零或简单数据模式擦除的速度异常地快，说明设备可能使用了透明压缩功能，此时很多磁盘块可能并未被擦除。部分#闪存设备存在此问题。
+</p><p>若要将擦除的部分用于存储加密数据，则不应当使用全零或其它简单数据模式擦除，而应当使用随机数据擦除（见下节），以避免削弱加密强度。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>全零或其它简单数据模式擦除可能因透明压缩而失效，因而对于闪存设备、固态硬盘应当慎重使用，且不应用于为存储加密数据做准备。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_.E9.9A.8F.E6.9C.BA.E6.95.B0.E6.8D.AE" id="随机数据"><span id=".E9.9A.8F.E6.9C.BA.E6.95.B0.E6.8D.AE"></span>随机数据</h3></div>
+<p><code>/dev/urandom</code>的随机数据由Linux内核生成，可作为快速且密码学安全的伪随机数来源。若要详细了解随机数和伪随机数来源，参见<a href="#pg5307fe842182">随机数生成</a>。
+</p><p>曾经，内核的随机数生成器速度较慢，因而常常使用加密数据流作为伪随机数据来源。加密数据流通常通过使用随机密钥加密<code>/dev/zero</code>获得。虽然加密数据流从理论上来讲仍是安全的，但随着内核随机数生成器的改进，其相比直接使用内核随机数生成器已经没有任何优势，且存在临时随机密钥被意外保存的风险。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>对于固态硬盘，若计划启用<a href="#pg2d5af776f6fd">TRIM</a>支持，则无需使用随机数据擦除。在启用TRIM支持后，由于擦除的部分将被标记为空闲空间，将逐渐被设备清除，使得随机数据擦除没有意义。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8e3f3779e38c_.E9.80.89.E6.8B.A9.E5.9D.97.E5.A4.A7.E5.B0.8F" id="选择块大小"><span id=".E9.80.89.E6.8B.A9.E5.9D.97.E5.A4.A7.E5.B0.8F"></span>选择块大小</h2></div>
+<p>另见<a href="https://zh.wikipedia.org/wiki/Dd_(Unix)#.E5.9D.97.E5.A4.A7.E5.B0.8F">zhwp:Dd_(Unix)#块大小</a>，<a href="https://people.redhat.com/msnitzer/docs/io-limits.txt">blocksize io-limits</a>。
+</p><p>若使用的机械硬盘采用<a href="#pg1e179f17182c">先进磁盘格式</a>，推荐在擦除时手动设置块大小，而不是默认的512字节设置。采用符合硬盘物理扇区大小的设置，可提高擦除速度。可通过<code>dd</code>命令的<code>bs</code>选项设置块大小（例如，<code>bs=4096</code>将设定块大小为4KiB）。
+</p><p>可使用<code>fdisk</code>获取设备的逻辑/物理块大小。或者，也可以通过sysfs暴露的信息获取：
+</p>
+<pre>/sys/block/sd<i>X</i>/size
+/sys/block/sd<i>X</i>/queue/physical_block_size
+/sys/block/sd<i>X</i>/queue/logical_block_size
+/sys/block/sd<i>X</i>/sd<i>XY</i>/alignment_offset
+/sys/block/sd<i>X</i>/sd<i>XY</i>/start
+/sys/block/sd<i>X</i>/sd<i>XY</i>/size
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>上述方法显示的是设备向内核报告的块大小。对于某些设备，这可能不准确。例如，大多数固态硬盘都报告物理块大小而512字节，小于设备实际的擦除单元大小。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/genwipe.sh/">genwipe.sh</a></span><sup><small>AUR</small></sup></span>脚本可用于辅助计算使用<code>dd</code>擦除设备时需要传递的参数。只需向脚本传入要擦除的设备即可，例如：<code>genwipe.sh /dev/sd<i>XY</i></code>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_.E6.89.8B.E5.8A.A8.E8.AE.A1.E7.AE.97.E8.A6.81.E6.93.A6.E9.99.A4.E7.9A.84.E5.9D.97.E6.95.B0" id="手动计算要擦除的块数"><span id=".E6.89.8B.E5.8A.A8.E8.AE.A1.E7.AE.97.E8.A6.81.E6.93.A6.E9.99.A4.E7.9A.84.E5.9D.97.E6.95.B0"></span>手动计算要擦除的块数</h3></div>
+<p>块设备被划分为扇区，可通过扇区数量乘扇区大小得到设备的大小。
+</p><p>例如，在使用<code>dd</code>命令擦除硬盘上的某一分区时，可按如下方式传递扇区数量、扇区大小等参数：
+</p>
+<pre># dd if=&lt;擦除数据源&gt; of=/dev/sd<i>X</i> bs=&lt;扇区大小&gt; count=&lt;扇区数量&gt; seek=&lt;分区起始扇区&gt; status=progress
+</pre>
+<p>下面将使用具体实例进行阐述。对于<code>/dev/sd<i>X</i></code>设备，fdisk的输出如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># fdisk -l /dev/sd<i>X</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Disk /dev/sd<i>X</i>: 1.8 TiB, <b>2000398934016</b> bytes, <b>3907029168</b> sectors
+Disk model: ST3500413AS
+Units: sectors of 1 * <b>512</b> = 512 bytes
+Sector size (logical/physical): 512 bytes / <b>4096</b> bytes
+...
+Device     Boot      Start        End         Sectors     Size  Id Type
+/dev/sd<i>X</i>1            2048         3839711231  3839709184  1,8T  83 Linux
+/dev/sd<i>X</i>2            3839711232   3907029167  67317936    32,1G  5 Extended</pre>
+<ul><li>输出的第一行显示了设备大小（按字节计）、逻辑扇区数量。</li>
+<li>此外，也可通过<code>blockdev --getsize64 /dev/sd<i>XY</i></code>获取整个设备或设备上某一分区的大小。</li>
+<li>输出中“Units”开头的行显示了设备的逻辑扇区大小。也可通过设备大小（按字节计）除以逻辑扇区数量得到逻辑扇区大小（<code>echo $((2000398934016 / 3907029168))</code>）。</li>
+<li>输出中“Sector size”开头的行显示了逻辑/物理扇区大小。使用物理扇区大小进行写入，可提高速度。</li>
+<li>可通过设备大小（按字节计）除以物理扇区大小得到物理扇区数量（<code>echo $((2000398934016 / 4096))</code>）。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>在本例中，将使用逻辑扇区大小进行擦除。</li>
+<li>通过计算下一分区的起始扇区数与前一分区的结束扇区数的差值，可以使用<code>dd</code>命令擦除未分区的磁盘空间。</li></ul></div>
+<p>例如，要擦除<code>/dev/sdX1</code>，并使用逻辑扇区大小作为擦除的块大小：
+</p>
+<ul><li>使用要擦除的分区的起始扇区数、结束扇区数定位：</li></ul>
+<pre># dd if=&lt;擦除数据源&gt; of=/dev/sd<i>X</i> bs=${BytesInSector} count=${End - Start} seek=${Start} status=progress
+</pre>
+<p>根据<code>fdisk</code>的输出，代入<code>Start=2048</code>，<code>End=3839711231</code>，<code>BytesInSector=512</code>即可。
+</p>
+<ul><li>或者，使用逻辑扇区数：</li></ul>
+<pre># dd if=&lt;擦除数据源&gt; of=/dev/sd<i>X</i>1 bs=${BytesInSector} count=${LogicalSectors} status=progress
+</pre>
+<p>根据<code>fdisk</code>的输出，代入<code>BytesInSector=512</code>，<code>LogicalSectors=3839709184</code>即可。
+</p><p>也可以擦除整个设备，并使用物理扇区大小作为擦除的块大小：
+</p>
+<pre># dd if=&lt;擦除数据源&gt; of=/dev/sd<i>X</i> bs=${PhysicalSectorSizeBytes} count=${AllDiskPhysicalSectors} seek=0 status=progress
+</pre>
+<p>根据<code>fdisk</code>的输出，代入<code>AllDiskPhysicalSectors=488378646</code>，<code>PhysicalSectorSizeBytes=4096</code>即可。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在擦除整个设备，或擦除单个分区，但已经通过<code>sd<i>XY</i></code>指定了分区的范围时，无需手动指定<code>count=</code>选项。<code>dd</code>将写满整个区域，不过会在写入结束时显示剩余空间不足的错误消息。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8e3f3779e38c_.E8.A6.86.E5.86.99.E7.9B.AE.E6.A0.87.E8.AE.BE.E5.A4.87" id="覆写目标设备"><span id=".E8.A6.86.E5.86.99.E7.9B.AE.E6.A0.87.E8.AE.BE.E5.A4.87"></span>覆写目标设备</h2></div>
+<p>可以使用多种工具对目标设备进行覆写。若只需要擦除一个文件，参见<a href="#pg15a57ebf5e5b">安全地擦除磁盘/提示和技巧#擦除单个文件</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_.E8.BE.93.E5.87.BA.E9.87.8D.E5.AE.9A.E5.90.91" id="输出重定向"><span id=".E8.BE.93.E5.87.BA.E9.87.8D.E5.AE.9A.E5.90.91"></span>输出重定向</h3></div>
+<p>通过输出重定向，可以创建文件、覆写分区中的空闲空间、擦除单一分区或整个设备。下文的例子中使用<code>/dev/zero</code>以全零填充设备，若需要随机擦除，应当改用<code>/dev/urandom</code>。
+</p><p>如下展示了如何将其它工具的<a href="https://tldp.org/HOWTO/Bash-Prog-Intro-HOWTO-3.html">标准输出</a>重定向到块设备中，达到覆写目的：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cat /dev/zero &gt; /dev/sd<i>XY</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">cat: write error: No space left on device
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># xz -z0 /dev/zero -c &gt; /dev/sd<i>XY</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">xz: (stdout): Write error: No space left on device
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dd if=/dev/zero status=progress &gt; /dev/sd<i>XY</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">dd: writing to ‘standard output’: No space left on device
+20481+0 records in
+20480+0 records out
+10485760 bytes (10 MB, 10 MiB) copied, 2.29914 s, 4.6 MB/s</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_dd" id="dd">dd</h3></div>
+<p>另见<a href="#pge09a1da9829f">dd</a>、<a href="#pg15a57ebf5e5b">安全地擦除磁盘/提示和技巧#擦除单个文件</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><code>dd</code>在执行操作前不会二次确认。一定要<b>仔细确认</b>输出指向了正确的设备或分区。确保<code>of=...</code>选项指向的是目标设备，而不是系统磁盘。</div>
+<p>使用<a href="https://zh.wikipedia.org/wiki//dev/zero">/dev/zero</a>全零流向磁盘每个可寻址位置写入零：
+</p>
+<pre># dd if=/dev/zero of=/dev/sd<i>X</i> bs=4096 status=progress
+</pre>
+<p>或者，使用<a href="https://zh.wikipedia.org/wiki//dev/random">/dev/urandom</a>随机流：
+</p>
+<pre># dd if=/dev/urandom of=/dev/sd<i>X</i> bs=4096 iflag=fullblock status=progress
+</pre>
+<p>当<code>dd</code>提示<code>No space left on device</code>并结束时，表示擦除完成：
+</p>
+<pre>dd: writing to ‘/dev/sd<i>X</i>’: No space left on device
+7959553+0 records in
+7959552+0 records out
+4075290624 bytes (4.1 GB, 3.8 GiB) copied, 1247.7 s, 3.3 MB/s
+</pre>
+<p>对于容量较大的目标设备，可参见如下提速技巧：
+</p>
+<ul><li><a href="#pg15a57ebf5e5b">安全地擦除磁盘/提示和技巧#使用dd进行高级擦除</a>使用OpenSSL</li>
+<li><a href="#pg15a57ebf5e5b">安全地擦除磁盘/提示和技巧#使用模板文件</a>使用非随机数据覆写（例如，重复写入一个文件的内容），随机性不足，但速度快</li>
+<li><a href="#pg7159ef654a5d">Dm-crypt/准备磁盘#dm-crypt_专用方案</a>使用dm-crypt</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_cp" id="cp">cp</h3></div>
+<p>文件复制命令<span class="plainlinks archwiki-template-man" title="$ man 1 cp"><a href="https://man.archlinux.org/man/cp.1">cp(1)</a></span>不会检查目标位置的类型，因而也可以用于覆写设备：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cp /dev/zero /dev/sd<i>XY</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"> cp: error writing ‘/dev/sd<i>XY</i>’: No space left on device
+ cp: failed to extend ‘/dev/sd<i>XY</i>’: No space left on device
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_pv" id="pv">pv</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pv">pv</a></span><sup><small>包</small></sup></span>工具可在覆写时显示进度条、已用时间、预计剩余时间。将选定的擦除数据源作为参数传递给<span class="plainlinks archwiki-template-man" title="$ man 1 pv"><a href="https://man.archlinux.org/man/pv.1">pv(1)</a></span>，并使用<code>-o</code>/<code>--output</code>选项指定要覆写的目标。例如，使用<code>/dev/zero</code>全零填充<code>/dev/sd<i>X</i></code>：
+</p>
+<pre># pv /dev/zero -o /dev/sd<i>X</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_wipe" id="wipe">wipe</h3></div>
+<p><code>wipe</code>是<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wipe">wipe</a></span><sup><small>包</small></sup></span>的一部分，专门用于擦除文件。例如，要擦除特定目标：
+</p>
+<pre>$ wipe -r <i>/path/to/wipe</i>
+</pre>
+<p>参见<span class="plainlinks archwiki-template-man" title="$ man 1 wipe"><a href="https://man.archlinux.org/man/wipe.1">wipe(1)</a></span>。注意：该工具上次更新于2009年，其<a href="https://wipe.sourceforge.net/">SourceForge 页面</a>显示当前已处于<b>不维护</b>状态。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_shred" id="shred">shred</h3></div>
+<p><a href="https://www.gnu.org/software/coreutils/manual/html_node/shred-invocation.html">shred</a>是<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=coreutils">coreutils</a></span><sup><small>包</small></sup></span>的一部分。其专门用于安全地删除单个文件或整个设备。被删除的文件或设备即使理论上能够被恢复，其难度也非常高，并且需要使用专用设备。默认情况下，<code>shred</code>将使用<a href="#pg5307fe842182">伪随机数据</a>执行3次覆写操作。可手动指定覆写操作执行的次数。
+</p><p>使用默认参数调用<code>shred</code>，这将在擦除时显示进度条：
+</p>
+<pre># shred -v /dev/sd<i>X</i>
+</pre>
+<p><code>shred</code>也可用于擦除单个分区。例如，要擦除设备上的第一个分区，使用<code>shred -v /dev/sd<i>X</i>1</code>。
+</p><p>此外，也可设定只执行1次覆写操作，选择<code>/dev/urandom</code>作为熵源，并在结束前再使用全零覆盖一次：
+</p>
+<pre># shred --verbose --random-source=/dev/urandom -n1 --zero /dev/sd<i>X</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_scrub" id="scrub">scrub</h3></div>
+<p><a href="https://github.com/chaos/scrub">scrub</a>将按指定的顺序，用不同的模式多次覆盖文件或设备，使得数据恢复更加困难。
+</p><p>如下命令使用默认参数调用<code>scrub</code>，覆写整个设备（模式1）。覆写使用的模式组合遵循NNSA Policy Letter NAP-14.x规范。这是效率最高的方式。
+</p>
+<pre>$ scrub /dev/sd<i>X</i>
+</pre>
+<p>如下命令使用默认参数调用<code>scrub</code>，覆写特定文件（模式2）。覆写使用的模式组合遵循NNSA Policy Letter NAP-14.x规范。实际覆写的字节数将向上取整到能够完全覆盖文件占用的最后一个文件系统块。注意，使用该模式时有一些需要注意的地方，详见<a href="https://linux.die.net/man/1/scrub">手册</a>。
+</p>
+<pre>$ scrub /path/to/<i>file</i> # <i>file</i>是常规文件
+</pre>
+<p>如下命令使用默认参数调用<code>scrub</code>，此时将创建一个目录，在目录中创建文件直到占满文件系统，之后再覆写创建的文件（模式3）。覆写使用的模式组合遵循NNSA Policy Letter NAP-14.x规范。对于每一个文件，实际覆写的字节数将向上取整到能够完全覆盖文件占用的最后一个文件系统块。注意，使用该模式时有一些需要注意的地方，详见<a href="https://linux.die.net/man/1/scrub">手册</a>。
+</p>
+<pre>$ scrub /path/to/<i>dir</i> # <i>dir</i>是目录
+</pre>
+<p>更多信息和用法，参见<a href="https://linux.die.net/man/1/scrub">手册</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_badblocks" id="badblocks">badblocks</h3></div>
+<p><a href="#pg12dd35839139">badblocks</a>是<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=e2fsprogs">e2fsprogs</a></span><sup><small>包</small></sup></span>的一部分，其通过反复向设备写入、读取数据检测坏扇区。由于其写入操作对存储的数据而言是破坏性的，因而也能用于擦除设备。在默认情况下，其将执行4次读取、写入循环，因而可能需要花费较长时间。
+</p>
+<pre># badblocks -wsv /dev/<i>device</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_hdparm" id="hdparm">hdparm</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不要尝试向通过USB连接的设备发送Secure Erase ATA命令。详见<a href="https://web.archive.org/web/20180711170859/http://www.tomshardware.co.uk/answers/id-1984547/secure-erase-external-usb-hard-drive.html">该回复</a>以及<a href="https://ata.wiki.kernel.org/index.php/ATA_Secure_EraseDo">[6]</a></div>
+<p><a href="#pg62a34c92338a">hdparm</a>支持<a href="https://tinyapps.org/docs/wipe_drives_hdparm.html">ATA Secure Erase</a>功能，该功能由设备固件处理，作用大致相当于使用全零填充整个设备，并包括软件无法访问的区域。其相当于现代版本的“低级格式化”命令。对于<a href="#pgcb28ba980ed7">固态硬盘</a>，有报道称执行该命令后，性能可恢复到出厂水平，但可能不足以完全擦除数据（参见#闪存）。
+</p><p>某些设备支持<b>Enhanced Secure Erase</b>功能，其具体实现方式依厂商而异。若<code>hdparm -I</code>的输出显示，使用Enhanced Secure Erase相比普通Secure Erase的用时显著更短，则说明设备可能支持硬件加密功能，而Enhanced Secure Erase将通过擦除加密密钥保护数据安全。
+</p><p>有关ATA Secure Erase的更多信息，参见<a href="#pg80f72e0236ed">固态硬盘/存储单元擦除</a>、<a href="https://ata.wiki.kernel.org/index.php/ATA_Secure_Erase">Linux ATA wiki</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e3f3779e38c_blkdiscard" id="blkdiscard">blkdiscard</h3></div>
+<p>参见<a href="#pg80f72e0236ed">固态硬盘/存储单元擦除#使用blkdiscard的通用方法</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8e3f3779e38c_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://superuser.com/questions/19326/how-to-wipe-free-disk-space-in-linux">Wipe free space in Linux</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807060716
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.259 seconds
+Real time usage: 0.265 seconds
+Preprocessor visited node count: 796/1000000
+Revision size: 21173/2097152 bytes
+Post‐expand include size: 9706/2097152 bytes
+Template argument size: 4451/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 790/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  129.229      1 -total
+ 63.65%   82.259      1 Template:翻译状态
+  5.35%    6.911     52 Template:Ic
+  2.47%    3.191      2 Template:提示
+  2.19%    2.830      3 Template:Man
+  2.10%    2.720      4 Template:Pkg
+  1.87%    2.414      5 Template:Related
+  1.86%    2.401      2 Template:注意
+  1.79%    2.316      7 Template:Hc
+  1.72%    2.226      1 Template:相关文章开始
+-->
+<!-- Render ID 3d4c0e0e-9226-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8395:|#|:idhash:canonical!zh-cn and timestamp 20260807060716 and revision id 34305. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

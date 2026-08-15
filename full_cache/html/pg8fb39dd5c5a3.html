@@ -1,0 +1,192 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg8fb39dd5c5a3">VirtualBox/在虚拟机中安装 Arch Linux</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN">
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgbedf72352aa7">VirtualBox</a></li>
+</ul></div>
+<p>本文介绍如何在 <a href="#pgbedf72352aa7">VirtualBox</a> 中安装 Arch linux。
+</p><p>在虚拟机的虚拟光驱里加载 Arch Linux 的<a href="https://archlinux.org/download/">安装镜像</a>，然后按照<a href="#pg0d85b8367b38">安装指南</a>里的步骤继续即可。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8fb39dd5c5a3_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E4.BB.A5_EFI_.E6.A8.A1.E5.BC.8F.E5.AE.89.E8.A3.85.EF.BC.88.E5.8F.AF.E9.80.89.EF.BC.89" id="以_EFI_模式安装（可选）"><span id=".E4.BB.A5_EFI_.E6.A8.A1.E5.BC.8F.E5.AE.89.E8.A3.85.EF.BC.88.E5.8F.AF.E9.80.89.EF.BC.89"></span>以 EFI 模式安装（可选）</h3></div>
+<p>如果你想在 VirtualBox 里以 EFI 模式安装 Arch Linux，这需要在虚拟机的设置窗口里，先从左侧选择 <i>System</i>，再从右侧选择 <i>Motherboard</i> 标签页，最后勾选 <i>Enable EFI (special OSes only)</i> 选项。从安装镜像的启动菜单里选好 Arch Linux 的内核之后，这时启动过程要卡顿一两分钟，之后就能正常进入系统，稍安勿躁。
+</p><p>等系统和<a href="#pgb00bcd49551f">启动引导程序</a>安装成功之后，VirtualBox 会首先尝试从 <a href="#pgc551b9cd7a20">ESP</a> 加载 <code>/EFI/BOOT/BOOTX64.EFI</code>。如果这个首选的文件加载失败，VirtualBox 会从 ESP 根目录尝试加载 EFI shell 脚本 <code>startup.nsh</code>。这样来说，为了能顺利进入系统，你需要从下面几种方案选一个：
+</p>
+<ul><li>每次都从 EFI shell <a href="#pg759eb38b76cf">手动选择启动引导程序</a></li>
+<li>把启动引导程序的 .EFI 文件移动到默认位置：<code>/EFI/BOOT/BOOTX64.EFI</code></li>
+<li>自己编写 ESP 分区的 <code>/startup.nsh</code> 脚本，用这个脚本加载想使用的引导程序（例如 <code>\EFI\grub\grubx64.efi</code>）</li>
+<li>从 ESP 分区的 <a href="#pgae292a1994d8">startup.nsh 脚本</a>直接启动到 Linux</li></ul>
+<p>虽然 VirtualBox 支持按 F2 进入自带的 VirtualBox Boot Manager 来管理 EFI 启动过程，但这部分功能还不完整而且有 bug。它还不能持久保存交互式设置的 EFI 变量。也就是说，开机时按下 F12 之后手动添加的、或者用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=efibootmgr">efibootmgr</a></span><sup><small>包</small></sup></span> 添加的 EFI 项目，重启后依然可以生效，但关机之后就会失效。
+</p><p>另见：<a href="https://bbs.archlinux.org/viewtopic.php?id=158003">UEFI VirtualBox installation boot problems</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E5.AE.89.E8.A3.85.E5.AE.A2.E4.BD.93.E6.9C.BA.E6.8F.92.E4.BB.B6" id="安装客体机插件"><span id=".E5.AE.89.E8.A3.85.E5.AE.A2.E4.BD.93.E6.9C.BA.E6.8F.92.E4.BB.B6"></span>安装客体机插件</h3></div>
+<p>VirtualBox <a href="https://www.virtualbox.org/manual/ch04.html">客体机插件</a>为客体系统提供了必要的驱动与应用软件，其作用包括改善图像分辨率与鼠标支持等。在客体机的 Arch Linux 系统里：
+</p>
+<ul><li>若需要支持 X，安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=virtualbox-guest-utils">virtualbox-guest-utils</a></span><sup><small>包</small></sup></span></li>
+<li>若不需支持 X，安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=virtualbox-guest-utils-nox">virtualbox-guest-utils-nox</a></span><sup><small>包</small></sup></span></li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>另一个安装方案是从宿主机（如果也是 Arch 系统）安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=virtualbox-guest-iso">virtualbox-guest-iso</a></span><sup><small>包</small></sup></span>，这个软件包里有供客体机安装插件的 ISO 文件。装好这个包之后，启动客体机，点击菜单项目 Devices -&gt; Insert Guest Additions CD Image 即可加载安装镜像。</li>
+<li>若要手动重新编译客体机的 VirtualBox 内核模块，以 root 权限运行 <code>rcvboxadd setup</code> 即可。</li></ul>
+</div>
+<p>客体机里运行的插件和主体机上的 VirtualBox 程序版本需要匹配。否则某些功能（比如剪贴板互通）可能会失效。如果你在客体机里升级系统（比如运行了 <code>pacman -Syu</code>），那么宿主机上的 VirtualBox 也要跟进更新到最新版。VirtualBox GUI 菜单里的 "Check for updates" 功能未必够用，可以去官网 <a href="https://www.virtualbox.org/">VirtualBox.org</a> 再看看。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E5.8A.A0.E8.BD.BD_VirtualBox_.E5.86.85.E6.A0.B8.E6.A8.A1.E5.9D.97" id="加载_VirtualBox_内核模块"><span id=".E5.8A.A0.E8.BD.BD_VirtualBox_.E5.86.85.E6.A0.B8.E6.A8.A1.E5.9D.97"></span>加载 VirtualBox 内核模块</h3></div>
+<p>若要开机自动加载模块，<a href="#pgac06dd8bfe95">启用</a> <code>vboxservice.service</code> 服务即可。该服务还能起到将客户机时间与宿主机同步的功能。
+</p><p>若要手动加载模块，使用这个命令：
+</p>
+<pre># modprobe -a vboxguest vboxsf vboxvideo
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E5.90.AF.E5.8A.A8_VirtualBox_.E5.AE.A2.E4.BD.93.E6.9C.BA.E6.9C.8D.E5.8A.A1" id="启动_VirtualBox_客体机服务"><span id=".E5.90.AF.E5.8A.A8_VirtualBox_.E5.AE.A2.E4.BD.93.E6.9C.BA.E6.9C.8D.E5.8A.A1"></span>启动 VirtualBox 客体机服务</h3></div>
+<p>安装并加载了 VirtualBox 内核模块之后，如果你在虚拟机系统里使用 <a href="#pga36c0aff60be">X</a>，那么推荐启动这样一个客体机服务：服务的程序名字叫 <code>VBoxClient</code>，它与 X 窗口系统沟通来实现其功能。具体功能包括：
+</p>
+<ul><li>在宿主机与客体机之间互通剪贴板，实现鼠标拖拽文件</li>
+<li>无缝窗口模式</li>
+<li>宿主机的虚拟机窗口缩放之后，使客体机的显示分辨率与之自动匹配</li>
+<li>检查宿主机的 VirtualBox 的版本</li></ul>
+<p>上述功能由专门的命令行参数来各自启用：
+</p>
+<pre>$ VBoxClient --clipboard --draganddrop --seamless --display --checkhostversion
+</pre>
+<p>为了方便，<code>VBoxClient-all</code> 这个 shell 脚本能取代上面这一整行命令。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=virtualbox-guest-utils">virtualbox-guest-utils</a></span><sup><small>包</small></sup></span> 包提供了 XDG 自启动项目 <code>/etc/xdg/autostart/vboxclient.desktop</code>，这会在登录 X 时自动运行 <code>VBoxClient-all</code>。然而，如果你在用的<a href="#pg712e4adaddad">桌面环境</a>或<a href="#pg3d6d7c1e6c7c">窗口管理器</a>不支持 XDG 自启动，那么你就需要手动配置。详见<a href="#pg9604da0ac74d">自动启动#桌面环境</a>。
+</p><p>至此，你的 Arch Linux 应该能在虚拟机里正常运行了。需要指出的是，某些功能（如剪贴板互通）在 VirtualBox 里是默认禁用的。这需要在各个虚拟机的设置选项里手动开启（<i>Settings &gt; General &gt; Advanced &gt; Shared Clipboard</i>）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E6.98.BE.E5.8D.A1.E5.8A.A0.E9.80.9F" id="显卡加速"><span id=".E6.98.BE.E5.8D.A1.E5.8A.A0.E9.80.9F"></span>显卡加速</h3></div>
+<p>从 VirtualBox 选项里可以开启显卡加速。已知 <a href="#pg89573e816846">GDM</a> 显示管理器从 3.16 版本起会导致显卡加速失效。<a href="https://bugzilla.gnome.org/show_bug.cgi?id=749390">[1]</a> 如果你遇到类似问题，可以换另一种显示管理器（比如 <a href="#pg145f4ecf55dc">LightDM</a>）试试看。<a href="https://bbs.archlinux.org/viewtopic.php?id=200025">[2]</a> <a href="https://bbs.archlinux.org/viewtopic.php?pid=1607593#p1607593">[3]</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E5.90.AF.E7.94.A8.E5.85.B1.E4.BA.AB.E7.9B.AE.E5.BD.95" id="启用共享目录"><span id=".E5.90.AF.E7.94.A8.E5.85.B1.E4.BA.AB.E7.9B.AE.E5.BD.95"></span>启用共享目录</h3></div>
+<p>共享目录的设置在宿主机这边操作。启动 VirtualBox 的图形管理界面，在虚拟机的设置界面的 <i>Shared Folders</i> 标签页可以找到相关设置。可以设置的项目包括：目录在宿主机的位置 <i>Folder Path</i>，客户机挂载点的名字 <i>Folder name</i>，还有 <i>Read-only</i>，<i>Auto-mount</i>, <i>Make permanent</i> 等杂项。还有一种管理方法是使用 <code>VBoxManage</code>。详情可以参阅 <a href="https://www.virtualbox.org/manual/ch04.html#sharedfolders">VirtualBox 手册</a>。
+</p><p>无论用哪一种方法来挂载共享目录，首先都要做些准备工作。
+</p><p>为了避免出现 <code>/sbin/mount.vboxsf: mounting failed with the error: No such device</code> 这种错误，首先要确保 <code>vboxsf</code> 内核模块已经加载。只要按照前面的步骤在加载客体机里加载内核模块，这一步应该没问题。
+</p><p>为了让挂载之后的目录能让 root 之外的用户也直接读写，还要：
+</p>
+<ul><li>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=virtualbox-guest-utils">virtualbox-guest-utils</a></span><sup><small>包</small></sup></span> 软件包时会创建用户组 <code>vboxsf</code>（在前面的步骤就装过了）</li>
+<li>你的用户需要加入到 <code>vboxsf</code> <a href="#pgc5547c3b9e44">用户组</a></li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8fb39dd5c5a3_.E6.89.8B.E5.8A.A8.E6.8C.82.E8.BD.BD" id="手动挂载"><span id=".E6.89.8B.E5.8A.A8.E6.8C.82.E8.BD.BD"></span>手动挂载</h4></div>
+<p>在 Arch Linux 客体系统里挂载共享目录的命令是：
+</p>
+<pre># mount -t vboxsf <i>&lt;共享目录的名字&gt;</i> <i>&lt;客户机系统的挂载点&gt;</i>
+</pre>
+<p>这个命令可以查看 vboxsf 的挂载参数：
+</p>
+<pre># mount.vboxsf
+</pre>
+<p>假如用户不在 <code>vboxsf</code> 组里，用这个命令可以把挂载点的读写权限授权给他：
+</p>
+<pre># mount -t vboxsf -o uid=1000,gid=1000 home /mnt/
+</pre>
+<p>其中 <i>uid</i> 和 <i>gid</i> 的值要与接受授权的用户的值相对应。用 <code>id</code> 命令可以为该用户找到这两个值。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8fb39dd5c5a3_.E8.87.AA.E5.8A.A8.E6.8C.82.E8.BD.BD" id="自动挂载"><span id=".E8.87.AA.E5.8A.A8.E6.8C.82.E8.BD.BD"></span>自动挂载</h4></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>自动挂载需要启用 <code>vboxservice</code> 服务才能生效</div>
+<p>为使用自动挂载功能，首先需要在 GUI 的管理界面里勾选自动挂载，或者为命令行工具 <code>VBoxManage sharedfolder</code> 加上参数 <code>--automount</code>。
+</p><p>此时，共享目录应该已经在 <code>/media/sf_<i>&lt;共享目录的名字&gt;</i></code> 挂载上了。如果用户没有读写权限，确认一下该目录的权限是否是 755。如果是 750 的话，确保该目录属于 <code>vboxsf</code> 组。
+</p><p>可以用软链接把共享目录链接到方便的位置，这样就不必进入那么远的目录了：
+</p>
+<pre>$ ln -s /media/sf_<i>共享目录的名字</i> ~/<i>my_documents</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8fb39dd5c5a3_.E6.8C.89.E9.85.8D.E7.BD.AE.E4.BA.8E.E5.90.AF.E5.8A.A8.E6.97.B6.E6.8C.82.E8.BD.BD" id="按配置于启动时挂载"><span id=".E6.8C.89.E9.85.8D.E7.BD.AE.E4.BA.8E.E5.90.AF.E5.8A.A8.E6.97.B6.E6.8C.82.E8.BD.BD"></span>按配置于启动时挂载</h4></div>
+<p><a href="#pgced0cc449f44">fstab</a> 可以用来挂载目录。然而，为了避免 Systemd 启动可能带来的问题，要在 <code>/etc/fstab</code> 配置里为共享目录加上挂载选项 <code>noauto,x-systemd.automount</code>。这样，共享目录会在开机后初次访问时挂载，而不是在系统启动过程里挂载。这可以避免 Systemd 在客体机插件加载之前就按 fstab 挂载目录而导致的出错。
+</p>
+<pre><i>sharedFolderName</i>  <i>/path/to/mntPtOnGuestMachine</i>  vboxsf  uid=<i>user</i>,gid=<i>group</i>,rw,dmode=700,fmode=600,noauto,x-systemd.automount 
+</pre>
+<ul><li><code><i>sharedFolderName</i></code>: 在虚拟机设置界面 <i>Settings &gt; SharedFolders &gt; Edit &gt; FolderName</i> 里所设置的值。这个值和宿主机里实际的目录名可以不相同。要查看虚拟机的设置，在宿主机的 VirtualBox GUI 管理界面选中虚拟机，然后点击工具栏的 <i>Settings</i> 按钮，再从弹出的对话框里选择 <i>Shared Folders</i>。</li>
+<li><code><i>/path/to/mntPtOnGuestMachine</i></code>: 如果这个路径在虚拟机里还不存在，那么需要在挂载之前手动创建（用 <a href="#pg4bb6491c480c">mkdir</a> 就可以）。</li>
+<li><code>dmode</code>/<code>fmode</code> 分别用来指定挂载共享目录之后，下面的子目录与文件的属性。</li></ul>
+<p><code>mount.vboxsf</code> 尚不支持 <code>nofail</code> 挂载参数：
+</p>
+<pre><i>desktop</i>  <i>/media/desktop</i>  vboxsf  uid=<i>user</i>,gid=<i>group</i>,rw,dmode=700,fmode=600,nofail  0  0
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E4.BB.8E.E5.AE.BF.E4.B8.BB.E6.9C.BA_SSH_.E7.99.BB.E5.BD.95.E5.AE.A2.E4.BD.93.E6.9C.BA" id="从宿主机_SSH_登录客体机"><span id=".E4.BB.8E.E5.AE.BF.E4.B8.BB.E6.9C.BA_SSH_.E7.99.BB.E5.BD.95.E5.AE.A2.E4.BD.93.E6.9C.BA"></span>从宿主机 SSH 登录客体机</h3></div>
+<p>在虚拟机设置的 Network 标签页 -&gt; 右侧打开 Advanced 折叠 -&gt; 单击 Port Forwarding 按钮，可以设置端口。
+</p><p>假如我们设置了将宿主机的 3022 端口转发到客体机的 22 端口。然后在宿主机执行：
+</p>
+<pre>user@host$ ssh -p 3022 $USER@localhost
+</pre>
+<p>即可 SSH 登录客体机。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8fb39dd5c5a3_.E7.94.A8_SSHFS_.E6.9D.A5.E5.AE.9E.E7.8E.B0.E5.85.B1.E4.BA.AB.E7.9B.AE.E5.BD.95" id="用_SSHFS_来实现共享目录"><span id=".E7.94.A8_SSHFS_.E6.9D.A5.E5.AE.9E.E7.8E.B0.E5.85.B1.E4.BA.AB.E7.9B.AE.E5.BD.95"></span>用 SSHFS 来实现共享目录</h4></div>
+<p>配置好了端口转发，再装上 <a href="#pg46a1cfd06473">SSHFS</a>，只要在宿主机运行这个命令就可以把客体机的目录挂载到宿主机：
+</p>
+<pre>user@host$ sshfs -p 3022 $USER@localhost:$HOME ~/shared_folder
+</pre>
+<p>这样也能实现互传文件。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8fb39dd5c5a3_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E8.AE.BF.E5.AE.A2.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.E4.B8.AD.E8.AE.BF.E9.97.AE.E4.B8.B2.E5.8F.A3" id="访客操作系统中访问串口"><span id=".E8.AE.BF.E5.AE.A2.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.E4.B8.AD.E8.AE.BF.E9.97.AE.E4.B8.B2.E5.8F.A3"></span>访客操作系统中访问串口</h3></div>
+<p>请参阅<a href="#pg0716612f78cd">使用终端仿真器程序连接串口的操作方式</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E5.AE.89.E8.A3.85.E8.BF.87.E7.A8.8B.E4.B8.ADTTY.E6.96.87.E6.9C.AC.E5.A4.AA.E5.B0.8F" id="安装过程中TTY文本太小"><span id=".E5.AE.89.E8.A3.85.E8.BF.87.E7.A8.8B.E4.B8.ADTTY.E6.96.87.E6.9C.AC.E5.A4.AA.E5.B0.8F"></span>安装过程中TTY文本太小</h3></div>
+<p>在主机上的VirtualBox管理器中，将显示比例设置为2.00或3.00。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E5.90.AF.E5.8A.A8_Xorg_.E4.B9.8B.E5.90.8E.E8.99.9A.E6.8B.9F.E6.9C.BA.E5.8D.A1.E6.AD.BB" id="启动_Xorg_之后虚拟机卡死"><span id=".E5.90.AF.E5.8A.A8_Xorg_.E4.B9.8B.E5.90.8E.E8.99.9A.E6.8B.9F.E6.9C.BA.E5.8D.A1.E6.AD.BB"></span>启动 Xorg 之后虚拟机卡死</h3></div>
+<p>出现这一问题的原因是驱动程序缺失或有错。例如：<a href="https://bbs.archlinux.org/viewtopic.php?pid=1167838">[4]</a> 或 <a href="https://bbs.archlinux.org/viewtopic.php?id=156079">[5]</a>。试试从菜单项 <i>Settings &gt; Display</i> 里关闭 3D 加速，并确认要用的 <a href="#pga36c0aff60be">Xorg</a> 驱动都已装好。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E5.85.A8.E5.B1.8F.E6.A8.A1.E5.BC.8F.E5.8F.AA.E8.83.BD.E7.9C.8B.E5.88.B0.E9.BB.91.E5.B1.8F" id="全屏模式只能看到黑屏"><span id=".E5.85.A8.E5.B1.8F.E6.A8.A1.E5.BC.8F.E5.8F.AA.E8.83.BD.E7.9C.8B.E5.88.B0.E9.BB.91.E5.B1.8F"></span>全屏模式只能看到黑屏</h3></div>
+<p>在某些窗口管理器（<a href="#pg04e8e3ac1488">i3</a>, <a href="#pg24b8665395f7">awesome</a>）下运行 VirtualBox 时，由于顶层状态栏（overlay bar）的问题，VirtualBox 的全屏模式会出现问题。试试在菜单项 "Guest Settings &gt; User Interface &gt; Mini ToolBar" 里禁用 "Show in Full-screen/Seamless" 有可能绕过这一问题。详情可见<a href="https://www.virtualbox.org/ticket/14323">上游的问题汇报</a>。
+</p><p>如果屏幕是在某个大小之后开始黑屏，例如大于 2048 像素宽度时，请尝试增加 <i>Settings &gt; Display &gt; Screen &gt; Video Memory</i>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_Linux_.E5.AE.A2.E4.BD.93.E6.9C.BA.E7.9A.84.E5.A3.B0.E9.9F.B3.E7.BC.93.E6.85.A2_.2F_.E6.89.AD.E6.9B.B2" id="Linux_客体机的声音缓慢_/_扭曲"><span id="Linux_.E5.AE.A2.E4.BD.93.E6.9C.BA.E7.9A.84.E5.A3.B0.E9.9F.B3.E7.BC.93.E6.85.A2_.2F_.E6.89.AD.E6.9B.B2"></span>Linux 客体机的声音缓慢 / 扭曲</h3></div>
+<p>在 VirtualBox 里运行时，Linux 内核的 AC97 声卡驱动偶尔会猜错时钟频率设定。这就会造成声音播放速度太慢 / 太快。在 <code>/etc/modprobe.d</code> 目录里创建一个内容如下的文件即可解决：
+</p>
+<pre>options snd-intel8x0 ac97_clock=48000
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_Linux_.E5.AE.BF.E4.B8.BB.E6.9C.BA.E5.AD.98.E5.9C.A8.E9.9F.B3.E9.A2.91.E5.8D.A1.E9.A1.BF.2F.E5.BB.B6.E8.BF.9F" id="Linux_宿主机存在音频卡顿/延迟"><span id="Linux_.E5.AE.BF.E4.B8.BB.E6.9C.BA.E5.AD.98.E5.9C.A8.E9.9F.B3.E9.A2.91.E5.8D.A1.E9.A1.BF.2F.E5.BB.B6.E8.BF.9F"></span>Linux 宿主机存在音频卡顿/延迟</h3></div>
+<p>在某些情况下，音频可能会出现延迟性能问题（例如在在线视频流媒体中音频与视频不同步）。一个可能的解决方法是在VirtualBox中使用Intel HD音频控制器，并通过在客户操作系统的<code>/etc/modprobe.d/</code> 目录下的文件中添加以下行来禁用其节能功能：
+</p>
+<pre>options snd_hda_intel power_save=0 power_save_controller=N
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_Arch:_pacstrap_.E8.84.9A.E6.9C.AC.E5.87.BA.E9.94.99" id="Arch:_pacstrap_脚本出错"><span id="Arch:_pacstrap_.E8.84.9A.E6.9C.AC.E5.87.BA.E9.94.99"></span>Arch: pacstrap 脚本出错</h3></div>
+<p>如果在安装 Arch 系统时，<b>还没有</b>启动至新安装到虚拟盘的系统，就用 <code>pactrap</code> 直接安装客体机插件，需要以 root 身份运行一次 <code>umount -l /mnt/dev</code> 然后再次运行 <code>pactrap</code>。否则新装的系统就不可用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_Windows_.E5.AE.BF.E4.B8.BB.E6.9C.BA:_VERR_ACCESS_DENIED" id="Windows_宿主机:_VERR_ACCESS_DENIED"><span id="Windows_.E5.AE.BF.E4.B8.BB.E6.9C.BA:_VERR_ACCESS_DENIED"></span>Windows 宿主机: VERR_ACCESS_DENIED</h3></div>
+<p>为了能在 Windows 宿主机上读取 RAW 格式的 VMDK 镜像，VirtualBox GUI 需要以管理员权限启动。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E5.9C.A8Arch_Linux.E5.AE.A2.E6.88.B7.E6.9C.BA.E4.B8.AD.E6.B2.A1.E6.9C.89.E7.A1.AC.E4.BB.B63D.E5.8A.A0.E9.80.9F" id="在Arch_Linux客户机中没有硬件3D加速"><span id=".E5.9C.A8Arch_Linux.E5.AE.A2.E6.88.B7.E6.9C.BA.E4.B8.AD.E6.B2.A1.E6.9C.89.E7.A1.AC.E4.BB.B63D.E5.8A.A0.E9.80.9F"></span>在Arch Linux客户机中没有硬件3D加速</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=virtualbox-guest-utils">virtualbox-guest-utils</a></span><sup><small>包</small></sup></span> 包的版本5.2.16-2缺少文件<code>VBoxEGL.so</code>. 这导致Arch Linux虚拟机无法正常使用3D加速。请参阅 <a href="https://bugs.archlinux.org/task/49752">FS#49752</a>.
+</p><p>为了解决这个问题，请按照<a href="https://bugs.archlinux.org/task/49752#comment152254">FS#49752#comment152254</a>中提供的补丁集进行修复。需要对补丁集进行一些修复，以使其适用于版本5.2.16-2。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_Plasma.E5.B0.86.E5.AE.A2.E6.88.B7.E6.9C.BA.E7.9A.84.E5.88.86.E8.BE.A8.E7.8E.87.E9.87.8D.E7.BD.AE.E4.B8.BA800.C3.97600" id="Plasma将客户机的分辨率重置为800×600"><span id="Plasma.E5.B0.86.E5.AE.A2.E6.88.B7.E6.9C.BA.E7.9A.84.E5.88.86.E8.BE.A8.E7.8E.87.E9.87.8D.E7.BD.AE.E4.B8.BA800.C3.97600"></span>Plasma将客户机的分辨率重置为800×600</h3></div>
+<p>See <a href="#pg5b70e23b1711">KDE#Cannot change screen resolution when running in a virtual machine</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8fb39dd5c5a3_.E5.9C.A8Plasma-X11.E6.9C.80.E5.B0.8F.E5.AE.89.E8.A3.85.E4.B8.AD.E5.87.BA.E7.8E.B0.E9.BB.91.E5.B1.8F" id="在Plasma-X11最小安装中出现黑屏"><span id=".E5.9C.A8Plasma-X11.E6.9C.80.E5.B0.8F.E5.AE.89.E8.A3.85.E4.B8.AD.E5.87.BA.E7.8E.B0.E9.BB.91.E5.B1.8F"></span>在Plasma-X11最小安装中出现黑屏</h3></div>
+<p>如果您使用的是 <b>plasma-desktop</b> 最小安装，而不是 <b>plasma</b> (包含Wayland支持), 那么在启动Plasma-X11会话后，可能会出现黑屏但有光标的情况。 
+</p><p>要解决此问题，请在VirtualBox窗口中多次调整虚拟机窗口大小，然后通过以下方式手动设置分辨率。
+</p><p>View -&gt; Virtual Screen 1 -&gt; Resize to 1024x768 (or other resolution you like)
+</p><p>然后<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kscreen">kscreen</a></span><sup><small>包</small></sup></span>. 
+</p><p>Open in KDE launcher <b>System Settings -&gt; Startup and Shutdown -&gt; Background Services</b>, stop and unselect <b>KScreen2</b> and save settings. Issue should go away forever
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807073925
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.149 seconds
+Real time usage: 0.154 seconds
+Preprocessor visited node count: 496/1000000
+Revision size: 13742/2097152 bytes
+Post‐expand include size: 5426/2097152 bytes
+Template argument size: 2111/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   34.463      1 -total
+ 15.04%    5.183     38 Template:Ic
+ 12.96%    4.467      1 Template:Translateme
+ 10.25%    3.534      8 Template:Pkg
+  6.66%    2.297      2 Template:注意
+  6.30%    2.172      1 Template:相关文章开始
+  5.35%    1.844      1 Template:Related
+  4.94%    1.704      1 Template:META_Message
+  2.93%    1.010      2 Template:Bug
+  2.60%    0.896      1 Template:META_Related_articles_start
+-->
+<!-- Render ID 1cd6808f-9233-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3956:|#|:idhash:canonical!zh-cn and timestamp 20260807073925 and revision id 33679. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

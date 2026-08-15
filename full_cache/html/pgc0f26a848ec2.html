@@ -1,0 +1,112 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgc0f26a848ec2">VPS 上的 Arch Linux</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgc07bb0ad05fd">服务器</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Arch_Linux_on_a_VPS">Arch Linux on a VPS</a>，最近一次同步于 2025-04-11，若英文版本有所<a href="https://wiki.archlinux.org/title/Arch_Linux_on_a_VPS?diff=0&amp;oldid=822219">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Arch_Linux_on_a_VPS_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>摘自 <a href="https://en.wikipedia.org/wiki/Virtual_private_server">Wikipedia:Virtual private server</a>:
+</p>
+<dl><dd>Virtual private server (VPS) is a term used by Internet hosting services to refer to a virtual machine. The term is used for emphasizing that the virtual machine, although running in software on the same physical computer as other customers' virtual machines, is in many respects functionally equivalent to a separate physical computer, is dedicated to the individual customer's needs, has the privacy of a separate physical computer, and can be configured to run server software.</dd></dl>
+<p>本文主要讨论 Arch Linux 在 VPS 上的应用，并且包括了一些适用于 VPS 的安装与维护指南.
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc0f26a848ec2_Arch_Linux_.E5.AE.98.E6.96.B9.E4.BA.91.E6.98.A0.E5.83.8F" id="Arch_Linux_官方云映像"><span id="Arch_Linux_.E5.AE.98.E6.96.B9.E4.BA.91.E6.98.A0.E5.83.8F"></span>Arch Linux 官方云映像</h2></div>
+<p>作为 <a href="https://gitlab.archlinux.org/archlinux/arch-boxes">arch-boxes 项目</a>的一部分，Arch Linux 提供了官方云映像。映像预装了 <a href="#pg74239a431ba7">Cloud-init</a>，应可用于多数云服务供应商。
+</p><p>可以从镜像源的 <code>images</code> 目录下找到该映像，具体使用步骤参考下方。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc0f26a848ec2_DigitalOcean" id="DigitalOcean">DigitalOcean</h3></div>
+<p>网站：<a href="https://digitalocean.com">Digital Ocean</a>
+</p><p>位置：全球
+</p><p>创建 Arch Linux VM 的步骤：
+</p>
+<ol><li>在镜像源上找到云映像的位置，例如：<a href="https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2">https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2</a></li>
+<li>将其<a href="https://docs.digitalocean.com/products/images/custom-images/how-to/upload/">导入</a>为自定义映像</li>
+<li><a href="https://docs.digitalocean.com/products/images/custom-images/how-to/create-droplets/">从自定义映像创建新 VM</a></li>
+<li>通过 SSH 连接到 VM：<code>ssh root@<i>ip</i></code></li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc0f26a848ec2_Hetzner_Cloud" id="Hetzner_Cloud">Hetzner Cloud</h3></div>
+<p>网站：<a href="https://www.hetzner.com/cloud">Hetzner Cloud</a>
+</p><p>位置：纽伦堡（德国），法尔肯施泰因（德国），赫尔辛基（芬兰），新加坡，希尔斯伯勒（美国西部），阿什本（美国东部）
+</p><p>创建 Arch Linux VM 的步骤：
+</p>
+<ol><li>使用该用户数据创建新 VM：<pre>#cloud-config<br/>vendor_data: {'enabled': false}</pre> <p>Hetzner 的 <code>vendor_data</code> 会覆盖掉<code>发行版</code>中设定的值，并在将默认用户设定为 <code>root</code> 的同时没有设置 <code>disable_root: false</code>，使得你无法登陆到机子上。</p></li>
+<li>以恢复模式启动 VM</li>
+<li>通过 SSH 连接到 VM，然后从镜像源下载云映像，例如：<code>curl -O https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2</code></li>
+<li>将映像写入到硬盘：<code>qemu-img convert -f qcow2 -O raw Arch-Linux-x86_64-cloudimg.qcow2 /dev/sda</code></li>
+<li>重启 VM</li>
+<li>通过 SSH 连接到 VM：<code>ssh arch@<i>ip</i></code></li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc0f26a848ec2_Linode" id="Linode">Linode</h3></div>
+<p>网站：<a href="https://www.linode.com">Linode</a>
+</p><p>位置：<a href="https://www.linode.com/global-infrastructure/">全球多地</a>
+</p><p>创建 Arch Linux VM 的步骤：
+</p>
+<ol><li>创建一台新 VM，并选择 Arch 作为发行版（如果要使用 Linode 提供的映像，到这一步就行；如果要使用官方映像，继续下列步骤）</li>
+<li>以恢复模式启动 VM</li>
+<li>通过 Lish 控制台连接到 VM，然后从镜像源下载基础映像，例如：<code>curl -O https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-basic.qcow2</code></li>
+<li>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=qemu-utils">qemu-utils</a></span><sup><small>包</small></sup></span>：<code>apt update &amp;&amp; apt install qemu-utils</code></li>
+<li>将映像写入到硬盘：<code>qemu-img convert -f qcow2 -O raw Arch-Linux-x86_64-basic.qcow2 /dev/sda</code></li>
+<li>在 Linode 控制台上，进入到 VM 配置菜单，然后将内核选项修改为 ”Direct Disk“</li>
+<li>重启 VM</li>
+<li>通过 SSH 连接到 VM：<code>ssh arch@<i>ip</i></code></li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc0f26a848ec2_OVH_Eco" id="OVH_Eco">OVH Eco</h3></div>
+<p>网站：<a href="https://www.kimsufi.com/en/dedicated-servers">Kimsufi</a> <a href="https://eco.ovhcloud.com/en-gb">OVH Eco</a>
+</p><p>位置：加拿大，法国
+</p><p>基于<a href="https://docs.ovh.com/gb/en/dedicated/bringyourownimage">官方文档</a>的 Arch Linux VM 创建步骤如下：
+</p>
+<ol><li>Navigate to the <a href="https://www.ovh.com/manager/#/dedicated/server">Dedicated Servers</a> section in your OVH management panel, then select the server you want to deploy Arch Linux to.</li>
+<li>Click the ... button next to "Last operating system (OS) installed by OVHcloud" and choose "Install"</li>
+<li>Select "Install from custom image"</li>
+<li>For "Image URL" put <code>https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2</code></li>
+<li>For "Image type" select <code>qcow2</code></li>
+<li>For "Checksum type" select <code>sha256</code></li>
+<li>For "Image checksum" put the fingerprint value from <a href="https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2.SHA256">https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2.SHA256</a></li>
+<li>Enable "ConfigDrive" to enter "Server host name" and your public "SSH key" (both are mandatory for Arch Cloud Init install)</li>
+<li>Click "Install the system"</li>
+<li>Wait (it takes a while) for an email from OVH titled "Installation of your image", it will say "Congratulations! Your dedicated server has just been installed! Connect to your server with ssh key provided during your installation."</li>
+<li>Use <code>ssh arch@<i>ip</i></code> to log in.</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc0f26a848ec2_Proxmox" id="Proxmox">Proxmox</h3></div>
+<p>网站：<a href="https://www.proxmox.com/">Proxmox</a>
+</p><p>位置：N/A
+</p><p>创建 Arch Linux VM 的步骤：
+</p>
+<ol><li>创建一台新 VM</li>
+<li>在 OS 选择步骤选中 “Do not use any media”</li>
+<li>在 VM 创建完成后从 VM 移除刚创建的硬盘</li>
+<li>使用 <code>qm disk import</code> 将刚下载好的映像连接到 VM，例如：<br/> <code>qm disk import 100 Arch-Linux-x86_64-cloudimg.qcow2 local</code>.</li>
+<li>在 Options 下，编辑启动顺序，添加刚创建的硬盘</li>
+<li>添加 cloudinit 盘，在 Cloud-Init 一项中添加你的配置</li>
+<li>启动 VM！</li></ol>
+<!-- 
+NewPP limit report
+Cached time: 20260807084325
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.088 seconds
+Real time usage: 0.091 seconds
+Preprocessor visited node count: 219/1000000
+Revision size: 5560/2097152 bytes
+Post‐expand include size: 2122/2097152 bytes
+Template argument size: 674/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 262/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   22.459      1 -total
+ 14.83%    3.332     19 Template:Ic
+ 14.66%    3.293      1 Template:翻译状态
+ 11.70%    2.627      1 Template:相关文章开始
+  9.11%    2.047      1 Template:Pkg
+  8.57%    1.925      1 Template:Related
+  5.26%    1.182      1 Template:Bc
+  4.64%    1.042      1 Template:META_Related_articles_start
+  3.65%    0.819      1 Template:相关文章结束
+-->
+<!-- Render ID 0da8008e-923c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6557:|#|:idhash:canonical!zh-cn and timestamp 20260807084325 and revision id 33682. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,130 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgf7db3a4f5978">触摸屏</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Touchscreen">Touchscreen</a>，最近一次同步于 2022-09-04，若英文版本有所<a href="https://wiki.archlinux.org/title/Touchscreen?diff=0&amp;oldid=750769">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Touchscreen_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>若您曾尝试过在Linux内配置一个触摸屏设备，你可能会发现这个设备要么开箱即用（除去一些简单的配置过程），要么拥有非常繁琐的配置，特别是它不被内核支持的情况下。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf7db3a4f5978_.E4.BB.8B.E7.BB.8D" id="介绍"><span id=".E4.BB.8B.E7.BB.8D"></span>介绍</h2></div>
+<p>本文假定你的触摸屏设备被内核支持（例如USB触摸屏模块），这意味着你的计算机上会有目录<code>/dev/input/event*/</code>。执行
+</p>
+<pre>$ less /proc/bus/input/devices
+</pre>
+<p>以查看你的设备是否被列出；或尝试
+</p>
+<pre># cat /dev/input/event‘’?‘’ # 以您设备的事件编号代替"?"
+</pre>
+<p>以查看每一个事件节点。若你找到了设备相应的节点，那么您的设备可能能正常工作。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf7db3a4f5978_.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F" id="驱动程序"><span id=".E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F"></span>驱动程序</h2></div>
+<p>有很多适用于触摸屏的X11驱动程序。最常见的驱动程序包是在<i>extra</i>软件仓库中：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-evdev">xf86-input-evdev</a></span><sup><small>包</small></sup></span> (在您的设备可以使用的情况下，这通常是默认的驱动程序)</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-libinput">xf86-input-libinput</a></span><sup><small>包</small></sup></span>;（参见 <a href="#pg6b314e43c2a8">libinput</a>）</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-elographics">xf86-input-elographics</a></span><sup><small>包</small></sup></span></li></ul>
+<p>也有一些仓库或AUR中没有包括的较不常见的驱动程序包，例如：
+</p>
+<ul><li>xf86-input-magictouch</li>
+<li>xf86-input-mutouch</li>
+<li>xf86-input-plpevtch</li>
+<li>xf86-input-palmax</li></ul>
+<p>某些设备存在专有驱动程序（例如：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xf86-input-egalax/">xf86-input-egalax</a></span><sup><small>AUR</small></sup></span>），但建议先尝试开源驱动程序。
+</p><p>请根据您的触摸屏的品牌、型号等参数选择适当的驱动程序。同样地，若您的触摸屏已经可以正常使用，那么<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-evdev">xf86-input-evdev</a></span><sup><small>包</small></sup></span>可能是首选驱动程序。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf7db3a4f5978_.E4.B8.A4.E6.8C.87.E6.BB.9A.E5.8A.A8" id="两指滚动"><span id=".E4.B8.A4.E6.8C.87.E6.BB.9A.E5.8A.A8"></span>两指滚动</h2></div>
+<p>必须在应用程序端实现两指滚动（参见<a href="https://bbs.archlinux.org/viewtopic.php?pid=1839974#p1839974">此链接</a>）。
+</p><p>对于 Firefox，见 <a href="#pgfbce43ea52ee">Firefox/Tweaks#Enable touchscreen gestures</a>。
+</p><p>在 <a href="#pgf7db3a4f5978_Touchegg">#Touchegg</a> 中，有一个 hack 可以模拟每个应用程序的这种滚动行为，但 X 服务器仍将其作为文本选择处理（至少在 <a href="#pgb8d7c68cf276">Plasma</a> 中）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf7db3a4f5978_evdev_.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F" id="evdev_驱动程序"><span id="evdev_.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F"></span>evdev 驱动程序</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf7db3a4f5978_.E6.A0.A1.E5.87.86" id="校准"><span id=".E6.A0.A1.E5.87.86"></span>校准</h3></div>
+<p>运行<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xinput_calibrator/">xinput_calibrator</a></span><sup><small>AUR</small></sup></span>包内的<code>xinput_calibrator</code>，并遵循说明进行操作。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf7db3a4f5978_.E5.9C.A8.E5.A4.9A.E6.98.BE.E7.A4.BA.E5.99.A8.E6.83.85.E6.99.AF.E4.B8.8B.E4.BD.BF.E7.94.A8.E8.A7.A6.E6.91.B8.E5.B1.8F" id="在多显示器情景下使用触摸屏"><span id=".E5.9C.A8.E5.A4.9A.E6.98.BE.E7.A4.BA.E5.99.A8.E6.83.85.E6.99.AF.E4.B8.8B.E4.BD.BF.E7.94.A8.E8.A7.A6.E6.91.B8.E5.B1.8F"></span>在多显示器情景下使用触摸屏</h2></div>
+<p>若要在多显示器的情况下使用触摸屏（其中一部分不是触摸屏），你需要配置Xorg对触摸位置和屏幕之间的映射。可以通过<code>xinput</code>实现。接下来的例子以具有wacom数位板和外接显示器的配置为例。
+</p><p>运行<code>xrandr</code>显示两个显示器的参数：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ xrandr</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Screen 0: minimum 320 x 200, current 2944 x 1080, maximum 8192 x 8192
+LVDS1 connected 1024x768+0+0 (normal left inverted right x axis y axis) 0mm x 0mm
+   1024x768       60.0*+
+   800x600        60.3     56.2  
+   640x480        59.9  
+VGA1 connected 1920x1080+1024+0 (normal left inverted right x axis y axis) 477mm x 268mm
+   1920x1080      60.0*+
+   1600x1200      60.0  
+   1680x1050      60.0  
+   1680x945       60.0  
+</pre>
+<p>可见这里有两个显示器：<i>LVDS1</i>与<i>VGA1</i>。<i>LVDS1</i>是笔记本电脑自带的显示器，<i>VGA1</i>是外接显示器。我们将要将手写笔输入映射到<i>LVDS1</i>，所以我们需要知道手写笔输入的ID：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ xinput --list</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">⎡ Virtual core pointer                    	id=2	[master pointer  (3)]
+⎜   ↳ Virtual core XTEST pointer              	id=4	[slave  pointer  (2)]
+⎜   ↳ QUANTA OpticalTouchScreen               	id=9	[slave  pointer  (2)]
+⎜   ↳ TPPS/2 IBM TrackPoint                   	id=11	[slave  pointer  (2)]
+⎜   ↳ Serial Wacom Tablet WACf004 stylus      	id=13	[slave  pointer  (2)]
+⎜   ↳ Serial Wacom Tablet WACf004 eraser      	id=14	[slave  pointer  (2)]
+⎣ Virtual core keyboard                   	id=3	[master keyboard (2)]
+    ↳ Virtual core XTEST keyboard             	id=5	[slave  keyboard (3)]
+    ↳ Power Button                            	id=6	[slave  keyboard (3)]
+    ↳ Video Bus                               	id=7	[slave  keyboard (3)]
+    ↳ Sleep Button                            	id=8	[slave  keyboard (3)]
+    ↳ AT Translated Set 2 keyboard            	id=10	[slave  keyboard (3)]
+    ↳ ThinkPad Extra Buttons                  	id=12	[slave  keyboard (3)]</pre>
+<p>我们可以看见有两个手写笔输入被识别出来，我们需要分别映射输入到屏幕输出，如下：
+</p>
+<pre>$ xinput --map-to-output 'Serial Wacom Tablet WACf004 stylus' LVDS1
+$ xinput --map-to-output 'Serial Wacom Tablet WACf004 eraser' LVDS1
+</pre>
+<p>你可以通过将它们添加到<code>~/xinitrc</code>或类似的文件中以自动执行这些命令。若你断开了屏幕并重新连接（比如通过KVM切换显示器时），那么映射将会失效。你可以使用<i><a href="#pge009209061ac">udev</a></i>规则来避免这种情况下可能出现的繁琐的配置过程。<i>（请参见<a href="#pga113d21ec09e">Calibrating Touchscreen#Do it automatically via a udev rule</a>）</i>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf7db3a4f5978_.E4.BD.BF.E7.94.A8xrandr-watch-git.E8.BD.AF.E4.BB.B6.E5.8C.85.E8.87.AA.E5.8A.A8.E6.98.A0.E5.B0.84" id="使用xrandr-watch-git软件包自动映射"><span id=".E4.BD.BF.E7.94.A8xrandr-watch-git.E8.BD.AF.E4.BB.B6.E5.8C.85.E8.87.AA.E5.8A.A8.E6.98.A0.E5.B0.84"></span>使用xrandr-watch-git软件包自动映射</h3></div>
+<p>我们可以通过<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xrandr-watch-git/">xrandr-watch-git</a></span><sup><small>AUR</small></sup></span>软件包配置一些<i><a href="#pgaa98d1ed067b">xrandr</a></i>事件的捕获并自动执行脚本。安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xrandr-watch-git/">xrandr-watch-git</a></span><sup><small>AUR</small></sup></span>，创建一个具有执行权限的脚本 <code>~/.xrandr-changed</code>，以执行 <code>map-to-output</code>，例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xrandr-changed</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+xinput --map-to-output "Wacom HID 4861 Finger touch" "eDP1"
+</pre>
+<p>并启动，测试并启用 <a href="#pg88cdcc283b9b">systemd/用户</a>的服务<code>xrandr-watcher.service</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf7db3a4f5978_Wayland.2FWeston" id="Wayland/Weston"><span id="Wayland.2FWeston"></span>Wayland/Weston</h3></div>
+<p>Wayland 目前没有已知的方法来将触摸锁定到特定显示器。有诸如 weston-touch-calibrator 之类的工具，但 Gnome Wayland 使用 XWayland，使校准器无法定位任何触摸屏。
+</p><p>Wayland/XWayland 也掩盖了 xinput 列表，并将它们下放到通用的 xwayland 设备，如 "xwayland-pointer"、"xwayland-relative-pointer"、"xwayland-touch-pointer"等等。"<a href="#pg0b73c44949c5">Xinput</a>"的Wayland方法是"<a href="#pg6b314e43c2a8">Libinput</a>"，但不具备所有相同的功能。 目前已知的在多头设置中使用触摸屏的方法是强制 Gnome 或 KDE 使用 X11。libinput 目前假设触摸屏覆盖所有可用的显示器。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf7db3a4f5978_Touchegg" id="Touchegg">Touchegg</h2></div>
+<p><a href="#pg986a4ef84733">Touchegg</a> 是一个多点触摸手势程序，仅与 X 兼容，可在后台以用户身份运行，识别手势并响应，例如将双指滑动映射为鼠标滚轮移动。但它也会使已经拥有自己的手势识别功能的应用程序或窗口管理器的手势功能不正常。如果您同时使用触摸板和触摸屏，并且已配置触摸板驱动程序（例如Synaptics或libinput）为不识别手势本身，而是通过多点触摸事件触发，那么Touchegg将抢先识别这些手势并让Synaptics与libinput无法识别。实际上，与Synaptics或libinput触摸板驱动程序相比，它能更好地识别手势。但是对于触摸屏，软件自己拥有的手势功能一般会更加好用。一些Qt和GTK应用程序拥有自己独有的手势系统，但是如果Touchegg覆盖了触摸事件，它们将无法识别。因此，当您主要运行较古老的应用程序时，Touchegg很有用，它们通常没有自己的手势功能。
+</p><p>在最近对 touchegg 2.0 的重写中，双指滚动已被禁用。
+</p><p>要启用它，请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdotool">xdotool</a></span><sup><small>包</small></sup></span> 并查看<a href="https://github.com/JoseExposito/touchegg/issues/438">这个关闭的问题</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807101416
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.085 seconds
+Real time usage: 0.088 seconds
+Preprocessor visited node count: 219/1000000
+Revision size: 7249/2097152 bytes
+Post‐expand include size: 4886/2097152 bytes
+Template argument size: 1991/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   16.188      1 -total
+ 19.90%    3.221      1 Template:翻译状态
+ 17.05%    2.761      5 Template:Pkg
+ 10.66%    1.726      8 Template:Ic
+  9.25%    1.497      4 Template:AUR
+  8.81%    1.426      3 Template:Hc
+-->
+<!-- Render ID beb4980e-9248-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3891:|#|:idhash:canonical!zh-cn and timestamp 20260807101416 and revision id 33863. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,138 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg4b9a9fc43b1c">OCaml 打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN">
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/OCaml_package_guidelines">OCaml package guidelines</a>，最近一次同步于 2025-07-14，若英文版本有所<a href="https://wiki.archlinux.org/title/OCaml_package_guidelines?diff=0&amp;oldid=812144">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/OCaml_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside><div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – OCaml – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<p>为使用 <a href="https://en.wikipedia.org/wiki/OCaml">OCaml</a> 编写的软件创建 <a href="#pgf9d748a7b27b">PKGBUILD</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b9a9fc43b1c_.E5.91.BD.E5.90.8D" id="命名"><span id=".E5.91.BD.E5.90.8D"></span>命名</h2></div>
+<p>若是库则采用 <code>ocaml-<i>modulename</i></code> 的格式，若是程序则采用程序名。不论如何，名字都应当是全小写的。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b9a9fc43b1c_.E6.96.87.E4.BB.B6.E7.9A.84.E4.BD.8D.E7.BD.AE" id="文件的位置"><span id=".E6.96.87.E4.BB.B6.E7.9A.84.E4.BD.8D.E7.BD.AE"></span>文件的位置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b9a9fc43b1c_.E5.BA.93" id="库"><span id=".E5.BA.93"></span>库</h3></div>
+<p>OCaml 库应当安装到 <code>/usr/lib/ocaml</code>。到 <code>/usr/lib/ocaml/site-lib</code> 已经弃用。
+</p><p>OCaml 库应当使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ocaml-findlib">ocaml-findlib</a></span><sup><small>包</small></sup></span> 来安装。<code>ocaml-findlib</code> 在包种包含了元信息来使库管理更加简单。这是一种惯例，现在很多 OCaml 都需要它。
+</p><p><code>ocaml-findlib</code> 从应被包含在源码包中的 <code>META</code> 的文件中取出必要的数据。If this file is not included, one should either be obtained from the corresponding Debian, Ubuntu, or Fedora package, or created for the package by the maintainer. A request to include the file should also be made to the upstream developers of the package.
+</p><p>The <code>OCAMLFIND_DESTDIR</code> variable should be used when installing packages with <code>ocaml-findlib</code>. See the example PKGBUILD below for details.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b9a9fc43b1c_OASIS" id="OASIS">OASIS</h3></div>
+<p>OCaml packages that install executables using OASIS ignore <code>DESTDIR</code>. This is a known limitation of OASIS (<a href="https://github.com/ocaml/oasis/issues/493">issue #493</a>). One way to enable <code>DESTDIR</code>-like functionality is to run the <code>configure</code> script with the <code>--destdir</code> argument, like so:
+</p>
+<pre>build() {
+    cd "${srcname}-${pkgver}"
+    ./configure --prefix /usr --destdir "$pkgdir"
+
+    # build commands
+}
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b9a9fc43b1c_OCaml_bytecode_and_levels" id="OCaml_bytecode_and_levels">OCaml bytecode and levels</h2></div>
+<p>OCaml can run code on multiple "levels", the top level interprets OCaml Code without compiling, the bytecode level creates machine independent bytecode and the native level creates machine code binaries (just like C/C++).
+</p><p>When building OCaml Packages you need to be aware if the build process is compiling native machine code, bytecode, or as in many cases both. This creates a number of situations which can cause problems with package options and the right dependencies.
+</p><p>If bytecode is produced at all then the PKGBUILD must contain the following to protect the bytecode:
+</p>
+<pre>options=('!strip')
+</pre>
+<p>If the package does not contain bytecode and only distributes a binary, then <code>ocaml</code> is not needed as a dependency, but it of course is required as a makedepends since the <code>ocaml</code> package provides the OCaml compiler. If the package contains both native code and bytecode then <code>ocaml</code> should be a dependency and a makedepends.
+</p><p>OCaml code is rarely (if ever) distributed as bytecode only and will almost always include native code: the only case where using <i>any</i> as the <i>arch</i> is advisable is when only un-compiled source code is distributed, usually with a library, though many libraries still distribute native code.
+</p><p>The moral of the story here is to be aware of what it is you are distributing, chances are your package contains both native machine code and bytecode.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b9a9fc43b1c_.E4.BD.BF.E7.94.A8_Dune_.E7.9A.84_PKGBUILD_.E5.AE.9E.E4.BE.8B" id="使用_Dune_的_PKGBUILD_实例"><span id=".E4.BD.BF.E7.94.A8_Dune_.E7.9A.84_PKGBUILD_.E5.AE.9E.E4.BE.8B"></span>使用 Dune 的 PKGBUILD 实例</h2></div>
+<p><a href="https://dune.build/">Dune</a> 是一种新的构建系统，现在已经越来越多的被用于 OCaml 项目中。
+</p><p>One thing to be aware is that a single project can build several "packages" in the OPAM/findlib sense, each with its own directory in <code>/usr/lib/ocaml/</code>. See <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ocaml-cairo">ocaml-cairo</a></span><sup><small>包</small></sup></span> for an example. For release builds, all "packages" have to be explicitly listed.
+</p>
+<pre># Contributor: Your Name &lt;youremail@domain.com&gt;
+
+pkgname=ocaml-&lt;package name&gt;
+pkgver=4.2
+pkgrel=1
+license=(<i>)</i>
+arch=('x86_64')
+pkgdesc="An OCaml Package"
+url=""
+depends=('ocaml')
+makedepends=('dune')
+source=()
+options=('!strip')
+sha256sums=()
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  # The "-p" flag is necessary for release builds, see the Dune manpage. Dune will complain if you forget some packages.
+  dune build -p package1,package1-extension,package2
+}
+
+package() {
+   cd "${pkgname}-${pkgver}"
+	
+   DESTDIR="${pkgdir}" dune install --prefix "/usr" --libdir "/usr/lib/ocaml" --docdir "/usr/share/doc"</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b9a9fc43b1c_.E4.BD.BF.E7.94.A8_findlib_.E7.9A.84_PKGBUILD_.E5.AE.9E.E4.BE.8B" id="使用_findlib_的_PKGBUILD_实例"><span id=".E4.BD.BF.E7.94.A8_findlib_.E7.9A.84_PKGBUILD_.E5.AE.9E.E4.BE.8B"></span>使用 findlib 的 PKGBUILD 实例</h2></div>
+<pre># Contributor: Your Name &lt;youremail@domain.com&gt;
+
+pkgname=ocaml-&lt;package name&gt;
+pkgver=4.2
+pkgrel=1
+license=(<i>)</i>
+arch=('x86_64')
+pkgdesc="An OCaml Package"
+url=""
+depends=('ocaml')
+makedepends=('ocaml-findlib')
+source=()
+options=('!strip')
+md5sums=()
+
+OCAMLFIND_DESTDIR="${pkgdir}$(ocamlfind printconf destdir)"
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  mkdir -p "$OCAMLFIND_DESTDIR"
+  ./configure --prefix=/usr
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  env DESTDIR="${pkgdir}" \
+    OCAMLFIND_DESTDIR="$OCAMLFIND_DESTDIR" \
+    make install
+}</pre>
+<p>需要留意的是许多 OCaml 包都需要给 <code>make</code> 与 <code>make install</code> 一些额外信息。同时，请去除 <code>!strip</code> 选项，并在包不编译为字节码时指定架构。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807083951
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.114 seconds
+Real time usage: 0.121 seconds
+Preprocessor visited node count: 232/1000000
+Revision size: 5039/2097152 bytes
+Post‐expand include size: 5489/2097152 bytes
+Template argument size: 1974/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 120/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   25.210      1 -total
+ 20.50%    5.167      1 Template:Translateme
+ 16.66%    4.200      1 Template:TranslationStatus
+ 11.61%    2.926     16 Template:Ic
+  9.76%    2.461      2 Template:Pkg
+  8.20%    2.068      1 Template:META_Message
+  7.60%    1.917      1 Template:Package_guidelines
+  5.70%    1.438      3 Template:Bc
+-->
+<!-- Render ID 8e1a318e-923b-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7609:|#|:idhash:canonical!zh-cn and timestamp 20260807083951 and revision id 33652. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

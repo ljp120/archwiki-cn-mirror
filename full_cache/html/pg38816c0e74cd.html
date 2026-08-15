@@ -1,0 +1,174 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg38816c0e74cd">Git 服务器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Git_server">Git server</a>，最近一次同步于 2024-5-17，若英文版本有所<a href="https://wiki.archlinux.org/title/Git_server?diff=0&amp;oldid=810719">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Git_server_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<p>本文概述了如何托管 <a href="#pg0d34da84b694">Git</a> 服务器。有关更多信息，请参阅 Pro Git 书籍的 <a href="https://git-scm.com/book/en/v2/Git-on-the-Server-The-Protocols">Git on the Server 一章</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg38816c0e74cd_.E5.8D.8F.E8.AE.AE" id="协议"><span id=".E5.8D.8F.E8.AE.AE"></span>协议</h2></div>
+<p>请参阅<a href="https://git-scm.com/book/en/v2/Git-on-the-Server-The-Protocols">Git on the Server - The Protocols</a>，了解详细说明以及优缺点。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg38816c0e74cd_.E6.99.AE.E9.80.9A.EF.BC.88General.EF.BC.89" id="普通（General）"><span id=".E6.99.AE.E9.80.9A.EF.BC.88General.EF.BC.89"></span>普通（General）</h3></div>
+<p><a href="https://miracoin.wordpress.com/2014/11/25/step-by-step-guide-on-setting-up-git-server-in-arch-linux-pushable/">设置 git 服务器 的分步指南</a>设置 git Server 的分步指南描述了如何在 Arch 上设置不安全的服务器。
+</p><p>默认情况下，git 用户已过期（"您的账户已过期，请联系您的系统管理员"）。使用 <a href="#pg1878f3bea1c2">chage</a> 可移除过期条件，举例如下：
+</p>
+<pre># chage -E -1 git
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg38816c0e74cd_SSH" id="SSH">SSH</h3></div>
+<p>您只需要设置一个 <a href="#pg81569eb76dc7">SSH 服务器</a>.
+</p><p>您可以进一步确保 SSH 用户账户的安全，只允许在该用户账户上执行推拉命令。方法是用 git-shell 代替默认登录 shell。请参阅<a href="https://git-scm.com/book/en/v2/Git-on-the-Server-Setting-Up-the-Server">设置服务器</a>。
+</p><p>在 Arch 上，使用 #General 中的说明和本节(<a href="#pg38816c0e74cd_SSH">#SSH</a>)中的说明创建 git 服务器时，需要采取以下额外步骤：
+</p>
+<ol><li>更改主目录： 为了让 ssh 能够读取 <code>/srv/git/.ssh/authorized_keys</code>，需要将 <code>/etc/passwd</code> 中 git 的主目录从<code>/</code>更改为 <code>/srv/git</code>。</li>
+<li>home目录更改之时更改基本路径： 如果仓库是从 git 的主目录提供服务的，为了让 git 能够为仓库提供服务，需要将<code>git-daemon\@.service</code>中的<code>--base-path</code>改为 <code>/srv/git</code>。</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg38816c0e74cd_Dumb_HTTP" id="Dumb_HTTP">Dumb HTTP</h3></div>
+<p>这里的 "Dump"是指只有 <a href="#pge0b92766527e">WebDAV</a> 参与了拉取和推送。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg38816c0e74cd_nginx" id="nginx">nginx</h4></div>
+<p>Follow the basic WebDAV instructions for nginx. Pushing via WebDAV also requires Locking. Here is an example location block:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nginx/nginx.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">location /repos/ {
+        auth_basic "Authorized Personnel Only!";
+        auth_basic_user_file /etc/nginx/htpasswd;
+        dav_methods PUT DELETE MKCOL COPY MOVE;
+        dav_ext_methods PROPFIND OPTIONS LOCK UNLOCK;
+        dav_access user:rw group:rw all:r;
+        dav_ext_lock zone=general;
+        create_full_put_path on;
+        client_body_temp_path /tmp;
+    }</pre>
+<p>Note the <code>dav_ext_lock zone</code>. Add the specified locking zone to the http section of your config:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nginx/nginx.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">dav_ext_lock_zone zone=general:10m;</pre>
+<p>Now do the ususal steps when preparing a git repo for the server:
+</p>
+<ul><li><code>git clone --bare /path/to/myrepo myrepo.git</code></li>
+<li>copy the bare repo to the server</li>
+<li>run <code>git update-server-info</code> in the bare repo</li>
+<li>chown the repo to be owned by http:http</li></ul>
+<p>You might have noticed that I added HTTP Basic Authentication to have at lease some means of access control. Everyone who has an password entry in the htaccess file can push.
+</p><p>Now you can clone as usual:
+</p>
+<pre>$ git clone https://www.example.com/repos/myrepo.git
+Cloning into 'myrepo'...
+$
+</pre>
+<p>Make some changes, add, commit, and push:
+</p>
+<pre>$ git push origin main
+error: Cannot access URL https://www.example.com/repos/myrepo.git/, return code 22
+fatal: git-http-push failed
+error: failed to push some refs to 'https://www.example.com/repos/myrepo.git'
+</pre>
+<p>Oh noes! For some reason PROPFIND reports 401 Unauthorized and that's all. Nothing in the nginx error logs. Appearently the git client has a problem passing the username and password for all subsequent requests. Running a git credential cache does not help. The only solution that works so far is editing the ~/.netrc (obviously git uses curl for http):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.netrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">machine www.example.com
+login git
+password topsecret</pre>
+<pre>$  &gt; git push origin main
+Fetching remote heads...
+ refs/
+ refs/heads/
+ refs/tags/
+updating 'refs/heads/main'
+ from 03f8860418facfbecedd5e0a81b480131b31bcba
+ to   ec5536091e31ebf172a34c6d1ebddfc36e3bd3a6
+   sending 3 objects
+   done
+Updating remote server info
+To https://www.example.com/repos/myrepo.git
+  0318860..ec55560  main -&gt; main
+</pre>
+<p>Don't even think to specify the clone URL as <code>https://username:password@www.example.com/repos/myrepo.git</code>. This works for the initial clone but for a subsequent push you get an error message in your error log stating that the destination URL is handled by a different repository.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg38816c0e74cd_Smart_HTTP" id="Smart_HTTP">Smart HTTP</h3></div>
+
+<p>The <span class="plainlinks archwiki-template-man" title="$ man 1 git-http-backend"><a href="https://man.archlinux.org/man/git-http-backend.1">git-http-backend(1)</a></span> is a CGI program, allowing efficient cloning, pulling and pushing over HTTP(S).
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg38816c0e74cd_Apache" id="Apache">Apache</h4></div>
+<p>设置非常简单，只需安装<a href="#pg9e2fcd944f95">Apache HTTP 服务器</a>，并启用 <code>mod_cgi</code>、<code>mod_alias</code> 和 <code>mod_env</code>，当然还有 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=git">git</a></span><sup><small>包</small></sup></span>。
+</p><p>运行基本设置后，在 Apache 配置文件中添加以下内容，该文件通常位于：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/httpd/conf/httpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">&lt;Directory "/usr/lib/git-core"&gt;
+    Require all granted
+&lt;/Directory&gt;
+ 
+SetEnv GIT_PROJECT_ROOT /srv/git
+SetEnv GIT_HTTP_EXPORT_ALL
+ScriptAlias /git/ /usr/lib/git-core/git-http-backend/
+</pre>
+<p>这假设的是：您的 Git 仓库位于 <code>/srv/git</code>，并且您希望通过以下方式访问它们： <code>http(s)://your_address.tld/git/your_repo.git</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>确保 Apache 可以读写您的版本库。</div>
+<p>有关更详细的文档，请访问以下链接：
+</p>
+<ul><li><a href="https://git-scm.com/book/en/v2/Git-on-the-Server-Smart-HTTP">https://git-scm.com/book/en/v2/Git-on-the-Server-Smart-HTTP</a></li>
+<li><a href="https://git-scm.com/docs/git-http-backend">https://git-scm.com/docs/git-http-backend</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg38816c0e74cd_Git" id="Git">Git</h3></div>
+<p>The Git protocol is not encrypted or authenticated, and only allows read access.
+</p><p>The Git daemon (<span class="plainlinks archwiki-template-man" title="$ man 1 git-daemon"><a href="https://man.archlinux.org/man/git-daemon.1">git-daemon(1)</a></span>) can be <a href="#pg073992cb666a">start</a>ed with <code>git-daemon.socket</code>.
+</p><p>The service uses the <code>--export-all</code> and <code>--base-path</code> parameters to serve all repositories placed in <code>/srv/git/</code>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg38816c0e74cd_.E8.AE.BF.E9.97.AE.E6.8E.A7.E5.88.B6" id="访问控制"><span id=".E8.AE.BF.E9.97.AE.E6.8E.A7.E5.88.B6"></span>访问控制</h2></div>
+<p>对于保险（fine-grained）的访问控制，可采用以下解决方案：
+</p>
+<ul><li><b><a href="#pg6f2e29fdae8a">Gitolite</a></b> — 一个 Git 访问控制层，用 Perl 编写。</li></ul>
+<dl><dd><a href="https://github.com/sitaramc/gitolite">https://github.com/sitaramc/gitolite</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gitolite">gitolite</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgaf3cdd66b73f">Gitosis</a></b> — 一个用于托管 Git 仓库的软件，用 Python 编写。</li></ul>
+<dl><dd><a href="https://github.com/tv42/gitosis">https://github.com/tv42/gitosis</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gitosis-git/">gitosis-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<p>请注意，如果您愿意为所有应该访问版本库的人创建<a href="#pgb3ea121ab2c1">用户账户</a>，并且不需要 git 对象（如分支）级别的访问控制，也可以使用标准的<a href="#pg1b0416ab15de">文件权限</a>来进行访问控制。<a href="https://github.com/sitaramc/gitolite/blob/d74e58b5de8c78bddd29b009ba2d606f7fcb4f2d/doc/overkill.mkd">[1]</a>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg38816c0e74cd_Web_.E7.95.8C.E9.9D.A2" id="Web_界面"><span id="Web_.E7.95.8C.E9.9D.A2"></span>Web 界面</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg38816c0e74cd_.E7.AE.80.E6.98.93_web_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="简易_web_应用程序"><span id=".E7.AE.80.E6.98.93_web_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>简易 web 应用程序</h3></div>
+<ul><li><a href="#pgc477060523d6">Gitweb</a>——Git 自带的默认 Web 界面</li>
+<li><b><a href="#pgd61d36820c84">cgit</a></b> — 一个用纯 C 语言编写的 git 网页界面。</li></ul>
+<dl><dd><a href="https://git.zx2c4.com/cgit/">https://git.zx2c4.com/cgit/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cgit">cgit</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg38816c0e74cd_.E9.AB.98.E7.BA.A7_web_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="高级_web_应用程序"><span id=".E9.AB.98.E7.BA.A7_web_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>高级 web 应用程序</h3></div>
+<ul><li><b><a href="#pg2d08f74738ef">Forgejo</a></b> — 自托管轻量级软件。Gitea 的社区管理分支。</li></ul>
+<dl><dd><a href="https://forgejo.org">https://forgejo.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=forgejo">forgejo</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgb2926b3dc3be">Gitea</a></b> — 无偿自托管 Git 服务。它最初是 Gogs 的一个社区管理分支，但在 2022 年由 Gitea Limited 以商业模式拥有。</li></ul>
+<dl><dd><a href="https://gitea.io">https://gitea.io</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gitea">gitea</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg91fa09eb18bf">GitLab</a></b> — 用 Ruby 编写的项目管理和代码托管应用程序。</li></ul>
+<dl><dd><a href="https://gitlab.com/gitlab-org/gitlab-ce">https://gitlab.com/gitlab-org/gitlab-ce</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gitlab">gitlab</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg9c1c8cea0de5">Gogs</a></b> — 用 Go 编写的自助托管 Git 服务。</li></ul>
+<dl><dd><a href="https://gogs.io">https://gogs.io</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gogs/">gogs</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<!-- 
+NewPP limit report
+Cached time: 20260807193850
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.132 seconds
+Real time usage: 0.136 seconds
+Preprocessor visited node count: 521/1000000
+Revision size: 7465/2097152 bytes
+Post‐expand include size: 8673/2097152 bytes
+Template argument size: 3830/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 263/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   39.968      1 -total
+ 19.22%    7.680      7 Template:App
+  8.78%    3.510      1 Template:翻译状态
+  8.69%    3.474     20 Template:Ic
+  8.42%    3.366      1 Template:需要翻译
+  8.16%    3.263      6 Template:Pkg
+  7.10%    2.837      1 Template:Expansion
+  5.97%    2.386      2 Template:Man
+  5.71%    2.283      2 Template:META_Message
+  4.64%    1.856      1 Template:Note
+-->
+<!-- Render ID 9d2ecd0f-9297-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7745:|#|:idhash:canonical!zh-cn and timestamp 20260807193850 and revision id 34268. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,97 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgcc3ec009df0a">XDG 用户目录</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/XDG_user_directories">XDG user directories</a>，最近一次同步于 2026-07-29，若英文版本有所<a href="https://wiki.archlinux.org/title/XDG_user_directories?diff=0&amp;oldid=877396">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/XDG_user_directories_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg4989d4f46056">环境变量</a></li>
+<li><a href="#pg2394d2f9797c">默认应用程序</a></li>
+<li><a href="#pg1b1ba6f94973">XDG 基本目录</a></li>
+<li><a href="#pg2980a4fd55f3">xdg-menu</a></li>
+</ul></div>
+<p>译自 <a href="https://www.freedesktop.org/wiki/Software/xdg-user-dirs/">freedesktop.org</a>：
+</p>
+<dl><dd><i>xdg-user-dirs</i> 是一个帮助管理用户常用目录（如桌面文件夹和音乐文件夹）的工具。它还处理这些文件夹名称的本地化（即翻译）。</dd></dl>
+<dl><dd>其工作原理是在登录阶段的早期运行 <span class="plainlinks archwiki-template-man" title="$ man 1 xdg-user-dirs-update"><a href="https://man.archlinux.org/man/xdg-user-dirs-update.1">xdg-user-dirs-update(1)</a></span> 程序。该程序会读取一个配置文件和一组默认目录，然后在用户的主目录中创建这些目录的本地化版本，并在 <code>$XDG_CONFIG_HOME/user-dirs.dirs</code>（<code>XDG_CONFIG_HOME</code> 默认为 <code>~/.config</code>）中设置一个配置文件，供应用程序读取以找到这些目录。</dd></dl>
+<p>大多数<a href="#pgcbd134d3bc62">文件管理器</a>会使用特殊图标标识 XDG 用户目录。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgcc3ec009df0a_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-user-dirs">xdg-user-dirs</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>某些<a href="#pg712e4adaddad">桌面环境</a>可能已默认安装，例如 <a href="#pg1e095fe2c2a6">GNOME</a>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgcc3ec009df0a_.E5.88.9B.E5.BB.BA.E9.BB.98.E8.AE.A4.E7.9B.AE.E5.BD.95" id="创建默认目录"><span id=".E5.88.9B.E5.BB.BA.E9.BB.98.E8.AE.A4.E7.9B.AE.E5.BD.95"></span>创建默认目录</h2></div>
+<p>可以用以下命令在 <code>$HOME</code> 下创建一整套默认的经本地化的用户目录：
+</p>
+<pre>$ xdg-user-dirs-update
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可以使用 <code>LC_ALL=C.UTF-8 xdg-user-dirs-update --force</code> 命令强制创建英文命名的目录。</div>
+<p>运行后该命令还会自动地：
+</p>
+<ul><li>创建一个本地的 <code>~/.config/user-dirs.dirs</code> 配置文件：应用程序通过他来查找使用特定帐号指定的用户目录。</li>
+<li>创建一个本地的 <code>~/.config/user-dirs.locale</code> 配置文件：根据使用的 locale 指定语言。</li></ul>
+<p>用户服务 <code>xdg-user-dirs.service</code> 也将默认安装并启用，以便在每次登录会话开始时运行此命令，保持您的目录是最新的。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgcc3ec009df0a_.E5.88.9B.E5.BB.BA.E8.87.AA.E5.AE.9A.E4.B9.89.E7.9B.AE.E5.BD.95" id="创建自定义目录"><span id=".E5.88.9B.E5.BB.BA.E8.87.AA.E5.AE.9A.E4.B9.89.E7.9B.AE.E5.BD.95"></span>创建自定义目录</h2></div>
+<p>本地 <code>~/.config/user-dirs.dirs</code> 和全局 <code>/etc/xdg/user-dirs.defaults</code> 配置文件使用以下环境变量格式指向用户目录：<code>XDG_DIRNAME_DIR="$HOME/directory_name"</code>。一个示例配置文件可能如下所示（这些都是默认目录）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/user-dirs.dirs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">XDG_DESKTOP_DIR="$HOME/桌面"
+XDG_DOCUMENTS_DIR="$HOME/文档"
+XDG_DOWNLOAD_DIR="$HOME/下载"
+XDG_MUSIC_DIR="$HOME/音乐"
+XDG_PICTURES_DIR="$HOME/图片"
+XDG_PROJECTS_DIR="$HOME/项目"
+XDG_PUBLICSHARE_DIR="$HOME/公共"
+XDG_TEMPLATES_DIR="$HOME/模板"
+XDG_VIDEOS_DIR="$HOME/视频"</pre>
+<p>因为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-user-dirs">xdg-user-dirs</a></span><sup><small>包</small></sup></span> 会参照本地配置文件来了解正确的用户目录，所以可以自定义。比如若将 <code>~/.config/user-dirs.dirs</code> 下 <code>XDG_DOWNLOAD_DIR</code> 变量设为了 <code>$HOME/Internet</code>，那么任何参照了该变量的程序都会改用这个目录。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>和其他的配置文件一样，本地设定覆盖全局设定。另外自定义的目录要自己创建。</div>
+<p>或者也可以用命令行修改默认目录。下列命令会产生和上面一样的效果：
+</p>
+<pre>$ xdg-user-dirs-update --set DOWNLOAD ~/Internet
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgcc3ec009df0a_.E6.9F.A5.E8.AF.A2.E9.85.8D.E7.BD.AE.E5.A5.BD.E7.9A.84.E7.9B.AE.E5.BD.95" id="查询配置好的目录"><span id=".E6.9F.A5.E8.AF.A2.E9.85.8D.E7.BD.AE.E5.A5.BD.E7.9A.84.E7.9B.AE.E5.BD.95"></span>查询配置好的目录</h2></div>
+<p>一旦设置完成，任何用户目录都可以通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-user-dirs">xdg-user-dirs</a></span><sup><small>包</small></sup></span> 查看。例如，以下命令将显示 <code>Templates</code> 目录的位置，该目录当然对应于本地配置文件中的 <code>XDG_TEMPLATES_DIR</code> 变量：
+</p>
+<pre>$ xdg-user-dir TEMPLATES
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><code>xdg-user-dir</code> 不应从未经检查的输入中获取其参数，因为它会将参数直接传递给 <code>eval</code>，而不进行任何有效性检查，代码行如下：
+<pre>eval echo \${XDG_${1}_DIR:-$HOME}
+</pre>
+这意味着 <code>xdg-user-dir</code> 会从未经清理的输入中执行任意代码。除非<a href="https://gitlab.freedesktop.org/xdg/xdg-user-dirs/-/issues/42">上游</a>修复了这个不安全的实现，否则 <code>xdg-user-dir</code> 应仅在使用硬编码或经过严格审核的参数时使用。</div>
+<!-- 
+NewPP limit report
+Cached time: 20260807030635
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.089 seconds
+Real time usage: 0.093 seconds
+Preprocessor visited node count: 285/1000000
+Revision size: 3918/2097152 bytes
+Post‐expand include size: 4401/2097152 bytes
+Template argument size: 1827/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   31.433      1 -total
+ 11.05%    3.472      1 Template:翻译状态
+ 10.97%    3.449     20 Template:Ic
+  8.06%    2.533      3 Template:Pkg
+  7.98%    2.507      1 Template:警告
+  7.53%    2.367      4 Template:Related
+  6.96%    2.188      1 Template:相关文章开始
+  5.85%    1.840      1 Template:Man
+  4.38%    1.376      1 Template:提示
+  3.88%    1.221      1 Template:Hc
+-->
+<!-- Render ID ff8ebb8e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:4006:|#|:idhash:canonical!zh-cn and timestamp 20260807030635 and revision id 35470. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

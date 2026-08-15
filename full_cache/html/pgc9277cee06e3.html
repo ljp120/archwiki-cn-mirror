@@ -1,0 +1,563 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgc9277cee06e3">核心工具</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Core_utilities">Core utilities</a>，最近一次同步于 2023-11-22，若英文版本有所<a href="https://wiki.archlinux.org/title/Core_utilities?diff=0&amp;oldid=787190">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Core_utilities_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg34c9d748f55e">命令行解释器</a></li>
+<li><a href="#pg60160f86c6a5">用户和用户组</a></li>
+<li><a href="#pgac06dd8bfe95">systemd</a></li>
+<li><a href="#pg9ef105bf1e3c">pacman</a></li>
+<li><a href="#pgb2db5e40b019">建议阅读</a></li>
+</ul></div>
+<p><i>核心工具</i>是 <a href="https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy">GNU/Linux</a> 系统基本、基础的工具。本文提供对它们不完整的概览、链接文档并描述有用的替代品。本文的范围包括，但不限于 <a href="https://www.gnu.org/software/coreutils/coreutils.html">GNU coreutils</a>。大多数核心工具都是传统的 <a href="https://en.wikipedia.org/wiki/Unix">Unix</a> 工具，它们中的许多已由 <a href="https://en.wikipedia.org/wiki/POSIX">POSIX</a> 标准化，但已进一步发展，从而提供更多功能。
+</p><p>大多数命令行界面的文档都在 <a href="#pg49a53c288b70">man 手册</a>中，来自 <a href="#pg0e81ab922f48">GNU 项目</a>的工具的文档主要在 <a href="#pg0e81ab922f48">Info 手册</a>中，一些 <a href="#pg34c9d748f55e">shell</a> 为内置命令提供了 <code>help</code> 命令。另外，大多数命令在使用 <code>--help</code> 标志运行时会显示自身的使用说明。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc9277cee06e3_.E5.9F.BA.E7.A1.80" id="基础"><span id=".E5.9F.BA.E7.A1.80"></span>基础</h2></div>
+<p>下表列出了一些 <a href="#pg83506eae4ba0">Arch Linux</a> 用户应当熟悉的重要的工具。另请参见 <span class="plainlinks archwiki-template-man" title="$ man 1 intro"><a href="https://man.archlinux.org/man/intro.1">intro(1)</a></span>。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>包</th>
+<th>工具</th>
+<th>描述</th>
+<th>文档</th>
+<th>替代品
+</th></tr>
+<tr>
+<td>shell 内置</td>
+<td>cd</td>
+<td>变更目录</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1p cd"><a href="https://man.archlinux.org/man/cd.1p">cd(1p)</a></span></td>
+<td>#cd 替代品
+</td></tr>
+<tr>
+<td rowspan="13">GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=coreutils">coreutils</a></span><sup><small>包</small></sup></span>
+</td>
+<td>ls</td>
+<td>列出目录</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 ls"><a href="https://man.archlinux.org/man/ls.1">ls(1)</a></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://www.gnu.org/software/coreutils/manual/html_node/ls-invocation.html">ls</a></span><sup><small><a href="https://www.gnu.org/manual/manual.html">GNU 文档</a></small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tree">tree</a></span><sup><small>包</small></sup></span>, #ls 替代品
+</td></tr>
+<tr>
+<td>cat</td>
+<td>将文件拼接到 stdout</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 cat"><a href="https://man.archlinux.org/man/cat.1">cat(1)</a></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://www.gnu.org/software/coreutils/manual/html_node/cat-invocation.html">cat</a></span><sup><small><a href="https://www.gnu.org/manual/manual.html">GNU 文档</a></small></sup></span>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 tac"><a href="https://man.archlinux.org/man/tac.1">tac(1)</a></span>, #cat 替代品
+</td></tr>
+<tr>
+<td>mkdir</td>
+<td>创建目录</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 mkdir"><a href="https://man.archlinux.org/man/mkdir.1">mkdir(1)</a></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://www.gnu.org/software/coreutils/manual/html_node/mkdir-invocation.html">mkdir</a></span><sup><small><a href="https://www.gnu.org/manual/manual.html">GNU 文档</a></small></sup></span>
+</td></tr>
+<tr>
+<td>rmdir</td>
+<td>删除空目录</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 rmdir"><a href="https://man.archlinux.org/man/rmdir.1">rmdir(1)</a></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://www.gnu.org/software/coreutils/manual/html_node/rmdir-invocation.html">rmdir</a></span><sup><small><a href="https://www.gnu.org/manual/manual.html">GNU 文档</a></small></sup></span>
+</td></tr>
+<tr>
+<td>rm</td>
+<td>删除文件或目录</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 rm"><a href="https://man.archlinux.org/man/rm.1">rm(1)</a></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://www.gnu.org/software/coreutils/manual/html_node/rm-invocation.html">rm</a></span><sup><small><a href="https://www.gnu.org/manual/manual.html">GNU 文档</a></small></sup></span>
+</td>
+<td><a href="#pg5c2ec7cab7da">shred</a> <span class="plainlinks archwiki-template-man" title="$ man 1 unlink"><a href="https://man.archlinux.org/man/unlink.1">unlink(1)</a></span>
+</td></tr>
+<tr>
+<td>cp</td>
+<td>复制文件或目录</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 cp"><a href="https://man.archlinux.org/man/cp.1">cp(1)</a></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html">cp</a></span><sup><small><a href="https://www.gnu.org/manual/manual.html">GNU 文档</a></small></sup></span>
+</td>
+<td>#cp 替代品
+</td></tr>
+<tr>
+<td>mv</td>
+<td>移动文件或目录</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 mv"><a href="https://man.archlinux.org/man/mv.1">mv(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/mv-invocation.html">info</a>
+</td></tr>
+<tr>
+<td>ln</td>
+<td>创建硬链接或符号链接</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 ln"><a href="https://man.archlinux.org/man/ln.1">ln(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/ln-invocation.html">info</a></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 sln"><a href="https://man.archlinux.org/man/sln.8">sln(8)</a></span> （soname 修复）
+</td></tr>
+<tr>
+<td><a href="#pg842e8a871f3c">chown</a></td>
+<td>改变文件所有者和组</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 chown"><a href="https://man.archlinux.org/man/chown.1">chown(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/chown-invocation.html">info</a></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 chgrp"><a href="https://man.archlinux.org/man/chgrp.1">chgrp(1)</a></span>
+</td></tr>
+<tr>
+<td><a href="#pgd868aa8d1162">chmod</a></td>
+<td>改变文件权限</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 chmod"><a href="https://man.archlinux.org/man/chmod.1">chmod(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/chmod-invocation.html">info</a>
+</td></tr>
+<tr>
+<td><a href="#pge09a1da9829f">dd</a></td>
+<td>转换并复制文件</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 dd"><a href="https://man.archlinux.org/man/dd.1">dd(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/dd-invocation.html">info</a></td>
+<td>#dd 替代品
+</td></tr>
+<tr>
+<td>df</td>
+<td>报告文件系统磁盘空间使用情况</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 df"><a href="https://man.archlinux.org/man/df.1">df(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/df-invocation.html">info</a></td>
+<td>#df 替代品
+</td></tr>
+<tr>
+<td>du</td>
+<td>估算文件和文件夹占用的空间</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 du"><a href="https://man.archlinux.org/man/du.1">du(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/du-invocation.html">info</a></td>
+<td>#du 替代品
+</td></tr>
+<tr>
+<td>GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tar">tar</a></span><sup><small>包</small></sup></span></td>
+<td>tar</td>
+<td>tar 归档程序</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 tar"><a href="https://man.archlinux.org/man/tar.1">tar(1)</a></span>, <a href="https://www.gnu.org/software/tar/manual/html_chapter/index.html">info</a></td>
+<td><a href="#pg24be1d21a7ac">归档与压缩</a>
+</td></tr>
+<tr>
+<td>GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=less">less</a></span><sup><small>包</small></sup></span></td>
+<td>less</td>
+<td>终端分页程序</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 less"><a href="https://man.archlinux.org/man/less.1">less(1)</a></span></td>
+<td><a href="#pga96df2a9d88c">终端翻页器</a>
+</td></tr>
+<tr>
+<td>GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=findutils">findutils</a></span><sup><small>包</small></sup></span></td>
+<td>find</td>
+<td>搜索文件或目录</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 find"><a href="https://man.archlinux.org/man/find.1">find(1)</a></span>, <a href="https://www.gnu.org/software/findutils/manual/html_node/find_html/index.html">info</a>, <a href="https://mywiki.wooledge.org/UsingFind">GregsWiki</a></td>
+<td>#find 替代品
+</td></tr>
+<tr>
+<td>GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=diffutils">diffutils</a></span><sup><small>包</small></sup></span></td>
+<td>diff</td>
+<td>逐行比对文件</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 diff"><a href="https://man.archlinux.org/man/diff.1">diff(1)</a></span>, <a href="https://www.gnu.org/software/diffutils/manual/html_node/Invoking-diff.html">info</a></td>
+<td>#diff 替代品
+</td></tr>
+<tr>
+<td>GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=grep">grep</a></span><sup><small>包</small></sup></span></td>
+<td>grep</td>
+<td>打印匹配模式的行</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 grep"><a href="https://man.archlinux.org/man/grep.1">grep(1)</a></span>, <a href="https://www.gnu.org/software/grep/manual/html_node/index.html">info</a></td>
+<td>#grep 替代品
+</td></tr>
+<tr>
+<td>GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sed">sed</a></span><sup><small>包</small></sup></span></td>
+<td>sed</td>
+<td>流编辑器</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 sed"><a href="https://man.archlinux.org/man/sed.1">sed(1)</a></span>, <a href="https://www.gnu.org/software/sed/manual/html_node/index.html">info</a>, <a href="http://sed.sourceforge.net/sed1line.txt">one-liners</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2025-08-15 ⓘ]</sup></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sad">sad</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sd">sd</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>GNU AWK (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gawk">gawk</a></span><sup><small>包</small></sup></span>)</td>
+<td><a href="#pg94d7b3bd691e">awk</a></td>
+<td>模式扫描和处理语言</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 gawk"><a href="https://man.archlinux.org/man/gawk.1">gawk(1)</a></span>, <a href="https://www.gnu.org/software/gawk/manual/html_node/index.html">info</a></td>
+<td><a href="#pg56dc491422f2">AWK#替代方案</a>
+</td></tr>
+<tr>
+<td rowspan="6"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=util-linux">util-linux</a></span><sup><small>包</small></sup></span>
+</td>
+<td><a href="https://en.wikipedia.org/wiki/dmesg">dmesg</a></td>
+<td>print or control the kernel ring buffer</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 dmesg"><a href="https://man.archlinux.org/man/dmesg.1">dmesg(1)</a></span></td>
+<td><a href="#pgeb782ecab4fb">systemd 日志</a>
+</td></tr>
+<tr>
+<td><a href="#pge173af99a32b">lsblk</a></td>
+<td>列出块设备</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 lsblk"><a href="https://man.archlinux.org/man/lsblk.8">lsblk(8)</a></span>
+</td></tr>
+<tr>
+<td><a href="#pg33fa78c05486">mount</a></td>
+<td>挂载文件系统</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mount"><a href="https://man.archlinux.org/man/mount.8">mount(8)</a></span>
+</td></tr>
+<tr>
+<td><a href="#pg7cbc65c5c61c">umount</a></td>
+<td>卸载文件系统</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 umount"><a href="https://man.archlinux.org/man/umount.8">umount(8)</a></span>
+</td></tr>
+<tr>
+<td><a href="#pg8b873c561d21">su</a></td>
+<td>替换用户</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 su"><a href="https://man.archlinux.org/man/su.1">su(1)</a></span></td>
+<td><a href="#pg023562413be7">sudo</a>, <a href="#pgcc8f82fc4af5">doas</a>
+</td></tr>
+<tr>
+<td>kill</td>
+<td>中止进程</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 kill"><a href="https://man.archlinux.org/man/kill.1">kill(1)</a></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 pkill"><a href="https://man.archlinux.org/man/pkill.1">pkill(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 killall"><a href="https://man.archlinux.org/man/killall.1">killall(1)</a></span>
+</td></tr>
+<tr>
+<td rowspan="3"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=procps-ng">procps-ng</a></span><sup><small>包</small></sup></span>
+</td>
+<td>pgrep</td>
+<td>根据名称或属性查找进程</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 pgrep"><a href="https://man.archlinux.org/man/pgrep.1">pgrep(1)</a></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 pidof"><a href="https://man.archlinux.org/man/pidof.1">pidof(1)</a></span>
+</td></tr>
+<tr>
+<td>ps</td>
+<td>显示进程信息</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 ps"><a href="https://man.archlinux.org/man/ps.1">ps(1)</a></span></td>
+<td rowspan="2"><span class="plainlinks archwiki-template-man" title="$ man 1 top"><a href="https://man.archlinux.org/man/top.1">top(1)</a></span>, <a href="#pga96df2a9d88c">任务管理器</a>
+</td></tr>
+<tr>
+<td>free</td>
+<td>显示已用和可用的内存</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 free"><a href="https://man.archlinux.org/man/free.1">free(1)</a></span>
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc9277cee06e3_.E9.98.B2.E6.AD.A2.E6.95.B0.E6.8D.AE.E6.8D.9F.E5.A4.B1" id="防止数据损失"><span id=".E9.98.B2.E6.AD.A2.E6.95.B0.E6.8D.AE.E6.8D.9F.E5.A4.B1"></span>防止数据损失</h3></div>
+<p><code>rm</code>、<code>mv</code>、<code>cp</code> 和 shell 重定向无需确认即可删除或覆盖文件。<code>rm</code>、<code>mv</code> 和 <code>cp</code> 都支持 <code>-i</code> 标志以在删除/覆盖前提醒用户。一些用户喜欢通过 <a href="#pg73ccc732cfb7">alias</a> 默认启用 <code>-i</code>。依赖这些 shell 选项可能很危险，因为你会习惯于它们，从而在你使用没有它们的系统或用户时导致潜在的数据损失。防止数据损失的最好办法是创建<a href="#pgbb7568ec4406">备份</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc9277cee06e3_.E9.9D.9E.E5.85.B3.E9.94.AE" id="非关键"><span id=".E9.9D.9E.E5.85.B3.E9.94.AE"></span>非关键</h2></div>
+<p>此表格列出了常常很有用的核心工具。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>包</th>
+<th>工具</th>
+<th>描述</th>
+<th>文档</th>
+<th>替代品
+</th></tr>
+<tr>
+<td rowspan="3">shell 内置
+</td>
+<td><a href="#pg73ccc732cfb7">alias</a></td>
+<td>定义或显示别名</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1p alias"><a href="https://man.archlinux.org/man/alias.1p">alias(1p)</a></span>
+</td></tr>
+<tr>
+<td>type</td>
+<td>打印命令的类型</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1p type"><a href="https://man.archlinux.org/man/type.1p">type(1p)</a></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1p command"><a href="https://man.archlinux.org/man/command.1p">command(1p)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 whereis"><a href="https://man.archlinux.org/man/whereis.1">whereis(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 which"><a href="https://man.archlinux.org/man/which.1">which(1)</a></span>
+</td></tr>
+<tr>
+<td>time</td>
+<td>记录命令执行时间</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1p time"><a href="https://man.archlinux.org/man/time.1p">time(1p)</a></span>
+</td></tr>
+<tr>
+<td rowspan="16">GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=coreutils">coreutils</a></span><sup><small>包</small></sup></span>
+</td>
+<td><a href="#pg8617dc2cb7e3">tee</a></td>
+<td>读取 stdin，写入 stdout 和文件</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 tee"><a href="https://man.archlinux.org/man/tee.1">tee(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/tee-invocation.html">info</a></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 pee"><a href="https://man.archlinux.org/man/pee.1">pee(1)</a></span>
+</td></tr>
+<tr>
+<td>mktemp</td>
+<td>创建临时文件或目录</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 mktemp"><a href="https://man.archlinux.org/man/mktemp.1">mktemp(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/mktemp-invocation.html">info</a>
+</td></tr>
+<tr>
+<td>mknod</td>
+<td>创建命名管道或设备节点</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 mknod"><a href="https://man.archlinux.org/man/mknod.1">mknod(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 mkfifo"><a href="https://man.archlinux.org/man/mkfifo.1">mkfifo(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/mkfifo-invocation.html#mkfifo-invocation">info</a>
+</td></tr>
+<tr>
+<td>truncate</td>
+<td>将文件缩小或扩展到指定的大小</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 truncate"><a href="https://man.archlinux.org/man/truncate.1">truncate(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/truncate-invocation.html#truncate-invocation">info</a></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 fallocate"><a href="https://man.archlinux.org/man/fallocate.1">fallocate(1)</a></span>
+</td></tr>
+<tr>
+<td>basenc</td>
+<td>编码数据并输出</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 basenc"><a href="https://man.archlinux.org/man/basenc.1">basenc(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 base64"><a href="https://man.archlinux.org/man/base64.1">base64(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/basenc-invocation.html">info</a>
+</td></tr>
+<tr>
+<td>cut</td>
+<td>打印选中的行</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 cut"><a href="https://man.archlinux.org/man/cut.1">cut(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html">info</a></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 colrm"><a href="https://man.archlinux.org/man/colrm.1">colrm(1)</a></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hck">hck</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=choose">choose</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>tr</td>
+<td>转换或删除字符</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 tr"><a href="https://man.archlinux.org/man/tr.1">tr(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/tr-invocation.html">info</a></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 uconv"><a href="https://man.archlinux.org/man/uconv.1">uconv(1)</a></span>
+</td></tr>
+<tr>
+<td>od</td>
+<td>以 8 进制或其他格式转储文件</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 od"><a href="https://man.archlinux.org/man/od.1">od(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/od-invocation.html">info</a></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 hexdump"><a href="https://man.archlinux.org/man/hexdump.1">hexdump(1)</a></span>, <a href="#pg74a2a3e4814c">vim</a>'s <span class="plainlinks archwiki-template-man" title="$ man 1 xxd"><a href="https://man.archlinux.org/man/xxd.1">xxd(1)</a></span>
+</td></tr>
+<tr>
+<td>sort</td>
+<td>给行排序</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 sort"><a href="https://man.archlinux.org/man/sort.1">sort(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html">info</a>
+</td></tr>
+<tr>
+<td>uniq</td>
+<td>报告或忽略重复的行</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 uniq"><a href="https://man.archlinux.org/man/uniq.1">uniq(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/uniq-invocation.html">info</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=anewer">anewer</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/runiq/">runiq</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/huniq-git/">huniq-git</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>comm</td>
+<td>逐行比对两个有序的文件</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 comm"><a href="https://man.archlinux.org/man/comm.1">comm(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/comm-invocation.html">info</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zet/">zet</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>head</td>
+<td>输出文件的前一部分</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 head"><a href="https://man.archlinux.org/man/head.1">head(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/head-invocation.html">info</a>
+</td></tr>
+<tr>
+<td>join</td>
+<td>将两个输入中有相同栏位的行连接起来</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 join"><a href="https://man.archlinux.org/man/join.1">join(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/join-invocation.html">info</a></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 combine"><a href="https://man.archlinux.org/man/combine.1">combine(1)</a></span> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zet/">zet</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>md5sum</td>
+<td>根据密码学计算输入的哈希值并输出</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 sha256sum"><a href="https://man.archlinux.org/man/sha256sum.1">sha256sum(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 sha512sum"><a href="https://man.archlinux.org/man/sha512sum.1">sha512sum(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/md5sum-invocation.html">info</a></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 shasum"><a href="https://man.archlinux.org/man/shasum.1">shasum(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 hashdeep"><a href="https://man.archlinux.org/man/hashdeep.1">hashdeep(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 rhash"><a href="https://man.archlinux.org/man/rhash.1">rhash(1)</a></span>
+</td></tr>
+<tr>
+<td>tail</td>
+<td>输出文件的末尾部分，或者动态跟踪显示文件末尾内容</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 tail"><a href="https://man.archlinux.org/man/tail.1">tail(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/tail-invocation.html">info</a>
+</td></tr>
+<tr>
+<td>wc</td>
+<td>输出换行、单词和字节数</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 wc"><a href="https://man.archlinux.org/man/wc.1">wc(1)</a></span>, <a href="https://www.gnu.org/software/coreutils/manual/html_node/wc-invocation.html">info</a>
+</td></tr>
+<tr>
+<td>GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=binutils">binutils</a></span><sup><small>包</small></sup></span></td>
+<td>strings</td>
+<td>打印二进制文件中可打印的字符</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 strings"><a href="https://man.archlinux.org/man/strings.1">strings(1)</a></span>, <a href="https://sourceware.org/binutils/docs/binutils/strings.html">info</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/stringsext/">stringsext</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=util-linux">util-linux</a></span><sup><small>包</small></sup></span></td>
+<td>column</td>
+<td>转化文件为列格式，也可按表格方式美观地打印</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 column"><a href="https://man.archlinux.org/man/column.1">column(1)</a></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 paste"><a href="https://man.archlinux.org/man/paste.1">paste(1)</a></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/csview/">csview</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=findutils">findutils</a></span><sup><small>包</small></sup></span></td>
+<td>xargs</td>
+<td>从标准输入组合或按模板构建外部命令并执行</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 xargs"><a href="https://man.archlinux.org/man/xargs.1">xargs(1)</a></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 parallel"><a href="https://man.archlinux.org/man/parallel.1">parallel(1)</a></span> (<span class="plainlinks archwiki-template-man" title="$ man 7 parallel_alternatives"><a href="https://man.archlinux.org/man/parallel_alternatives.7">parallel_alternatives(7)</a></span>)
+</td></tr>
+<tr>
+<td>GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glibc">glibc</a></span><sup><small>包</small></sup></span></td>
+<td>iconv</td>
+<td>转换字符编码</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 iconv"><a href="https://man.archlinux.org/man/iconv.1">iconv(1)</a></span></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=recode">recode</a></span><sup><small>包</small></sup></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 uconv"><a href="https://man.archlinux.org/man/uconv.1">uconv(1)</a></span>
+</td></tr>
+<tr>
+<td>GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sharutils">sharutils</a></span><sup><small>包</small></sup></span></td>
+<td>uudecode</td>
+<td>将文件编码为电子邮件友好的文本格式</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 uuencode"><a href="https://man.archlinux.org/man/uuencode.1">uuencode(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 uudecode"><a href="https://man.archlinux.org/man/uudecode.1">uudecode(1)</a></span>, <a href="https://www.gnu.org/software/sharutils/manual/html_node/uuencode-Invocation.html">info</a></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 uudeview"><a href="https://man.archlinux.org/man/uudeview.1">uudeview(1)</a></span>
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=file">file</a></span><sup><small>包</small></sup></span></td>
+<td>file</td>
+<td>猜测文件类型</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 file"><a href="https://man.archlinux.org/man/file.1">file(1)</a></span>
+</td></tr></tbody></table>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=moreutils">moreutils</a></span><sup><small>包</small></sup></span> 包提供了 GNU coreutils 中没有的有用的工具，例如 <span class="plainlinks archwiki-template-man" title="$ man 1 sponge"><a href="https://man.archlinux.org/man/sponge.1">sponge(1)</a></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc9277cee06e3_.E6.9B.BF.E4.BB.A3.E5.93.81" id="替代品"><span id=".E6.9B.BF.E4.BB.A3.E5.93.81"></span>替代品</h2></div>
+<p>核心工具的替代品由以下包提供：
+</p>
+<ul><li><b><a href="#pgfa370e66efa0">BusyBox</a></b> — 用于救援系统和嵌入式系统的核心工具。</li></ul>
+<dl><dd><a href="https://busybox.net">https://busybox.net</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=busybox">busybox</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Toybox">Toybox</a></b> — 一体化的 Linux 命令行。</li></ul>
+<dl><dd><a href="https://landley.net/toybox">https://landley.net/toybox</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/toybox/">toybox</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>uutils</b> — Rust 重构的跨平台的 GNU 核心工具。</li></ul>
+<dl><dd><a href="https://github.com/uutils/coreutils">https://github.com/uutils/coreutils</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=uutils-coreutils">uutils-coreutils</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Heirloom Toolchest</b> — 标准 Unix 工具的传统实现。</li></ul>
+<dl><dd><a href="https://heirloom.sourceforge.net">https://heirloom.sourceforge.net</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/heirloom-sh/">heirloom-sh</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/heirloom-doctools/">heirloom-doctools</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>9base</b> — 原版 Plan9 工具在 Unix 的移植。</li></ul>
+<dl><dd><a href="https://tools.suckless.org/9base">https://tools.suckless.org/9base</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=9base">9base</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/sbase">sbase</a></b> — *nix 核心工具的一个极简变体。</li></ul>
+<dl><dd><a href="https://core.suckless.org/sbase">https://core.suckless.org/sbase</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sbase-git/">sbase-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>ubase</b> — sbase 工具的一个扩展。</li></ul>
+<dl><dd><a href="https://core.suckless.org/ubase">https://core.suckless.org/ubase</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ubase-git/">ubase-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc9277cee06e3_cat_.E6.9B.BF.E4.BB.A3.E5.93.81" id="cat_替代品"><span id="cat_.E6.9B.BF.E4.BB.A3.E5.93.81"></span>cat 替代品</h3></div>
+<ul><li><b>bat</b> — 支持语法高亮和 Git 集成的 cat 克隆。</li></ul>
+<dl><dd><a href="https://github.com/sharkdp/bat">https://github.com/sharkdp/bat</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bat">bat</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc9277cee06e3_cd_.E6.9B.BF.E4.BB.A3.E5.93.81" id="cd_替代品"><span id="cd_.E6.9B.BF.E4.BB.A3.E5.93.81"></span>cd 替代品</h3></div>
+<ul><li><b>zoxide</b> — 一个智能化的 cd 命令，可以学习用户的习惯，只需按几个键即可随处导航。</li></ul>
+<dl><dd><a href="https://github.com/ajeetdsouza/zoxide">https://github.com/ajeetdsouza/zoxide</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=zoxide">zoxide</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>autojump</b> — 在命令行中导航到文件的快速方式。</li></ul>
+<dl><dd><a href="https://github.com/wting/autojump">https://github.com/wting/autojump</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/autojump/">autojump</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<p>参阅 <a href="#pg1ca1e15827ff">Bash#输入路径自动添加"cd"</a> 和 <a href="#pg187873cfd725">Zsh#记住最近的目录</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc9277cee06e3_cp_.E6.9B.BF.E4.BB.A3.E5.93.81" id="cp_替代品"><span id="cp_.E6.9B.BF.E4.BB.A3.E5.93.81"></span>cp 替代品</h3></div>
+<p>使用 <a href="#pg4bb0ada72a54">rsync#作为 cp/mv 的替代</a>可以断点续传、显示传输状态、跳过已存在的文件并使用校验和确保目标文件的完整性。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc9277cee06e3_ls_.E6.9B.BF.E4.BB.A3.E5.93.81" id="ls_替代品"><span id="ls_.E6.9B.BF.E4.BB.A3.E5.93.81"></span>ls 替代品</h3></div>
+<ul><li><b>broot</b> — 一种在目录间浏览和导航的新方法。</li></ul>
+<dl><dd><a href="https://github.com/Canop/broot">https://github.com/Canop/broot</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=broot">broot</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>clifm</b> — 一个像 ls(1) 一样列出文件的文件管理器，加上了图标和 RGB 颜色支持。</li></ul>
+<dl><dd><a href="https://github.com/leo-arch/clifm/wiki/Advanced#files-lister-ls-mode">https://github.com/leo-arch/clifm/wiki/Advanced#files-lister-ls-mode</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clifm/">clifm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>eza</b> — 另一个 ls 的替代品，具有颜色支持、树视图、git 集成和其他功能。基于停止支持的 exa 开发而来。</li></ul>
+<dl><dd><a href="https://github.com/eza-community/eza">https://github.com/eza-community/eza</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=eza">eza</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>lsd</b> — ls 的现代版，具有很多漂亮的颜色和美观的图标。</li></ul>
+<dl><dd><a href="https://github.com/Peltoche/lsd">https://github.com/Peltoche/lsd</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lsd">lsd</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc9277cee06e3_find_.E6.9B.BF.E4.BB.A3.E5.93.81" id="find_替代品"><span id="find_.E6.9B.BF.E4.BB.A3.E5.93.81"></span>find 替代品</h3></div>
+<ul><li><b>fd</b> — find 的简单、快速且易用的替代品。默认忽略隐藏文件和 <code>.gitignore</code> 文件。</li></ul>
+<dl><dd><a href="https://github.com/sharkdp/fd">https://github.com/sharkdp/fd</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fd">fd</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>fuzzy-find</b> — 模糊查找文件。</li></ul>
+<dl><dd><a href="https://github.com/silentbicycle/ff">https://github.com/silentbicycle/ff</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ff-git/">ff-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgf40552d9e5ef">plocate</a></b> — 一个更快速的 locate 命令。</li></ul>
+<dl><dd><a href="https://plocate.sesse.net/">https://plocate.sesse.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=plocate">plocate</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>rawhide</b> — 使用 C 语言样式的表达式查找文件。</li></ul>
+<dl><dd><a href="https://raf.org/rawhide/">https://raf.org/rawhide/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rawhide/">rawhide</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<p>图形界面的文件搜索工具请参阅<a href="#pga96df2a9d88c">应用程序列表/工具#文件搜索</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc9277cee06e3_diff_.E6.9B.BF.E4.BB.A3.E5.93.81" id="diff_替代品"><span id="diff_.E6.9B.BF.E4.BB.A3.E5.93.81"></span>diff 替代品</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=diffutils">diffutils</a></span><sup><small>包</small></sup></span> 不提供单词级别的文本比较，一些其他程序提供了这一功能：
+</p>
+<ul><li><a href="#pg0d34da84b694">git</a> diff 可以加上 <code>--color-words</code> 参数进行单词级别的比较，使用 <code>--no-index</code> 可以比较 Git 工作树外的文件。</li>
+<li><b>cwdiff</b> — 一个对 GNU wdiff 的包装，对输出进行了着色。</li></ul>
+<dl><dd><a href="https://github.com/junghans/cwdiff">https://github.com/junghans/cwdiff</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cwdiff/">cwdiff</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>git-delta</b> — 一个带语法高亮功能的分页器，作用于 git、diff 和 grep 的输出。</li></ul>
+<dl><dd><a href="https://dandavison.github.io/delta/">https://dandavison.github.io/delta/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=git-delta">git-delta</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>dwdiff</b> — diff 程序加上单词比较功能的前端，支持着色。</li></ul>
+<dl><dd><a href="https://os.ghalkes.nl/dwdiff.html">https://os.ghalkes.nl/dwdiff.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dwdiff/">dwdiff</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>icdiff</b> — 带着色的、Python 编写的 diff 工具。“改进版彩色 diff”用于扩充 diff 的用法。</li></ul>
+<dl><dd><a href="https://github.com/jeffkaufman/icdiff">https://github.com/jeffkaufman/icdiff</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/icdiff/">icdiff</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>wdiff</b> — GNU diff 加上单词比较功能的实现，不支持着色。</li></ul>
+<dl><dd><a href="https://www.gnu.org/software/wdiff/">https://www.gnu.org/software/wdiff/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wdiff">wdiff</a></span><sup><small>包</small></sup></span></dd></dl>
+<p>参阅<a href="#pga96df2a9d88c">应用程序列表/工具#比较，差异，合并</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc9277cee06e3_grep_.E6.9B.BF.E4.BB.A3.E5.93.81" id="grep_替代品"><span id="grep_.E6.9B.BF.E4.BB.A3.E5.93.81"></span>grep 替代品</h3></div>
+<ul><li><b>mgrep</b> — 多行 grep。</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/multiline-grep/">https://sourceforge.net/projects/multiline-grep/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mgrep/">mgrep</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>pdfgrep</b> — 在 PDF 文件中搜索文本的工具。</li></ul>
+<dl><dd><a href="https://pdfgrep.org/">https://pdfgrep.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdfgrep">pdfgrep</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>ripgrep-all</b> — 搜索纯文本，包括在 PDF、电子书、Office 文档、zip、tar.gz 中的文本。</li></ul>
+<dl><dd><a href="https://github.com/phiresky/ripgrep-all">https://github.com/phiresky/ripgrep-all</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ripgrep-all">ripgrep-all</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc9277cee06e3_.E4.BB.A3.E7.A0.81.E6.90.9C.E7.B4.A2.E5.B7.A5.E5.85.B7" id="代码搜索工具"><span id=".E4.BB.A3.E7.A0.81.E6.90.9C.E7.B4.A2.E5.B7.A5.E5.85.B7"></span>代码搜索工具</h4></div>
+<p>以下 3 个工具旨在在代码搜索方面替代 grep。它们默认执行递归搜索、跳过二进制文件并遵守 <code>.gitignore</code>。
+</p>
+<ul><li><b>ack</b> — 基于 Perl 的 grep 替代品，为搜索大量异构的源码树而生。</li></ul>
+<dl><dd><a href="https://beyondgrep.com/">https://beyondgrep.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ack">ack</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>ripgrep (rg)</b> — 结合了 ag 的易用性和 grep 的速度。</li></ul>
+<dl><dd><a href="https://github.com/BurntSushi/ripgrep">https://github.com/BurntSushi/ripgrep</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ripgrep">ripgrep</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>The Silver Searcher (ag)</b> — 类似 Ack 的代码搜索工具，不过更快。</li></ul>
+<dl><dd><a href="https://github.com/ggreer/the_silver_searcher">https://github.com/ggreer/the_silver_searcher</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=the_silver_searcher">the_silver_searcher</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>ugrep (ug)</b> — 超快速的 grep，具备交互式用户界面、模糊搜索、布尔查询、十六进制转储等功能。</li></ul>
+<dl><dd><a href="https://github.com/Genivia/ugrep">https://github.com/Genivia/ugrep</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ugrep">ugrep</a></span><sup><small>包</small></sup></span></dd></dl>
+<p>参阅 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cscope">cscope</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc9277cee06e3_.E4.BA.A4.E4.BA.92.E5.BC.8F.E8.BF.87.E6.BB.A4.E5.99.A8" id="交互式过滤器"><span id=".E4.BA.A4.E4.BA.92.E5.BC.8F.E8.BF.87.E6.BB.A4.E5.99.A8"></span>交互式过滤器</h4></div>
+<ul><li><b><a href="#pga155e3e123ce">fzf</a></b> — 通用的命令行模糊查找工具，默认由 find 提供支持。</li></ul>
+<dl><dd><a href="https://github.com/junegunn/fzf">https://github.com/junegunn/fzf</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fzf">fzf</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>fzy</b> — 一种简单快速的文本模糊选择工具，具有先进的评分算法。</li></ul>
+<dl><dd><a href="https://github.com/jhawthorn/fzy">https://github.com/jhawthorn/fzy</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fzy">fzy</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>peco</b> — 简单的交互式过滤工具。</li></ul>
+<dl><dd><a href="https://github.com/peco/peco">https://github.com/peco/peco</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=peco">peco</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>percol</b> — 为传统的 UNIX shell 管道概念加上了交互式过滤功能。</li></ul>
+<dl><dd><a href="https://github.com/mooz/percol">https://github.com/mooz/percol</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/percol/">percol</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>skim</b> — 用 Rust 编写的模糊查找工具，与 fzf 类似。</li></ul>
+<dl><dd><a href="https://github.com/lotabout/skim">https://github.com/lotabout/skim</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=skim">skim</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc9277cee06e3_dd_.E6.9B.BF.E4.BB.A3.E5.93.81" id="dd_替代品"><span id="dd_.E6.9B.BF.E4.BB.A3.E5.93.81"></span>dd 替代品</h3></div>
+
+<p>参阅 <a href="#pge09a1da9829f">dd</a> 和 <a href="#pgb7b2c2a224cf">ddrescue</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc9277cee06e3_dd_.E7.9A.84.E6.9B.BF.E4.BB.A3.E5.AE.9E.E7.8E.B0" id="dd_的替代实现"><span id="dd_.E7.9A.84.E6.9B.BF.E4.BB.A3.E5.AE.9E.E7.8E.B0"></span>dd 的替代实现</h4></div>
+<p>本小节列举了 <i>dd</i> 的其他实现，它们的接口和默认行为基本符合 <span class="plainlinks archwiki-template-man" title="$ man 1p dd"><a href="https://man.archlinux.org/man/dd.1p">dd(1p)</a></span> 的 POSIX 规范。
+</p>
+<ul><li><b>ddpt</b> — 由 Linux 内核的 SCSI 子系统维护者对 <span class="plainlinks archwiki-template-man" title="$ man 8 sg_dd"><a href="https://man.archlinux.org/man/sg_dd.8">sg_dd(8)</a></span> 进行的可移植重写，具有可选但非常专业的硬件 I/O（SCSI 命令集）支持，还有许多其他功能。</li></ul>
+<dl><dd><a href="http://sg.danny.cz/sg/ddpt.html">http://sg.danny.cz/sg/ddpt.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ddpt/">ddpt</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>sdd</b> — 可以跨 UNIX 环境使用的 dd 实现，由 Joerg Schilling 开发，可以对复制的数据进行校验并重新读取损坏数据。</li></ul>
+<dl><dd><a href="https://schilytools.sourceforge.net/">https://schilytools.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/schily-tools-sdd/">schily-tools-sdd</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgc9277cee06e3_GNU_dd_.E7.9A.84.E8.A1.8D.E7.94.9F.E7.89.88" id="GNU_dd_的衍生版"><span id="GNU_dd_.E7.9A.84.E8.A1.8D.E7.94.9F.E7.89.88"></span>GNU dd 的衍生版</h5></div>
+<p>核心工具中的 GNU 实现的 dd 的也符合 POSIX。本小节列出了它的衍生版。
+</p>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Dd_(Unix)#dcfldd">dcfldd</a></b> —  GNU dd 的功能增强衍生版，用于取证和安全场景，包括即时哈希、灵活擦除、写入验证、同时输出到多个目标、拆分和管道输出。</li></ul>
+<dl><dd><a href="https://dcfldd.sourceforge.net">https://dcfldd.sourceforge.net</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dcfldd/">dcfldd</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Dd_(Unix)#dc3dd">dc3dd</a></b> — GNU dd 的另一个打了补丁的版本，来自美国国防部网络犯罪中心 (DC3)，与 dcfldd 具有相似的目标和功能。</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/dc3dd/">https://sourceforge.net/projects/dc3dd/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dc3dd/">dc3dd</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc9277cee06e3_.E7.8E.B0.E4.BB.A3.E5.8C.96.E7.9A.84_dd_.E4.BB.BF.E7.85.A7.E7.89.88" id="现代化的_dd_仿照版"><span id=".E7.8E.B0.E4.BB.A3.E5.8C.96.E7.9A.84_dd_.E4.BB.BF.E7.85.A7.E7.89.88"></span>现代化的 dd 仿照版</h4></div>
+<p>本小节列举的 <i>dd</i> 替代方案，在类 JCL 命令行语法和<a href="https://unix.stackexchange.com/a/192114">默认行为</a>方面是不符合 POSIX 的。
+</p>
+<ul><li><b>dd_rescue</b> — 功能丰富的现代化 dd 仿照版，适用于日常脚本编写、磁盘克隆和数据恢复。</li></ul>
+<dl><dd><a href="http://www.garloff.de/kurt/linux/ddrescue/">http://www.garloff.de/kurt/linux/ddrescue/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dd_rescue">dd_rescue</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>rw</b> — 小型且可移植的 <i>dd</i> 仿照版，具有传统的命令行参数。</li></ul>
+<dl><dd><a href="https://sortix.org/rw/">https://sortix.org/rw/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rw/">rw</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc9277cee06e3_buffer_.E7.9A.84.E8.A1.8D.E7.94.9F.E7.89.88" id="buffer_的衍生版"><span id="buffer_.E7.9A.84.E8.A1.8D.E7.94.9F.E7.89.88"></span>buffer 的衍生版</h4></div>
+<p>本小节列举了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/buffer/">buffer</a></span><sup><small>AUR</small></sup></span> 的衍生版，buffer 是一个类似于 <i>dd</i> 的通用 I/O 缓冲程序，但具有动态大小的缓冲区。它支持区块为单位的 I/O，可以用来对 LTO 磁带进行进/出转储，以避免擦鞋 (Shoe Shining) 效应。
+</p>
+<ul><li><b>mbuffer</b> — <i>buffer</i> 程序的延续，具有多线程等功能。</li></ul>
+<dl><dd><a href="https://www.maier-komor.de/mbuffer.html">https://www.maier-komor.de/mbuffer.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mbuffer">mbuffer</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc9277cee06e3_df_.E6.9B.BF.E4.BB.A3.E5.93.81" id="df_替代品"><span id="df_.E6.9B.BF.E4.BB.A3.E5.93.81"></span>df 替代品</h3></div>
+<ul><li><b>duf</b> — 一个查看磁盘使用情况/剩余空间的工具。</li></ul>
+<dl><dd><a href="https://github.com/muesli/duf">https://github.com/muesli/duf</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=duf">duf</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc9277cee06e3_du_.E6.9B.BF.E4.BB.A3.E5.93.81" id="du_替代品"><span id="du_.E6.9B.BF.E4.BB.A3.E5.93.81"></span>du 替代品</h3></div>
+<ul><li><b>cdu</b> — du 的包装，带有着色和漂亮的直方图。</li></ul>
+<dl><dd><a href="http://arsunik.free.fr/prog/cdu.html">http://arsunik.free.fr/prog/cdu.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cdu/">cdu</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>dust</b> — du 的更直观版本，用 Rust 编写。</li></ul>
+<dl><dd><a href="https://github.com/bootandy/dust">https://github.com/bootandy/dust</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dust">dust</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>ncdu</b> — 基于 ncurses 的简单磁盘使用分析器。</li></ul>
+<dl><dd><a href="https://dev.yorhel.nl/ncdu">https://dev.yorhel.nl/ncdu</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ncdu">ncdu</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>gdu</b> — 带控制台界面的磁盘使用分析器，用 Go 编写。</li></ul>
+<dl><dd><a href="https://github.com/Dundee/gdu">https://github.com/Dundee/gdu</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gdu">gdu</a></span><sup><small>包</small></sup></span></dd></dl>
+<p>参阅<a href="#pga96df2a9d88c">应用程序列表/工具#磁盘使用情况显示</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc9277cee06e3_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://www.gnu.org/software/coreutils/manual/">coreutils 手册</a></span><sup><small><a href="https://www.gnu.org/manual/manual.html">GNU 文档</a></small></sup></span></li></ul>
+<ul><li><a href="https://www.gnu.org/software/coreutils/faq/coreutils-faq.html">GNU Coreutils FAQ</a></li>
+<li><a href="https://www.pixelbeat.org/docs/coreutils-gotchas.html">Coreutils Gotchas</a>: GNU 核心工具的维护者写的关于核心组件一些奇怪行为的注释</li>
+<li><a href="https://pubs.opengroup.org/onlinepubs/9699919799/idx/utilities.html">POSIX 工具</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807031543
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.414 seconds
+Real time usage: 0.424 seconds
+Preprocessor visited node count: 3875/1000000
+Revision size: 19331/2097152 bytes
+Post‐expand include size: 48887/2097152 bytes
+Template argument size: 16811/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 2/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  157.575      1 -total
+ 30.64%   48.277     89 Template:Man
+ 18.49%   29.130     47 Template:App
+  7.48%   11.780     55 Template:Pkg
+  2.39%    3.773     10 Template:Aur
+  2.14%    3.366      1 Template:翻译状态
+  2.06%    3.253      1 Template:扩充
+  1.81%    2.859      7 Template:GNU
+  1.69%    2.670     17 Template:AUR
+  1.58%    2.494      1 Template:Dead_link
+-->
+<!-- Render ID 4630e58e-920e-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2962:|#|:idhash:canonical!zh-cn and timestamp 20260807031543 and revision id 33791. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

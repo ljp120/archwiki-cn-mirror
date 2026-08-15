@@ -1,0 +1,245 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgd3ea58bac98d">调试/获取跟踪信息</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Debugging/Getting_traces">Debugging/Getting traces</a>，最近一次同步于 2025-01-28，若英文版本有所<a href="https://wiki.archlinux.org/title/Debugging/Getting_traces?diff=0&amp;oldid=758446">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Debugging_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Getting_traces_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgcc0723982992">General troubleshooting</a></li>
+<li><a href="#pg7817680d64e1">Reporting bug guidelines</a></li>
+<li><a href="#pgd1650b5669f2">Debuginfod</a></li>
+<li><a href="#pgd8951e6ec7b8">核心转储</a></li>
+</ul></div>
+<p>通常，为了让人们方便调试，会让可执行文件尽可能小。在没有调试信息的情况下获取跟踪信息，会大大降低其实用性。例如，在没有调试信息的情况下，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gdb">gdb</a></span><sup><small>包</small></sup></span> 会话的跟踪信息可能如下所示：
+</p>
+<pre>[...]
+Backtrace was generated from '/usr/bin/epiphany'
+
+<b>(no debugging symbols found)</b>
+Using host libthread_db library "<b>/lib/libthread_db.so.1</b>".
+<b>(no debugging symbols found)</b>
+[Thread debugging using libthread_db enabled]
+[New Thread -1241265952 (LWP 12630)]
+(no debugging symbols found)
+0xb7f25410 in __kernel_vsyscall ()
+#0  0xb7f25410 in __kernel_vsyscall ()
+#1  0xb741b45b in <b>??</b> () from /lib/libpthread.so.0
+[...]
+</pre>
+<p><code>??</code> 会显示调试信息缺失的位置，以及调用该函数的库或可执行文件的名称。同样，当出现 <code>(no debugging symbols found)</code> 时，应查找所述文件名。
+</p><p>要获得对程序开发人员有用的正确跟踪，请遵循以下章节。大多数 Arch 官方软件包都有单独的调试文件，可以通过 <a href="#pgd1650b5669f2">Debuginfod</a> 下载（参见 #获取跟踪）。
+如果没有在可执行文件中添加enhanced debugging information，则必须启用调试符号重建软件包。
+</p><p>使用完整的堆栈跟踪来告知开发人员您之前发现的错误。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd3ea58bac98d_.E8.8E.B7.E5.8F.96.E8.BF.BD.E8.B8.AA.E6.96.87.E4.BB.B6" id="获取追踪文件"><span id=".E8.8E.B7.E5.8F.96.E8.BF.BD.E8.B8.AA.E6.96.87.E4.BB.B6"></span>获取追踪文件</h2></div>
+<p>实际的回溯（或堆栈跟踪）可以通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gdb">gdb</a></span><sup><small>包</small></sup></span> （GNU 调试器）获取。根据是否应启动程序的新实例、是否应附加到现有进程、或是否应检查之前的崩溃，可以以多种方式使用调试器。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd3ea58bac98d_.E5.90.AF.E5.8A.A8.E7.A8.8B.E5.BA.8F.E7.9A.84.E6.96.B0.E5.AE.9E.E4.BE.8B" id="启动程序的新实例"><span id=".E5.90.AF.E5.8A.A8.E7.A8.8B.E5.BA.8F.E7.9A.84.E6.96.B0.E5.AE.9E.E4.BE.8B"></span>启动程序的新实例</h3></div>
+<p>Start <i>gdb</i> with an executable program that can be found in <code>$PATH</code> (or a full path):
+</p>
+<pre>$ gdb <i>application</i>
+</pre>
+<p><i>gdb</i> automatically tries to download debug information and symbols for packages in the <a href="#pg0a3e16d13281">official repositories</a>. When <i>gdb</i> asks whether <a href="#pgd1650b5669f2">Debuginfod</a> should be enabled in the debugging session, answer <code>y</code>:
+</p>
+<pre>This GDB supports auto-downloading debuginfo from the following URLs:
+  &lt;<a href="https://debuginfod.archlinux.org">https://debuginfod.archlinux.org</a>&gt;
+Enable debuginfod for this session? (y or [n]) y
+Debuginfod has been enabled.
+To make this setting permanent, add 'set debuginfod enabled on' to .gdbinit.
+Downloading separate debug info for /usr/bin/<i>application</i>
+Reading symbols from /home/user/.cache/debuginfod_client/fbaee841e2ed2c11ecbbda26f39eeec1da23d6c3/debuginfo...</pre>
+<p>Then, within <i>gdb</i>, type <code>run</code> followed by any arguments you wish the program to start with:
+</p>
+<pre>(gdb) run <i>arguments</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>Alternatively, you can pass arguments when starting <i>gdb</i> using <code>gdb --args <i>application arguments...</i></code> and then use only <code>run</code> without arguments within <i>gdb</i>. For example, to debug an application written in Python, run <code>gdb --args /usr/bin/python <i>/path/to/application</i></code>.</div>
+<p>Now do whatever is necessary to evoke the bug. <i>gdb</i> will automatically halt the application when it crashes and prompt for commands. In case of freezes or similar issues, press <code>Ctrl+c</code> and you will be returned to the command prompt, too.
+</p><p>Then enable logging to a file:
+</p>
+<pre>(gdb) set logging enabled on
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>The default file name is <code>gdb.txt</code>. An alternate file name can be specified with <code>set logging file <i>trace.log</i></code> within <i>gdb</i>.</div>
+<p>And finally have the backtrace written to the specified file in the current working directory:
+</p>
+<pre>(gdb) thread apply all backtrace full
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd3ea58bac98d_Attaching_to_an_existing_process" id="Attaching_to_an_existing_process">Attaching to an existing process</h3></div>
+<p>If the program you want to debug is already running, you need to first find its process ID. Tools such as <span class="plainlinks archwiki-template-man" title="$ man 1 pidof"><a href="https://man.archlinux.org/man/pidof.1">pidof(1)</a></span> or <span class="plainlinks archwiki-template-man" title="$ man 1 pgrep"><a href="https://man.archlinux.org/man/pgrep.1">pgrep(1)</a></span> are available. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ pidof python3</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">907171 491909
+</pre>
+<p>When the output does not give a unique ID, you can try more filtering or look at the output of <code>ps aux</code> or <code>pstree --show-pids</code>.
+</p><p>Attaching as regular user does not work by default due to restricted <a href="#pg08a28f4ac689">ptrace scope</a>. The restriction can be lowered temporarily with <code>echo 0 &gt; /proc/sys/kernel/yama/ptrace_scope</code> or you can run <i>gdb</i> as a privileged user, e.g. using <a href="#pg023562413be7">sudo</a>.
+</p><p>Start <i>gdb</i> attaching it to the process:
+</p>
+<pre>$ gdb --pid=<i>PID</i>
+</pre>
+<p><i>gdb</i> will ask if <a href="#pgd1650b5669f2">Debuginfod</a> should be enabled in this debugging session, to which you should answer <code>y</code>.
+</p><p>Note that attaching to a process has stopped it and it needs to be explicitly continued. This replaces the <code>run</code> command from the workflow in the #Starting a new instance of a program section:
+</p>
+<pre>(gdb) continue
+</pre>
+<p>Now do whatever is necessary to evoke the bug in the attached process. Then proceed with enabling logging and obtaining the trace same as in #Starting a new instance of a program.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd3ea58bac98d_Examining_a_previous_crash" id="Examining_a_previous_crash">Examining a previous crash</h3></div>
+<p>To debug an application that has already crashed, you will want to invoke <i>gdb</i> on its <i>core dump</i>. See <a href="#pg73fa8a2b7f17">Core dump#Analyzing a core dump</a> for details.
+</p><p>If debugging information for the crashed program is not available and a proper backtrace was not obtained, you may need to <a href="#pgd3ea58bac98d_Rebuilding_packages">rebuild the package</a> and reproduce the crash again.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd3ea58bac98d_Manually_getting_debug_info" id="Manually_getting_debug_info">Manually getting debug info</h2></div>
+
+<p>The first thing to do is to obtain the names of the packages which <a href="#pgd3ea58bac98d_Rebuilding_packages">require rebuilding</a> or the <a href="#pgd3ea58bac98d_Installing_debug_packages">install of a debug package</a>.
+</p>
+<pre>[...]
+Backtrace was generated from '/usr/bin/epiphany'
+
+<b>(no debugging symbols found)</b>
+Using host libthread_db library "<b>/lib/libthread_db.so.1</b>".
+<b>(no debugging symbols found)</b>
+[...]
+</pre>
+<p>For example for the above extract from a trace, the package name for the associated package can be obtained with <a href="#pg9ef105bf1e3c">pacman</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ pacman -Qo /lib/libthread_db.so.1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/lib/libthread_db.so.1 is owned by <i>glibc</i> 2.5-8
+</pre>
+<p>The package is called <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glibc">glibc</a></span><sup><small>包</small></sup></span> in version 2.5-8. Repeat this step for every package that needs debugging information.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd3ea58bac98d_Installing_debug_packages" id="Installing_debug_packages">Installing debug packages</h3></div>
+
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Debug packages are not archived by Arch Linux on <a href="#pg34e1f0126c90">Arch Linux Archive</a>.</div>
+<p>A few mirrors currently distribute debug packages in accessible repositories. These are sponsored mirrors controlled by Arch Linux and are given access to the debug repositories.
+</p>
+<ul><li><a href="https://geo.mirror.pkgbuild.com">https://geo.mirror.pkgbuild.com</a> (GeoDNS mirror)</li></ul>
+<p>To install a package you can install it directly from the repository. For example:
+</p>
+<pre># pacman -U https://geo.mirror.pkgbuild.com/core-debug/os/x86_64/<i>zstd-debug-1.5.2-2</i>-x86_64.pkg.tar.zst
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>Debug packages from one <a href="#pg0ec420ad4fac">mirror</a> are not compatible with regular packages from another mirror, if both mirrors are not in sync, and thus have mismatching builds. In this case, avoid mixing packages from different mirrors (this would result in a <a href="#pg044ac0368b26">partial upgrade</a>), but point all repositories to the <code>debug</code> mirror.</div>
+
+<p>Another option is to add the repositories to your pacman configuration.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Testing Repositories
+
+[core-testing-debug]
+Include = /etc/pacman.d/mirrorlist
+
+[extra-testing-debug]
+Include = /etc/pacman.d/mirrorlist
+
+[multilib-testing-debug]
+Include = /etc/pacman.d/mirrorlist
+
+# Stable repositories
+
+[core-debug]
+Include = /etc/pacman.d/mirrorlist
+
+[extra-debug]
+Include = /etc/pacman.d/mirrorlist
+
+[multilib-debug]
+Include = /etc/pacman.d/mirrorlist</pre>
+<p>Place a mirror with debug packages as the first one in the mirrorlist file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.d/mirrorlist</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch
+...</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd3ea58bac98d_Rebuilding_packages" id="Rebuilding_packages">Rebuilding packages</h3></div>
+<p>If debug information is not exposed through <i>debuginfod</i> (for example, when the package originates from the <a href="#pg89cb7b475cfb">AUR</a>), then it can be rebuilt from source. See <a href="#pg649c5e3c750b">ABS</a> for packages in the <a href="#pg0a3e16d13281">official repositories</a>, or <a href="#pg89cb7b475cfb">AUR#Acquire build files</a> for packages in the <a href="#pg89cb7b475cfb">AUR</a>.
+</p><p>To set the required <a href="#pgd3ea58bac98d_Compilation_options">#Compilation options</a>, you can modify the <a href="#pg7edcce763396">makepkg configuration</a> if you will only use <i>makepkg</i> for debug purposes. In other cases, you should modify package's <code>PKGBUILD</code> file only for each package you would like to rebuild.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd3ea58bac98d_Compilation_options" id="Compilation_options">Compilation options</h4></div>
+<p>As of pacman 4.1, <span class="plainlinks archwiki-template-man" title="$ man 5 makepkg.conf"><a href="https://man.archlinux.org/man/makepkg.conf.5">makepkg.conf(5)</a></span> has debug compilation flags in <code>DEBUG_CFLAGS</code> and <code>DEBUG_CXXFLAGS</code>. To use them, enable the <code>debug</code> <i>makepkg</i> option, and disable <code>strip</code>.
+</p><p>These settings will force compilation with debug symbols and will disable their stripping from executables. 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/makepkg.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">OPTIONS+=(debug !strip)</pre>
+<p>To apply this setting to a single package, modify the <code>PKGBUILD</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PKGBUILD</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options=(debug !strip)</pre>
+<p>Alternatively you can put the debug information in a separate package by enabling both <code>debug</code> and <code>strip</code>, debug symbols will then be stripped from the main package and placed, together with source files to aid in stepping through the debugger, in a separate <code><i>pkgbase</i>-debug</code> package. This is advantageous if the package contains very large binaries (e.g. over a GB with debug symbols included) as it might cause freezing and other strange, unwanted behavior occurring.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>It is insufficient to simply install the newly compiled debug package, because the debugger will check that the file containing the debug symbols is from the same build as the associated library and executable. You must install both of the recompiled packages. In Arch, the debug symbol files are installed under <code>/usr/lib/debug/</code>, and source files are installed under <code>/usr/src/debug</code>. See the <a href="https://sourceware.org/gdb/onlinedocs/gdb/Separate-Debug-Files.html">GDB documentation</a> for more information about debug packages.</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgd3ea58bac98d_glibc" id="glibc">glibc</h5></div>
+<p>Certain packages such as <i>glibc</i> are stripped regardless. Check the <code>PKGBUILD</code> for sections such as:
+</p>
+<pre>strip $STRIP_BINARIES usr/bin/{gencat,getconf,getent,iconv,iconvconfig} \
+                      usr/bin/{ldconfig,locale,localedef,makedb} \
+                      usr/bin/{pcprofiledump,pldd,rpcgen,sln,sprof} \
+                      usr/lib/getconf/*
+
+strip $STRIP_STATIC usr/lib/*.a
+
+strip $STRIP_SHARED usr/lib/{libanl,libBrokenLocale,libcidn,libcrypt}-*.so \
+                    usr/lib/libnss_{compat,db,dns,files,hesiod,nis,nisplus}-*.so \
+                    usr/lib/{libdl,libm,libnsl,libresolv,librt,libutil}-*.so \
+                    usr/lib/{libmemusage,libpcprofile,libSegFault}.so \
+                    usr/lib/{audit,gconv}/*.so
+</pre>
+<p>And remove them where appropriate.
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgd3ea58bac98d_Clang" id="Clang">Clang</h5></div>
+
+<p>Packages using <a href="#pgcea29c159a3c">Clang</a> as the compiler will not build with the <code>debug</code> option due to the debug flag <code>-fvar-tracking-assignments'</code> not being handled (e.g. the previous <a href="https://gitlab.archlinux.org/archlinux/packaging/packages/js78/-/blob/main/PKGBUILD">js78 PKGBUILD</a>).
+</p><p>Add the following at the top of the <code>build()</code> function to only remove the flag for the affected package: 
+</p>
+<pre>build() {
+  CFLAGS=${CFLAGS/-fvar-tracking-assignments}
+  CXXFLAGS=${CXXFLAGS/-fvar-tracking-assignments}
+[...]</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgd3ea58bac98d_LTO" id="LTO">LTO</h5></div>
+<p>Using <a href="https://en.wikipedia.org/wiki/Interprocedural_optimization#WPO_and_LTO">Link-time optimization (LTO)</a> will, both during compiling and in a debugger, use more memory<a href="https://pp.ipd.kit.edu/uploads/publikationen/weinreuter16bachelorarbeit.pdf#section.4.3">[1]</a><a href="https://sourceware.org/bugzilla/show_bug.cgi?id=23710">[2]</a>. Depending on the application, especially if it is a large one like Firefox or Qt, it might exceed the available memory. Build the application without LTO if this happens.
+</p><p>All packages in the official repositories are generally built with LTO.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd3ea58bac98d_Building_and_installing_the_package" id="Building_and_installing_the_package">Building and installing the package</h4></div>
+<p>Build the package from source using <code>makepkg</code> while in the <code>PKGBUILD</code>'s directory. This could take some time:
+</p>
+<pre>$ makepkg
+</pre>
+<p>Then install the built package:
+</p>
+<pre># pacman -U glibc-2.26-1-x86_64.pkg.tar.gz
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd3ea58bac98d_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://wiki.debian.org/HowToGetABacktrace">Debian:HowToGetABacktrace</a></li>
+<li><a href="https://wiki.gentoo.org/wiki/Project:Quality_Assurance/Backtraces">Gentoo:Project:Quality Assurance/Backtraces</a></li>
+<li><a href="https://fedoraproject.org/wiki/StackTraces">Fedora:StackTraces</a></li>
+<li><a href="https://wiki.gnome.org/GettingInTouch/Bugzilla/GettingTraces/Details#Obtaining_a_stack_trace_.28the_easy_way.29">GNOME - Getting Stack Traces</a></li>
+<li><a href="https://linux.bytesex.org/gdb.html">gdb mini intro</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807041054
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.206 seconds
+Real time usage: 0.214 seconds
+Preprocessor visited node count: 694/1000000
+Revision size: 12919/2097152 bytes
+Post‐expand include size: 12946/2097152 bytes
+Template argument size: 5805/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 99/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   73.588      1 -total
+  8.73%    6.426      2 Template:Out_of_date
+  7.77%    5.720     34 Template:Ic
+  7.11%    5.231      1 Template:Merge
+  6.58%    4.840      2 Template:Tip
+  6.15%    4.524      1 Template:翻译状态
+  5.84%    4.301      4 Template:META_Message
+  5.32%    3.914      1 Template:Related_articles_start
+  5.27%    3.875      3 Template:Man
+  4.59%    3.376      3 Template:Pkg
+-->
+<!-- Render ID fbb3670e-9215-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6597:|#|:idhash:canonical!zh-cn and timestamp 20260807041054 and revision id 35037. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

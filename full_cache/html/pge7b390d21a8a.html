@@ -1,0 +1,350 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pge7b390d21a8a">U 盘安装介质</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/USB_flash_installation_medium">USB flash installation medium</a>，最近一次同步于 2023-11-20，若英文版本有所<a href="https://wiki.archlinux.org/title/USB_flash_installation_medium?diff=0&amp;oldid=792523">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/USB_flash_installation_medium_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg00ff68993b08">光盘驱动器</a></li>
+<li><a href="#pg2da385a25e75">Archiso</a></li>
+<li><a href="#pge8004bd198cc">多引导 USB 设备</a></li>
+</ul></div>
+<p>USB 驱动器，也被称为闪存驱动器、USB记忆棒、U盘等。可以从 ISO 制作 Arch LiveUSB 系统，从 UEFI 或 BIOS 系统上直接启动 Arch Linux 安装环境。由于 <code>/</code> 根目录使用了 <a href="#pgc1930632f19c">Overlayfs</a>，关机后所有的更改都会丢失。这样的系统可用于 Arch Linux 安装、系统维护或者系统恢复。
+</p><p>要在 U 盘上运行完整的 Arch Linux（即能保留设置），请阅读<a href="#pg849f37ba57e2">在可移动设备上安装 Arch Linux</a>。如果想将 Arch Linux U 盘当作救援 USB 来用，参见 <a href="#pg5d8a2c5e3ac5">chroot</a>。
+</p><p>在进行下列任何操作前，先从 <a href="https://archlinux.org/download/">https://archlinux.org/download/</a> 下载 ISO 并<a href="#pgbdbcbed611fc">验证其完整性</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge7b390d21a8a_.E7.9B.B4.E6.8E.A5.E4.BD.BF.E7.94.A8_ISO.EF.BC.88BIOS_.E5.92.8C_UEFI.EF.BC.89" id="直接使用_ISO（BIOS_和_UEFI）"><span id=".E7.9B.B4.E6.8E.A5.E4.BD.BF.E7.94.A8_ISO.EF.BC.88BIOS_.E5.92.8C_UEFI.EF.BC.89"></span>直接使用 ISO（BIOS 和 UEFI）</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>这一操作将不可恢复地删除 USB 驱动器上的所有数据，所以在操作前先确保驱动器上没有存放任何重要文件。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果你想将 ISO 写入到机械硬盘或是固态硬盘上，而不是使用 U 盘或是 SD 卡，请确保硬盘的逻辑扇区大小不大于 2048 字节（<a href="https://en.wikipedia.org/wiki/ISO_9660">ISO 9660</a> 扇区大小），并按此数值进行对齐。这也意味着不能用此方法将 ISO 写入到 4Kn <a href="#pg1e179f17182c">先进格式化</a>硬盘中。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_GNU.2FLinux" id="GNU/Linux"><span id="GNU.2FLinux"></span>GNU/Linux</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8.E5.9F.BA.E6.9C.AC.E5.91.BD.E4.BB.A4.E8.A1.8C.E5.B7.A5.E5.85.B7" id="使用基本命令行工具"><span id=".E4.BD.BF.E7.94.A8.E5.9F.BA.E6.9C.AC.E5.91.BD.E4.BB.A4.E8.A1.8C.E5.B7.A5.E5.85.B7"></span>使用基本命令行工具</h4></div>
+<p>推荐该方法是因为它简单，且由于这些工具是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=coreutils">coreutils</a></span><sup><small>包</small></sup></span>（由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base">base</a></span><sup><small>包</small></sup></span> <a href="#pgac5d7e9d277d">元软件包</a>引入）的一部分，其通用性也很广。
+</p><p>使用 <code>ls -l /dev/disk/by-id/usb-*</code> 找到 U 盘的名字，然后使用 <code>lsblk</code> 检查确保其<b>没有</b>被挂载。
+</p><p>将下列命令中的 <code>/dev/disk/by-id/usb-<i>My_flash_drive</i></code> 替换为你的 U 盘（例如<code>/dev/disk/by-id/usb-Kingston_DataTraveler_2.0_408D5C1654FDB471E98BED5C-0:0</code>）。(<b>不要</b>加上分区编号，也就是<b>不要</b>输入类似 <code>/dev/disk/by-id/usb-Kingston_DataTraveler_2.0_408D5C1654FDB471E98BED5C-0:0<b>-part1</b></code> 或者是 <code>/dev/sdb<b>1</b></code> 的东西）：
+</p>
+<ul><li>使用 <span class="plainlinks archwiki-template-man" title="$ man 1 cat"><a href="https://man.archlinux.org/man/cat.1">cat(1)</a></span>：<pre># cat <i>path/to/</i>archlinux-<i>version</i>-x86_64.iso &gt; /dev/disk/by-id/usb-<i>My_flash_drive</i></pre></li>
+<li>使用 <span class="plainlinks archwiki-template-man" title="$ man 1 cp"><a href="https://man.archlinux.org/man/cp.1">cp(1)</a></span>：<pre># cp <i>path/to/</i>archlinux-<i>version</i>-x86_64.iso /dev/disk/by-id/usb-<i>My_flash_drive</i></pre></li>
+<li>使用 <a href="#pge09a1da9829f">dd</a>：<pre># dd bs=4M if=<i>path/to/</i>archlinux-<i>version</i>-x86_64.iso of=/dev/disk/by-id/usb-<i>My_flash_drive</i> conv=fsync oflag=direct status=progress</pre></li>
+<li>使用 <a href="#pg8617dc2cb7e3">tee</a>：<pre># tee &lt; <i>path/to/</i>archlinux-<i>version</i>-x86_64.iso &gt; /dev/disk/by-id/usb-<i>My_flash_drive</i></pre></li>
+<li>使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pv">pv</a></span><sup><small>包</small></sup></span>：<pre># pv <i>path/to/</i>archlinux-<i>version</i>-x86_64.iso &gt; /dev/disk/by-id/usb-<i>My_flash_drive</i></pre></li></ul>
+<p>可参考 <a href="https://unix.stackexchange.com/questions/224277/is-it-better-to-use-cat-dd-pv-or-another-procedure-to-copy-a-cd-dvd/224314#224314">[1]</a> 和 <a href="https://www.vidarholen.net/contents/blog/?p=479">[2]</a> 来对比这些工具并了解它们的大致用法，以及为何 <i>dd</i> 可能是最不适用的方法。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>执行完命令后，使用根权限执行 <code>sync</code> 来确保在移除硬盘前缓冲区数据已完全写入。</li>
+<li>If the UEFI version of the USB's Arch ISO hangs or is unable to load, try repeating the medium creation process on the same USB drive one or more times. If this does not work, you may also try updating your motherboard's firmware.</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果在使用完 Arch ISO 镜像后要 U 盘恢复为空的可用 USB 存储设备，须在<a href="#pg8edad8d1135b">重分区</a>和<a href="#pg6c70b7fdfa57">重新格式化</a> U 盘前使用根权限运行 <code>wipefs --all /dev/disk/by-id/usb-<i>My_flash_drive</i></code> 将 ISO 9660 文件系统签名移除。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_GNOME_Disk_Utility" id="使用_GNOME_Disk_Utility"><span id=".E4.BD.BF.E7.94.A8_GNOME_Disk_Utility"></span>使用 GNOME Disk Utility</h4></div>
+<p>Linux distributions running GNOME can easily make a live CD through <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nautilus">nautilus</a></span><sup><small>包</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-disk-utility">gnome-disk-utility</a></span><sup><small>包</small></sup></span>.  Simply right-click on the <i>.iso</i> file, and select <i>Open With Disk Image Writer</i>.  When GNOME Disk Utility opens, specify the flash drive from the <i>Destination</i> drop-down menu and click <i>Start Restoring</i>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_MultiWriter" id="使用_MultiWriter"><span id=".E4.BD.BF.E7.94.A8_MultiWriter"></span>使用 MultiWriter</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-multi-writer">gnome-multi-writer</a></span><sup><small>包</small></sup></span> 是一个基于 <a href="#pg6438c4cbb62c">GTK</a>3 的图形化工具，用于将 ISO 文件同时写入到单个或多个 U 盘中。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_Kindd" id="使用_Kindd"><span id=".E4.BD.BF.E7.94.A8_Kindd"></span>使用 Kindd</h4></div>
+<p><a href="https://github.com/LinArcX/Kindd">Kindd</a> 是基于 Qt 的 dd 图形化前端，可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/kindd/">kindd</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_Popsicle" id="使用_Popsicle"><span id=".E4.BD.BF.E7.94.A8_Popsicle"></span>使用 Popsicle</h4></div>
+<p><a href="https://github.com/pop-os/popsicle">Popsicle</a> 是由 PopOS 开发团队制作的工具，用于同时向多个 U 盘写入 ISO 文件。它使用 Rust 和 GTK 编写，可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/popsicle/">popsicle</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_SUSE_Studio_ImageWriter" id="使用_SUSE_Studio_ImageWriter"><span id=".E4.BD.BF.E7.94.A8_SUSE_Studio_ImageWriter"></span>使用 SUSE Studio ImageWriter</h4></div>
+<p><a href="https://github.com/openSUSE/imagewriter">SUSE Studio ImageWriter</a> 是由 OpenSUSE 开发团队基于 Qt 制作的 Qt，可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/imagewriter/">imagewriter</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_xorriso-dd-target" id="使用_xorriso-dd-target"><span id=".E4.BD.BF.E7.94.A8_xorriso-dd-target"></span>使用 xorriso-dd-target</h4></div>
+<p><a href="https://dev.lovelyhq.com/libburnia/libisoburn/raw/master/xorriso-dd-target/xorriso-dd-target">xorriso-dd-target</a>（来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libisoburn">libisoburn</a></span><sup><small>包</small></sup></span>）是一个 shell 脚本，尝试降低覆盖到错误存储设备的风险。它最安全的模式名为 <code>-plug_test</code>。以可以通过 <a href="#pg023562413be7">sudo</a> 提升到 root 权限的普通用户为例：
+</p>
+<pre>$ xorriso-dd-target -with_sudo -plug_test -DO_WRITE -image_file archlinux-<i>version</i>-x86_64.iso
+</pre>
+<p>更多信息可参考 <span class="plainlinks archwiki-template-man" title="$ man 1 xorriso-dd-target"><a href="https://man.archlinux.org/man/xorriso-dd-target.1">xorriso-dd-target(1)</a></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_USBImager" id="使用_USBImager"><span id=".E4.BD.BF.E7.94.A8_USBImager"></span>使用 USBImager</h4></div>
+<p><a href="https://gitlab.com/bztsrc/usbimager/">USBImager</a> 是一个跨平台的图形化程序，用于将压缩的磁盘镜像写入到 U 盘中并进行验证，并可以创建备份。可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/usbimager/">usbimager</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_Windows" id="Windows">Windows</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_win32diskimager" id="使用_win32diskimager"><span id=".E4.BD.BF.E7.94.A8_win32diskimager"></span>使用 win32diskimager</h4></div>
+<p><a href="https://sourceforge.net/projects/win32diskimager/">win32diskimager</a> 是另一个用于在 Windows 上写入镜像到 USB 或者 SD/CF 卡上的工具。只需选择 ISO 映像和目标 USB 盘符（可能需要先格式化 USB 驱动器后才能分配驱动器号），然后点击“Write”即可。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_USBwriter" id="使用_USBwriter"><span id=".E4.BD.BF.E7.94.A8_USBwriter"></span>使用 USBwriter</h4></div>
+<p>这一方法和 Linux 下的 <code>dd</code> 一样简单，只要下载 Arch Linux 安装镜像，并通过本地管理员权限使用 <a href="https://sourceforge.net/p/usbwriter/wiki/Documentation/">USBwriter</a> 写入 U 盘即可。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_USBImager_2" id="使用_USBImager_2"><span id=".E4.BD.BF.E7.94.A8_USBImager_2"></span>使用 USBImager</h4></div>
+<p><a href="https://gitlab.com/bztsrc/usbimager/">USBImager</a> 是一个跨平台的图形化程序，用于将压缩的磁盘镜像写入到 U 盘中并进行验证，并可以创建备份。可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/usbimager/">usbimager</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_Rufus" id="使用_Rufus"><span id=".E4.BD.BF.E7.94.A8_Rufus"></span>使用 Rufus</h4></div>
+<p><a href="https://rufus.ie/zh/">Rufus</a> 是一款多用途的 USB ISO 写入工具。它提供了图形化用户界面，并不关心驱动器是否被正确地格式化。
+</p><p>只要简单地选择 Arch Linux ISO、要创建可启动 Arch Linux 的 USB 驱动器，然后点击<i>开始</i>即可。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果USB设备使用默认USB镜像模式无法正确引导，请选用""DD Image 模式""。如果要切换到这个模式，请在“分区方案”下拉菜单中选择“GPT”，点击“开始”后你会看到选项提示框，最后选择“DD Image 模式”</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>要添加 <a href="https://github.com/pbatard/rufus/issues/691">一个用于持久存储的额外分区</a> ，请使用滑块选择持久分区的大小。在使用持久分区功能时，请确保在 “分区方案 ”下拉菜单中选择 “MBR”，并在 “目标系统 ”中选择 “BIOS 或 UEFI”，否则硬盘将无法同时用于 BIOS 和 UEFI 启动。
+</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_Cygwin" id="使用_Cygwin"><span id=".E4.BD.BF.E7.94.A8_Cygwin"></span>使用 Cygwin</h4></div>
+<p>先确保你的 <a href="https://www.cygwin.com/">Cygwin</a> 环境包含了 <code>dd</code> 包。
+</p><p>将您的镜像文件放在您的 home 目录中：
+</p>
+<pre>C:\cygwin\home\<i>User</i>\
+</pre>
+<p>以管理员身份运行 cygwin（以允许 cygwin 访问硬件）。用下列命令写入到您的 USB 设备：
+</p>
+<pre>dd if=archlinux-<i>version</i>-x86_64.iso of=\\.\<i>x</i>: bs=4M
+</pre>
+<p>其中 <code>archlinux-<i>version</i>-x86_64.iso</code> 是 <code>cygwin</code> 目录下的 ISO 镜像路径，而 <code>\\.\<i>x</i>:</code> 是你的 U 盘，里面的 <code><i>x</i></code> 是 Windows 为您的 USB 设备指定的盘符，例如 <code>\\.\d:</code>。
+</p><p>Cygwin 6.0 版本中可以这样找到正确的分区：
+</p>
+<pre>cat /proc/partitions
+</pre>
+<p>然后根据输出信息写入ISO映像，例如：
+</p>
+<pre>dd if=archlinux-<i>version</i>-x86_64.iso of=/dev/sdb bs=4M
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_dd_for_Windows" id="使用_dd_for_Windows"><span id=".E4.BD.BF.E7.94.A8_dd_for_Windows"></span>使用 dd for Windows</h4></div>
+<p><a href="http://www.chrysocome.net/dd">http://www.chrysocome.net/dd</a> 上有基于 GPL 协议的 Windows 版 dd。相比于 Cygwin，它的优势在于需下载量较小。使用方法参考上面的 Cygwin 部分。
+</p><p>首先下载最新版本的 dd for Windows，并把内容解压到 <code>Downloads</code> 目录或者别的什么地方。
+</p><p>现在以管理员身份运行<i>命令提示符</i>。然后切换目录（<code>cd</code>）到 <code>Downloads</code> 目录。
+</p><p>如果你的 Arch Linux ISO 在别的地方，你可能需要列出完整路径。为了方便起见，你可能会想把它放在 <i>dd</i> 程序的同一目录中。命令的基本格式像这样：
+</p>
+<pre># dd if=archlinux-<i>version</i>-x86_64.iso od=\\.\<i>x</i>: bs=4M
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Windows 的驱动器盘符链接到的是分区。为了选择完整的硬盘，上述命令使用了 <i>dd for Windows</i> 提供的 <code>od</code> 参数。需要注意，这一参数仅适用于 <i>dd for Windows</i>，并不适用于其它 <i>dd</i> 实现。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_flashnul" id="使用_flashnul"><span id=".E4.BD.BF.E7.94.A8_flashnul"></span>使用 flashnul</h4></div>
+<p><a href="https://github.com/amarao/flashnul/blob/master/README.md">flashnul</a> 是一款用于验证和维护闪存（USB 闪存、IDE 闪存、SecureDigital、MMC、MemoryStick、SmartMedia、XD、CompactFlash 等）功能的实用程序。
+</p><p>在命令提示符下，用 <code>-p</code> 调用 flashnul，并确定 USB 驱动器的设备索引，例如
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">C:\&gt;flashnul -p</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Avaible physical drives:
+Avaible logical disks:
+C:\
+D:\
+E:\
+</pre>
+<p>确定了正确的设备后，您就可以将镜像写入硬盘，通过用<code>-L</code>设备索引和镜像的路径来调用 flashnul，例如：
+</p>
+<pre>C:\&gt;flashnul <b>E:</b> -L <i>path\to\</i>archlinux-<i>version</i>-x86_64.iso
+</pre>
+<p>只要你已经确定要开始写入数据，就输入 yes ，稍等片刻等待写入完成。如果出现了拒绝访问的错误，请关闭所有打开的资源管理器窗口。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>请以管理员身份打开命令提示符，否则 flashnul 将无法将镜像作为块设备打开，只能通过 windows 提供的驱动器句柄写入。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_macOS" id="macOS">macOS</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_macOS_dd" id="使用_macOS_dd"><span id=".E4.BD.BF.E7.94.A8_macOS_dd"></span>使用 macOS dd</h4></div>
+<p>首先确认设备，打开 <code>/Applications/Utilities/Terminal</code> 然后通过下面命令查看所有存储设备：
+</p>
+<pre>$ diskutil list
+</pre>
+<p>USB 设备应该类似于 <code>/dev/disk2 (external, physical)</code>。通过名称和大小确认设备是否正确，在后面的命令中用其替换掉 <code>/dev/disk<i>X</i></code>。
+</p><p>macOS 通常会自动挂载 USB 设备，在使用 <code>dd</code> 前需要将其卸载（不是弹出）。打开 <i>Terminal</i>，然后输入：
+</p>
+<pre>$ diskutil unmountDisk /dev/disk<i>X</i>
+</pre>
+<p>然后将 ISO 镜像复制到设备上：
+</p><p>{{Note|
+</p>
+<ul><li>BSD 的 <code>dd</code> 衍生版本（包括 macOS 预装的）使用小写 <code>m</code> 后缀。这与本文其它地方使用的 GNU 版本 <code>dd</code> 不同。</li>
+<li><code>disk</code> 前的 <code>r} 意味着使用 raw 模式，可以大幅提升传输速率。</code></li><code>
+<li>在新版 macOS 中，dd 命令支持使用 <code>status=progress</code> 来显示进度。你也可以通过下方描述手动显示进度。</li></code></ul><code></code><p><code></code>
+</p>
+<pre># dd if=<i>path/to</i>/archlinux-<i>version</i>-x86_64.iso of=/dev/<b>r</b>disk<i>X</i> bs=1m
+</pre>
+<p>这一命令将静默执行。如果要显示进度，可以按下 {{ic|Ctrl+t} 来传递 SIGINFO 信号。注意，这里的 <code>disk<i>X</i></code> 不应包含 <code>s1</code> 后缀，否则 U 盘将仅支持 UEFI 模式启动。完成后，macOS 可能抱怨 <i>The disk you inserted was not readable by this computer</i>，选择忽略就行。启动盘就做好了。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_USBImager_3" id="使用_USBImager_3"><span id=".E4.BD.BF.E7.94.A8_USBImager_3"></span>使用 USBImager</h4></div>
+<p><a href="https://gitlab.com/bztsrc/usbimager/">USBImager</a> 是一个跨平台的图形化程序，用于将压缩的磁盘镜像写入到 U 盘中并进行验证，并可以创建备份。可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/usbimager/">usbimager</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_Android" id="Android">Android</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_EtchDroid" id="使用_EtchDroid"><span id=".E4.BD.BF.E7.94.A8_EtchDroid"></span>使用 EtchDroid</h4></div>
+<p><a href="https://etchdroid.depau.eu/">EtchDroid</a> 是一个安卓平台上的系统镜像烧录器，从安卓 5 开始不再需要 root 权限。如果遇到任何问题，可查看 <a href="https://github.com/EtchDroid/EtchDroid/issues/">GitHub</a> 上游。
+</p><p>要创建 Arch Linux 安装盘，需先将 ISO 镜像下载到安卓设备上。将 U 盘插入到设备，有需要的话可以使用 USB-OTG 转接器。接下来打开 EtchDroid，选择 <i>Flash raw image</i>，选择 Arch ISO 文件，然后选择 U 盘。最后授予 USB API 权限并确认。
+</p><p>刷入镜像时请将手机放在桌子上：很多 USB-OTG 转接器的连接都不太稳，很容易不小心被拔掉。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge7b390d21a8a_.E6.89.8B.E5.8A.A8.E6.96.B9.E6.B3.95" id="手动方法"><span id=".E6.89.8B.E5.8A.A8.E6.96.B9.E6.B3.95"></span>手动方法</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_BIOS_.E5.92.8C_UEFI" id="BIOS_和_UEFI"><span id="BIOS_.E5.92.8C_UEFI"></span>BIOS 和 UEFI</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_GNU.2FLinux_2" id="GNU/Linux_2"><span id="GNU.2FLinux_2"></span>GNU/Linux</h4></div>
+<p>这种方法比通过 <code>dd</code> 直接写入镜像复杂，但能够保持 U 盘可用于数据存储（ISO 被装在<a href="#pg8edad8d1135b">分了区的设备</a>的特定分区里而无需改变其他分区）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>接下来会用 <code>/dev/disk/by-id/usb-<i>My_flash_drive</i>-part<i>n</i></code> 指代目标分区，请根据实际情况修改命令中的 <code><i>My_flash_drive</i></code> 和 <code><i>n</i></code>。</div>
+<ul><li>预先在 <code>/dev/disk/by-id/usb-<i>My_flash_drive</i></code> 创建<a href="#pg10de20c4b0fb">分区表</a>。</li>
+<li>预先在设备上创建一个分区，<code>/dev/disk/by-id/usb-<i>My_flash_drive</i>-part<i>n</i></code> 分区必须格式化为 <a href="#pgfeb479f7aff2">FAT32</a>。</li>
+<li>挂载 U 盘上的 FAT32 文件系统，并将 ISO 镜像中的内容<a href="#pga15a09dcd981">解压</a>到其中。</li></ul>
+<pre># mount /dev/disk/by-id/usb-<i>My_flash_drive</i>-part<i>n</i> /mnt
+# bsdtar -x -f archlinux-<i>version</i>-x86_64.iso -C /mnt
+</pre>
+<p>在 BIOS 平台上启动时需指定文件所在的卷，默认情况下会使用 UUID <code><i>YYYY-mm-dd-HH-MM-SS</i>-00</code>（即 UTC 时区的镜像发布时间）。可以将 <code>/mnt/boot/syslinux/archiso_sys-linux.cfg</code> 中的 <code>archisodevice=</code> 参数替换为对应设备的<a href="#pgd2fddf50b50f">持久化设备识别符</a>，例如：<code>archisodevice=UUID=<i>YOUR-UUID</i></code>
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>错误的 <code>archisolabel</code> 或 <code>archisodevice</code> 将导致无法从创建好的介质中启动。</div>
+<p>用于 BIOS 的 <a href="#pg0ca06688075c">Syslinux</a> 文件已被拷入到 <code>/mnt/boot/syslinux/</code>。<a href="#pg6c70b7fdfa57">卸载</a> FAT 文件系统，<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=syslinux">syslinux</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mtools">mtools</a></span><sup><small>包</small></sup></span> 包，并运行以下命令来使分区变为可启动：
+</p>
+<pre># umount /mnt
+# syslinux --directory boot/syslinux --install /dev/disk/by-id/usb-<i>My_flash_drive</i>-part<i>n</i>
+# dd bs=440 count=1 conv=notrunc if=/usr/lib/syslinux/bios/mbr.bin of=/dev/disk/by-id/usb-<i>My_flash_drive</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>如果 <code>/dev/disk/by-id/usb-<i>My_flash_drive</i></code> 使用 <a href="#pg8edad8d1135b">GUID 分区表</a>，需将 <code>mbr.bin</code> 替换为 <code>gptmbr.bin</code>。详细信息可参考 <a href="#pg0ca06688075c">Syslinux#手动安装</a>。</li>
+<li>对于 <a href="#pg3fb7df0ff769">MBR</a> 分区表，需要设定“boot”标记。详细信息可参考 <a href="#pg0ca06688075c">Syslinux#MBR_分区表</a>。</li></ul>
+</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_Windows" id="Windows_2">Windows</h4></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>对于手动方法而言，不要使用任何<b>可启动 USB 创建工具</b>制作 UEFI 启动 U 盘，也不要用 <i>dd for Windows</i> 将 ISO 镜像写入 U 盘。</li>
+<li>下列命令假定 U 盘盘符为 <code><i>X</i>:</code>。</li>
+<li>Windows 使用反斜杠 <code>\</code> 作为路径分隔符，这一规则同样用于下列命令中。</li>
+<li>所有命令都应该在<b>以管理员身份运行</b>的命令提示符内执行。</li>
+<li><code>&gt;</code> 表示 Windows 命令提示符。</li></ul>
+</div>
+<ul><li>使用 <a href="https://rufus.ie/zh/">Rufus USB partitioner</a>对 U 盘进行分区和格式化。在分区类型一项选择 <b>MBR for BIOS and UEFI</b>，文件系统选择 <b>FAT32</b>。反选“Create a bootable disk using ISO image”和“创建扩展的标签和图标文件”两项。</li>
+<li>如果用的是官方 ISO 镜像（<a href="#pg2da385a25e75">Archiso</a>），需修改 U 盘的<b>卷标</b>到你想要的值。这一步骤也可以在“分区并格式化”这一步中通过 Rufus 来完成。</li>
+<li>使用 <a href="https://www.7-zip.org/">7-Zip</a> 将 ISO 中的文件解压（与解压 ZIP 压缩包类似）到 U 盘中。</li>
+<li>编辑 <code><i>X</i>:\boot\syslinux\archiso_sys-linux.cfg</code>，将所有 <code>archisodevice=UUID=<i>YYYY-mm-dd-HH-MM-SS</i>-00</code> 替换为 <code>archisodevice=LABEl=<i>YOUR_LABEL</i></code>，其中 <code><i>YOUR_LABEL</i></code> 为上一步设定的卷标。</li>
+<li>从 <a href="https://www.kernel.org/pub/linux/utils/boot/syslinux/">https://www.kernel.org/pub/linux/utils/boot/syslinux/</a> 下载官方 Syslinux 6.xx 二进制文件（ZIP 打包文件）并解压。Syslinux 的版本应与 ISO 镜像所使用的版本一致。</li></ul>
+<ul><li>在命令提示符内，以管理员身份运行以下命令：</li></ul>
+<pre>&gt; cd bios\
+&gt; for /r %Y in (*.c32) do copy "%Y" "<i>X</i>:\boot\syslinux\" /y
+&gt; copy mbr\*.bin <i>X</i>:\boot\syslinux\ /y
+</pre>
+<ul><li>通过以下命令将 Syslinux 安装到 U 盘（64 位系统则使用 <code>win64\syslinux64.exe</code>）：</li></ul>
+<pre>&gt; cd bios\
+&gt; win32\syslinux.exe -d /boot/syslinux -i -a -m <i>X</i>:
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>仅复制文件并不能使得可以从 U 盘启动；最后一条命令将 Syslinux 的文件安装到了 U 盘的 VBR 分区，在 MBR 分区表中将该分区设置为“活跃/启动”，并将 MBR 启动代码写入到了 U 盘中。</li>
+<li><code>-d</code> 参数需要使用正斜杠作为路径分隔符，与类 unix 系统上类似。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_.E4.BB.85_BIOS" id="仅_BIOS"><span id=".E4.BB.85_BIOS"></span>仅 BIOS</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_GNU.2FLinux_3" id="GNU/Linux_3"><span id="GNU.2FLinux_3"></span>GNU/Linux</h4></div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pge7b390d21a8a_.E5.88.B6.E4.BD.9C_USB-ZIP_.E7.9B.98" id="制作_USB-ZIP_盘"><span id=".E5.88.B6.E4.BD.9C_USB-ZIP_.E7.9B.98"></span>制作 USB-ZIP 盘</h5></div>
+<p>某些旧的 BIOS 设备仅支持从 USB-ZIP 盘启动。该方法让你可以继续从 USB 硬盘上启动。
+</p>
+<ul><li><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=syslinux">syslinux</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mtools">mtools</a></span><sup><small>包</small></sup></span>。</li>
+<li>通过 <code>ls /dev/disk/by-id/usb-*</code> 命令找到你的 U 盘。</li>
+<li>输入 <code>mkdiskimage -4 /dev/disk/by-id/usb-<i>My_flash_drive</i> 0 64 32</code>，完成需要一段时间。</li></ul>
+<p>接下来继续按手动方法进行操作。由于 ZIP 硬盘的工作方式，分区将使用 <code>/dev/disk/by-id/usb-<i>My_flash_drive</i>-part4</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>不要将盘格式化为 FAT32 格式，必须使用 FAT16。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_.E4.BB.85_UEFI" id="仅_UEFI"><span id=".E4.BB.85_UEFI"></span>仅 UEFI</h3></div>
+<p>如果仅使用 UEFI 启动，只需将 ISO 中文件解压到 FAT 格式的 U 盘中即可。
+</p><p>由于所有 UEFI 系统都可以 U 盘的任何 FAT 卷中启动，不需要单独创建 EFI 系统分区。兼容性最强的配置方法为使用 MBR 分区表，并创建单个活动（可启动）主分区，类型为 <code>0c</code>“W95 FAT32 (LBA)”。<a href="https://lists.gnu.org/archive/html/grub-devel/2019-05/msg00063.html">[3]</a>
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>See <a href="#pgf5f38183c9dc">Secure Boot#Sign the official ISO with custom keys</a> to understand which files need to be signed if Secure Boot is configured with custom keys.</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_GNU.2FLinux_4" id="GNU/Linux_4"><span id="GNU.2FLinux_4"></span>GNU/Linux</h4></div>
+<p>This method extracts files from the ISO image to a USB flash drive.
+</p>
+<ol><li>If not done yet, create a <a href="#pg91fe8969ec3e">partition table</a> on <code>/dev/disk/by-id/usb-<i>My_flash_drive</i></code> and a <a href="#pg959c291c0851">partition</a> (<code>/dev/disk/by-id/usb-<i>My_flash_drive</i>-part<i>n</i></code>) on the device.</li>
+<li>If not done yet, format the partition to <a href="#pgfeb479f7aff2">FAT32</a>: <pre># mkfs.fat -F 32 /dev/disk/by-id/usb-<i>My_flash_drive</i>-part<i>n</i></pre></li>
+<li><a href="#pg33fa78c05486">Mount</a> the file system: <pre># mount /dev/disk/by-id/usb-<i>My_flash_drive</i>-part<i>n</i> /mnt</pre></li>
+<li>Extract the ISO image to the mounted file system: <pre># bsdtar -x -f archlinux-<i>version</i>-x86_64.iso -C /mnt</pre></li>
+<li><a href="#pg7906e2d97e3a">Unmount</a> the file system.</li></ol>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_Windows" id="Windows_3">Windows</h4></div>
+<p>This method copies files from the ISO image to a USB flash drive.
+</p>
+<ol><li>Partition the USB flash drive and format it to FAT32.</li>
+<li>Right click on <code>archlinux-<i>version</i>-x86_64.iso</code> and select <i>Mount</i>.</li>
+<li>Navigate to the newly created DVD drive and copy all files and folders to the USB flash drive.</li>
+<li>When done copying, right click on the DVD drive and select <i>Eject</i>.</li>
+<li>Eject the USB flash drive.</li></ol>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_macOS" id="macOS_2">macOS</h4></div>
+<p>Neither <i>DiskImageMounter</i> nor <i>Disk Utility</i> can mount isohybrid ISOs, but since macOS ships with <i>libarchive</i>, the ISO can simply be extracted onto the flash drive using <i>bsdtar</i>.
+</p>
+<ol><li>If not done yet, partition the USB flash drive and format the partition to FAT32 using <i>Disk Utility</i>.</li>
+<li>Mount the volume.</li>
+<li>Open the <i>Terminal</i> application and use <i>bsdtar</i> to extract the ISO image to the mounted file system: <pre>$ bsdtar -x -f archlinux-<i>version</i>-x86_64.iso -C /Volumes/<i>your-flash-drive</i></pre></li>
+<li>When done, unmount and eject the USB flash drive.</li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8.E5.A4.9A.E5.BC.95.E5.AF.BC_USB_.E8.AE.BE.E5.A4.87" id="使用多引导_USB_设备"><span id=".E4.BD.BF.E7.94.A8.E5.A4.9A.E5.BC.95.E5.AF.BC_USB_.E8.AE.BE.E5.A4.87"></span>使用多引导 USB 设备</h2></div>
+
+<p>该方法允许从单个 U 盘启动包括 archiso 在内的多个 ISO。将现有 U 盘升级到新版 ISO 的流程比其余多数方法都简单，详情可参考<a href="#pg478300ddead9">多引导USB设备</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_ventoy" id="使用_ventoy"><span id=".E4.BD.BF.E7.94.A8_ventoy"></span>使用 ventoy</h3></div>
+<p><a href="#pg3f1c38595131">Ventoy</a> 是一个适用于 ISO/WIM/IMG/VHD(x)/EFI 文件的开源可启动 U 盘制作工具。通过使用 ventoy，你不需要反复格式化硬盘，而只需将 ISO/WIM/IMG/VHD(x)EFI 文件复制到 U 盘，然后直接启动即可。你可以一次性复制多个文件，ventoy 会显示一个启动清单让你进行选择。ventoy 可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ventoy-bin/">ventoy-bin</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_Windows" id="Windows_4">Windows</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7b390d21a8a_.E4.BB.8E.E5.86.85.E5.AD.98.E5.8A.A0.E8.BD.BD.E5.AE.89.E8.A3.85.E4.BB.8B.E8.B4.A8" id="从内存加载安装介质"><span id=".E4.BB.8E.E5.86.85.E5.AD.98.E5.8A.A0.E8.BD.BD.E5.AE.89.E8.A3.85.E4.BB.8B.E8.B4.A8"></span>从内存加载安装介质</h4></div>
+<p>这个方法使用 <a href="#pg0ca06688075c">Syslinux</a> 和一个 <a href="#pg5b6e894bc3da">Ramdisk</a>（<a href="https://wiki.syslinux.org/wiki/index.php/MEMDISK">MEMDISK</a>）来把整个 Arch Linux ISO 镜像加载到内存中。由于它将完全运行于系统内存中，您要确保使用这种方法安装的设备上有足够的内存。至少 500MB 到 1G 内存就足以在 MEMDISK 上安装 Arch Linux。
+</p><p>Arch Linux 和 MEMDISK 系统要求参见<a href="#pgbdbcbed611fc">安装指南</a>和<a href="http://www.etherboot.org/wiki/bootingmemdisk#preliminaries">这里</a>，也可以参考<a href="https://bbs.archlinux.org/viewtopic.php?id=135266">之前的论坛帖</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>一旦安装程序加载完毕，您就可以移除 U 盘，甚至再在另一台机器上用它开始执行整个安装步骤。使用 MEMDISK 还允许你在同一个 U 盘中引导并安装 Arch Linux 到它上面。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pge7b390d21a8a_.E5.87.86.E5.A4.87_U_.E7.9B.98" id="准备_U_盘"><span id=".E5.87.86.E5.A4.87_U_.E7.9B.98"></span>准备 U 盘</h5></div>
+<p>首先将 U 盘格式化为 <b>FAT32</b> 文件系统。然后在格式化后的磁盘中创建以下目录：
+</p>
+<ul><li><code>Boot</code>
+<ul><li><code>Boot/ISOs</code></li>
+<li><code>Boot/Settings</code></li></ul></li></ul>
+<div class="mw-heading mw-heading5"><h5 data-bm="pge7b390d21a8a_.E5.A4.8D.E5.88.B6.E9.9C.80.E8.A6.81.E7.9A.84.E6.96.87.E4.BB.B6.E5.88.B0_U_.E7.9B.98" id="复制需要的文件到_U_盘"><span id=".E5.A4.8D.E5.88.B6.E9.9C.80.E8.A6.81.E7.9A.84.E6.96.87.E4.BB.B6.E5.88.B0_U_.E7.9B.98"></span>复制需要的文件到 U 盘</h5></div>
+<p>然后，把要引导的 ISO 复制到 <code>Boot/ISOs</code> 目录。接着，从<a href="https://www.kernel.org/pub/linux/utils/boot/syslinux/">这里</a>下载最新版的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=syslinux">syslinux</a></span><sup><small>包</small></sup></span>，并从中提取以下文件并复制到下列目录：
+</p>
+<ul><li><code>./win32/syslinux.exe</code> 到桌面或者系统中的 Downloads 目录。</li>
+<li><code>./memdisk/memdisk</code> 到 U 盘中的 <code>Settings</code> 目录。</li></ul>
+<div class="mw-heading mw-heading5"><h5 data-bm="pge7b390d21a8a_.E5.88.9B.E5.BB.BA.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6" id="创建配置文件"><span id=".E5.88.9B.E5.BB.BA.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6"></span>创建配置文件</h5></div>
+<p>复制完所需文件后，在 U 盘的 /Boot/Settings 目录中创建文件 <code>syslinux.cfg</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在 <code>INITRD</code> 一行中，确保使用了复制到 <code>ISOs</code> 文件夹中的 ISO 文件名。</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/Boot/Settings/syslinux.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">DEFAULT arch_iso
+
+LABEL arch_iso
+        MENU LABEL Arch Setup
+        LINUX memdisk
+        INITRD /Boot/ISOs/archlinux-<i>version</i>-x86_64.iso
+        APPEND iso</pre>
+<p>更多信息可参考 <a href="#pg0ca06688075c">Syslinux</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pge7b390d21a8a_.E6.9C.80.E5.90.8E.E4.B8.80.E6.AD.A5" id="最后一步"><span id=".E6.9C.80.E5.90.8E.E4.B8.80.E6.AD.A5"></span>最后一步</h5></div>
+<p>最后，在 <code>syslinux.exe</code> 所在目录创建一个 <code>*.bat</code> 文件并运行（如果是在 Vista 或者 Windows 7 下，需要“以管理员身份运行”）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">C:\Documents and Settings\username\Desktop\install.bat</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">@echo off
+syslinux.exe -m -a -d /Boot/Settings X:
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge7b390d21a8a_.E4.B8.8D.E6.8E.A8.E8.8D.90.E7.9A.84.E6.96.B9.E6.B3.95" id="不推荐的方法"><span id=".E4.B8.8D.E6.8E.A8.E8.8D.90.E7.9A.84.E6.96.B9.E6.B3.95"></span>不推荐的方法</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不推荐使用下列方法。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_etcher" id="使用_etcher"><span id=".E4.BD.BF.E7.94.A8_etcher"></span>使用 etcher</h3></div>
+<p>etcher 包含分析数据收集和第一方广告。可参考<a href="https://github.com/balena-io/etcher/issues/2057">[4]</a>，<a href="https://github.com/balena-io/etcher/blob/37769efbeda0abe7993d95e2b2aea2f461edd307/lib/gui/app/pages/main/MainPage.tsx#L151">[5]</a> 和 <a href="https://github.com/balena-io/etcher/blob/37769efbeda0abe7993d95e2b2aea2f461edd307/docs/MAINTAINERS.md#publishing">[6]</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_Universal_USB_Installer" id="使用_Universal_USB_Installer"><span id=".E4.BD.BF.E7.94.A8_Universal_USB_Installer"></span>使用 Universal USB Installer</h3></div>
+<ul><li>下载页包含可能带毒的假<i>下载</i>按钮。</li>
+<li>Universal USB Installer 不会按原样写入 ISO 数据，会由于 syslinux 版本的差异导致 BIOS 环境无法启动，可参考 <a href="https://bbs.archlinux.org/viewtopic.php?pid=1344629">[7]</a>。</li>
+<li>Arch Linux 安装镜像的引导加载器期望 ISO 数据位于卷标为 <code>ARCH_<i>YYYYXX</i></code> 的卷上。Universal USB Installer 不会更新卷标，也不会修正引导加载器的配置。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_.E4.BD.BF.E7.94.A8_UNetbootin" id="使用_UNetbootin"><span id=".E4.BD.BF.E7.94.A8_UNetbootin"></span>使用 UNetbootin</h3></div>
+<ul><li>UNetbootin 不会按原样写入 ISO 数据，会由于 syslinux 版本的差异导致 BIOS 环境无法启动。</li>
+<li>Arch Linux 安装镜像的引导加载器期望 ISO 数据位于卷标为 <code>ARCH_<i>YYYYXX</i></code> 的卷上。UNetbootin 不会更新卷标，也不会修正引导加载器的配置。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge7b390d21a8a_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_.E6.9C.AA.E6.98.BE.E7.A4.BA.E8.AE.BE.E5.A4.87" id="未显示设备"><span id=".E6.9C.AA.E6.98.BE.E7.A4.BA.E8.AE.BE.E5.A4.87"></span>未显示设备</h3></div>
+<p>如果由于 <code>/dev/disk/by-label/ARCH_<i>YYYYMM</i></code> 未挂载而出现 <code>device did not show up after 30 seconds</code> 报错，可以尝试将 U 盘重命名为 <code>ARCH_<i>YYYYMM</i></code> 来让 Arch 进行自动搜寻（例如 ISO 名为 <code>archlinux-2021.02.01-x86_64.iso</code>，设备名应为 <code>ARCH_202102</code>）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_Failed_to_set_up_loop_devices__No_such_f" id="Failed_to_set_up_loop_devices:_No_such_file_or_directory">Failed to set up loop devices: No such file or directory</h3></div>
+<p>如果你看到了 <code>losetup: /run/archiso/bootmnt/arch/x86_64/airootfs.sfs: failed to set up loop devices: No such file or directory</code> 报错，请尝试换用 USB 2.0 接口，有时 USB 集线器的部分 USB 3.0 接口会失效。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7b390d21a8a_.E5.85.B6.E5.AE.83.E6.8A.A5.E9.94.99" id="其它报错"><span id=".E5.85.B6.E5.AE.83.E6.8A.A5.E9.94.99"></span>其它报错</h3></div>
+<p>对于其它报错，请尝试换一个 U 盘，通常情况下可以解决所有问题。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge7b390d21a8a_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://wiki.gentoo.org/wiki/LiveUSB/Guide">Gentoo:LiveUSB/Guide</a></li>
+<li><a href="https://fedoraproject.org/wiki/How_to_create_and_use_Live_USB">Fedora wiki - How to create and use Live USB</a></li>
+<li><a href="https://en.opensuse.org/SDB:Live_USB_stick">openSUSE wiki - SDB:Live USB stick</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807022021
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.398 seconds
+Real time usage: 0.418 seconds
+Preprocessor visited node count: 1274/1000000
+Revision size: 25579/2097152 bytes
+Post‐expand include size: 17872/2097152 bytes
+Template argument size: 8599/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  168.435      1 -total
+ 14.14%   23.823      1 Template:Merge
+  8.97%   15.104     11 Template:Note
+  7.90%   13.304     87 Template:Ic
+  6.68%   11.252      3 Template:Tip
+  4.85%    8.162      9 Template:Bc
+  4.30%    7.238      1 Template:翻译状态
+  3.70%    6.236      1 Template:小贴士
+  3.28%    5.532     12 Template:Pkg
+  2.91%    4.904      3 Template:Man
+-->
+<!-- Render ID 8a1fec91-9206-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3910:|#|:idhash:canonical!zh-cn and timestamp 20260807022021 and revision id 33677. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

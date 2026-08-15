@@ -1,0 +1,202 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg11c49d01fb59">XDG MIME 应用程序</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg39f5c87a7ce6">桌面项</a></li>
+<li><a href="#pg712e4adaddad">桌面环境</a></li>
+<li><a href="#pg3d6d7c1e6c7c">窗口管理器</a></li>
+<li><a href="#pg2394d2f9797c">默认应用程序</a></li>
+<li><a href="#pga1898b9793a9">xdg-utils</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/XDG_MIME_Applications">XDG MIME Applications</a>，最近一次同步于 2026-07-20，若英文版本有所<a href="https://wiki.archlinux.org/title/XDG_MIME_Applications?diff=0&amp;oldid=875640">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/XDG_MIME_Applications_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p><a href="https://specifications.freedesktop.org/mime-apps-spec/latest/">XDG MIME 应用程序规范</a>基于#共享 MIME 数据库和<a href="#pg39f5c87a7ce6">桌面项</a>，提供<a href="#pg2394d2f9797c">默认应用程序</a>。
+</p>
+<ol><li>应用程序通过<a href="#pg39f5c87a7ce6">桌面项</a>描述它们能够处理哪些 MIME 类型。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=desktop-file-utils">desktop-file-utils</a></span><sup><small>包</small></sup></span> 注册了一个 <a href="#pge47265f36417">pacman 钩子</a>，用于构建由桌面项处理的 MIME 类型的缓存数据库，详见 <span class="plainlinks archwiki-template-man" title="$ man 1 update-desktop-database"><a href="https://man.archlinux.org/man/update-desktop-database.1">update-desktop-database(1)</a></span>。</li>
+<li>应用程序可以通过将 XML 文件放置在 <code>/usr/share/mime/packages/</code> 中来安装新的 MIME 类型。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=shared-mime-info">shared-mime-info</a></span><sup><small>包</small></sup></span> 注册了一个 <a href="#pge47265f36417">pacman 钩子</a>，用于构建共享 MIME 信息数据库缓存，详见 <span class="plainlinks archwiki-template-man" title="$ man 1 update-mime-database"><a href="https://man.archlinux.org/man/update-mime-database.1">update-mime-database(1)</a></span>。</li>
+<li><a href="#pg712e4adaddad">桌面环境</a>和用户可以通过 mimeapps.list 文件更改默认应用程序并添加或删除 MIME 类型与应用程序的关联。</li></ol>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg11c49d01fb59_.E5.85.B1.E4.BA.AB_MIME_.E6.95.B0.E6.8D.AE.E5.BA.93" id="共享_MIME_数据库"><span id=".E5.85.B1.E4.BA.AB_MIME_.E6.95.B0.E6.8D.AE.E5.BA.93"></span>共享 MIME 数据库</h2></div>
+<p><a href="https://specifications.freedesktop.org/shared-mime-info-spec/latest/">XDG 共享 MIME 信息数据库规范</a>促进了桌面环境之间的共享 MIME 数据库，并允许应用程序轻松地在系统范围内注册新的 MIME 类型。
+</p><p>该数据库是由软件包在 <code>/usr/share/mime/packages/</code> 中安装的 XML 文件构建的，使用来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=shared-mime-info">shared-mime-info</a></span><sup><small>包</small></sup></span> 的工具。
+</p><p><code>/usr/share/mime/</code> 中的文件不应直接编辑，但可以在 <code>~/.local/share/mime/</code> 树中为每个用户维护单独的数据库。
+</p><p>“URI 方案处理 [...] 通过处理 <code>x-scheme-handler/foo</code> MIME 类型的应用程序来进行，其中 foo 是相关的 URI 方案。”<a href="https://specifications.freedesktop.org/shared-mime-info-spec/latest/ar01s02.html#id-1.3.18">[1]</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg11c49d01fb59_.E6.96.B0.E7.9A.84_MIME_.E7.B1.BB.E5.9E.8B" id="新的_MIME_类型"><span id=".E6.96.B0.E7.9A.84_MIME_.E7.B1.BB.E5.9E.8B"></span>新的 MIME 类型</h3></div>
+
+<p>此示例定义了一个新的 MIME 类型 <code>application/x-foobar</code>，并将其分配给任何以 <i>.foo</i> 结尾的文件。只需创建以下文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.local/share/mime/packages/application-x-foobar.xml</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info"&gt;
+    <b>&lt;mime-type type="application/x-foobar"&gt;</b>
+        &lt;comment&gt;foo 文件&lt;/comment&gt;
+        &lt;icon name="application-x-foobar"/&gt;
+        &lt;glob-deleteall/&gt;
+        <b>&lt;glob pattern="*.foo"/&gt;</b>
+    &lt;/mime-type&gt;
+&lt;/mime-info&gt;</pre>
+<p>然后更新 MIME 数据库：
+</p>
+<pre>$ update-mime-database ~/.local/share/mime
+</pre>
+<p>当然，如果没有桌面条目与 MIME 类型关联，这不会产生任何效果。您可能需要创建新的<a href="#pg39f5c87a7ce6">桌面项</a>或修改 mimeapps.list。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg11c49d01fb59_mimeapps_list" id="mimeapps.list">mimeapps.list</h2></div>
+<p><a href="https://specifications.freedesktop.org/mime-apps-spec/latest/">XDG 标准</a>是配置桌面环境最常用的方式。每个 MIME 类型的默认应用程序存储在 <code>mimeapps.list</code> 文件中，该文件可以存储在多个位置。它们按照以下顺序搜索，前面的关联优先于后面的关联：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>路径</th>
+<th>用途
+</th></tr>
+<tr>
+<td><code>~/.config/mimeapps.list</code></td>
+<td>用户覆盖
+</td></tr>
+<tr>
+<td><code>/etc/xdg/mimeapps.list</code></td>
+<td>系统范围的覆盖
+</td></tr>
+<tr>
+<td><code>~/.local/share/applications/mimeapps.list</code></td>
+<td><b>（已废弃）</b>用户覆盖
+</td></tr>
+<tr>
+<td><code>/usr/local/share/applications/mimeapps.list</code><br/><code>/usr/share/applications/mimeapps.list</code></td>
+<td>分发提供的默认值
+</td></tr></tbody></table>
+<p>此外，还可以在名为 <code><i>桌面环境</i>-mimeapps.list</code> 的文件中定义<a href="#pg712e4adaddad">桌面环境</a>特定的默认应用程序，其中 <code><i>桌面环境</i></code> 是桌面环境的名称（来自 <code>XDG_CURRENT_DESKTOP</code> 环境变量）。例如，<code>/etc/xdg/xfce-mimeapps.list</code> 定义了 <a href="#pg361394ab1daf">Xfce</a> 的系统范围默认应用程序覆盖。这些特定桌面的覆盖优先于相应的非特定桌面文件。例如，<code>/etc/xdg/xfce-mimeapps.list</code> 优先于 <code>/etc/xdg/mimeapps.list</code>，但仍会被 <code>~/.config/mimeapps.list</code> 覆盖。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>虽然已废弃，但许多应用程序仍然读写 <code>~/.local/share/applications/mimeapps.list</code>。为了简化维护，可以将其符号链接到 <code>~/.config/mimeapps.list</code>： <pre>$ ln -s ~/.config/mimeapps.list ~/.local/share/applications/mimeapps.list</pre></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>您还可能会在这些位置找到名为 <code>defaults.list</code> 的文件。此文件类似于 <code>mimeapps.list</code>，但仅列出默认应用程序（而不是已添加/删除的关联）。它现在已废弃，应手动与 <code>mimeapps.list</code> 合并。</div>
+<p>要发现所有被扫描的文件，可以通过设置环境变量 <code>XDG_UTILS_DEBUG_LEVEL=2</code> 启用调试模式：例如，<code>xdg-mime query default <i>类型</i></code> 命令将打印它搜索 MIME 信息的每个配置文件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg11c49d01fb59_.E6.A0.BC.E5.BC.8F" id="格式"><span id=".E6.A0.BC.E5.BC.8F"></span>格式</h3></div>
+<p>考虑以下示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">mimeapps.list</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Added Associations]
+image/jpeg=bar.desktop;baz.desktop
+video/H264=bar.desktop
+[Removed Associations]
+video/H264=baz.desktop
+[Default Applications]
+image/jpeg=foo.desktop</pre>
+<p>每个部分将一个或多个桌面条目分配给 MIME 类型。
+</p>
+<ul><li><b>Added Associations</b> 表示应用程序支持打开该 MIME 类型。例如，<code>bar.desktop</code> 和 <code>baz.desktop</code> 可以打开 JPEG 图像。这可能会影响您在文件浏览器中右键点击文件时看到的应用程序列表。</li>
+<li><b>Removed Associations</b> 表示应用程序<b>不</b>支持该 MIME 类型。例如，<code>baz.desktop</code> 无法打开 H.264 视频。</li>
+<li><b>Default Applications</b> 表示该应用程序应为打开该 MIME 类型的默认选择。例如，JPEG 图像应使用 <code>foo.desktop</code> 打开。这隐式地在应用程序和 MIME 类型之间添加了一个关联。如果有多个应用程序，它们会按顺序尝试。</li></ul>
+<p>每个部分都是可选的，如果不需要可以省略。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg11c49d01fb59_.E5.B7.A5.E5.85.B7" id="工具"><span id=".E5.B7.A5.E5.85.B7"></span>工具</h2></div>
+<p>虽然可以通过直接编辑 mimeapps.list 和#共享 MIME 数据库来配置默认应用程序和 MIME 类型，但有许多工具可以简化这一过程。这些工具也很重要，因为应用程序可能将文件的打开委托给这些工具，而不是自己尝试实现 MIME 类型标准。
+</p><p>如果您使用的是<a href="#pg712e4adaddad">桌面环境</a>，应首先检查它是否提供了自己的工具。应该优先使用这些工具，而不是其他替代方案。
+</p><p>官方的 <a href="#pga1898b9793a9">xdg-utils</a> 包含用于根据 XDG 标准管理 MIME 类型和默认应用程序的工具（<a href="#pga1898b9793a9">xdg-mime</a>）。最重要的是，它提供了 <a href="#pgb93e62033a8f">xdg-open</a>，许多应用程序用它来用默认应用程序打开文件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg11c49d01fb59_lsdesktopf" id="lsdesktopf">lsdesktopf</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lsdesktopf/">lsdesktopf</a></span><sup><small>AUR</small></sup></span> 提供了几种搜索 MIME 数据库和桌面 MIME 条目的方法。
+</p><p>例如，要查看系统中所有与 MIME 类型 <code>video</code> 相关联的 <i>.desktop</i> 文件的 MIME 扩展名，可以使用 <code>lsdesktopf --gm -gx video</code>，或要在 XML 数据库文件中搜索，请使用 <code>lsdesktopf --gdx -gx video</code>。要快速了解有多少个且哪些 <i>.desktop</i> 文件可以与某个 MIME 类型关联，请使用 <code>lsdesktopf --gen-mimeapps</code>。要查看 XML 数据库文件中的所有文件名扩展名，可以使用 <code>lsdesktopf --gdx -gfx</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg11c49d01fb59_selectdefaultapplication" id="selectdefaultapplication">selectdefaultapplication</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/selectdefaultapplication-git/">selectdefaultapplication-git</a></span><sup><small>AUR</small></sup></span> 是一个 GUI 应用程序，列出了所有支持各种 MIME 类型的应用程序，并允许您快速将其设置为所有或一些它支持的 MIME 类型的默认应用程序（通过修改 <code>mimeapps.list</code>）。
+</p><p>它还显示了“可读”的名称和文件扩展名，因此您不需要记住 MIME 类型的名称。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg11c49d01fb59_mime_tui" id="mime-tui">mime-tui</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mime-tui/">mime-tui</a></span><sup><small>AUR</small></sup></span> 是一个 TUI（文本用户界面）应用程序，它允许用户通过两种方式之一来编辑 mimetype 关联（通过修改 <code>mimeapps.list</code>）：一种是按应用程序编辑（此应用程序应支持哪些 mimetype 类型？），另一种是按 mimetype 编辑（此 mimetype 类型应与哪些应用程序关联？）。此外，它还能标记与已卸载应用程序关联的 mimetype 类型。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg11c49d01fb59_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<p>如果文件未通过您期望的默认应用程序打开，可能有多个原因。您可能需要检查每种情况。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg11c49d01fb59_.E7.BC.BA.E5.B0.91.E6.A1.8C.E9.9D.A2.E6.9D.A1.E7.9B.AE" id="缺少桌面条目"><span id=".E7.BC.BA.E5.B0.91.E6.A1.8C.E9.9D.A2.E6.9D.A1.E7.9B.AE"></span>缺少桌面条目</h3></div>
+<p>需要一个<a href="#pg39f5c87a7ce6">桌面项</a>来将应用程序与 MIME 类型关联。确保存在这样的条目，并且可以用它来（手动）打开文件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg11c49d01fb59_.E7.BC.BA.E5.B0.91.E5.85.B3.E8.81.94" id="缺少关联"><span id=".E7.BC.BA.E5.B0.91.E5.85.B3.E8.81.94"></span>缺少关联</h3></div>
+<p>如果应用程序的桌面条目没有在其 <code>MimeType</code> 键下指定 MIME 类型，它在需要打开该类型时将不会被考虑。编辑 mimeapps.list，将桌面文件与 MIME 类型关联起来。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg11c49d01fb59_.E9.9D.9E.E9.BB.98.E8.AE.A4.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="非默认应用程序"><span id=".E9.9D.9E.E9.BB.98.E8.AE.A4.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>非默认应用程序</h3></div>
+<p>如果桌面条目已与 MIME 类型关联，可能只是没有设置为默认值。编辑 mimeapps.list，将其设置为默认关联。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg11c49d01fb59_.E9.9D.9E.E6.A0.87.E5.87.86.E5.85.B3.E8.81.94" id="非标准关联"><span id=".E9.9D.9E.E6.A0.87.E5.87.86.E5.85.B3.E8.81.94"></span>非标准关联</h3></div>
+<p>应用程序可以忽略或仅部分实现 XDG 标准。检查是否使用了已废弃的文件，如 <code>~/.local/share/applications/mimeapps.list</code> 和 <code>~/.local/share/applications/defaults.list</code>。如果您尝试从其他应用程序（如 Web 浏览器或文件管理器）打开文件，请检查该应用程序是否有自己的方法来选择默认应用程序。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg11c49d01fb59_.desktop_.E6.96.87.E4.BB.B6.E4.B8.AD.E5.BD.B1.E5.93.8D.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E5.90.AF.E5.8A.A8.E7.9A.84.E5.8F.98.E9.87.8F" id=".desktop_文件中影响应用程序启动的变量"><span id=".desktop_.E6.96.87.E4.BB.B6.E4.B8.AD.E5.BD.B1.E5.93.8D.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E5.90.AF.E5.8A.A8.E7.9A.84.E5.8F.98.E9.87.8F"></span>.desktop 文件中影响应用程序启动的变量</h3></div>
+
+<p>支持该规范的桌面环境和文件管理器根据 <i>.desktop</i> 文件中的定义启动程序。参见<a href="#pg39f5c87a7ce6">桌面项#应用程序项</a>。
+</p><p>通常不需要配置打包的 <i>.desktop</i> 文件，但它可能并非没有缺陷。即使一个包含必要 MIME 类型描述的应用程序在 <i>.desktop</i> 文件中的 <code>MimeType</code> 变量被用于关联，它也可能无法正确启动，根本无法启动，或者启动时未能打开文件。
+</p><p>例如，这可能发生在 <code>Exec</code> 变量缺少打开文件所需的内部选项，或缺少如何在菜单中显示应用程序的配置。<code>Exec</code> 变量通常以 <code>%</code> 开头；有关当前支持的选项，请参见 <a href="https://specifications.freedesktop.org/desktop-entry-spec/latest/exec-variables.html">exec-variables</a>。
+</p><p>以下表格列出了影响应用程序启动的 <i>.desktop</i> 文件中主要的变量条目，如果它与 MIME 类型关联。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>变量名称</th>
+<th>示例 1 内容</th>
+<th>示例 2 内容</th>
+<th>描述
+</th></tr>
+<tr>
+<td>DBusActivatable</td>
+<td>DBusActivatable=true</td>
+<td>DBusActivatable=false</td>
+<td>应用程序与 <a href="https://www.freedesktop.org/wiki/Software/dbus/">D-Bus</a> 交互。<br/> 另见配置： <a href="https://specifications.freedesktop.org/desktop-entry-spec/latest/dbus.html">D-Bus</a>。
+</td></tr>
+<tr>
+<td>MimeType</td>
+<td>MimeType=application/vnd.oasis.opendocument.text</td>
+<td>MimeType=application/vnd.sun.xml.math</td>
+<td>应用程序支持的 MIME 类型列表
+</td></tr>
+<tr>
+<td>StartupWMClass</td>
+<td>StartupWMClass=google-chrome</td>
+<td>StartupWMClass=xpad</td>
+<td>将窗口与拥有该窗口的应用程序关联
+</td></tr>
+<tr>
+<td>Terminal</td>
+<td>Terminal=true</td>
+<td>Terminal=false</td>
+<td>在默认终端中启动
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg11c49d01fb59_.E7.A9.BA.E7.9A.84_MIME_.E5.85.B3.E8.81.94_.2F_.E5.9C.A8_KDE_.E4.B8.AD.E6.89.93.E5.BC.80.E8.8F.9C.E5.8D.95" id="空的_MIME_关联_/_在_KDE_中打开菜单"><span id=".E7.A9.BA.E7.9A.84_MIME_.E5.85.B3.E8.81.94_.2F_.E5.9C.A8_KDE_.E4.B8.AD.E6.89.93.E5.BC.80.E8.8F.9C.E5.8D.95"></span>空的 MIME 关联 / 在 KDE 中打开菜单</h3></div>
+
+<p><br/>
+安装 archlinux-xdg-menu 并运行 <code>XDG_MENU_PREFIX=arch- kbuildsycoca6</code>，或将 <code>export XDG_MENU_PREFIX=plasma-</code> 添加到 <code>.xinitrc</code>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807080145
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.181 seconds
+Real time usage: 0.189 seconds
+Preprocessor visited node count: 700/1000000
+Revision size: 11783/2097152 bytes
+Post‐expand include size: 10906/2097152 bytes
+Template argument size: 4756/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 79/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   61.728      1 -total
+ 11.15%    6.885     49 Template:Ic
+ 10.44%    6.445      2 Template:Expansion
+  8.41%    5.190      1 Template:Related_articles_start
+  6.76%    4.173      3 Template:META_Message
+  6.65%    4.105      1 Template:Tip
+  6.00%    3.706      1 Template:Move
+  5.02%    3.102      1 Template:Note
+  4.57%    2.821      4 Template:Pkg
+  4.16%    2.570      3 Template:AUR
+-->
+<!-- Render ID 3b8a468e-9236-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7984:|#|:idhash:canonical!zh-cn and timestamp 20260807080145 and revision id 35361. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

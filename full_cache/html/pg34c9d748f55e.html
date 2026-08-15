@@ -1,0 +1,154 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg34c9d748f55e">命令行解释器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgc9277cee06e3">核心工具</a></li>
+<li><a href="#pg5319995350d6">dotfiles</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Command-line_shell">Command-line shell</a>，最近一次同步于 2025-10-24，若英文版本有所<a href="https://wiki.archlinux.org/title/Command-line_shell?diff=0&amp;oldid=849359">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Command-line_shell_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>根据 <a href="https://en.wikipedia.org/wiki/zh:Unix_shell">Wikipedia</a>:
+</p>
+<dl><dd>Unix shell 是为 Unix 和类 Unix 系统提供传统用户界面的命令行解释器或 shell，通过执行用户输入的命令文本，或包含命令的文本脚本来指导计算机的运行。</dd></dl>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg34c9d748f55e_Shell_.E5.88.97.E8.A1.A8" id="Shell_列表"><span id="Shell_.E5.88.97.E8.A1.A8"></span>Shell 列表</h2></div>
+<p>或多或少<a href="https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html">符合 POSIX</a> 的 Shell 列在 #符合 POSIX 下，语法不同的 Shell 列在 #其他 Shell 下。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg34c9d748f55e_.E7.AC.A6.E5.90.88_POSIX" id="符合_POSIX"><span id=".E7.AC.A6.E5.90.88_POSIX"></span>符合 POSIX</h3></div>
+<p>可以从 <code>/usr/bin/sh</code> 链接到这些 Shell。当使用 <code>sh</code> 名称调用 <a href="#pg1ca1e15827ff">Bash</a>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mksh/">mksh</a></span><sup><small>AUR</small></sup></span> 和 <a href="#pg187873cfd725">zsh</a> 时，它们会自动变得更符合 POSIX。
+</p>
+<ul><li><b><a href="#pg1ca1e15827ff">Bash</a></b> — Bash 扩展了 Bourne shell，支持命令行历史和补全、索引和关联数组、整数算术、进程替换、here document、正则表达式匹配和大括号展开。</li></ul>
+<dl><dd><a href="https://www.gnu.org/software/bash/">https://www.gnu.org/software/bash/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bash">bash</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg774ddff6a445">Dash</a></b> — Almquist SHell (ash) 的 NetBSD 版本的后代。快速且符合 POSIX 的 Shell，以尽可能小为目标。</li></ul>
+<dl><dd><a href="http://gondor.apana.org.au/~herbert/dash/">http://gondor.apana.org.au/~herbert/dash/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dash">dash</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>KornShell（ksh）</b> — KornShell 语言是完整、强大的高级编程语言，通常比其他高级语言更容易快捷。这使得它特别适合于原型开发。Ksh 拥有 Bourne shell 和 C shell 的最佳特性，以及独有的许多新特性。因此，无论是系统交互，还是编程，ksh 都可以大大提高工作效率和质量。Ksh 程序更容易编写，并且比用 C 等低级语言编写的程序更简洁和可读。</li></ul>
+<dl><dd><a href="http://www.kornshell.com">http://www.kornshell.com</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ksh">ksh</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>nsh</b> — 类似于 Fish 的命令行 shell，但兼容 POSIX。</li></ul>
+<dl><dd><a href="https://github.com/nuta/nsh">https://github.com/nuta/nsh</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nsh-git/">nsh-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgb8c96dd2723a">Oil Shell</a>（OSH）</b> — Oil Shell 是兼容 Bash 的 UNIX 命令行 Shell。OSH 可以在大多数类 UNIX 操作系统上运行，包括 GNU/Linux。它是用 Python (v2.7) 编写的，但附带了一个原生可执行文件。OSH 使用的 Bash 方言称为 OSH 语言。</li></ul>
+<dl><dd><a href="https://oils.pub/">https://oils.pub/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=oil">oil</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Yash</b> — Yet another shell（另一个 shell）是用 C99（ISO/IEC 9899:1999）编写的符合 POSIX 的命令行 shell。Yash 旨在成为最符合 POSIX 的 shell，同时支持日常交互和脚本使用。</li></ul>
+<dl><dd><a href="https://magicant.github.io/yash/">https://magicant.github.io/yash/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/yash/">yash</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg187873cfd725">Zsh</a></b> — 为交互式使用而设计的 Shell，同时也是一门强大的脚本语言。Bash、ksh 和 tcsh 的许多有用特性都被合并到 Zsh 中，还添加了许多原创特性。<a href="https://zsh.sourceforge.net/Intro/intro_toc.html">介绍性文档</a>详细介绍了 Zsh 的一些特性。</li></ul>
+<dl><dd><a href="https://www.zsh.org/">https://www.zsh.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=zsh">zsh</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可以用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=shellcheck">shellcheck</a></span><sup><small>包</small></sup></span> lint POSIX 和 Bash 脚本。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg34c9d748f55e_.E5.85.B6.E4.BB.96_Shell" id="其他_Shell"><span id=".E5.85.B6.E4.BB.96_Shell"></span>其他 Shell</h3></div>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/C_shell">C shell</a> (tcsh)</b> — 命令语言解释器，既可用作交互式登录 shell，也可用作 shell 脚本命令处理器。其包含命令行编辑器，可编程单词补全， 拼写修正，历史机制，任务控制和类 C 句法。</li></ul>
+<dl><dd><a href="https://www.tcsh.org">https://www.tcsh.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tcsh">tcsh</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Closh</b> — 基于 Clojure 的类 Bash shell。</li></ul>
+<dl><dd><a href="https://github.com/dundalek/closh">https://github.com/dundalek/closh</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/closh/">closh</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Elvish</b> — Elvish 是一个现代、富有表现力的 shell。可以通过管道传输内部结构值。这一功能可以避免大量复杂的文本处理代码。它是一种表现力丰富的编程语言，具有异常、命名空间和匿名函数等功能。它具有强大的读入行功能，可在键入时检查语法，默认情况下还具有语法高亮功能。</li></ul>
+<dl><dd><a href="https://elv.sh">https://elv.sh</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=elvish">elvish</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg5d70232b3a46">fish</a></b> — 智能、用户友好型命令行 shell。Fish 采用全色命令行句法高亮，也对命令及其参数、文件存在性和历史提供高亮和补全。其也支持对历史和命令的输入实时补全。Fish 还能够解析系统 man 手册页面，以决定命令的有效参数，从而实现高亮和补全。可以采用  <code>Alt+Up</code> 对上一命令进行修改。fish 守护程序（fishd）对历史和通用且持续的环境变量，在所有 fish 实例间进行同步。而且，fish 具有极度简洁的编程句法和类似 ruby 的控制流。参见<a href="https://fishshell.com/docs/current/tutorial">教程</a>以获得更多信息。</li></ul>
+<dl><dd><a href="https://fishshell.com/">https://fishshell.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fish">fish</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>ion</b> — Ion 是一个现代系统 shell，具有简洁但强大的句法。全部使用 Rust 编写，这极大提升了 shell 的整体质量和安全性，消除了类似于 ShellShock 的漏洞的可能，也简化了开发。利用其功能，Ion 还能提供超越 Dash 的性能水平。尽管它伴随且主要为了 RedoxOS 开发，在其它 *nix 平台上也完全可用。参见<a href="https://doc.redox-os.org/ion-manual/">用户手册</a>以获得更多信息.</li></ul>
+<dl><dd><a href="https://gitlab.redox-os.org/redox-os/ion/">https://gitlab.redox-os.org/redox-os/ion/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ion-git/">ion-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Murex</b> — 改进功能和增强用户体验的命令行 shell。</li></ul>
+<dl><dd><a href="https://murex.rocks/">https://murex.rocks/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/murex/">murex</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgb2afc7bfadb1">nushell</a></b> — Nu 从函数式编程语言、现代命令行接口工具中汲取灵感。其不将文件和服务视为纯文本流，而是将输入视为有结构之物。</li></ul>
+<dl><dd><a href="https://www.nushell.sh">https://www.nushell.sh</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nushell">nushell</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Oh</b> — Go 编写的 Unix shell。其主旨类似其他 Unix shell，但细节有所不同。在没有牺牲 shell 的交互功能的条件下，Oh 扩展了 shell 的编程语言功能。</li></ul>
+<dl><dd><a href="https://github.com/michaelmacinnis/oh">https://github.com/michaelmacinnis/oh</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/oh-git/">oh-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgef1f3694e83f">PowerShell</a></b> — PowerShell 是一种面向对象的编程语言和交互式命令行 shell。原先为 Windows 编写且被其独占。后来被开源、移植到 Linux 和 MacOS 上。</li></ul>
+<dl><dd><a href="https://github.com/PowerShell/PowerShell">https://github.com/PowerShell/PowerShell</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/powershell/">powershell</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/rc">rc</a></b> — Plan 9 的命令解释器，功能与 UNIX 的 Bourne shell 类似，也增加了一些小功能，语法也不那么独树一帜。</li></ul>
+<dl><dd><a href="https://doc.cat-v.org/plan_9/4th_edition/papers/rc">https://doc.cat-v.org/plan_9/4th_edition/papers/rc</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=9base">9base</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>xonsh</b> — 由 Python 驱动的 shell，附加 Bash 和 IPython 中常用的 shell 原语。</li></ul>
+<dl><dd><a href="https://xon.sh/">https://xon.sh/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xonsh">xonsh</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg34c9d748f55e_.E6.9B.B4.E6.94.B9.E9.BB.98.E8.AE.A4_Shell" id="更改默认_Shell"><span id=".E6.9B.B4.E6.94.B9.E9.BB.98.E8.AE.A4_Shell"></span>更改默认 Shell</h2></div>
+<p>在安装上面的 Shell 之后，运行其可执行文件即可在当前 Shell 中直接执行。但是，如果想在登录时直接使用，则需要更改默认 Shell。
+</p><p>列出所有已安装的 shell：
+</p>
+<pre>$ chsh -l
+</pre>
+<p>为当前用户设置默认 Shell：
+</p>
+<pre>$ chsh -s <i>/full/path/to/shell</i>
+</pre>
+<p>如果使用 <a href="#pg70e8fdf88586">systemd-homed</a>，请运行：
+</p>
+<pre>$ homectl update --shell=<i>/full/path/to/shell</i> <i>用户名</i>
+</pre>
+<p>其中 <code><i>/full/path/to/shell</i></code> 是 <code>chsh -l</code> 提供的完整路径。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>新用户的默认 shell 是 <a href="#pg1ca1e15827ff">Bash</a>。要切换回 <a href="#pg1ca1e15827ff">Bash</a>，以上命令 shell 路径采用 <code>/usr/bin/bash</code> 即可。</div>
+<p>如果现在注销并再次登录，就将使用新设置的 Shell。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><i>chsh</i> 会参考 <code>/etc/shells</code>。如果最近安装的 Shell 不在列表中，可以手动将其添加到此文件中。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg34c9d748f55e_.E5.8D.B8.E8.BD.BD_Shell" id="卸载_Shell"><span id=".E5.8D.B8.E8.BD.BD_Shell"></span>卸载 Shell</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不遵循以下步骤可能会导致用户无法访问能用的 Shell。</div>
+<p>移除 Shell 软件包前先更改默认 Shell。
+</p><p>或者，修改<span class="ilh-all" data-foreign-title="user database" data-lang-code="en" data-lang-name="英语" data-orig-title="用户数据库"><span class="ilh-page"><a href="#pgbdde1827bc04">用户数据库</a></span></span>。
+</p><p>对于每个设置了除 <i>bash</i> 之外的 Shell 作为登录 Shell 的用户（如果有必要，也包括 root 用户）执行这一操作。完成后就可以移除软件包。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg34c9d748f55e_.E7.99.BB.E5.BD.95_Shell" id="登录_Shell"><span id=".E7.99.BB.E5.BD.95_Shell"></span>登录 Shell</h2></div>
+<p><i>登录 Shell</i> 是一种调用模式，在这种模式下，Shell 读取一次性初始化文件，例如系统范围的 <code>/etc/profile</code>、用户的 <code>~/.profile</code> 或其他特定于 Shell 的文件。这些文件将会设置初始环境，且会被所有从 Shell 启动的进程（包括其他非登录 Shell 或图形程序）继承。因此，其只会在会话开始时读取一次，例如，在控制台或通过 <a href="#pg81569eb76dc7">SSH</a> 登录、使用 <code>--login</code> 参数通过 <a href="#pg023562413be7">sudo</a> 或 <a href="#pg8b873c561d21">su</a> 切换用户、手动调用登录 Shell（例如，通过 <code>bash --login</code>）。
+</p><p>可在#配置文件及其所包含的链接中查看各种初始化文件的概述。参见 Stackexchange 上的<a href="https://unix.stackexchange.com/q/38175">登录 Shell 和非登录 Shell 之间的区别？（英文）</a>和<a href="https://unix.stackexchange.com/q/324359">为什么要用“登录”Shell 而不是“非登录”Shell？（英文）</a>了解更多有关登录 Shell 的信息.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg34c9d748f55e_.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6" id="配置文件"><span id=".E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6"></span>配置文件</h2></div>
+<p>要在登录时或在控制台中自动启动程序，可以使用 Shell 启动文件或目录。阅读 Shell 的文档或其对应文章，例如 <a href="#pg1ca1e15827ff">Bash#配置文件</a>或 <span class="ilh-all" data-foreign-title="Zsh#Startup/Shutdown files" data-lang-code="en" data-lang-name="英语" data-orig-title="Zsh 启动/结束文件"><span class="ilh-page"><a href="#pgd0e5d8a565ac">Zsh#启动/结束文件</a></span></span>。
+</p><p><a href="https://en.wikipedia.org/wiki/Unix_shell#Configuration_files">Wikipedia:Unix shell#Configuration files</a> 中有对各种 Shell 配置文件的比较。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg34c9d748f55e_.2Fetc.2Fprofile" id="/etc/profile"><span id=".2Fetc.2Fprofile"></span>/etc/profile</h3></div>
+<p>在登录时，所有兼容 Bourne Shell 的 Shell 都会读取 <code>/etc/profile</code>，而 <code>/etc/profile</code> 又会读取 <code>/etc/profile.d/</code> 中任何可读的 <code>*.sh</code> 文件：这些脚本不需要解释器指令，也不需要具有可执行权限。它们用于设置环境并定义特定于应用程序的设置。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg34c9d748f55e_.E6.A0.87.E5.87.86.E5.8C.96" id="标准化"><span id=".E6.A0.87.E5.87.86.E5.8C.96"></span>标准化</h3></div>
+<p>可以使（某些）Shell 配置文件遵循相同的命名约定，并支持一些 Shell 之间的共同的配置。
+</p><p>请参阅<a href="https://blog.flowblok.id.au/2013-02/shell-startup-scripts.html">相关文章</a>和<a href="https://heptapod.host/flowblok/shell-startup">相关存储库</a>，也请参阅<a href="https://github.com/sgleizes/xsh">xsh</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg34c9d748f55e_.E8.BE.93.E5.85.A5.E4.B8.8E.E8.BE.93.E5.87.BA" id="输入与输出"><span id=".E8.BE.93.E5.85.A5.E4.B8.8E.E8.BE.93.E5.87.BA"></span>输入与输出</h2></div>
+<p>另见 <a href="https://mywiki.wooledge.org/BashGuide/InputAndOutput">GregsWiki</a> 及 <a href="https://www.tldp.org/LDP/abs/html/io-redirection.html">I/O 重定向</a>。
+</p>
+<ul><li>重定向在命令执行前截断文件：因此使用 <pre>$ <i>command</i> <i>file</i> &gt; <i>file</i></pre> 命令不会达到预期效果。的确，有部分命令（例如 <a href="#pgeaad1414e3d4">sed</a>） 提供就地编辑文件的选项，但大部分不会。这时，可用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=moreutils">moreutils</a></span><sup><small>包</small></sup></span> 的 <span class="plainlinks archwiki-template-man" title="$ man 1 sponge"><a href="https://man.archlinux.org/man/sponge.1">sponge(1)</a></span> 命令。</li>
+<li>因为 <i>cat</i> 不是 shell 内置的，所以，多数情况下，您可能发现使用<a href="https://en.wikipedia.org/wiki/Redirection_(computing)">重定向</a>更方便。例如，在脚本中或在苛求性能的情况下。事实上 <code>&lt; <i>file</i></code> 等价于 <code>cat <i>file</i></code>。</li>
+<li>遵循 POSIX 的 shell 支持 <a href="https://tldp.org/LDP/abs/html/here-docs.html">Here Document</a>: <pre>$ cat &lt;&lt; EOF
+one
+two
+three
+EOF
+</pre></li>
+<li>Shell <a href="https://en.wikipedia.org/wiki/Pipeline_(Unix)">管道</a>默认在标准输出 stdout 上操作。要在标准错误 <span class="plainlinks archwiki-template-man" title="$ man 3 stderr"><a href="https://man.archlinux.org/man/stderr.3">stderr(3)</a></span> 上输出，可重定向 <i>stderr</i> 至 <i>stdout</i>：<code><i>command</i> 2&gt;&amp;1 | <i>othercommand</i></code>；或者，对于 Bash 4：<code><i>command</i> |&amp; <i>othercommand</i></code>。</li>
+<li>许多 GNU <a href="#pg4bb6491c480c">核心工具</a>接受文件作为参数。因此，例如 <code>grep <i>pattern</i> &lt; <i>file</i></code> 可替代为 <code>grep <i>pattern</i> <i>file</i></code>。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg34c9d748f55e_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://developer.ibm.com/tutorials/l-linux-shells/">Linux 中 Shell 的演变（英文）</a>（位于 IBM developerWorks）</li>
+<li><a href="https://terminal.sexy/">terminal.sexy（英文）</a>——终端配色方案设计器</li>
+<li><a href="https://hyperpolyglot.org/unix-shells">Hyperpolyglot（英文）</a>——Shell 语法的并排比较</li>
+<li><a href="https://docstore.mik.ua/orelly/unix/upt/index.htm">UNIX Power Tools（英文）</a>——一般命令行工具用法</li>
+<li><a href="https://www.commandlinefu.com/commands/browse">commandlinefu.com（英文）</a>——命令行代码片段分享</li>
+<li><a href="#pga96df2a9d88c">应用程序列表/工具#终端模拟器</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807034059
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.216 seconds
+Real time usage: 0.224 seconds
+Preprocessor visited node count: 728/1000000
+Revision size: 11508/2097152 bytes
+Post‐expand include size: 16491/2097152 bytes
+Template argument size: 9039/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 2/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 37/5000000 bytes
+Lua time usage: 0.012/7.000 seconds
+Lua memory usage: 629527/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   91.104      1 -total
+ 39.62%   36.093      2 Template:Link-en
+ 17.80%   16.216     18 Template:App
+  4.94%    4.499     13 Template:Pkg
+  4.01%    3.651     21 Template:Ic
+  3.76%    3.430      2 Template:Man
+  3.75%    3.414      2 Template:Related
+  3.37%    3.071      1 Template:翻译状态
+  2.87%    2.616      1 Template:相关文章开始
+  2.24%    2.037      7 Template:AUR
+-->
+<!-- Render ID cdcc238e-9211-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7572:|#|:idhash:canonical!zh-cn and timestamp 20260807034059 and revision id 34502. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

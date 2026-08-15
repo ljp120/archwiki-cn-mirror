@@ -1,0 +1,258 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg9078aa01b1b0">蓝光</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg00ff68993b08">光盘驱动器</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Blu-ray">Blu-ray</a>，最近一次同步于 2025-01-04，若英文版本有所<a href="https://wiki.archlinux.org/title/Blu-ray?diff=0&amp;oldid=824502">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Blu-ray_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文旨在帮助 Linux 用户在电脑上播放合法购买的蓝光（Blu-ray）光盘。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>鉴于 Linux 上缺乏商业性蓝光播放软件，用户必须使用开源库来处理保护光盘内容的 DRM 方案。这在大多数允许互操作性的国家都是合法的。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9078aa01b1b0_.E5.8E.9F.E7.90.86" id="原理"><span id=".E5.8E.9F.E7.90.86"></span>原理</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9078aa01b1b0_.E8.93.9D.E5.85.89.E5.85.89.E7.9B.98_DRM" id="蓝光光盘_DRM"><span id=".E8.93.9D.E5.85.89.E5.85.89.E7.9B.98_DRM"></span>蓝光光盘 DRM</h3></div>
+<p>与 DVD CSS 一旦特定加密密钥泄露就会被攻破不同，蓝光使用了更强的 DRM 手段，使得其更难以被破解。第一，AACS 标准使用了更复杂的加密流程来保护光盘内容，且一旦密钥泄露，业内可将旧密钥吊销，并通过新光盘分发新的密钥。第二，蓝光具有另一层保护方式：BD+。虽然大部分商业光盘都使用 AACS，有一些额外使用了 BD+。在 2007 年，AACS 系统被黑入，解密密钥被流出到网络上，并由此产生了许多解密软件，但 Linux 用户的兴趣主要集中如何于在电脑上播放合法购买的光盘的能力。虽然业内吊销了最初流出的解密密钥，但新密钥还是时不时被流出，基本上已成了猫鼠游戏。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_AACS" id="AACS">AACS</h4></div>
+<p>AACS 标准和解密流程公开于 <a href="https://aacsla.com/aacs-specifications/">[1]</a>。大量相关文章和研究报告位于 <a href="https://forum.doom9.org/showthread.php?t=122363">[2]</a>，<a href="https://web.archive.org/web/20170809220215/http://cacr.uwaterloo.ca/~dstinson/papers/AACS-journal.pdf">[3]</a> 和 <a href="https://www.iis.sinica.edu.tw/papers/lcs/5007-F.pdf">[4]</a><sup title="最后检查状态：SSL error">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2024-07-30 ⓘ]</sup>。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libaacs">libaacs</a></span><sup><small>包</small></sup></span> 是 VideoLAN 开发团队基于高级内容访问系统（Advanced Access Content System，AACS）标准实现并分发的开源库 <a href="https://www.videolan.org/developers/libaacs.html">[5]</a>。该项目不包含任何可被用于解密版权资源的密钥或证书，但只要结合密钥数据库文件，就可以将其用于播放使用 AACS 标准的蓝光光盘。该文件名为 <code>KEYDB.cfg</code>，会被 libaacs 在 <code>$XDG_CONFIG_DIRS/aacs</code> 路径下进行访问。该文件的格式位于 <a href="https://code.videolan.org/videolan/libaacs/-/blob/master/KEYDB.cfg">[6]</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg9078aa01b1b0_AACS_.E8.A7.A3.E5.AF.86.E6.B5.81.E7.A8.8B" id="AACS_解密流程"><span id="AACS_.E8.A7.A3.E5.AF.86.E6.B5.81.E7.A8.8B"></span>AACS 解密流程</h5></div>
+<p>认证播放器解密受 AACS 保护的光盘内容分为四个阶段：
+</p>
+<ol><li>软件/嵌入式播放器的设备密钥和光盘的媒体密钥块（Media Key Block，MKB）被用于获取“处理密钥”，该密钥加上来自 MKB 的其它数据被用于计算媒体密钥。</li>
+<li>该媒体密钥，加上播放器向光盘出示有效主机证书后获取的光盘卷 ID（Volume ID，VID）被用于生成卷唯一密钥（Volume Unique Key，VUK）。</li>
+<li>该 VUK 被用于解密光盘的一系列头密钥。</li>
+<li>最后，这些头密钥被用于解密受保护的光盘媒体内容。</li></ol>
+<p>注意，这些是包含 MKB 的光盘。从 2006 年第一个蓝光产品发布开始，MKB 就一直在不断更新。最新的 MKB 版本是 78，很多光盘其实有完全相同的 MKB。播放器软件提供主机密钥和证书，而光驱包含了一系列被吊销的主机密钥/证书清单。主机密钥/证书吊销在 MKB 版本比之前播放过的盘更高的新光盘被（尝试）解密/播放时发生（将光盘插入播放器时不会），在该情况下，光驱会失去使用旧主机密钥/证书的能力。
+</p><p>通过使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libaacs">libaacs</a></span><sup><small>包</small></sup></span>，可以跳过以上部分阶段到最后一步，使得媒体播放器可以播放光盘。该步骤是通过在 <code>KEYDB.cfg</code> 中放入以下任一/两者实现的：
+</p>
+<ul><li>一个有效（于光盘 MKB 版本对应）处理密钥和一个有效（即未被光驱吊销）主机密钥/证书</li>
+<li>针对特定光盘的有效 VUK</li></ul>
+<p>如果 libaacs 找到了针对光盘 MKB 版本有效的处理密钥及有效主机密钥和证书，它就可以从步骤 2 开始解密流程。然而，主机密钥/证书会随着新蓝光光盘的传播而周期性被吊销。在吊销后，光驱将无法读取再新的和旧的光盘。该操作通常无法逆转，唯一修复方法为提供更新的主机密钥/证书（对于 Windows 用户就是更新对应的播放器软件）。该方法的优势为，只要主机密钥证书/有效且光盘使用处理密钥已知的 MKB，libaacs 就可以为任意光盘计算 VUK。
+</p><p>幸运的是，在无有效处理密钥及/或主机证书被吊销的情况下，libaacs 还是有办法解密光盘内容：在 <code>KEYDB.cfg</code> 文件内提供有效 VUK，使得 libaacs 跳到步骤 3 开始处理。与处理密钥不同，VUK 是特定于单个光盘的，但优势是只要被计算出来，VUK 就无法被吊销。如果 libaacs 使用有效主机密钥/证书成功进行了步骤 2，那它会将步骤 3 生成的 VUK 存放在 <code>~/.cache/aacs/vuk</code>。后续对同一光盘的播放，libaacs 会重用之前保存的 VUK。因此，建议备份这些 VUK，或是在网上进行共享。
+</p><p>已经有多次从不同来源汇编 VUK 的尝试，最早的可在如 <a href="https://forum.doom9.org/forumdisplay.php?f=9">Doom9.org</a> 的论坛上找到。随着社群不断组织起来，<a href="https://web.archive.org/web/20170726015555/http://www.labdv.com/aacs">[7]</a> 上创建了一个中心化的 VUK 数据库，其中包括了超过 24,000 个 VUK，但该网站似乎已不再进行维护。由 <a href="https://forum.doom9.org/showthread.php?t=172472">FindVUK tool</a> 的作者倡导的新库创建在了 <a href="http://fvonline-db.bplaced.net/">http://fvonline-db.bplaced.net/</a> ，其中包含超过 150,000 条可下载项，使其成为了最完整的公开可用 VUK 来源。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_BD.2B" id="BD+"><span id="BD.2B"></span>BD+</h4></div>
+<p>BD+ 是蓝光 DRM 的一个可选附加组件。在 2013 年 12 月，VideoLAN 发布了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libbdplus/">libbdplus</a></span><sup><small>AUR</small></sup></span>，其提供了实验性 BD+ 解密支持。该库不提供 BD+ 解密所需的密钥或证书，需要你手动在其他地方获取并安装。
+</p><p>BD+ 主要工作方式为在视频流中添加错误，虽不到无法观看的地步，但其持续性的伪影足以令人难以忍受。官方播放器通过使用“修复表”来修复这些问题。“修复表”从网上下载，提供了将损坏的视频流转换为正确视频流的映射。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9078aa01b1b0_.E5.9B.9E.E6.94.BE" id="回放"><span id=".E5.9B.9E.E6.94.BE"></span>回放</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9078aa01b1b0_.E5.87.86.E5.A4.87.E5.B7.A5.E4.BD.9C" id="准备工作"><span id=".E5.87.86.E5.A4.87.E5.B7.A5.E4.BD.9C"></span>准备工作</h3></div>
+<ol><li><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libbluray">libbluray</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libaacs">libaacs</a></span><sup><small>包</small></sup></span>。</li>
+<li>从 <a href="http://fvonline-db.bplaced.net/">[8]</a> 下载一个 <code>KEYDB.cfg</code> 文件（名称区分大小写），并复制到 <code>~/.config/aacs</code> 或 <code>/etc/xdg/aacs</code> 目录下，其中包含解密超过 90,000 张光盘所需的 VUK 数据。顺带一提，不同语言包含的光盘解密信息是一样的，只有光盘名称被翻译过。光盘数据会不断更新，所以你可能会想定期更新下该文件。</li>
+<li>你可以将 <a href="https://forum.doom9.org/showpost.php?p=1883655&amp;postcount=3">[9]</a> 提供的处理密钥和主机密钥/证书数据复制到 <code>KEYDB.cfg</code> 文件的开头，这些数据适用于 MKB v68 及更旧的光盘。该操作仅适用于未在 VUK 文件中列出的光盘，且只对从未读取过 MKB v70 及以上光盘的光驱有用。</li>
+<li>如有需要的话（如卷未被自动挂载），可以用如下命令将光盘挂载到目录下：<pre># mount /dev/sr0 /media/blurays</pre></li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9078aa01b1b0_.E8.B0.83.E5.8F.96.E5.85.89.E7.9B.98.E4.BF.A1.E6.81.AF" id="调取光盘信息"><span id=".E8.B0.83.E5.8F.96.E5.85.89.E7.9B.98.E4.BF.A1.E6.81.AF"></span>调取光盘信息</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libbluray">libbluray</a></span><sup><small>包</small></sup></span> 附带的 <code>bd_info</code> 工具可用于识别光盘使用的加密和 DRM 方案，以及当前配置是否可以对其进行解密。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># bd_info /dev/sr0</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Using libbluray version 1.2.1
+aacs.c:597: Error calculating media key. Missing right processing key ?
+mmc.c:386: AACS not active or supported by the drive
+bluray.c:1091: WARNING: BluRay profile 6 BD-J menu support is experimental
+Volume Identifier   : TITLE
+BluRay detected     : yes
+First Play supported: yes
+Top menu supported  : yes
+HDMV titles         : 8
+BD-J titles         : 3
+UNSUPPORTED titles  : 0
+
+BD-J detected       : yes
+Java VM found       : yes
+BD-J handled        : yes
+BD-J organization ID: XXXXX
+BD-J disc ID        : XX000000000000000000000000XXXXX
+
+AACS detected       : yes
+libaacs detected    : yes
+Disc ID             : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+AACS MKB version    : 76
+AACS handled        : yes
+
+BD+ detected        : no
+...
+</pre>
+<p>注意，<code>AACS handled: yes</code> 表示光盘可被解密，且回放应不成问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9078aa01b1b0_.E8.A7.A3.E5.AF.86.E6.B5.81.E7.A8.8B" id="解密流程"><span id=".E8.A7.A3.E5.AF.86.E6.B5.81.E7.A8.8B"></span>解密流程</h3></div>
+<p>打开例如 VLC 的蓝光播放软件，并播放光盘（以 VLC 为例，选择 <i>Media &gt; Open Disc</i>，然后进入 <i>Disc</i> 标签，选择 <i>Blu-ray</i>，并确保选中了 <i>No disc Menus</i>）。接着播放软件会进行如下解密操作：
+</p>
+<ol><li>用户使用支持 libbluray 和 libaacs 的播放软件打开蓝光盘</li>
+<li>如果蓝光盘没有使用 AACS 加扰，跳到步骤 4.1。</li>
+<li>如果蓝光盘使用了 AACS 加扰，那么 libaacs 将：
+<ol><li>检查 <code>~/.cache/aacs/vuk/</code> 是否存在有效 VUK，如果有，就跳到步骤 4.1；如果没有，继续下一步。</li>
+<li>读取 <code>$XDG_CONFIG_DIRS/KEYDB.cfg</code>：
+<ol><li>如果存在有效 VUK，就跳到步骤 4.1，否则继续下一步。</li>
+<li>如果存在有效处理密钥（与光盘 MKB 版本对应），且存在有效（未被光驱吊销）的主机密钥/证书，那么 libaacs 将尝试计算 VUK。计算出的 VUK 将被保存在 <code>~/.cache/aacs/vuk</code> 供日后使用，并继续到步骤 4.1。如果找不到有效处理密钥或主机密钥/证书，就跳到步骤 4.2。</li></ol></li></ol></li>
+<li>结果
+<ol><li>播放器软件成功读取到光盘内容。</li>
+<li>播放器软件读取光盘内容失败。</li></ol></li></ol>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_.E4.BD.BF.E7.94.A8_VUK_.E8.BF.9B.E8.A1.8C.E8.A7.A3.E5.AF.86.EF.BC.88.E6.AD.A5.E9.AA.A4_3.1_.E6.88.96_3.2.1.EF.BC.89" id="使用_VUK_进行解密（步骤_3.1_或_3.2.1）"><span id=".E4.BD.BF.E7.94.A8_VUK_.E8.BF.9B.E8.A1.8C.E8.A7.A3.E5.AF.86.EF.BC.88.E6.AD.A5.E9.AA.A4_3.1_.E6.88.96_3.2.1.EF.BC.89"></span>使用 VUK 进行解密（步骤 3.1 或 3.2.1）</h4></div>
+<p>由于 VUK 是蓝光光盘最下游的解密密钥，因此使用光盘专用的 VUK 将始终有效，而且不会被业界撤销。但是，每张光盘只有唯一的一个 VUK 对应一个 VID，因此这种方法依赖于 VUK 列表或数据库。如果满足以下任意一种情况，就可以得出 VUK：
+</p>
+<ul><li>使用处理密钥和主机密钥/证书按下文方法解密过一次，并将得出的 VUK 存放到了 <code>~/.cache/aacs/vuk</code>；</li>
+<li>从第三方获取到了光盘的有效 VUK（即 <code>KEYDB.cfg</code> 中的数据）。这使得在处理密钥和主机密钥/证书被光盘 MKB 版本注销的情况下，还能读取光盘内容。</li></ul>
+<p>如果不满足以上情况，播放软件会尝试通过第二种方法进行解密。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_.E4.BD.BF.E7.94.A8.E5.A4.84.E7.90.86.E5.AF.86.E9.92.A5.E5.92.8C.E4.B8.BB.E6.9C.BA.E5.AF.86.E9.92.A5.2F.E8.AF.81.E4.B9.A6.E8.BF.9B.E8.A1.8C.E8.A7.A3.E5.AF.86.EF.BC.88.E6.AD.A5.E9.AA.A4_3.2.2.EF.BC.89" id="使用处理密钥和主机密钥/证书进行解密（步骤_3.2.2）"><span id=".E4.BD.BF.E7.94.A8.E5.A4.84.E7.90.86.E5.AF.86.E9.92.A5.E5.92.8C.E4.B8.BB.E6.9C.BA.E5.AF.86.E9.92.A5.2F.E8.AF.81.E4.B9.A6.E8.BF.9B.E8.A1.8C.E8.A7.A3.E5.AF.86.EF.BC.88.E6.AD.A5.E9.AA.A4_3.2.2.EF.BC.89"></span>使用处理密钥和主机密钥/证书进行解密（步骤 3.2.2）</h4></div>
+<p>该方法使用了 <code>KEYDB.cfg</code> 开头的处理密钥和主机密钥/证书，只有在这两者未被光驱吊销的情况下可用。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>从 2019 年 8 月开始，最新的蓝光盘都携带了 MKB v70。鉴于最新公开的处理密钥和主机密钥/证书仅对 MKB v68 及更老的版本可用，该方法只适用于读取过不高于 MKB v68 版本光盘的光驱有效。如果你读取过包含 MKB v70 及以上版本的光盘，那所有公开已知的主机密钥/证书都已被光驱注销，你只能使用上面的方法。</div>
+<p>如果该方法可用，libaacs 将在播放光盘后将 VUK 保存在 <code>~/.cache/aacs/vuk</code> 下，文件名是光盘 ID，内容是 VUK。即使在没有有效  <code>KEYDB.cfg</code> 文件的情况下，VLC 还是会复用该 VUK，因此建议备份该文件夹以供后续使用。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_BD.2B_.E6.94.AF.E6.8C.81" id="BD+_支持"><span id="BD.2B_.E6.94.AF.E6.8C.81"></span>BD+ 支持</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libbdplus/">libbdplus</a></span><sup><small>AUR</small></sup></span> 提供了实验性 BD+ 解密支持。但如果该方法失败，用户只能使用类似 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/makemkv/">makemkv</a></span><sup><small>AUR</small></sup></span> 或 DVDFab（在 Wine 下使用）的商业方案。
+</p><p>自 0.2.0 版本起，libbdplus 支持用于校正数据流的缓存表，从而避免了完全模拟 BD+ 虚拟机的需要。
+</p><p>为了让 libbdplus 正常工作，需要进行以下准备：
+</p>
+<ol><li>从 Doom9 论坛 <a href="https://forum.doom9.org/showthread.php?t=176924">[10]</a> 下载 BD+ 虚拟机文件及缓存表存档。</li>
+<li>将虚拟机文件移动到 <code>~/.config/bdplus/vm0/</code>。</li>
+<li>解压缓存表，并移动到 <code>~/.cache/bdplus/convtab/</code>。</li></ol>
+<p>完成后，在播放受 BD+ 保护的光盘时，libbdplus 应能找到相应的表并修复数据流。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9078aa01b1b0_.E5.AA.92.E4.BD.93.E6.92.AD.E6.94.BE.E5.99.A8" id="媒体播放器"><span id=".E5.AA.92.E4.BD.93.E6.92.AD.E6.94.BE.E5.99.A8"></span>媒体播放器</h3></div>
+<p>有些媒体播放器可以使用 libbluray 和 libaacs 来播放 AACS 加密过的蓝光盘。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_mplayer" id="mplayer">mplayer</h4></div>
+<p>用 mplayer 播放蓝光盘的基本命令是：
+</p>
+<pre>$ mplayer br:///<i>/bluray/mount/dir</i>
+</pre>
+<p>或者是：
+</p>
+<pre>$ mplayer br://<i>title number</i> -bluray-device <i>/bluray/mount/dir</i>
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg9078aa01b1b0_.E8.A7.86.E9.A2.91.E5.8D.A1.E9.A1.BF" id="视频卡顿"><span id=".E8.A7.86.E9.A2.91.E5.8D.A1.E9.A1.BF"></span>视频卡顿</h5></div>
+<p>你可能需要启用硬件加速和多核 CPU 支持，才能流畅播放蓝光盘。
+</p><p>对于 nvidia 显卡用户，可以通过安装 libvdpau 来启用硬件加速，并对 mplayer 使用 <code>--hwdec=auto</code> 选项，例如：
+</p>
+<pre>$ mplayer --hwdec=auto br:///<i>/bluray/mount/dir</i>
+</pre>
+<p>使用 <code>--vd-lavc-threads=<i>N</i></code> 选项来启用多核 CPU 支持，其中 <code><i>N</i></code>  是核心数，例如：
+</p>
+<pre>$ mplayer --vd-lavc-threads=4 br:///<i>/bluray/mount/dir</i>
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg9078aa01b1b0_.E9.9F.B3.E9.A2.91.E8.AF.AD.E8.A8.80.E9.94.99.E8.AF.AF" id="音频语言错误"><span id=".E9.9F.B3.E9.A2.91.E8.AF.AD.E8.A8.80.E9.94.99.E8.AF.AF"></span>音频语言错误</h5></div>
+<p>你可以用 <code>#</code> 键查看回放语言列表。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg9078aa01b1b0_.E9.9F.B3.E7.94.BB.E4.B8.8D.E5.90.8C.E6.AD.A5" id="音画不同步"><span id=".E9.9F.B3.E7.94.BB.E4.B8.8D.E5.90.8C.E6.AD.A5"></span>音画不同步</h5></div>
+<p>你需要从 mplayer 的第一个输出中，找到蓝光使用的编解码器。它位于 ”Selected video codec“ 一行的末尾。
+</p><p>对于 H.264 光盘，使用 <code>-vc ffh264vdpau</code> 选项，例如：
+</p>
+<pre>$ mplayer -vc ffh264vdpau br:///<i>/bluray/mount/dir</i>
+</pre>
+<p>对于 VC-1 光盘，使用 <code>-vc ffvc1vdpau</code> 选项，例如：
+</p>
+<pre>$ mplayer -vc ffvc1vdpau br:///<i>/bluray/mount/dir</i>
+</pre>
+<p>对于 MPEG 光盘，使用 <code>-vc ffmpeg12vdpau</code> 选项，例如：
+</p>
+<pre>$ mplayer -vc ffmpeg12vdpau br:///<i>/bluray/mount/dir</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_mpv" id="mpv">mpv</h4></div>
+<p>可以通过如下命令播放蓝光盘：
+</p>
+<pre>$ mpv bd://<i>title/device</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_VLC" id="VLC">VLC</h4></div>
+<p>使用如下命令进行回放：
+</p>
+<pre>$ vlc bluray://<i>/bluray/mount/dir</i>
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg9078aa01b1b0_VLC_.E9.95.BF.E6.97.B6.E5.8A.A0.E8.BD.BD" id="VLC_长时加载"><span id="VLC_.E9.95.BF.E6.97.B6.E5.8A.A0.E8.BD.BD"></span>VLC 长时加载</h5></div>
+<p>如果 VLC 一直在加载，同时没有出现报错信息，请参考 <a href="#pgf08ba452154b">VLC#介质无法加载</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_xine" id="xine">xine</h4></div>
+<p>使用如下命令进行回放：
+</p>
+<pre>$ xine bluray://<i>/bluray/mount/dir</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9078aa01b1b0_.E6.8E.92.E9.9A.9C" id="排障"><span id=".E6.8E.92.E9.9A.9C"></span>排障</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_KEYDB.cfg_.E6.96.87.E4.BB.B6.E7.BC.BA.E5.A4.B1" id="KEYDB.cfg_文件缺失"><span id="KEYDB.cfg_.E6.96.87.E4.BB.B6.E7.BC.BA.E5.A4.B1"></span>KEYDB.cfg 文件缺失</h4></div>
+<p>如果 <code>~/.cache/aacs/vuk</code> 中存在有效 VUK，则 libaacs 无需 <code>KEYDB.cfg</code> 来解密光盘内容。但是，<code>$XDG_CONFIG_DIRS/aacs/</code> 下仍必须要有一个 <code>KEYDB.cfg</code> 文件（与是否为空无关）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_.E4.B8.BB.E6.9C.BA.E5.AF.86.E9.92.A5.2F.E8.AF.81.E4.B9.A6.E8.A2.AB.E5.90.8A.E9.94.80" id="主机密钥/证书被吊销"><span id=".E4.B8.BB.E6.9C.BA.E5.AF.86.E9.92.A5.2F.E8.AF.81.E4.B9.A6.E8.A2.AB.E5.90.8A.E9.94.80"></span>主机密钥/证书被吊销</h4></div>
+<p>不幸的是，当尝试播放较新的蓝光盘时，可能会发生主机密钥/证书（即受认证的软件播放器的密钥）被光驱吊销的情况。出现这种情况时，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aacskeys/">aacskeys</a></span><sup><small>AUR</small></sup></span> 将返回以下信息：
+</p>
+<pre>The given Host Certficate / Private Key has been revoked by your drive.
+</pre>
+<p>这是 AACS 保护方案的一部分：编辑人员可以吊销在互联网上泄露的旧软件播放器主机密钥，并在新的商业光盘上分发这些列表。该操作不可逆，即使重新刷写光驱也无法修复。纠正这种情况的方法只有两种：
+</p>
+<ul><li>将 <code>KEYDB.cfg</code> 中的主机密钥/证书替换为尚未被吊销密钥/证书</li>
+<li>参考上文在 <code>KEYDB.cfg</code> 中添加光盘特定的 VUK。VUK 无法被业内吊销。</li></ul>
+<p>使用 mplayer 或 VLC 将光盘解密成功后，libaacs 会将 VUK 保存在 <code>~/.cache/aacs/vuk</code> 中。如果 <code>KEYDB.cfg</code> 中的主机密钥/证书随后被吊销，VLC 仍能使用已存储的 VUK，建议备份 <code>~/.cache/aacs</code> 目录以供后续使用。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_.E4.BD.BF.E7.94.A8_aacskeys" id="使用_aacskeys"><span id=".E4.BD.BF.E7.94.A8_aacskeys"></span>使用 aacskeys</h4></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aacskeys/">aacskeys</a></span><sup><small>AUR</small></sup></span>。你需要在包含有效主机密钥/证书和处理密钥的文件夹中运行 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aacskeys/">aacskeys</a></span><sup><small>AUR</small></sup></span>:
+</p>
+<pre>$ cd /usr/share/aacskeys
+</pre>
+<p>然后运行：
+</p>
+<pre>$ aacskeys <i>/bluray/mount/dir</i>
+</pre>
+<p>例如：
+</p>
+<pre>$ cd /usr/share/aacskeys &amp;&amp; aacskeys /media/blurays
+</pre>
+<p>你也可以将蓝光盘添加到密钥数据库中：编辑 <code>$XDG_CONFIG_DIRS/KEYDB.cfg</code> 并按如下格式添加 aacskeys 的输出：
+</p>
+<pre>0x<i>unit key file hash</i> = Film Title    | V | 0x<i>volume unique key</i>
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg9078aa01b1b0_aacskeys_.E6.97.A0.E6.B3.95.E7.94.9F.E6.88.90.E5.AF.86.E9.92.A5" id="aacskeys_无法生成密钥"><span id="aacskeys_.E6.97.A0.E6.B3.95.E7.94.9F.E6.88.90.E5.AF.86.E9.92.A5"></span>aacskeys 无法生成密钥</h5></div>
+<p>试下 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/makemkv/">makemkv</a></span><sup><small>AUR</small></sup></span>，它给出的报错信息相对会更清晰些。
+</p><p>在光驱支持的情况下，你可以尝试刷入<a href="https://www.makemkv.com/forum/viewtopic.php?t=19634#p74718">定制固件</a>来解除读取限制，也就是“LibreDrive”模式。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/makemkv/">makemkv</a></span><sup><small>AUR</small></sup></span> 附带的 <code>sdftool</code> 可被用于在 Linux 下原生刷写光驱固件。具体选项作用可参考 <a href="https://www.makemkv.com/forum/viewtopic.php?f=16&amp;t=22896#p94848">GUI 封装程序</a>的讨论贴，可帮你决定是否需要使用如 <code>enc</code> 等选项。
+</p><p>和其它固件刷写操作一样，该操作有可能会损坏设备，需十分小心。
+</p><p>刷入新固件后，光驱将能允许 VLC 等媒体播放器直接读取光驱，无需使用 makemkv。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9078aa01b1b0_.E5.A6.82.E6.9E.9C.E4.BD.A0.E6.9C.89.E5.AF.B9.E5.BA.94.E7.9A.84_VUK.EF.BC.8C.E4.BD.86.E8.BF.98.E6.98.AF.E6.B2.A1.E6.B3.95.E6.92.AD.E6.94.BE.E8.93.9D.E5.85.89.E7.9B.98" id="如果你有对应的_VUK，但还是没法播放蓝光盘"><span id=".E5.A6.82.E6.9E.9C.E4.BD.A0.E6.9C.89.E5.AF.B9.E5.BA.94.E7.9A.84_VUK.EF.BC.8C.E4.BD.86.E8.BF.98.E6.98.AF.E6.B2.A1.E6.B3.95.E6.92.AD.E6.94.BE.E8.93.9D.E5.85.89.E7.9B.98"></span>如果你有对应的 VUK，但还是没法播放蓝光盘</h4></div>
+<p>有些光驱需要加载 sg 内核模块。
+</p>
+<pre># modprobe sg</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9078aa01b1b0_.E5.8F.82.E8.80.83" id="参考"><span id=".E5.8F.82.E8.80.83"></span>参考</h2></div>
+<p>下面为一些蓝光盘/HD-DVD 盘的解密方式。用户可在合理使用原则的指导下使用它们对商业蓝光电影进行备份：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aacskeys/">aacskeys</a></span><sup><small>AUR</small></sup></span> - 开源</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/makemkv/">makemkv</a></span><sup><small>AUR</small></sup></span> - 闭源/功能有限的免费测试版，提供原生 Linux 版本</li></ul>
+<ul><li><a href="https://github.com/m4tthi4s/vukextract">vukextract</a> <a href="https://forum.doom9.org/showthread.php?t=174404">VukExtract 支持+讨论</a> - 使用私有 DVDFab 来提取 VUK 的开源软件</li>
+<li><a href="https://www.redfox.bz/anydvdhd.html">AnyDVD HD</a><sup title="最后检查状态：domain name not resolved">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2024-07-30 ⓘ]</sup> - 商业软件，需要 Windows 虚拟机来运行</li>
+<li><a href="https://appdb.winehq.org/objectManager.php?sClass=application&amp;iId=2377">DVDFab HD Decrypter</a> - 用于 Windows 下的商业软件，但可以用 <a href="#pg39e5cd9380ff">Wine</a> 来运行</li>
+<li><a href="https://www.aiseesoft.com/blu-ray-player/">Aiseesoft Blu-ray Player</a> - Windows 下的商业播放软件，但可以用 <a href="#pg39e5cd9380ff">Wine</a> 来运行</li>
+<li><a href="https://forum.doom9.org/showthread.php?t=176924">使用 libaacs 和 libbdplus 来播放蓝光盘</a> - Doom9 论坛讨论贴</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807193921
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.202 seconds
+Real time usage: 0.210 seconds
+Preprocessor visited node count: 623/1000000
+Revision size: 17722/2097152 bytes
+Post‐expand include size: 7339/2097152 bytes
+Template argument size: 2424/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 4/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   63.883      1 -total
+ 14.07%    8.991     40 Template:Ic
+  7.44%    4.753      1 Template:Related_articles_start
+  5.76%    3.678      5 Template:Pkg
+  5.63%    3.597      8 Template:AUR
+  5.36%    3.425      2 Template:Dead_link
+  3.93%    2.512      2 Template:Note
+  3.13%    2.001      1 Template:翻译状态
+  3.08%    1.966      1 Template:Related
+  2.79%    1.780      1 Template:Related_articles_end
+-->
+<!-- Render ID afa9068f-9297-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7955:|#|:idhash:canonical!zh-cn and timestamp 20260807193921 and revision id 33857. Rendering was triggered because: diff-page
+ -->
+</div>
+</div>

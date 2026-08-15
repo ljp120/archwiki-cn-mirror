@@ -1,0 +1,813 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgfefbd690c49d">安全</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Security">Security</a>，最近一次同步于 2026-08-14，若英文版本有所<a href="https://wiki.archlinux.org/title/Security?diff=0&amp;oldid=883243">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Security_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg93154f64951d">Arch 安全团队</a></li>
+<li><a href="#pgb2db5e40b019">建议阅读</a></li>
+<li><a href="#pg755e5f753866">认证管理</a></li>
+<li><a href="#pg0d85601792d1">Capabilities</a></li>
+<li><a href="#pgaacadd2abcc8">应用程序列表/安全</a></li>
+</ul></div>
+<p>本文包含了<a href="https://zh.wikipedia.org/wiki/%E5%AE%89%E5%85%A8%E5%BC%BA%E5%8C%96">加固</a> Arch Linux 系统的常用建议与最佳实践。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E6.A6.82.E5.BF.B5" id="概念"><span id=".E6.A6.82.E5.BF.B5"></span>概念</h2></div>
+<ul><li>收紧安全措施有可能达到使系统无法使用的程度。安全性与便利性需要得到平衡。诀窍在于建立一个安全且有用的系统。</li>
+<li>最大的威胁是（并且一直都会是）用户。</li>
+<li><a href="https://zh.wikipedia.org/wiki/%E6%9C%80%E5%B0%8F%E6%9D%83%E9%99%90%E5%8E%9F%E5%88%99">最小权限原则</a>：系统的每一部分应该只能访问到它确实需要的东西，除此之外的则不可以。</li>
+<li>纵深防御：多个独立的层次能带来更好的安全性。当一层防护被攻破时，另一层应该能够阻止攻击。</li>
+<li>保持一点点的偏执和多疑。如果有件事看起来太好了，不像是真的，那可能确实如此。</li>
+<li>永远无法令系统 100% 安全，除非把机器从网络上断开，关掉电源，锁进保险柜，用混凝土封住并不再使用它。</li>
+<li>为失败做好准备。预先为安全措施被攻破的情况制定可供执行的计划。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E5.AF.86.E7.A0.81" id="密码"><span id=".E5.AF.86.E7.A0.81"></span>密码</h2></div>
+<p>密码是一个安全系统的关键。它可以保护你的<a href="#pgc5547c3b9e44">用户账户</a>、<a href="#pg53cd5af0ce43">加密的文件系统</a>和 <a href="#pg3dc3eb79488b">SSH</a>/<a href="#pg168817120ccc">GPG</a> 密钥。密码也是让计算机信任使用者的主要方式，所以安全性的很大一部分就在于选择高强度的密码并保护它们不被泄露。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E9.80.89.E6.8B.A9.E5.AE.89.E5.85.A8.E7.9A.84.E5.AF.86.E7.A0.81" id="选择安全的密码"><span id=".E9.80.89.E6.8B.A9.E5.AE.89.E5.85.A8.E7.9A.84.E5.AF.86.E7.A0.81"></span>选择安全的密码</h3></div>
+<p>密码必须足够复杂，不能轻易地被猜中（比如和个人信息有关的密码），也不能轻易地被社会工程或暴力尝试等方法<a href="https://en.wikipedia.org/wiki/Password_cracking">破解</a>。强密码的要点在于<i>长度</i>和<i>随机性</i>。在密码学中，密码的质量被称为它的<a href="https://en.wikipedia.org/wiki/Entropic_security">熵安全性</a>。
+</p><p>不安全的密码包括： 
+</p>
+<ul><li>个人可识别信息（如：狗的名字，出生日期，区号，最喜欢的视频游戏）</li>
+<li>对单词简单地替换一些字符（如：<code>k1araj0hns0n</code>），因为现代字典攻击可以轻松对付它们</li>
+<li>在基本单词或常见字符串的前后加上数字，符号或其他字符（如：<code>DG091101%</code>）</li>
+<li>常见句子或词典中单词的序列（如：<code>photocopyhauntbranchexpose</code>），包括对其字符进行替换（如：<code>Ph0toc0pyh4uN7br@nch3xp*se</code>）</li>
+<li>任何一个<a href="https://en.wikipedia.org/wiki/List_of_the_most_common_passwords">最常见的密码</a></li></ul>
+<p>最好的选择是由随机来源生成的长密码（越长越好）。使用长密码很重要。<a href="https://www.theregister.com/2019/02/14/password_length">弱哈希算法会使得一个8字符密码的哈希值在几小时之内便被攻破。</a>
+</p><p>像 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pwgen">pwgen</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/apg/">apg</a></span><sup><small>AUR</small></sup></span> 这样的工具可生成随机密码，不过这些密码可能很难记住：为了记住它们，一种方法（仅针对经常使用的密码）是生成一个长密码并记住一小段（这一小段要能保证最低限度的安全），暂时把完整的密码写下来。在一次次的密码输入过程中，尝试着记住从一小段到一大段乃至全部密码，随着时间推移，密码就会随着肌肉记忆根深蒂固。这种方法很难，但是能保证密码不会出现在破解用的字典里，也可以抵御“智能地”组合单词并替换部分字符的暴力破解手段。
+</p><p>除了密码管理，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=keepassxc">keepassxc</a></span><sup><small>包</small></sup></span> 还提供密码/口令生成功能。用户可以在图形用户界面中自定义生成密码。还支持基于字典的口令。
+</p><p>还有个方法可以产生安全性好的、看起来随机的密码，那就是从一句句子的每一个词中提炼出一个符号。
+例如 “the girl is walking down the rainy street” 这句话可以转换为 <code>t6!WdtR5</code> 或是更加复杂的 <code>t&amp;6!RrlW@dtR,57</code>。
+这种方法可以更为简单地帮助记忆密码，但是请注意，不同字母出现在单词开头的概率不同 (<a href="https://zh.wikipedia.org/wiki/%E5%AD%97%E6%AF%8D%E9%A2%91%E7%8E%87">Wikipedia:字母频率</a>)。
+</p><p>另外一种有效的技术是写下随机生成的密码并将其存储在<i>安全</i>的地方，例如钱包、挎包或文件保险箱中。不少人在保护其物理贵重物品免受盗窃方面通常做得很好，并且与数字安全实践相比，大多数人更容易理解物理安全最佳实践。
+</p><p>将助记符和随机技术结合起来，通过<a href="#pgaacadd2abcc8">密码管理器</a>保存长的随机生成的密码也非常有效。密码管理器需要用一个易记的“主密码”来访问，这个密码只能用于此目的。主密码必须记住，绝不能保存。这就要求在系统上安装密码管理器，以便轻松访问密码（根据情况，这可以被视为不方便或安全特性）。一些密码管理器还有智能手机应用，可以用来显示用于在没有安装该密码管理器的系统上进行手动输入的密码（如果这是常见的使用情况，那么你仍然可以为每个服务使用易于输入但安全的密码，而不是完全随机的密码，参见下文）。注意，如果你忘记了主密码，密码管理器就引入了一个单点故障。
+</p><p>有些密码管理器根据主密码和你想要登录的服务名称计算包含的密码，而不是加密它们，使得在新的系统上无需同步任何数据也可以使用它。
+</p><p>使用一长串相互无关的单词作为密码或许是有效的方法。原理在于，如果使用足够长的短语，从密码长度所获得的熵就可以抵消使用字典词汇而失去的熵。这个 <a href="https://xkcd.com/936/">XKCD 漫画</a>描绘了此方法中对于熵的权衡，考虑到短语中每个单词可能的单词集的限制。如果你使用的单词集很大（数千个单词）并且您从中选择 5-7 个甚至更多随机单词，那就算攻击者知道你所选择的可能单词集和选择的单词数量，这种方法仍能提供很大的熵。参见<a href="https://www.rempe.us/diceware/">Diceware</a>。
+</p><p>参阅 <a href="https://www.iusmentis.com/security/passphrasefaq/">The passphrase FAQ</a> 或 <a href="https://en.wikipedia.org/wiki/Password_strength">Wikipedia:Password strength</a> ，获取额外背景信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E7.BB.B4.E6.8A.A4.E5.AF.86.E7.A0.81.E5.AE.89.E5.85.A8" id="维护密码安全"><span id=".E7.BB.B4.E6.8A.A4.E5.AF.86.E7.A0.81.E5.AE.89.E5.85.A8"></span>维护密码安全</h3></div>
+<p>一旦你选择了一个强密码，就一定要保证它的安全。当心<a href="https://en.wikipedia.org/wiki/Keylogger">键盘记录器</a>（软件层面 和 硬件层面），屏幕记录器，<a href="https://en.wikipedia.org/wiki/Social_engineering_(security)">社会工程</a>，<a href="https://en.wikipedia.org/wiki/Shoulder_surfing_(computer_security)">肩窥</a>，并避免对不同的服务器（网站）使用重复密码，以防止不安全的服务器泄漏超出其范围的信息。<a href="#pgdc111707b7de">密码管理器</a>可以帮助管理大量复杂密码：将密码从管理器复制粘贴到其他程序中时，记住每次粘贴完都清除复制缓冲区，并确保密码不会“意外地”保存在任何类型的文件中（例如，不要将它们粘贴在普通的终端命令中，因为这些命令会存到 <code>.bash_history</code> 之类的文件里）。
+</p><p>最好不要因为安全性强的密码难记而选择不安全的密码，密码是它们之间的一种平衡。与拥有许多相似的弱密码相比，更好的做法是建立一个加密的安全密码数据库，数据库由密钥和一个强主密码保护着。把密码写下来也许同样有效<a href="https://www.schneier.com/blog/archives/2005/06/write_down_your.html">[1]</a>，可以避开软件中的潜在漏洞，同时也需要保证物理安全。
+</p><p>衡量密码强度的另一个指标是它不能够被轻易从其他地方恢复。
+</p><p>如果你使用与登录密码相同的磁盘加密密码（这在登录时自动挂载加密分区或目录很有用），请确保 <code>/etc/shadow</code> 也在加密分区上，或者/并 使用强哈希算法（即 sha512/bcrypt，而不是 md5）来存储密码哈希（详细信息请参阅 <a href="#pg7254c425ae76">SHA password hashes</a>）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>Arch Linux 已于 2013 年将<a href="https://archlinux.org/news/changes-to-default-password-hashing-algorithm-and-umask-settings/">默认哈希</a>算法切换到 yescrypt。若未自定义过默认配置，仅需使用 <code>passwd</code> 执行一次密码修改，即可应用新的默认算法。</div>
+<p>如果要备份密码数据库，请勿将备份的副本存储在密码保护之下（比如存储在加密的驱动器或需要身份验证的远程存储服务），而解锁副本的密码又存储在副本中，这样在需要时将无法访问它（相当于把房间的钥匙锁在了房间里）。一个有用的技巧是，使用主密码的简单哈希来加密存储密码数据库的驱动器或帐户。维护一份记录备份位置的列表：如果有一天你觉得主密码已被泄露，一是要更改所有数据库备份的密码，二是要使用从新主密码派生的新哈希来保护存有数据库的位置。
+</p><p>以安全的方式控制数据库的版本可能非常复杂：如果你这样做，那你必须有办法更新所有数据库版本的主密码。主密码泄露时，你可能并不能马上知道：为了降低其他人在你意识到主密码泄露之前发现密码的风险，你可以选择定期更改主密码。如果你担心自己失去了对数据库副本的控制权，则需要根据主密码的熵，在暴力破解主密码所需的时间内更改数据库副本中包含的所有密码。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.AF.86.E7.A0.81.E7.9A.84.E6.95.A3.E5.88.97.E5.80.BC" id="密码的散列值"><span id=".E5.AF.86.E7.A0.81.E7.9A.84.E6.95.A3.E5.88.97.E5.80.BC"></span>密码的散列值</h3></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E6%95%A3%E5%88%97%E5%87%BD%E6%95%B0">散列函数</a>（又称哈希函数）是一种单向不可逆函数。其设计旨在于确保无法通过输出结果（散列值，又称哈希值）逆向推导出原始输入。优秀的散列算法（又称哈希算法）需要具备极强抗碰撞性（即很难找到两个不同输入产生相同的散列值）与<a href="https://zh.wikipedia.org/wiki/%E9%9B%AA%E5%B4%A9%E6%95%88%E5%BA%94">雪崩效应</a>（输入微调即导致输出结果剧烈变化）。
+</p><p><a href="https://zh.wikipedia.org/wiki/%E5%AF%86%E7%A0%81%E6%95%A3%E5%88%97%E5%87%BD%E6%95%B0">密码散列函数</a>（Cryptographic hash function；例如：bcrypt）则专用于存储密码，为防止攻击者通过<a href="https://zh.wikipedia.org/wiki/%E5%BD%A9%E8%99%B9%E8%A1%A8">彩虹表</a>、暴力穷举等手段破解密码，密码散列函数除了前述不可逆性外往往使用<a href="https://en.wikipedia.org/wiki/Key_stretching">密钥拉伸</a>技术或加盐（Salting）机制。
+</p><p><a href="https://zh.wikipedia.org/wiki/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0">密钥派生函数</a>（Key derivation function, KDF；例如：yescrypt、scrypt、PBKDF2、Argon2）是从一个或多个值（如主密钥、密码）中派生出一个或多个安全密钥（如 AES 密钥、密码散列值）的加密算法。现代 KDF 使用密钥拉伸技术，通过增加算法执行步骤资源消耗，使派生出的密钥在抗暴力破解能力上更优，因此，KDF 可适用于多种应用场景，其中便包括作为密码散列函数。
+</p><p>默认情况下，Arch 将用户密码散列值存储在仅 root 可读的 <code>/etc/shadow</code> 文件中，与存储在所有人可读的 <code>/etc/passwd</code> 文件中的其他用户参数分开，请参阅 <a href="#pgc5547c3b9e44">Users and groups#用户信息存储</a>。另请参阅 #限制 root 权限。
+</p><p>使用 <b>passwd</b> 命令来设置密码，该命令会调用系统的 <a href="https://en.wikipedia.org/wiki/Crypt_(C)">crypt</a> 函数对密码进行<a href="https://en.wikipedia.org/wiki/Key_stretching">密钥拉伸</a>，然后将它们保存在 <code>/etc/shadow</code> 中。密码在处理中还会被<a href="https://en.wikipedia.org/wiki/Salt_(cryptography)">加盐（salting）</a>，以抵御<a href="https://zh.wikipedia.org/wiki/%E5%BD%A9%E8%99%B9%E8%A1%A8">彩虹表</a>攻击。若需了解其底层原理，参见<a href="https://www.slashroot.in/how-are-passwords-stored-linux-understanding-hashing-shadow-utils">密码在 Linux 中的存储方式（理解 shadow 工具集的散列机制）</a>。
+</p><p>由于密码散列值遵循特定的格式，因此可针对后续新执行的 <i>passwd</i> 命令配置不同的加密方法与参数。这也意味着，<code>/etc/shadow</code> 文件中存储的各个用户散列值可以是系统所支持的各种散列函数的混合体。
+</p><p>若需了解有关格式、散列方法和参数的更多信息，请参考 <span class="plainlinks archwiki-template-man" title="$ man 5 crypt"><a href="https://man.archlinux.org/man/crypt.5">crypt(5)</a></span>。
+</p><p><code>/etc/login.defs</code> 文件用于配置<a href="https://archlinux.org/news/changes-to-default-password-hashing-algorithm-and-umask-settings/">默认密码散列</a>方法 <code>ENCRYPT_METHOD YESCRYPT</code> 及其参数 <code>YESCRYPT_COST_FACTOR</code>。
+</p><p>例如，调高默认的 <code>YESCRYPT_COST_FACTOR</code> 参数值，将导致从密码推导哈希值所需的计算时间呈对数级增长。此时间增长对试图破解密码的第三方和进行用户登录认证的系统同样有效。
+</p><p>相比之下，SHA-512 哈希函数的计算时间受其参数呈线性影响。关于 Arch 之前的默认配置，请参考 <a href="#pg7254c425ae76">SHA password hashes</a>。需要注意，yescrypt 算法在内部结合了 SHA-256、HMAC 和 PBKDF2 来计算密码哈希，其主要目的在于融合这些经过广泛测试的常用函数的优点，以提升抗攻击能力。由于 SHA 在各类场景中的广泛应用，硬件层面已对其提供了加速支持。这意味着纯 SHA 哈希的计算性能已大幅提升，因而直接将其用作密码哈希函数已逐渐被时代淘汰。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E7.A6.81.E7.94.A8.E7.A9.BA.E5.AF.86.E7.A0.81" id="禁用空密码"><span id=".E7.A6.81.E7.94.A8.E7.A9.BA.E5.AF.86.E7.A0.81"></span>禁用空密码</h3></div>
+<p>允许空密码进行身份验证会扩大系统的攻击面。例如<a href="https://nvd.nist.gov/vuln/detail/CVE-2020-27780">CVE-2020-27780</a> 或 <a href="https://github.com/V4bel/dirtyfrag">dirtyfrag (CVE-2026-43284 , CVE-2026-43500)</a>——后者即为通过恶意篡改 <code>/etc/shadow</code> 并利用 <code>pam_unix</code> 中启用的 <code>nullok</code> 选项来实现攻击。
+若要禁用空密码，请移除 <code>/etc/pam.d/system-auth</code> 的 <code>nullok</code> 选项：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/system-auth</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">auth       [success=1 default=bad]     pam_unix.so          try_first_pass</pre>
+<p>若要列出当前密码为空的用户，请执行：
+</p>
+<pre># getent shadow | awk -F: '($2=="") {print $1}'
+</pre>
+<p>若输出结果中包含本地系统无对应账号的用户（例如通过 <a href="#pge1dda5cfbff6">OpenLDAP</a> 进行身份验证的用户），这些用户将不受移除 <code>nullok</code> 选项的影响。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E7.94.A8_pam_pwquality_.E5.BC.BA.E5.88.B6.E4.BD.BF.E7.94.A8.E5.BC.BA.E5.AF.86.E7.A0.81" id="用_pam_pwquality_强制使用强密码"><span id=".E7.94.A8_pam_pwquality_.E5.BC.BA.E5.88.B6.E4.BD.BF.E7.94.A8.E5.BC.BA.E5.AF.86.E7.A0.81"></span>用 pam_pwquality 强制使用强密码</h3></div>
+<p>PAM 为“可插拔身份验证模块”（Pluggable Authentication Modules）的缩写。<i>pam_pwquality</i> 提供针对<a href="https://en.wikipedia.org/wiki/Dictionary_attack">字典攻击</a>的保护，并可用于配置在整个系统中实施的密码策略。它基于 <i>pam_cracklib</i>，故也向后兼容其选项。
+</p><p><a href="#pg3296932e5bbe">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libpwquality">libpwquality</a></span><sup><small>包</small></sup></span> 软件包。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><i>root</i> 账户默认不会受此策略影响。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>可以用 <i>root</i> 帐户来帮助想绕过策略的用户设置他们的密码。这在设置临时密码时很有用。</div><div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>目前有关密码的安全指南（例如来自 NIST 以及其他机构的指南）并不建议强制使用特殊字符，因为它们通常只会导致可预测的更改。</div>
+<p>举个例子，假设要强制执行下面的策略： 
+</p>
+<ul><li>如果密码错误，则提示 2 次输入密码（retry 选项）</li>
+<li>最小长度为10个字符（minlen 选项）</li>
+<li>输入新密码时，新密码应至少有 6 个字符与旧密码不同（difok 选项）</li>
+<li>至少 1 个数字（dcredit 选项）</li>
+<li>至少 1 个大写字母（ucredit 选项）</li>
+<li>至少 1 个小写字母（lcredit 选项）</li>
+<li>至少 1 个除上述之外的其他字符（ocredit 选项）</li>
+<li>不能包含单词 "myservice" 和 "mydomain"</li>
+<li>为 root 应用此策略</li></ul>
+<p>编辑 <code>/etc/pam.d/passwd</code> 文件，把它改成：
+</p>
+<pre>#%PAM-1.0
+password required pam_pwquality.so retry=2 minlen=10 difok=6 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1 [badwords=myservice mydomain] enforce_for_root
+password required pam_unix.so use_authtok yescrypt shadow</pre>
+<p><code>password required pam_unix.so use_authtok</code> 用来告诉 <i>pam_unix</i> 模块不要显示输入密码的提示符，而采用 <i>pam_pwquality</i> 所提供的。
+</p><p>更多信息可以参考 <span class="plainlinks archwiki-template-man" title="$ man 8 pam_pwquality"><a href="https://man.archlinux.org/man/pam_pwquality.8">pam_pwquality(8)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 8 pam_unix"><a href="https://man.archlinux.org/man/pam_unix.8">pam_unix(8)</a></span> 手册页。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_CPU" id="CPU">CPU</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.BE.AE.E7.A0.81" id="微码"><span id=".E5.BE.AE.E7.A0.81"></span>微码</h3></div>
+<p>关于如何为CPU微码安装重要安全更新的信息见<a href="#pgdc6bceef5651">微码</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E7.A1.AC.E4.BB.B6.E6.BC.8F.E6.B4.9E" id="硬件漏洞"><span id=".E7.A1.AC.E4.BB.B6.E6.BC.8F.E6.B4.9E"></span>硬件漏洞</h3></div>
+<p>有些 CPU 存在硬件漏洞。这些漏洞的列表见<a href="https://docs.kernel.org/admin-guide/hw-vuln/">关于硬件漏洞的 Linux 内核文档</a>，其中也包含了修补方法选择指南，有助于针对特定场景对内核自定义，从而修补这些漏洞。
+</p><p>要检查是否受到已知漏洞影响，请运行：
+</p>
+<pre>$ grep -r . /sys/devices/system/cpu/vulnerabilities/
+</pre>
+<p>大部分情况下，更新内核和微码能够修补漏洞。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_.E5.90.8C.E6.AD.A5.E5.A4.9A.E7.BA.BF.E7.A8.8B.EF.BC.88.E8.B6.85.E7.BA.BF.E7.A8.8B.EF.BC.89" id="同步多线程（超线程）"><span id=".E5.90.8C.E6.AD.A5.E5.A4.9A.E7.BA.BF.E7.A8.8B.EF.BC.88.E8.B6.85.E7.BA.BF.E7.A8.8B.EF.BC.89"></span>同步多线程（超线程）</h4></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E5%90%8C%E6%97%B6%E5%A4%9A%E7%BA%BF%E7%A8%8B">同步多线程</a>（SMT），在英特尔 CPU 上又称超线程，这一硬件功能可能是 <a href="https://docs.kernel.org/admin-guide/hw-vuln/l1tf.html">L1 Terminal Fault</a> 与<a href="https://docs.kernel.org/admin-guide/hw-vuln/mds.html">微架构数据采样（Microarchitectural Data Sampling）</a>漏洞的来源。 Linux 内核和微码更新含有针对已知漏洞的补丁，但是<a href="https://docs.kernel.org/admin-guide/hw-vuln/l1tf.html#virtualization-with-untrusted-guests">如果存在不受信任的虚拟化客户机，则对于某些 CPU 可能仍然需要禁用 SMT</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>禁用 SMT 的受益对象主要为宿主机/虚拟机监视器（Hypervisor）。对于普通系统而言，禁用 SMT 几乎无法带来安全受益。</div>
+<p>SMT 往往可以在系统固件中关闭。更多信息见主板或系统文档。通过添加以下<a href="#pgec0856954f1c">内核参数</a>，也可以在内核中禁用 SMT：
+</p>
+<pre>mitigations=auto,nosmt
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E5.86.85.E5.AD.98" id="内存"><span id=".E5.86.85.E5.AD.98"></span>内存</h2></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_.E5.8A.A0.E5.9B.BA_malloc" id="加固_malloc"><span id=".E5.8A.A0.E5.9B.BA_malloc"></span>加固 malloc</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hardened_malloc/">hardened_malloc</a></span><sup><small>AUR</small></sup></span> 是 <a href="https://en.wikipedia.org/wiki/GNU_C_Library">glibc</a> 函数 malloc() 加固过的替代品。此项目最开始由 <a href="https://en.wikipedia.org/wiki/GrapheneOS">GrapheneOS</a> 的 Daniel Micay 开发，集成在 Android 的 <a href="https://en.wikipedia.org/wiki/Bionic_(software)">Bionic</a> 和 <a href="https://en.wikipedia.org/wiki/musl">musl</a>，他也内置了对 x86_64 标准 Linux 发行版的支持。 
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E5.AD.98.E5.82.A8" id="存储"><span id=".E5.AD.98.E5.82.A8"></span>存储</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E9.9D.99.E6.80.81.E6.95.B0.E6.8D.AE.E5.8A.A0.E5.AF.86" id="静态数据加密"><span id=".E9.9D.99.E6.80.81.E6.95.B0.E6.8D.AE.E5.8A.A0.E5.AF.86"></span>静态数据加密</h3></div>
+<p><a href="#pg812206bba43d">静态数据加密</a>，最好是使用强密码的全磁盘加密，是保护数据免受物理恢复的唯一方法。这在计算机关闭或相关磁盘卸载时提供了数据机密性。
+</p><p>然而，一旦计算机启动并且驱动器被挂载，其数据将变得与未加密的驱动器一样容易受到攻击。因此，最佳做法是在不再需要数据分区时立即卸载它们。
+</p><p>你还可以<a href="https://wiki.archlinux.org/title/Trusted_Platform_Module#LUKS_encryption">使用存储在 TPM 中的密钥对驱动器进行加密</a>，尽管它<a href="https://tpm.fail/">过去存在</a>可以通过<a href="https://pulsesecurity.co.nz/articles/TPM-sniffing">总线嗅探攻击</a>提取密钥的漏洞。
+</p><p>某些程序，如 <a href="#pg8e3a9446707a">dm-crypt</a>，允许用户将 Loop file 加密为虚拟卷。当系统只有特定的部分需要加密时，这种方法可以替代全盘加密。
+</p><p>虽然<a href="#pg812206bba43d">数据静态加密wiki</a> 中比较的基于块设备或文件系统的加密类型对于保护物理媒体上的数据很有用，但大多数不能用于保护无法控制的远程系统上的数据（例如云存储）。在某些情况下，个别文件加密会很有用。
+</p><p>以下是一些加密文件的方法：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=age">age</a></span><sup><small>包</small></sup></span> 是一款简单易用的文件加密工具。该工具支持多接收者模式以及使用 SSH 密钥进行加密，非常适合用于安全文件共享。</li>
+<li>一些<a href="#pg24be1d21a7ac">归档和压缩</a>工具还提供基本的加密功能。由于部分工具出于兼容性考虑可能会使用弱加密算法（尤其是在使用 zip 文件格式时<a href="https://math.ucr.edu/~mike/zipattacks.pdf">[2]</a>），因此在未充分了解特定工具及其配置的安全属性前，切勿盲目依赖此类功能。典型示例包括<a href="#pgef42a478c1eb">7-zip</a>（<code>-p</code>参数）和<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=zip">zip</a></span><sup><small>包</small></sup></span>（<code>-e</code>参数）。</li>
+<li><a href="#pg8f4e7555fd6d">GnuPG</a> 亦可用于<a href="https://wiki.archlinux.org/title/GnuPG#Encrypt_and_decrypt">加密文件</a>。然而，安全地使用该工具需要大量专业培训与知识储备<a href="https://www.gnupg.com/20260122-39C3_reply_gpg_fail.html">[3]</a><a href="https://gpg.fail/">[4]</a>，且其包含的<a href="https://wiki.archlinux.org/title/GunPG#OpenPGP_compatibility"> GnuPG 专属拓展</a>与 OpenPGP 标准并不兼容。为防止常见的用户操作失误，GunPG 维护者建议使用图形化界面程序 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kleopatra">kleopatra</a></span><sup><small>包</small></sup></span>，而非 GPG 命令行工具<a href="https://www.gnupg.com/20260122-39C3_reply_gpg_fail.html">[5]</a>。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="文件系统"><span id=".E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>文件系统</h3></div>
+<p>如果用 sysctl 启用了内核的 <code>fs.protected_hardlinks</code> 和 <code>fs.protected_symlinks</code> 选项，内核就可以防止出现硬链接和软链接（符号链接）相关的安全问题。因此将全局可写的目录独立出来不再具有安全方面的优势。
+</p><p>使包含全局可写目录的文件系统保持独立 仍然可以作为一种防止恶意程序填充垃圾内容使磁盘空间耗尽的粗略手段。但是，把 <code>/var</code> 或 <code>/tmp</code> 所在分区塞满也足以使系统停止响应。处理这种问题的更灵活的机制是存在的（比如<a href="#pg9a1bf037dd35">磁盘配额</a>），并且某些<a href="#pg35e92562adc7">文件系统</a>自身就带有相关功能（Btrfs 的子卷可以设置配额）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_.E6.8C.82.E8.BD.BD.E7.82.B9" id="挂载点"><span id=".E6.8C.82.E8.BD.BD.E7.82.B9"></span>挂载点</h4></div>
+<p>根据最小权限原则，挂载文件系统时应该采用最为严格的挂载选项（在不损失功能的情况下）。
+</p><p>相关的挂载选项有： 
+</p>
+<ul><li><code>nodev</code>: 文件系统中，禁止解释任何字符或屏蔽特殊设备。</li>
+<li><code>nosuid</code>: 禁止 set-user-identifier 或 set-group-identifier 标志位生效。</li>
+<li><code>noexec</code>: 禁止文件系统里的任何二进制文件直接运行。
+<ul><li>在 <code>/home</code> 上设置 <code>noexec</code> 选项会禁用可执行脚本，影响 <a href="#pg39e5cd9380ff">Wine</a>* 、PyCharm 、 <a href="#pg95e65bdea0f3">Steam</a> 、 <a href="#pg314c3525bd57">.NET</a>等软件正常运行。
+<ul><li>Wine 不需要 <code>exec</code> 标志来打开 Windows 二进制文件。仅当 Wine 本身安装在 <code>/home</code> 中时才需要它。</li>
+<li>为了保持 <a href="#pg95e65bdea0f3">Steam</a> 正常工作，你可以通过在 <a href="#pgced0cc449f44">fstab</a> 中添加以下内容来让 <code>/home/user/.local/share/Steam</code> 以 <code>exec</code>标志挂载 ：<div class="mw-highlight mw-highlight-lang-shell mw-content-ltr" dir="ltr"><pre><span></span>/home/user/.local/share/Steam<span class="w">  </span>/home/user/.local/share/Steam<span class="w">  </span>none<span class="w"> </span>defaults,bind,user,exec,nofail<span class="w">  </span><span class="m">0</span><span class="w">  </span><span class="m">0</span>
+</pre></div></li></ul></li>
+<li>部分软件包（比如编译 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-dkms">nvidia-dkms</a></span><sup><small>包</small></sup></span>）可能需要 <code>/var</code> 目录下有 <code>exec</code> 权限。</li></ul></li></ul>
+<p>用于存放数据的文件系统应该坚持使用 <code>nodev</code>、<code>nosuid</code> 和 <code>noexec</code> 挂载。
+</p><p>可能的文件系统划分参考： 
+</p>
+<ul><li><code>/var</code></li>
+<li><code>/home</code></li>
+<li><code>/dev/shm</code></li>
+<li><code>/tmp</code></li>
+<li><code>/boot</code></li></ul>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>使用 <a href="#pgac06dd8bfe95"> GPT 分区自动挂载</a> 时，ESP 和 XBOOTLDR 分区<a href="https://github.com/systemd/systemd-stable/commit/49804cfb71d3a79f433096e4cfb5616980171336">始终使用</a><code>noexec,nosuid,nodev</code>挂载选项。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_.E6.97.A0_SUID" id="无_SUID"><span id=".E6.97.A0_SUID"></span>无 SUID</h4></div>
+<p>若能接受使用 <a href="#pgbf9d0efc26ae">run0</a> 替代 <a href="#pg023562413be7">sudo</a> 以及移除所有其他 SUID 和文件系统<a href="#pg0d85601792d1">能力（Capabilities）</a>而带来部分功能缺失，那么将包括根系统在内的所有文件系统都挂载为 <code>nosuid</code> 是完全可行的。
+</p><p>首先，找出系统中的 SUID 和 SGID 文件。
+</p><p>接着，排查带有文件系统能力（Capabilities）的二进制文件：
+</p>
+<pre>$ getcap -r /
+</pre>
+<p>由于移除了 <code>nvidia-modprobe</code> 的 SUID 权限，配备 <a href="#pge12579b7d4ac">NVIDIA</a> 显卡的系统需要添加以下配置单元以进行补偿：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/local-nvidia.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+Type=simple
+ExecStart=/usr/bin/nvidia-modprobe -m -l -s
+ 	
+[Install]
+WantedBy=multi-user.target</pre>
+<p>在无 SUID 的配置中，还可以全局启用<code>NoNewPrivileges=yes</code>，这同样会禁用 SUID/SGID 以及文件系统的能力（Capabilities）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system.conf.d/local-nnp.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Manager]
+NoNewPrivileges=yes</pre>
+<p>也可以尝试从 PID 1 及其子进程，或者从单个单元（Unit）中移除特定的能力（Capabilities）。参见 <a href="#pg0d85601792d1">Capabilities</a> 和 <a href="https://wiki.archlinux.org/title/systemd/Sandboxing#Capabilities">en:systemd/Sandboxing#Capabilities</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_.E5.BF.AB.E7.85.A7" id="快照"><span id=".E5.BF.AB.E7.85.A7"></span>快照</h4></div>
+<p>当使用 <a href="#pg429e7ec45c9c">Btrfs</a>、<a href="#pg02cd87050dfd">LVM</a> 或 <a href="#pgefb77a75bb9b">ZFS</a> 等文件系统快照功能时，必须注意：快照可能会保留用户认为已被删除的敏感信息。在配置了 <a href="#pgb3c697ba5d77">Snapper</a> 等自动快照工具时尤为如此，因为它们会定期或在特定系统事件发生时自动创建快照。以下是一些 <code>/home/</code> 目录下的敏感信息如何在快照中残留的典型场景：
+</p>
+<ul><li>已删除的文件和目录：即便文件或目录已从当前文件系统中删除，它们仍可能存在于历史快照中。在大多数情况下这符合备份预期，但需仔细考量是否应当保留如 <code>.local/share/Trash/</code>、<code>.history</code> 等文件和目录。</li>
+<li>临时文件与缓存：应用程序生成的临时文件和缓存数据可能会被包含在快照中。例如，保存在加密目录中的文件在被打开时，可能会产生缩略图（<code>.cache/thumbnails</code>）或工作副本，这些内容进而可能会被写入快照。同理，浏览记录（如 <code>.mozila/</code>、<code>.config/chromium/</code> 等）也可能在被彻底清理之前就已经被保存在了某次快照中。</li></ul>
+<p>如果系统支持，建议考虑将此类目录完全排除在快照范围之外。例如，若使用 <a href="#pg429e7ec45c9c">Btrfs</a>，可根据实际需求，为 <code>.cache/</code>、<code>.local</code>、<code>.var/</code>或任何其他目录创建独立的子卷（Subvolume）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在某些情况下，将 <code>.local/share/Trash</code> 移动到独立的子卷可能会导致回收站功能失效，例如在<a href="#pg3738a76f9acc">GNOME/文件</a>中。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E6.96.87.E4.BB.B6.E8.AE.BF.E9.97.AE.E6.9D.83.E9.99.90" id="文件访问权限"><span id=".E6.96.87.E4.BB.B6.E8.AE.BF.E9.97.AE.E6.9D.83.E9.99.90"></span>文件访问权限</h3></div>
+
+<p>默认的<a href="#pgd9b7af1c137b">文件权限</a>对几乎所有文件都赋予了读权限，修改文件权限可以在取得了非 root 账户（如<code>http</code> 或 <code>nobody</code> 账户）的攻击者面前隐藏有价值的信息。
+</p><p>您可以使用 chmod 取消组和其他人的所有权限：
+</p><p>例如：
+</p>
+<pre># chmod go-r <i>path_to_hide</i>
+
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不要广泛应用这个原则。请一次尝试一种配置，确保它值得隐藏，并且不会破坏程序功能。如果依赖于组，您可能需要从命令中删除<code>g</code>（或者如果已经运行，则使用<code>chmod g+r <i>path</i></code>重新添加权限）。</div>
+<p>需要考虑的一些路径是：
+</p>
+<ul><li><code>/boot</code> ：<a href="#pg8edad8d1135b">引导目录</a>，其中可能包含传统的 <a href="#pgc66c8898d8fa">vmlinuz</a> 和 <a href="#pg5409190f7704">initramfs</a> 镜像，或是<a href="#pg3bddb6ba0c50">统一内核镜像（UKI）</a>。请注意，在使用 <a href="#pgac06dd8bfe95"> systemd 的 GPT 分区自动挂载</a>时，默认会采用更安全的权限设置。</li>
+<li><code>/etc/nftables.conf</code> ：<a href="#pg7bf4c060a5c1">nftables</a> 配置，适用于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nftables">nftables</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iptables-nft">iptables-nft</a></span><sup><small>包</small></sup></span>。</li>
+<li><code>/etc/iptables</code>: 旧版 <a href="#pg5d43226b0584">iptables</a> 配置，适用于<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iptables-legacy">iptables-legacy</a></span><sup><small>包</small></sup></span> 。</li></ul>
+<p>可以修改默认的 <a href="#pgf51971ffe792">Umask</a> <code>0022</code> 来为新建的文件提高安全性。<a href="https://apps.nsa.gov/iaarchive/library/ia-guidance/security-configuration/operating-systems/guide-to-the-secure-configuration-of-red-hat-enterprise.cfm">NSA RHEL5 安全指南</a>建议将 umask 设置为 <code>0077</code> 以获得最充分的安全性，这将使得新文件无法被创建者之外的用户读取。要修改 umask，参见 <a href="#pgf51971ffe792">Umask#Set the mask value</a>。如果你使用 <a href="#pg023562413be7">sudo</a>，可以考虑将其配置为<a href="#pg023562413be7">使用默认的 root umask</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_SUID_.E5.92.8C_SGID_.E6.96.87.E4.BB.B6" id="SUID_和_SGID_文件"><span id="SUID_.E5.92.8C_SGID_.E6.96.87.E4.BB.B6"></span>SUID 和 SGID 文件</h4></div>
+<p>了解系统中哪些文件启用了 <a href="https://en.wikipedia.org/wiki/Setuid">Setuid</a>（SUID）或 Setgid（SGID）权限至关重要。若要搜索所有设置了 SUID 或 SGID 权限的文件，请运行：
+</p>
+<pre>$ find / -perm "/u=s,g=s" -type f 2&gt;/dev/null
+</pre>
+<p>常见的已设置 SUID 权限的相关文件示例：
+</p>
+<ul><li><a href="#pgdacf2e1d6f91">unix_chkpwd</a></li>
+<li>chage、expiry、gpasswd、<a href="#pg82abbe6fe69f">passwd</a>、sg（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=shadow">shadow</a></span><sup><small>包</small></sup></span>）</li>
+<li><a href="#pg28f17f5cf109">fusermount3</a>、fusermount2</li>
+<li><a href="#pg74611dd9d3c8">pkexec</a></li>
+<li><a href="#pg4df2d7b1a305">ssh-keysign</a></li>
+<li>chfn、chsh、mount、newgrp、umount、wall、write（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=util-linux">util-linux</a></span><sup><small>包</small></sup></span>）</li>
+<li><a href="#pg023562413be7">sudo</a>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sudo-rs">sudo-rs</a></span><sup><small>包</small></sup></span>、<a href="#pgcc8f82fc4af5">doas</a>、<a href="#pg8b873c561d21">su</a>、su-rs、<a href="#pg3ac39333c5e1">ksu</a></li>
+<li><a href="#pgca26842a75ba">firejail</a></li>
+<li><a href="#pg3eb1c1fe7aa8">dbus-daemon-launch-helper</a></li>
+<li><a href="#pgad69d7c7a814">chromium-sandbox</a></li>
+<li><a href="#pga36c0aff60be">Xorg.wrap</a></li></ul>
+<p>这类可执行文件最显著的风险在于可能存在特权提升（提权）漏洞，具体参考<a href="https://en.wikipedia.org/wiki/Setuid#Security_impact"> Setuid 的安全影响</a><a href="https://www.cvedetails.com/vulnerability-list/vendor_id-16224/product_id-36412/Calibre-ebook-Calibre.html">[7]</a><a href="https://www.cvedetails.com/product/32625/Sudo-Project-Sudo.html?vendor_id=15714">[8]</a><a href="https://www.cvedetails.com/vulnerability-list/vendor_id-16191/Firejail-Project.html">[9]</a>。
+</p><p>未归 root 所有但设置了 SUID 权限的文件，或是设置了 SGID 权限的文件，“通常”潜在影响较小，但如果存在漏洞，理论上仍可能造成不小的危害。通常情况下，可以通过分配<a href="#pg0d85601792d1">能力（Capabilities）</a>来完全避免使用 SUID 或 SGID。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>必须保持警惕，及时更新提供 SUID/SGID 可执行文件的软件包，以防止系统产生漏洞；另请参阅无 SUID 这一替代方案</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.A4.87.E4.BB.BD" id="备份"><span id=".E5.A4.87.E4.BB.BD"></span>备份</h3></div>
+<p>备份对于安全至关重要，因为通过备份，系统可以在遭遇<a href="https://zh.wikipedia.org/wiki/%E5%8B%92%E7%B4%A2%E8%BD%AF%E4%BB%B6">勒索软件</a>、数据损坏、误删除以及系统受损时进行恢复，从而避免永久性的数据丢失。参见<a href="#pgab5c8518328c">系统备份</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_SATA_SSD_.E5.86.BB.E7.BB.93.E6.A8.A1.E5.BC.8F" id="SATA_SSD_冻结模式"><span id="SATA_SSD_.E5.86.BB.E7.BB.93.E6.A8.A1.E5.BC.8F"></span>SATA SSD 冻结模式</h3></div>
+<p>SATA 固态硬盘（SSD）在从睡眠状态唤醒时，极易受到安全擦除单元（ATA SECURITY ERASE UNIT）命令的攻击。若需降低此风险，参阅<a href="#pgcb28ba980ed7">固态硬盘#从睡眠中唤醒时设置 SATA SSD 为冻结模式</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E8.B4.A6.E6.88.B7.E8.AE.BE.E7.BD.AE" id="账户设置"><span id=".E8.B4.A6.E6.88.B7.E8.AE.BE.E7.BD.AE"></span>账户设置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E4.B8.8D.E8.A6.81.E6.97.A5.E5.B8.B8.E4.BD.BF.E7.94.A8_root_.E8.B4.A6.E6.88.B7" id="不要日常使用_root_账户"><span id=".E4.B8.8D.E8.A6.81.E6.97.A5.E5.B8.B8.E4.BD.BF.E7.94.A8_root_.E8.B4.A6.E6.88.B7"></span>不要日常使用 root 账户</h3></div>
+<p>根据最小权限原则，不要日常使用 root 账户。给每个使用系统的人建立一个没有特权的用户账户。有关临时获取特权的方法，参见<a href="#pgaacadd2abcc8">应用程序列表/安全#提权</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.9C.A8.E5.A4.B1.E8.B4.A5.E7.9A.84.E7.99.BB.E5.BD.95.E5.B0.9D.E8.AF.95.E5.90.8E.E5.BC.BA.E5.88.B6.E5.BB.B6.E6.97.B6.E4.B8.80.E6.AE.B5.E6.97.B6.E9.97.B4" id="在失败的登录尝试后强制延时一段时间"><span id=".E5.9C.A8.E5.A4.B1.E8.B4.A5.E7.9A.84.E7.99.BB.E5.BD.95.E5.B0.9D.E8.AF.95.E5.90.8E.E5.BC.BA.E5.88.B6.E5.BB.B6.E6.97.B6.E4.B8.80.E6.AE.B5.E6.97.B6.E9.97.B4"></span>在失败的登录尝试后强制延时一段时间</h3></div>
+<p>将下方的行添加至 <code>/etc/pam.d/system-login</code> 即可在失败的登录尝试后延时至少 4 秒：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/system-login</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">auth optional pam_faildelay.so delay=4000000</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此行必须作为文件中的第一行。</div>
+<p><code>4000000</code> 是延时的微秒数。
+</p><p>除 <code>pam_faildelay</code> 外，其他 PAM 模块也可以建议此类延迟；如果多个模块同时指定了延迟，PAM 将采用其中最长的时间。
+</p><p>特别是 <code>pam_unix</code> 和 <code>pam_faillock</code>，它们默认会设置至少 2 秒的最低延迟。
+</p><p>若要完全移除该延迟，你需要为这些模块的任何 <code>auth</code> 配置行添加 <code>nodelay</code> 参数，例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/system-auth</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">auth       [success=1 default=bad]     pam_unix.so          try_first_pass nullok nodelay</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.9C.A8.E4.B8.89.E6.AC.A1.E7.99.BB.E5.BD.95.E5.B0.9D.E8.AF.95.E5.A4.B1.E8.B4.A5.E5.90.8E.E5.B0.81.E9.94.81.E7.94.A8.E6.88.B7" id="在三次登录尝试失败后封锁用户"><span id=".E5.9C.A8.E4.B8.89.E6.AC.A1.E7.99.BB.E5.BD.95.E5.B0.9D.E8.AF.95.E5.A4.B1.E8.B4.A5.E5.90.8E.E5.B0.81.E9.94.81.E7.94.A8.E6.88.B7"></span>在三次登录尝试失败后封锁用户</h3></div>
+<p>至 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pambase">pambase</a></span><sup><small>包</small></sup></span> 20200721.1-2时，<code>pam_faillock.so</code> 默认启用，在15分钟内3次失败的登录尝试之后会封锁用户10分钟（见 <a href="https://bugs.archlinux.org/task/67644">FS#67644</a>）。这一封锁只适用于密码认证（如登录及 sudo），通过 SSH 的公钥认证仍然会被接受。为防止彻底拒绝服务，该封锁对于 root 禁用。
+</p><p>要解锁用户，执行：
+</p>
+<pre>$ faillock --reset --user <i>username</i>
+</pre>
+<p>默认情况下，封锁机制为每个用户一个文件，位于 <code>/run/faillock/</code>。删除或清空此文件及可解锁该用户——该目录是由 root 所有，但文件是由该用户所有，故 <code>faillock</code> 命令只会清空文件，因此并不需要 root。
+</p><p><code>pam_faillock.so</code> 模块可通过文件 <code>/etc/security/faillock.conf</code> 配置。封锁参数： 
+</p>
+<ul><li><code>unlock_time</code>——封锁时间（单位为秒，默认10分钟）。</li>
+<li><code>fail_interval</code>——导致封锁的失败尝试时间范围（单位为秒，默认15分钟）。</li>
+<li><code>deny</code>——封锁前允许的登录失败次数（默认为3）。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>锁定的主要目的是减缓暴力攻击，使其变得不可行。因此，如果由于密码输入错误而导致的锁定变得过于频繁，请优先考虑放宽尝试次数，而不是减少锁定时间。</div><div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>deny = 0</code> 会禁用封锁。</div>
+<p>默认情况下，重新启动后所有用户锁都会丢失。如果攻击者可以重新启动计算机，则锁定持续存在会更安全。要使锁定持续存在，请将 <code>/etc/security/faillock.conf</code> 中的 <code>dir</code> 参数更改为 <code>/var/lib/faillock</code> 。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果你将锁定设置为持久化，受 polkit 127 引入的变更影响：你可能需要放宽其辅助代理（helper agent）的沙箱限制，以使其维持正常功能。最佳方法是通过 <code>}systemctl edit polkit-agent-helper@.service</code> 为其 systemd 服务单元创建一个配置补丁，并添加如下内容：
+<pre>[Service]
+ReadWritePaths=/var/lib/faillock
+</pre>
+</div>
+<p>更改无需重启即可生效。更多配置选项见 <span class="plainlinks archwiki-template-man" title="$ man 5 faillock.conf"><a href="https://man.archlinux.org/man/faillock.conf.5">faillock.conf(5)</a></span> ，如启用 root 账户封锁、在中心化登录（如 LDAP）情况下禁用等。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E9.99.90.E5.88.B6.E8.BF.9B.E7.A8.8B.E6.95.B0.E9.87.8F" id="限制进程数量"><span id=".E9.99.90.E5.88.B6.E8.BF.9B.E7.A8.8B.E6.95.B0.E9.87.8F"></span>限制进程数量</h3></div>
+<p>在有很多用户或存在不可信用户的系统上，限制每个用户同时可运行的进程数很重要，这样可以防止 <a href="https://en.wikipedia.org/wiki/Fork_bomb">fork bombs</a> 以及其他拒绝服务攻击。<code>/etc/security/limits.conf</code> 配置文件决定了每个用户或组可以运行的进程数，默认情况下为空（除了有用的注释）。将以下行添加到此文件将限制所有用户每位最多运行 100 个活动进程，除非他们使用 <code>prlimit</code> 命令将此次会话的最大值显式地提高到 200。可以根据用户应当运行的进程数量或当前管理的系统的硬件条件来确定这些值。
+</p>
+<pre>* soft nproc 100
+* hard nproc 200
+</pre>
+<p>当前每个用户运行的进程数量可以使用 <code>ps --no-headers -Leo user | sort | uniq -c</code> 查看。这可以帮助确定合适的用户进程限额。参见<a href="https://wiki.archlinux.org/title/limits.conf">en:limits.conf</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E6.98.BE.E7.A4.BA.E6.9C.8D.E5.8A.A1.E5.99.A8" id="显示服务器"><span id=".E6.98.BE.E7.A4.BA.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>显示服务器</h3></div>
+<p>尽量使用 <a href="#pga21a6be8b605">Wayland</a> 代替 <a href="#pga36c0aff60be">Xorg</a> 作为<a href="https://wiki.archlinux.org/title/List_of_applications#Display_Server">显示服务器</a>。Xorg 的设计早于现代安全实践，并且<a href="https://security.stackexchange.com/questions/4641/why-are-people-saying-that-the-x-window-system-is-not-secure/4646#4646">被许多人认为是不安全的</a>。例如，Xorg 应用程序可以在不活动时记录击键。
+</p><p>在 Wayland 中，Xwayland 兼容层将自动使用无 root 权限的 Xorg。如果必须运行 <a href="#pga36c0aff60be">Xorg</a>，建议避免以 root 身份运行，参考<a href="#pga36c0aff60be">Xorg#没有 root 权限的 Xorg</a>，并<a href="#pga36c0aff60be">确保其不监听抽象套接字（Abstract sockets）和 TCP 套接字</a>。 
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E9.99.90.E5.88.B6_root_.E6.9D.83.E9.99.90" id="限制_root_权限"><span id=".E9.99.90.E5.88.B6_root_.E6.9D.83.E9.99.90"></span>限制 root 权限</h2></div>
+<p>按照系统的设计，root 用户是系统中最强大的用户。<a href="https://wiki.archlinux.org/title/audit">审计</a> root 用户帐户也很困难。因此，重要的是尽可能多地限制root用户帐户的使用。有多种方法可以保持 root 用户的权力，同时限制其造成损害的能力。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E7.94.A8_sudo_.E6.9B.BF.E4.BB.A3_su" id="用_sudo_替代_su"><span id=".E7.94.A8_sudo_.E6.9B.BF.E4.BB.A3_su"></span>用 sudo 替代 su</h3></div>
+<p>出于下述原因，使用 <a href="#pg023562413be7">sudo</a> 进行特权访问比 <a href="#pg8b873c561d21">su</a> 更好： 
+</p>
+<ul><li>sudo 记录了普通权限用户运行每个特权命令的日志。</li>
+<li>root 用户的密码不需要告知每个请求 root 权限的用户。</li>
+<li><code>sudo</code> 可以防止用户意外地以 <i>root</i> 身份执行无需该权限的命令，因为 sudo 并没有为 root 创建完整的终端。这符合<a href="https://en.wikipedia.org/wiki/Principle_of_least_privilege">最小权限原则</a>。</li>
+<li>可以为单个用户启用单个程序的 root 权限，而不用为了运行一个程序启用该用户对 root 的完整访问权。</li></ul>
+<p>有关更多信息，参见<a href="#pg023562413be7">Sudo#配置</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_.E4.BD.BF.E7.94.A8_sudo_.E7.BC.96.E8.BE.91.E6.96.87.E4.BB.B6" id="使用_sudo_编辑文件"><span id=".E4.BD.BF.E7.94.A8_sudo_.E7.BC.96.E8.BE.91.E6.96.87.E4.BB.B6"></span>使用 sudo 编辑文件</h4></div>
+<p>参见<a href="#pg023562413be7">Sudo#编辑文件</a>。另外，你也可以使用像<code>rvim</code>或<code>rnano</code>这样限制了部分高级功能的的编辑器，因而可以安全地在 root 环境下运行。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E9.99.90.E5.88.B6_root_.E7.99.BB.E5.BD.95" id="限制_root_登录"><span id=".E9.99.90.E5.88.B6_root_.E7.99.BB.E5.BD.95"></span>限制 root 登录</h3></div>
+<p>正确配置 <a href="#pg023562413be7">sudo</a> 后，完全的 root 权限就可以被严格限制或停用，且不会损失太多可用性。要禁用 root 而允许使用 <a href="#pg023562413be7">sudo</a>，可以运行 <code>passwd -l root</code>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_.E4.BB.85.E5.85.81.E8.AE.B8.E7.89.B9.E5.AE.9A.E7.94.A8.E6.88.B7" id="仅允许特定用户"><span id=".E4.BB.85.E5.85.81.E8.AE.B8.E7.89.B9.E5.AE.9A.E7.94.A8.E6.88.B7"></span>仅允许特定用户</h4></div>
+<p><a href="#pgdacf2e1d6f91">PAM</a> 的 <code>pam_wheel.so</code> 模块可以做到仅允许 <code>wheel</code> 组中的用户使用  <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=su">su</a></span><sup><small>包</small></sup></span>登录。参见<a href="#pg8b873c561d21">Su#su 和 wheel 用户组</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_.E6.8B.92.E7.BB.9D_SSH_.E7.99.BB.E5.BD.95" id="拒绝_SSH_登录"><span id=".E6.8B.92.E7.BB.9D_SSH_.E7.99.BB.E5.BD.95"></span>拒绝 SSH 登录</h4></div>
+<p>即使你不想禁止 root 用户在本地登录，也最好<a href="#pg4df2d7b1a305">禁止 root 通过 SSH 登录</a>。这样做的目的是在用户可以在远程完全破坏系统之前添加额外的一层安全保护。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_.E4.BD.BF.E7.94.A8_access.conf_.E6.8C.87.E5.AE.9A.E5.85.81.E8.AE.B8.E7.9A.84.E7.99.BB.E5.BD.95.E7.BB.84.E5.90.88" id="使用_access.conf_指定允许的登录组合"><span id=".E4.BD.BF.E7.94.A8_access.conf_.E6.8C.87.E5.AE.9A.E5.85.81.E8.AE.B8.E7.9A.84.E7.99.BB.E5.BD.95.E7.BB.84.E5.90.88"></span>使用 access.conf 指定允许的登录组合</h4></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>如果正在使用 GNOME 49 及更高版本，应确保<i>gdm</i>用户组能够从本地登录。这可以通过添加<code>+:(gdm):LOCAL</code>规则来实现。<a href="https://gitlab.gnome.org/GNOME/gdm/-/issues/1021">[10]</a></div>
+<p>当用户尝试通过 <a href="#pgdacf2e1d6f91">PAM</a>进行登录时,系统会检查 <code>/etc/security/access.conf</code> 文件，并从中查找第一个 与其登录属性匹配的组合。随后，系统将根据该匹配规则决定允许还是拒绝此次登录尝试。 
+</p>
+<pre>+:root:LOCAL
+-:root:ALL
+</pre>
+<p>我们可以为特定的组和用户设置规则。在下面的示例中，用户 <code>archie</code>、<code>wheel</code> 组和 <code>adm</code> 组的所有成员都被允许进行本地登录，而所有其他登录尝试均被拒绝：
+</p>
+<pre>+:archie:LOCAL
++:(wheel):LOCAL
++:(adm):LOCAL
+-:ALL:ALL
+</pre>
+<p>更多信息请参阅 <span class="plainlinks archwiki-template-man" title="$ man 5 access.conf"><a href="https://man.archlinux.org/man/access.conf.5">access.conf(5)</a></span>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E5.BC.BA.E5.88.B6.E8.AE.BF.E9.97.AE.E6.8E.A7.E5.88.B6" id="强制访问控制"><span id=".E5.BC.BA.E5.88.B6.E8.AE.BF.E9.97.AE.E6.8E.A7.E5.88.B6"></span>强制访问控制</h2></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E5%BC%BA%E5%88%B6%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6">强制访问控制</a>（Mandatory Access Control, MAC）是一种安全策略，它与 Arch 以及大部分 Linux 发行版默认使用的 <a href="https://zh.wikipedia.org/wiki/%E8%87%AA%E4%B8%BB%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6">自主访问控制</a> （Discretionary Access Control, DAC）有很大的不同。MAC 本质上是对照着一个安全规则集，检查程序的每一个可能对系统造成影响的操作。与 DAC 方式相比，用户不能修改 MAC 的规则集。使用几乎任 何强制访问控制系统都将显著提高计算机的安全性，尽管它们的实现方式存在差异。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.9F.BA.E4.BA.8E.E8.B7.AF.E5.BE.84.E7.9A.84MAC" id="基于路径的MAC"><span id=".E5.9F.BA.E4.BA.8E.E8.B7.AF.E5.BE.84.E7.9A.84MAC"></span>基于路径的MAC</h3></div>
+<p>基于路径的访问控制是一种简单的访问控制形式，它根据文件的路径提供相应的权限。这种方式有缺点，就是当文件改变路径以后相应的权限并没有随着文件一起移动，或是在给无法访问的文件添加硬链接将使文件可被访问。从积极的方面来说，基于路径的 MAC 可以在更广泛的文件系统上实现，这与基于标签的另一种可选方案是不同的。 
+</p>
+<ul><li><a href="#pgfe1adbe33dca">AppArmor</a> 是一个由 <a href="https://en.wikipedia.org/wiki/Canonical">Canonical</a> 维护的 MAC 实现，它被看做是 SELinux 的简化版替代方案。</li></ul>
+<ul><li><a href="#pg34f69caada1e">TOMOYO Linux</a> 是另一种提供访问控制的系统，简单而易用。它的使用方式和内部实现都被设计得足够简单，需要的依赖也很少。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.9F.BA.E4.BA.8E.E6.A0.87.E7.AD.BE.E7.9A.84MAC" id="基于标签的MAC"><span id=".E5.9F.BA.E4.BA.8E.E6.A0.87.E7.AD.BE.E7.9A.84MAC"></span>基于标签的MAC</h3></div>
+<p>基于标签的访问控制意味着每份文件都带有扩展属性用于决定它的安全权限。虽然这类系统应该比基于路径的控制更灵活，但它只适用于支持这些扩展属性的文件系统。 
+</p>
+<ul><li><a href="#pg7e957d97ab97">SELinux</a> 是一个基于 <a href="https://zh.wikipedia.org/wiki/%E7%BE%8E%E5%9B%BD%E5%9B%BD%E5%AE%B6%E5%AE%89%E5%85%A8%E5%B1%80">美国国家安全局(NSA)</a> 的项目，用于提高 Linux 的安全性。它完整实现了 MAC，将系统用户与角色独立开来。它实现了一个非常强大的多级 MAC 策略，可以在系统扩大和改变得超出其原始配置时也能轻松控制系统。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E8.AE.BF.E9.97.AE.E6.8E.A7.E5.88.B6.E8.A1.A8_.28ACLs.29" id="访问控制表_(ACLs)"><span id=".E8.AE.BF.E9.97.AE.E6.8E.A7.E5.88.B6.E8.A1.A8_.28ACLs.29"></span>访问控制表 (ACLs)</h3></div>
+<p><a href="#pgf63e2c04d59e">访问控制列表</a>（Access Control Lists, ACLs）是以某种方式将规则直接附加到文件系统的一种可选方法。ACLs 将程序的实际操作与允许的操作对照，来实现访问控制。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E5.86.85.E6.A0.B8.E5.8A.A0.E5.9B.BA" id="内核加固"><span id=".E5.86.85.E6.A0.B8.E5.8A.A0.E5.9B.BA"></span>内核加固</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.86.85.E6.A0.B8.E8.87.AA.E6.88.91.E4.BF.9D.E6.8A.A4_.2F_.E6.BC.8F.E6.B4.9E.E9.98.B2.E6.8A.A4" id="内核自我保护_/_漏洞防护"><span id=".E5.86.85.E6.A0.B8.E8.87.AA.E6.88.91.E4.BF.9D.E6.8A.A4_.2F_.E6.BC.8F.E6.B4.9E.E9.98.B2.E6.8A.A4"></span>内核自我保护 / 漏洞防护</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 相较于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 使用了<a href="https://github.com/anthraxx/linux-hardened">基本内核加固补丁集</a>和更多安全相关的编译时配置选项。也可以使用自定义编译选项来把握安全性和性能之间的平衡，而不是使用强调安全性的默认选项。
+</p><p>然而需要注意的是，当使用该内核时，某些软件包（例如<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=throttled">throttled</a></span><sup><small>包</small></sup></span>）将无法正常工作。
+</p><p>如果你用了内核代码树以外的驱动，比如 <a href="#pge12579b7d4ac">NVIDIA</a>，可能会需要切换到它的 <a href="#pg1c7185826129">DKMS</a> 包。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_.E7.94.A8.E6.88.B7.E7.A9.BA.E9.97.B4_ASLR_.E6.AF.94.E8.BE.83" id="用户空间_ASLR_比较"><span id=".E7.94.A8.E6.88.B7.E7.A9.BA.E9.97.B4_ASLR_.E6.AF.94.E8.BE.83"></span>用户空间 ASLR 比较</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 包为用户空间进程提供了改进的 ASLR（Address Space Layout Randomization，地址空间布局随机化）实现。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=paxtest">paxtest</a></span><sup><small>包</small></sup></span> 命令可用于获取所提供熵的估计值：
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgfefbd690c49d_64_.E4.BD.8D.E8.BF.9B.E7.A8.8B" id="64_位进程"><span id="64_.E4.BD.8D.E8.BF.9B.E7.A8.8B"></span>64 位进程</h5></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">linux-hardened 5.4.21.a-1-hardened</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Anonymous mapping randomization test     : 32 quality bits (guessed)
+Heap randomization test (ET_EXEC)        : 40 quality bits (guessed)
+Heap randomization test (PIE)            : 40 quality bits (guessed)
+Main executable randomization (ET_EXEC)  : 32 quality bits (guessed)
+Main executable randomization (PIE)      : 32 quality bits (guessed)
+Shared library randomization test        : 32 quality bits (guessed)
+VDSO randomization test                  : 32 quality bits (guessed)
+Stack randomization test (SEGMEXEC)      : 40 quality bits (guessed)
+Stack randomization test (PAGEEXEC)      : 40 quality bits (guessed)
+Arg/env randomization test (SEGMEXEC)    : 44 quality bits (guessed)
+Arg/env randomization test (PAGEEXEC)    : 44 quality bits (guessed)
+Offset to library randomisation (ET_EXEC): 34 quality bits (guessed)
+Offset to library randomisation (ET_DYN) : 34 quality bits (guessed)
+Randomization under memory exhaustion @~0: 32 bits (guessed)
+Randomization under memory exhaustion @0 : 32 bits (guessed)
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">linux 5.5.5-arch1-1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Anonymous mapping randomization test     : 28 quality bits (guessed)
+Heap randomization test (ET_EXEC)        : 28 quality bits (guessed)
+Heap randomization test (PIE)            : 28 quality bits (guessed)
+Main executable randomization (ET_EXEC)  : 28 quality bits (guessed)
+Main executable randomization (PIE)      : 28 quality bits (guessed)
+Shared library randomization test        : 28 quality bits (guessed)
+VDSO randomization test                  : 20 quality bits (guessed)
+Stack randomization test (SEGMEXEC)      : 30 quality bits (guessed)
+Stack randomization test (PAGEEXEC)      : 30 quality bits (guessed)
+Arg/env randomization test (SEGMEXEC)    : 22 quality bits (guessed)
+Arg/env randomization test (PAGEEXEC)    : 22 quality bits (guessed)
+Offset to library randomisation (ET_EXEC): 28 quality bits (guessed)
+Offset to library randomisation (ET_DYN) : 28 quality bits (guessed)
+Randomization under memory exhaustion @~0: 29 bits (guessed)
+Randomization under memory exhaustion @0 : 29 bits (guessed)
+</pre><pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">linux-lts 4.19.101-1-lts</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Anonymous mapping randomization test     : 28 quality bits (guessed)
+Heap randomization test (ET_EXEC)        : 28 quality bits (guessed)
+Heap randomization test (PIE)            : 28 quality bits (guessed)
+Main executable randomization (ET_EXEC)  : 28 quality bits (guessed)
+Main executable randomization (PIE)      : 28 quality bits (guessed)
+Shared library randomization test        : 28 quality bits (guessed)
+VDSO randomization test                  : 19 quality bits (guessed)
+Stack randomization test (SEGMEXEC)      : 30 quality bits (guessed)
+Stack randomization test (PAGEEXEC)      : 30 quality bits (guessed)
+Arg/env randomization test (SEGMEXEC)    : 22 quality bits (guessed)
+Arg/env randomization test (PAGEEXEC)    : 22 quality bits (guessed)
+Offset to library randomisation (ET_EXEC): 28 quality bits (guessed)
+Offset to library randomisation (ET_DYN) : 28 quality bits (guessed)
+Randomization under memory exhaustion @~0: 28 bits (guessed)
+Randomization under memory exhaustion @0 : 28 bits (guessed)</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgfefbd690c49d_32_.E4.BD.8D.E8.BF.9B.E7.A8.8B.EF.BC.88.E8.BF.90.E8.A1.8C.E5.9C.A8_x86_64_.E5.86.85.E6.A0.B8.E4.B8.8A.EF.BC.89" id="32_位进程（运行在_x86_64_内核上）"><span id="32_.E4.BD.8D.E8.BF.9B.E7.A8.8B.EF.BC.88.E8.BF.90.E8.A1.8C.E5.9C.A8_x86_64_.E5.86.85.E6.A0.B8.E4.B8.8A.EF.BC.89"></span>32 位进程（运行在 x86_64 内核上）</h5></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">linux-hardened</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Anonymous mapping randomization test     : 16 quality bits (guessed)
+Heap randomization test (ET_EXEC)        : 22 quality bits (guessed)
+Heap randomization test (PIE)            : 27 quality bits (guessed)
+Main executable randomization (ET_EXEC)  : No randomization
+Main executable randomization (PIE)      : 18 quality bits (guessed)
+Shared library randomization test        : 16 quality bits (guessed)
+VDSO randomization test                  : 16 quality bits (guessed)
+Stack randomization test (SEGMEXEC)      : 24 quality bits (guessed)
+Stack randomization test (PAGEEXEC)      : 24 quality bits (guessed)
+Arg/env randomization test (SEGMEXEC)    : 28 quality bits (guessed)
+Arg/env randomization test (PAGEEXEC)    : 28 quality bits (guessed)
+Offset to library randomisation (ET_EXEC): 18 quality bits (guessed)
+Offset to library randomisation (ET_DYN) : 16 quality bits (guessed)
+Randomization under memory exhaustion @~0: 18 bits (guessed)
+Randomization under memory exhaustion @0 : 18 bits (guessed)
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">linux</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Anonymous mapping randomization test     : 8 quality bits (guessed)
+Heap randomization test (ET_EXEC)        : 13 quality bits (guessed)
+Heap randomization test (PIE)            : 13 quality bits (guessed)
+Main executable randomization (ET_EXEC)  : No randomization
+Main executable randomization (PIE)      : 8 quality bits (guessed)
+Shared library randomization test        : 8 quality bits (guessed)
+VDSO randomization test                  : 8 quality bits (guessed)
+Stack randomization test (SEGMEXEC)      : 19 quality bits (guessed)
+Stack randomization test (PAGEEXEC)      : 19 quality bits (guessed)
+Arg/env randomization test (SEGMEXEC)    : 11 quality bits (guessed)
+Arg/env randomization test (PAGEEXEC)    : 11 quality bits (guessed)
+Offset to library randomisation (ET_EXEC): 8 quality bits (guessed)
+Offset to library randomisation (ET_DYN) : 13 quality bits (guessed)
+Randomization under memory exhaustion @~0: No randomization
+Randomization under memory exhaustion @0 : No randomization
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgfefbd690c49d_.E6.89.8B.E5.8A.A8.E9.85.8D.E7.BD.AE" id="手动配置"><span id=".E6.89.8B.E5.8A.A8.E9.85.8D.E7.BD.AE"></span>手动配置</h5></div>
+<p>在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 之外的内核上，也可以通过使用以下 sysctl 参数来达到相同的效果：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/51-aslr.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">vm.mmap_rnd_bits = 32
+vm.mmap_rnd_compat_bits = 16</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E9.99.90.E5.88.B6.E8.AE.BF.E9.97.AE_proc_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E4.B8.AD.E7.9A.84.E5.86.85.E6.A0.B8.E6.8C.87.E9.92.88" id="限制访问_proc_文件系统中的内核指针"><span id=".E9.99.90.E5.88.B6.E8.AE.BF.E9.97.AE_proc_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E4.B8.AD.E7.9A.84.E5.86.85.E6.A0.B8.E6.8C.87.E9.92.88"></span>限制访问 proc 文件系统中的内核指针</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 默认设置是 <code>kptr_restrict=2</code> 而不是 <code>0</code>。</div>
+<p>将 <code>kernel.kptr_restrict</code> 设置为 1 将针对没有 <code>CAP_SYSLOG</code> 的普通用户隐藏 <code>/proc/kallsyms</code> 中的内核符号地址，这使得利用内核漏洞动态解析地址/符号变得更加困难。这对预编译好的 Arch Linux 内核没有多大帮助，因为攻击者可以直接下载到内核包并从那里手动获取符号，但如果你正在编译自己的内核，这可以帮助减轻本地根攻击。这样做以后会影响非 root 用户运行部分 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perf">perf</a></span><sup><small>包</small></sup></span> 命令（虽然很多 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perf">perf</a></span><sup><small>包</small></sup></span> 功能本身就需要 root 权限）。更多信息请参见 <a href="https://bugs.archlinux.org/task/34323">FS#34323</a>。
+</p><p>将  <code>kernel.kptr_restrict</code> 设置为 2 将隐藏 <code>/proc/kallsyms</code> 中的内核符号地址，而忽略用户的权限。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/50-kptr-restrict.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">kernel.kptr_restrict = 1</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_BPF_.E5.8A.A0.E5.9B.BA" id="BPF_加固"><span id="BPF_.E5.8A.A0.E5.9B.BA"></span>BPF 加固</h3></div>
+<p>BPF 是一种用在运行时动态向内核加载并执行字节码的系统。它被广泛应用于许多 Linux 内核子系统中，例如网络（如 XDP、tc）、跟踪（如 kprobes、uprobes、tracepoints）以及安全（如 seccomp）。此外，它在高级网络安全、性能分析和动态跟踪方面也大有裨益。
+</p><p>BPF 最初是<a href="https://zh.wikipedia.org/wiki/BPF">伯克利包过滤器</a>（Berkeley Packet Filter）的缩写，因为最初的经典 BPF 仅用于 BSD 的数据包捕获工具。该技术最终演变为扩展 BPF（eBPF），不久后被简称为 BPF（不再作为缩写）。不应将 BPF 与 iptables 或 netfilter 等数据包过滤工具混淆，尽管 BPF 可以用于实现此类数据包过滤工具。
+</p><p>BPF 代码既可被解释执行，也可以使用<a href="https://zh.wikipedia.org/wiki/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91">即时编译器</a>（JIT）进行编译。Arch 内核在构建时启用了<code>CONFIG_BPF_JIT_ALWAYS_ON</code>，该选项会禁用 BPF 解释器，并强制所有 BPF 均使用 JIT 编译。这使得攻击者更难利用 BPF 来扩大对 SPECTRE（幽灵）这类漏洞的攻击。有关更多细节，参见<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=290af86629b25ffd1ed6232c4e9107da031705cb">引入 CONFIG_BPF_JIT_ALWAYS_ON 的内核补丁</a>。
+</p><p>内核包含一项针对 JIT 编译 BPF 的加固特性，该特性可以缓解某些类型的 JIT 喷射（JIT spraying）攻击，但代价是会损失部分性能，并会使许多 BPF 程序的跟踪与调试功能失效。可以通过将<code>net.core.bpf_jit_harden</code>设置为<code>1</code>（仅对非特权代码启用加固）或<code>2</code>（对所有代码启用加固）来开启此功能。
+</p><p>有关更多信息，参见<a href="https://docs.kernel.org/admin-guide/sysctl/net.html">内核文档</a>中的 <code>net.core.bpf_*</code> 设置。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 默认将该值设置为 <code>net.core.bpf_jit_harden=2</code> 而非 <code>0</code>。</li>
+<li>默认情况下，非特权用户也可以运行 BPF 程序。若要更改此行为，请设置 <code>kernel.unprivileged_bpf_disabled=1</code><a href="https://access.redhat.com/security/cve/cve-2021-33624">[11]</a>。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_ptrace_.E4.BD.9C.E7.94.A8.E5.9F.9F" id="ptrace_作用域"><span id="ptrace_.E4.BD.9C.E7.94.A8.E5.9F.9F"></span>ptrace 作用域</h3></div>
+<p><span class="plainlinks archwiki-template-man" title="$ man 2 ptrace"><a href="https://man.archlinux.org/man/ptrace.2">ptrace(2)</a></span> 系统提供了一种手段，使得一个进程（“追踪者”）可以观察和控制另一个进程（“被追踪者”）的执行情况，并检查或更改被追踪者的内存和寄存器。<code>ptrace</code> 通常被 <i>gdb</i>、<i>strace</i>、<i>perf</i>、<i>reptyr</i> 等调试及跟踪工具使用。然而，它也为恶意进程读取其他进程的数据并获取控制权提供了可乘之机。
+</p><p>Arch 默认启用了 <a href="https://docs.kernel.org/admin-guide/LSM/Yama.html">Yama LSM</a> ，它提供了一个 <code>kernel.yama.ptrace_scope</code> <a href="#pgec0856954f1c">内核参数</a>。该参数默认设置为 <code>1</code>（受限模式），这会阻止追踪者对受限作用域之外的进程执行 <code>ptrace</code> 调用，除非追踪者拥有特权或具备 <code>CAP_SYS_PTRACE</code> <a href="#pg0d85601792d1">能力</a>。与传统权限相比，这在安全上是一次显著的提升。如果没有这个模块，在没有引入额外的安全层（如<span class="plainlinks archwiki-template-man" title="$ man 7 pid_namespaces"><a href="https://man.archlinux.org/man/pid_namespaces.7">pid_namespaces(7)</a></span>）的情况下，以相同用户运行的各进程之间将毫无隔离可言。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>默认情况下，若需使用依赖 <code>ptrace</code> 的工具，仍可通过以特权进程身份运行它们来实现（例如使用<a href="#pg023562413be7">Sudo</a>）。</div>
+<p>如果无须使用调试工具，可以考虑将 <code>kernel.yama.ptrace
+_scope</code> 设置为 <code>2</code>（仅限管理员）或 <code>3</code>（完全禁用 <code>ptrace</code>）以加固系统。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>某些反作弊或数字版权管理（DRM）实现需要依赖 <code>ptrace</code> 才能工作，包括 Wine 环境下的 Easy Anti-Cheat 和 Ubisoft Connect。将此参数设置为 <code>2</code> 或更高可能会导致使用这些方案的游戏无法启动。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E9.9A.90.E8.97.8F.E8.BF.9B.E7.A8.8B.E6.A0.87.E8.AF.86.E7.AC.A6" id="隐藏进程标识符"><span id=".E9.9A.90.E8.97.8F.E8.BF.9B.E7.A8.8B.E6.A0.87.E8.AF.86.E7.AC.A6"></span>隐藏进程标识符</h3></div>
+
+
+<p><br/>
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>这可能会导致某些应用程序出现问题，例如在沙盒和 <a href="#pga36c0aff60be">Xorg</a> 中运行的应用程序（请参阅解决方法）。</li>
+<li>当所使用的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd">systemd</a></span><sup><small>包</small></sup></span> 版本大于 237.64-1 时，这可能会导致 <a href="#pg05349798cdb5">D-Bus</a>、<a href="#pga942ba974b3d">PulseAudio</a> 和 <a href="#pg0379b52c0e22">bluetooth</a> 出现问题。</li></ul></div>
+<p>其他用户的进程通常可以在 <code>/proc</code> 访问到，而内核有能力向非特权用户隐藏这些进程，按照<a href="https://docs.kernel.org/filesystems/proc.html">此处</a>记录的方法以 <code>hidepid=</code> 和 <code>gid=</code> 选项挂载 <code>proc</code> 文件系统即可。
+</p><p>这使得入侵者收集正在运行的进程信息变得异常艰难，同样艰难的还包括判断是否存在特权运行的守护进程、其他用户是否正在运行敏感程序，甚至无法捕捉到其他用户运行的任何程序，更无法捕捉到特定的程序是否正在运行（假设该程序不会因为其自身行为暴露自己），并且作为额外的优势，那些通过外部参数传递敏感信息的、写得不那么好的程序现在可以防范本地窃听了。
+</p><p>由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=filesystem">filesystem</a></span><sup><small>包</small></sup></span> 软件包提供的 <code>proc</code> <a href="#pgc5547c3b9e44">用户组</a>相当于一个白名单，包含了有权访问其他用户进程信息的用户。如果用户或服务需要访问除自身以外的 <code>/proc/&lt;pid&gt;</code> 目录，请<a href="#pgc5547c3b9e44">将他们加入该用户组</a>。
+</p><p>例如，把除了 <code>proc</code> 组中用户之外的其他用户的进程信息都隐藏起来：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">proc	/proc	proc	nosuid,nodev,noexec,hidepid=2,gid=proc	0	0</pre>
+<p>要使用户会话正常工作，需要为 <i>systemd-logind</i> 添加例外：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/systemd-logind.service.d/hidepid.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+SupplementaryGroups=proc</pre>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E9.99.90.E5.88.B6.E6.A8.A1.E5.9D.97.E5.8A.A0.E8.BD.BD" id="限制模块加载"><span id=".E9.99.90.E5.88.B6.E6.A8.A1.E5.9D.97.E5.8A.A0.E8.BD.BD"></span>限制模块加载</h3></div>
+<p>默认的 Arch 内核启用了 <code>CONFIG_MODULE_SIG_ALL</code>，这会对作为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 软件包一部分构建的所有内核模块进行签名。这使得内核只能加载带有有效签名的模块，也就是说，本地编译的树外（out-of-tree）模块或由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-open">nvidia-open</a></span><sup><small>包</small></sup></span> 等软件包提供的模块将被无法加载。可以使用 <code>modinfo</code> 来验证当前加载的模块是否包含签名；而手动验证签名则稍微复杂一些<a href="https://unix.stackexchange.com/a/496800">[13]</a>。
+</p><p>可以通过设置 <code>module.sig_enforce=1</code> <a href="#pgec0856954f1c">内核参数</a>来限制内核模块的加载。更多信息可以在<a href="https://docs.kernel.org/admin-guide/module-signing.html">内核文档</a>中找到。
+</p><p>此外，可以将不需要的特定模块列入<a href="#pg9a7fe4327732">黑名单</a>，具体示例可以参考<a href="https://github.com/secureblue/secureblue/blob/live/files/system/usr/lib/modprobe.d/secureblue.conf">secureblue</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E7.A6.81.E7.94.A8.E6.A8.A1.E5.9D.97.E5.8A.A0.E8.BD.BD" id="禁用模块加载"><span id=".E7.A6.81.E7.94.A8.E6.A8.A1.E5.9D.97.E5.8A.A0.E8.BD.BD"></span>禁用模块加载</h3></div>
+<p>某些安全漏洞（例如 <a href="https://copy.fail/">Copy Fail</a>）存在于大多数用户并不需要的内核模块中。禁用所有无关模块的加载可以防止此类漏洞被利用。要使此方案可行，内核通常必须处于稳定状态，这意味着一旦系统完全启动，通常就不再需要加载任何模块。当内核达到该状态时，可以切换 <a href="https://docs.kernel.org/admin-guide/sysctl/kernel.html#modules-disabled">modules_disabled</a> 选项，以不可逆地禁用模块的加载和卸载，直至下一次重启后失效。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E7.A6.81.E7.94.A8_kexec" id="禁用_kexec"><span id=".E7.A6.81.E7.94.A8_kexec"></span>禁用 kexec</h3></div>
+<p>Kexec 允许替换当前正在运行的内核。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/51-kexec-restrict.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">kernel.kexec_load_disabled = 1</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 中，kexec 默认已被禁用</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_Kernel_.E9.94.81.E5.AE.9A.E6.A8.A1.E5.BC.8F.EF.BC.88Lockdown.EF.BC.89" id="Kernel_锁定模式（Lockdown）"><span id="Kernel_.E9.94.81.E5.AE.9A.E6.A8.A1.E5.BC.8F.EF.BC.88Lockdown.EF.BC.89"></span>Kernel 锁定模式（Lockdown）</h3></div>
+<p>Linux 支持一项可选的<a href="https://mjg59.dreamwidth.org/55105.html">锁定（Lockdown）特性</a>，旨在强化 UID 0（root）与内核之间的边界。启用此功能后，某些依赖对硬件或内核进行底层访问的应用程序可能会停止工作。
+</p><p>要使用锁定功能，必须先初始化其 LSM（Linux 安全模块）并设置一种锁定模式。
+</p><p>所有<a href="#pg3473491e6a48">官方支持的内核</a>都会初始化该 LSM，但默认都不会强制执行任何锁定模式。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可以通过运行 <code>cat /sys/kernel/security/lsm</code> 来验证已初始化的 LSM。</div>
+<p>锁定模式有两种运行级别：
+</p>
+<ul><li><code>integrity</code>（完整性）：禁止允许用户空间修改正在运行的内核的特性（例如 kexec、bpf）。</li>
+<li><code>confidentiality</code>（机密性）：在完整性的基础上，进一步禁用允许用户空间从内核提取机密信息的内核特性。</li></ul>
+<p>除非特定的威胁模型另有要求，否则建议使用 <code>integrity</code> 模式。
+</p><p>若要在运行时启用内核锁定，请运行：
+</p>
+<pre># echo <i>mode</i> &gt; /sys/kernel/security/lockdown
+</pre>
+<p>若要在引导时启用内核锁定，请使用<a href="#pgec0856954f1c">内核参数</a> <code>lockdown=<i>mode</i></code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>内核锁定在运行时无法被禁用。</li>
+<li>内核锁定会禁用<a href="#pg146ac4b0e523">休眠（挂起到磁盘）</a>功能。</li>
+<li>在早于 6.17 的 <span class="plainlinks archwiki-template-man" title="$ man 7 kernel_lockdown"><a href="https://man.archlinux.org/man/kernel_lockdown.7">kernel_lockdown(7)</a></span> 手册页版本中，错误地写到“如果系统在 EFI 安全启动模式下引导，锁定将被自动启用”。这既不是上游内核的行为，也不是 Arch 打包的<a href="#pg3473491e6a48">内核</a>的行为。</li></ul>
+</div>
+<p>另请参见 <span class="plainlinks archwiki-template-man" title="$ man 7 kernel_lockdown"><a href="https://man.archlinux.org/man/kernel_lockdown.7">kernel_lockdown(7)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_Linux_.E5.86.85.E6.A0.B8.E8.BF.90.E8.A1.8C.E6.97.B6.E5.AE.88.E6.8A.A4.EF.BC.88LKRG.EF.BC.89" id="Linux_内核运行时守护（LKRG）"><span id="Linux_.E5.86.85.E6.A0.B8.E8.BF.90.E8.A1.8C.E6.97.B6.E5.AE.88.E6.8A.A4.EF.BC.88LKRG.EF.BC.89"></span>Linux 内核运行时守护（LKRG）</h3></div>
+<p><a href="https://www.openwall.com/lkrg/">LKRG</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lkrg-dkms/">lkrg-dkms</a></span><sup><small>AUR</small></sup></span>）是一个用于对内核进行完整性检查并检测漏洞利用尝试的内核模块。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E7.A6.81.E7.94.A8.E7.B4.A7.E6.80.A5_Shell" id="禁用紧急_Shell"><span id=".E7.A6.81.E7.94.A8.E7.B4.A7.E6.80.A5_Shell"></span>禁用紧急 Shell</h3></div>
+
+<p><br/>
+紧急 Shell（Emergency shell）用于在引导过程中对机器进行交互式故障排除。然而，它也是攻击者可以用来访问 TPM 等安全资源的工具。有关实际案例，参见<a href="https://pulsesecurity.co.nz/advisories/tpm-luks-bypass">这篇文章</a>。禁用紧急 Shell 可以增加攻击的难度，但代价是移除了一款用于排查早期引导故障的工具。
+</p><p>若要禁用紧急 Shell，参见<a href="#pgac06dd8bfe95">Systemd#在远程主机上关闭救援（emergency）模式</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E7.A6.81.E7.94.A8.E9.9D.9E.E7.89.B9.E6.9D.83.E7.94.A8.E6.88.B7.E5.91.BD.E5.90.8D.E7.A9.BA.E9.97.B4" id="禁用非特权用户命名空间"><span id=".E7.A6.81.E7.94.A8.E9.9D.9E.E7.89.B9.E6.9D.83.E7.94.A8.E6.88.B7.E5.91.BD.E5.90.8D.E7.A9.BA.E9.97.B4"></span>禁用非特权用户命名空间</h3></div>
+
+<p>除 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 外，在所有<a href="#pg3473491e6a48">官方支持的内核</a>中，非特权<span class="plainlinks archwiki-template-man" title="$ man 7 user_namespace"><a href="https://man.archlinux.org/man/user_namespace.7">user_namespace(7)</a></span>（用户命名空间）的使用默认都是启用的。非特权用户命名空间极大地扩大了本地特权提升的攻击面；参见 <a href="https://gitlab.com/apparmor/apparmor/-/wikis/unprivileged_userns_restriction">AppArmor 的 Wiki</a> 和 <a href="https://bugs.archlinux.org/task/36969">FS#36969</a>。
+</p><p>为缓解此风险，可以执行以下操作之一：
+</p>
+<ul><li>使用已具备安全默认设置的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 内核，或</li>
+<li>将 <code>kernel.unprivileged_userns_clone</code> <a href="#pg7b7cc2bbe79a">Sysctl</a> 参数设置为 <code>0</code>。</li></ul>
+<p>注意，这可能会破坏诸如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nsjail">nsjail</a></span><sup><small>包</small></sup></span> 等应用程序。在此设置下，基于 <a href="#pgad69d7c7a814">Chromium</a> 的应用程序需要为 <code>chrome-sandbox</code> 开启 SUID 位才能正常工作。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E9.99.90.E5.88.B6.E7.B3.BB.E7.BB.9F.E6.9C.8D.E5.8A.A1" id="限制系统服务"><span id=".E9.99.90.E5.88.B6.E7.B3.BB.E7.BB.9F.E6.9C.8D.E5.8A.A1"></span>限制系统服务</h2></div>
+<p>可以对系统服务允许执行的操作进行限制。使用 <code>systemd-analyze security</code> 命令可以审查机器上 systemd 服务单元的安全属性，阅读专属文章 <a href="https://wiki.archlinux.org/title/systemd/sandbox">en:systemd/sandbox</a> 以了解更多信息。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E6.B2.99.E7.AE.B1.E7.A8.8B.E5.BA.8F" id="沙箱程序"><span id=".E6.B2.99.E7.AE.B1.E7.A8.8B.E5.BA.8F"></span>沙箱程序</h2></div>
+<p>另请参阅 <a href="https://en.wikipedia.org/wiki/Sandbox_(computer_security)">Wikipedia:Sandbox (computer security)</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_Firejail" id="Firejail">Firejail</h3></div>
+<p><a href="#pgca26842a75ba">Firejail</a>是一种易于使用的用于沙盒化应用程序和服务器的工具。它原本是为浏览器和面向互联网的应用程序创建的，但现在已经支持大量的应用程序。为了建立具有各种特性的沙盒环境，它被安装为一个suid二进制文件，并根据黑名单和白名单为目标应用程序构建一个沙盒化的运行时环境。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_bubblewrap" id="bubblewrap">bubblewrap</h3></div>
+<p><a href="#pg351d995f478c">bubblewrap</a> 是为无特权容器工具（如 <a href="#pge822df3d71e0">Flatpak</a>）开发的沙箱应用程序，其资源占用和复杂性都远远小于Firejail。虽然它缺少某些功能，如文件路径白名单，但bubblewrap确实提供了bind挂载以及创建用户/IPC/PID/网络/cgroup命名空间的功能，并且可以支持简单和复杂的沙箱。对于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 内核，你需要使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bubblewrap-suid">bubblewrap-suid</a></span><sup><small>包</small></sup></span>
+</p><p><a href="#pg60be4eb0f83f">Bubblejail</a>沙箱基于<a href="#pg351d995f478c">bubblewrap</a>，并提供了一个面向资源的权限模型，用户可以通过图形界面进行权限的调整。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_Portable" id="Portable">Portable</h3></div>
+<p><a href="https://github.com/Kraftland/portable">Portable</a> 是一个沙箱框架，它利用 <a href="#pg351d995f478c">bubblewrap</a> 和许多其他工具来锁定运行中的应用程序。该框架旨在为打包者提供便利，同时为用户保证效率，并且默认切断安全漏洞并监控后台进程。
+</p><p>关于由 portable 沙箱化的应用程序仓库，参见 <a href="https://github.com/Kraftland/portable-arch">portable-arch</a>。
+</p><p>如果沙箱化的应用程序没有使用 Portal 文件选择器，portable 可以将文件传递给沙箱（通过传递 <code>--actions share-files</code> 参数）。
+</p><p>Portable 在 GNOME 上功能完全正常，而其他桌面环境可能会缺少诸如高级后台监控和屏幕截图 Portal 等少量特性
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_chroots" id="chroots">chroots</h3></div>
+<p>也可以手动构建<a href="#pg5d8a2c5e3ac5">chroot</a>囚禁来创建沙箱化的进程环境。其相比其他沙箱技术的功能有限；它的沙箱程度仅限于文件路径隔离。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_gVisor" id="gVisor">gVisor</h3></div>
+<p>由 Google 主导的 <a href="https://gvisor.dev/">gVisor</a> 项目提供了一款沙箱应用程序，重点专注于遵循 <a href="https://opencontainers.org/">OCI 倡议</a>的容器技术，例如 <a href="#pg06238a3e6183">Docker</a> 和 <a href="#pg2745ad675c4e">Kubernetes</a>。它通过拦截绝大多数发往内核的系统调用，并将自身伪装为用户机内核（Guest Kernel），从而实现容器及单个应用程序与宿主机的隔离。
+</p><p>与其他拦截型沙箱项目的一个关键区别在于，gVisor 使用 Go 语言重新实现了系统调用，具体详见其<a href="https://gvisor.dev/docs/architecture_guide/intro/">设计概述</a>。有关<a href="https://gvisor.dev/docs/user_guide/compatibility/linux/amd64/">已重新实现的系统调用</a>列表细节，可以在 <a href="https://github.com/google/gvisor/blob/master/pkg/sentry/syscalls/linux/linux64.go">git</a> 中查看。关于使用示例、局限性以及特殊特性，请参阅此项目的<a href="https://gvisor.dev/docs/">项目文档</a>。
+</p><p>该应用程序可以通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gvisor-git/">gvisor-git</a></span><sup><small>AUR</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gvisor-bin/">gvisor-bin</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_Linux.E5.AE.B9.E5.99.A8" id="Linux容器"><span id="Linux.E5.AE.B9.E5.99.A8"></span>Linux容器</h3></div>
+<p>当你需要比其他选项提供的更多分离时（简略于 #完全虚拟化选项) ，<a href="#pg63885cc723dc">Linux Containers</a>是另一个很好的选择。LXC在现有内核之上运行，采用伪chroot，并拥有自己的虚拟硬件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.AE.8C.E5.85.A8.E8.99.9A.E6.8B.9F.E5.8C.96.E9.80.89.E9.A1.B9" id="完全虚拟化选项"><span id=".E5.AE.8C.E5.85.A8.E8.99.9A.E6.8B.9F.E5.8C.96.E9.80.89.E9.A1.B9"></span>完全虚拟化选项</h3></div>
+<p>如果你计划运行风险应用程序或浏览危险网站，使用完全虚拟化选项如<a href="#pgbedf72352aa7">VirtualBox</a>，<a href="#pg0c58b0bfaab8">KVM</a>，<a href="#pgd1e005f2258d">Xen</a>或 <a href="https://www.qubes-os.org/">Qubes OS</a> (基于Xen)也可以提高隔离和安全性。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E7.BD.91.E7.BB.9C.E4.B8.8E.E9.98.B2.E7.81.AB.E5.A2.99" id="网络与防火墙"><span id=".E7.BD.91.E7.BB.9C.E4.B8.8E.E9.98.B2.E7.81.AB.E5.A2.99"></span>网络与防火墙</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E9.98.B2.E7.81.AB.E5.A2.99" id="防火墙"><span id=".E9.98.B2.E7.81.AB.E5.A2.99"></span>防火墙</h3></div>
+<p>虽然源里面的 Arch 内核能够启用 <a href="https://en.wikipedia.org/wiki/Netfilter">Netfilter</a> 的 <a href="#pg7bf4c060a5c1">nftables</a>（以及它的前身 <a href="#pg5d43226b0584">iptables</a>），但其服务默认是不<a href="#pg3ef6532bc644">启用</a>的。强烈建议配置防火墙来保护系统上运行的服务。许多资料（包括 ArchWiki）没有明确说明哪些服务值得保护，因此启用防火墙是一个很好的预防措施。 
+</p>
+<ul><li>参阅 <a href="#pg7bf4c060a5c1">nftables</a> 来获取一般信息。</li>
+<li>参阅 <a href="#pgf56c4de5366f">Uncomplicated Firewall</a> 来获取配置一个基础防火墙的指南。</li>
+<li>参阅 <a href="#pgd731f05c812a">Category:Firewalls</a> 来获取设置 netfilter 的其他方法。</li>
+<li>参阅 <a href="#pg69eed16796b6">Ipset</a> 以设置 IP 地址黑名单，内容可参考来自 Bluetack 的名单。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.BC.80.E6.94.BE.E7.AB.AF.E5.8F.A3" id="开放端口"><span id=".E5.BC.80.E6.94.BE.E7.AB.AF.E5.8F.A3"></span>开放端口</h3></div>
+
+<p>一些服务会在开放的网络端口上监听入站流量。只将这些服务绑定到严格必要的地址和接口是非常重要的。远程攻击者可能能够<a href="https://samy.pl/slipstream/">利用有缺陷的网络协议访问暴露的服务</a>。即使在<a href="https://nvd.nist.gov/vuln/detail/CVE-2019-13450">绑定到localhost的进程</a>中，这种情况也可能发生。
+</p><p>总的来说，如果一个服务只需要对本地系统可访问，那么就绑定到一个Unix域套接字 (<span class="plainlinks archwiki-template-man" title="$ man 7 unix"><a href="https://man.archlinux.org/man/unix.7">unix(7)</a></span>)或者一个回环地址，比如<code>localhost</code>，而不是非回环地址，比如<code>0.0.0.0/0</code>。
+</p><p>如果一个服务需要通过网络对其他系统可访问，那么就通过严格的<a href="#pg4afb09a98033">防火墙</a>规则控制访问，并且尽可能配置认证、授权和加密。
+</p><p>你可以使用<code>ss -l</code>来列出所有当前开放的端口。要显示所有<b>正在监听的</b>进程及其<b>数值化的</b> <b>tcp</b> 和 <b>udp</b> 端口号：
+</p>
+<pre># ss -lpntu
+</pre>
+<p>查看 <span class="plainlinks archwiki-template-man" title="$ man 8 ss"><a href="https://man.archlinux.org/man/ss.8">ss(8)</a></span> 以获取更多选项。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0" id="内核参数"><span id=".E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0"></span>内核参数</h3></div>
+<p>作用于网络的内核参数可以使用 <a href="#pg7b7cc2bbe79a">Sysctl</a> 来设置。要查询具体方法，请参阅 <a href="#pg7b7cc2bbe79a">Sysctl#TCP/IP stack hardening</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_SSH" id="SSH">SSH</h3></div>
+<p>为了减轻<a href="https://en.wikipedia.org/wiki/Brute-force_attack">暴力攻击</a>，建议强制使用基于密钥的身份验证。对于 OpenSSH，请参阅 <a href="#pg4df2d7b1a305">OpenSSH#保护</a>。另外，<a href="#pgff31d434851a">Fail2ban</a> 或 <a href="#pga4d595f5bda6">Sshguard</a> 通过监控日志并写入 <a href="#pg5d43226b0584">iptables 规则</a>提供了较少形式的保护，但这样做可能会使服务器拒绝服务，因为攻击者可以伪装成管理员的地址并发送欺骗性的数据包。
+</p><p>你可以用双因素身份验证来进一步强化身份验证。<a href="#pg2317b2227970">Google Authenticator</a>（Google 身份验证器）使用一次性密码 (OTP) 提供两步验证过程。
+</p><p>拒绝 root 登录也是一种很好的做法，既可以跟踪入侵，也可以在 root 访问之前添加额外的安全层。对于 OpenSSH，请参阅 <a href="#pg4df2d7b1a305">OpenSSH#Deny</a>。
+</p><p>Mozilla公开发布了一个<a href="https://infosec.mozilla.org/guidelines/openssh.html">OpenSSH配置指南</a>，其中设置了更为详尽的审计日志记录，并限制了密码。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_DNS" id="DNS">DNS</h3></div>
+<p>默认的域名解析（DNS）配置具有很高的兼容性，但存在安全弱点。查看<a href="#pg5622270e5836">域名解析#隐私与安全</a>获得更多信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E4.BB.A3.E7.90.86" id="代理"><span id=".E4.BB.A3.E7.90.86"></span>代理</h3></div>
+<p>代理通常用作应用程序和网络之间的额外层，对来自不可信来源的数据进行清理。从攻击面上看，一个以较低权限运行的小型代理的攻击面显著小于以最终用户权限运行的复杂应用程序。
+</p><p>例如，DNS解析器在<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glibc">glibc</a></span><sup><small>包</small></sup></span>中实现，该解析器与应用程序（可能以root身份运行）链接，因此DNS解析器中的错误可能导致远程代码执行。通过安装DNS缓存服务器，例如<a href="#pg72acb6a2ac2c">dnsmasq</a>，它可以起到代理的作用，可以防止这种情况发生。<a href="https://googleonlinesecurity.blogspot.it/2016/02/cve-2015-7547-glibc-getaddrinfo-stack.html">[16]</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E7.AE.A1.E7.90.86TLS.E8.AF.81.E4.B9.A6" id="管理TLS证书"><span id=".E7.AE.A1.E7.90.86TLS.E8.AF.81.E4.B9.A6"></span>管理TLS证书</h3></div>
+<p>请查看 <a href="#pgd402ac6108d6">TLS#信任管理</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E7.89.A9.E7.90.86.E5.AE.89.E5.85.A8" id="物理安全"><span id=".E7.89.A9.E7.90.86.E5.AE.89.E5.85.A8"></span>物理安全</h2></div>
+<p>只要有足够的时间和资源，对计算机的物理访问就等同于 root 权限的访问。然而，通过设置足够的障碍，可以获得较高的<i>实际</i>安全级别。
+</p><p>攻击者可以通过简单地连接一个恶意的IEEE 1394（FireWire）、雷电或PCI Express设备，即可在下次启动时完全控制您的计算机，因为这些设备默认被赋予全内存访问权限。<a href="https://web.archive.org/web/20210312083421/http://breaknenter.org/2014/09/inception-metasploit-integration/">[17]</a> 对于雷电，您可以完全限制直接内存访问或仅限于已知设备，参见<a href="#pg5799ea3f4a55">雷电#用户设备授权</a>。对于Firewire和PCI Express，防止此类事件或硬件自身的修改（例如在驱动器上刷新恶意固件）您能做的很少。但是，大多数攻击者并非这么有知识和决心。
+</p><p>#静态数据加密可以防止计算机被盗时对您的数据的访问，但是资源充足的攻击者可以安装恶意固件，在您下次登录时获取此数据。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E9.94.81.E5.AE.9ABIOS" id="锁定BIOS"><span id=".E9.94.81.E5.AE.9ABIOS"></span>锁定BIOS</h3></div>
+<p>在BIOS中添加密码可以防止他人启动至可移动媒体，这基本上相当于对您的计算机拥有根访问权限。您应确保您的驱动程序在启动顺序中排在第一，并尽可能禁用其他驱动程序的启动功能。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F_.28Bootloader.29" id="引导加载程序_(Bootloader)"><span id=".E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F_.28Bootloader.29"></span>引导加载程序 (Bootloader)</h3></div>
+<p>保护您的<a href="#pgee8f2050088a">引导加载程序</a>非常重要。一个未受保护的启动加载器可以绕过任何登录限制：例如通过设置<code>init=/bin/sh</code><a href="#pgec0856954f1c">内核参数</a>以直接启动到shell，它会使得任何用户的登录限制完全无用。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_Syslinux" id="Syslinux">Syslinux</h4></div>
+<p><a href="#pg0ca06688075c">Syslinux</a>支持<a href="#pg0ca06688075c">对启动加载器进行密码保护</a>。它允许您设置菜单项密码 或者 全局启动加载器密码。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_GRUB" id="GRUB">GRUB</h4></div>
+<p><a href="#pgca9c4017f7ad">GRUB</a>也支持启动加载器密码。请查看<a href="#pgf7e75f090fea">GRUB/技巧和窍门#用密码保护 GRUB 菜单</a>以获取详细信息。它还支持 <a href="#pgca9c4017f7ad">#加密的/boot</a>，这可以加密GRUB的配置，<a href="#pg3473491e6a48">内核</a>和 <a href="#pg5409190f7704">initramfs</a> ，只剩下启动加载器代码中的一部分未加密。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfefbd690c49d_systemd_boot" id="systemd-boot">systemd-boot</h4></div>
+<p>当启用了#安全启动（Secure Boot）时，<a href="#pg171755f7b428">systemd-boot</a>会自动禁用对内核参数的编辑功能。此外，也可以在 systemd-boot 中设置<a href="#pg171755f7b428">带密码保护的内核参数编辑器</a>，以使用更传统的密码验证方案。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8" id="安全启动"><span id=".E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8"></span>安全启动</h3></div>
+<p><a href="#pg0e14304dd697">安全启动</a>是<a href="#pg46c3147defaf">UEFI</a>的功能，允许验证你的计算机启动的文件。这有助于防止一些<a href="https://zh.wikipedia.org/wiki/%E9%82%AA%E6%81%B6%E5%A5%B3%E4%BD%A3%E6%94%BB%E5%87%BB">邪恶女仆攻击</a>，如替换启动分区内的文件。通常，计算机会携带由供应商（OEM）授予的密钥，不过，密钥可以被删除，并使计算机进入<i>设置模式</i>，允许用户导入并管理自己的密钥。
+</p><p>安全启动页面会引导你如何通过<a href="#pg4b4af9f551f6">使用自己的密钥</a>来设置安全启动。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.8F.AF.E4.BF.A1.E5.B9.B3.E5.8F.B0.E6.A8.A1.E5.9D.97_.28TPM.29" id="可信平台模块_(TPM)"><span id=".E5.8F.AF.E4.BF.A1.E5.B9.B3.E5.8F.B0.E6.A8.A1.E5.9D.97_.28TPM.29"></span>可信平台模块 (TPM)</h3></div>
+<p><a href="#pg3760f6882d85">TPMs</a> 是带有嵌入式加密密钥的硬件微处理器。这构成了大多数现代电脑的基本信任根（源），允许对启动链执行端到端验证。它们可用作内部智能卡，验证计算机上运行的固件，并允许用户将密码插入防篡改和抗暴力破解的存储器中。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.9C.A8.E5.8F.AF.E7.A7.BB.E5.8A.A8.E9.97.AA.E5.AD.98.E9.A9.B1.E5.8A.A8.E5.99.A8.E4.B8.8A.E7.9A.84.E5.90.AF.E5.8A.A8.E5.88.86.E5.8C.BA" id="在可移动闪存驱动器上的启动分区"><span id=".E5.9C.A8.E5.8F.AF.E7.A7.BB.E5.8A.A8.E9.97.AA.E5.AD.98.E9.A9.B1.E5.8A.A8.E5.99.A8.E4.B8.8A.E7.9A.84.E5.90.AF.E5.8A.A8.E5.88.86.E5.8C.BA"></span>在可移动闪存驱动器上的启动分区</h3></div>
+<p>一个流行的想法是将启动分区放在闪存驱动器上，以便在没有它的情况下系统无法启动。提倡这个想法的人通常会使用全盘加密，有些人还会使用放在启动分区的<a href="#pg2d5af776f6fd">分离的加密头</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E8.87.AA.E5.8A.A8.E6.B3.A8.E9.94.80" id="自动注销"><span id=".E8.87.AA.E5.8A.A8.E6.B3.A8.E9.94.80"></span>自动注销</h3></div>
+<p>如果您使用<a href="#pg1ca1e15827ff">Bash</a>或<a href="#pg187873cfd725">Zsh</a>，您可以设置 <code>TMOUT</code> 在超时后自动从shell注销。
+</p><p>
+例如，以下操作将在虚拟控制台（但不是X11中的终端模拟器）自动退出：</p><pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/profile.d/shell-timeout.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">TMOUT="$(( 60*10 ))";
+[ -z "$DISPLAY" ] &amp;&amp; export TMOUT;
+case $( /usr/bin/tty ) in
+    /dev/tty[0-9]*) export TMOUT;;
+esac
+</pre><p>如果你确实希望每一个Bash/Zsh提示符（甚至在X内）都有超时，使用：
+</p><pre>$ export TMOUT="$(( 60*10 ))";
+</pre>
+<p>注意，如果有一些命令在shell中运行（例如：一个SSH会话或没有<code>TMOUT</code>支持的其他shell），这将不起作用。但是，如果你主要是用VC来重启冷冻的GDM/Xorg作为root，那么这会非常有用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E4.BF.9D.E6.8A.A4.E5.85.8D.E5.8F.97.E6.81.B6.E6.84.8FUSB.E8.AE.BE.E5.A4.87.E7.9A.84.E6.94.BB.E5.87.BB" id="保护免受恶意USB设备的攻击"><span id=".E4.BF.9D.E6.8A.A4.E5.85.8D.E5.8F.97.E6.81.B6.E6.84.8FUSB.E8.AE.BE.E5.A4.87.E7.9A.84.E6.94.BB.E5.87.BB"></span>保护免受恶意USB设备的攻击</h3></div>
+<p>内核提供了<a href="https://docs.kernel.org/usb/authorization.html">用于停用</a> USB 端口的设置，以保护计算机免受恶意 USB 设备（又称<a href="https://en.wikipedia.org/wiki/BadUSB">BadUSB</a>、<a href="https://github.com/samyk/poisontap">PoisonTap</a> 或 <a href="https://lanturtle.com/">LanTurtle</a>）的侵害。这些设置可以在运行时配置，并通过 <a href="#pg7b7cc2bbe79a">sysctl</a> 实现自动化。
+</p><p>如果需要更精细的控制，可以安装 <a href="#pgebb104a2ef58">USBGuard</a>。这是一个基于设备属性实现基础白名单和黑名单功能的软件框架。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E6.98.93.E5.A4.B1.E6.80.A7.E6.95.B0.E6.8D.AE.E6.94.B6.E9.9B.86" id="易失性数据收集"><span id=".E6.98.93.E5.A4.B1.E6.80.A7.E6.95.B0.E6.8D.AE.E6.94.B6.E9.9B.86"></span>易失性数据收集</h3></div>
+<p>开启状态的计算机可能会受到<a href="https://web.archive.org/web/20210420075636/https://fedvte.usalearning.gov/courses/CSI/course/videos/pdf/CSI_D01_S05_T01_STEP.pdf">易失性数据收集</a>的威胁。将计算机完全关闭，在无需使用时或者计算机的物理安全暂时受到破坏时（例如，通过安全检查点），是一种最好的做法。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E8.BD.AF.E4.BB.B6.E5.8C.85" id="软件包"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85"></span>软件包</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E9.AA.8C.E8.AF.81" id="验证"><span id=".E9.AA.8C.E8.AF.81"></span>验证</h3></div>
+<p>如果没有正确地对包进行签名，包管理器就有可能<a href="https://www2.cs.arizona.edu/stork/packagemanagersecurity/attacks-on-package-managers.html#overview">受到攻击</a>，甚至可能会影响原本具有<a href="https://www2.cs.arizona.edu/stork/packagemanagersecurity/faq.html">签名机制</a>的包管理器。Arch 默认采用软件包签名机制，并依赖与 5 个受信任的主密钥的信任网络。详情请参阅 <a href="#pga737061352e4">pacman/Package signing</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.8D.87.E7.BA.A7" id="升级"><span id=".E5.8D.87.E7.BA.A7"></span>升级</h3></div>
+<p>定期<a href="#pg9a1cc6af125e">升级系统</a>非常重要。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E5.85.B3.E6.B3.A8.E6.BC.8F.E6.B4.9E.E8.AD.A6.E6.8A.A5" id="关注漏洞警报"><span id=".E5.85.B3.E6.B3.A8.E6.BC.8F.E6.B4.9E.E8.AD.A6.E6.8A.A5"></span>关注漏洞警报</h3></div>
+<p>可订阅由国家漏洞数据库提供的Common Vulnerabilities and Exposure（CVE）安全警报更新，在<a href="https://nvd.nist.gov/download.cfm">NVD Download网页</a>上可以找到。
+</p><p>如果您通过主要仓库或AUR之外的其他方式安装软件，您还应考虑订阅您使用的软件的 发布通知。一些软件有您可以订阅的安全通知邮件列表。源代码托管网站通常提供可以接收新版本发布消息的RSS源。参见 <a href="#pg93154f64951d">Arch 安全团队#资源</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfefbd690c49d_.E9.87.8D.E6.96.B0.E6.9E.84.E5.BB.BA.E8.BD.AF.E4.BB.B6.E5.8C.85" id="重新构建软件包"><span id=".E9.87.8D.E6.96.B0.E6.9E.84.E5.BB.BA.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>重新构建软件包</h3></div>
+<p>软件包可以去除不需要的功能并重新构建，这样可以缩小受攻击范围。例如，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bzip2">bzip2</a></span><sup><small>包</small></sup></span> 可以在没有 <code>bzip2recover</code> 的情况下重新构建，以试图规避 <a href="https://security.archlinux.org/CVE-2016-3189">CVE-2016-3189</a> 漏洞。强化安全的自定义编译参数也可以手动或通过包装器在编译时加入。
+</p>
+
+
+<p><br/>
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>参数（Flag）</th>
+<th>用途（Purpose）
+</th></tr>
+<tr>
+<td>-D_FORTIFY_SOURCE=2</td>
+<td>检测运行时缓冲区溢出
+</td></tr>
+<tr>
+<td>-D_GLIBCXX_ASSERTIONS</td>
+<td>C++ 字符串和容器的运行时边界检查
+</td></tr>
+<tr>
+<td>-fasynchronous-unwind-tables</td>
+<td>提高回溯（Backtrace）的可靠性
+</td></tr>
+<tr>
+<td>-fexceptions</td>
+<td>启用基于表的线程取消机制
+</td></tr>
+<tr>
+<td>-fpie -Wl,-pie</td>
+<td>为可执行文件启用完全地址布局空间随机化（ASLR）
+</td></tr>
+<tr>
+<td>-fpic -shared</td>
+<td>共享库无文本重定位
+</td></tr>
+<tr>
+<td>-fplugin=annobin</td>
+<td>生成用于加固质量控制的数据
+</td></tr>
+<tr>
+<td>-fstack-clash-protection</td>
+<td>提高栈溢出检测的可靠性
+</td></tr>
+<tr>
+<td>-fstack-protector, -fstack-protector-all or -fstack-protector-strong</td>
+<td>栈粉碎保护（Stack Smashing Protector）
+</td></tr>
+<tr>
+<td>-grecord-gcc-switches</td>
+<td>在调试信息中存储编译器参数
+</td></tr>
+<tr>
+<td>-mcet -fcf-protection</td>
+<td>控制流完整性（CFI）保护
+</td></tr>
+<tr>
+<td>-Werror=format-security</td>
+<td>拒绝潜在不安全的文件格式化字符串参数
+</td></tr>
+<tr>
+<td>-Werror=implicit-function-declaration</td>
+<td>拒绝隐式函数声明（缺少函数原型）
+</td></tr>
+<tr>
+<td>-Wl,-z,defs</td>
+<td>检测并拒绝欠链接（Underlinking）
+</td></tr>
+<tr>
+<td>-Wl,-z,now</td>
+<td>禁用延迟绑定（Lazy binding）
+</td></tr>
+<tr>
+<td>-Wl,-z,relro</td>
+<td>重定位后将相关段设为只读
+</td></tr></tbody></table>
+<p><br/>
+</p>
+<ul><li><a href="https://developers.redhat.com/blog/2018/03/21/compiler-and-linker-flags-gcc/">参数和信息源</a></li></ul>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfefbd690c49d_.E5.8F.82.E8.80.83.E8.B5.84.E6.96.99" id="参考资料"><span id=".E5.8F.82.E8.80.83.E8.B5.84.E6.96.99"></span>参考资料</h2></div>
+<ul><li><a href="https://bilibili.com/BV1yHxgefEsL">unixchad 的视频：《捍卫隐私的真正方法：Firejail，全盘加密，GPG和ufw》</a></li>
+<li><a href="https://security.archlinux.org/">Arch Linux Security Tracker</a></li>
+<li><a href="https://wiki.centos.org/HowTos/OS_Protection">CentOS Wiki: OS Protection</a></li>
+<li><a href="https://www.ibm.com/developerworks/linux/tutorials/l-harden-desktop/index.html">Hardening the Linux desktop</a></li>
+<li><a href="https://www.ibm.com/developerworks/linux/tutorials/l-harden-server/index.html">Hardening the Linux server</a></li>
+<li><a href="https://github.com/lfit/itpol/blob/master/linux-workstation-security.md">Linux Foundation: Linux workstation security checklist</a></li>
+<li><a href="https://www.privacytools.io/">privacytools.io Privacy Resources</a></li>
+<li><a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Security_Guide/">Red Hat Enterprise Linux 7 Security Guide</a></li>
+<li><a href="https://www.debian.org/doc/manuals/securing-debian-manual/index.en.html">Securing Debian Manual</a></li>
+<li><a href="https://web.archive.org/web/20140220055801/http://crunchbang.org:80/forums/viewtopic.php?id=24722">The paranoid #! Security Guide</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260814021552
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.672 seconds
+Real time usage: 1.008 seconds
+Preprocessor visited node count: 2885/1000000
+Revision size: 76116/2097152 bytes
+Post‐expand include size: 42594/2097152 bytes
+Template argument size: 20277/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 542/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  516.556      1 -total
+  5.44%   28.079    159 Template:Ic
+  2.29%   11.827     37 Template:Pkg
+  2.22%   11.448     12 Template:Man
+  2.21%   11.436      8 Template:META_Message
+  1.88%    9.695     11 Template:注意
+  1.70%    8.781      2 Template:准确性
+  1.35%    6.989      2 Template:Accuracy
+  1.28%    6.625      7 Template:提示
+  1.14%    5.896     16 Template:Hc
+-->
+<!-- Render ID 12ae080e-9786-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3782:|#|:idhash:canonical!zh-cn and timestamp 20260814021551 and revision id 35549. Rendering was triggered because: page-edit
+ -->
+</div>
+</div>

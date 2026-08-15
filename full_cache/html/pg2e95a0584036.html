@@ -1,0 +1,222 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg2e95a0584036">VCS 软件打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/VCS_package_guidelines">VCS package guidelines</a>，最近一次同步于 2025-08-31，若英文版本有所<a href="https://wiki.archlinux.org/title/VCS_package_guidelines?diff=0&amp;oldid=826458">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/VCS_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – VCS – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg6a9e963f286f">Arch 用户软件仓库 (AUR)</a></li>
+<li><a href="#pge327f4597f76">AUR 提交准则</a></li>
+<li><a href="#pgf9d748a7b27b">PKGBUILD</a></li>
+</ul></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6">版本控制</a>系统可用于获取常规静态版本软件包的源代码，以及开发分支的最新（主干）版本。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacman">pacman</a></span><sup><small>包</small></sup></span> 软件包提供的 <code>/usr/share/pacman/PKGBUILD-vcs.proto</code> 原型文件。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2e95a0584036_.E5.8C.85.E5.90.8D" id="包名"><span id=".E5.8C.85.E5.90.8D"></span>包名</h2></div>
+<p>除非软件包获取的是特定发布版本，否则应添加后缀 <code>-bzr</code>、<code>-cvs</code>、<code>-darcs</code>、<code>-git</code>、<code>-hg</code> 或 <code>-svn</code> 等。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2e95a0584036_.E7.89.88.E6.9C.AC" id="版本"><span id=".E7.89.88.E6.9C.AC"></span>版本</h2></div>
+<p>若因修改依赖关系、URL 或源代码导致生成的软件包发生变化，请将 <code>pkgver</code> 更新至最新版本。若自上次更新 <code>PKGBUILD</code> 以来 <code>pkgver</code> 未发生变化，则应递增 <code>pkgrel</code> 的值。
+</p><p>建议采用以下版本格式：<code><i>发行（release）</i>.r<i>修订（revision）</i></code>，其中 <code><i>修订</i></code> 是唯一标识源代码树的单调递增数字（VCS 修订号即符合此特性）。若无公开发行版本且仓库无标签，可用 0 作为发行版本号，或完全省略 <code><i>发行</i></code> 部分直接使用形如 <code>r<i>修订</i></code> 的版本号。若有公开发行版本但仓库未打标签，开发者需通过解析项目文件等方式获取发行版本号。
+</p><p>修订号分隔符（<code><i>修订</i></code> 之前的 <code>r</code>）至关重要，可避免上游首次发布版本或使用不同组件数量的版本时出现的问题。例如，若在修订版 <code>455</code> 时上游决定发布 <code>0.1</code> 版本，修订号分隔符能保持版本单调性：<code>0.1.r456 &gt; r454</code>。若无分隔符将导致单调性失效：<code>0.1.456 &lt; 454</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可使用 <code>--holdver</code> 选项阻止 <a href="#pg7edcce763396">makepkg</a> 更新 <code>pkgver</code>，详见 <span class="plainlinks archwiki-template-man" title="$ man 8 makepkg"><a href="https://man.archlinux.org/man/makepkg.8">makepkg(8)</a></span>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2e95a0584036_.E5.86.B2.E7.AA.81.E3.80.81.E6.8F.90.E4.BE.9B.E4.B8.8E.E4.BE.9D.E8.B5.96" id="冲突、提供与依赖"><span id=".E5.86.B2.E7.AA.81.E3.80.81.E6.8F.90.E4.BE.9B.E4.B8.8E.E4.BE.9D.E8.B5.96"></span>冲突、提供与依赖</h2></div>
+<ul><li>明确声明软件包冲突与提供，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fluxbox-git/">fluxbox-git</a></span><sup><small>AUR</small></sup></span> 应包含：</li></ul>
+<dl><dd><pre>conflicts=('fluxbox')
+provides=("fluxbox=${pkgver}")
+</pre></dd>
+<dd><div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>关于版本控制的通用建议（尤其适用于 VCS 软件包），请参阅 <a href="#pgf9d748a7b27b">PKGBUILD#provides</a>。</div></dd></dl>
+<ul><li><code>replaces=()</code> 通常会引起不必要的问题，应避免使用。</li></ul>
+<ul><li>在 <code>makedepends=()</code> 中包含对应的版本控制工具⸺<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cvs">cvs</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=subversion">subversion</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=git">git</a></span><sup><small>包</small></sup></span> 等。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2e95a0584036_.E8.AE.A4.E8.AF.81.E4.B8.8E.E5.AE.89.E5.85.A8" id="认证与安全"><span id=".E8.AE.A4.E8.AF.81.E4.B8.8E.E5.AE.89.E5.85.A8"></span>认证与安全</h2></div>
+<ul><li>使用 cvsroot 时，优先采用 <code>anonymous:@</code> 而非 <code>anonymous@</code>，以避免输入空密码；若必须提供密码则使用 <code>anonymous:password@</code>。</li>
+<li>由于源代码并非静态文件，需在 <code>sha256sums=()</code> 中通过添加 <code>'SKIP'</code> 跳过硬校验。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2e95a0584036_VCS_.E6.BA.90.E4.BB.A3.E7.A0.81" id="VCS_源代码"><span id="VCS_.E6.BA.90.E4.BB.A3.E7.A0.81"></span>VCS 源代码</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Arch 官方不支持使用稀疏克隆（sparse clone）或浅克隆（shallow clone），相关讨论参见 <a href="https://bugs.archlinux.org/task/34677">FS#34677</a> 及<a href="https://lists.archlinux.org/archives/list/aur-requests@lists.archlinux.org/thread/4IM3GOPMSIW4IULKB5DTIY3FAOIQKIN6/#O3OB7N3R2G7QMRBDCPE7SYCYVS7VL5JS">邮件列表</a>。</div>
+<p>VCS 源代码需在 <code>source</code> 数组中指定，其处理方式与其他类型源代码相同。makepkg 会将仓库克隆/检出/分支（clone/checkout/branch）到 <code>$SRCDEST</code> 目录（若未在 <span class="plainlinks archwiki-template-man" title="$ man 5 makepkg.conf"><a href="https://man.archlinux.org/man/makepkg.conf.5">makepkg.conf(5)</a></span> 中设置，则默认使用 <code>$startdir</code>），然后以特定于各 VCS 的方式将其复制到 <code>$srcdir</code>。本地仓库不会被修改，因此无需使用 <code>-build</code> 目录。
+</p><p><code>source</code> 数组的通用格式为：
+</p>
+<pre>source=('[folder::][vcs+]url[#fragment]')
+</pre>
+<ul><li><code>folder</code>（可选）——文件夹名称，用于将默认仓库名称更改为更具意义的名称（例如替代 <code>trunk</code>），或保留先前源代码路径</li>
+<li><code>vcs+</code>——当 URL 未体现 VCS 类型时需要添加，例如 <code>git+https://some_repo</code></li>
+<li><code>url</code>——远程或本地仓库的 URL</li>
+<li><code>#fragment</code>（可选）——片段，用于拉取特定分支或提交。各 VCS 支持的片段格式请参阅 <span class="plainlinks archwiki-template-man" title="$ man 5 PKGBUILD"><a href="https://man.archlinux.org/man/PKGBUILD.5#USING_VCS_SOURCES">PKGBUILD(5) § USING VCS SOURCES</a></span></li></ul>
+<p>使用 <a href="#pg0d34da84b694">Git</a> 时的 <code>source</code> 数组示例：
+</p>
+<pre>source=('project_name::git+https://project_url#branch=project_branch')
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>请勿在 <code>folder</code> 字段中使用 <code>pkgver</code> 变量，因为该变量可能在 <code>pkgver()</code> 函数调用时被修改，导致后续函数无法访问已创建的文件夹。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2e95a0584036_pkgver.28.29_.E5.87.BD.E6.95.B0" id="pkgver()_函数"><span id="pkgver.28.29_.E5.87.BD.E6.95.B0"></span>pkgver() 函数</h2></div>
+<p>通过专用的 <code>pkgver()</code> 函数可实现自动版本更新。这种方式能更精细地控制版本号，维护者应尽量采用有意义的版本格式。使用该函数时，仍需预先声明更改 PKGBUILD 时最新的 <code>pkgver</code> 变量值，makepkg 工具会自动调用 <code>pkgver()</code> 并更新该变量。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e95a0584036_Bazaar" id="Bazaar">Bazaar</h3></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">pkgver() {
+  cd "$pkgname"
+  printf "r%s" "$(bzr revno)"
+}</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">r830
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e95a0584036_Git" id="Git">Git</h3></div>
+<p>基于最后提交可达的最近的带注释的标签生成版本号：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">pkgver() {
+  cd "$pkgname"
+  git describe --long --abbrev=7 | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">2.0.r6.ga17a017
+</pre>
+<p>基于最后提交可达的最近的未注释的标签生成版本号：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">pkgver() {
+  cd "$pkgname"
+  git describe --long --tags --abbrev=7 | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">0.71.r115.gd95ee07
+</pre>
+<p>若 <span class="plainlinks archwiki-template-man" title="$ man 1 git-tag"><a href="https://man.archlinux.org/man/git-tag.1">git-tag(1)</a></span> 名称不含连字符，可使用简化 <span class="plainlinks archwiki-template-man" title="$ man 1 sed"><a href="https://man.archlinux.org/man/sed.1">sed(1)</a></span> 表达式 <code>sed 's/-/.r/;s/-/./'</code>。
+</p><p>当标签包含前缀（如 <code>v</code> 或项目名）时需进行截取：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">pkgver() {
+  cd "$pkgname"
+  # 移除Git标签中的'foo-'前缀
+  git describe --long --abbrev=7 | sed 's/^foo-//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">6.1.r3.gd77e105
+</pre>
+<p>无可用标签时使用历史提交计数：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">pkgver() {
+  cd "$pkgname"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">r1142.a17a017
+</pre>
+<p>省略 <a href="https://zh.wikipedia.org/wiki/SHA-1">SHA-1</a> 哈希，仅保留版本号与修订号（注意此时若版本号混乱，将无法快速定位到具体修订版本）：
+</p>
+<pre>git describe --long --abbrev=7 --tags | sed 's/\([^-]*\)-g.*/r\1/;s/-/./g'
+</pre>
+<p>可组合使用两种方法以支持开始无标签、后期添加标签的仓库（使用了 bash 特性）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">pkgver() {
+  cd "$pkgname"
+  ( set -o pipefail
+    git describe --long --abbrev=7 2&gt;/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+  )
+}</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">0.9.9.r27.g2b039da  # 存在标签时
+r1581.2b039da       # 无标签时回退方案
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e95a0584036_Mercurial" id="Mercurial">Mercurial</h3></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">pkgver() {
+  cd "$pkgname"
+  printf "r%s.%s" "$(hg identify -n)" "$(hg identify -i)"
+}</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">r2813.75881cc5391e
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e95a0584036_Subversion" id="Subversion">Subversion</h3></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">pkgver() {
+  cd "$pkgname"
+  local ver="$(svnversion)"
+  printf "r%s" "${ver//[[:alpha:]]}"
+}</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">r8546
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>应优先采用项目正式发布版本（如果有），而非使用 <code>0.</code> 占位符。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e95a0584036_.E5.9B.9E.E9.80.80.E6.96.B9.E6.A1.88" id="回退方案"><span id=".E5.9B.9E.E9.80.80.E6.96.B9.E6.A1.88"></span>回退方案</h3></div>
+<p>当无法从仓库提取有效版本时，可使用当前日期：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">pkgver() {
+  date +%Y%m%d
+}</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">20130408
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此方法无法唯一标识代码状态，应尽量避免使用。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2e95a0584036_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e95a0584036_Git_.E5.AD.90.E6.A8.A1.E5.9D.97" id="Git_子模块"><span id="Git_.E5.AD.90.E6.A8.A1.E5.9D.97"></span>Git 子模块</h3></div>
+<p>Git 子模块的处理需要特别注意。核心思路是将子模块自身的 URL 直接添加到 <code>sources</code> 数组，然后在 <code>prepare()</code> 阶段进行引用。
+</p><p>下游项目开发者可能不会使用与上游仓库相同的子模块命名。要查看 Git 子模块名称，需访问项目仓库中的 <code>.gitmodules</code> 文件。例如，上游开发者命名为 <code><i>lib-dependency</i></code> 的仓库，在下游 <code>.gitmodules</code> 中可能注册为 <code><i>libs/libdep</i></code> 子模块。
+</p>
+<pre>[submodule "<i><b>libs/libdep</b></i>"]
+  path = <i><b>libs/libdep</b></i>
+  url = https://example.org/lib-dependency/<i><b>lib-dependency</b></i>.git
+</pre>
+<pre>source=("git+https://example.org/main-project/main-project.git"
+        https://example.org/lib-dependency/<i><b>lib-dependency</b></i>.git)
+
+prepare() {
+  cd main-project
+  git submodule init
+  git config submodule.<i><b>libs/libdep</b></i>.url "$srcdir/<i><b>lib-dependency</b></i>"
+  git -c protocol.file.allow=always submodule update
+}
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e95a0584036_Git_.E5.A4.A7.E6.96.87.E4.BB.B6.E5.AD.98.E5.82.A8.EF.BC.88LFS.EF.BC.89" id="Git_大文件存储（LFS）"><span id="Git_.E5.A4.A7.E6.96.87.E4.BB.B6.E5.AD.98.E5.82.A8.EF.BC.88LFS.EF.BC.89"></span>Git 大文件存储（LFS）</h3></div>
+<p>Git 大文件存储（LFS）需要一些额外配置：
+</p>
+<pre>makedepends=(... 'git-lfs')
+</pre>
+<pre>prepare() {
+  git lfs install --local
+  git remote add network-origin https://example.org/upstream/lfs/repo
+  git lfs fetch network-origin
+  git lfs checkout
+}
+</pre>
+<p>这在子模块中使用 LFS 时也可用：
+</p>
+<pre>prepare() {
+  git submodule init
+  git config submodule.<i><b>libs/libdep</b></i>.url "$srcdir/<i><b>lib-dependency</b></i>"
+  git -c protocol.file.allow=always submodule update
+
+  git -C <i><b>libs/libdep</b></i> lfs install --local
+  git -C <i><b>libs/libdep</b></i> remote add network-origin https://example.org/upstream/lfs/repo
+  git -C <i><b>libs/libdep</b></i> lfs fetch network-origin
+  git -C <i><b>libs/libdep</b></i> lfs checkout
+}
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e95a0584036_Git_.E6.A0.A1.E9.AA.8C.E5.92.8C" id="Git_校验和"><span id="Git_.E6.A0.A1.E9.AA.8C.E5.92.8C"></span>Git 校验和</h3></div>
+<p>当通过 <code>git+https://domain.invalid/repository.git#tag=v1.0.0</code> 引用稳定的 Git 标签或特定提交作为源时，可以在 <code>PKGBUILD</code> 中指定校验和。只需使用 <code>makepkg -g</code> 或 <code>updatepkgsums</code> 生成校验和，操作方式与其他非 Git 源相同。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807103600
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.178 seconds
+Real time usage: 0.185 seconds
+Preprocessor visited node count: 938/1000000
+Revision size: 9581/2097152 bytes
+Post‐expand include size: 11381/2097152 bytes
+Template argument size: 3845/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 1512/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   65.165      1 -total
+ 12.77%    8.320     62 Template:Ic
+ 11.78%    7.676      2 Template:提示
+  6.81%    4.435      5 Template:Man
+  5.69%    3.709      1 Template:翻译状态
+  4.61%    3.006      9 Template:Hc
+  4.43%    2.885      4 Template:注意
+  4.18%    2.726      4 Template:Pkg
+  3.43%    2.237      3 Template:Related
+  3.32%    2.162      1 Template:Package_guidelines
+-->
+<!-- Render ID c7f3340e-924b-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7587:|#|:idhash:canonical!zh-cn and timestamp 20260807103600 and revision id 34326. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

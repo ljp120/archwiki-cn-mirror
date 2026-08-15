@@ -1,0 +1,98 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg9604da0ac74d">自动启动</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Autostarting">Autostarting</a>，最近一次同步于 2025-11-14，若英文版本有所<a href="https://wiki.archlinux.org/title/Autostarting?diff=0&amp;oldid=850145">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Autostarting_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>有许多方法可在特定事件发生时自动执行脚本或启动应用程序，本文提供了这些方法的链接。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9604da0ac74d_.E5.BC.80.E5.85.B3.E6.9C.BA.E6.97.B6" id="开关机时"><span id=".E5.BC.80.E5.85.B3.E6.9C.BA.E6.97.B6"></span>开关机时</h2></div>
+<p><a href="#pg6bfd324d34c9">启用</a>相关的 systemd 服务。如果应用程序没有提供 systemd 服务，请自行<a href="#pgac06dd8bfe95">编写</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9604da0ac74d_.E7.94.A8.E6.88.B7.E7.99.BB.E5.BD.95.E7.99.BB.E5.87.BA.E6.97.B6" id="用户登录登出时"><span id=".E7.94.A8.E6.88.B7.E7.99.BB.E5.BD.95.E7.99.BB.E5.87.BA.E6.97.B6"></span>用户登录登出时</h2></div>
+<p><a href="#pg6bfd324d34c9">启用</a>相关的<a href="#pg88cdcc283b9b">用户单元</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9604da0ac74d_.E6.8F.92.E5.85.A5.E6.8B.94.E5.87.BA.E8.AE.BE.E5.A4.87.E6.97.B6" id="插入拔出设备时"><span id=".E6.8F.92.E5.85.A5.E6.8B.94.E5.87.BA.E8.AE.BE.E5.A4.87.E6.97.B6"></span>插入拔出设备时</h2></div>
+<p>使用 <a href="#pge009209061ac">udev</a> 规则。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9604da0ac74d_.E5.9F.BA.E4.BA.8E.E6.97.B6.E9.97.B4.E4.BA.8B.E4.BB.B6" id="基于时间事件"><span id=".E5.9F.BA.E4.BA.8E.E6.97.B6.E9.97.B4.E4.BA.8B.E4.BB.B6"></span>基于时间事件</h2></div>
+<p>在特定时间、日期或间隔定期执行：
+</p>
+<ul><li><a href="#pgda7c331fa9af">systemd/Timers</a></li>
+<li><a href="#pg093fe1353c86">Cron</a></li></ul>
+<p>仅在某日或某时执行一次：
+</p>
+<ul><li><a href="#pgda7c331fa9af">systemd/Timers</a></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=at">at</a></span><sup><small>包</small></sup></span></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9604da0ac74d_.E5.9F.BA.E4.BA.8E.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E4.BA.8B.E4.BB.B6" id="基于文件系统事件"><span id=".E5.9F.BA.E4.BA.8E.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E4.BA.8B.E4.BB.B6"></span>基于文件系统事件</h2></div>
+<p>使用 <a href="https://en.wikipedia.org/wiki/inotify">inotify</a> 事件监视器：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=inotify-tools">inotify-tools</a></span><sup><small>包</small></sup></span>，参见 <span class="plainlinks archwiki-template-man" title="$ man 1 inotifywait"><a href="https://man.archlinux.org/man/inotifywait.1">inotifywait(1)</a></span></li>
+<li><a href="#pg6b29ad42e1ea">incron</a></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fswatch/">fswatch</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=entr">entr</a></span><sup><small>包</small></sup></span></li>
+<li><a href="#pgac06dd8bfe95">systemd</a> 可以使用 <span class="plainlinks archwiki-template-man" title="$ man 5 systemd.path"><a href="https://man.archlinux.org/man/systemd.path.5">systemd.path(5)</a></span> 文件在文件系统事件发生时激活单元</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9604da0ac74d_shell_.E7.99.BB.E5.BD.95.E7.99.BB.E5.87.BA.E6.97.B6" id="shell_登录登出时"><span id="shell_.E7.99.BB.E5.BD.95.E7.99.BB.E5.87.BA.E6.97.B6"></span>shell 登录登出时</h2></div>
+<p>参见<a href="#pg34c9d748f55e">命令行解释器#配置文件</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9604da0ac74d_Xorg_.E5.90.AF.E5.8A.A8.E6.97.B6" id="Xorg_启动时"><span id="Xorg_.E5.90.AF.E5.8A.A8.E6.97.B6"></span>Xorg 启动时</h2></div>
+<ul><li>如果使用 <a href="#pg9fc1e9437ae5">xinit</a> 手动启动 <a href="#pga36c0aff60be">Xorg</a>，请参见 <a href="#pg05a4704b29d5">xinitrc</a>。</li>
+<li>如果使用<a href="#pg30e2075251d0">显示管理器</a>启动，请参见 <a href="#pgde17e8bd8891">xprofile</a>。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9604da0ac74d_.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83.E5.90.AF.E5.8A.A8.E6.97.B6" id="桌面环境启动时"><span id=".E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83.E5.90.AF.E5.8A.A8.E6.97.B6"></span>桌面环境启动时</h2></div>
+<p>大多数<a href="#pg712e4adaddad">桌面环境</a>实现了 <a href="#pg537a6963395e">XDG Autostart</a>。
+</p><p>如果某个桌面环境有相关文章，请参见其“自动启动”（<i>Autostart</i>）章节。
+</p>
+<ul><li><a href="#pg1e095fe2c2a6">GNOME#自启动</a></li>
+<li><a href="#pg5b70e23b1711">KDE#自启动</a></li>
+<li><a href="#pg361394ab1daf">Xfce#自动运行</a></li>
+<li><a href="#pg9ecdb3d7e45b">LXDE#程序自动开启</a></li>
+<li><a href="#pge82b8c855868">LXQt#自动启动</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9604da0ac74d_.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.90.AF.E5.8A.A8.E6.97.B6" id="窗口管理启动时"><span id=".E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.90.AF.E5.8A.A8.E6.97.B6"></span>窗口管理启动时</h2></div>
+<p>许多<a href="#pg3d6d7c1e6c7c">窗口管理器</a>（和<a href="#pga21a6be8b605">Wayland 混成器</a>）实现了 <a href="#pg537a6963395e">XDG Autostart</a>。
+</p><p>如果有相关文章，请参见其“自动启动”（<i>Autostart</i>）章节。
+</p>
+<ul><li><a href="#pg24b8665395f7">Awesome#Autostart</a></li>
+<li><a href="#pgd927e4187724">dwm#Autostart</a></li>
+<li><a href="#pg335e0e02a34a">Fluxbox#自启动程序</a></li>
+<li><a href="#pgbed7b3bdbe0a">FVWM#Autostart</a></li>
+<li><a href="#pgc1bca245b144">Hyprland#自动启动</a></li>
+<li><a href="#pg04e8e3ac1488">i3#自启动程序</a></li>
+<li><a href="#pg933499a8978b">IceWM#Autostart</a></li>
+<li><a href="#pg3030f4eb0b9c">JWM#Autostart</a></li>
+<li><a href="#pg9f011775c790">Labwc#Autostart</a></li>
+<li><a href="#pgc97ddfda6e33">Niri#自动启动</a></li>
+<li><a href="#pg8bc45a0eb197">Openbox#自动启动</a></li>
+<li><a href="#pge14d9d7dd917">PekWM#Autostart</a></li>
+<li><a href="#pgbbc1b50bf190">Qtile#Autostart</a></li>
+<li><a href="#pg52d2715967a0">Ratpoison#Autostart</a></li>
+<li><a href="#pgce53c77336e7">River#Autostart</a></li>
+<li><a href="#pg7c25baec4c3f">Sway#程序自启动</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807043408
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.079 seconds
+Real time usage: 0.083 seconds
+Preprocessor visited node count: 159/1000000
+Revision size: 2260/2097152 bytes
+Post‐expand include size: 1932/2097152 bytes
+Template argument size: 191/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   11.442      1 -total
+ 28.12%    3.218      1 Template:翻译状态
+ 22.71%    2.598      3 Template:Pkg
+ 21.25%    2.431      2 Template:Man
+  9.32%    1.066      1 Template:AUR
+-->
+<!-- Render ID 3a96ec0f-9219-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2819:|#|:idhash:canonical!zh-cn and timestamp 20260807043408 and revision id 34560. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

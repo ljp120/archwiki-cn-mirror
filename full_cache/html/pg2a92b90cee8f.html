@@ -1,0 +1,73 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg2a92b90cee8f">网络订阅源</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><br/>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Web_feed">Web feed</a>，最近一次同步于 2025-11-17，若英文版本有所<a href="https://wiki.archlinux.org/title/Web_feed?diff=0&amp;oldid=853219">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Web_feed_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgaf1b27bddf8e">应用程序列表/互联网#News,_RSS,_and_blogs</a></li>
+<li><a href="#pgcaeb7ea02b2c">Rss2email</a></li>
+</ul></div>
+<p>一些网站提供了<a href="https://zh.wikipedia.org/wiki/%E6%B6%88%E6%81%AF%E4%BE%86%E6%BA%90">网络订阅源（Web feed）</a> 或 <b>新闻订阅源</b> ，一般以 <a href="https://zh.wikipedia.org/wiki/RSS">RSS</a>， [<a href="https://zh.wikipedia.org/wiki/Atom_(%E6%A8%99%E6%BA%96)">Atom</a>]，或 [<a href="https://zh.wikipedia.org/wiki/JSON">JSON</a>] 格式提供。 <b><a href="#pgf21632e162db">新闻聚合器</a></b>可以读取这些订阅源的内容，检查这些内容是否有更新，从而让用户订阅博客或播客内容。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2a92b90cee8f_.E8.8E.B7.E5.8F.96.E7.BD.91.E7.BB.9C.E8.AE.A2.E9.98.85.E6.BA.90" id="获取网络订阅源"><span id=".E8.8E.B7.E5.8F.96.E7.BD.91.E7.BB.9C.E8.AE.A2.E9.98.85.E6.BA.90"></span>获取网络订阅源</h2></div>
+<p>即使一个网站并没有声明其拥有网络订阅源，也有可能提供这项服务。您可以尝试在网址后添加<code>/feed</code>或<code>/rss</code>来查看网站是否支持。如果这样还是不行的话，可以使用<code>Ctrl+u</code>查看网页源代码，然后使用<code>Ctrl+f</code>搜索<code>&lt;link rel="alternate" type="application/atom+xml"</code>或<code>&lt;link rel="alternate" type="application/rss+xml"</code>。火狐浏览器插件<a href="https://addons.mozilla.org/firefox/addon/awesome-rss/">Awesome RSS</a>会在访问支持网络订阅源的网站时于地址栏添加一个可以点击的图标。
+</p><p>如果网站不支持网页订阅源，可以试试这个应用<a href="https://github.com/rss-bridge/rss-bridge">RSS-Bridge</a>.
+</p><p>以下章节描述了在特定网站上如何获得订阅链接。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2a92b90cee8f_Arch_Linux" id="Arch_Linux">Arch Linux</h3></div>
+<ul><li><a href="https://archlinux.org/feeds/news/">新闻（英文）</a></li>
+<li><a href="https://archlinux.org/feeds/">订阅链接汇总（英文）</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2a92b90cee8f_GitHub" id="GitHub">GitHub</h3></div>
+<p>对提交commit订阅使用如下链接语法：
+</p>
+<pre>https://github.com/<i>user</i>/<i>repo</i>/commits/<i>branch</i>/<i>path</i>/<i>to</i>/<i>subdir</i>.atom
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2a92b90cee8f_Reddit" id="Reddit">Reddit</h3></div>
+<p>Reddit provides <a href="https://www.reddit.com/wiki/rss">feeds</a> for subreddits, posts and users: simply add <code>.rss</code> to the URL. If you have a Reddit account, you can find your personal feeds in <a href="https://www.reddit.com/prefs/feeds/">the preferences</a>.
+</p><p>Reddit提供<a href="https://www.reddit.com/wiki/rss">RSS订阅链接</a>。对于子版块、帖子和用户，仅需要在网址后添加<code>.rss</code>即可。如果你已经拥有Reddit账户，你可以在<a href="https://www.reddit.com/prefs/feeds/">偏好</a>中找到自己的订阅链接。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2a92b90cee8f_YouTube" id="YouTube">YouTube</h3></div>
+<p>订阅一个频道：
+</p>
+<pre>https://www.youtube.com/feeds/videos.xml?channel_id=UC<i>xxxxxxxxxxxxxxxxxxxxxx</i>
+</pre>
+<p>如果这个频道使用以<code>/user/<i>username</i></code>结尾的传统网址，你也可以使用：
+</p>
+<pre>https://www.youtube.com/feeds/videos.xml?user=<i>username</i>
+</pre>
+<p>你可以从<a href="https://takeout.google.com/takeout/custom/youtube">Google Takeout</a>上下载你的订阅链接，然后使用<a href="https://github.com/jeb5/YouTube-Subscriptions-RSS">这个项目</a>将其转换为<a href="https://zh.wikipedia.org/wiki/OPML">OMPL</a>格式。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807071925
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.070 seconds
+Real time usage: 0.072 seconds
+Preprocessor visited node count: 137/1000000
+Revision size: 2929/2097152 bytes
+Post‐expand include size: 1343/2097152 bytes
+Template argument size: 262/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 119/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   16.493      1 -total
+ 20.28%    3.345      1 Template:翻译状态
+ 19.01%    3.135      1 Template:Related_articles_start
+ 13.04%    2.150      2 Template:Related
+ 11.59%    1.912      9 Template:Ic
+ 10.64%    1.754      1 Template:Related_articles_end
+  5.35%    0.883      1 Template:META_Related_articles_start
+-->
+<!-- Render ID 5195088e-9230-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8444:|#|:idhash:canonical!zh-cn and timestamp 20260807071925 and revision id 34573. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

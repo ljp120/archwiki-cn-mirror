@@ -1,0 +1,1042 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg20f71a8eddbf">蓝牙</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg1c24dfca6f79">蓝牙鼠标</a></li>
+<li><a href="#pgb5d5921e44b9">蓝牙耳机</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Bluetooth">Bluetooth</a>，最近一次同步于 2022-12-31，若英文版本有所<a href="https://wiki.archlinux.org/title/Bluetooth?diff=0&amp;oldid=761726">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Bluetooth_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p><a href="https://en.wikipedia.org/wiki/Bluetooth">蓝牙（Bluetooth）</a>是一个短距离无线通信标准，用于在手机、计算机和其他电子设备之间通信。在 Linux 中，权威的蓝牙协议栈实现是 <a href="http://www.bluez.org/">BlueZ</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg20f71a8eddbf_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<ol><li><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez">bluez</a></span><sup><small>包</small></sup></span>，这个软件包提供蓝牙协议栈。</li>
+<li><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-utils">bluez-utils</a></span><sup><small>包</small></sup></span>，这个软件包提供 <code>bluetoothctl</code> 实用程序。另外，也可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-deprecated-tools">bluez-deprecated-tools</a></span><sup><small>包</small></sup></span> 来获得#弃用的 BlueZ 工具。</li>
+<li><code>btusb</code> 内核模块是通用蓝牙驱动。<a href="#pg6dbfce2ea89d">检查</a>模块是否已加载。如果还没有，先<a href="#pg6dbfce2ea89d">加载模块</a>。</li>
+<li><a href="#pg75b0ec583607">启动/启用</a> <code>bluetooth.service</code>。</li></ol>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>蓝牙守护程序默认只会向属于 <code>lp</code> <a href="#pg60160f86c6a5">组</a>的用户暴露 bnep0 设备。如果要连接到蓝牙设备的话，需先将用户添加到这个组。可以在 <code>/usr/share/dbus-1/system.d/bluetooth.conf</code> 中修改需要加入的组。</li>
+<li>一些蓝牙适配器和无线网卡绑定（例如 <a href="https://www.intel.com/content/www/us/en/wireless-products/centrino-advanced-n-6235.html">Intel Centrino</a>）。这些蓝牙适配器需要先启用无线网卡（在笔记本上通常通过键盘快捷键）才能被内核识别。</li>
+<li>一些蓝牙适配器（例如 Broadcom）和网络适配器冲突。因此，需要确保在网络服务启动之前连接蓝牙。</li>
+<li>一些工具（例如 hcitool 和 hciconfig）已被上游弃用，并且不再包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-utils">bluez-utils</a></span><sup><small>包</small></sup></span> 中。这些工具将不会被更新，因此建议更新脚本，避免使用它们。如果还是想用，安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-deprecated-tools">bluez-deprecated-tools</a></span><sup><small>包</small></sup></span>。参见 <a href="https://bugs.archlinux.org/task/53110">FS#53110</a> 和 <a href="https://lore.kernel.org/linux-bluetooth/20170104133401.3636-1-luiz.dentz@gmail.com/">Bluez 邮件列表</a>。</li>
+<li>从<a href="https://gitlab.archlinux.org/archlinux/packaging/packages/bluez/-/commit/3dc43f553660cf4409532b8b0b3c2dc9c6e4f1a9">此 commit</a> 开始， <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-obex">bluez-obex</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-mesh">bluez-mesh</a></span><sup><small>包</small></sup></span> 已经从 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez">bluez</a></span><sup><small>包</small></sup></span> 中独立出来，因此如果要通过蓝牙传输文件，必须安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-obex">bluez-obex</a></span><sup><small>包</small></sup></span>。</li></ul></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E5.89.8D.E7.AB.AF" id="前端"><span id=".E5.89.8D.E7.AB.AF"></span>前端</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg20f71a8eddbf_.E6.8E.A7.E5.88.B6.E5.8F.B0" id="控制台"><span id=".E6.8E.A7.E5.88.B6.E5.8F.B0"></span>控制台</h4></div>
+<ul><li><b>bluetoothctl</b> — 在 shell 中配对设备是最简单可靠的方法之一。</li></ul>
+<dl><dd><a href="http://www.bluez.org/">http://www.bluez.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-utils">bluez-utils</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>bluetuith</b> — 为终端界面提供蓝牙管理器，可以方便的配对和管理设备，具有 OBEX 文件传输和鼠标支持。</li></ul>
+<dl><dd><a href="https://www.github.com/darkhz/bluetuith">https://www.github.com/darkhz/bluetuith</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bluetuith/">bluetuith</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>要自动化 bluetoothctl 命令，使用 <code>echo -e "<i>command1</i>\n<i>command2</i>\n" | bluetoothctl</code> 或 <code>bluetoothctl -- <i>command</i></code>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg20f71a8eddbf_.E5.9B.BE.E5.BD.A2.E7.95.8C.E9.9D.A2" id="图形界面"><span id=".E5.9B.BE.E5.BD.A2.E7.95.8C.E9.9D.A2"></span>图形界面</h4></div>
+<p>以下软件包提供图形界面来自定义蓝牙。
+</p>
+<ul><li><b>GNOME Bluetooth</b> — <a href="#pg1e095fe2c2a6">GNOME</a> 的蓝牙工具。
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-bluetooth-3.0">gnome-bluetooth-3.0</a></span><sup><small>包</small></sup></span> 提供后端（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-bluetooth">gnome-bluetooth</a></span><sup><small>包</small></sup></span> 已过时）</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-shell">gnome-shell</a></span><sup><small>包</small></sup></span> 提供状态托盘</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-control-center">gnome-control-center</a></span><sup><small>包</small></sup></span> 可通过图形界面配置蓝牙。可以在活动预览输入“蓝牙”或者运行 <code>gnome-control-center bluetooth</code> 进行配置。</li>
+<li>你还可以直接运行 <code>bluetooth-sendto</code> 命令来把文件发送到远程设备。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nautilus-bluetooth/">nautilus-bluetooth</a></span><sup><small>AUR</small></sup></span> 在 Nautilus 右键菜单添加“通过蓝牙发送”</li>
+<li>打开蓝牙设置面板来接收文件；只有在蓝牙设置面板打开时才能接收文件。</li>
+<li>要在 Thunar 的“发送到”菜单中添加蓝牙选项，请查看<a href="https://docs.xfce.org/xfce/thunar/send-to">这里</a>的指导。（使用 <code>bluetooth-sendto %F</code> 命令）。</li></ul></li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Projects/GnomeBluetooth">https://wiki.gnome.org/Projects/GnomeBluetooth</a> ||</dd></dl>
+<ul><li><b>Bluedevil</b> — <a href="#pg5b70e23b1711">KDE</a> 的蓝牙工具。如果 Dolphin 和系统托盘里没有蓝牙图标，就在系统托盘选项里启用，或者添加一个挂件。点击图标或在 KDE 系统设置里都可以配置蓝牙。</li></ul>
+<dl><dd><a href="https://invent.kde.org/plasma/bluedevil">https://invent.kde.org/plasma/bluedevil</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluedevil">bluedevil</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Blueberry</b> — Linux Mint 的独立版 GNOME Bluetooth，可在所有桌面环境工作。<i>Blueberry</i> 不支持通过 Obex Object 推送来接收文件。</li></ul>
+<dl><dd><a href="https://github.com/linuxmint/blueberry">https://github.com/linuxmint/blueberry</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=blueberry">blueberry</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Blueman</b> — 全功能蓝牙管理器。</li></ul>
+<dl><dd><a href="https://github.com/blueman-project/blueman">https://github.com/blueman-project/blueman</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=blueman">blueman</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Bluetooth Manager Sidebar</b> — 适用于 Wayland 会话的 GTK4/libadwaita 蓝牙管理器，以侧边栏形式打开，支持设备配对、OBEX 文件传输和音频配置文件切换。</li></ul>
+<dl><dd><a href="https://github.com/Relz/bluetooth-manager-sidebar">https://github.com/Relz/bluetooth-manager-sidebar</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bm-sidebar/">bm-sidebar</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>ObexFTP</b> — 用来和启动了 OBEX 的设备传输文件的工具。</li></ul>
+<dl><dd><a href="http://dev.zuckschwerdt.org/openobex/wiki/ObexFtp">http://dev.zuckschwerdt.org/openobex/wiki/ObexFtp</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/obexftp/">obexftp</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg20f71a8eddbf_.E9.85.8D.E5.AF.B9" id="配对"><span id=".E9.85.8D.E5.AF.B9"></span>配对</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>使用蓝牙设备之前，先检查它有没有被 <a href="#pg8a736e641a47">rfkill</a> 禁用。</div><p>这一小节介绍直接用 <i>bluetoothctl</i> 配置 <i>bluez5</i> 的方法，如果你已经有前端工具（比如 GNOME Bluetooth）的话就不需要了。
+</p><p>实际的步骤取决于设备和它的输入功能。以下是使用 <code>bluetoothctl</code> 配对设备的一般步骤。
+</p><p>运行 <code>bluetoothctl</code> 交互命令。输入 <code>help</code> 来获取帮助。
+</p>
+<ol><li>（可选操作）使用 <code>select <i>MAC_address</i></code> 选择一个默认的蓝牙接收器。</li>
+<li>（可选操作）如果蓝牙设备已经关闭，使用命令 <code>power on</code> 打开蓝牙。蓝牙默认是开启的，请参考#默认电源状态。</li>
+<li>使用命令 <code>devices</code> 获得要配对的设备的 MAC 地址。</li>
+<li>如果设备没有出现在上一步的列表中，使用命令 <code>scan on</code> 去搜索发现所有可配对的设备。</li>
+<li>使用命令 <code>agent on</code> 打开代理或者选择一个特定的代理：如果在 <code>agent</code> 命令后按下两次 tab 键，应该就能看到可用代理的列表。蓝牙代理用于管理蓝牙“配对码”。它可以回复外部发来的“配对码”，也可以主动发送。大部分情况下使用 <code>default-agent</code> 应该就足够了。<a href="https://askubuntu.com/questions/763939/bluetoothctl-what-is-a-bluetooth-agent">[1]</a></li>
+<li>使用命令 <code>pair <i>MAC_address</i></code> 配对设备（可用 tab 键补全 MAC 地址）。</li>
+<li>如果配对设备不需要 PIN，那么你可能需要手动将设备添加到信任列表。使用命令 <code>trust <i>MAC_address</i></code>。</li>
+<li>使用命令 <code>connect <i>MAC_address</i></code> 建立连接。</li></ol>
+<p>以下为一个交互实例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ bluetoothctl</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[NEW] Controller 00:10:20:30:40:50 <i>hostname</i> [default]
+[bluetooth]# agent KeyboardOnly
+Agent registered
+
+[bluetooth]# default-agent
+Default agent request successful
+
+[bluetooth]# power on
+Changing power on succeeded
+[CHG] Controller 00:10:20:30:40:50 Powered: yes
+
+[bluetooth]# scan on
+Discovery started
+[CHG] Controller 00:10:20:30:40:50 Discovering: yes
+[NEW] Device 00:12:34:56:78:90 <i>device name</i>
+[CHG] Device 00:12:34:56:78:90 LegacyPairing: yes
+
+[bluetooth]# pair 00:12:34:56:78:90
+Attempting to pair with 00:12:34:56:78:90
+[CHG] Device 00:12:34:56:78:90 Connected: yes
+[CHG] Device 00:12:34:56:78:90 Connected: no
+[CHG] Device 00:12:34:56:78:90 Connected: yes
+Request PIN code
+[agent] Enter PIN code: 1234
+[CHG] Device 00:12:34:56:78:90 Paired: yes
+Pairing successful
+[CHG] Device 00:12:34:56:78:90 Connected: no
+
+[bluetooth]# connect 00:12:34:56:78:90
+Attempting to connect to 00:12:34:56:78:90
+[CHG] Device 00:12:34:56:78:90 Connected: yes
+Connection successful
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E5.8F.8C.E7.B3.BB.E7.BB.9F.E9.85.8D.E5.AF.B9" id="双系统配对"><span id=".E5.8F.8C.E7.B3.BB.E7.BB.9F.E9.85.8D.E5.AF.B9"></span>双系统配对</h3></div>
+<p>对于如蓝牙#保存配置所示的双 Linux 系统的情况，仅需确保 <code>/var/lib/bluetooth/<i>BT-Adapter-MAC-address</i></code> 下的所有文件在两个系统中相同即可。既可以复制，也可以通过链接实现。
+</p><p>而对于 Windows 或 MacOS，需要在 Linux 下手动更改配对密钥，以使其与 Windows 或 macOS 下的密钥保持一致。
+</p><p>这里只介绍手动配置的方法，自动化方法参见 <a href="https://github.com/x2es/bt-dualboot">bt-dualboot</a> 等项目。如果需要半自动化工具，考虑使用 <a href="https://github.com/nbanks/bluetooth-dualboot">bluetooth-dualboot 脚本</a>，该工具不会主动修改文件，而会帮助您执行正确的命令，给出可直接复制粘贴的值。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg20f71a8eddbf_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h4></div>
+<p>首先，在 Arch Linux 中配对设备。然后重新启动到另一个操作系统，再次配对设备。接下来需要提取配对密钥，但首先要关闭蓝牙设备以防止其尝试重新连接。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>部分罗技产品的 MAC 地址可能会在和新系统配对后自增1，比如 <a href="https://wiki.archlinux.org/title/Logitech_MX_Master">arch:Logitech MX Master</a> 和 Logitech 604 Lightspeed。请检查你的设备是否有这种情况，配置过程中需要考虑这一点。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg20f71a8eddbf_.E5.AF.B9.E4.BA.8E_Windows" id="对于_Windows"><span id=".E5.AF.B9.E4.BA.8E_Windows"></span>对于 Windows</h4></div>
+<p>你可以选择进入 Windows 提取密钥，或是直接在 Linux 下进入 Windows 的系统分区，用 <code>chntpw</code> 工具提取密钥。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg20f71a8eddbf_.E5.9C.A8_Windows_.E4.B8.8A.E6.8F.90.E5.8F.96.E5.AF.86.E9.92.A5" id="在_Windows_上提取密钥"><span id=".E5.9C.A8_Windows_.E4.B8.8A.E6.8F.90.E5.8F.96.E5.AF.86.E9.92.A5"></span>在 Windows 上提取密钥</h5></div>
+<p>首先进入 Windows。
+</p><p>存储配对密钥的注册表项只有 <a href="https://docs.microsoft.com/en-us/windows/security/identity-protection/access-control/local-accounts#system">SYSTEM 用户</a>能访问。但是，无法以 SYSTEM 用户的身份登录系统，要以 <code>SYSTEM</code> 的身份运行 <code>regedit.exe</code>，必须借助微软的 Sysinternal 网站提供的 <a href="https://docs.microsoft.com/en-us/sysinternals/downloads/psexec">PsExec</a> 工具。
+</p><p>下载 <a href="https://download.sysinternals.com/files/PSTools.zip">PsTools</a>，然后解压出 <code>PsExec64.exe</code>。
+</p><p>在解压出 EXE 的位置，以管理员身份打开<a href="https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/windows-commands#command-shell-overview">命令提示符</a>，启动注册表编辑器：
+</p>
+<pre>.\PsExec64.exe -s -i regedit.exe
+</pre>
+<p>在regedit中找到下面这一注册表项
+</p>
+<pre>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters\Keys
+</pre>
+<p>在此项中存储着每个蓝牙适配器的注册表项，按 MAC 地址列出。如果存在多个项目，可以按照<a href="https://www.addictivetips.com/windows-tips/find-bluetooth-mac-address-windows-10/">这篇文章</a>找到目标蓝牙适配器对应的 MAC 地址。
+</p><p>在目标适配器的表项中，每个已配对设备（也按照 MAC 地址列出）又各自对应一个二进制值。
+</p><p>对每个准备跨系统使用的设备，右键其整个注册表项，然后导出为 <i>.reg</i> 文件，之后可以从这个文件中复制密钥。
+</p><p>在此文件中，如果只有一个单独的二进制密钥，说明这个设备<i>不是</i>蓝牙 5.1 设备，只需要一个密钥。如果这个设备有多个密钥（比如 <code>LTK</code> 或 <code>IRK</code>），那么这<i>是</i>一个蓝牙 5.1 设备，配置方法参见#准备蓝牙 5.1 密钥。
+</p><p>最后，重启进入 Linux，然后跳到#保存配置步骤
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg20f71a8eddbf_.E5.9C.A8_Linux_.E4.B8.8A.E6.8F.90.E5.8F.96.E5.AF.86.E9.92.A5" id="在_Linux_上提取密钥"><span id=".E5.9C.A8_Linux_.E4.B8.8A.E6.8F.90.E5.8F.96.E5.AF.86.E9.92.A5"></span>在 Linux 上提取密钥</h5></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果 Windows 分区启用了 Bitlocker 加密，则无法从 Linux 中使用 chntpw 访问</div>
+<p>进入 Arch Linux，安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=chntpw">chntpw</a></span><sup><small>包</small></sup></span>，然后挂载 Windows 系统盘。
+</p>
+<pre>$ cd <i>/path/to/windows/system</i>/Windows/System32/config
+$ chntpw -e SYSTEM
+</pre>
+<p>在 <code>chntpw</code> 环境中，运行 <code>ls</code>。你可能会看到 CurrentControlSet 或者 ControlSet00X，X 是任意数字。根据看到的名称，执行
+</p>
+<pre>&gt; cd CurrentControlSet\Services\BTHPORT\Parameters\Keys
+</pre>
+<p>如果该环境下没有 <code>CurrentControlSet</code>，但存在 <code>ControlSet00<i>X</i></code>，那么执行
+</p>
+<pre>&gt; cd ControlSet00<i>X</i>\Services\BTHPORT\Parameters\Keys
+</pre>
+<p>这里可能仅有一个以蓝牙适配器的 MAC 地址为名的子密钥。
+使用 <code>ls</code> 查看并 <code>cd</code> 进去：
+</p>
+<pre>&gt; ls
+&gt; cd <i>your-adapter's-mac-address</i>
+</pre>
+<p>该适配器下的子密钥名就是适配器配对的<i>设备</i>的 MAC 地址。
+使用 <code>ls</code>查看，并 <code>cd</code> 进入所有你想要在双系统下配对的设备：
+</p>
+<pre>&gt; ls
+&gt; cd <i>your-device's-mac-address</i>
+</pre>
+<p>如果<i>不是</i>蓝牙 5.1 设备，将只有一个密钥：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">&gt; ls</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Node has 0 subkeys and 1 values
+size  type        value name    [value if type DWORD]
+16    REG_BINARY &lt;123456789876&gt;
+</pre>
+<p>使用 <code>hex</code> 获取密钥：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">&gt; hex 123456789876</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">:00000 XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX (some other chars)
+</pre>
+<p>上面若干“XX”表示的就是密钥。记下这个密钥和它对应的 MAC 地址。
+</p><p>如果是蓝牙 5.1 设备，你将看到有多个密钥：
+</p>
+<pre>Node has 0 subkeys and 8 values
+  size     type              value name             [value if type DWORD]
+    16  3 REG_BINARY         &lt;LTK&gt;
+     4  4 REG_DWORD          &lt;KeyLength&gt;               16 [0x10]
+     8  b REG_QWORD          &lt;ERand&gt;
+     4  4 REG_DWORD          &lt;EDIV&gt;                 37520 [0x9290]
+    16  3 REG_BINARY         &lt;IRK&gt;
+     8  b REG_QWORD          &lt;Address&gt;
+     4  4 REG_DWORD          &lt;AddressType&gt;              1 [0x1]
+     4  4 REG_DWORD          &lt;AuthReq&gt;                 45 [0x2d]
+</pre>
+<p>参考#准备蓝牙 5.1 密钥，用 <code>hex <i>value_name</i></code> 获取需要的值。
+</p><p>最后，跳到#保存配置将这些密钥导入到 Linux 中。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg20f71a8eddbf_.E5.AF.B9.E4.BA.8E_macOS" id="对于_macOS"><span id=".E5.AF.B9.E4.BA.8E_macOS"></span>对于 macOS</h4></div>
+<p>进入 macOS:
+</p>
+<ul><li>对于macOS Monterey或更高的版本:
+<ol><li>打开“钥匙串”，搜索 Bluetooth。</li>
+<li>按日期排序。</li>
+<li>如果刚刚移除并重连设备，则可以直接选择最新的设备。设备名可能是MobileBluetooth (较旧的蓝牙设备) 或者只是一个UUID (蓝牙5.1+)。</li>
+<li>双击此项，检查MAC地址和你的设备是否一致。</li>
+<li>勾选“显示密码”复选框，然后重复输入两次你的密码。</li>
+<li>复制密码显示区域中的文本，它实际上是个 XML 文件 (<code>⌘+a</code> <code>⌘+c</code>)</li>
+<li>把文本粘贴到<code>~/bt_keys.txt</code>中。</li></ol></li></ul>
+<ul><li>如果系统版本为 High Sierra 或更高的版本，运行</li></ul>
+<pre># defaults read /private/var/root/Library/Preferences/com.apple.bluetoothd.plist LinkKeys &gt; ~/bt_keys.txt</pre>
+<ul><li>如果系统版本为 Sierra 或更低的版本，运行</li></ul>
+<pre># defaults read /private/var/root/Library/Preferences/blued.plist LinkKeys &gt; ~/bt_keys.txt</pre>
+<p>此时，<code>~/.bt_keys.txt</code> 文件已经包含了所需的密钥。在旧版本的 macOS（High Sierra 和更低的版本）中则需要先反转密钥。例如，将 <code>98 54 2f aa bb cc dd ee ff gg hh ii jj kk ll mm</code> 变为 <code>MM LL KK JJ GG FF EE DD CC BB AA 2F 54 98</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>反转可以用这段 <a href="#pgf6d3de5ccfac">Python</a> 代码完成:
+<pre>&gt;&gt;&gt; key = "98 54 2f aa bb cc dd ee ff gg hh ii jj kk ll mm"
+&gt;&gt;&gt; " ".join(reversed(key.split()))</pre>
+</div>
+<p>如果这是一个蓝牙 5.1 设备，将会有多个密钥与之对应。参考#准备蓝牙 5.1 密钥使用这些密钥。
+</p><p>最后，将 <code>bt_keys.txt</code> 文件复制到可由 Arch Linux 读取的驱动器。然后重新启动到 Arch Linux，跳到#保存配置小节继续。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg20f71a8eddbf_.E5.87.86.E5.A4.87.E8.93.9D.E7.89.995.1.E5.AF.86.E9.92.A5" id="准备蓝牙5.1密钥"><span id=".E5.87.86.E5.A4.87.E8.93.9D.E7.89.995.1.E5.AF.86.E9.92.A5"></span>准备蓝牙5.1密钥</h4></div>
+
+<p>若在#对于 Windows或#对于 macOS小节中发现蓝牙5.1密钥，则需在导入Linux系统前对它们的值进行一些转换。在执行#保存配置步骤前，需创建好所需的文件，并填入恰当的内容。本步骤因设备而异，参照下表。一部分值的需要进行特殊操作，相关的实用程序也一并提供在下。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>设备</th>
+<th>原始密钥与所需的转换 (Windows)</th>
+<th>原始密钥与所需的转换 (macOS)</th>
+<th>目标密钥文件
+</th></tr>
+<tr>
+<td rowspan="3">
+<ul><li>Logitech MX Anywhere 3S</li>
+<li>Logitech MX Master 3</li>
+<li>Logitech MX Master 3S</li>
+<li>Logitech MX Keys</li>
+<li>Logitech MX Keys Mini</li>
+<li>Logitech MX Mechanical</li>
+<li>Xbox One S Wireless Controller</li></ul>
+</td>
+<td>
+<ul><li>复制 <code>IRK</code></li>
+<li>删除十六进制字节之间的空格</li></ul>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">?
+</td>
+<td><code>IdentityResolvingKey.Key</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>复制 <code>LTK</code>.</li>
+<li>删除十六进制字节之间的空格</li></ul>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">?
+</td>
+<td><code>SlaveLongTermKey.Key</code> 与 <code>PeripheralLongTermKey.Key</code>
+</td></tr>
+<tr>
+<td><code>ERand</code> 和 <code>EDIV</code> 应为 <code>0</code>
+</td>
+<td><i>Random Number</i> 与 <i>Encrypted Diversifier</i> 应为 <code>0</code>.
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td rowspan="6">
+<ul><li>Logitech MX Anywhere 2S</li></ul>
+</td>
+<td>
+<ul><li>Copy <code>IRK</code>.</li>
+<li>Remove the spaces between the hex octets.</li></ul>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">?
+</td>
+<td><code>IdentityResolvingKey.Key</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>Copy <code>CSRK</code>.</li>
+<li>Remove the spaces between the hex octets.</li></ul>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">?
+</td>
+<td><code>LocalSignatureKey.Key</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>Copy <code>LTK</code>.</li>
+<li>Remove the spaces between the hex octets.</li></ul>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">?
+</td>
+<td><code>LongTermKey.Key</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>Copy <code>KeyLength</code>.</li>
+<li>Convert the whole number to decimal.</li></ul>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">?
+</td>
+<td><code>LongTermKey.EncSize</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>Copy <code>EDIV</code>.</li>
+<li>Convert the whole number to decimal.</li></ul>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">?
+</td>
+<td><code>LongTermKey.EDiv</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>Copy <code>ERand</code>.</li>
+<li>Reverse the order of the octets.</li>
+<li>Convert the whole number to decimal.</li></ul>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">?
+</td>
+<td><code>LongTermKey.Rand</code>
+</td></tr>
+<tr>
+<td rowspan="1">
+<ul><li>Royal Kludge F68 keyboard is like the Logitech MX Anywhere 2S</li></ul>
+</td>
+<td>
+<ul><li>Also copy <code>CSRKInbound</code> too.</li>
+<li>Remove the spaces between the hex octets.</li></ul>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">?
+</td>
+<td><code>RemoteSignatureKey.Key</code>
+</td></tr>
+<tr>
+<td rowspan="4">
+<ul><li>ThinkPad TrackPoint Keyboard II</li>
+<li>Pebble M350 mouse</li>
+<li>Logitech G604 Lightspeed mouse</li></ul>
+</td>
+<td>
+<ul><li>复制 <code>IRK</code></li>
+<li>反转十六进制字节的顺序</li></ul>
+</td>
+<td>
+<ul><li>复制 <i>Remote IRK</i></li>
+<li>将其从base64转换为十六进制</li></ul>
+</td>
+<td><code>IdentityResolvingKey.Key</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>复制 <code>LTK</code>，删除十六进制字节之间的空格</li></ul>
+</td>
+<td>
+<ul><li>复制 <i>Remote Encryption</i> &gt; <i>Long-term Key</i>.</li>
+<li>将其从base64转换为十六进制</li></ul>
+</td>
+<td><code>LongTermKey.Key</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>复制 <code>ERand</code></li>
+<li>反转十六进制字节的顺序</li>
+<li>整体转换为十进制</li></ul>
+</td>
+<td>
+<ul><li>复制 <i>Remote Encryption</i> &gt; <i>Random Number</i></li>
+<li>将其从base64转换为小端十进制数字（参见下方 Python 脚本）</li></ul>
+</td>
+<td><code>LongTermKey.Rand</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>复制 <code>EDIV</code></li>
+<li>反转十六进制字节的顺序</li>
+<li>整体转换为十进制</li></ul>
+</td>
+<td>
+<ul><li>复制 <i>Remote Encryption</i> &gt; <i>Encrypted Diversifier</i></li>
+<li>将其从base64转换为小端十进制数字（参见下方 Python 脚本）</li></ul>
+</td>
+<td><code>LongTermKey.EDiv</code>
+</td></tr>
+<tr>
+<td rowspan="4">Logitech M585/M590
+</td>
+<td>
+<ul><li>复制 <code>IRK</code></li>
+<li>反转十六进制字节的顺序</li></ul>
+</td>
+<td>
+</td>
+<td><code>IdentityResolvingKey.Key</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>复制 <code>LTK</code>，删除十六进制字节之间的空格</li></ul>
+</td>
+<td>
+</td>
+<td><code>LongTermKey.Key</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>复制 <code>ERand</code></li>
+<li>反转十六进制字节的顺序</li>
+<li>整体转换为十进制</li></ul>
+</td>
+<td>
+</td>
+<td><code>LongTermKey.Rand</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>复制 <code>EDIV</code></li>
+<li>整体转换为十进制(可直接复制deword的十进制值)</li></ul>
+</td>
+<td>
+</td>
+<td><code>LongTermKey.EDiv</code>
+</td></tr>
+<tr>
+<td rowspan="3">其他设备
+</td>
+<td>
+<ul><li>复制 <code>LTK</code></li>
+<li>删除16进制字节之间的空格</li></ul>
+</td>
+<td>
+<ul><li>复制 <i>Remote IRK</i></li>
+<li>将其从base64转换为十六进制</li></ul>
+</td>
+<td><code>LongTermKey.Key</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>复制 <code>ERand</code></li>
+<li>反转十六进制字节的顺序</li>
+<li>整体转换为十进制</li></ul>
+</td>
+<td>
+<ul><li>复制 <i>Remote Encryption</i> &gt; <i>Long-term Key</i></li>
+<li>将其从base64转换为十六进制</li></ul>
+</td>
+<td><code>LongTermKey.Rand</code>
+</td></tr>
+<tr>
+<td>
+<ul><li>复制 <code>EDIV</code></li>
+<li>删除16进制字节之间的空格</li></ul>
+</td>
+<td>
+<ul><li>复制 <i>Remote Encryption</i> &gt; <i>Encrypted Diversifier</i></li>
+<li>将其从base64转换为十六进制</li>
+<li>反转十六进制字节的顺序</li></ul>
+</td>
+<td><code>LongTermKey.EDiv</code>
+</td></tr>
+<tr>
+<td rowspan="1">Xbox wireless controller
+</td>
+<td>
+<ul><li>Copy <code>LTK</code>.</li>
+<li>Remove the spaces between the hex octets.</li></ul>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">?
+</td>
+<td><code>SlaveLongTermKey.Key</code>
+</td></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>删除十六进制字节间的空格，可使用 <a href="https://www.browserling.com/tools/remove-all-whitespace">这一在线工具</a> 或这段 <a href="#pgf6d3de5ccfac">Python</a> 代码:</li></ul>
+<pre>&gt;&gt;&gt; "<i>key_value</i>".replace(" ", "")
+</pre>
+<ul><li>这段Python代码实现了反转字节:</li></ul>
+<pre>&gt;&gt;&gt; ERand=" 63 02 84 B8 5D 40 44 DF   "
+&gt;&gt;&gt; ERand=list(reversed(ERand.strip().split()))</pre>
+<ul><li>这段Python代码将十六进制数转为十进制:</li></ul>
+<pre>&gt;&gt;&gt; int("".join(ERand), 16)
+16088054540146049635</pre>
+<ul><li>这段Python代码将base64的值转化为十六进制表示:</li></ul>
+<pre>binascii.hexlify(base64.decodebytes(b'...')).upper()
+</pre>
+<ul><li>这段Python代码完整完成 macOS Encrypted Diversifier 的转换:</li></ul>
+<pre>struct.unpack('&lt;H', base64.decodebytes(b'...'))
+</pre>
+<ul><li>这段Python代码完整完成 macOS Random Number 的转换:</li></ul>
+<pre>struct.unpack('&lt;Q', base64.decodebytes(b'...'))
+</pre>
+</div>
+<p>例如，在通常情况下:
+</p>
+<ul><li><code>LTK</code> 为 <code>48 4D AF CD 0F 92 22 88 0A 52 9A F4 76 DA 8B 94</code>，转换为 <code>LongTermKey.Key</code> 应为 <code>484DAFCD0F9222880A529AF476DA8B94</code>.</li>
+<li><code>ERand</code> 为 <code>63 02 84 B8 5D 40 44 DF</code>， 转换为 <code>Rand</code> 应为 <code>16088054540146049635</code>.</li>
+<li><code>EDIV</code> 为 <code>37520</code>，转换为<code>EDiv</code> 应为 <code>37520</code>.</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg20f71a8eddbf_.E4.BF.9D.E5.AD.98.E9.85.8D.E7.BD.AE" id="保存配置"><span id=".E4.BF.9D.E5.AD.98.E9.85.8D.E7.BD.AE"></span>保存配置</h4></div>
+<p>获得密钥后，切换用户为 root，然后输入：
+</p>
+<pre># cd /var/lib/bluetooth/<i>BT-Adapter-MAC-address</i></pre>
+<p>在此处可以找到每个已配对蓝牙设备的文件夹。对于要与 Arch 和双启动配对的每个设备，执行以下操作：
+</p>
+<pre># cd <i>device-MAC-address</i></pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>若使用的是会在配队后自增MAC地址的设备，请在这一步改成将MAC地址文件夹改成自增后的。可以直接从Windows复制MAC地址过来，也可以手动自增（注意到每个8bit字节都是一个两位<a href="https://en.wikipedia.org/wiki/Hexadecimal">十六进制</a>数）。</div>
+<p>如果的设备不是蓝牙5.1设备（只有一个密钥），编辑 <code>info</code> 文件，改变 <code>[LinkKey]</code> 中列出的密钥。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">info</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[LinkKey]
+Key=XXXXXXXXXXXXXXX</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>确保所有字母都大写，并且删除所有空格。</div>
+<p>如果有多个蓝牙 5.1 的密钥，编辑 <code>info</code> 文件并将所有适用的密钥替换为记录的值。例如，对于 Xbox One S 无线手柄：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">info</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[IdentityResolvingKey]
+Key=&lt;IdentityResolvingKey.Key&gt;
+
+[PeripheralLongTermKey]
+Key=&lt;PeripheralLongTermKey.Key&gt;
+
+[SlaveLongTermKey]
+Key=&lt;SlaveLongTermKey.Key&gt;</pre>
+<p>然后<a href="#pgac06dd8bfe95">重新启动</a> <code>bluetooth.service</code> 和 <code>pulseaudio</code>（使用 <code>pulseaudio -k &amp;&amp; pulseaudio --start</code>）。
+</p><p>现在应该可以连接到你的设备了。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>取决于蓝牙管理器，可能需要完全重启才能重新连接到设备。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg20f71a8eddbf_.E9.85.8D.E7.BD.AE_2" id="配置_2"><span id=".E9.85.8D.E7.BD.AE_2"></span>配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E9.BB.98.E8.AE.A4.E7.94.B5.E6.BA.90.E7.8A.B6.E6.80.81" id="默认电源状态"><span id=".E9.BB.98.E8.AE.A4.E7.94.B5.E6.BA.90.E7.8A.B6.E6.80.81"></span>默认电源状态</h3></div>
+<p>截至 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez">bluez</a></span><sup><small>包</small></sup></span> 5.65, 它的默认行为是在启动服务或从挂起恢复时打开所有蓝牙适配器的电源<a href="https://github.com/bluez/bluez/commit/180cf09933b2d8eb03972c8638063429fe5fece5">[2]</a>
+</p><p>如果希望蓝牙在重启后不自动启动(比如要在移动设备中节省电量)。需要将 <code>AutoEnable=false</code> 添加在 <code>/etc/bluetooth/main.conf</code> 底部的 <code>[Policy]</code> 下面：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/bluetooth/main.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Policy]
+AutoEnable=false</pre>
+<p>禁用后可以用 <code>power on</code> 命令开启。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E5.90.AF.E5.8A.A8.E5.90.8E.E8.87.AA.E5.8A.A8.E5.8F.AF.E8.A2.AB.E5.8F.91.E7.8E.B0" id="启动后自动可被发现"><span id=".E5.90.AF.E5.8A.A8.E5.90.8E.E8.87.AA.E5.8A.A8.E5.8F.AF.E8.A2.AB.E5.8F.91.E7.8E.B0"></span>启动后自动可被发现</h3></div>
+<p>如果设备应该总是可见或者可以直接连接：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/bluetooth/main.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[General]
+DiscoverableTimeout = 0</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E4.BB.8E.E6.8C.82.E8.B5.B7.E4.B8.AD.E5.94.A4.E9.86.92" id="从挂起中唤醒"><span id=".E4.BB.8E.E6.8C.82.E8.B5.B7.E4.B8.AD.E5.94.A4.E9.86.92"></span>从挂起中唤醒</h3></div>
+<p>允许蓝牙鼠标或者蓝牙键盘将系统从挂起中唤醒。首先，检查bios设置确认从USB中唤醒功能没有被禁止。许多情况下，蓝牙在主板上被看作是USB设备。
+</p><p>获得蓝牙适配器的厂商代码和设备ID。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsusb | grep bluetooth -i</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Bus 001 Device 002: ID 8087:0039 Intel Corp. AX200 Bluetooth
+</pre>
+<p>针对（上面适配器的）厂商代码和设备ID增加新的udev规则来允许从挂起中唤醒。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/91-keyboard-mouse-wakeup.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SUBSYSTEM=="usb", ATTRS{idVendor}=="8087", ATTRS{idProduct}=="0039" RUN+="/bin/sh -c 'echo enabled &gt; /sys$env{DEVPATH}/../power/wakeup;'"</pre>
+<p>如果系统唤醒后，要自动重新配置蓝牙键盘，例如，设置不同的键盘布局或者按键重复速度（相关细节，查看<a href="#pg2ae705869f4b">Xorg/Keyboard configuration#Adjusting typematic delay and rate</a> 和 <a href="#pgd45fc6933524">xmodmap</a>），可以创建一个<a href="#pgf46977f5f342">可执行</a>脚本：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">configure_keyboard.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+export DISPLAY=:0
+xset r rate 220 30
+xmodmap /<i>your</i>/<i>path</i>/<i>to</i>/.Xmodmap</pre>
+<p>然后创建一个像上面一样的额外的udev规则。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/92-keyboard-reconfiguration-wakeup.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SUBSYSTEM=="usb", ATTRS{idVendor}=="8087", ATTRS{idProduct}=="0039" RUN+="/<i>your</i>/<i>path</i>/<i>to</i>/configure_keyboard.sh"</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E5.90.AF.E7.94.A8.E5.AE.9E.E9.AA.8C.E6.80.A7.E5.8A.9F.E8.83.BD" id="启用实验性功能"><span id=".E5.90.AF.E7.94.A8.E5.AE.9E.E9.AA.8C.E6.80.A7.E5.8A.9F.E8.83.BD"></span>启用实验性功能</h3></div>
+<p>Bluez 堆栈将新的、有可能出现错误的功能放在 D-Bus 实验性和内核实验性选项后面。这些功能随着时间的推移而变化，因为实验性功能被确定为稳定，不再需要该选项。要启用这些功能，请取消配置中相应行的注释：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/bluetooth/main.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+
+# Enables D-Bus experimental interfaces
+# Possible values: true or false
+<b>#Experimental = true</b>
+
+# Enables kernel experimental features, alternatively a list of UUIDs
+# can be given.
+# Possible values: true,false,&lt;UUID List&gt;
+# Possible UUIDS:
+...
+# Defaults to false.
+<b>#KernelExperimental = true</b></pre>
+<p>或者说， 你可以<a href="#pgfbacf3a1812d">编辑</a> <code>bluetooth.service</code> 来添加 <code>--experimental</code> 或者 <code>--kernel</code> 标识，类似这个 <a href="#pg1a2ec25e3c0c">drop-in file</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/bluetooth.service.d/override.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+ExecStart=
+ExecStart=/usr/lib/bluetooth/bluetoothd --experimental</pre>
+<p>无论是哪种方式，你都必须在之后<a href="#pgdf6211f8fea3">重启</a> <code>bluetooth.service</code>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg20f71a8eddbf_.E9.9F.B3.E9.A2.91" id="音频"><span id=".E9.9F.B3.E9.A2.91"></span>音频</h2></div>
+<p>通常你需要采取额外的步骤去整合针对蓝牙的音频服务。下面的章节会给出相关细节。
+</p><p>查看<a href="#pgb5d5921e44b9">蓝牙耳机</a>页面获得更多关于蓝牙音频和蓝牙耳机的信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_PulseAudio" id="PulseAudio">PulseAudio</h3></div>
+<p>要使用蓝牙耳机或音响的话要先安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pulseaudio-bluetooth">pulseaudio-bluetooth</a></span><sup><small>包</small></sup></span>。 要确认重新启动pulseaudio来使得安装生效：<code>pulseaudio -k</code>。默认的PulseAudio配置就可以直接用蓝牙耳机或音响了。<a href="https://gitlab.freedesktop.org/pulseaudio/pulseaudio/-/blob/stable-16.x/src/daemon/default.pa.in#L84-93">[3]</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>有时要用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pavucontrol">pavucontrol</a></span><sup><small>包</small></sup></span> 选择音频的输出设备。</div>
+<p>如果你有全局的 PulseAudio 设置，首先确保运行守护进程（一般是 <code>pulse</code>）的用户在 <code>lp</code> 组，并且在 PulseAudio 配置中加载蓝牙模块：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pulse/system.pa</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+load-module module-bluetooth-policy
+load-module module-bluetooth-discover
+...</pre>
+<p>可选的，如果你想要自动切换所有的音频输出到蓝牙设备，增加 <code>load-module module-switch-on-connect</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_PipeWire" id="PipeWire">PipeWire</h3></div>
+<p>PipeWire 版本v0.3.19默认打开对蓝牙的支持。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_ALSA" id="ALSA">ALSA</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Bluez5 已经不再直接集成对 <a href="#pgb16dfd48462f">ALSA</a> 的支持，目前只对 <a href="#pga942ba974b3d">PulseAudio</a> 提供支持。如果你不能或者不想使用PulseAudio，请参考下面的命令。</div>
+<p>首先，确认你的蓝牙音频设备已经正确配对且已经连接到系统。
+</p><p>然后，安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bluez-alsa-git/">bluez-alsa-git</a></span><sup><small>AUR</small></sup></span>，启动（和使能） <code>bluealsa</code> 服务， 并增加当前用户到 <code>audio</code> 组。
+</p><p>执行下面的命令确认一切是否像预想地那样工作（替换下面的 <code><i>XX:XX:XX:XX:XX:XX</i></code> 和 <code><i>FILE.wav</i></code>）：
+</p>
+<pre>$ aplay -D bluealsa:SRV=org.bluealsa,DEV=<i>XX:XX:XX:XX:XX:XX</i>,PROFILE=a2dp <i>FILE.wav</i>
+</pre>
+<p>最后，增加下面的配置行到你的 <code>~/.asoundrc</code> ：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.asoundrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">defaults.bluealsa {
+    service "org.bluealsa"
+    device "XX:XX:XX:XX:XX:XX"
+    profile "a2dp"
+}
+</pre>
+<p>现在你可以使用<code>bluealsa</code>设备来访问你的蓝牙音频设备。可以使用带有参数 <code>-D bluealsa</code> 的命令 <code>alsamixer</code> 来进行音量管理。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg20f71a8eddbf_.E8.93.9D.E7.89.99.E4.B8.B2.E5.8F.A3" id="蓝牙串口"><span id=".E8.93.9D.E7.89.99.E4.B8.B2.E5.8F.A3"></span>蓝牙串口</h2></div>
+<p>如果要在Bluetooth-to-Serial模块 (HC-05, HC-06）上进行蓝牙串口通信，需要执行下面的步骤：
+</p><p>使用 <code>bluetoothctl</code> <b>配对</b>你的蓝牙设备，像上面所描述的那样。
+</p><p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-deprecated-tools">bluez-deprecated-tools</a></span><sup><small>包</small></sup></span>，因为它提供了我们需要的特定的功能，这些功能没有被新工具支持。
+</p><p>绑定已经配对的设备的MAC地址到tty终端：
+</p>
+<pre># rfcomm bind rfcomm0 <i>MAC_address_of_Bluetooth_device</i>
+</pre>
+<p>现在你可以打开 <code>/dev/rfcomm0</code> 来进行串口通信：
+</p>
+<pre>$ picocom /dev/rfcomm0 -b 115200
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg20f71a8eddbf_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_Debugging.EF.BC.88.E6.8E.92.E9.99.A4.E6.95.85.E9.9A.9C.EF.BC.89" id="Debugging（排除故障）"><span id="Debugging.EF.BC.88.E6.8E.92.E9.99.A4.E6.95.85.E9.9A.9C.EF.BC.89"></span>Debugging（排除故障）</h3></div>
+<p>为了调试，首先<a href="#pgdcb013fc86b7">停止</a> <code>bluetooth.service</code>。
+</p><p>然后用-d参数：
+</p>
+<pre># /usr/lib/bluetooth/bluetoothd -n -d
+</pre>
+<p>另一种选择是用<code>btmon</code>工具。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E5.BC.83.E7.94.A8.E7.9A.84_BlueZ_.E5.B7.A5.E5.85.B7" id="弃用的_BlueZ_工具"><span id=".E5.BC.83.E7.94.A8.E7.9A.84_BlueZ_.E5.B7.A5.E5.85.B7"></span>弃用的 BlueZ 工具</h3></div>
+<p>八个BlueZ tools<a href="https://git.kernel.org/pub/scm/bluetooth/bluez.git/commit/?id=b1eb2c4cd057624312e0412f6c4be000f7fc3617">已经弃用</a>并从<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-utils">bluez-utils</a></span><sup><small>包</small></sup></span> 中移除,尽管并非所有这些都被更新的工具所取代。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-deprecated-tools">bluez-deprecated-tools</a></span><sup><small>包</small></sup></span> 提供了<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-utils">bluez-utils</a></span><sup><small>包</small></sup></span> 的替代版本包，使用了不推荐使用的工具。
+</p>
+<table class="wikitable" style="max-width: 50em;">
+<tbody><tr>
+<th>不推荐的工具
+</th>
+<th>推荐的替代品
+</th></tr>
+<tr>
+<td><a href="https://manpages.debian.org/stretch/bluez/gatttool.1.en.html">gatttool</a></td>
+<td>btgatt-client, <a href="https://git.kernel.org/cgit/bluetooth/bluez.git/tree/doc/gatt-api.txt">D-Bus Gatt API</a>
+</td></tr>
+<tr>
+<td><a href="https://manpages.debian.org/stretch/bluez/hciattach.1.en.html">hciattach</a></td>
+<td>btattach
+</td></tr>
+<tr>
+<td><a href="https://manpages.debian.org/stretch/bluez/hciconfig.1.en.html">hciconfig</a></td>
+<td>btmgmt (and bluetoothctl?)
+</td></tr>
+<tr>
+<td><a href="https://manpages.debian.org/stretch/bluez-hcidump/hcidump.1.en.html">hcidump</a></td>
+<td>btmon (and btsnoop)
+</td></tr>
+<tr>
+<td><a href="https://manpages.debian.org/stretch/bluez/hcitool.1.en.html">hcitool</a></td>
+<td>missing, <a href="https://git.kernel.org/cgit/bluetooth/bluez.git/tree/doc/device-api.txt">D-Bus Device API</a> available
+</td></tr>
+<tr>
+<td><a href="https://manpages.debian.org/stretch/bluez/rfcomm.1.en.html">rfcomm</a>
+</td>
+<td rowspan="2">missing, implement with <a href="https://git.kernel.org/cgit/bluetooth/bluez.git/tree/doc/profile-api.txt">D-Bus Profile1 API</a>?
+</td></tr>
+<tr>
+<td><a href="https://manpages.debian.org/stretch/bluez/ciptool.1.en.html">ciptool</a>
+</td></tr>
+<tr>
+<td style="vertical-align: top;"><a href="https://manpages.debian.org/stretch/bluez/sdptool.1.en.html">sdptool</a>
+</td>
+<td>missing, functionality seems to be scattered over different D-Bus objects: <a href="https://git.kernel.org/cgit/bluetooth/bluez.git/tree/doc/profile-api.txt">Profile</a>, <a href="https://git.kernel.org/cgit/bluetooth/bluez.git/tree/doc/advertising-api.txt">Advertising</a>, and the UUIDs arrays in <a href="https://git.kernel.org/cgit/bluetooth/bluez.git/tree/doc/device-api.txt">device</a> and <a href="https://git.kernel.org/cgit/bluetooth/bluez.git/tree/doc/adapter-api.txt">adapter</a>.
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_gnome-bluetooth.EF.BC.88gnome.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83.E4.B8.8B.E7.9A.84.E8.93.9D.E7.89.99.E7.AE.A1.E7.90.86.E5.99.A8.EF.BC.89" id="gnome-bluetooth（gnome桌面环境下的蓝牙管理器）"><span id="gnome-bluetooth.EF.BC.88gnome.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83.E4.B8.8B.E7.9A.84.E8.93.9D.E7.89.99.E7.AE.A1.E7.90.86.E5.99.A8.EF.BC.89"></span>gnome-bluetooth（gnome桌面环境下的蓝牙管理器）</h3></div>
+<p>如果接收文件时出现以下信息：
+</p>
+<pre>Bluetooth OBEX start failed: Invalid path
+Bluetooth FTP start failed: Invalid path
+</pre>
+<p>确保 <a href="#pg078511578327">XDG user directories</a> 存在。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E5.A4.96.E7.BD.AEUSB.E8.93.9D.E7.89.99.2F2.4GHz.E6.8E.A5.E6.94.B6.E5.99.A8" id="外置USB蓝牙/2.4GHz接收器"><span id=".E5.A4.96.E7.BD.AEUSB.E8.93.9D.E7.89.99.2F2.4GHz.E6.8E.A5.E6.94.B6.E5.99.A8"></span>外置USB蓝牙/2.4GHz接收器</h3></div>
+<p>如果你在使用外置USB蓝牙/2.4GHz接收器，你要先检查蓝牙接收器是否被识别。插入USB接收器后可通过 <code>journalctl -f</code> 检测（或查看 <code>/var/log/messages.log</code>）。 可能像下面这样:(注意hci）：
+</p>
+<pre>Feb 20 15:00:24 hostname kernel: [ 2661.349823] usb 4-1: new full-speed USB device number 3 using uhci_hcd
+Feb 20 15:00:24 hostname bluetoothd[4568]: HCI dev 0 registered
+Feb 20 15:00:24 hostname bluetoothd[4568]: Listening for HCI events on hci0
+Feb 20 15:00:25 hostname bluetoothd[4568]: HCI dev 0 up
+Feb 20 15:00:25 hostname bluetoothd[4568]: Adapter /org/bluez/4568/hci0 has been enabled
+</pre>
+<p>如果只有前两行，说明系统找到了设备而只需要启动它。
+例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hciconfig -a hci0</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">hci0:	Type: USB
+	BD Address: 00:00:00:00:00:00 ACL MTU: 0:0 SCO MTU: 0:0
+	DOWN 
+	RX bytes:0 acl:0 sco:0 events:0 errors:0
+        TX bytes:0 acl:0 sco:0 commands:0 errors:
+</pre>
+<pre># hciconfig hci0 up
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hciconfig -a hci0</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">hci0:	Type: USB
+	BD Address: 00:02:72:C4:7C:06 ACL MTU: 377:10 SCO MTU: 64:8
+	UP RUNNING 
+	RX bytes:348 acl:0 sco:0 events:11 errors:0
+        TX bytes:38 acl:0 sco:0 commands:11 errors:0
+</pre>
+<p>用 <code>bluez-utils</code> 里的 <code>hcitool</code> 检查设备是否被检测到。 要获取可用设备和他们的标识和MAC地址可以输入：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ hcitool dev</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Devices:
+        hci0	00:1B:DC:0F:DB:40
+</pre>
+<p>设备的详细信息可以用<code>hciconfig</code>获取 ：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ hciconfig -a hci0</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">hci0:   Type: USB
+        BD Address: 00:1B:DC:0F:DB:40 ACL MTU: 310:10 SCO MTU: 64:8
+        UP RUNNING PSCAN ISCAN
+        RX bytes:1226 acl:0 sco:0 events:27 errors:0
+        TX bytes:351 acl:0 sco:0 commands:26 errors:0
+        Features: 0xff 0xff 0x8f 0xfe 0x9b 0xf9 0x00 0x80
+        Packet type: DM1 DM3 DM5 DH1 DH3 DH5 HV1 HV2 HV3
+        Link policy: RSWITCH HOLD SNIFF PARK
+        Link mode: SLAVE ACCEPT 
+        Name: 'BlueZ (0)'
+        Class: 0x000100
+        Service Classes: Unspecified
+        Device Class: Computer, Uncategorized
+        HCI Ver: 2.0 (0x3) HCI Rev: 0xc5c LMP Ver: 2.0 (0x3) LMP Subver: 0xc5c
+        Manufacturer: Cambridge Silicon Radio (10)
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg20f71a8eddbf_.E9.9F.B3.E9.A2.91.E8.AE.BE.E5.A4.87.E5.BC.80.E5.A7.8B.E5.9C.A8.E7.A6.BBUSB.E6.8E.A5.E6.94.B6.E5.99.A8.E8.BE.83.E8.BF.91.E7.9A.84.E8.B7.9D.E7.A6.BB.E6.9D.A5.E5.9B.9E.E5.88.87.E6.8D.A2" id="音频设备开始在离USB接收器较近的距离来回切换"><span id=".E9.9F.B3.E9.A2.91.E8.AE.BE.E5.A4.87.E5.BC.80.E5.A7.8B.E5.9C.A8.E7.A6.BBUSB.E6.8E.A5.E6.94.B6.E5.99.A8.E8.BE.83.E8.BF.91.E7.9A.84.E8.B7.9D.E7.A6.BB.E6.9D.A5.E5.9B.9E.E5.88.87.E6.8D.A2"></span>音频设备开始在离USB接收器较近的距离来回切换</h4></div>
+<p>如果有其他设备（和当前设备）共用同一个USB主机，它们可能会<a href="https://bbs.archlinux.org/viewtopic.php?pid=1440161#p1440161">中断与音频设备的通信</a>。 确保它是唯一连接到其总线的设备。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsusb</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Bus 002 Device 002: ID 0a12:0001 Cambridge Silicon Radio, Ltd Bluetooth Dongle (HCI mode)
+Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 001 Device 004: ID 048d:1345 Integrated Technology Express, Inc. Multi Cardreader
+Bus 001 Device 003: ID 0424:a700 Standard Microsystems Corp. 2 Port Hub
+Bus 001 Device 002: ID 8087:0024 Intel Corp. Integrated Rate Matching Hub
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg20f71a8eddbf_CSR_.E6.8E.A5.E6.94.B6.E5.99.A8_0a12:0001" id="CSR_接收器_0a12:0001"><span id="CSR_.E6.8E.A5.E6.94.B6.E5.99.A8_0a12:0001"></span>CSR 接收器 0a12:0001</h4></div>
+<p>该设备 <code>ID 0a12:0001 Cambridge Silicon Radio, Ltd Bluetooth Dongle (HCI mode)</code> 有一个回归错误<sup class="reference" id="cite_ref-1"><span class="cite-bracket">[</span>1<span class="cite-bracket">]</span></sup>, 目前仅适用于5.17和&lt;6.0版本的内核。若想获得更多相关信息，请参阅<a href="https://bugzilla.kernel.org/show_bug.cgi?id=60824">Kernel Bug 60824</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E7.BD.97.E6.8A.80.E5.8F.8C.E6.A8.A1.E5.A4.96.E7.BD.AE.E8.93.9D.E7.89.99.2F2.4GHz.E5.8F.AF.E5.88.87.E6.8D.A2USB.E6.8E.A5.E6.94.B6.E5.99.A8" id="罗技双模外置蓝牙/2.4GHz可切换USB接收器"><span id=".E7.BD.97.E6.8A.80.E5.8F.8C.E6.A8.A1.E5.A4.96.E7.BD.AE.E8.93.9D.E7.89.99.2F2.4GHz.E5.8F.AF.E5.88.87.E6.8D.A2USB.E6.8E.A5.E6.94.B6.E5.99.A8"></span>罗技双模外置蓝牙/2.4GHz可切换USB接收器</h3></div>
+<p>罗技的外置USB接收器 （例如罗技MX5000）可以在两种模式下运行：2.4GHz接收器模式（模拟USB模式）和HCI（蓝牙模式）。在2.4GHz接收器模式下，接收器模拟了USB设备，所以在您的计算机上，您就像在用普通的USB有线鼠标/键盘一样。
+</p><p>如果您按住接收器上的红色小按钮，它会启用其他模式。按住接收器上的红色按钮并将其插入计算机，按住按钮3-5秒后，将以蓝牙模式接入设备。蓝牙图标会出现在系统托盘里。讨论
+</p><p>或者，您可以安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-hid2hci">bluez-hid2hci</a></span><sup><small>包</small></sup></span>当您连接罗技的接收器时，它可以自动切换模式。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_hcitool.E6.89.AB.E6.8F.8F.EF.BC.9A.E6.89.BE.E4.B8.8D.E5.88.B0.E8.AE.BE.E5.A4.87" id="hcitool扫描：找不到设备"><span id="hcitool.E6.89.AB.E6.8F.8F.EF.BC.9A.E6.89.BE.E4.B8.8D.E5.88.B0.E8.AE.BE.E5.A4.87"></span>hcitool扫描：找不到设备</h3></div>
+<ul><li>在一些戴尔笔记本电脑（例如Studio 15）上，您必须将蓝牙模式从HID切换到HCI。安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-hid2hci">bluez-hid2hci</a></span><sup><small>包</small></sup></span>，那么<a href="#pge009209061ac">udev</a>应该会自动执行此操作。或者，您可以运行此命令手动切换到HCI：</li></ul>
+<pre># /usr/lib/udev/hid2hci
+</pre>
+<ul><li>如果设备没有显示，并且您的计算机上有Windows系统，请尝试引导它并从Windows启用蓝牙适配器。</li></ul>
+<ul><li>有时，如下这个简单的命令能帮到您：</li></ul>
+<pre># hciconfig hci0 up
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_bluetoothctl:_No_default_controller_available.EF.BC.88.E6.B2.A1.E6.9C.89.E5.8F.AF.E7.94.A8.E7.9A.84.E9.BB.98.E8.AE.A4.E6.8E.A7.E4.BB.B6.EF.BC.89" id="bluetoothctl:_No_default_controller_available（没有可用的默认控件）"><span id="bluetoothctl:_No_default_controller_available.EF.BC.88.E6.B2.A1.E6.9C.89.E5.8F.AF.E7.94.A8.E7.9A.84.E9.BB.98.E8.AE.A4.E6.8E.A7.E4.BB.B6.EF.BC.89"></span>bluetoothctl: No default controller available（没有可用的默认控件）</h3></div>
+<p>一些主板蓝牙控件出现错误。要查看这是否是问题所在，请运行<code>journalctl|grep-hci</code>。如果出现“Command tx timeout”或“Failed to read Intel version command”之类的报错，请关闭电脑电源，并拔下电源线几秒钟。这会强制控件重新加载固件（而标准重新启动不会）。请参阅<a href="https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1859592">此处</a>的错误报告。
+</p><p>确保设备没有被<a href="#pg8a736e641a47">rfkill</a>阻止。
+</p><p>蓝牙服务（软件）无法正确识别一些英特尔设备（硬件）（如8260）也可能发生这种情况。在某些情况下，使用不推荐使用的<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bluez+utils+compata/">bluez utils compata</a></span><sup><small>AUR</small></sup></span>来代替<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez+utils">bluez utils</a></span><sup><small>包</small></sup></span>据报道已经解决了这个问题。
+</p><p>这也可能是由电源策略<sup class="reference" id="cite_ref-2"><span class="cite-bracket">[</span>2<span class="cite-bracket">]</span></sup>引起的，在这种情况下，添加<a href="#pgc7833704a8db">内核参数</a><code>btusb.enable_autosuspend=n</code>是一个潜在的解决方案。另请参阅<a href="https://bugzilla.redhat.com/show_bug.cgi?id=1573562">Red Hat Bugzilla–Bug 1573562</a>。
+</p><p>有时，在没有选项的情况下重新加载<code>btusb</code>有助于恢复控件：
+</p>
+<pre># modprobe -r btusb
+# modprobe btusb
+</pre>
+<p>当接收器是CSR克隆时也可能发生这种情况
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_systemd:_Condition_check_resulted_in_Bluetooth_service_being_skipped.EF.BC.88.E6.9D.A1.E4.BB.B6.E6.A3.80.E6.9F.A5.E5.AF.BC.E8.87.B4.E8.B7.B3.E8.BF.87.E8.93.9D.E7.89.99.E6.9C.8D.E5.8A.A1.EF.BC.89" id="systemd:_Condition_check_resulted_in_Bluetooth_service_being_skipped（条件检查导致跳过蓝牙服务）"><span id="systemd:_Condition_check_resulted_in_Bluetooth_service_being_skipped.EF.BC.88.E6.9D.A1.E4.BB.B6.E6.A3.80.E6.9F.A5.E5.AF.BC.E8.87.B4.E8.B7.B3.E8.BF.87.E8.93.9D.E7.89.99.E6.9C.8D.E5.8A.A1.EF.BC.89"></span>systemd: Condition check resulted in Bluetooth service being skipped（条件检查导致跳过蓝牙服务）</h3></div>
+<p><code>bluetooth.service</code>只需要存在于<code>/sys/class/bluetooth</code> 目录即可，该目录应由内核模块 <code>bluetooth</code>创建，只有当 <code>systemd-udev</code> 真正找到一个工作的蓝牙硬件设备时，它才会自动加载。 
+</p><p>如果您的<code>/sys/class/bluetooth</code> 不存在，请检查您的内核蓝牙模块是否由<code>lsmod</code>加载。如果没有， 并且您很确定自己有蓝牙设备， 您可以尝试通过<a href="#pga016157dc9e9">加载蓝牙模块</a>并<a href="#pgdf6211f8fea3">重新启动</a><code>bluetooth.service</code>，来重新启动这些服务。
+</p><p>在加载<code>bluetooth</code>模块时，您还应该加载相应的内核蓝牙驱动程序，一般用<code>btusb</code>,但是也可以用<code>btrtl,btintel,btbcm,bnep,btusb</code> 等。
+</p><p>检查<code>bluetooth.service</code>的 <a href="#pga7d036f50280">unit status</a> （单元状态），看看它是否启动。
+</p><p>另请参阅 <a href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=853207">Debian Bug report logs - #853207</a>.
+</p><p>如果 <code>bluetooth.service</code> 成功启动，但有可能您仍然无法正常使用蓝牙(例如， <code>bluetoothctl</code> 在您<code>scan on</code>时显示类似<code>org.Bluez.Error.NotReady</code> )。如果发生这种情况，请尝试重新启动计算机，并仔细检查：目录<code>/sys/class/bluetooth</code> 是否存在； <code>lsmod</code> 是否包括正确的蓝牙模块；在 <a href="#pg47c5e1af4d24">journal</a>中记录的信息; 等。 <code>systemd-udev</code> 应该自动检测出您的蓝牙硬件，而无需再次手动更改。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_rfkill_unblock.EF.BC.9A.E4.B8.8D.E8.83.BDunblock" id="rfkill_unblock：不能unblock"><span id="rfkill_unblock.EF.BC.9A.E4.B8.8D.E8.83.BDunblock"></span>rfkill unblock：不能unblock</h3></div>
+<p>如果你的设备unblock后依然是soft blocked，试试：
+</p>
+<pre>$ connmanctl enable bluetooth
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E7.94.B5.E8.84.91.E8.93.9D.E7.89.99.E4.B8.8D.E5.8F.AF.E8.A7.81" id="电脑蓝牙不可见"><span id=".E7.94.B5.E8.84.91.E8.93.9D.E7.89.99.E4.B8.8D.E5.8F.AF.E8.A7.81"></span>电脑蓝牙不可见</h3></div>
+<p>手机蓝牙扫描不到电脑？启动PSCAN和ISCAN：
+</p>
+<pre># enable PSCAN and ISCAN
+$ hciconfig hci0 piscan 
+# check it worked
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ hciconfig</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">hci0:   Type: USB
+        BD Address: 00:12:34:56:78:9A ACL MTU: 192:8 SCO MTU: 64:8
+        <b>UP RUNNING PSCAN ISCAN</b>
+        RX bytes:20425 acl:115 sco:0 events:526 errors:0
+        TX bytes:5543 acl:84 sco:0 commands:340 errors:0
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在 <code>/etc/bluetooth/main.conf</code> 检查设备可见超时和配对超时</div>
+<p>尝试在 <code>/etc/bluetooth/main.conf</code> 中更改设备类，如下所示：
+</p>
+<pre># Default device class. Only the major and minor device class bits are
+# considered.
+#Class = 0x000100 (from default config)
+Class = 0x100100
+</pre>
+<p>这是让我的电脑对我的手机可见的唯一解决方案。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_Foxconn_.2F_Hon_Hai_.2F_Lite-On_Broadcom_device.EF.BC.88.E5.AF.8C.E5.A3.AB.E5.BA.B7.2F.E9.B8.BF.E6.B5.B7.2F.E5.85.89.E5.AE.9D.2F.E5.8D.9A.E9.80.9A_.E8.AE.BE.E5.A4.87.EF.BC.89" id="Foxconn_/_Hon_Hai_/_Lite-On_Broadcom_device（富士康/鸿海/光宝/博通_设备）"><span id="Foxconn_.2F_Hon_Hai_.2F_Lite-On_Broadcom_device.EF.BC.88.E5.AF.8C.E5.A3.AB.E5.BA.B7.2F.E9.B8.BF.E6.B5.B7.2F.E5.85.89.E5.AE.9D.2F.E5.8D.9A.E9.80.9A_.E8.AE.BE.E5.A4.87.EF.BC.89"></span>Foxconn / Hon Hai / Lite-On Broadcom device（富士康/鸿海/光宝/博通  设备）</h3></div>
+<p>其中一些设备需要在启动时将固件闪存到设备中。没有提供固件，但可以使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hex2hcd">hex2hcd</a></span><sup><small>包</small></sup></span>（与<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez+utils">bluez utils</a></span><sup><small>包</small></sup></span>一起安装）将Microsoft Windows.hex文件转换为.hcd包)。
+</p><p>为了获得正确的.hex文件，请尝试搜索设备供应商：使用lsusb获得的产品代码，例如：
+</p>
+<pre>   ...
+   Bus 002 Device 004: ID <b>04ca:2006</b> Lite-On Technology Corp. Broadcom BCM43142A0 Bluetooth Device
+   ...
+</pre>
+<p>or
+</p>
+<pre>   Bus 004 Device 004: Id <b>0489:e031</b> Foxconn / Hon Hai
+</pre>
+<p>或者，启动到Windows（安装虚拟机即可），并从设备管理器获取固件名称。如果你想知道你的设备的型号，但在<i>lsusb</i>中看不到，你能作为<code>iProduct</code>用<i>lsusb-v</i>看到它。
+</p><p>也可以从下载的Windows驱动程序中提取<i>.hex</i>文件，而无需为其运行Windows。下载合适的驱动程序，例如 <a href="http://www.fujitsupc.com/downloads/mobile/BLUETOOTH_WIDCOMM_V6.5.0.3100_WIN7-32_FPC46-1771-01.EXE">Bluetooth Widcomm</a> ( 在为<a href="http://support.fujitsupc.com/CS/Portal/supportsearch.do?srch=DOWNLOADS&amp;Series=P%20Series&amp;Model=P771&amp;ProductType=Notebook%20PC">Lifebook P771</a><sup title="最后检查状态：domain name not resolved">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2022-09-17 ⓘ]</sup> 提供的驱动中有列出)，其中包含许多Broadcomm设备的驱动程序。在蓝牙Widcomm的情况下，驱动程序是一个自提取的RAR档案，因此可以使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=unrar">unrar</a></span><sup><small>包</small></sup></span>提取包 x。T要找出众多<i>.hex</i>文件中哪一个最适合您，请查找文件<code>Win32/bcbtums-win7x86-brcm.inf</code>并搜索<code>[RAMUSB<b>E031</b>.CopyList]</code>，其中<code>E031</code> 应替换为大写的设备的产品代码(<i>lsusb中的第二个十六进制数</i>)。在下面，您应该看到正确的<i>.hex</i>文件的文件名。
+</p><p>您有了.hcd文件，就把它复制到<code>/lib/firmware/brcm/BCM.hcd</code> 中——这个文件名是<code>dmesg</code>建议的，在您的情况下可能会更改，所以请检查您的<i>dmesg</i> 输出以进行验证。然后重新加载<i>btusb</i>模块：
+</p>
+<pre># rmmod btusb
+# modprobe btusb
+</pre>
+<p>在某些情况下（使用较旧的内核？），您必须使用<i>brcm_patchram_plus</i> utility来闪存<i>.hcd</i>文件，该实用程序由<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brcm_patchram_plus-git/">brcm_patchram_plus-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> 提供。首先，确保<i>dmesg</i> 中的设备被<i>btusb</i>识别为蓝牙设备。然后，运行以下操作（用您的供应商产品替换04ca 2006）：
+</p>
+<pre># echo '04ca 2006' &gt; /sys/bus/usb/drivers/btusb/new_id
+    
+</pre>
+<p>启用设备：
+</p>
+<pre># hciconfig hci0 up
+</pre>
+<p>写入固件 
+</p>
+<pre># brcm_patchram_plus_usb --patchram fw-04ca_2006.hcd hci0
+</pre>
+<p>该设备现在应该可用。请参阅 <a href="https://bbs.archlinux.org/viewtopic.php?id=162688">BBS#162688</a> ，了解有关使这些更改持久化的信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_Intel_combined_WiFi_and_Bluetooth_cards.28.E8.8B.B1.E7.89.B9.E5.B0.94.E9.9B.86.E6.88.90.E5.BC.8FWIFI.E5.92.8C.E8.93.9D.E7.89.99.EF.BC.89" id="Intel_combined_WiFi_and_Bluetooth_cards(英特尔集成式WIFI和蓝牙）"><span id="Intel_combined_WiFi_and_Bluetooth_cards.28.E8.8B.B1.E7.89.B9.E5.B0.94.E9.9B.86.E6.88.90.E5.BC.8FWIFI.E5.92.8C.E8.93.9D.E7.89.99.EF.BC.89"></span>Intel combined WiFi and Bluetooth cards(英特尔集成式WIFI和蓝牙）</h3></div>
+<p>请参阅<a href="#pgf204aa4045fd">Wireless network configuration#Bluetooth coexistence</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E8.AE.BE.E5.A4.87.E9.85.8D.E5.AF.B9.E6.88.90.E5.8A.9F.EF.BC.8C.E4.B8.80.E6.AE.B5.E6.97.B6.E9.97.B4.E5.90.8E.E6.84.8F.E5.A4.96.E6.96.AD.E5.BC.80" id="设备配对成功，一段时间后意外断开"><span id=".E8.AE.BE.E5.A4.87.E9.85.8D.E5.AF.B9.E6.88.90.E5.8A.9F.EF.BC.8C.E4.B8.80.E6.AE.B5.E6.97.B6.E9.97.B4.E5.90.8E.E6.84.8F.E5.A4.96.E6.96.AD.E5.BC.80"></span>设备配对成功，一段时间后意外断开</h3></div>
+<p>如果运行 <code>journalctl</code>有以下结果，并且你的设备配对后过一会儿又断开：
+</p>
+<pre>bluetoothd: Unable to get connect data for Headset Voice gateway: getpeername: Transport endpoint is not connected (107)
+bluetoothd: connect error: Connection refused (111)
+</pre>
+<p>这可能是因为你在其它操作系统中用同样的蓝牙适配器配对了这个设备（比如双系统）。有的设备不能处理与同一MAC地址相关联的多个不同配对。你可以移除设备后重新配对：
+</p>
+<pre>$ bluetoothctl
+[bluetooth]# devices
+Device XX:XX:XX:XX:XX:XX My Device
+[bluetooth]# remove XX:XX:XX:XX:XX:XX
+</pre>
+<p>再<a href="#pgdf6211f8fea3">重启</a> <code>bluetooth.service</code>，打开蓝牙适配器，让设备可见，重新扫描配对。因为蓝牙管理器不一样，有时需要重启系统。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E6.89.AB.E6.8F.8F.E4.B8.8D.E5.88.B0.E8.AE.BE.E5.A4.87" id="扫描不到设备"><span id=".E6.89.AB.E6.8F.8F.E4.B8.8D.E5.88.B0.E8.AE.BE.E5.A4.87"></span>扫描不到设备</h3></div>
+<p>有的节能蓝牙设备用bluetoothctl扫描不到，比如某些蓝牙鼠标(如Logitech MX Master)。可以尝试使用<code>transport le</code>来扫描设备:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># bluetoothctl</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[bluetooth]# menu scan
+[bluetooth]# transport le
+[bluetooth]# back
+[bluetooth]# scan on
+[bluetooth]# devices
+...
+Device XX:XX:XX:XX:XX:XX <i>device name</i> &lt;---- 这个就是你的设备
+</pre>
+<p>另一种方法是安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-deprecated-tools">bluez-deprecated-tools</a></span><sup><small>包</small></sup></span> 再<a href="#pg073992cb666a">启动</a> <code>bluetooth.service</code> 再输入：
+</p>
+<pre># bluetoothctl
+[NEW] Controller (MAC) myhostname [default]
+[bluetooth]# power on
+[CHG] Controller (MAC) Class: 0x0c010c
+Changing power on succeeded
+[CHG] Controller (MAC) Powered: yes
+[bluetooth]# scan on
+Discovery started
+[CHG] Controller (MAC) Discovering: yes
+</pre>
+<p>在另一个终端里输入：
+</p>
+<pre># hcitool lescan
+</pre>
+<p>等待你的设备出现，再按 Ctrl+C。 bluetoothctl 就可以获取你的设备并正常配对了。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_Cannot_receive_transferred_files_due_to_symlink.EF.BC.88.E7.94.B1.E4.BA.8E.E7.AC.A6.E5.8F.B7.E9.93.BE.E6.8E.A5.EF.BC.8C.E6.97.A0.E6.B3.95.E6.8E.A5.E6.94.B6.E4.BC.A0.E8.BE.93.E7.9A.84.E6.96.87.E4.BB.B6.EF.BC.89" id="Cannot_receive_transferred_files_due_to_symlink（由于符号链接，无法接收传输的文件）"><span id="Cannot_receive_transferred_files_due_to_symlink.EF.BC.88.E7.94.B1.E4.BA.8E.E7.AC.A6.E5.8F.B7.E9.93.BE.E6.8E.A5.EF.BC.8C.E6.97.A0.E6.B3.95.E6.8E.A5.E6.94.B6.E4.BC.A0.E8.BE.93.E7.9A.84.E6.96.87.E4.BB.B6.EF.BC.89"></span>Cannot receive transferred files due to symlink（由于符号链接，无法接收传输的文件）</h3></div>
+<p>如果在功能正常的蓝牙连接上传入文件传输失败，则问题可能是由于文件传输路径中的符号链接造成的。日志中会显示这样的日志：
+</p>
+<pre>Jun 18 11:18:13 ember obexd[3338969]: open(/home/me/.cache/obexd/MOC740): Operation not permitted (1)
+</pre>
+<p>如果错误消息中显示的路径包含符号链接，则obexd默认情况下<a href="https://git.kernel.org/pub/scm/bluetooth/bluez.git/tree/obexd/plugins/filesystem.c#n90">不会接受它</a>。初始化时可以使用<code>obex.service</code><a href="#pg71f5edcc580c">用户服务</a>的<a href="#pg1a2ec25e3c0c">Drop-in file</a>覆盖该行为：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/systemd/user/obex.service.d/10-symlink.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+ExecStart=
+ExecStart=/usr/lib/bluetooth/obexd --symlinks</pre>
+<p>然后<a href="#pgd732b403250d">重新加载</a>调用用户的<i>systemd</i>管理器配置，并<a href="#pgdf6211f8fea3">重新启动</a><code>obex.service</code>用户单元。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E8.80.B3.E6.9C.BA.E5.92.8C.E9.BC.A0.E6.A0.87.E4.B9.8B.E9.97.B4.E7.9A.84.E5.B9.B2.E6.89.B0" id="耳机和鼠标之间的干扰"><span id=".E8.80.B3.E6.9C.BA.E5.92.8C.E9.BC.A0.E6.A0.87.E4.B9.8B.E9.97.B4.E7.9A.84.E5.B9.B2.E6.89.B0"></span>耳机和鼠标之间的干扰</h3></div>
+<p>如果您在同时使用蓝牙鼠标和键盘时遇到音频断断续续的问题，您可以尝试以下#23中提到的方法 <a href="https://bugs.launchpad.net/ubuntu/+source/bluez/+bug/424215">https://bugs.launchpad.net/ubuntu/+source/bluez/+bug/424215</a>
+</p>
+<pre># hciconfig hci0 lm ACCEPT,MASTER
+# hciconfig hci0 lp HOLD,SNIFF,PARK
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E8.93.9D.E7.89.99.E9.BC.A0.E6.A0.87.E5.8A.A8.E4.BD.9C.E5.BB.B6.E8.BF.9F" id="蓝牙鼠标动作延迟"><span id=".E8.93.9D.E7.89.99.E9.BC.A0.E6.A0.87.E5.8A.A8.E4.BD.9C.E5.BB.B6.E8.BF.9F"></span>蓝牙鼠标动作延迟</h3></div>
+<p>尝试编辑文件 <code>/var/lib/bluetooth/XX:XX:XX:XX:XX:XX/YY:YY:YY:YY:YY:YY/info</code> (<code>XX:XX:XX:XX:XX:XX</code>-您的蓝牙适配器MAC地址，<code>YY:YY:YY:YY:YY:YY</code> -您的鼠标MAC地址），并添加以下行：
+</p>
+<pre>[ConnectionParameters]
+MinInterval=6
+MaxInterval=9
+Latency=44
+Timeout=216
+</pre>
+<p>您可以通过运行<code>hcitool dev</code>命令查看本地适配器的MAC地址。您可以通过执行<code>hcitool con</code>命令查看当前连接的远程设备的MAC地址。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E6.8C.82.E8.B5.B7.2F.E4.BC.91.E7.9C.A0.E5.90.8E.E9.80.82.E9.85.8D.E5.99.A8.E6.B6.88.E5.A4.B1" id="挂起/休眠后适配器消失"><span id=".E6.8C.82.E8.B5.B7.2F.E4.BC.91.E7.9C.A0.E5.90.8E.E9.80.82.E9.85.8D.E5.99.A8.E6.B6.88.E5.A4.B1"></span>挂起/休眠后适配器消失</h3></div>
+<p>首先，查找适配器的供应商和产品ID。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsusb -tv</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/:  Bus 01.Port 1: Dev 1, Class=root_hub, Driver=xhci_hcd/12p, 480M
+    ID 1d6b:0002 Linux Foundation 2.0 root hub
+    ...
+    |__ Port 3: Dev 3, If 0, Class=Wireless, Driver=btusb, 12M
+        ID 8087:0025 Intel Corp. 
+    |__ Port 3: Dev 3, If 1, Class=Wireless, Driver=btusb, 12M
+        ID 8087:0025 Intel Corp. 
+    ...
+</pre>
+<p>在以上的例子中，供应商ID是8087，产品ID是0025。
+</p><p>然后，使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=usb_modeswitch">usb_modeswitch</a></span><sup><small>包</small></sup></span>重置你指定的适配器：
+</p>
+<pre># usb_modeswitch -R -v <i>vendor_ID</i> -p <i>product_ID</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_Problems_with_all_BLE_devices_on_kernel_.EF.BC.885.9.2B.E5.86.85.E6.A0.B8.E7.89.88.E6.9C.AC5.9.E4.BB.A5.E4.B8.8A.E6.89.80.E6.9C.89BLE.E8.AE.BE.E5.A4.87.E7.9A.84.E9.97.AE.E9.A2.98.EF.BC.89" id="Problems_with_all_BLE_devices_on_kernel_（5.9+内核版本5.9以上所有BLE设备的问题）"><span id="Problems_with_all_BLE_devices_on_kernel_.EF.BC.885.9.2B.E5.86.85.E6.A0.B8.E7.89.88.E6.9C.AC5.9.E4.BB.A5.E4.B8.8A.E6.89.80.E6.9C.89BLE.E8.AE.BE.E5.A4.87.E7.9A.84.E9.97.AE.E9.A2.98.EF.BC.89"></span>Problems with all BLE devices on kernel （5.9+内核版本5.9以上所有BLE设备的问题）</h3></div>
+<p>从v5.9开始，内核蓝牙堆栈尝试在BLE连接上使用链路层隐私。如果设备在配对后工作，但无法在重新启动或挂起后继续运行，可能是因为这个原因。
+</p><p>要解决<sup class="reference" id="cite_ref-3"><span class="cite-bracket">[</span>3<span class="cite-bracket">]</span></sup>此问题，请打开<code>/var/lib/bluetooth/<i>adapter_mac</i>/<i>device_mac</i>/info</code>删除以下行，然后重新启动<code>bluetooth.service</code>:
+</p>
+<pre>[IdentityResolvingKey]
+Key=...</pre>
+<p>请参阅Arch论坛上的<a href="https://bbs.archlinux.org/viewtopic.php?id=259954">相关讨论</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_Bluetooth_immediately_waking_up_suspend-to-idle_devices.EF.BC.88.E8.93.9D.E7.89.99.E7.AA.81.E7.84.B6.E5.94.A4.E9.86.92.E6.8C.82.E8.B5.B7.E7.9A.84.E7.A9.BA.E9.97.B2.E8.AE.BE.E5.A4.87.EF.BC.89" id="Bluetooth_immediately_waking_up_suspend-to-idle_devices（蓝牙突然唤醒挂起的空闲设备）"><span id="Bluetooth_immediately_waking_up_suspend-to-idle_devices.EF.BC.88.E8.93.9D.E7.89.99.E7.AA.81.E7.84.B6.E5.94.A4.E9.86.92.E6.8C.82.E8.B5.B7.E7.9A.84.E7.A9.BA.E9.97.B2.E8.AE.BE.E5.A4.87.EF.BC.89"></span>Bluetooth immediately waking up suspend-to-idle devices（蓝牙突然唤醒挂起的空闲设备）</h3></div>
+<p>在能够挂起到空闲 <a href="#pgf74f0234a0f8">suspend-to-idle/S2idle/S0ix/Modern Standby</a>的系统上，蓝牙控件将在睡眠期间保持启用状态。如果连接了蓝牙设备，这通常会导致系统在<a href="https://bugzilla.kernel.org/show_bug.cgi?id=200039">进入睡眠状态后立即唤醒</a>。
+</p><p>为了防止这种情况，你可以在启用睡眠模式前完全禁用蓝牙——安装T <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-utils">bluez-utils</a></span><sup><small>包</small></sup></span> 并创建此文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/bluetooth-disable-before-sleep.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Disable Bluetooth before going to sleep
+Before=sleep.target
+Before=suspend.target
+Before=hybrid-sleep.target
+Before=suspend-then-hibernate.target
+StopWhenUnneeded=yes
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+ExecStart=/usr/bin/bluetoothctl power off
+ExecStop=/usr/bin/bluetoothctl power on
+
+[Install]
+WantedBy=sleep.target
+WantedBy=suspend.target
+WantedBy=hybrid-sleep.target
+WantedBy=suspend-then-hibernate.target</pre>
+<p><a href="#pg6bfd324d34c9">启用</a>此服务并检查蓝牙设备在进入睡眠状态时是否断开连接，以及在唤醒系统后蓝牙何时恢复连接。
+</p><p>如果使用此解决方法，则使用蓝牙鼠标/键盘唤醒系统将不起作用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_.E6.8C.81.E7.BB.AD.E8.BF.9E.E6.8E.A5.2F.E6.96.AD.E5.BC.80.E4.B8.8ETP-LINK_UB400.E5.92.8CXbox.E6.89.8B.E6.9F.84.E7.9A.84.E8.BF.9E.E6.8E.A5" id="持续连接/断开与TP-LINK_UB400和Xbox手柄的连接"><span id=".E6.8C.81.E7.BB.AD.E8.BF.9E.E6.8E.A5.2F.E6.96.AD.E5.BC.80.E4.B8.8ETP-LINK_UB400.E5.92.8CXbox.E6.89.8B.E6.9F.84.E7.9A.84.E8.BF.9E.E6.8E.A5"></span>持续连接/断开与TP-LINK UB400和Xbox手柄的连接</h3></div>
+<p>使用以下设置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/bluetooth/main.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+[General
+JustWorksRepairing = always
+FastConnectable = true
+Class = 0x000100
+...
+[GATT]
+ReconnectIntervals=1,1,2,3,5,8,13,21,34,55
+AutoEnable=true
+...</pre>
+<p>然后<a href="#pgdf6211f8fea3">重新启用</a><code>bluetooth.service</code>.
+</p><p>你可以参阅<a href="https://github.com/atar-axis/xpadneo/issues/166">discussion on xpadneo</a> 但不需要xpadneo驱动程序
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg20f71a8eddbf_Mediatek_MT7921.E6.88.96MT7961.E5.9C.A8.E5.B8.A6.E6.9C.89windows.E7.9A.84.E5.8F.8C.E5.90.AF.E5.8A.A8.E7.B3.BB.E7.BB.9F.E4.B8.8A" id="Mediatek_MT7921或MT7961在带有windows的双启动系统上"><span id="Mediatek_MT7921.E6.88.96MT7961.E5.9C.A8.E5.B8.A6.E6.9C.89windows.E7.9A.84.E5.8F.8C.E5.90.AF.E5.8A.A8.E7.B3.BB.E7.BB.9F.E4.B8.8A"></span>Mediatek MT7921或MT7961在带有windows的双启动系统上</h3></div>
+<p>在双启动系统上，如果Windows和Linux的蓝牙固件版本不同，则蓝牙适配器在重新启动到Windows后无法工作。
+</p><p>防止这种情况的最佳方法是为每个操作系统更新最新版本的蓝牙驱动程序（尤其是固件）。 
+</p><p>如果找不到Windows的最新版本驱动程序（或固件），可以从Arch Linux复制最新的固件文件<code>/usr/lib/firmware/mediatek/BT_RAM_CODE_MT7961_1_2_hdr.bin.xz</code> 并提取到Windows(例如<code>C:\WINDOWS\system32\DRIVERS\</code>，可以在Windows上的设备管理器中找到固件文件路径）。
+</p>
+
+<!-- 
+NewPP limit report
+Cached time: 20260807082532
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.501 seconds
+Real time usage: 0.516 seconds
+Preprocessor visited node count: 2703/1000000
+Revision size: 49489/2097152 bytes
+Post‐expand include size: 41462/2097152 bytes
+Template argument size: 21771/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 795/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  165.483      1 -total
+ 13.61%   22.523    187 Template:Ic
+  7.21%   11.932     10 Template:Grey
+  6.41%   10.603      8 Template:App
+  5.03%    8.319     12 Template:注意
+  4.88%    8.082     34 Template:Pkg
+  3.55%    5.873     26 Template:Hc
+  3.47%    5.736     11 Template:META_Table_cell
+  2.10%    3.483      1 Template:Expansion
+  1.92%    3.178      1 Template:翻译状态
+-->
+<!-- Render ID 8e19320e-9239-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2865:|#|:idhash:canonical!zh-cn and timestamp 20260807082532 and revision id 35277. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

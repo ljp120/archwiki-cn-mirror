@@ -1,0 +1,123 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pge1381418960a">Java 运行环境字体配置</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Java_Runtime_Environment_fonts">Java Runtime Environment fonts</a>，最近一次同步于 2019-3-8，若英文版本有所<a href="https://wiki.archlinux.org/title/Java_Runtime_Environment_fonts?diff=0&amp;oldid=568119">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Java_Runtime_Environment_fonts_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg7830c089a224">Fonts</a></li>
+<li><a href="#pg5f4c7de3e275">Font configuration</a></li>
+<li><a href="#pg72c1a3127c6f">MS Fonts</a></li>
+<li><a href="#pgee37e74b8f6f">X Logical Font Description</a></li>
+</ul></div>
+<p>可能一部分人认为Java应用程序中的默认字体和字体的显示模式不大理想。下面有几种方法可以改进Oracle Java Runtime Environment (JRE)中的字体显示。这些方法可以单独使用，但是经过许多用户实践发现将它们组合使用可以获得更好的效果。
+</p><p>Java对于TrueType格式字体的支持似乎是最好的。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge1381418960a_.E6.8A.97.E9.94.AF.E9.BD.BF" id="抗锯齿"><span id=".E6.8A.97.E9.94.AF.E9.BD.BF"></span>抗锯齿</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge1381418960a_.E5.9F.BA.E7.A1.80.E8.AE.BE.E7.BD.AE" id="基础设置"><span id=".E5.9F.BA.E7.A1.80.E8.AE.BE.E7.BD.AE"></span>基础设置</h3></div>
+<p>Linux上的Oracle Java 1.6和OpenJDK提供了字体的<a href="https://en.wikipedia.org/wiki/Font_rasterization">抗锯齿</a>功能。使用这个功能，请将以下内容添加到<code>/etc/environment</code>:
+</p>
+<pre>_JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=<i>setting</i>'
+</pre>
+<p><code><i>setting</i></code> 是下面内容的其中一项:
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>设置值
+</th>
+<th>描述
+</th></tr>
+<tr>
+<td><code>off</code>, <code>false</code>, <code>default</code>
+</td>
+<td>不开启抗锯齿
+</td></tr>
+<tr>
+<td><code>on</code>
+</td>
+<td>全效抗锯齿
+</td></tr>
+<tr>
+<td><code>gasp</code>
+</td>
+<td>使用字体文件自带的配置信息
+</td></tr>
+<tr>
+<td><code>lcd</code>, <code>lcd_hrgb</code>
+</td>
+<td>为流行的显示器调整过的抗锯齿
+</td></tr>
+<tr>
+<td><code>lcd_hbgr</code>, <code>lcd_vrgb</code>, <code>lcd_vbgr</code>
+</td>
+<td>替代显示器的设置
+</td></tr></tbody></table>
+<p><code>gasp</code> 和<code>lcd</code> 设置在大部分情况下表现良好。
+</p><p>选择使用GTK的显示风格，请将下面的内容添加到.bashrc：
+</p>
+<pre>_JAVA_OPTIONS='-Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel'
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>所描述的Java选项仅适用于使用Java绘制GUI的应用程序，如Jdownloader，而不适用于仅使用Java作为后端的应用程序，如Openoffice.org和Matlab。</li>
+<li>“TrueType” 字体包含一个网格显示拟合和扫描转换过程的表(Grid-fitting And Scan-conversion Procedure “GASP”)，其中包含了字体作者对不同大小字体显示的建议。一些字号可以完全抗锯齿，一些只有部分提示，还有一些显示为位图。对于一些字号，上面的方法会组合使用。</li></ul>
+</div>
+<p>在运行之前，在命令行中指定其他的变量，可以尝试别的配置:
+</p>
+<pre>_JAVA_OPTIONS=<i>options</i> <i>executable</i> 
+</pre>
+<p>你需要重新登录使配置生效。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge1381418960a_OpenJDK_.E8.A1.A5.E4.B8.81" id="OpenJDK_补丁"><span id="OpenJDK_.E8.A1.A5.E4.B8.81"></span>OpenJDK 补丁</h3></div>
+<p>即使通过Java选项强制执行了抗锯齿，得到的抗锯齿效果也可能不如本机应用程序。可以通过OpenJDK的一个补丁来弥补，<a href="#pg89cb7b475cfb">AUR</a>提供了这个补丁:
+</p>
+<ul><li>修补后的 <b>OpenJDK7</b> 可用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jre7-openjdk-infinality/">jre7-openjdk-infinality</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> (<code><div class="archwiki-template-box archwiki-template-box-warning"><strong>模板错误：</strong> 您在尝试使用 <span style="display:inline; background-color:#ebf1f5; padding: 0.1em 0.2em; font-family:monospace,monospace; color:#222;">=</span> 标志吗？ 有关解决方法，请访问 <a href="#pg798f9ed1c056">Help:Template#Escape template-breaking characters</a>。</div></code>)</li>
+<li>修补后的 <b>OpenJDK8</b> 可用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jre8-openjdk-infinality/">jre8-openjdk-infinality</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup></li></ul>
+<p>修补后的版本从fontconfig获得FreeType类型字体的渲染和加载标志，而不是使用OpenJDK的方法。虽然这是一个<a href="#pge43ed3166d14">Infinality</a>包，但是补丁本身实际上并不依赖于<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fontconfig-Infinality/">fontconfig-Infinality</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>，因为只使用了普通的<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fontconfig">fontconfig</a></span><sup><small>包</small></sup></span> api。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge1381418960a_.E9.80.89.E6.8B.A9.E5.AD.97.E4.BD.93" id="选择字体"><span id=".E9.80.89.E6.8B.A9.E5.AD.97.E4.BD.93"></span>选择字体</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge1381418960a_TrueType_.E5.AD.97.E4.BD.93" id="TrueType_字体"><span id="TrueType_.E5.AD.97.E4.BD.93"></span>TrueType 字体</h3></div>
+<p>使一些应用程序知道所需字体的目录路径，那么这些Java应用程序就会使用特定的TrueType字体。TrueType字体安装在<code>/usr/share/fonts/TTF</code>目录中。将以下内容添加到<code>/etc/environment</code>以启用这些字体。
+</p>
+<pre>JAVA_FONTS=/usr/share/fonts/TTF
+</pre>
+<p>你需要重新登录使配置生效。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge1381418960a_.E4.BF.AE.E5.A4.8D.E4.B9.B1.E7.A0.81_.28For_JRE8.29" id="修复乱码_(For_JRE8)"><span id=".E4.BF.AE.E5.A4.8D.E4.B9.B1.E7.A0.81_.28For_JRE8.29"></span>修复乱码 (For JRE8)</h3></div>
+<p>将字体文件放在下面的目录下。如果目录不存在，则创建该目录。
+</p>
+<pre>/usr/lib/jvm/java-8-openjdk/jre/lib/fonts/fallback/
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807035230
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.095 seconds
+Real time usage: 0.101 seconds
+Preprocessor visited node count: 290/1000000
+Revision size: 3693/2097152 bytes
+Post‐expand include size: 4684/2097152 bytes
+Template argument size: 1065/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 6/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   29.825      1 -total
+ 13.62%    4.062     17 Template:Ic
+ 11.46%    3.417      1 Template:翻译状态
+ 11.10%    3.311      3 Template:Broken_package_link
+  7.75%    2.312      4 Template:Related
+  7.28%    2.171      1 Template:相关文章开始
+  6.62%    1.974      1 Template:Pkg
+  4.85%    1.445      3 Template:AUR
+  3.17%    0.946      1 Template:注意
+  3.07%    0.917      1 Template:META_Error
+-->
+<!-- Render ID 69aa5f0e-9213-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3322:|#|:idhash:canonical!zh-cn and timestamp 20260807035230 and revision id 33635. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

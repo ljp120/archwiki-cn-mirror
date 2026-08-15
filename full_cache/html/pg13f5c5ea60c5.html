@@ -1,0 +1,848 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg13f5c5ea60c5">游戏手柄</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Gamepad">Gamepad</a>，最近一次同步于 2024-11-14，若英文版本有所<a href="https://wiki.archlinux.org/title/Gamepad?diff=0&amp;oldid=819561">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Gamepad_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>如今，许多游戏手柄可以开箱即用，但由于不同应用程序对游戏手柄的支持差异很大，仍然存在许多潜在的问题和错误来源。
+</p>
+
+<p>Linux 有两种不同的游戏手柄输入系统——原始的Joystick接口和基于evdev的新接口。
+</p><p><code>/dev/input/jsX</code> 对应 Joystick API 接口而 <code>/dev/input/event*</code> 对应于 evdev 接口（这也包括其他输入设备，如鼠标和键盘。 这些设备的符号链接也可以在 <code>/dev/input/by-id/</code> 和 <code>/dev/input/by-path/</code> 中找到，其中原始的Joystick API 设备名称以   <code>-joystick</code> 结尾，而 evdev 设备名称则以 <code>-event-joystick</code> 结尾。
+</p><p>大多数新游戏默认使用 evdev 接口，因为它能够提供更详细的按钮和轴的信息，并且还支持力反馈。
+</p><p>许多应用使用 SDL 来访问游戏手柄。
+</p>
+<ul><li>SDL1 默认使用 evdev 接口， 但可以通过设置环境变量 <code>SDL_JOYSTICK_DEVICE=/dev/input/js0</code> 强制使用Joystick。</li>
+<li>SDL2 和 SDL3 默认在最常用的控制器上使用 hidapi，以获得原始访问权限。在其他控制器上，或者如果 hidapi 被禁用，则使用 evdev 代替。</li></ul>
+<p>SDL 本身提供了不同的 API，具体使用哪个取决于应用程序。它们的使用是相互独立的，并不是互相排斥的。
+</p>
+<ul><li><code>SDL_Joystick</code> 在所有版本中都被支持，并将 evdev（或 Joystick）事件与 SDL 自己的事件一一映射。</li>
+<li><code>SDL_GameController</code> 在 SDL2 中得到支持，提供了设备之间的标准化映射。 要支持一个控制器，它需要在一个数据库 <code>gamecontrollerdb.txt</code> 中建立 evdev:SDL 映射。 这个 API 在 SDL3 中被 <code>SDL_Gamepad</code> 替代。</li></ul>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg13f5c5ea60c5_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>除非你使用的是非常老旧的joystick，且它采用 <a href="https://en.wikipedia.org/wiki/Game_port">Gameport</a> 或专有的 USB 协议，否则只需要使用通用的 USB 人机接口设备（HID）模块即可。
+</p><p>要全面了解 Linux 中与joystick相关的所有模块， 你需要访问 Linux 内核源代码——特别是文档部分。 遗憾的是，官方内核软件包并不包含我们需要的内容。如果你已经下载了内核源代码，请查看 <code>Documentation/input/joydev/</code>. 你也可以通过访问点击 <a href="https://kernel.org/">kernel.org</a> 来浏览内核源代码树。方法是点击你所使用的内核版本旁边的“browse”链接（cgit——git 前端），然后点击页面顶部的“tree”链接。 或者，你也可以查看。<a href="https://docs.kernel.org/input/joydev/joystick.html">最新内核的文档</a>。
+</p><p>有些手柄需要特定的模块， 例如 Microsoft Sidewinder controllers (<code>sidewinder</code>)， 或者 Logitech digital controllers (<code>adi</code>). 许多老式手柄可以使用简单的 <code>analog</code> 模块。 如果你的手柄是通过声卡的游戏端口连接的，你需要加载声卡驱动程序。不过, 有些声卡, （如 Soundblaster Live）有专门的游戏端口驱动 (<code>emu10k1-gp</code>). 而一些老式的 ISA 声卡可能需要使用 <code>ns558</code> 模块，这是一个标准的游戏端口模块。
+</p><p>如你所见，有许多不同的模块都与在 Linux 中使用手柄有关，因此这里并未涵盖所有内容。详情请查看上述文档。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_.E5.8A.A0.E8.BD.BD.E6.A8.A1.E6.8B.9F.E8.AE.BE.E5.A4.87.E7.9A.84.E6.A8.A1.E5.9D.97" id="加载模拟设备的模块"><span id=".E5.8A.A0.E8.BD.BD.E6.A8.A1.E6.8B.9F.E8.AE.BE.E5.A4.87.E7.9A.84.E6.A8.A1.E5.9D.97"></span>加载模拟设备的模块</h3></div>
+<p>你需要为游戏端口加载一个模块 (如 <code>ns558</code>, <code>emu10k1-gp</code>, <code>cs461x</code>... )，为手柄加载一个模块(如<code>analog</code>, <code>sidewinder</code>, <code>adi</code>...), 最后加载内核手柄设备驱动 (<code>joydev</code>)。 你可以在启动时加载这些模块 或者用 <a href="#pg15804b343888">modprobe</a> 命令手动加载。<code>gameport</code> 模块应该会自动加载，因为它是其他模块的依赖项。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_USB_.E6.89.8B.E6.9F.84" id="USB_手柄"><span id="USB_.E6.89.8B.E6.9F.84"></span>USB 手柄</h3></div>
+<p>你需要让 USB 正常工作，然然后使用 modprobe 命令加载你的游戏手柄驱动，通常是  <code>usbhid</code>, 以及 <code>joydev</code>。
+如果你使用的是 USB 鼠标或键盘， <code>usbhid</code> 模块会自动加载， 时你只需要加载 <code>joydev</code> 模块即可。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果你的 Xbox 360 游戏手柄是通过 Play&amp;Charge USB 数据线连接的，它会在 <code>lsusb</code> 中显示，b但不会作为输入设备出现在  <code>/dev/input/js*</code>中。详情请参见 #Xbox 360 controller.</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg13f5c5ea60c5_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_.E6.B5.8B.E8.AF.95" id="测试"><span id=".E6.B5.8B.E8.AF.95"></span>测试</h3></div>
+<p>一旦模块加载完成，你应该能够找到一个新设备:<code>/dev/input/js0</code> 以及一个以 <code>-event-joystick</code> 结尾的文件，位于 <code>/dev/input/by-id</code> 目录下。 你可以通过 <code>cat</code> 命令查看这些设备是否正常工作——推动操纵杆、按下任意按键 - 应该能看到乱码输出，表明设备正在正常工作。
+</p><p>如果出现权限错误，请参阅 #设备权限.
+</p><p><a href="#pg39e5cd9380ff">Wine</a> 使用 SDL 来模拟 DirectInput 和 XInput，若不支持，则回退到 evdev 。你可以通过运行 <code>wine control joy.cpl</code>来测试。 对于 PlayStation 4 和 5 控制器，详见#Using with Wine.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_Joystick_API" id="Joystick_API">Joystick API</h4></div>
+<p>有很多应用程序可以用来测试这个旧的 API。, <code>jstest</code> (来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=joyutils">joyutils</a></span><sup><small>包</small></sup></span> ) 是其中最简单的。如果输出因为行太长而难以阅读，你也可以使用图形化工具。 KDE Plasma 在<i>系统设置 &gt; 输入和输出 &gt; 游戏控制器</i>中内置了一个测试工具。还有 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jstest-gtk-git/">jstest-gtk-git</a></span><sup><small>AUR</small></sup></span> 可供选择。
+</p><p>使用 <code>jstest</code> 非常简单， 只需运行 <code>jstest /dev/input/js0</code> 它会打印一行，显示所有摇杆的 (normalised to <code>{-32767,32767}</code>) 和按钮状态。
+</p><p>启动<code>jstest-gtk</code>后, 它会显示一个可用的游戏杆列表，你只需要选择一个设备，然后点击“属性”按钮。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_evdev_API" id="evdev_API">evdev API</h4></div>
+<p>'evdev' API 可以通过 <code>evtest</code> (来自<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=evtest">evtest</a></span><sup><small>包</small></sup></span>) 或 <code>evtest-qt</code> (来自<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/evtest-qt-git/">evtest-qt-git</a></span><sup><small>AUR</small></sup></span>)。
+</p><p>要测试设备上的震动反馈，可以使用 <code>fftest</code> (来自<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linuxconsole">linuxconsole</a></span><sup><small>包</small></sup></span>):
+</p>
+<pre>$ fftest /dev/input/by-id/usb-*event-joystick
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_SDL_APIs" id="SDL_APIs">SDL APIs</h4></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sdl-jstest-git/">sdl-jstest-git</a></span><sup><small>AUR</small></sup></span>. 如果连接了多个控制器，请使用 <code>sdl2-jstest --list</code> 来获取它们的 ID。
+</p><p>To test the <code>SDL_Joystick</code> API on device index 0:
+</p>
+<pre>$ sdl2-jstest --test 0
+</pre>
+<p>要测试设备索引为 0 的 <code>SDL_GameController</code> API:
+</p>
+<pre>$ sdl2-jstest --gamecontroller 0
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_HTML5_Gamepad_API" id="HTML5_Gamepad_API">HTML5 Gamepad API</h4></div>
+<p>访问 <a href="https://gamepad-tester.com/。">https://gamepad-tester.com/。</a> 目前，在 <a href="#pgad69d7c7a814">Chromium</a> 中支持测试震动和生成游戏手柄的可视化，但 <a href="#pg9b5d7fec8088">Firefox</a> 不支持。此外，从版本 107.0.5304.121-1 开始，Chromium 可以读取 Joystick 设备，但不能读取 evdev 设备。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_.E8.AE.BE.E7.BD.AE.E6.AD.BB.E5.8C.BA.E5.92.8C.E6.A0.A1.E5.87.86" id="设置死区和校准"><span id=".E8.AE.BE.E7.BD.AE.E6.AD.BB.E5.8C.BA.E5.92.8C.E6.A0.A1.E5.87.86"></span>设置死区和校准</h3></div>
+
+<p>如果你想设置（或完全移除）模拟输入的死区，你需要分别为 xorg（用于鼠标和键盘仿真）、Joystick API 和 evdev API 进行设置。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E5.9C.A8_Wine_.E4.B8.AD.E8.AE.BE.E7.BD.AE.E6.AD.BB.E5.8C.BA" id="在_Wine_中设置死区"><span id=".E5.9C.A8_Wine_.E4.B8.AD.E8.AE.BE.E7.BD.AE.E6.AD.BB.E5.8C.BA"></span>在 Wine 中设置死区</h4></div>
+<p>添加以下注册表项并将其设置为 <code>0</code> 到 <code>10000</code> (影响所有摇杆):
+</p>
+<pre>HKEY_CURRENT_USER\Software\Wine\DirectInput\DefaultDeadZone
+</pre>
+<p>Source: <a href="https://gitlab.winehq.org/wine/wine/-/wikis/Useful-Registry-Keys">Useful Registry Keys</a>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_Xorg_deadzones" id="Xorg_deadzones">Xorg deadzones</h4></div>
+<p>在 <code>/etc/X11/xorg.conf.d/51-joystick.conf</code> 中添加类似的一行（如果不存在，则需要创建）:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/51-joystick.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "InputClass"
+    Option "MapAxis1" "deadzone=1000"
+EndSection</pre>
+<p><code>1000</code> 是默认值， 你可以设置 <code>0</code> 到 {{<code>30000</code>之间的任何值。 To get the axis number see the "Testing Your Configuration" section of this article.
+If you already have an option with a specific axis just type in the <code>deadzone=value</code> at the end of the parameter separated by a space.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_Joystick_API_.E6.AD.BB.E5.8C.BA.E5.92.8C.E6.A0.A1.E5.87.86" id="Joystick_API_死区和校准"><span id="Joystick_API_.E6.AD.BB.E5.8C.BA.E5.92.8C.E6.A0.A1.E5.87.86"></span>Joystick API 死区和校准</h4></div>
+<p>最简单的方法是使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jstest-gtk-git/">jstest-gtk-git</a></span><sup><small>AUR</small></sup></span>中的<i>jstest-gtk</i> 。 选择你想编辑的游戏手柄，点击 <i>Properties</i>（属性）按钮。 在新窗口中，点击 <i>Calibration</i>（校准）按钮 (<b>不要点击</b> <i>Start Calibration</i>). 然后，你可以设置 <code>CenterMin</code> 和 <code>CenterMax</code> 值，这两个值控制中心死区;  <code>RangeMin</code> 和 <code>RangeMax</code>，值控制扳机死区的末端。 请注意，校准设置会在应用程序打开设备时生效，因此你需要重新启动你的游戏或测试应用程序，才能看到更新后的校准设置。
+</p><p>在设置完死区后，你还可以创建一个 <a href="#pge009209061ac">udev</a> 规则，使所有更改永久生效：
+</p><p>首先，获取手柄的供应商 ID（将<code><i>X</i></code>替换为手柄编号，通常为<code>0</code>）
+</p>
+<pre>$ udevadm info -q property --property ID_VENDOR_ID --value /dev/input/js<i>X</i>
+</pre>
+<p>Also grab the model id:
+</p>
+<pre>$ udevadm info -q property --property ID_MODEL_ID --value /dev/input/js<i>X</i>
+</pre>
+<p>如果上述命令的输出为空，可能是因为控制器是通过蓝牙连接的，因此这些唯一属性只能在父设备上看到。为避免这种情况，您可以尝试运行以下命令查找其他唯一属性：
+</p>
+<pre>$ udevadm info -a /dev/input/js<i>X</i>
+</pre>
+<p>这将列出您设备（及其父设备）所有可用的属性。例如，如果您的操纵杆的父设备具有属性 <code>ATTRS{uniq}=="a0:b1:c2:d3:e4:f5"</code>, 或者可能同时具有 <code>ATTRS{idVendor}=="054c"</code> 和 <code>ATTRS{idProduct}=="09cc"</code>, 那么您可以在下面的 <i>udev</i> 规则中使用这些属性来替代 <code>ENV{ID_VENDOR_ID} </code> 和 <code>ENV{ID_MODEL_ID} </code>
+</p><p>您也可以同时使用这两条规则，只需用换行将它们分开。
+</p><p>总之，现在使用 jscal 来输出手柄的新校准设置：
+</p>
+<pre>$ jscal -p /dev/input/js<i>X</i>
+</pre>
+<p>现在，使用您获得的值修改这个 <i>udev</i> 规则：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/85-jscal-custom-calibration.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", KERNEL=="js[0-9]*", ENV{ID_VENDOR_ID}=="054c", ENV{ID_MODEL_ID}=="09cc", RUN+="/usr/bin/jscal -s 1,1,1,1 /dev/input/js%n"</pre>
+<p>这条规则将在您连接具有供应商 ID 为 <code>054c</code> 和型号 ID 为 <code>09cc</code> 的手柄时，自动运行 <code>/usr/bin/jscal -s 1,1,1,1 /dev/input/js%n</code>。其中的 <code>/dev/input/js%n</code> 部分是必需的，用于自动确定正确的摇杆，因此请<b>不要删除它</b>。
+</p><p>最后, <a href="#pge009209061ac">加载</a>新的 <i>udev</i> 规则.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_evdev_API_.E6.AD.BB.E5.8C.BA.E5.92.8C.E6.A0.A1.E5.87.86" id="evdev_API_死区和校准"><span id="evdev_API_.E6.AD.BB.E5.8C.BA.E5.92.8C.E6.A0.A1.E5.87.86"></span>evdev API 死区和校准</h4></div>
+<pre><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linuxconsole">linuxconsole</a></span><sup><small>包</small></sup></span> 中的<i>evdev-joystick</i>工具 可以用来查看和更改  <code>evdev</code> 设备的死区。
+</pre>
+<p>查看设备配置：
+</p>
+<pre>$ evdev-joystick --showcal /dev/input/by-id/usb-*-event-joystick
+</pre>
+<p>要更改某个摇杆的死区，可以使用类似以下的命令：
+</p>
+<pre>$ evdev-joystick --evdev /dev/input/by-id/usb-*-event-joystick --axis 0 --deadzone 0
+</pre>
+<p>要同时为所有摇杆设置相同的死区，请省略<code>--axis 0</code>选项。
+</p><p>使用 udev 规则文件可以在控制器连接时自动设置这些参数。
+</p><p>请注意，在内核中，该值被称为 <code>flatness</code>，并通过 <code>EVIOCSABS</code> <code>ioctl</code> 来设置。
+</p><p>默认配置与此类似：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ evdev-joystick --showcal /dev/input/by-id/usb-Madcatz_Saitek_Pro_Flight_X-55_Rhino_Stick_G0000090-event-joystick</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Supported Absolute axes:
+   Absolute axis 0x00 (0) (X Axis) (min: 0, max: 65535, flatness: 4095 (=6.25%), fuzz: 255)
+   Absolute axis 0x01 (1) (Y Axis) (min: 0, max: 65535, flatness: 4095 (=6.25%), fuzz: 255)
+   Absolute axis 0x05 (5) (Z Rate Axis) (min: 0, max: 4095, flatness: 255 (=6.23%), fuzz: 15)
+   Absolute axis 0x10 (16) (Hat zero, x axis) (min: -1, max: 1, flatness: 0 (=0.00%), fuzz: 0)
+   Absolute axis 0x11 (17) (Hat zero, y axis) (min: -1, max: 1, flatness: 0 (=0.00%), fuzz: 0)</pre>
+<p>而更合理的设置应该是这样的（其他轴重复）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ evdev-joystick --evdev /dev/input/by-id/usb-Madcatz_Saitek_Pro_Flight_X-55_Rhino_Stick_G0000090-event-joystick --axis 0 --deadzone 512</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Event device file: /dev/input/by-id/usb-Madcatz_Saitek_Pro_Flight_X-55_Rhino_Stick_G0000090-event-joystick
+ Axis index to deal with: 0
+ New dead zone value: 512
+ Trying to set axis 0 deadzone to: 512
+   Absolute axis 0x00 (0) (X Axis) Setting deadzone value to : 512
+ (min: 0, max: 65535, flatness: 512 (=0.78%), fuzz: 255)</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_xboxdrv_.E6.AD.BB.E5.8C.BA.E5.92.8C.E6.A0.A1.E5.87.86" id="xboxdrv_死区和校准"><span id="xboxdrv_.E6.AD.BB.E5.8C.BA.E5.92.8C.E6.A0.A1.E5.87.86"></span>xboxdrv 死区和校准</h4></div>
+<p>创建虚拟 Xbox 360 控制器的示例命令，<code>Y1</code>轴的死区设置为<code>4000</code>,，最小可读值为<code>-32768</code> ，中心点为<code>128</code>，最大值为<code>29000</code>。
+</p>
+<pre># xboxdrv --deadzone 4000 --calibration Y1=-32768:128:29000
+</pre>
+<p>更多选项请参见<span class="plainlinks archwiki-template-man" title="$ man 1 xboxdrv"><a href="https://manned.org/man/xboxdrv#head6">xboxdrv(1) § AXIS FILTER</a></span>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_.E7.A6.81.E7.94.A8.E6.91.87.E6.9D.86.E6.8E.A7.E5.88.B6.E9.BC.A0.E6.A0.87" id="禁用摇杆控制鼠标"><span id=".E7.A6.81.E7.94.A8.E6.91.87.E6.9D.86.E6.8E.A7.E5.88.B6.E9.BC.A0.E6.A0.87"></span>禁用摇杆控制鼠标</h3></div>
+<p>如果您想使用手柄玩游戏，您可能需要禁用它对鼠标光标的操控。
+</p><p>最简单的方法是禁用<a href="#pg712e4adaddad">桌面环境</a>设置中的鼠标设备。否则，编辑  <code>/etc/X11/xorg.conf.d/51-joystick.conf</code>（如果不存在，可以创建），使其内容如下所示：
+</p><p><br/>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/51-joystick.conf </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "InputClass"
+        Identifier "joystick catchall"
+        MatchIsJoystick "on"
+        MatchDevicePath "/dev/input/event*"
+        Driver "joystick"
+        <b>Option "StartKeysEnabled" "False"</b>
+        <b>Option "StartMouseEnabled" "False"</b>
+EndSection</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_.E4.BD.BF.E7.94.A8.E6.B8.B8.E6.88.8F.E6.89.8B.E6.9F.84.E5.8F.91.E9.80.81.E9.94.AE.E7.9B.98.E6.8C.89.E9.94.AE" id="使用游戏手柄发送键盘按键"><span id=".E4.BD.BF.E7.94.A8.E6.B8.B8.E6.88.8F.E6.89.8B.E6.9F.84.E5.8F.91.E9.80.81.E9.94.AE.E7.9B.98.E6.8C.89.E9.94.AE"></span>使用游戏手柄发送键盘按键</h3></div>
+<p>有几个程序可以将游戏手柄按钮映射到键盘按键：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qjoypad/">qjoypad</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=antimicrox">antimicrox</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sc-controller/">sc-controller</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=steam">steam</a></span><sup><small>包</small></sup></span> - see <a href="#pg95e65bdea0f3">Steam#Steam Input</a></li></ul>
+<p>所有操作都能正常工作，无需额外的 X.org 配置。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_Xorg_.E9.85.8D.E7.BD.AE.E7.A4.BA.E4.BE.8B" id="Xorg_配置示例"><span id="Xorg_.E9.85.8D.E7.BD.AE.E7.A4.BA.E4.BE.8B"></span>Xorg 配置示例</h4></div>
+<p>对于很少重启 Xorg 的系统来说，这是一个很好的解决方案，因为它是静态配置，只在 X 启动时加载。 示例在<a href="#pg559d0d1281b7">Kodi</a>媒体 PC 上运行，使用 Logitech Cordless RumblePad 2 控制。 由于 d-pad（即“十字方向键”）被识别为另一个轴的问题，使用了 <a href="#pg19950cc76589">Joy2Key</a> 作为解决方法。由于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kodi">kodi</a></span><sup><small>包</small></sup></span>  11.0 版本 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/joy2key/">joy2key</a></span><sup><small>AUR</small></sup></span>  1.6.3-1 版本 之后，这种设置不再有效，因此创建了以下配置，允许 Xorg 处理摇杆事件。
+</p><p>首先, <a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xf86-input-joystick/">xf86-input-joystick</a></span><sup><small>AUR</small></sup></span> 。 然后，创建一个 X 配置文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/51-joystick.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "InputClass"
+  Identifier "Joystick hat mapping"
+  Option "StartKeysEnabled" "True"
+  #MatchIsJoystick "on"
+  Option "MapAxis5" "keylow=113 keyhigh=114"
+  Option "MapAxis6" "keylow=111 keyhigh=116"
+ EndSection</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>MatchIsJoystick "on"</code> 这一行似乎不是必需的，但您可能需要取消注释以确保配置能够正常工作。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_.E6.B8.B8.E6.88.8F.E6.89.8B.E6.9F.84.E6.8C.89.E9.92.AE.E9.87.8D.E6.96.B0.E6.98.A0.E5.B0.84.E5.8F.8A.E6.9B.B4.E5.A4.9A.E9.85.8D.E7.BD.AE" id="游戏手柄按钮重新映射及更多配置"><span id=".E6.B8.B8.E6.88.8F.E6.89.8B.E6.9F.84.E6.8C.89.E9.92.AE.E9.87.8D.E6.96.B0.E6.98.A0.E5.B0.84.E5.8F.8A.E6.9B.B4.E5.A4.9A.E9.85.8D.E7.BD.AE"></span>游戏手柄按钮重新映射及更多配置</h3></div>
+<p>通过某些程序，您还可以进一步配置游戏手柄，包括以下潜在功能：
+</p>
+<ul><li>重新映射按钮和轴
+<ul><li>为不同游戏分配映射配置文件</li></ul></li>
+<li>模拟不同类型的游戏手柄。某些软件允许将游戏手柄模拟为另一种类型的控制器。比如，很多程序和游戏在识别 Xbox 360 控制器时表现更好，因为它是非常常见的控制器，且许多游戏已经在其上进行过优化和测试</li>
+<li>额外功能，如宏、屏幕显示等</li></ul>
+<p>软件列表:
+</p>
+<ul><li><b>SC Controller</b> — Open-source software supporting button remapping and Xbox 360 Controller emulation.</li></ul>
+<dl><dd><a href="https://github.com/Ryochan7/sc-controller">https://github.com/Ryochan7/sc-controller</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sc-controller/">sc-controller</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg95e65bdea0f3">Steam</a></b> — Proprietary storefront whose client supports rebinding gamepad inputs via <a href="https://partner.steamgames.com/doc/features/steam_controller">Steam Input</a>. When enabled, Steam exposes a Steam Controller to games that opt into the Steam Input API, as well as an emulated Xbox 360 Controller to games using traditional gamepad APIs. See <a href="#pg95e65bdea0f3">Steam#Steam Input</a> for further details.</li></ul>
+<dl><dd><a href="https://store.steampowered.com/about/">https://store.steampowered.com/about/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=steam">steam</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg6a83114351e6">xboxdrv</a></b> — Xbox 360 controller driver which supports emulating the controller from a different input controller. See #Mimic Xbox 360 controller. It's also a flexible option for remapping and calibration.</li></ul>
+<dl><dd><a href="https://github.com/xiota/xboxdrv">https://github.com/xiota/xboxdrv</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xboxdrv/">xboxdrv</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E5.9C.A8_SDL2_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.8A.E9.87.8D.E6.96.B0.E6.98.A0.E5.B0.84.E6.B8.B8.E6.88.8F.E6.89.8B.E6.9F.84" id="在_SDL2_应用程序上重新映射游戏手柄"><span id=".E5.9C.A8_SDL2_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.8A.E9.87.8D.E6.96.B0.E6.98.A0.E5.B0.84.E6.B8.B8.E6.88.8F.E6.89.8B.E6.9F.84"></span>在 SDL2 应用程序上重新映射游戏手柄</h4></div>
+<p>可以通过使用  <code>SDL_GAMECONTROLLERCONFIG</code> 环境变量重新映射 SDL2 应用程序中的游戏手柄。每行配置包括游戏手柄的 GUID、名称、按钮/轴映射以及平台。要获取控制器的 GUID，可以通过安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sdl-jstest-git/">sdl-jstest-git</a></span><sup><small>AUR</small></sup></span> 然后运行 <code>sdl2-jstest --list</code> 来获取。
+</p><p>例如，要映射具有不同 GUID 的 Microsoft Xbox 360 控制器
+For example, to map Microsoft Xbox 360 controllers with different GUIDs:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bashrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">export SDL_GAMECONTROLLERCONFIG="
+030000005e0400008e02000001000000,Microsoft Xbox 360,a:b0,b:b1,back:b6,dpdown:h0.1,dpleft:h0.2,dpright:h0.8,dpup:h0.4,leftshoulder:b4,leftstick:b9,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b10,righttrigger:a5,rightx:a3,righty:a4,start:b7,x:b2,y:b3,platform:Linux,
+030000005e0400008e02000004010000,Microsoft Xbox 360,a:b0,b:b1,back:b6,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b8,leftshoulder:b4,leftstick:b9,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b10,righttrigger:a5,rightx:a3,righty:a4,start:b7,x:b2,y:b3,platform:Linux,
+"</pre>
+<p>一些应用程序从 <code>gamecontrollerdb.txt</code> 文件中提取映射信息。可以通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/controllermap/">controllermap</a></span><sup><small>AUR</small></sup></span> 以图形方式进行编辑。最新的数据库可以在以下位置找到<a href="https://github.com/gabomdq/SDL_GameControllerDB">[1]</a>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E6.A8.A1.E6.8B.9F_Xbox_360_.E6.8E.A7.E5.88.B6.E5.99.A8" id="模拟_Xbox_360_控制器"><span id=".E6.A8.A1.E6.8B.9F_Xbox_360_.E6.8E.A7.E5.88.B6.E5.99.A8"></span>模拟 Xbox 360 控制器</h4></div>
+<p>xboxdrv 可以通过 <code>--mimic-xpad</code> 选项将任何控制器模拟为 Xbox 360 控制器。这对于那些原生支持 Xbox 360 控制器，但在检测或使用其他游戏手柄时出现问题的游戏来说，可能会很有用。
+</p><p>你可以使用以下命令来模拟 Xbox 360 控制器：
+</p>
+<pre>$ xboxdrv --evdev /dev/input/event* --evdev-absmap ABS_RX=X2 --evdev-keymap BTN_THUMB2=a,BTN_THUMB=b,BTN_PINKIE=rt --mimic-xpad
+</pre>
+<p>上面的示例是不完整的。它仅映射了一个轴和三个按钮用于演示。可以使用 <code>xboxdrv --help-button</code> 查看 Xbox 控制器按钮和轴的名称，并通过扩展上述命令来相应地绑定它们。轴映射应放在 <code>--evdev-absmap</code> 后面，按钮映射应放在 <code>--evdev-keymap</code>  后面（以逗号分隔的列表；不带空格）。
+</p><p>默认情况下，xboxdrv 会将所有事件输出到终端。你可以使用这一功能来测试映射是否正确。如果想保持静默，可以附加  <code>--silent</code>  选项。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg13f5c5ea60c5_.E7.89.B9.E5.AE.9A.E8.AE.BE.E5.A4.87" id="特定设备"><span id=".E7.89.B9.E5.AE.9A.E8.AE.BE.E5.A4.87"></span>特定设备</h2></div>
+<p>虽然大多数游戏手柄，尤其是基于 USB 的游戏手柄都能正常工作，但有些游戏手柄可能需要使用其他驱动程序（或使用其他驱动程序会有更好的效果）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_.E8.B7.B3.E8.88.9E.E6.AF.AF" id="跳舞毯"><span id=".E8.B7.B3.E8.88.9E.E6.AF.AF"></span>跳舞毯</h3></div>
+<p>大多数舞毯垫应该都能正常工作。然而，一些舞蹈毯，尤其是通过适配器从游戏主机连接的舞蹈毯，往往会将方向按钮映射为轴按钮。这会导致无法同时按下左-右或上-下方向键。对于 xpad 识别的设备，可以通过模块选项修复此行为：
+</p>
+<pre># modprobe -r xpad
+# modprobe xpad dpad_to_buttons=1
+</pre>
+<p>如果这样做无效，你可以尝试使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/axisfix-git/">axisfix-git</a></span><sup><small>AUR</small></sup></span> 或者修补 <code>joydev</code> 内核模块（<a href="https://github.com/adiel-mittmann/dancepad）。">https://github.com/adiel-mittmann/dancepad）。</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_.E7.BD.97.E6.8A.80_Thunderpad_Digital" id="罗技_Thunderpad_Digital"><span id=".E7.BD.97.E6.8A.80_Thunderpad_Digital"></span>罗技 Thunderpad Digital</h3></div>
+<p>如果使用 <code>analog</code>模块，Logitech Thunderpad Digital 将无法显示所有按钮。请使用该控制器专用的 <code>adi</code> 模块。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_.E4.BB.BB.E5.A4.A9.E5.A0.82GAMECUBE.E6.8E.A7.E5.88.B6.E5.99.A8" id="任天堂GAMECUBE控制器"><span id=".E4.BB.BB.E5.A4.A9.E5.A0.82GAMECUBE.E6.8E.A7.E5.88.B6.E5.99.A8"></span>任天堂GAMECUBE控制器</h3></div>
+<p>Dolphin 模拟器的 <a href="https://wiki.dolphin-emu.org/index.php?title=How_to_use_the_Official_GameCube_Controller_Adapter_for_Wii_U_in_Dolphin">Wiki</a> 上有一页解释了如何使用官方的 Nintendo USB 适配器连接 GameCube 控制器。如果将开关设置为“Wii U”，此配置也适用于 Mayflash 控制器适配器。
+</p><p>对于其他应用程序，你可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wii-u-gc-adapter/">wii-u-gc-adapter</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_.E4.BB.BB.E5.A4.A9.E5.A0.82_Switch_Pro_.E6.8E.A7.E5.88.B6.E5.99.A8.E5.92.8C_Joy-Con_.E6.8E.A7.E5.88.B6.E5.99.A8" id="任天堂_Switch_Pro_控制器和_Joy-Con_控制器"><span id=".E4.BB.BB.E5.A4.A9.E5.A0.82_Switch_Pro_.E6.8E.A7.E5.88.B6.E5.99.A8.E5.92.8C_Joy-Con_.E6.8E.A7.E5.88.B6.E5.99.A8"></span>任天堂 Switch Pro 控制器和 Joy-Con 控制器</h3></div>
+<p>这些控制器从内核版本 5.16 开始得到支持。Switch Online 的 NES、SNES 和 N64 控制器从内核版本 6.12 开始也得到支持。
+</p><p>对于较早的内核版本，可以安装 <a href="#pgeae7d2a5f976">DKMS</a> 模块 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hid-nintendo-nso-dkms/">hid-nintendo-nso-dkms</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E5.B0.86_Joy-Con_.E4.BD.9C.E4.B8.BA.E4.B8.80.E4.B8.AA.E8.AE.BE.E5.A4.87.E4.BD.BF.E7.94.A8" id="将_Joy-Con_作为一个设备使用"><span id=".E5.B0.86_Joy-Con_.E4.BD.9C.E4.B8.BA.E4.B8.80.E4.B8.AA.E8.AE.BE.E5.A4.87.E4.BD.BF.E7.94.A8"></span>将 Joy-Con 作为一个设备使用</h4></div>
+<p>hid-nintendo 内核驱动将两个 Joy-Con 控制器处理为两个独立的设备。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/joycond-git/">joycond-git</a></span><sup><small>AUR</small></sup></span> 是一个用户空间守护进程，它使用 uinput 将两个内核中的 Joy-Con evdev 设备合并为一个虚拟输入设备。当守护进程处于活动状态时，Switch 控制器将进入伪配对模式，LED 灯会开始闪烁。按住扳机可以用来配对控制器并使其可用。要将两个 Joy-Con 配对在一起，按下每个 Joy-Con 上的扳机。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E5.9C.A8_SDL2_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.AD.E4.BD.BF.E7.94.A8.E4.BD.8D.E7.BD.AE.E5.B8.83.E5.B1.80" id="在_SDL2_应用程序中使用位置布局"><span id=".E5.9C.A8_SDL2_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.AD.E4.BD.BF.E7.94.A8.E4.BD.8D.E7.BD.AE.E5.B8.83.E5.B1.80"></span>在 SDL2 应用程序中使用位置布局</h4></div>
+<p>默认情况下，SDL2 会根据游戏手柄的标签映射 Nintendo 控制器上的按钮，而不是根据按钮的位置。这是通过 <a href="https://github.com/libsdl-org/SDL/blob/b886f4c6c97f3d37d65f65afdb6bd68148fd4de6/include/SDL_hints.h#L508">SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS</a> 设置启用的，对于已知使用 Nintendo 按钮布局的控制器<a href="https://github.com/libsdl-org/SDL/blob/7c05ea0a0ef075527fd745215d5d8a77f667bc21/src/joystick/SDL_gamecontrollerdb.h">[2]</a> ，该设置默认为 <code>1</code> ，而对于其他控制器<a href="https://github.com/libsdl-org/SDL/blob/ec58a817ef66efc23d7d6e964844317673b23ead/src/joystick/SDL_gamecontroller.c#L1575-L1582">[3]</a>则默认为 <code>0</code>。可以通过设置 <code>SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS</code> <a href="#pg4989d4f46056">环境变量</a>来覆盖所有控制器的此行为。例如，如果不希望使用 Nintendo 的 A/B 和 X/Y 按钮布局，可以设置 <code>SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS=0</code>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_Steam_.E6.8E.A7.E5.88.B6.E5.99.A8" id="Steam_控制器"><span id="Steam_.E6.8E.A7.E5.88.B6.E5.99.A8"></span>Steam 控制器</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>内核 4.18 <a href="https://lore.kernel.org/lkml/20180416122703.22306-1-rodrigorivascosta@gmail.com/">提供了一个内核驱动</a>程序，可以在没有 <a href="#pg95e65bdea0f3">Steam</a> 的情况下将 Steam 控制器作为有线/无线控制器输入设备使用。</div>
+<p><a href="#pg95e65bdea0f3">Steam</a> 客户端会识别控制器，并在 Steam 运行时提供键盘/鼠标/游戏手柄仿真。要使游戏手柄仿真正常工作，需要启用并确保 Steam 游戏内覆盖层处于工作状态。如果在安装并运行 Steam 后控制器无法立即工作，可能需要以 root 权限运行 <code>udevadm trigger</code>，或者拔出并重新插入适配器。如果仍然无效，尝试在适配器插入的状态下重启计算机。
+</p><p>如果你使用的是通过 Bluetooth LE 连接的控制器，请确保用户属于 <code>input</code>  组。
+</p><p>如果你无法让 Steam 控制器正常工作，请参见 #Steam 控制器无法配对。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>If you do not use the <a href="#pg4aa1bc29e76a">Steam runtime</a>, you might actually need to disable the overlay for the controller to work in certain games (Rocket Wars, Rocket League, Binding of Isaac, etc.). Right click on a game in your library, select "Properties", and uncheck "Enable Steam Overlay".</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_Xbox_360_.E6.8E.A7.E5.88.B6.E5.99.A8" id="Xbox_360_控制器"><span id="Xbox_360_.E6.8E.A7.E5.88.B6.E5.99.A8"></span>Xbox 360 控制器</h3></div>
+<p>有线和无线（使用 <i>Xbox 360 Wireless Receiver for Windows</i>）控制器都受到 <code>xpad</code>  内核模块的支持，并且应该无需额外的包即可正常工作。请注意，使用 Play&amp;Charge USB 数据线连接无线 Xbox 360 控制器是无法正常工作的。该数据线仅用于充电，不能通过线缆传输任何输入数据。
+</p><p>有报告指出，默认的 xpad 驱动程序在某些较新的有线和无线控制器上存在一些问题，例如：
+</p>
+<ul><li>incorrect button mapping. (<a href="https://github.com/ValveSoftware/steam-for-linux/issues/95#issuecomment-14009081">discussion in Steam bugtracker</a>)</li>
+<li>not-working sync. (<a href="https://bbs.archlinux.org/viewtopic.php?id=156028">discussion in Arch Forum</a>)</li>
+<li>all four LEDs keep blinking, but controller works. TLP's USB autosuspend is one sure cause of this issue with wireless controllers. See below for fix.</li></ul>
+<p>如果你使用 <a href="#pg10f1d5521407">TLP</a> 电源管理工具，可能会遇到与 Microsoft 无线适配器的连接问题（例如，适配器连接几秒钟后指示灯熄灭，且控制器连接尝试失败，四个 LED 持续闪烁，但控制器仍然可以正常工作）。这是由于 TLP 的 USB 自动挂起功能导致的，解决方法是将 Microsoft 无线适配器的设备 ID 添加到 TLP 黑名单中（要检查设备 ID，可以运行 <code>tlp-stat -u</code>；对于原版的 MS 无线适配器，只需将 <code>USB_DENYLIST="045e:0719"</code> 添加到 <code>/etc/tlp.conf</code>中）。有关更多细节，请查看  <a href="https://linrunner.de/en/tlp/docs/tlp-configuration.html#usb">TLP 配置</a>。
+</p><p>如果你遇到此类问题，可以改为使用 <a href="#pg13f5c5ea60c5_xboxdrv">#xboxdrv</a> 作为默认的 <code>xpad</code> 驱动程序。
+</p><p>为了通过蓝牙连接，请添加以下<a href="#pgec0856954f1c">内核参数</a>：<code>bluetooth.disable_ertm=1</code>。
+</p><p>如果你在游戏中遇到震动功能无法正常工作的情况，可能需要设置环境变量 <code>SDL_JOYSTICK_HIDAPI=0</code>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_xboxdrv" id="xboxdrv">xboxdrv</h4></div>
+
+<p><br/>
+<a href="https://github.com/xiota/xboxdrv">xboxdrv</a> is an alternative to <code>xpad</code> which provides more functionality and might work better with certain controllers. It works in userspace and can be launched as system service. 
+</p><p>Install it with the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xboxdrv/">xboxdrv</a></span><sup><small>AUR</small></sup></span> package. Then <a href="#pg073992cb666a">start</a>/<a href="#pg6bfd324d34c9">enable</a> <code>xboxdrv.service</code>.
+</p><p>If you have issues with the controller being recognized but not working in steam games or working but with incorrect mappings, it may be required to modify you configuration as such:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/xboxdrv</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[xboxdrv]
+silent = true
+device-name = "Xbox 360 Wireless Receiver"
+mimic-xpad = true
+deadzone = 4000
+
+[xboxdrv-daemon]
+dbus = disabled</pre>
+<p>Then <a href="#pgdf6211f8fea3">restart</a> <code>xboxdrv.service</code>.
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg13f5c5ea60c5_.E5.A4.9A.E4.B8.AA.E6.8E.A7.E5.88.B6.E5.99.A8" id="多个控制器"><span id=".E5.A4.9A.E4.B8.AA.E6.8E.A7.E5.88.B6.E5.99.A8"></span>多个控制器</h5></div>
+<p>xboxdrv 支持多种控制器，但需要在 <code>/etc/default/xboxdrv</code> 中进行配置。对于每个额外的控制器，添加一行 <code>next-controller = true</code>。例如，当使用 4 个控制器时，需要添加 3 次：
+</p>
+<pre>[xboxdrv]
+silent = true
+next-controller = true
+next-controller = true
+next-controller = true
+[xboxdrv-daemon]
+dbus = disabled</pre>
+<p>然后 <a href="#pgdf6211f8fea3">restart</a> <code>xboxdrv.service</code>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E4.BD.BF.E7.94.A8.E9.80.9A.E7.94.A8.2F.E5.85.8B.E9.9A.86.E6.8E.A7.E5.88.B6.E5.99.A8" id="使用通用/克隆控制器"><span id=".E4.BD.BF.E7.94.A8.E9.80.9A.E7.94.A8.2F.E5.85.8B.E9.9A.86.E6.8E.A7.E5.88.B6.E5.99.A8"></span>使用通用/克隆控制器</h4></div>
+<p>一些克隆游戏手柄可能需要特定的初始化序列才能正常工作（<a href="https://superuser.com/a/1380235">Super User answer</a>）。为此，你应该以 root 用户身份运行以下 Python 脚本：
+</p>
+<pre>#!/usr/bin/env python3
+
+import usb.core
+
+dev = usb.core.find(idVendor=0x045e, idProduct=0x028e)
+
+if dev is None:
+    raise ValueError('Device not found')
+else:
+    dev.ctrl_transfer(0xc1, 0x01, 0x0100, 0x00, 0x14)</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_Xbox_.E6.97.A0.E7.BA.BF.E6.8E.A7.E5.88.B6.E5.99.A8_.2F_Xbox_One_.E6.97.A0.E7.BA.BF.E6.8E.A7.E5.88.B6.E5.99.A8" id="Xbox_无线控制器_/_Xbox_One_无线控制器"><span id="Xbox_.E6.97.A0.E7.BA.BF.E6.8E.A7.E5.88.B6.E5.99.A8_.2F_Xbox_One_.E6.97.A0.E7.BA.BF.E6.8E.A7.E5.88.B6.E5.99.A8"></span>Xbox 无线控制器 / Xbox One 无线控制器</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E9.80.9A.E8.BF.87_USB_.E6.95.B0.E6.8D.AE.E7.BA.BF.E8.BF.9E.E6.8E.A5_Xbox_.E6.97.A0.E7.BA.BF.E6.8E.A7.E5.88.B6.E5.99.A8" id="通过_USB_数据线连接_Xbox_无线控制器"><span id=".E9.80.9A.E8.BF.87_USB_.E6.95.B0.E6.8D.AE.E7.BA.BF.E8.BF.9E.E6.8E.A5_Xbox_.E6.97.A0.E7.BA.BF.E6.8E.A7.E5.88.B6.E5.99.A8"></span>通过 USB 数据线连接 Xbox 无线控制器</h4></div>
+<p>这是由内核支持的，并且无需任何额外的包即可正常工作。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E9.80.9A.E8.BF.87.E8.93.9D.E7.89.99.E8.BF.9E.E6.8E.A5_Xbox_.E6.97.A0.E7.BA.BF.E6.8E.A7.E5.88.B6.E5.99.A8" id="通过蓝牙连接_Xbox_无线控制器"><span id=".E9.80.9A.E8.BF.87.E8.93.9D.E7.89.99.E8.BF.9E.E6.8E.A5_Xbox_.E6.97.A0.E7.BA.BF.E6.8E.A7.E5.88.B6.E5.99.A8"></span>通过蓝牙连接 Xbox 无线控制器</h4></div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg13f5c5ea60c5_.E9.80.9A.E8.BF.87_Windows_10_.E6.9B.B4.E6.96.B0.E6.8E.A7.E5.88.B6.E5.99.A8.E5.9B.BA.E4.BB.B6" id="通过_Windows_10_更新控制器固件"><span id=".E9.80.9A.E8.BF.87_Windows_10_.E6.9B.B4.E6.96.B0.E6.8E.A7.E5.88.B6.E5.99.A8.E5.9B.BA.E4.BB.B6"></span>通过 Windows 10 更新控制器固件</h5></div>
+<p>Xbox 无线控制器的固件曾导致与 Bluez 连接/断开连接的循环问题。最佳的解决方法是将控制器（通过 USB 数据线）连接到 Windows 10 计算机，下载 <a href="https://apps.microsoft.com/store/detail/xbox-accessories/9NBLGGH30XJ3?hl=en-us&amp;gl=us">Xbox Accessories</a> 应用程序（通过 Microsoft Store），并更新控制器的固件。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg13f5c5ea60c5_xpadneo" id="xpadneo">xpadneo</h5></div>
+<p>一个相对较新的驱动程序叫做 <a href="https://github.com/atar-axis/xpadneo/">xpadneo</a>，它支持通过蓝牙连接 Xbox One S 和 Xbox Series X|S 控制器。除了这两个型号，它还为 Xbox Elite Series 2 无线控制器提供了基本支持。虽然目前只完全支持这两款控制器，但它提供了许多增强功能，包括读取正确的电池电量、支持震动（甚至包括触发按钮上的震动 - L2/R2）、修正（有时错误的）按钮映射等。
+</p><p>安装可以通过 DKMS 完成：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xpadneo-dkms/">xpadneo-dkms</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>第一次配对 Xbox One S 控制器时可能会遇到一些困难，从完全无法配对到进入连接/断开循环。这些问题可以在 [<a href="https://github.com/atar-axis/xpadneo/issues/295">这里</a>] 找到相关描述。可靠地配对控制器的最佳方法是先在 Windows 10 中配对。但需要注意的是，这必须使用相同的蓝牙适配器。一个解决方案是，在虚拟机中安装免费的 Windows 10 企业版（使用 <a href="#pg434f3f4063b1">QEMU</a> 或 <a href="#pgbedf72352aa7">VirtualBox</a>，并确保蓝牙适配器通过 USB 设备正确传递），以 Arch Linux 作为主机，然后首先在 Windows 10 中进行配对，再在 Arch Linux 系统中执行相同的操作。之后，配对将成功，并且不再需要使用 Windows 10。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E9.80.9A.E8.BF.87_Microsoft_Xbox_.E6.97.A0.E7.BA.BF.E9.80.82.E9.85.8D.E5.99.A8.E8.BF.9E.E6.8E.A5_Xbox_.E6.97.A0.E7.BA.BF.E6.8E.A7.E5.88.B6.E5.99.A8" id="通过_Microsoft_Xbox_无线适配器连接_Xbox_无线控制器"><span id=".E9.80.9A.E8.BF.87_Microsoft_Xbox_.E6.97.A0.E7.BA.BF.E9.80.82.E9.85.8D.E5.99.A8.E8.BF.9E.E6.8E.A5_Xbox_.E6.97.A0.E7.BA.BF.E6.8E.A7.E5.88.B6.E5.99.A8"></span>通过 Microsoft Xbox 无线适配器连接 Xbox 无线控制器</h4></div>
+<p><a href="https://github.com/medusalix/xone">xone</a> 是一个 Linux 内核驱动程序，用于支持 Xbox One 和 Xbox Series X|S 配件。它作为一个现代替代品，取代了 xpad 和 xow。目前可以通过有线连接或使用 Microsoft Xbox 无线适配器“适配器”正常工作。该驱动程序的 bug 修复目前由 <a href="https://github.com/dlundqvist/xone">dlundqvist fork</a> 维护。
+</p><p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xone-dkms-git/">xone-dkms-git</a></span><sup><small>AUR</small></sup></span>，如果使用无线适配器，还需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xone-dongle-firmware/">xone-dongle-firmware</a></span><sup><small>AUR</small></sup></span>。安装完成后需要重启系统。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>需要与你的内核对应的头文件; 请参见 <a href="#pgeae7d2a5f976">DKMS#安装</a></li>
+<li>该适配器使用基于 mt76 的 802.11/15 芯片组，这可能会导致与连接到同一系统或附近的其他无线适配器产生干扰</li></ul>
+</div>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg13f5c5ea60c5_.E6.8E.A7.E5.88.B6.E5.99.A8.E9.85.8D.E5.AF.B9.E5.90.8E.E8.A1.A8.E7.8E.B0.E4.B8.8D.E4.BD.B3.EF.BC.88.E5.9B.9E.E6.8A.A5.E7.8E.87.E4.BD.8E.EF.BC.89" id="控制器配对后表现不佳（回报率低）"><span id=".E6.8E.A7.E5.88.B6.E5.99.A8.E9.85.8D.E5.AF.B9.E5.90.8E.E8.A1.A8.E7.8E.B0.E4.B8.8D.E4.BD.B3.EF.BC.88.E5.9B.9E.E6.8A.A5.E7.8E.87.E4.BD.8E.EF.BC.89"></span>控制器配对后表现不佳（回报率低）</h5></div>
+<p>你需要在 Windows 中使用 Microsoft Store 的 "Xbox Accessories" 应用程序来<a href="https://support.xbox.com/en-US/help/hardware-network/controller/update-xbox-wireless-controller">更新控制器固件</a>。理论上，通过将 USB 设备传递到 Windows 虚拟机中也应该能够完成此操作，但你可能需要双重启动到一个实际的（裸机）Windows 系统，以便 Xbox Accessories 应用能够识别控制器并进行固件更新。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg13f5c5ea60c5_.E4.B8.8E_Windows_.E5.8F.8C.E5.90.AF.E5.8A.A8" id="与_Windows_双启动"><span id=".E4.B8.8E_Windows_.E5.8F.8C.E5.90.AF.E5.8A.A8"></span>与 Windows 双启动</h5></div>
+<p>在 Windows 中配对控制器和适配器可能会导致在 Linux 中丢失配对。每次重启进入 Linux 时，你需要重新配对控制器和适配器。这种情况也会反过来发生——当控制器和适配器在 Linux 中配对时，下次你想在 Windows 中使用它们时，也需要重新配对。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg13f5c5ea60c5_.E6.8C.82.E8.B5.B7.E5.92.8C.E5.94.A4.E9.86.92.E5.90.8E.E6.97.A0.E6.B3.95.E8.BF.9E.E6.8E.A5.E3.80.82" id="挂起和唤醒后无法连接。"><span id=".E6.8C.82.E8.B5.B7.E5.92.8C.E5.94.A4.E9.86.92.E5.90.8E.E6.97.A0.E6.B3.95.E8.BF.9E.E6.8E.A5.E3.80.82"></span>挂起和唤醒后无法连接。</h5></div>
+<p>在某些平台上，挂起可能会导致设备进入一个无法正常响应的状态。由于设备被 Linux 识别为蓝牙适配器，因此在挂起时会自动进入关机状态，这也会禁用通过游戏手柄唤醒系统的功能。可以通过在内核命令行中使用 <code>btusb.enable_autosuspend=n</code>来缓解此问题。注意：这将禁用系统中所有其他 USB 蓝牙适配器的电源挂起功能。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_PlayStation_3_.E6.8E.A7.E5.88.B6.E5.99.A8" id="PlayStation_3_控制器"><span id="PlayStation_3_.E6.8E.A7.E5.88.B6.E5.99.A8"></span>PlayStation 3 控制器</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E9.80.9A.E8.BF.87USB.E8.BF.9E.E6.8E.A5" id="通过USB连接"><span id=".E9.80.9A.E8.BF.87USB.E8.BF.9E.E6.8E.A5"></span>通过USB连接</h4></div>
+<p>如果你拥有一个 PS3 控制器并且可以通过 USB 连接，将其插入电脑并按下 PS 按钮。控制器将启动，四个 LED 中的一个应该会亮起，表示控制器的编号。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E9.80.9A.E8.BF.87.E8.93.9D.E7.89.99.E8.BF.9E.E6.8E.A5" id="通过蓝牙连接"><span id=".E9.80.9A.E8.BF.87.E8.93.9D.E7.89.99.E8.BF.9E.E6.8E.A5"></span>通过蓝牙连接</h4></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez">bluez</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-utils">bluez-utils</a></span><sup><small>包</small></sup></span>。按照<a href="#pg20f71a8eddbf">蓝牙#配对</a>的前五个步骤确保蓝牙正常工作，并保持 bluetoothctl 命令运行。然后，通过按下中间的 'PS' 按钮打开控制器（所有 4 个 LED 应该快速闪烁，大约 4 Hz），并通过 USB 将控制器连接到你的电脑。最后，当 bluetoothctl 出现下面的提示输入"yes" <code>Authorize service 00001124-0000-1000-8000-00805f9b34fb (yes/no)</code>
+替代说明： 
+要通过蓝牙将 PS3 控制器连接到电脑，首先需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez">bluez</a></span><sup><small>包</small></sup></span>，然后通过 USB 连接控制器。弹出窗口应会提示进行配对，点击 Trust &amp; Authorize。现在你可以拔掉控制器并按下 PS 按钮，控制器将连接并且一个 LED 会保持常亮。此时你可以用它来玩游戏。仅在控制器已经连接到其他系统后，才需要使用 USB 数据线进行连接。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+在最新版本的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez">bluez</a></span><sup><small>包</small></sup></span>（截至 2024/01/03），出于安全原因，<code>ClassicBondedOnly</code> 的默认值已从 <code>false</code> 更改为 <code>true</code> <a href="https://bugs.launchpad.net/ubuntu/+source/bluez/+bug/2045931/comments/6">[4]</a>。此更改导致无法配对 Dual Shock 3 控制器，因为 <code>bluetoothctl</code> 会要求输入 PIN 码，且无法继续配对。为了解决此问题，可以通过在新创建的 <code>/etc/bluetooth/input.conf</code> 文件中添加以下行，将 <code>ClassicBondedOnly</code> 设置为 <code>false</code>：</div><p>.
+</p><p>截至 2024年3月9日，<code>UserspaceHID</code> 的默认值也已更改为 <code>true</code>。虽然连接可以成功，但除非将该值更改为 <code>false</code>，否则控制器无法进入操作模式。有关更多信息，请参阅 <a href="https://github.com/bluez/bluez/issues/771">GitHub  issue#771</a>。
+</p>
+<pre>[General]
+ClassicBondedOnly=false
+UserspaceHID=false
+</pre>
+<p>请注意，此解决方案在安全性上存在倒退。有关详细信息，请参阅 <a href="https://github.com/bluez/bluez/issues/673#issuecomment-1858431729">GitHub</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>互联网上有许多关于设置 PS3 控制器的复杂说明，通常需要很多步骤，例如编译和安装 qtsixa 或 sixpair，手动设置控制器，或者用一些特定的补丁修补 bluez。但在现代 Linux 内核上如果安装了 bluez-plugins 后，这些步骤都不再是必须的。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_PlayStation_3.2F4_.E6.8E.A7.E5.88.B6.E5.99.A8" id="PlayStation_3/4_控制器"><span id="PlayStation_3.2F4_.E6.8E.A7.E5.88.B6.E5.99.A8"></span>PlayStation 3/4 控制器</h3></div>
+<p>DualShock 3、DualShock 4 和 Sixaxis 控制器在通过 USB 插入时可以即插即用（需要按下 PS 按钮才能开始）。它们也可以通过蓝牙无线使用。
+</p><p>Steam 会正确识别它为 PS3 手柄，并且可以通过 PS 按钮启动 Big Picture 模式。Big Picture 模式和一些游戏可能会将其识别为 360 手柄。默认情况下，手柄控制鼠标功能是开启的。你可能希望在玩游戏之前关闭它，详见#禁用摇杆控制鼠标。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E9.80.9A.E8.BF.87.E8.93.9D.E7.89.99.E8.BF.9E.E6.8E.A5_2" id="通过蓝牙连接_2"><span id=".E9.80.9A.E8.BF.87.E8.93.9D.E7.89.99.E8.BF.9E.E6.8E.A5_2"></span>通过蓝牙连接</h4></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez">bluez</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-utils">bluez-utils</a></span><sup><small>包</small></sup></span> 包，其中包括 <i>sixaxis</i> 插件。然后<a href="#pg6ec215b93a06">启动</a> <a href="#pg0379b52c0e22">bluetooth</a> 服务，并确保蓝牙已开启。如果使用 <i>bluetoothctl</i>，在终端中启动它，然后通过 USB 插入控制器。你应该会被提示在 bluetoothctl 中信任该控制器。图形化的蓝牙前端可能会自动将电脑的蓝牙地址写入控制器。按下 PlayStation 按钮并检查在插入时控制器是否正常工作。
+</p><p>现在你可以断开控制器的连接。下次按下 PlayStation 按钮时，它将自动连接，无需任何额外操作。
+</p><p>另外，在 PS4 控制器上，你可以同时按住分享按钮和 PlayStation 按钮（持续几秒钟）将手柄置于配对模式，然后按通常的方式进行配对。
+</p><p>GNOME 的设置也提供了一个图形界面，当控制器通过有线连接时，可以配对 sixaxis 控制器。
+</p><p>记得在使用完后断开控制器的连接，因为控制器在连接时会一直处于开启状态，从而耗尽电池。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果控制器未能连接，请确保蓝牙接口已开启，并且控制器已被信任。 (详情见 <a href="#pg20f71a8eddbf">蓝牙</a>)</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E4.BD.BF.E7.94.A8.E9.80.9A.E7.94.A8.2F.E5.85.8B.E9.9A.86.E6.8E.A7.E5.88.B6.E5.99.A8_2" id="使用通用/克隆控制器_2"><span id=".E4.BD.BF.E7.94.A8.E9.80.9A.E7.94.A8.2F.E5.85.8B.E9.9A.86.E6.8E.A7.E5.88.B6.E5.99.A8_2"></span>使用通用/克隆控制器</h4></div>
+<p>使用通用/克隆 Dualshock 控制器是可行的，但有一个问题可能需要安装一个补丁包。默认的蓝牙协议栈无法检测到某些克隆控制器。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bluez-ps3/">bluez-ps3</a></span><sup><small>AUR</small></sup></span> 包是一个经过补丁的版本，能够检测这些控制器。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bluez-plugins-ps3/">bluez-plugins-ps3</a></span><sup><small>AUR</small></sup></span> 是另一个包，它只对 bluez-plugins 进行补丁，可能适用于某些控制器。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_PlayStation_4.2F5_.E6.8E.A7.E5.88.B6.E5.99.A8" id="PlayStation_4/5_控制器"><span id="PlayStation_4.2F5_.E6.8E.A7.E5.88.B6.E5.99.A8"></span>PlayStation 4/5 控制器</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E9.80.9A.E8.BF.87_USB_.E8.BF.9E.E6.8E.A5" id="通过_USB_连接"><span id=".E9.80.9A.E8.BF.87_USB_.E8.BF.9E.E6.8E.A5"></span>通过 USB 连接</h4></div>
+<p>通过 USB 连接你的控制器并按下 <code>PS</code> 按钮。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E9.80.9A.E8.BF.87.E8.93.9D.E7.89.99.E8.BF.9E.E6.8E.A5_3" id="通过蓝牙连接_3"><span id=".E9.80.9A.E8.BF.87.E8.93.9D.E7.89.99.E8.BF.9E.E6.8E.A5_3"></span>通过蓝牙连接</h4></div>
+<p>如果你想使用蓝牙模式，请同时按住 <code>PS</code> 按钮和 <code>Share</code> 按钮。控制器的白色 LED 应该会快速地闪烁，随后无线控制器可以与你的蓝牙管理器配对。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E5.9C.A8_Wine_.E4.B8.AD.E4.BD.BF.E7.94.A8" id="在_Wine_中使用"><span id=".E5.9C.A8_Wine_.E4.B8.AD.E4.BD.BF.E7.94.A8"></span>在 Wine 中使用</h4></div>
+<p>对于这些控制器，Wine 默认使用 hidraw（自 8.0 起），因此支持它们的 Windows 应用程序可以使用它们的所有功能。由于这种类似 Windows 的行为，这些控制器不会作为 XInput 设备暴露，因此无法在许多应用程序中使用。
+要禁用此行为，可以将以下文本文件导入 Wine 注册表
+<a href="https://gitlab.winehq.org/wine/wine/-/wikis/FAQ#how-do-i-edit-the-wine-registry">regedit</a>:
+</p>
+<pre>Windows Registry Editor Version 5.00
+[HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\winebus]
+"DisableHidraw"=dword:1
+</pre>
+<p>Since Wine 9.18, this setting can be controlled from <code>wine control joy.cpl</code>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_.E7.A6.81.E7.94.A8.E8.A7.A6.E6.91.B8.E6.9D.BF.E4.BD.9C.E4.B8.BA.E9.BC.A0.E6.A0.87.E4.BD.BF.E7.94.A8" id="禁用触摸板作为鼠标使用"><span id=".E7.A6.81.E7.94.A8.E8.A7.A6.E6.91.B8.E6.9D.BF.E4.BD.9C.E4.B8.BA.E9.BC.A0.E6.A0.87.E4.BD.BF.E7.94.A8"></span>禁用触摸板作为鼠标使用</h4></div>
+<p>如果在<a href="#pga36c0aff60be">Xorg</a>下使用<a href="#pg6b314e43c2a8">libinput</a>，或使用<a href="#pga21a6be8b605">Wayland</a>，则可以按照<a href="#pg6b314e43c2a8">Libinput#禁用触摸板</a>禁用触摸板。
+</p><p>注意，由于触摸板只是控制器的一部分，仅通过供应商和产品 ID 选择输入设备是不够的。相反，建议通过设备名称来选择设备。
+</p><p>要查看可用的完整属性集，可以使用 <code>udevadm info --attribute-walk --name=<i>device_path</i></code>，其中 <code><i>device_path</i></code> 是设备的路径，例如 <code>/dev/input/event<i>n</i></code> 或 <code>/dev/input/by-id/<i>identifier</i></code>。
+</p><p>要查找设备路径，你可以使用工具，如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=evtest">evtest</a></span><sup><small>包</small></sup></span>，只需运行 <code>evtest</code> 命令。该命令还应打印出设备的名称。
+</p><p>示例代码片段:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/72-ds4tm.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Disable DS4 touchpad acting as mouse
+# USB
+ATTRS{name}=="Sony Interactive Entertainment Wireless Controller Touchpad", ENV{LIBINPUT_IGNORE_DEVICE}="1"
+# Bluetooth
+ATTRS{name}=="Wireless Controller Touchpad", ENV{LIBINPUT_IGNORE_DEVICE}="1"</pre>
+<p>对于 DualSense 控制器，将名称替换为 <code>Sony Interactive Entertainment DualSense Wireless Controller Touchpad</code> and <code>DualSense Wireless Controller Touchpad</code>.
+</p><p>然后，重新<a href="#pge009209061ac">加载 udev 规则</a>。重新连接游戏手柄以应用更改。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_dualsensectl" id="dualsensectl">dualsensectl</h4></div>
+<p><a href="https://github.com/nowrep/dualsensectl">dualsensectl</a> 是一个可以切换灯条和麦克风（及其 LED）、监控电池状态和关闭控制器电源的工具。要使用它，[[安装］ <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dualsensectl-git/">dualsensectl-git</a></span><sup><small>AUR</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg13f5c5ea60c5_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_.E9.80.9A.E8.BF.87.E7.BD.91.E7.BB.9C.E4.BD.BF.E7.94.A8.E6.B8.B8.E6.88.8F.E6.89.8B.E6.9F.84" id="通过网络使用游戏手柄"><span id=".E9.80.9A.E8.BF.87.E7.BD.91.E7.BB.9C.E4.BD.BF.E7.94.A8.E6.B8.B8.E6.88.8F.E6.89.8B.E6.9F.84"></span>通过网络使用游戏手柄</h3></div>
+<p>如果你想通过网络将游戏手柄连接到另一台计算机，可以使用 USB/IP 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/netstick-git/">netstick-git</a></span><sup><small>AUR</small></sup></span> 来实现。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg13f5c5ea60c5_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_.E8.AE.BE.E5.A4.87.E6.9D.83.E9.99.90" id="设备权限"><span id=".E8.AE.BE.E5.A4.87.E6.9D.83.E9.99.90"></span>设备权限</h3></div>
+<p>游戏手柄设备受 <a href="#pge009209061ac">udev 规则</a>的影响：除非这些规则授予设备访问权限，否则普通用户将无法读取设备。本节将探讨是否有可能在配置文件中处理这一问题。
+</p><p>Any gamepad device, regardless of whether it is over USB or Bluetooth, is handled by the <a href="https://docs.kernel.org/input/input_uapi.html">"input" subsystem of the kernel</a>, corresponding with <code>/dev/input</code>. It's also common for udev rules to target the <a href="https://docs.kernel.org/hid/hidraw.html">"hidraw" kernel module</a>. Combining these, we can understand udev's handling of these devices by inspecting the configuration shipped by packages:
+</p>
+<pre>$ grep --extended-regexp 'SUBSYSTEM=="input"|KERNEL=="hidraw' --recursive /usr/lib/udev/rules.d
+</pre>
+<p>Some examples of applications which ship noteworthy rules:
+</p>
+<ul><li><a href="#pgac06dd8bfe95">systemd</a>'s default rules set the group of all <code>input</code> devices to <code>input</code>, and the mode of joystick devices to <code>664</code> <a href="https://github.com/systemd/systemd/blob/edfb4a474e5cbef6578a70aae7f08a0f435c6c6a/rules.d/50-udev-default.rules.in#L33">[5]</a>.</li>
+<li><a href="#pg95e65bdea0f3">Steam</a> ships udev rules allowing access to a variety of controllers. See <a href="https://steamcommunity.com/app/353370/discussions/2/1735465524711324558/">this Steam discussion</a> for further info about the contents of the rules.</li>
+<li><a href="#pgae08ccae4226">Dolphin emulator</a> ships udev rules allowing access to controllers it supports.</li></ul>
+<p>If your system does not already happen to have a udev rule for the device you want to use, you can either write one yourself or install the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/game-devices-udev/">game-devices-udev</a></span><sup><small>AUR</small></sup></span> package and restart your computer.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>It is possible to add a user to the <code>input</code> group in order to give them access to all devices. However, this is not recommended <a href="https://github.com/systemd/systemd/issues/4288">[6]</a>.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_Gamepad_is_not_recognized_by_all_program" id="Gamepad_is_not_recognized_by_all_programs">Gamepad is not recognized by all programs</h3></div>
+<p>Some software, Steam for example, will only recognize the first gamepad it encounters. Due to a bug in the driver for Microsoft wireless periphery devices this can in fact be the bluetooth dongle. If you find you have a <code>/dev/input/js*</code> and <code>/dev/input/event*</code> belonging to you keyboard's bluetooth transceiver you can get automatically get rid of it by creating according udev rules: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-btcleanup.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", KERNEL=="js[0-9]*", SUBSYSTEM=="input", KERNELS=="...", ATTRS{bInterfaceSubClass}=="00", ATTRS{bInterfaceProtocol}=="00", ATTRS{bInterfaceNumber}=="02", RUN+="/usr/bin/rm /dev/input/js%n"
+ACTION=="add", KERNEL=="event*", SUBSYSTEM=="input", KERNELS=="...", ATTRS{bInterfaceSubClass}=="00", ATTRS{bInterfaceProtocol}=="00", ATTRS{bInterfaceNumber}=="02", RUN+="/usr/bin/rm /dev/input/event%n"</pre>
+<p>Correct the <code>KERNELS=="..."</code> to match your device. The correct value can be found by running
+</p>
+<pre># udevadm info -an /dev/input/js0
+</pre>
+<p>Assuming the device in question is <code>/dev/input/js0</code>. After you placed the rule reload the rules with
+</p>
+<pre># udevadm control --reload
+</pre>
+<p>Then replug the device making you trouble. The joystick and event devices should be gone, although their number will still be reserved. But the files are out of the way.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_Application_only_supports_Xbox_360_contr" id="Application_only_supports_Xbox_360_controllers">Application only supports Xbox 360 controllers</h3></div>
+<p>Some Windows games look for an Xbox 360 controller in particular, missing functionality (like vibration) or not working at all otherwise.
+</p><p>For a workaround, see #Mimic Xbox 360 controller.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_Steam_.E6.8E.A7.E5.88.B6.E5.99.A8_2" id="Steam_控制器_2"><span id="Steam_.E6.8E.A7.E5.88.B6.E5.99.A8_2"></span>Steam 控制器</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_Steam_.E6.8E.A7.E5.88.B6.E5.99.A8.E6.97.A0.E6.B3.95.E9.85.8D.E5.AF.B9" id="Steam_控制器无法配对"><span id="Steam_.E6.8E.A7.E5.88.B6.E5.99.A8.E6.97.A0.E6.B3.95.E9.85.8D.E5.AF.B9"></span>Steam 控制器无法配对</h4></div>
+<p>There are some unknown cases where the packaged udev rule for the Steam controller does not work (<a href="https://bugs.archlinux.org/task/47330">FS#47330</a>). The most reliable workaround is to make the controller world readable. Copy the rule <code>/usr/lib/udev/rules.d/70-steam-controller.rules</code> to <code>/etc/udev/rules.d</code> with a later prioritiy and change anything that says <code>MODE="0660"</code> to <code>MODE="066<b>6</b>"</code> e.g.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-steam-controller-perms.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0666"
+...</pre>
+<p>You may have to reboot in order for the change to take effect.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_Steam_Controller_makes_a_game_crash_or_n" id="Steam_Controller_makes_a_game_crash_or_not_recognized">Steam Controller makes a game crash or not recognized</h4></div>
+<p>If your Steam Controller is working well in Steam Big Picture mode, but not recognized by a game or the game starts crashing when you plug in the controller, this may be because of the native driver that has been added to the Linux kernel 4.18. Try to unload it, restart Steam and replug the controller.
+</p><p>The module name of the driver is <code>hid_steam</code>, so to unload it you may perform:
+</p>
+<pre># rmmod hid_steam
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_Xbox_One_Wireless_Gamepad_detected_but_n" id="Xbox_One_Wireless_Gamepad_detected_but_no_inputs_recognized">Xbox One Wireless Gamepad detected but no inputs recognized</h3></div>
+<p>This can occur when using a third party Xbox One controller with the <code>xpad</code> or <a href="#pg13f5c5ea60c5_xboxdrv">#xboxdrv</a> drivers. Try switching to <a href="#pg13f5c5ea60c5_xpadneo">#xpadneo</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_Playstation_4_controllers" id="Playstation_4_controllers">Playstation 4 controllers</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_Controller_not_recognized_when_using_Blu" id="Controller_not_recognized_when_using_Bluetooth">Controller not recognized when using Bluetooth</h4></div>
+<p><a href="#pg54c3351b3e3b">Install</a> the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ds4drv/">ds4drv</a></span><sup><small>AUR</small></sup></span> package and run it with the hidraw (<code>ds4drv --hidraw</code>) backend parameter.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_Motion_controls_taking_over_joypad_controls_and.2For_causing_unintended_input_with_joypad_controls" id="Motion_controls_taking_over_joypad_controls_and/or_causing_unintended_input_with_joypad_controls"><span id="Motion_controls_taking_over_joypad_controls_and.2For_causing_unintended_input_with_joypad_controls"></span>Motion controls taking over joypad controls and/or causing unintended input with joypad controls</h4></div>
+
+<p>With certain cloud gaming applications such as Parsec and Shadow, the Dualshock 4 V1 and V2 motion controls can conflict with the joypad controls resulting in the joypad not working, and with certain input sensitive games, especially racing games, the motion controls can cause unintentional drift during joypad control gameplay.
+</p><p>This can be worked around by disabling the motion controls and the touchpad by adding the following udev rules:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/51-disable-DS3-and-DS4-motion-controls.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SUBSYSTEM=="input", ATTRS{name}=="*Controller Motion Sensors", RUN+="/bin/rm %E{DEVNAME}", ENV{ID_INPUT_JOYSTICK}=""
+SUBSYSTEM=="input", ATTRS{name}=="*Controller Touchpad", RUN+="/bin/rm %E{DEVNAME}", ENV{ID_INPUT_JOYSTICK}=""</pre>
+<p>Then <a href="#pge009209061ac">reload the rules</a> or reboot: these rules should work in both USB and Bluetooth mode.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_Multi_mode_wired_gamepads" id="Multi-mode_wired_gamepads">Multi-mode wired gamepads</h3></div>
+
+<p>Some gamepads have 3 modes when wired: Switch, Xbox 360/Windows, Android.
+</p><p>And they also don't have hotkeys to switch between them when connected <i>wired</i>.
+</p><p>When you connect such gamepad to Windows, it is in Xbox 360 Controller mode.
+</p><p>But when you connect such gamepad to Linux, it enters the fallback mode (which happens to be the Android mode), which has a worse polling rate (100 Hz), the Home button acting as <code>XF86Home</code>; doesn't expose vibration, gyroscope, and accelerometer; doesn't support <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xboxdrv/">xboxdrv</a></span><sup><small>AUR</small></sup></span> without <code>--evdev</code>; and identifies itself as e.g. "SHANWAN Android Gamepad" which is not liked by some games (though for SDL2 apps you can set a name in <code>SDL_GAMECONTROLLERCONFIG</code>).
+</p><p>When you connect the gamepad, it first tries to be a "Switch Pro Controller", but for some reason the Linux kernel considers the descriptors (sent by the gamepad) invalid, and therefore disconnects the gamepad. This causes the gamepad to reconnect in the aforementioned fallback mode.
+</p><p>In <code>dmesg</code> this looks like:
+</p>
+<pre>usb 1-5.3: new full-speed USB device number 37 using xhci_hcd
+usb 1-5.3: unable to read config index 0 <b>descriptor</b>/start: -32
+usb 1-5.3: chopping to 0 config(s)
+usb 1-5.3: can't read configurations, error <b>-32</b>
+usb 1-5.3: new full-speed USB device number 38 using xhci_hcd
+usb 1-5.3: New USB device found, idVendor=0079, idProduct=181c, bcdDevice= 1.00
+usb 1-5.3: New USB device strings: Mfr=1, Product=2, SerialNumber=0
+usb 1-5.3: Product: Android Gamepad
+usb 1-5.3: Manufacturer: SHANWAN</pre>
+<p>Notice that the "USB Device number" gets increased after the failure. For some USB hubs the error code is <code>-32</code> (EPIPE: broken pipe), for others it is <code>-71</code> (EPROTO: protocol error).
+</p><p>This error can be fixed by setting a quirk in <code>usbcore</code> module (not <code>usbhid</code>) for Switch controller's USB ID:
+</p>
+<pre># If you have already *manually* set quirks for other devices,
+# then don't forget to include them in the two commands below ↓
+echo -n "057e:2009:<b>ik</b>" | sudo tee /sys/module/usbcore/parameters/quirks
+</pre>
+<pre># Optionally constant polling mode:
+sudo modprobe -r usbhid ; sleep 4 ; sudo modprobe -v usbhid "quirks=0x057e:0x2009:0x400"
+</pre>
+<p><code>ik</code> are 2 flags (<a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/7.7_release_notes/kernel_parameters_changes">List of all flags</a>).
+</p><p>The flag <code>i</code> means "allow bad descriptors".
+</p><p>And the flag <code>k</code> means "disable LPM" (link power management). It is specified in the command because it often helps devices of other types. This flag might do nothing because not all USB controllers even have LPM. You can try without <code>k</code> aftewards.
+</p><p>You could also try the flag <code>g</code> ("200 ms pause after reading the descriptors") because it often helps devices of other types, but at least in the case of iPEGA PG-SW038C (a $10 gamepad) flag <code>g</code> causes it infinitely reconnect.
+</p><p>Note that once the gamepad downgrades to the fallback mode, it will never change its mode until you reconnect it. Even <code>echo 0 then 1 &gt; %sysfsGamepadDir%/authorized</code> doesn't work. And that's why passing the gamepad to a Windows VM would not help; <code>usbcore</code> inits USB devices before passing them to a VM.
+</p>
+<hr/>
+<p>Now reconnect the gamepad, it should be finally listed now as <code>ID 057e:2009 Nintendo Co., Ltd Switch Pro Controller</code> when you run <code>lsusb</code>. If that's true, then you can make this quirk permanent by add this option to GRUB:
+</p><p><code>usbcore.quirks="057e:2009:ik"</code>
+</p><p>along with (optionally) <code>usbhid.quirks="0x057e:0x2009:0x400"</code> which stops the pointless blinking of LEDs when the gamepad is unused.
+</p><p>Now that your gamepad is in Switch mode, you'll run into a problem of SDL2 deciding to become a user-space driver (for this it uses <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libusb">libusb</a></span><sup><small>包</small></sup></span>, just like <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xboxdrv/">xboxdrv</a></span><sup><small>AUR</small></sup></span>), which causes any SDL2 game to claim the whole gamepad (that is: <code>/dev/input/*</code> and <code>/dev/hidraw*</code> disappear, yet it's still possible to play this launched game with the gamepad), so you can't use the gamepad in multiple apps anymore.
+</p><p>This can be fixed by adding
+</p>
+<pre>SDL_HIDAPI_DISABLE_LIBUSB=1
+</pre>
+<p>into <code>/etc/environment</code>, and rebooting.
+</p><p>If you have <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/joycond-git/">joycond-git</a></span><sup><small>AUR</small></sup></span>, then delete it, because it is useless for such Switch-like gamepads, moreover <code>joycond</code> has a <code>udev</code> rule that disallows Steam to provide its own user-space driver.
+</p><p>Unlike SDL2 (when it uses <code>/dev/hidraw*</code> which is its preferred way in 2023), <code>xboxdrv</code> and <code>/dev/input/*</code> provide incorrect values for the right stick's X axis (it's always ≤0). Probably a bug in <code>hid-nintendo</code> or something. For this reason <code>xboxdrv</code> is unusable in most games when in Switch mode.
+</p><p>You can test your gyroscope and accelerometer by launching <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=antimicrox">antimicrox</a></span><sup><small>包</small></sup></span>. They are not available in other gamepad modes when connected wired because their values are sent <i>mixed</i> with other event data (RX/RY/etc) in a special format that is not fully compatible with <code>xpad</code> and <code>hid-generic</code>.
+</p><p>If you see in <code>dmesg</code> that <code>hid-generic</code> is used by your gamepad, then it's probably because you have built Linux kernel with your own config without <code>hid-nintendo</code>. Unfortuately, Switch mode + <code>hid-generic</code> is as useless as the fallback mode (even no vibration).
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg13f5c5ea60c5_Xbox_360_Controller_mode" id="Xbox_360_Controller_mode">Xbox 360 Controller mode</h4></div>
+<p>After having completed everything above (i.e. 1-2 quirks, 1 envvar),
+</p><p>add
+</p>
+<pre>blacklist hid_nintendo
+</pre>
+<p>into <code>/etc/modprobe.d/blacklist.conf</code>
+</p><p>then run <code>sudo mkinitcpio -P</code> to rebuild <code>/boot/initramfs*</code> (kernel reads <code>/etc/modprobe.d/</code> only from its own initramfs, not your rootfs)
+</p><p>
+Now create the following file: </p><pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/10-disallow-generic-driver-for-switch.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># If
+# 1. a gamepad is multi-mode (Switch, X360, PC) and defaults to USB ID 057e:2009
+# AND at the same time
+# 2. `hid-nintendo` module can't be loaded (blacklisted or not compiled)
+# AND at the same time
+# 3. there's already a launched game that immediately grabs a gamepad,
+#
+# Then when you connect such gamepad, it will stay in "Switch Pro" mode,
+# but using the fallback `hid-generic` module
+# which would result in no vibration/etc
+# despite still being listed as a "Switch Pro Controller".
+
+# But by notifying the gamepad that we abandon to use it as an HID,
+# it automatically downgrades to "Xbox 360 Controller" mode,
+# which causes vibration and `xboxdrv` to work.
+SUBSYSTEM=="hid", DRIVER=="hid-generic", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="2009", RUN="/bin/sh -c 'echo $id:1.0 &gt; /sys/bus/usb/drivers/usbhid/unbind'"</pre>
+<p>then run <code>sudo udevadm control --reload-rules &amp;&amp; sudo udevadm trigger</code>
+</p><p>Since you probably don't want to reboot, run <code>sudo modprobe -r hid_nintendo</code>
+</p><p>From now on, to switch ("downgrade") from Switch mode to Xbox 360 mode, just run <code>sudo modprobe -r hid_nintendo</code> (you don't even need to reconnect it). Within 2 seconds you'll have <code>045e:028e Microsoft Corp. Xbox360 Controller</code> in <code>lsusb</code>
+</p><p>And if you want to switch vice versa:
+</p>
+<ol><li><code>sudo modprobe hid_nintendo</code> (even though it is blacklisted, this command still works because blacklisting just means "don't load this module <i>automatically</i>").</li>
+<li>Reconnect.</li></ol>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg13f5c5ea60c5_Alternative_rootless_solution" id="Alternative_rootless_solution">Alternative rootless solution</h5></div>
+<p>If you don't have root access, then:
+</p>
+<ol><li>Power off your PC (not just suspend)</li>
+<li>Reconnect your gamepad.</li>
+<li>Power the PC on.</li>
+<li>UEFI (just like non-virtualized Windows) automatically and successfully initializes the gamepad (even if it's connected through a USB hub in your monitor) despite the invalid descriptors.</li>
+<li>The gamepad receives info from UEFI (or maybe GRUB) that it's no longer needed as an HID, which causes it to switch ("downgrade") to Xbox 360 Controller mode. Switching between modes is done this way: the gamepad disconnects, then connects under a different USB ID.</li>
+<li>You can even suspend (without turning off the monitor if that's what it's connected to) and then wake-up the PC, and it will still be in Xbox 360 Controller mode. But if you reconnect the gamepad, it will be in the fallback mode, so you'll have to follow the instruction again.</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_USB_debugging" id="USB_debugging">USB debugging</h3></div>
+<p>You'll probably not need to know this, but this USB ID (057e:2009) was discovered by USB debugging:
+</p>
+<pre># Allow debugging of the kernel:
+sudo ls /sys/kernel/debug/usb &gt;/dev/null 2&gt;&amp;1 || sudo mount -t debugfs none_debugfs /sys/kernel/debug
+# Load the module that allows sniffing of the traffic of USB buses:
+sudo modprobe usbmon
+# We need only connection events, and in these events
+# we need only a USB ID which is in the pre-pre-last column:
+sudo /bin/grep --line-buffered -Po '(?&lt;=0 0 18 = .{18}).{8}' /sys/kernel/debug/usb/usbmon/<b>99999</b>u | /bin/sed -E 's/([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/\2\1:\4\3/'
+</pre>
+<p>where <code>99999</code> must be replaced with the USB Bus number that your gamepad uses, e.g. <code>1</code> (without leading zeroes). It can be found by running <code>lsusb</code>.
+</p><p>If nothing helped and your gamepad still works in full capacity only in Windows, you can catch USB messages while in Windows, and then replay them while in Linux. See <a href="https://github.com/JohnDMcMaster/usbrply">usbrply</a>. For this, Windows must not be in VM because Linux kernel's <code>usbcore</code> initializes a USB device before passing it to a VM. This could be avoided by buying a PCI-E USB controller and passing it through (External USB hubs can't be passed through). Or you can pass-through your motherboard's own USB controller if it is in a IOMMU group without devices important for you:
+</p>
+<table class="wikitable mw-collapsible mw-collapsed" role="presentation">
+<tbody><tr>
+<td><strong>Script which lists IOMMU groups</strong>
+</td></tr>
+<tr>
+<td><pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">list-iommu-groups.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+shopt -s nullglob
+for g in $(find /sys/kernel/iommu_groups/* -maxdepth 0 -type d | sort -V); do
+  echo "IOMMU Group ${g##*/}:"
+  for d in $g/devices/*; do
+      echo -e "\t$(lspci -nns ${d##*/})"
+  done;
+done;</pre>
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg13f5c5ea60c5_Example_xboxdrv_configurations" id="Example_xboxdrv_configurations">Example xboxdrv configurations</h2></div>
+
+<p><br/>
+To give these devices a persistent name, set an udev rule in this format.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-btjoy.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#Create a symlink to appropriate /dev/input/eventX at /dev/btjoy
+ACTION=="add", SUBSYSTEM=="input", ATTRS{name}=="Bluetooth Gamepad", ATTRS{uniq}=="00:17:02:01:ae:2a", SYMLINK+="btjoy"</pre>
+<p>Replace "Bluetooth Gamepad" with your device name and "00:17:02:01:ae:2a" with your device's address.
+</p><p>When you have the configuration and your device is connected you can start the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xboxdrv/">xboxdrv</a></span><sup><small>AUR</small></sup></span> like so:
+</p>
+<pre># xboxdrv --evdev /dev/btjoy --config .config/xboxdrv/ipega.conf
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_iPEGA_9017s" id="iPEGA-9017s">iPEGA-9017s</h3></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/xboxdrv/ipega.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#iPEGA PG-9017S Config 
+
+[xboxdrv]
+evdev-debug = true
+evdev-grab = true
+rumble = false
+mimic-xpad = true
+
+[evdev-absmap]
+ABS_HAT0X = dpad_x
+ABS_HAT0Y = dpad_y
+
+ABS_X = X1
+ABS_Y = Y1
+
+ABS_Z  = X2
+ABS_RZ = Y2
+
+[axismap]
+-Y1 = Y1
+-Y2 = Y2
+
+[evdev-keymap]
+BTN_EAST=a
+BTN_C=b
+BTN_NORTH=y
+BTN_SOUTH=x
+BTN_TR2=start
+BTN_TL2=back
+BTN_Z=rt
+BTN_WEST=lt
+
+BTN_MODE = guide</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_iPEGA_9068_and_9087" id="iPEGA-9068_and_9087">iPEGA-9068 and 9087</h3></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/xboxdrv/ipega.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#iPEGA PG-9068 and PG-9087 Config 
+
+[xboxdrv]
+evdev-debug = true
+evdev-grab = true
+rumble = false
+mimic-xpad = true
+
+[evdev-absmap]
+ABS_HAT0X = dpad_x
+ABS_HAT0Y = dpad_y
+
+ABS_X = X1
+ABS_Y = Y1
+
+ABS_Z  = X2
+ABS_RZ = Y2
+
+[axismap]
+-Y1 = Y1
+-Y2 = Y2
+
+[evdev-keymap]
+BTN_A=a
+BTN_B=b
+BTN_Y=y
+BTN_X=x
+BTN_TR=rb
+BTN_TL=lb
+BTN_TR2=rt
+BTN_TL2=lt
+BTN_THUMBL=tl
+BTN_THUMBR=tr
+BTN_START=start
+BTN_SELECT=back
+
+BTN_MODE = guide</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_Defender_X7" id="Defender_X7">Defender X7</h3></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/xboxdrv/defender.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#Defender x7 xboxdrv config
+
+[xboxdrv]
+evdev-debug = true
+evdev-grab = true
+rumble = false
+mimic-xpad = true
+
+[evdev-absmap]
+ABS_HAT0X = dpad_x
+ABS_HAT0Y = dpad_y
+
+ABS_X = X1
+ABS_Y = Y1
+
+ABS_Z  = X2
+ABS_RZ = Y2
+
+[axismap]
+-Y1 = Y1
+-Y2 = Y2
+
+[evdev-keymap]
+BTN_EAST=b
+BTN_NORTH=x
+BTN_SOUTH=a
+BTN_WEST=y
+BTN_TR2=rt
+BTN_TL2=lt
+BTN_TR=rb
+BTN_TL=lb
+BTN_THUMBL=tl
+BTN_THUMBR=tr
+BTN_START=start
+BTN_SELECT=back
+
+BTN_MODE = guide</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_Stadia_Controller" id="Stadia_Controller">Stadia Controller</h3></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/xboxdrv/stadia.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Stadia xboxdrv config
+
+[xboxdrv]
+mimic-xpad=true
+silent=true
+
+[evdev-absmap]
+ABS_X=x1
+ABS_Y=y1
+ABS_Z=x2
+ABS_RZ=y2
+ABS_GAS=rt
+ABS_BRAKE=lt
+ABS_HAT0X=dpad_x
+ABS_HAT0Y=dpad_y
+
+[axismap]
+-y1=y1
+-y2=y2
+
+[evdev-keymap]
+BTN_SOUTH=A
+BTN_EAST=B
+BTN_NORTH=X
+BTN_WEST=Y
+
+BTN_START=start
+BTN_SELECT=back
+BTN_MODE=guide
+
+BTN_THUMBL=tl
+BTN_THUMBR=tr
+BTN_TR=rb
+BTN_TL=lb</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_Logitech_Dual_Action" id="Logitech_Dual_Action">Logitech Dual Action</h3></div>
+<pre># xboxdrv --evdev /dev/input/event* \
+   --evdev-absmap ABS_X=x1,ABS_Y=y1,ABS_RZ=x2,ABS_Z=y2,ABS_HAT0X=dpad_x,ABS_HAT0Y=dpad_y \
+   --axismap -Y1=Y1,-Y2=Y2 \
+   --evdev-keymap BTN_TRIGGER=x,BTN_TOP=y,BTN_THUMB=a,BTN_THUMB2=b,BTN_BASE3=back,BTN_BASE4=start,BTN_BASE=lt,BTN_BASE2=rt,BTN_TOP2=lb,BTN_PINKIE=rb,BTN_BASE5=tl,BTN_BASE6=tr \
+   --mimic-xpad --silent
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_PlayStation_2_controller" id="PlayStation_2_controller">PlayStation 2 controller</h3></div>
+<pre># xboxdrv --evdev /dev/input/event* \
+   --evdev-absmap ABS_X=x1,ABS_Y=y1,ABS_RZ=x2,ABS_Z=y2,ABS_HAT0X=dpad_x,ABS_HAT0Y=dpad_y \
+   --axismap -Y1=Y1,-Y2=Y2 \
+   --evdev-keymap   BTN_TOP=x,BTN_TRIGGER=y,BTN_THUMB2=a,BTN_THUMB=b,BTN_BASE3=back,BTN_BASE4=start,BTN_BASE=lb,BTN_BASE2=rb,BTN_TOP2=lt,BTN_PINKIE=rt,BTN_BASE5=tl,BTN_BASE6=tr \
+   --mimic-xpad --silent
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_PlayStation_4_controller" id="PlayStation_4_controller">PlayStation 4 controller</h3></div>
+<pre># xboxdrv \
+   --evdev /dev/input/by-id/usb-Sony_Computer_Entertainment_Wireless_Controller-event-joystick\
+   --evdev-absmap ABS_X=x1,ABS_Y=y1                 \
+   --evdev-absmap ABS_Z=x2,ABS_RZ=y2                \
+   --evdev-absmap ABS_HAT0X=dpad_x,ABS_HAT0Y=dpad_y \
+   --evdev-keymap BTN_A=x,BTN_B=a                   \
+   --evdev-keymap BTN_C=b,BTN_X=y                   \
+   --evdev-keymap BTN_Y=lb,BTN_Z=rb                 \
+   --evdev-keymap BTN_TL=lt,BTN_TR=rt               \
+   --evdev-keymap BTN_SELECT=tl,BTN_START=tr        \
+   --evdev-keymap BTN_TL2=back,BTN_TR2=start        \
+   --evdev-keymap BTN_MODE=guide                    \
+   --axismap -y1=y1,-y2=y2                          \
+   --mimic-xpad                                     \
+   --silent
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg13f5c5ea60c5_PlayStation_5_controller" id="PlayStation_5_controller">PlayStation 5 controller</h3></div>
+<pre># xboxdrv \
+  --evdev /dev/input/by-id/usb-Sony_Interactive_Entertainment_DualSense_Wireless_Controller-if03-event-joystick \
+  --evdev-absmap ABS_HAT0X=dpad_x,ABS_HAT0Y=dpad_y,ABS_X=X1,ABS_Y=Y1,ABS_RX=X2,ABS_RY=Y2,ABS_Z=LT,ABS_RZ=RT \
+  --evdev-keymap BTN_SOUTH=A,BTN_EAST=B,BTN_NORTH=Y,BTN_WEST=X,BTN_START=start,BTN_MODE=guide,BTN_SELECT=back \
+  --evdev-keymap BTN_TL=LB,BTN_TR=RB,BTN_TL2=LT,BTN_TR2=RT,BTN_THUMBL=TL,BTN_THUMBR=TR \
+  --axismap -y1=y1,-y2=y2                          \
+  --mimic-xpad                                     \
+  --silent
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807155345
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.480 seconds
+Real time usage: 0.493 seconds
+Preprocessor visited node count: 2606/1000000
+Revision size: 59099/2097152 bytes
+Post‐expand include size: 37925/2097152 bytes
+Template argument size: 18103/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 287/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  146.167      1 -total
+ 16.97%   24.811    200 Template:Ic
+  5.03%    7.349      9 Template:Note
+  4.27%    6.245     30 Template:AUR
+  3.89%    5.682      2 Template:Remove
+  3.80%    5.552      2 Template:Expansion
+  3.54%    5.174     17 Template:Pkg
+  3.32%    4.854     19 Template:Hc
+  2.83%    4.139      6 Template:META_Message
+  2.81%    4.107      3 Template:App
+-->
+<!-- Render ID 2b93568e-9278-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7971:|#|:idhash:canonical!zh-cn and timestamp 20260807155345 and revision id 34292. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

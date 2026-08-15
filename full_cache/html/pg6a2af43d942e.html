@@ -1,0 +1,158 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg6a2af43d942e">业余无线电</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><br/>
+</p>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg96d7a0730ebf">GNU Radio</a></li>
+<li><a href="#pgb0ad25af8b77">RTL-SDR</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Amateur_radio">Amateur radio</a>，最近一次同步于 2025-07-21，若英文版本有所<a href="https://wiki.archlinux.org/title/Amateur_radio?diff=0&amp;oldid=834028">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Amateur_radio_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>业余无线电爱好者（又称“火腿”、“HAM”）自从无线电存在的早期就活跃在相关实验与开发的前沿。在各个无线电频段上，有多种常用的通信模式。
+本页面列举了 <a href="#pg89cb7b475cfb">AUR</a> 中与业余无线电有关的软件，其中有些可以独立运行，但多数处理数字通信的程序则需要配合无线电硬件或者声卡使用。相关硬件可以购买，也可以自制。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>无线电频谱资源属于国家所有。根据《业余无线电台管理办法》等法律法规规定，在中国大陆，如果你想要发射业余无线电信号，需要获得<b><a href="http://www.crac.org.cn/">中国无线电协会</a></b>颁发的<b>业余无线电台操作证书</b>以及无线电管理机构颁发的<b>业余电台执照</b>。<b>违规发射将面临严重法律后果。</b></div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6a2af43d942e_.E9.80.9A.E7.94.A8.E4.BF.A1.E6.81.AF" id="通用信息"><span id=".E9.80.9A.E7.94.A8.E4.BF.A1.E6.81.AF"></span>通用信息</h2></div>
+<p>下面的很多程序都需要使用串口（如: <code>/dev/ttyS0</code>）与发信机通信。首先，你的用户需要在<code>uucp</code>用户组中。要将一个用户添加到<code>uucp</code>组中，以root身份运行下面的命令：
+</p>
+<pre>$ gpasswd -a <i>用户名</i> uucp
+</pre>
+<p>之后注销再重新登录。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6a2af43d942e_.E7.A1.AC.E4.BB.B6" id="硬件"><span id=".E7.A1.AC.E4.BB.B6"></span>硬件</h2></div>
+<p><a href="https://digirig.net/">Digirig</a>是适用于许多无线电硬件的接口之一。尽管有着许多型号，但它们大致上都通过<a href="#pgb16dfd48462f">ALSA</a>以“C-Media Electronics USB Audio Device”呈现给操作系统，包含着音频输入/输出的两个通道。通过<code>/dev/ttyUSB0</code>串口设备，Digirig也可用于控制电台。
+</p><p>其它设备，例如ICOM IC-705，具有内置声卡和CAT控制器。你可以直接通过USB连接电台，它应该作为USB音频设备(Burr-Brown USB Audio)和串口设备( <code>/dev/ttyUSB0</code> 和 <code>/dev/ttyUSB1</code>)。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6a2af43d942e_.E8.BD.AF.E4.BB.B6.E5.88.97.E8.A1.A8" id="软件列表"><span id=".E8.BD.AF.E4.BB.B6.E5.88.97.E8.A1.A8"></span>软件列表</h2></div>
+<ul><li><b>Hamlib</b> — 为无线电硬件和控制程序之间提供了一个接口。它只是用于帮助控制电台等硬件(例如记录日志，数字模式等)，并不是一个能独立使用的程序。</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/hamlib/">https://sourceforge.net/projects/hamlib/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hamlib">hamlib</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Soundmodem</b> — 由Tom Sailer（HB9JNX/AE4WA）编写，它能将声卡作为一个分组无线电的调制解调器，从而能使用多种AX.25通信模式。</li></ul>
+<p><br/>
+</p>
+<dl><dd><a href="https://web.archive.org/web/20130824024508/http://www.baycom.org/~tom/ham/soundmodem/">https://web.archive.org/web/20130824024508/http://www.baycom.org/~tom/ham/soundmodem/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/soundmodem/">soundmodem</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Grig</b> — 基于Hamlib的简单的控制程序。</li></ul>
+<dl><dd><a href="http://groundstation.sourceforge.net/grig/">http://groundstation.sourceforge.net/grig/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/grig/">grig</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>gMFSK</b> — 支持多种数字模式，使用hamlib和xlog记录日志。</li></ul>
+<dl><dd><a href="http://gmfsk.connect.fi">http://gmfsk.connect.fi</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gmfsk/">gmfsk</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>lysdr</b> — 一个SDR程序。</li></ul>
+<dl><dd><a href="https://github.com/gordonjcp/lysdr">https://github.com/gordonjcp/lysdr</a> || <small>未被打包？<a href="https://aur.archlinux.org/packages/">在 AUR 里搜索</a></small></dd></dl>
+<ul><li><b>linrad</b> — SM5BSZ编写的SDR控制程序。</li></ul>
+<dl><dd><a href="https://www.sm5bsz.com/linuxdsp/linrad.htm">https://www.sm5bsz.com/linuxdsp/linrad.htm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linrad/">linrad</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>quisk</b> — N2ADR编写的SDR控制程序</li></ul>
+<dl><dd><a href="https://james.ahlstrom.name/quisk/">https://james.ahlstrom.name/quisk/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/quisk/">quisk</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>owx</b> — 使用CSV表格给欧讯电台写频的命令行工具。</li></ul>
+<dl><dd><a href="http://owx.chmurka.net">http://owx.chmurka.net</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/owx/">owx</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>fldigi</b> — W1HKJ开发的GUI程序，支持多种数字通信模式。</li></ul>
+<dl><dd><a href="http://w1hkj.com/Fldigi.html">http://w1hkj.com/Fldigi.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fldigi/">fldigi</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>libfap</b> — APRS数据包解析程序。</li></ul>
+<dl><dd><a href="http://pakettiradio.net/libfap/">http://pakettiradio.net/libfap/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libfap/">libfap</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>aprx</b> — 轻量的APRS数字接口与i-Gate接口。</li></ul>
+<dl><dd><a href="https://thelifeofkenneth.com/aprx/">https://thelifeofkenneth.com/aprx/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aprx/">aprx</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>xdx</b> — 一个DX Cluster客户端。</li></ul>
+<dl><dd><a href="https://www.qsl.net/pg4i/linux/xdx.html">https://www.qsl.net/pg4i/linux/xdx.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xdx/">xdx</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>qsstv</b> — SSTV(慢扫描电视)编解码程序。</li></ul>
+<dl><dd>|| <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qsstv/">qsstv</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>linpsk</b> — 一个PSK31程序。</li></ul>
+<dl><dd>|| <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linpsk/">linpsk</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>xpsk31</b> — 一个PSK31程序，使用GTK+编写GUI。</li></ul>
+<dl><dd><a href="https://www.qsl.net/5b4az/pkg/psk31/xpsk31/xpsk31.html">https://www.qsl.net/5b4az/pkg/psk31/xpsk31/xpsk31.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xpsk31/">xpsk31</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6a2af43d942e_AX_25" id="AX.25">AX.25</h3></div>
+<p><b><a href="https://en.wikipedia.org/wiki/AX.25">AX.25</a></b> — 一个广泛应用于分组无线电的数据链路层协议。它既支持有线连接，也支持无线连接（如<a href="https://en.wikipedia.org/wiki/APRS">APRS</a>）。Linux内核中有对AX.25的原生支持。这里有更多信息：<a href="https://tldp.org/HOWTO/AX25-HOWTO/">guide</a><a href="#pg89cb7b475cfb">AUR</a>中有以下软件可用：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ax25-apps/">ax25-apps</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ax25-tools/">ax25-tools</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libax25/">libax25</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/node/">node</a></span><sup><small>AUR</small></sup></span></li></ul>
+<dl><dd><a href="http://www.ax25.net/">http://www.ax25.net/</a> || 原生内核已包含</dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6a2af43d942e_WSJT_X" id="WSJT-X">WSJT-X</h3></div>
+<p><b><a href="https://en.wikipedia.org/wiki/WSJT_(Amateur_radio_software)">WSJT-X</a> (Weak Signal Communication by K1JT)</b> — 提供了丰富的包括针对流星散射、电离层散射和VHF/UHF的EME(月面反射)以及HF天波传播优化的特定数字模式(如FT8和WSPR)。WSJT由诺贝尔物理学奖得主Joe Taylor领导开发，他的业余无线电呼号为KIJT。该程序可以解码流星余迹反射通信中几分之一秒的信号和低于可听阈值10 dB的稳定信号。WSJT需要串口访问权限，确保你的用户在uucp用户组中(见上文)。
+</p>
+<dl><dd><a href="https://wsjt.sourceforge.io/wsjtx.html">https://wsjt.sourceforge.io/wsjtx.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wsjtx/">wsjtx</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6a2af43d942e_WSJT_X_Improved" id="WSJT-X_Improved">WSJT-X_Improved</h3></div>
+<p><b>wsjt-x_improved by DG2YCB</b> — 是WSJT-X的加强版。WSJT-X_Improved提供了为DX(Distant eXchange，远距离通信)特殊的优化和其它创新性的提升和特性。有三个不同的可用软件包，它们分别采用标准GUI, Alternate Layout (AL) GUI, 和Widescreen GUI。
+</p>
+<dl><dd><a href="https://sourceforge.net/projects/wsjt-x-improved">https://sourceforge.net/projects/wsjt-x-improved</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wsjtx-improved/">wsjtx-improved</a></span><sup><small>AUR</small></sup></span> | <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wsjtx-improved-al/">wsjtx-improved-al</a></span><sup><small>AUR</small></sup></span> | <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wsjtx-improved-widescreen/">wsjtx-improved-widescreen</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6a2af43d942e_JTDX_Improved" id="JTDX_Improved">JTDX_Improved</h3></div>
+<p><b>jtdx_improved by DG2YCB</b> — 是一个JTDX(由Igor Chernikov et al开发，<a href="https://sourceforge.net/projects/jtdx/">https://sourceforge.net/projects/jtdx/</a> )的加强版。DG2YCB和Igor的两个版本都是基于WSJT-X的。有两个不同的GUI布局可供选择，分别为改进版GUI和标准JTDX GUI。
+</p>
+<dl><dd><a href="https://sourceforge.net/projects/jtdx-improved">https://sourceforge.net/projects/jtdx-improved</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jtdx-improved/">jtdx-improved</a></span><sup><small>AUR</small></sup></span> | <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jtdx-improved-jtdxgui/">jtdx-improved-jtdxgui</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6a2af43d942e_Xastir" id="Xastir">Xastir</h3></div>
+<p><b>Xastir</b> — 意思是X Amateur Station and Information Reporting，是一个<a href="https://en.wikipedia.org/wiki/APRS">APRS</a>客户端。Xastir是一个开源程序，提供对APRS的完全支持。该软件正处于一个积极开发的阶段当中。<br/>
+Xastir具有很高的灵活性，有许多配置它的方法。例如，在有网络连接的情况下，可以通过网络进行操作而无需无线电设备。<a href="https://xastir.org">https://xastir.org</a> 上的wiki非常详细，包含了关于软件功能和软件设置的所有信息。<br/>
+该软件具有一个可选的语音功能，可以在安装软件包festival后启用。此外还需要安装如festival-en或festival-english这样的语音库软件包。如果想要启用该功能，festival必须在编译xastir之前安装到系统上。在启动xastir之前，运行festival：
+</p>
+<pre>$ festival --server
+</pre>
+<p>或者也可以写一个简单的脚本来自动化这个按顺序的启动程序。如果有其它程序(像是一个播放器)正在同时访问音频，可能会出现问题。PKGBUILD会自动下载850kB大小的一组.wav文件放置在<code>/usr/share/xastir/sounds/</code>中。它们是一个不需要festival渲染的北美英语的警报录音。configure菜单的音频播放命令<code>play</code>可能不起作用，请用<code>aplay</code>代替。
+</p>
+<dl><dd><a href="http://www.xastir.org">http://www.xastir.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xastir/">xastir</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6a2af43d942e_.E6.95.B0.E5.AD.97.E8.AF.AD.E9.9F.B3" id="数字语音"><span id=".E6.95.B0.E5.AD.97.E8.AF.AD.E9.9F.B3"></span>数字语音</h3></div>
+<p><b>FreeDV</b> — 是一个用于 HF 频段的数字语音模式。它使用开源免费的 Codec2 语音编解码器，可以在窄带宽、低比特率的情况下高效率进行通信，特别适用于短波无线电通联。使用FreeDV所需要的只有一台运行Free DV GUI程序的计算机，以及 SSB 模式的电台。对于 Arch Linux，FreeDV 和 Codec2 都可以从 AUR 获取到。两者都需要安装好才能使用 FreeDV。
+</p>
+<ul><li><a href="https://www.rowetel.com/codec2.html">https://www.rowetel.com/codec2.html</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=codec2">codec2</a></span><sup><small>包</small></sup></span></li></ul>
+<dl><dd><a href="https://freedv.org">https://freedv.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/freedv/">freedv</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6a2af43d942e_.E5.88.86.E6.9E.90.E5.B7.A5.E5.85.B7" id="分析工具"><span id=".E5.88.86.E6.9E.90.E5.B7.A5.E5.85.B7"></span>分析工具</h3></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gpredict/">gpredict</a></span><sup><small>AUR</small></sup></span> – 用于实时卫星追踪、卫星轨道预测的软件</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hamsolar/">hamsolar</a></span><sup><small>AUR</small></sup></span> – 在桌面上显示当前太阳活动指数</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/splat/">splat</a></span><sup><small>AUR</small></sup></span> – 无线电信号传播、损耗和地形分析</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sunclock/">sunclock</a></span><sup><small>AUR</small></sup></span> – 用于预测灰线传播路径</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xnec2c/">xnec2c</a></span><sup><small>AUR</small></sup></span> – 天线模拟软件</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6a2af43d942e_.E9.80.9A.E8.81.94.E6.97.A5.E5.BF.97" id="通联日志"><span id=".E9.80.9A.E8.81.94.E6.97.A5.E5.BF.97"></span>通联日志</h3></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cqrlog-bin/">cqrlog-bin</a></span><sup><small>AUR</small></sup></span> – 常见的Linux日志程序</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fdlog/">fdlog</a></span><sup><small>AUR</small></sup></span> – 一个有网络节点的Field Day日志记录器</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/klog/">klog</a></span><sup><small>AUR</small></sup></span> – 运行在KDE上的业余无线电日志程序</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qle/">qle</a></span><sup><small>AUR</small></sup></span> – QSO  日志记录器和编辑器，用 Perl 编写</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tlf/">tlf</a></span><sup><small>AUR</small></sup></span> – 一个日志与竞赛控制台程序</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/trustedqsl/">trustedqsl</a></span><sup><small>AUR</small></sup></span> – 用于上传LoTW(Logbook of the World)日志</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xlog/">xlog</a></span><sup><small>AUR</small></sup></span> – 一个业余无线电日志系统</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/yfklog/">yfklog</a></span><sup><small>AUR</small></sup></span> – 通用的*nix业余无线电日志程序</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/yfktest/">yfktest</a></span><sup><small>AUR</small></sup></span> – 无线电爱好者的通联竞赛日志程序</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6a2af43d942e_.E5.B7.A5.E5.85.B7" id="工具"><span id=".E5.B7.A5.E5.85.B7"></span>工具</h3></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cty/">cty</a></span><sup><small>AUR</small></sup></span> – 包含实体（国家）、前缀、呼号等信息，供业余无线电日志程序使用</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dxcc/">dxcc</a></span><sup><small>AUR</small></sup></span> – 一个确认指定呼号DXCC实体的小程序</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6a2af43d942e_.E6.91.A9.E5.B0.94.E6.96.AF.E7.94.B5.E7.A0.81.E7.BB.83.E4.B9.A0.E5.B7.A5.E5.85.B7" id="摩尔斯电码练习工具"><span id=".E6.91.A9.E5.B0.94.E6.96.AF.E7.94.B5.E7.A0.81.E7.BB.83.E4.B9.A0.E5.B7.A5.E5.85.B7"></span>摩尔斯电码练习工具</h3></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aldo/">aldo</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cutecw/">cutecw</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ebook2cw/">ebook2cw</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gtkmmorse/">gtkmmorse</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/kochmorse/">kochmorse</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qrq/">qrq</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/unixcw/">unixcw</a></span><sup><small>AUR</small></sup></span></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6a2af43d942e_.E5.85.B6.E4.BB.96" id="其他"><span id=".E5.85.B6.E4.BB.96"></span>其他</h3></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cwirc/">cwirc</a></span><sup><small>AUR</small></sup></span> – 通过IRC收发摩尔斯电码</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807050026
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.163 seconds
+Real time usage: 0.167 seconds
+Preprocessor visited node count: 712/1000000
+Revision size: 9066/2097152 bytes
+Post‐expand include size: 20332/2097152 bytes
+Template argument size: 10523/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   48.013      1 -total
+ 43.23%   20.756     21 Template:App
+ 17.75%    8.522     49 Template:AUR
+  6.49%    3.117      1 Template:翻译状态
+  5.42%    2.601      1 Template:相关文章开始
+  4.92%    2.362      2 Template:Pkg
+  4.52%    2.169      2 Template:Related
+  3.81%    1.830      1 Template:Warning
+  1.99%    0.955      1 Template:META_Related_articles_start
+  1.97%    0.946      1 Template:META_Missing_package
+-->
+<!-- Render ID e7269d0e-921c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7007:|#|:idhash:canonical!zh-cn and timestamp 20260807050026 and revision id 33694. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

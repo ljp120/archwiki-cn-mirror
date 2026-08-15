@@ -1,0 +1,274 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg74c1ac5b6606">编解码器与容器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg9277af4b0bef">Optical disc drive#Playback</a></li>
+<li><a href="#pgdc8e7a283f0c">GStreamer</a></li>
+<li><a href="#pgd5cab245336d">FFmpeg</a></li>
+</ul></div>
+<p>自维基百科<a href="https://en.wikipedia.org/wiki/Codec">Wikipedia</a>, "<b>编解码器</b>（英语：codec）指的是一个能够对一个信号或者一个数据流进行编解码操作的设备或者程序。."
+</p><p>一般来说，编解码器被多媒体应用程序用来对音频或视频流进行编码或解码。为了播放编码后的数据流，用户必须确保安装了适当的编解码器。
+</p><p>这篇文章只关于编解码器及程式后端；见<a href="#pg58f89a7cd9f4">List of applications/Multimedia</a> 以列举音视频播放器的选择如(<a href="#pgb6ea2b1dfebb">MPlayer</a>, <a href="#pg110f55dc83f2">mpv</a> 和 <a href="#pgf08ba452154b">VLC</a>)
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg74c1ac5b6606_.E9.9C.80.E6.B1.82" id="需求"><span id=".E9.9C.80.E6.B1.82"></span>需求</h2></div>
+<p>播放常见的媒体需要
+</p>
+<ul><li>一个播放器</li>
+<li>一个编解码器</li></ul>
+<p>如果有了媒体播放器，不一定非要安装编解码器。例如，<a href="#pgb6ea2b1dfebb">MPlayer</a> 就内置了大量编解码器。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg74c1ac5b6606_.E7.BC.96.E8.A7.A3.E7.A0.81.E5.99.A8.E5.88.97.E8.A1.A8" id="编解码器列表"><span id=".E7.BC.96.E8.A7.A3.E7.A0.81.E5.99.A8.E5.88.97.E8.A1.A8"></span>编解码器列表</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg74c1ac5b6606_.E9.9F.B3.E9.A2.91" id="音频"><span id=".E9.9F.B3.E9.A2.91"></span>音频</h3></div>
+<p>见<a href="https://en.wikipedia.org/wiki/Comparison_of_audio_coding_formats">Wikipedia:Comparison of audio coding formats</a>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg74c1ac5b6606_.E6.97.A0.E6.8D.9F.E9.9F.B3.E9.A2.91.E7.BC.96.E8.A7.A3.E7.A0.81.E5.99.A8" id="无损音频编解码器"><span id=".E6.97.A0.E6.8D.9F.E9.9F.B3.E9.A2.91.E7.BC.96.E8.A7.A3.E7.A0.81.E5.99.A8"></span>无损音频编解码器</h4></div>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Apple_Lossless">Apple Lossless</a> (ALAC)</b> — 由苹果公司开发的无损音频压缩编解码器，部署在其所有的平台和设备上。</li></ul>
+<dl><dd><a href="https://alac.macosforge.org/">https://alac.macosforge.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/alac-git/">alac-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/FLAC">FLAC</a></b> — 自由的音频编解码器</li></ul>
+<dl><dd><a href="https://xiph.org/flac/">https://xiph.org/flac/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=flac">flac</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/WavPack">WavPack</a></b> — 无损的音频压缩格式，同时也有有损的<a href="https://en.wikipedia.org/wiki/WavPack#Hybrid_mode">hybrid mode</a>.</li></ul>
+<dl><dd><a href="https://www.wavpack.com/">https://www.wavpack.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wavpack">wavpack</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg74c1ac5b6606_.E6.9C.89.E6.8D.9F.E9.9F.B3.E9.A2.91.E7.BC.96.E8.A7.A3.E7.A0.81.E5.99.A8" id="有损音频编解码器"><span id=".E6.9C.89.E6.8D.9F.E9.9F.B3.E9.A2.91.E7.BC.96.E8.A7.A3.E7.A0.81.E5.99.A8"></span>有损音频编解码器</h4></div>
+<table class="wikitable" style="text-align:center">
+<tbody><tr>
+<th colspan="2">格式</th>
+<th>编码器</th>
+<th>解码器
+</th></tr>
+<tr>
+<td colspan="2"><a href="https://en.wikipedia.org/wiki/Advanced_Audio_Coding">AAC</a></td>
+<td colspan="2"><a href="#pg74c1ac5b6606_AAC">#AAC</a>
+</td></tr>
+<tr>
+<td colspan="2"><a href="https://en.wikipedia.org/wiki/ATSC_A/52">ATSC A/52</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aften/">aften</a></span><sup><small>AUR</small></sup></span></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=a52dec">a52dec</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td colspan="2"><a href="https://en.wikipedia.org/wiki/CELT">CELT</a></td>
+<td colspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/celt/">celt</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td rowspan="2"><a href="https://en.wikipedia.org/wiki/MPEG-1">MPEG-1</a></td>
+<td></td>
+<td> </td>
+<td rowspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libmad">libmad</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/MP3">MP3</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lame">lame</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td colspan="2"><a href="https://en.wikipedia.org/wiki/Musepack">Musepack</a> (MPC)</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">– <sup>1</sup></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libmpcdec">libmpcdec</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td colspan="2"><a href="https://en.wikipedia.org/wiki/Opus_(audio_format)">Opus</a></td>
+<td colspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=opus">opus</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td colspan="2"><a href="https://en.wikipedia.org/wiki/Vorbis">Vorbis</a></td>
+<td colspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libvorbis">libvorbis</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<th colspan="4">语音编解码器
+</th></tr>
+<tr>
+<td colspan="2"><a href="https://en.wikipedia.org/wiki/Adaptive_Multi-Rate_audio_codec">AMR</a></td>
+<td colspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=opencore-amr">opencore-amr</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td colspan="2"><a href="https://en.wikipedia.org/wiki/Speex">Speex</a></td>
+<td colspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=speex">speex</a></span><sup><small>包</small></sup></span>
+</td></tr></tbody></table>
+<ol><li>mppenc 没有打包。</li></ol>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/CELT">CELT</a></b> — 开源、无专利的有损编解码器， 特点是低延迟。</li></ul>
+<dl><dd><a href="http://www.celt-codec.org/">http://www.celt-codec.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/celt/">celt</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/LAME">LAME</a></b> — MP3 编码器、可视化框架分析。</li></ul>
+<dl><dd><a href="https://lame.sourceforge.io/">https://lame.sourceforge.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lame">lame</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>liba52</b> — 解码 <a href="https://en.wikipedia.org/wiki/ATSC_A/52">ATSC A/52</a> (Dolby Digital) 流（有损）的自由库。</li></ul>
+<dl><dd><a href="https://liba52.sourceforge.io/">https://liba52.sourceforge.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=a52dec">a52dec</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/libdca">libdca</a></b> — 编码 DTS 相干声学流（DTS Coherent Acoustics streams）的自由库。</li></ul>
+<dl><dd><a href="https://www.videolan.org/developers/libdca.html">https://www.videolan.org/developers/libdca.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libdca">libdca</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/libmad">MAD</a></b> — 高品质 MPEG 音频解码器。</li></ul>
+<dl><dd><a href="https://www.underbit.com/products/mad/">https://www.underbit.com/products/mad/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libmad">libmad</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Musepack">Musepack</a> (MPC)</b> — 开源有损音频编解码器，为 <a href="https://en.wikipedia.org/wiki/Transparency_(data_compression)">transparency</a> 而设计。</li></ul>
+<dl><dd><a href="https://musepack.net/">https://musepack.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libmpcdec">libmpcdec</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Adaptive_Multi-Rate_audio_codec">opencore-amr</a></b> — 自适应多速率（Adaptive Multi Rate，AMR）语音解码器的开源实现。</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/opencore-amr/">https://sourceforge.net/projects/opencore-amr/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=opencore-amr">opencore-amr</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Opus_(audio_codec)">Opus</a></b> — 开源无专利音频编解码器，为语音和通用音频而设计，低延迟。</li></ul>
+<dl><dd><a href="https://www.opus-codec.org/">https://www.opus-codec.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=opus">opus</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Speex">Speex</a></b> — 为语音设计的无专利有损音频压缩格式。</li></ul>
+<dl><dd><a href="https://www.speex.org/">https://www.speex.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=speex">speex</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Vorbis">Vorbis</a></b> — 开源无专利有损音频编解码器。</li></ul>
+<dl><dd><a href="https://xiph.org/vorbis/">https://xiph.org/vorbis/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libvorbis">libvorbis</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg74c1ac5b6606_AAC" id="AAC">AAC</h5></div>
+<p>自 <a href="https://en.wikipedia.org/wiki/Advanced_Audio_Coding">Wikipedia</a>:
+</p>
+<dl><dd><b>高级音频编码</b>（Advanced Audio Coding，AAC）是为数字音频压缩而设计的专有音频编码格式。作为 MP3 格式的继任者，AAC在相同采样率下音质一般优于 MP3。</dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/FAAC">FAAC</a></b> — 专有 AAC 音频编码器。</li></ul>
+<dl><dd><a href="http://faac.sourceforge.net/">http://faac.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=faac">faac</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/FAAD2">FAAD2</a></b> — ISO AAC 音频解码器。</li></ul>
+<dl><dd><a href="http://faac.sourceforge.net/">http://faac.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=faad2">faad2</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Fraunhofer_FDK_AAC">Fraunhofer FDK AAC</a></b> — AAC 编码器的 OpenCORE 框架实现。该库经 Fraunhofer AAC 编解码器修改而来。</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/opencore-amr/">https://sourceforge.net/projects/opencore-amr/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libfdk-aac">libfdk-aac</a></span><sup><small>包</small></sup></span> (codec library) <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fdkaac">fdkaac</a></span><sup><small>包</small></sup></span> (CLI frontend for libfdk-aac)</dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Nero_AAC_Codec">Nero AAC</a></b> — Nero AAC reference quality MPEG-4 and 3GPP audio codec. (deprecated)</li></ul>
+<dl><dd><a href="https://www.nero.com/">https://www.nero.com/</a> || <a href="https://aur.archlinux.org/pkgbase/neroaac-bin/">neroaac-bin</a><sup>AUR</sup></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg74c1ac5b6606_.E5.9B.BE.E5.83.8F.E7.BC.96.E8.A7.A3.E7.A0.81.E5.99.A8" id="图像编解码器"><span id=".E5.9B.BE.E5.83.8F.E7.BC.96.E8.A7.A3.E7.A0.81.E5.99.A8"></span>图像编解码器</h3></div>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/JasPer">JasPer</a></b> — 新兴的 JPEG-2000 Part-1 标准编解码器的软件实现。</li></ul>
+<dl><dd><a href="https://www.ece.uvic.ca/~frodo/jasper/">https://www.ece.uvic.ca/~frodo/jasper/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=jasper">jasper</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/OpenJPEG">OpenJPEG</a></b> — 开源 JPEG 2000 编解码器。</li></ul>
+<dl><dd><a href="https://www.openjpeg.org/">https://www.openjpeg.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/openjpeg/">openjpeg</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/WebP">WebP</a></b> — 适用于有损与无损压缩的图像格式服务。目前由 Google 开发。</li></ul>
+<dl><dd><a href="https://developers.google.com/speed/webp/">https://developers.google.com/speed/webp/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libwebp">libwebp</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/AVIF">AV1 Image File Format (AVIF)</a></b> — 基于 AV1 视频编解码器的图像实现。</li></ul>
+<dl><dd><a href="https://github.com/AOMediaCodec/libavif">https://github.com/AOMediaCodec/libavif</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libavif">libavif</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/High_Efficiency_Image_File_Format">High Efficiency Image File Format (HEIF)</a></b> — 基于 HEVC 编解码器的图像格式。通常使用 HEIC 容器。</li></ul>
+<dl><dd><a href="https://github.com/strukturag/libheif">https://github.com/strukturag/libheif</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libheif">libheif</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg74c1ac5b6606_.E8.A7.86.E9.A2.91.E7.BC.96.E8.A7.A3.E7.A0.81.E5.99.A8" id="视频编解码器"><span id=".E8.A7.86.E9.A2.91.E7.BC.96.E8.A7.A3.E7.A0.81.E5.99.A8"></span>视频编解码器</h3></div>
+<p>另见 <a href="https://en.wikipedia.org/wiki/Comparison_of_video_codecs">Wikipedia:Comparison of video codecs</a>。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>格式</th>
+<th>编解码器库
+</th></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/AV1">AV1</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=aom">aom</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dav1d">dav1d</a></span><sup><small>包</small></sup></span> (decode), <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rav1e">rav1e</a></span><sup><small>包</small></sup></span> (encode), <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=svt-av1">svt-av1</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Audio_Video_Standard">AVS2</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/davs2/">davs2</a></span><sup><small>AUR</small></sup></span> (decode)
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Daala">Daala</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/daala-git/">daala-git</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Dirac_(video_compression_format)">Dirac</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=schroedinger">schroedinger</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/DV">DV</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libdv">libdv</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td rowspan="2"><a href="https://en.wikipedia.org/wiki/High_Efficiency_Video_Coding">H.265</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=x265">x265</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/x265-hg/">x265-hg</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libde265">libde265</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libde265-git/">libde265-git</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/H.264">H.264</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=x264">x264</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/x264-git/">x264-git</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/MPEG-1">MPEG-1</a></td>
+<td rowspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libmpeg2">libmpeg2</a></span><sup><small>包</small></sup></span> (decode)
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/MPEG-2">MPEG-2</a>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/MPEG-4">MPEG-4</a></td>
+<td><a href="https://en.wikipedia.org/wiki/Xvid">Xvid</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xvidcore">xvidcore</a></span><sup><small>包</small></sup></span>)
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Theora">Theora</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libtheora">libtheora</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/VP8">VP8</a>, <a href="https://en.wikipedia.org/wiki/VP9">VP9</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libvpx">libvpx</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libvpx-git/">libvpx-git</a></span><sup><small>AUR</small></sup></span>
+</td></tr></tbody></table>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/AV1">AV1</a></b> — AOMedia Video 1 (AV1) 是 Google's VP9、Mozilla's Daala、Cisco's Thor 编解码器的继任者。“aom”是编解码器的参考实现， “dav1d”是注重性能的编解码器， “rav1e” 是注重性能的解码器。Most benchmark show better performances with svt-av1 than rav1e.</li></ul>
+<dl><dd><a href="https://aomediacodec.github.io/av1-spec/">https://aomediacodec.github.io/av1-spec/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=aom">aom</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dav1d">dav1d</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rav1e">rav1e</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=svt-av1">svt-av1</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Daala">Daala</a></b> — Research video codec under development by the Xiph.Org Foundation and sponsored by the Mozilla Foundation. The goal of the project is to provide a free to implement, use and distribute digital media format and reference implementation with technical performance superior to h.265.</li></ul>
+<dl><dd><a href="https://www.xiph.org/daala/">https://www.xiph.org/daala/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/daala-git/">daala-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>libde265</b> — Open source implementation of the h.265 video codec.</li></ul>
+<dl><dd><a href="https://github.com/strukturag/libde265">https://github.com/strukturag/libde265</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libde265">libde265</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/DV">libdv</a></b> — The Quasar DV codec (libdv) is a software codec for DV video.</li></ul>
+<dl><dd><a href="http://libdv.sourceforge.net/">http://libdv.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libdv">libdv</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/libmpeg2">libmpeg2</a></b> — Library for decoding MPEG-1 and MPEG-2 video streams.</li></ul>
+<dl><dd><a href="https://libmpeg2.sourceforge.io/">https://libmpeg2.sourceforge.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libmpeg2">libmpeg2</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Dirac_(video_compression_format)">Schrödinger</a></b> — Advanced royalty-free video compression format designed for a wide range of uses, from delivering low-resolution web content to broadcasting HD and beyond, to near-lossless studio editing.</li></ul>
+<dl><dd><a href="https://launchpad.net/schroedinger/">https://launchpad.net/schroedinger/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=schroedinger">schroedinger</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Theora">Theora</a></b> — Open video codec developed by the Xiph.org.</li></ul>
+<dl><dd><a href="https://www.theora.org/">https://www.theora.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libtheora">libtheora</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/VP9">VP9</a></b> — High-quality, open video format for the web that's freely available to everyone. Improved version of earlier <a href="https://en.wikipedia.org/wiki/VP8">VP8</a> codec.</li></ul>
+<dl><dd><a href="https://www.webmproject.org">https://www.webmproject.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libvpx">libvpx</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/x264">x264</a></b> — Free library for encoding H264/AVC video streams.</li></ul>
+<dl><dd><a href="https://www.videolan.org/developers/x264.html">https://www.videolan.org/developers/x264.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=x264">x264</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/x265">x265</a></b> — Open-source project and free application library for encoding video streams into the H.265/High Efficiency Video Coding (HEVC) format.</li></ul>
+<dl><dd><a href="https://www.x265.org/">https://www.x265.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=x265">x265</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Xvid">Xvid</a></b> — Open source MPEG-4 video codec.</li></ul>
+<dl><dd><a href="https://www.xvid.com/">https://www.xvid.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xvidcore">xvidcore</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg74c1ac5b6606_.E5.AE.B9.E5.99.A8.E6.A0.BC.E5.BC.8F.E5.B7.A5.E5.85.B7" id="容器格式工具"><span id=".E5.AE.B9.E5.99.A8.E6.A0.BC.E5.BC.8F.E5.B7.A5.E5.85.B7"></span>容器格式工具</h2></div>
+<p>另见 <a href="https://en.wikipedia.org/wiki/Comparison_of_video_container_formats">Wikipedia:Comparison of video container formats</a>。
+</p>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/MKVToolNix">MKVToolNix</a></b> — 一套用于创建、编辑和检查 Matroska 文件的工具。</li></ul>
+<dl><dd><a href="https://mkvtoolnix.download/">https://mkvtoolnix.download/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkvtoolnix-cli">mkvtoolnix-cli</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkvtoolnix-gui">mkvtoolnix-gui</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>MP4Joiner</b> — 一组用于处理 MP4 文件的图形用户界面工具（MP4Joiner、MP4Splitter）。</li></ul>
+<dl><dd><a href="https://www.mp4joiner.org/">https://www.mp4joiner.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mp4joiner/">mp4joiner</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>OGMtools</b> — OGG 媒体流的信息、提取或创建。</li></ul>
+<dl><dd><a href="https://www.bunkus.org/videotools/ogmtools">https://www.bunkus.org/videotools/ogmtools</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ogmtools">ogmtools</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg74c1ac5b6606_.E5.90.8E.E7.AB.AF" id="后端"><span id=".E5.90.8E.E7.AB.AF"></span>后端</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg74c1ac5b6606_GStreamer" id="GStreamer">GStreamer</h3></div>
+<p>摘自 <a href="https://gstreamer.freedesktop.org/">https://gstreamer.freedesktop.org/</a>:
+</p>
+<dl><dd>GStreamer is a library for constructing graphs of media-handling components. The applications it supports range from simple Ogg/Vorbis playback, audio/video streaming to complex audio (mixing) and video (non-linear editing) processing.</dd></dl>
+<p>简单地说，GStreamer 是许多媒体应用程序使用的"后端"或"框架"。参见 <a href="#pgdc8e7a283f0c">GStreamer</a> 一文。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg74c1ac5b6606_xine" id="xine">xine</h3></div>
+<p>摘自 <a href="https://sourceforge.net/projects/xine/">https://sourceforge.net/projects/xine/</a>:
+</p>
+<dl><dd>xine is a free multimedia player. It plays back CDs, DVDs, BluRays and VCDs. It also decodes multimedia files like AVI, MOV, WMV, and MP3 from local disk drives, and displays multimedia streamed over the Internet.</dd></dl>
+<p>作为 GStreamer 的替代方案，许多媒体播放器都可以配置为使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xine-lib">xine-lib</a></span><sup><small>包</small></sup></span> 提供的 xine 后端。
+</p><p>请注意，xine 项目本身提供了一个视频播放器 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xine-ui">xine-ui</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg74c1ac5b6606_libavcodec" id="libavcodec">libavcodec</h3></div>
+<p><a href="https://ffmpeg.org/libavcodec.html">libavcodec</a> 是 <a href="#pgd5cab245336d">FFmpeg</a> 项目的一部分。它包含大量视频和音频编解码器。libavcodec 编解码器包含在 <a href="#pgb6ea2b1dfebb">MPlayer</a> 和 <a href="#pgf08ba452154b">VLC</a> 等媒体播放器中，因此您可能不需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ffmpeg">ffmpeg</a></span><sup><small>包</small></sup></span> 软件包本身。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg74c1ac5b6606_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg74c1ac5b6606_Totem_Player_.E4.B8.AD.E6.B2.A1.E6.9C.89_H264.E3.80.81mpg4_.E6.88.96_Musepack_.28.mpc.29" id="Totem_Player_中没有_H264、mpg4_或_Musepack_(.mpc)"><span id="Totem_Player_.E4.B8.AD.E6.B2.A1.E6.9C.89_H264.E3.80.81mpg4_.E6.88.96_Musepack_.28.mpc.29"></span>Totem Player 中没有 H264、mpg4 或 Musepack (.mpc)</h3></div>
+<p>如果您在使用 Totem Player 时看到 "The H264 plugin is missing" 的警告，<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gst-libav">gst-libav</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg74c1ac5b6606_Parole_Player_.E4.B8.AD.E6.B2.A1.E6.9C.89_H264" id="Parole_Player_中没有_H264"><span id="Parole_Player_.E4.B8.AD.E6.B2.A1.E6.9C.89_H264"></span>Parole Player 中没有 H264</h3></div>
+<p>如果您在使用 Parole 媒体播放器时看到 "Parole needs H.264 decoder to play this file" 的警告，<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gst-libav">gst-libav</a></span><sup><small>包</small></sup></span>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808020828
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.230 seconds
+Real time usage: 0.236 seconds
+Preprocessor visited node count: 1083/1000000
+Revision size: 11420/2097152 bytes
+Post‐expand include size: 25931/2097152 bytes
+Template argument size: 12979/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   59.987      1 -total
+ 45.02%   27.004     36 Template:App
+ 20.93%   12.554     61 Template:Pkg
+  5.21%    3.123     13 Template:AUR
+  4.88%    2.927      1 Template:-
+  4.34%    2.605      1 Template:相关文章开始
+  3.72%    2.233      3 Template:Related
+  2.53%    1.517      1 Template:META_Table_cell
+  1.72%    1.029      1 Template:META_Related_articles_start
+  1.41%    0.844      1 Template:相关文章结束
+-->
+<!-- Render ID 0b8e820e-92ce-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2929:|#|:idhash:canonical!zh-cn and timestamp 20260808020828 and revision id 34826. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

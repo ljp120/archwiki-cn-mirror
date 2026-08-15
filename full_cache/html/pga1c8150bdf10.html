@@ -1,0 +1,200 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pga1c8150bdf10">Wine 打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Wine_package_guidelines">Wine package guidelines</a>，最近一次同步于 2025-12-18，若英文版本有所<a href="https://wiki.archlinux.org/title/Wine_package_guidelines?diff=0&amp;oldid=859024">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Wine_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<p>有不少 Windows 软件在 Linux 上也很有用，所以我们也可以为它们创建软件包，但两个操作系统上的区别使这一过程变得有点复杂。由于提供了源码的软件通常都会被移植到 Linux 上，因此本文将主要讨论 Win32 二进制文件相关内容。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga1c8150bdf10_.E9.A6.96.E5.85.88.E6.A3.80.E6.9F.A5" id="首先检查"><span id=".E9.A6.96.E5.85.88.E6.A3.80.E6.9F.A5"></span>首先检查</h2></div>
+<ul><li>许可证：是否允许重新打包？</li>
+<li>安装器：是否提供免安装版本？如果没有，是否可以静默安装？</li>
+<li>便携性与洁净性：软件是否有便携性？是否洁净？</li></ul>
+<p>这里提到的便携性是指软件<i>从不</i>向注册表或目录外进行写入；洁净是指软件<i>从不</i>向自身目录进行写入，但可能会将设置写入到用户目录中。一个软件可以二者兼具（例如从不写入设置信息）或二者兼非（例如会向自身目录、其它目录和注册表等进行写入）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga1c8150bdf10_.E8.AE.B8.E5.8F.AF.E8.AF.81" id="许可证"><span id=".E8.AE.B8.E5.8F.AF.E8.AF.81"></span>许可证</h3></div>
+<p>通常来说许可证是安装路径下的一个文本文件。如果没找到，可以参考安装时显示的界面。如果它没有提到与重新打包相关的内容，则代表作者没有进行限制，可以继续。如果有相关内容，那通常会不允许移除任何文件，甚至是不允许进行重新打包。对于前者，只需确保 <a href="#pg7edcce763396">makepkg</a> 时没有文件丢失，然后可以在 <code>post_install</code> 阶段移除不需要的文件（例如卸载器）。对于后者，安装操作必须在 <code>post_install</code> 阶段完成，<code>build</code> 阶段只可用于复制安装文件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga1c8150bdf10_.E5.AE.89.E8.A3.85.E5.99.A8" id="安装器"><span id=".E5.AE.89.E8.A3.85.E5.99.A8"></span>安装器</h3></div>
+<p>类似 <code>.zip</code> 的压缩文件比 Windows 安装器处理起来简单得多。如果作者坚持通过安装器来分发软件包，可以查一下 <a href="https://web.archive.org/web/20180209090444/http://unattended.msfn.org/unattended.xp/page/list/switch">MSFN</a> 或其它网页看看安装器是否支持静默安装。如果找不到办法，可以试试通过其它<a href="#pge8e96600d1a5">解压工具</a>打开安装器，有时能行。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga1c8150bdf10_.E4.BE.BF.E6.90.BA.E6.80.A7.E4.B8.8E.E6.B4.81.E5.87.80.E6.80.A7" id="便携性与洁净性"><span id=".E4.BE.BF.E6.90.BA.E6.80.A7.E4.B8.8E.E6.B4.81.E5.87.80.E6.80.A7"></span>便携性与洁净性</h3></div>
+<p>便携软件无需独立的 <a href="#pg39e5cd9380ff">Wine</a> 模拟文件系统，可以在 <a href="https://www.portablefreeware.com/">Portable Freeware</a> 上查下你的软件是否便携。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga1c8150bdf10_.E6.8C.87.E5.8D.97.E6.A6.82.E8.A6.81" id="指南概要"><span id=".E6.8C.87.E5.8D.97.E6.A6.82.E8.A6.81"></span>指南概要</h2></div>
+<p>打包 Windows 软件的过程基本上就是将应用文件作为数据，由 Wine 进行解析，就像 JVM 和 Java 字节码一样。
+</p><p>我们将把应用安装到 <code>/usr/share/"$pkgname"</code>，然后将应用所需文件写入到 <code>"$HOME"/."$pkgname"</code>。路径位于 <code>/usr/bin/"$pkgname"</code> 的一个小脚本将负责创建目录，有需要时进行配置，然后启动应用。
+</p><p>下面的部分将对各个步骤进行讲解。
+</p><p>这样，每个用户都可以保留其独立的设置信息，不会互相影响。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga1c8150bdf10_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h3></div>
+<p>如果应用没有安装器，那么安装过程就是单纯地解压文件到 <code>"$pkgdir"/usr/share/$pkgname</code>，并确保权限配置正常。以下命令可完成该操作：
+</p>
+<pre>$ find "$pkgdir"/usr/share -type f -exec chmod 644 "{}" \;
+$ find "$pkgdir"/usr/share -type d -exec chmod 755 "{}" \;
+</pre>
+<p>如果无法直接解压，就需要创建一个 Wine 环境：
+</p>
+<pre>$ install -m755 -d "$srcdir"/tmp "$srcdir"/tmp/env "$srcdir"/tmp/local
+$ export WINEPREFIX="$srcdir"/tmp/env
+$ export XDG_DATA_HOME="$srcdir"/tmp/local
+$ wine "$srcdir"/installer.exe /silentoptions
+</pre>
+<p>我们还没讲到便携软件，但如果应用不需要其编辑的注册表键值，可以直接复制以下目录：
+</p>
+<pre>"$srcdir"/tmp/env/drive_c/Program\ Files/programname
+</pre>
+<p>否则就需要复制所有注册表文件和应用安装的所有文件。<code>"$srcdir"/tmp/local</code> 中包含了菜单图标和桌面快捷方式，可以按需将其复制到软件包中。如果没有办法静默安装，或许也可以自行创建一个 <code>.tar.gz</code> 文件，然后传到网上以供下载。如果无法将安装过程自动化，可以强制用户使用安装器，并使用一些检查项来确保安装过程中没有出现异常（例如用户点了取消按钮）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga1c8150bdf10_.2Fusr.2Fbin_.E8.84.9A.E6.9C.AC" id="/usr/bin_脚本"><span id=".2Fusr.2Fbin_.E8.84.9A.E6.9C.AC"></span>/usr/bin 脚本</h3></div>
+<p>该脚本用于配置设置目录并启动应用。如果应用具有便携性，那么脚本如下：
+</p>
+<pre>#!/bin/bash
+unset WINEPREFIX
+if [ ! -d "$HOME"/.programname ] ; then
+   mkdir -p "$HOME"/.programname
+   #prepare the environment here
+fi
+WINEDEBUG=-all wine "$HOME"/.programname/programname "$@"
+</pre>
+<p>如果应用具有洁净性，那么脚本如下：
+</p>
+<pre>#!/bin/bash
+export WINEPREFIX="$HOME"/.programname/wine
+if [ ! -d "$HOME"/.programname ] ; then
+   mkdir -p "$HOME"/.programname/wine
+   wineboot -u
+   #copy the registry file if needed
+fi
+WINEDEBUG=-all wine /usr/share/programname "$@"
+</pre>
+<p>可以看到，第二种情况中的脚本没有环境配置的步骤。实际上，由于洁净应用不会向自身目录进行写入，因此可以直接从 <code>/usr/share</code> 启动应用，设置信息会被写入到模拟文件系统中。
+</p><p>如果应用不具备便携性和洁净性，那就必须将这两种方法混合使用。
+</p><p>如果应用完全不写入设置信息，那么可以跳过 <code>if</code> 这一段，直接从 <code>/usr/share</code> 启动应用。
+</p><p>环境配置的具体步骤取决于应用，但可以参考以下经验法则：
+如果应用：
+</p>
+<ul><li>只需要对文件进行读取，可以创建符号链接</li>
+<li>如果需要对文件进行写入，则需要将其复制</li>
+<li>如果无需使用某个文件，则可以无视</li></ul>
+<p>显然，最小运行步骤为 <code>WINEDEBUG=-all wine /usr/share/programname "$@"</code>。
+</p><p>通常，环境是通过在 <code>"$HOME"/.<i>programname</i></code> 目录与 <code>/usr/share/<i>programname</i></code> 文件之间建立符号链接来创建的。但由于某些 Windows 程序对路径非常挑剔，你可能需要直接在 <code>"$HOME"/.<i>programname</i>/wine/drive_c/Program\ Files/<i>programname</i></code> 目录中创建符号链接。
+</p><p>当然，这些只是将 Win32 应用整合到 Linux 环境中的一种方法，可以自己进行变通和尝试。
+</p><p>举个例子，<a href="https://en.wikipedia.org/wiki/%CE%BCTorrent">μTorrent</a> 默认是个洁净应用，但很容易就能将其作为便携应用使用。鉴于该应用为单个文件且体积较小，单独为其创建 Wine 环境（约 5MB）有些小题大做了。更好的方法是符号链接到可执行文件，创建一个空 <b>settings.dat</b> 文件，使得能在 <code>$HOME/.utorrent</code> 目录下便携使用该应用。该方法还使用户可以在 <code>.utorrent</code> 目录中找到下载的 <code>.torrent</code> 文件副本。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga1c8150bdf10_UnionFsFuse" id="UnionFsFuse">UnionFsFuse</h3></div>
+<p>可以考虑使用 <a href="https://github.com/rpodgorny/unionfs-fuse">UnionFsFuse</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/unionfs-fuse/">unionfs-fuse</a></span><sup><small>AUR</small></sup></span>），它可以将基础目录保留在 <code>/usr/share</code>，然后基本上全自动地将应用需写入的文件复制到 <code>$HOME/.programname</code>。
+</p><p>使用 UnionFsFuse 意味着需添加额外依赖，并会用到不是所有用户都已加载的 fuce 模块。但如果应用需要大量符号链接，或是不清楚应用具体需要写入哪些文件，那可以考虑使用该方法，只要确保 UnionFs 正确被挂/卸载即可。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga1c8150bdf10_.E7.A4.BA.E4.BE.8B" id="示例"><span id=".E7.A4.BA.E4.BE.8B"></span>示例</h2></div>
+<p>可在 <a href="https://aur.archlinux.org/rpc/v5/search/wine?by=depends">https://aur.archlinux.org/rpc/v5/search/wine?by=depends</a> 查找依赖于 wine 的 AUR 软件包作为示例。
+</p>
+
+<p>We will make a package for <a href="https://www.emule-project.net/">eMule</a>. According to <a href="https://www.portablefreeware.com/?q=emule">Portable Freeware</a>, eMule is not completely portable since it writes some (useless) keys in the registry.
+</p><p>On the other hand, it is not clean either since it writes its configuration files and puts its downloads in its installation folder.
+</p><p>Luckily there is an <a href="https://sourceforge.net/projects/emule/files/eMule/0.49b/eMule0.49b.zip">installer-less version available</a>.
+</p><p>So we make our <a href="#pgf9d748a7b27b">PKGBUILD</a>; the only dependency is <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wine">wine</a></span><sup><small>包</small></sup></span>. The <code>md5sums</code> should be added.
+</p>
+<pre># Maintainer: You &lt;youremail&gt;
+pkgname=emule
+pkgver=0.49b
+pkgrel=1
+pkgdesc="One of the biggest and most reliable peer-to-peer file sharing
+clients around the world."
+arch=('x86_64')
+url="https://www.emule-project.net"
+license=('GPL')
+depends=()
+depends=(wine)
+makedepends=(unzip)
+source=(emule https://sourceforge.net/projects/emule/files/eMule/$pkgver/eMule$pkgver.zip)
+noextract=()
+options=(!strip)
+
+build() {
+  rm -f src/eMule"$pkgver"/license* #It is GPL
+
+  install -d -m755 pkg/usr/share/emule
+  cp -ra src/eMule"$pkgver"/* pkg/usr/share/emule
+  find pkg/usr/share/emule -type d -exec chmod 755 "{}" \;
+  find pkg/usr/share/emule -type f -exec chmod 644 "{}" \;
+
+  install -d -m755 pkg/usr/bin
+  install -m755 emule pkg/usr/bin 
+}
+</pre>
+<p>Now we make our <b>emule</b> file, which according to <code>build</code>, will be copied and made executable in <code>/usr/bin</code>.
+</p>
+<pre>#!/bin/bash
+export WINEARCH=win32 WINEPREFIX="$HOME/.emule/wine"
+
+if [ ! -d "$HOME"/.emule ] ; then
+  mkdir -p "$HOME"/.emule/wine || exit 1
+  #Each user will have its config, we copy the default file since emule
+  #needs to write here.
+  cp -r /usr/share/emule/config "$HOME"/.emule || exit 1
+  #We symlink the files emule needs to read to work
+  ln -s /usr/share/emule/emule.exe "$HOME"/.emule/emule || exit 1
+  ln -s -T /usr/share/emule/lang "$HOME"/.emule/lang || exit 1
+  ln -s -T /usr/share/emule/webserver "$HOME"/.emule/webserver || exit 1
+fi
+
+wine "$HOME"/.emule/emule "$@"
+</pre>
+<p>If you want to be more precise, you may add a message in the <code>.install</code> file telling the user that they should disable search history since wine messes up that menu. You may even provide a default configuration file with the best settings.  And that's it... run <code>$ makepkg</code>, check the package folder to be sure, and install.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga1c8150bdf10_Gecko_.E5.92.8C_Mono" id="Gecko_和_Mono"><span id="Gecko_.E5.92.8C_Mono"></span>Gecko 和 Mono</h2></div>
+<p>除非你确定软件需要 .NET 运行时的浏览器功能（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wine-gecko">wine-gecko</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wine-mono">wine-mono</a></span><sup><small>包</small></sup></span> 软件包），否则 Wine 默认不应提示安装 Gecko/Mono。
+</p><p>要禁用 HTML 渲染、字节码支持和提示窗口，需要在脚本中使用 dlloverride。
+对于 Gecko：
+</p>
+<pre>export WINEDLLOVERRIDES="mshtml="
+</pre>
+<p>对于 Mono：
+</p>
+<pre>export WINEDLLOVERRIDES="mscoree="
+</pre>
+<p>对于二者：
+</p>
+<pre>export WINEDLLOVERRIDES="mscoree,mshtml="
+</pre>
+<p>还可以打开 <code>winecfg</code>，然后将 mscoree/mshtml 禁用。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807025436
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.123 seconds
+Real time usage: 0.138 seconds
+Preprocessor visited node count: 323/1000000
+Revision size: 10326/2097152 bytes
+Post‐expand include size: 4925/2097152 bytes
+Template argument size: 972/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 742/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   38.942      1 -total
+ 35.11%   13.673      1 Template:Package_guidelines
+ 10.02%    3.902     28 Template:Ic
+  9.82%    3.823      1 Template:Out_of_date
+  8.37%    3.258      1 Template:翻译状态
+  6.38%    2.483      3 Template:Pkg
+  4.11%    1.600      1 Template:META_Message
+  2.60%    1.011      1 Template:Bc
+  2.54%    0.990      1 Template:AUR
+-->
+<!-- Render ID 53000a0e-920b-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8486:|#|:idhash:canonical!zh-cn and timestamp 20260807025436 and revision id 35047. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

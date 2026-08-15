@@ -1,0 +1,182 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgbc36b75e46d4">统一 Qt 和 GTK 应用程序的外观</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Uniform_look_for_Qt_and_GTK_applications">Uniform look for Qt and GTK applications</a>，最近一次同步于 2021年3月4日，若英文版本有所<a href="https://wiki.archlinux.org/title/Uniform_look_for_Qt_and_GTK_applications?diff=0&amp;oldid=651850">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Uniform_look_for_Qt_and_GTK_applications_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg6438c4cbb62c">GTK</a></li>
+<li><a href="#pg5016907af879">Qt</a></li>
+</ul></div>
+
+<p>基于 <a href="#pg5016907af879">Qt</a> 和 <a href="#pg6438c4cbb62c">GTK</a> 的程序使用不同的图形库来渲染图形化用户界面，各自具有不同的主题、风格和图标，所以观感明显有所不同。这篇文章将使你的 Qt 和 GTK 程序看起来更相似，以此获得更加现代化、集成化的桌面体验。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbc36b75e46d4_.E4.BB.8B.E7.BB.8D" id="介绍"><span id=".E4.BB.8B.E7.BB.8D"></span>介绍</h2></div>
+<p>要想在不同的图形库之间获得相似的外观，你通常需要修改以下内容：
+</p>
+<ul><li><b>主题</b>——应用程序和组件等元素的自定义外观。通常包含一套风格、图标主题和颜色主题。</li>
+<li><b>风格</b>——组件的布局和样式。</li>
+<li><b>图标主题</b>——全局图标。</li>
+<li><b>颜色主题</b>——与风格相适应的全局颜色样式。</li></ul>
+<p>你可以选择下面的不同方法：
+</p>
+<ul><li>使用下面列出的，适用于各个图形库的工具分别修改 Qt 和 GTK 的主题，以选择外观相似的主题（样式，颜色，图标，光标，字体）。</li>
+<li>使用特殊的主题引擎，该引擎作为中间人修改其他图形库的主题，以匹配您的主要图形库。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbc36b75e46d4_Qt_.E5.92.8C_GTK_.E9.80.9A.E7.94.A8.E7.9A.84.E4.B8.BB.E9.A2.98" id="Qt_和_GTK_通用的主题"><span id="Qt_.E5.92.8C_GTK_.E9.80.9A.E7.94.A8.E7.9A.84.E4.B8.BB.E9.A2.98"></span>Qt 和 GTK 通用的主题</h2></div>
+<p>下面列出了几种主题，Qt 和 GTK 都可使用，并且风格统一。这些主题适配了 Qt 和 GTK 的主要版本。有了这些主题，你就可以在使用不同的图形库构建的应用程序之间得到相同的外观了。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果希望将用户定义的主题应用于 root 用户的应用, 参考<a href="#pg6438c4cbb62c">GTK#主题没有应用到 root 用户的应用程序上</a>和<a href="#pg5016907af879">Qt#主题没有应用到 root 用户的应用程序上</a>。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>GTK 3 从 3.16 版本开始<a href="https://bbs.archlinux.org/viewtopic.php?pid=1518404#p1518404">不再支持</a>非 CSS 主题，因此，以前的解决方案，例如 Oxygen-Gtk，<a href="https://bugs.kde.org/show_bug.cgi?id=340288">已经不再可用</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_Breeze" id="Breeze">Breeze</h3></div>
+<p>Breeze 是 KDE Plasma 的默认 Qt 主题。它可以通过适用于 Qt 5 的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=breeze">breeze</a></span><sup><small>包</small></sup></span>，适用于 Qt 4 的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/breeze-kde4/">breeze-kde4</a></span><sup><small>AUR</small></sup></span> 以及适用于 GTK 2 和 GTK 3 的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=breeze-gtk">breeze-gtk</a></span><sup><small>包</small></sup></span> 软件包安装。
+</p><p>安装后，您可以使用<a href="#pg6438c4cbb62c">GTK 配置工具</a>更改 GTK 主题。
+</p><p>如果当前运行的是 KDE Plasma，请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kde-gtk-config">kde-gtk-config</a></span><sup><small>包</small></sup></span>，然后从命令行运行之；或者注销后重新登录，接着转到<i>系统设置 &gt; 外观 &gt; 应用程序风格 &gt; 配置 GNOME/GTK 应用程序风格…</i>来配置 GTK 程序的主题。“系统设置”中设置的字体、图标主题、光标和组件样式将自动应用至 GTK，仅 GTK 主题需要用前面提到的 GTK 配置工具手动更改。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_Adwaita" id="Adwaita">Adwaita</h3></div>
+<p>Adwaita是 GNOME 默认的主题。GTK 3 版本包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gtk3">gtk3</a></span><sup><small>包</small></sup></span> 软件包中，而 GTK 2 版本包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-themes-extra">gnome-themes-extra</a></span><sup><small>包</small></sup></span> 中。<a href="https://github.com/MartinBriza/adwaita-qt">adwaita-qt</a>是 Adwaita 主题的 Qt 移植版本。与模仿 GTK 2 主题的 <a href="#pgbc36b75e46d4_QGtkStyle">#QGtkStyle</a> 不同，它提供了与 GTK 3 Adwaita 相似的原生 Qt 样式。可以通过适用于 Qt 4 的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/adwaita-qt4/">adwaita-qt4</a></span><sup><small>AUR</small></sup></span>、适用于 Qt 5 的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adwaita-qt5">adwaita-qt5</a></span><sup><small>包</small></sup></span> 和适用于 Qt 6 的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adwaita-qt6">adwaita-qt6</a></span><sup><small>包</small></sup></span> 软件包来安装此主题。
+</p><p>要将 Qt 样式设置为默认值：
+</p>
+<ul><li>对于 Qt 4，可以使用<i>Qt 配置</i>（<code>qtconfig-qt4</code>）启用它，在<i>外观 &gt; GUI 样式</i>中选择<i>adwaita</i>。或者，编辑 <code>/etc/xdg/Trolltech.conf</code>（系统范围）或 <code>~/.config/Trolltech.conf</code>（用户范围）文件：</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/Trolltech.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+[Qt]
+style=adwaita
+...</pre>
+<ul><li>对于 Qt 5，可以通过以下环境变量来启用主题：<code>QT_STYLE_OVERRIDE=adwaita</code>。或者，使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=qt5ct">qt5ct</a></span><sup><small>包</small></sup></span> 软件包。更多详细说明，参考 <a href="#pg5016907af879">Qt#在KDE Plasma以外的环境下配置Qt5应用程序</a>。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbc36b75e46d4_.E4.B8.BB.E9.A2.98.E5.BC.95.E6.93.8E" id="主题引擎"><span id=".E4.B8.BB.E9.A2.98.E5.BC.95.E6.93.8E"></span>主题引擎</h2></div>
+<p>主题引擎可以认为是一个简单的 API，用于从一个或多个图形库转译主题（图标除外）。这些引擎为进程添加额外的代码，这种解决方案不如使用原生主题那样优雅可行。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_Kvantum" id="Kvantum">Kvantum</h3></div>
+<p>Kvantum（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kvantum">kvantum</a></span><sup><small>包</small></sup></span>）是一个用于 Qt 5 的，基于 SVG 的可定制主题引擎，具有多种内置样式，包含一些版本的流行 GTK 主题，例如 Adapta、Arc、Ambiance 和 Materia。
+</p><p>Kvantum 被视为一种风格而不是主题。要通过环境变量的方式为所有 Qt 应用设置 Kvantum，使用<code>QT_STYLE_OVERRIDE=kvantum</code>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgbc36b75e46d4_.E4.B8.BB.E9.A2.98.E9.85.8D.E7.BD.AE" id="主题配置"><span id=".E4.B8.BB.E9.A2.98.E9.85.8D.E7.BD.AE"></span>主题配置</h4></div>
+<p>要为 Kvantum <a href="https://github.com/tsujan/Kvantum/blob/master/Kvantum/doc/Theme-Config.pdf">设置一个主题变体</a>，如 <a href="https://github.com/GabePoel/KvLibadwaita">KvLibadwaita</a>，像这样编辑配置文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/xdg/Kvantum/kvantum.kvconfig（或 ~/.config/Kvantum/kvantum.kvconfig）</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+theme=KvLibadwaita
+...</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_QGtkStyle" id="QGtkStyle">QGtkStyle</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>QGtkStyle 已从 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=qt5-base">qt5-base</a></span><sup><small>包</small></sup></span> 5.7.0 中移除<a href="https://github.com/qtproject/qtbase/commit/899a815414e95da8d9429a4a4f4d7094e49cfc55">[1]</a>并添加到 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qt5-styleplugins/">qt5-styleplugins</a></span><sup><small>AUR</small></sup></span> 中<a href="https://github.com/qtproject/qtstyleplugins/commit/102da7d50231fc5723dba6e72340bef3d29471aa">[2]</a>。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>取决于 GTK 2 的主题，此样式可能会导致显示问题，例如透明的字体或不一致的部件。</div>
+<p>此 Qt 样式使用 GTK 2 渲染所有组件以便于与 <a href="#pg1e095fe2c2a6">GNOME</a> 和类似基于 GTK 的环境相协调。从 Qt 4.5 开始，此样式包含在 Qt 中。它要求安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gtk2">gtk2</a></span><sup><small>包</small></sup></span> 并进行配置。
+</p><p>这是 Cinnamon、GNOME 和 Xfce 中的默认 Qt 4 样式，也是 Cinnamon、GNOME、MATE、LXDE 和 Xfce 中的默认 Qt 5 样式。至于其他环境：
+</p>
+<ul><li>对于Qt4，可以使用<i>Qt 配置</i>（<code>qtconfig-qt4</code>）启用它，在<i>外观 &gt; GUI 样式</i>下选择 <i>GTK</i>。或者，编辑 <code>/etc/xdg/Trolltech.conf</code>（系统范围）或 <code>~/.config/Trolltech.conf</code>（用户范围）：</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/Trolltech.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+[Qt]
+style=GTK+
+...</pre>
+<ul><li>对于 Qt 5，可以通过安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qt5-styleplugins/">qt5-styleplugins</a></span><sup><small>AUR</small></sup></span> 并设置以下<a href="#pg4989d4f46056">环境变量</a>来启用它：<code>QT_QPA_PLATFORMTHEME=gtk2</code></li></ul>
+<ul><li>对于 Qt 6，可以通过安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qt6gtk2/">qt6gtk2</a></span><sup><small>AUR</small></sup></span> 并在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=qt6ct">qt6ct</a></span><sup><small>包</small></sup></span> 中选择 <i>qt6gtk2</i> 样式，或设置以下环境变量：<code>QT_QPA_PLATFORMTHEME=gtk2</code>。</li></ul>
+<p>为了完全统一，请确保配置的 <a href="#pg6438c4cbb62c">GTK 主题</a>同时支持 GTK 2 和 GTK 3。如果你的首选主题在将 Qt 配置为使用 GTK 2 后出现了不一致的渲染效果，请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gtk-theme-switch2/">gtk-theme-switch2</a></span><sup><small>AUR</small></sup></span>，然后选择一个主题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_QAdwaitaDecorations" id="QAdwaitaDecorations">QAdwaitaDecorations</h3></div>
+<p>Qt 装饰插件实现类似 GNOME Adwaita 的客户端装饰，适用于Qt 6 和 QT 5 平台。
+</p><p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qadwaitadecorations-qt5/">qadwaitadecorations-qt5</a></span><sup><small>AUR</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=qadwaitadecorations-qt6">qadwaitadecorations-qt6</a></span><sup><small>包</small></sup></span> 软件包。
+</p><p>可以通过设置环境变量 <code>QT_WAYLAND_DECORATION=adwaita</code> 开启。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_QWhiteSurGtkDecorations" id="QWhiteSurGtkDecorations">QWhiteSurGtkDecorations</h3></div>
+<p>QWhiteSurGtkDecorations是一个 Qt 装饰插件，可以在Gnome wayland上实现类似 GNOME WhiteSur-gtk 主题风格的客户端装饰，适用于Qt 6 和 QT 5 平台。
+</p><p>需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qwhitesurgtkdecorations-qt5/">qwhitesurgtkdecorations-qt5</a></span><sup><small>AUR</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=qwhitesurgtkdecorations-qt6">qwhitesurgtkdecorations-qt6</a></span><sup><small>包</small></sup></span> 软件包。
+</p><p>可以通过设置环境变量 <code>QT_WAYLAND_DECORATION=whitesur-gtk</code> 启用它。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbc36b75e46d4_Tips_and_tricks" id="Tips_and_tricks">Tips and tricks</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_.E5.9C.A8Qt.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.AD.E4.BD.BF.E7.94.A8GTK.E5.9B.BE.E6.A0.87.E4.B8.BB.E9.A2.98" id="在Qt应用程序中使用GTK图标主题"><span id=".E5.9C.A8Qt.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.AD.E4.BD.BF.E7.94.A8GTK.E5.9B.BE.E6.A0.87.E4.B8.BB.E9.A2.98"></span>在Qt应用程序中使用GTK图标主题</h3></div>
+<p>如果您正在运行Plasma，请安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kde-gtk-config">kde-gtk-config</a></span><sup><small>包</small></sup></span>，然后在<i>系统设置 &gt; 应用程序风格 &gt; 应用样式 &gt; 配置GNOME/GTK应用样式</i>下选择图标主题。
+</p><p>如果您使用的是<a href="#pg1e095fe2c2a6">GNOME</a>，请首先检查是否安装了<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dconf-editor">dconf-editor</a></span><sup><small>包</small></sup></span>。
+</p><p>然后，运行<code>dconf-editor</code>，然后在<i>org&gt; gnome &gt; desktop &gt; interface</i> 下查找<code>icon-theme</code>键，并将其更改为您的首选图标主题。
+</p><p>如果您使用的不是<a href="#pg1e095fe2c2a6">GNOME</a>，例如，如果您使用的是<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=i3-wm">i3-wm</a></span><sup><small>包</small></sup></span>，请首先安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dconf-editor">dconf-editor</a></span><sup><small>包</small></sup></span>。
+</p><p>然后，运行<code>dconf-editor</code>，然后在<i> org &gt; gnome &gt; desktop&gt; interface</i>下查找<code>icon-theme</code>键，并将其更改为您的图标主题。
+</p><p>由于您使用的不是<a href="#pg1e095fe2c2a6">GNOME</a>，因此可能需要在个人的配置文件中设置<code>DESKTOP_SESSION</code>的值。 为此，请在终端中执行以下代码，然后重新启动系统。
+</p>
+<pre>$ echo 'export DESKTOP_SESSION=gnome' &gt;&gt; /etc/profile
+</pre>
+<p><b>或者</b>
+</p><p>将<code>export DESKTOP_SESSION=gnome</code>设置在<code>~/.xinitrc</code>中的某个位置，或者在<a href="#pgde17e8bd8891">Xprofile</a>中使用一个<a href="#pg9aa798802a24">Display manager</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果未应用图标主题，则可能要检查您输入的首选主题名称是否格式正确。例如，如果要将当前活动的图标主题应用于QT应用程序，则可以使用以下命令找到其名称的正确格式：
+<pre>$ awk -F= '/icon-theme/ {print $2}' ~/.gtkrc-2.0</pre>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_.E6.B7.BB.E5.8A.A0.E6.A0.87.E9.A2.98.E6.A0.8F.E5.92.8C.E6.A1.86.E6.9E.B6.E5.88.B0KDE_Plasma.E4.B8.8B.E7.9A.84GTK3.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="添加标题栏和框架到KDE_Plasma下的GTK3应用程序"><span id=".E6.B7.BB.E5.8A.A0.E6.A0.87.E9.A2.98.E6.A0.8F.E5.92.8C.E6.A1.86.E6.9E.B6.E5.88.B0KDE_Plasma.E4.B8.8B.E7.9A.84GTK3.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>添加标题栏和框架到KDE Plasma下的GTK3应用程序</h3></div>
+<p>要使Gnome/GTK应用程序显示KDE/Plasma的标题栏和框架，请安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gtk-nocsd-git/">gtk-nocsd-git</a></span><sup><small>AUR</small></sup></span>并重新启动窗口管理器以加载更新的库路径。
+</p><p>您还可以使用它运行Gtk应用程序：
+</p>
+<pre>$ gtk3-nocsd gedit
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_.E5.9C.A8KDE_Plasma.E4.B8.8B.E6.94.B9.E5.96.84GTK.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E7.9A.84.E4.BA.9A.E5.83.8F.E7.B4.A0.E6.B8.B2.E6.9F.93" id="在KDE_Plasma下改善GTK应用程序的亚像素渲染"><span id=".E5.9C.A8KDE_Plasma.E4.B8.8B.E6.94.B9.E5.96.84GTK.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E7.9A.84.E4.BA.9A.E5.83.8F.E7.B4.A0.E6.B8.B2.E6.9F.93"></span>在KDE Plasma下改善GTK应用程序的亚像素渲染</h3></div>
+<p>See <a href="#pg5f4c7de3e275">Font configuration#LCD filter</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_.E4.B8.80.E8.87.B4.E7.9A.84.E6.96.87.E4.BB.B6.E5.AF.B9.E8.AF.9D.E6.A1.86" id="一致的文件对话框"><span id=".E4.B8.80.E8.87.B4.E7.9A.84.E6.96.87.E4.BB.B6.E5.AF.B9.E8.AF.9D.E6.A1.86"></span>一致的文件对话框</h3></div>
+<p>为了具有相同的文件对话框，可以使用XDG Portal。
+</p><p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal">xdg-desktop-portal</a></span><sup><small>包</small></sup></span>和<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-kde">xdg-desktop-portal-kde</a></span><sup><small>包</small></sup></span>，并在环境变量<a href="#pg18ad99d88887">environment variable</a>中设置<code>GTK_USE_PORTAL=1</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbc36b75e46d4_.E6.95.85.E9.9A.9C.E6.8E.92.E6.9F.A5" id="故障排查"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E6.9F.A5"></span>故障排查</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_.E4.B8.BB.E9.A2.98.E5.AF.B9GTK.E7.A8.8B.E5.BA.8F.E6.97.A0.E6.95.88" id="主题对GTK程序无效"><span id=".E4.B8.BB.E9.A2.98.E5.AF.B9GTK.E7.A8.8B.E5.BA.8F.E6.97.A0.E6.95.88"></span>主题对GTK程序无效</h3></div>
+<p>如果你安装的风格或主题引擎在某些GTK程序不能显示，很可能你的GTK设置文件因某些原因不能被加载。你可以检查你的系统找到那些文件作如下设置：
+</p>
+<pre>export | grep gtk
+</pre>
+<p>通常那些文件设置在 ~/.gtkrc （GTK1）, ~/.gtkrc2.0 或 ~/.gtkrc2.0-kde （GTK2）
+</p><p>新版gtk-qt-engine 使用 ~/.gtkrc2.0-kde 和  ~/.kde/env/gtk-qt-engine.rc.sh 设置输出变量
+如果你最近移除了gtk-qt-engine然后试图设置GTK主题，你必有要移除 ~/.kde/env/gtk-qt-engine.rc.sh 然后重启。这样做会使GTK外观使用标准的设置 ~/.gtkrc2.0来代替 ~/.gtkrc2.0-kde
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_.E7.B3.BB.E7.BB.9F.E5.8D.87.E7.BA.A7.E5.90.8EGTK.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.8D.E4.BD.BF.E7.94.A8svg.EF.BC.88breeze.EF.BC.89.E5.9B.BE.E6.A0.87" id="系统升级后GTK应用程序不使用svg（breeze）图标"><span id=".E7.B3.BB.E7.BB.9F.E5.8D.87.E7.BA.A7.E5.90.8EGTK.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.8D.E4.BD.BF.E7.94.A8svg.EF.BC.88breeze.EF.BC.89.E5.9B.BE.E6.A0.87"></span>系统升级后GTK应用程序不使用svg（breeze）图标</h3></div>
+<p>尝试运行下面命令来解决问题：
+</p>
+<pre># gdk-pixbuf-query-loaders --update-cache
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_Flatpak_Qt.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.8D.E4.BD.BF.E7.94.A8Gnome_Adwaita.E9.BB.91.E6.9A.97.E4.B8.BB.E9.A2.98" id="Flatpak_Qt应用程序不使用Gnome_Adwaita黑暗主题"><span id="Flatpak_Qt.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.8D.E4.BD.BF.E7.94.A8Gnome_Adwaita.E9.BB.91.E6.9A.97.E4.B8.BB.E9.A2.98"></span>Flatpak Qt应用程序不使用Gnome Adwaita黑暗主题</h3></div>
+<p>如果将主题切换为Adwaita-dark后，Flatpak Qt应用程序仍使用精简版，请安装所需的KStyle：
+</p>
+<pre># flatpak install flathub org.kde.KStyle.Adwaita
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_.E5.8D.B3.E4.BD.BF.E5.9C.A8.E8.AE.BE.E7.BD.AEQt.E4.B8.BB.E9.A2.98.E5.90.8E.EF.BC.8C.E5.9C.A8GNOME_Wayland.E4.B8.8A.E8.BF.90.E8.A1.8C.E7.9A.84Qt.E5.BA.94.E7.94.A8.E4.B9.9F.E6.9C.89.E4.B8.8D.E5.8C.B9.E9.85.8D.E7.9A.84.E7.AA.97.E5.8F.A3.E8.A3.85.E9.A5.B0.E5.A4.96.E8.A7.82" id="即使在设置Qt主题后，在GNOME_Wayland上运行的Qt应用也有不匹配的窗口装饰外观"><span id=".E5.8D.B3.E4.BD.BF.E5.9C.A8.E8.AE.BE.E7.BD.AEQt.E4.B8.BB.E9.A2.98.E5.90.8E.EF.BC.8C.E5.9C.A8GNOME_Wayland.E4.B8.8A.E8.BF.90.E8.A1.8C.E7.9A.84Qt.E5.BA.94.E7.94.A8.E4.B9.9F.E6.9C.89.E4.B8.8D.E5.8C.B9.E9.85.8D.E7.9A.84.E7.AA.97.E5.8F.A3.E8.A3.85.E9.A5.B0.E5.A4.96.E8.A7.82"></span>即使在设置Qt主题后，在GNOME Wayland上运行的Qt应用也有不匹配的窗口装饰外观</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qadwaitadecorations-qt5/">qadwaitadecorations-qt5</a></span><sup><small>AUR</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qadwaitadecorations-qt6/">qadwaitadecorations-qt6</a></span><sup><small>AUR</small></sup></span>，并设置以下环境变量<a href="#pge575f3f9cef9">environment variable</a>:<code>export QT_WAYLAND_DECORATION=adwaita</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_GTK_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.8D.E8.83.BD.E5.AE.8C.E5.85.A8.E4.BD.BF.E7.94.A8_KDE_.E7.B3.BB.E7.BB.9F.E8.AE.BE.E7.BD.AE" id="GTK_应用程序不能完全使用_KDE_系统设置"><span id="GTK_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.8D.E8.83.BD.E5.AE.8C.E5.85.A8.E4.BD.BF.E7.94.A8_KDE_.E7.B3.BB.E7.BB.9F.E8.AE.BE.E7.BD.AE"></span>GTK 应用程序不能完全使用 KDE 系统设置</h3></div>
+<p>为了进一步整合 GTK 应用程序上的 <a href="#pgb8d7c68cf276">Plasma</a> 设置，可能需要<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-settings-daemon">gnome-settings-daemon</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gsettings-desktop-schemas">gsettings-desktop-schemas</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gsettings-qt">gsettings-qt</a></span><sup><small>包</small></sup></span>，这将为 GTK 提供适当的 Qt 绑定。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_.E5.AE.89.E8.A3.85kde-gtk-config.E5.90.8E.EF.BC.8C.E6.B2.A1.E6.9C.89.E2.80.9C.E7.B3.BB.E7.BB.9F.E8.AE.BE.E7.BD.AE.3E.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E6.A0.B7.E5.BC.8F.3E_GTK.E2.80.9D.E8.8F.9C.E5.8D.95" id="安装kde-gtk-config后，没有“系统设置&gt;应用程序样式&gt;_GTK”菜单"><span id=".E5.AE.89.E8.A3.85kde-gtk-config.E5.90.8E.EF.BC.8C.E6.B2.A1.E6.9C.89.E2.80.9C.E7.B3.BB.E7.BB.9F.E8.AE.BE.E7.BD.AE.3E.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E6.A0.B7.E5.BC.8F.3E_GTK.E2.80.9D.E8.8F.9C.E5.8D.95"></span>安装kde-gtk-config后，没有“系统设置&gt;应用程序样式&gt; GTK”菜单</h3></div>
+<p>使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kde-gtk-config">kde-gtk-config</a></span><sup><small>包</small></sup></span>时，可以选择<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lxappearance">lxappearance</a></span><sup><small>包</small></sup></span>之类的<a href="#pg6438c4cbb62c">GTK configuration tools</a>来配置GTK 2和GTK 3样式。
+</p><p>即使它来自LXDE项目，它也是与桌面无关的（它不需要LXDE桌面的其他部分）
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbc36b75e46d4_Dolphin.E4.B8.BB.E9.A2.98.E4.B8.8ENautilus.E5.8C.B9.E9.85.8D.E6.95.88.E6.9E.9C.E4.B8.8D.E4.BD.B3" id="Dolphin主题与Nautilus匹配效果不佳"><span id="Dolphin.E4.B8.BB.E9.A2.98.E4.B8.8ENautilus.E5.8C.B9.E9.85.8D.E6.95.88.E6.9E.9C.E4.B8.8D.E4.BD.B3"></span>Dolphin主题与Nautilus匹配效果不佳</h3></div>
+<p>参考 <a href="https://wiki.archlinux.org/title/Dolphin#Mismatched_folder_view_background_colors">arch:Dolphin#Mismatched_folder_view_background_colors</a> 小节以解决颜色奇怪的问题
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807044339
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.178 seconds
+Real time usage: 0.185 seconds
+Preprocessor visited node count: 680/1000000
+Revision size: 11782/2097152 bytes
+Post‐expand include size: 12925/2097152 bytes
+Template argument size: 3670/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   52.815      1 -total
+ 12.68%    6.699     25 Template:Pkg
+  6.87%    3.626     21 Template:Ic
+  6.61%    3.493      1 Template:翻译状态
+  6.06%    3.198      1 Template:过时
+  6.04%    3.189      3 Template:注意
+  4.89%    2.583      2 Template:Related2
+  4.15%    2.193      1 Template:相关文章开始
+  3.92%    2.068      1 Template:警告
+  3.68%    1.946      7 Template:AUR
+-->
+<!-- Render ID 8eee9b8e-921a-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3922:|#|:idhash:canonical!zh-cn and timestamp 20260807044339 and revision id 35239. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

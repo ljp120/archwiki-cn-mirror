@@ -1,0 +1,76 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgd0c20f98fedf">Equinox 桌面环境</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Equinox_Desktop_Environment">Equinox Desktop Environment</a>，最近一次同步于 2021-06-03，若英文版本有所<a href="https://wiki.archlinux.org/title/Equinox_Desktop_Environment?diff=0&amp;oldid=675326">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Equinox_Desktop_Environment_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg712e4adaddad">桌面环境</a></li>
+</ul></div>
+<p><a href="https://edeproject.org/">Equinox Desktop Environment</a>（EDE）是一种桌面环境，旨在简单，轻巧和快速。
+</p><p>它主要提供最基本的功能：窗口管理器（默认情况下使用 <a href="#pge14d9d7dd917">PekWM</a>），包含面板的简单 GUI，监视可移动媒体的守护程序和通知守护程序。除此之外，只剩下一些配置程序，计算器等。从 2.0 版开始，EDE 遵循 FreeDesktop.org 准则。
+</p><p>与其他桌面环境不同，EDE 基于 <a href="https://fltk.org">FLTK 工具包</a>。它特别适合于 RAM 很少的系统，或者想要完全自定义系统并需要功能和应用程序尚未膨胀的 GUI 的用户。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd0c20f98fedf_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ede/">ede</a></span><sup><small>AUR</small></sup></span> 包从 <a href="#pg89cb7b475cfb">AUR</a> <a href="#pg811194d6beaa">安装</a> EDE。
+</p><p>或者，您可以从#自定义存储库中获取它。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd0c20f98fedf_.E8.87.AA.E5.AE.9A.E4.B9.89.E5.AD.98.E5.82.A8.E5.BA.93" id="自定义存储库"><span id=".E8.87.AA.E5.AE.9A.E4.B9.89.E5.AD.98.E5.82.A8.E5.BA.93"></span>自定义存储库</h3></div>
+<p>要启用 EDE 的<a href="#pg8660d0639479">非官方用户存储库</a>，请将以下行添加到 <code>/etc/pacman.conf</code> 中：
+</p>
+<pre>[ede]
+SigLevel = Optional
+Server = http://ede.elderlinux.org/repos/archlinux/$arch
+</pre>
+<p>接下来<a href="#pg61db3d3fc575">刷新软件包列表</a>，并通过 <a href="#pg9ef105bf1e3c">pacman</a> <a href="#pg811194d6beaa">安装</a> EDE 软件包：
+</p>
+<ul><li><i>edelib</i></li>
+<li><i>ede-common</i></li>
+<li><i>ede</i></li>
+<li><i>ede-wallpapers</i> (optional)</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd0c20f98fedf_.E5.90.AF.E5.8A.A8.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83" id="启动桌面环境"><span id=".E5.90.AF.E5.8A.A8.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83"></span>启动桌面环境</h2></div>
+<p>要启动 EDE，可以使用<a href="#pg30e2075251d0">显示管理器</a>或使用 startx。如果选择后者，只需将以下内容写入用户的 <code>.xinitrc</code>：
+</p>
+<pre> exec startede
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd0c20f98fedf_.E5.BA.94.E7.94.A8" id="应用"><span id=".E5.BA.94.E7.94.A8"></span>应用</h2></div>
+<p>由于 EDE 是基本的桌面环境，因此您甚至必须自己添加最常见的应用程序，例如文件管理器或编辑器。您有选择的自由。
+</p><p>由于这个桌面环境的性质，安装轻量级软件显然很有意义。但是，没有太多的 <a href="https://fltk.org">FLTK</a> 应用程序可用，因此您可能不得不依靠第二个工具包，例如 <a href="#pg6438c4cbb62c">GTK</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd0c20f98fedf_.E4.B8.80.E4.BA.9B.E5.BB.BA.E8.AE.AE" id="一些建议"><span id=".E4.B8.80.E4.BA.9B.E5.BB.BA.E8.AE.AE"></span>一些建议</h3></div>
+<ul><li>文件管理器：<a href="#pg9519798d0f49">PCManFM</a></li>
+<li>浏览器：<a href="#pgac1f4b84fd50">Dillo</a> 或 <a href="#pgd915346c726e">Midori</a></li>
+<li>编辑器：<a href="http://tarot.freeshell.org/leafpad/">Leafpad</a></li>
+<li>终端模拟器：<a href="#pg12c4c9eae03a">Xterm</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807160437
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.059 seconds
+Real time usage: 0.063 seconds
+Preprocessor visited node count: 94/1000000
+Revision size: 2237/2097152 bytes
+Post‐expand include size: 1338/2097152 bytes
+Template argument size: 178/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 47/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   10.154      1 -total
+ 26.53%    2.694      1 Template:翻译状态
+ 17.23%    1.750      1 Template:相关文章开始
+ 15.63%    1.587      1 Template:Related
+  8.18%    0.831      2 Template:Ic
+  8.07%    0.820      1 Template:AUR
+  7.45%    0.757      1 Template:META_Related_articles_start
+  6.07%    0.616      1 Template:相关文章结束
+-->
+<!-- Render ID b032a48e-9279-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3066:|#|:idhash:canonical!zh-cn and timestamp 20260807160437 and revision id 33618. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

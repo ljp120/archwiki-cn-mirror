@@ -1,0 +1,154 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg30e2075251d0">显示管理器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Display_manager">Display manager</a>，最近一次同步于 2026-02-21，若英文版本有所<a href="https://wiki.archlinux.org/title/Display_manager?diff=0&amp;oldid=866211">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Display_manager_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgb2b30451e491">登录时自动启动 X</a></li>
+</ul></div>
+<p><a href="https://en.wikipedia.org/wiki/X_display_manager_(program_type)">显示管理器</a>（或登录管理器）通常是一个在启动过程结束时代替默认 shell 显示的图形用户界面。与<a href="#pg3d6d7c1e6c7c">窗口管理器</a>和<a href="#pg712e4adaddad">桌面环境</a>类似，显示管理器也有很多实现。每个显示管理器通常都能进行一定程度的定制。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg30e2075251d0_.E6.98.BE.E7.A4.BA.E7.AE.A1.E7.90.86.E5.99.A8.E5.88.97.E8.A1.A8" id="显示管理器列表"><span id=".E6.98.BE.E7.A4.BA.E7.AE.A1.E7.90.86.E5.99.A8.E5.88.97.E8.A1.A8"></span>显示管理器列表</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg30e2075251d0_.E6.8E.A7.E5.88.B6.E5.8F.B0" id="控制台"><span id=".E6.8E.A7.E5.88.B6.E5.8F.B0"></span>控制台</h3></div>
+<ul><li><b><a href="#pg31460b7b196f">CDM</a></b> — 用 Bash 编写的显示管理器。</li></ul>
+<dl><dd><a href="https://github.com/evertiro/cdm">https://github.com/evertiro/cdm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cdm/">cdm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pga205801566dd">Console TDM</a></b> — 用 Bash 编写的 <i>xinit</i> 扩展。</li></ul>
+<dl><dd><a href="https://github.com/dopsi/console-tdm">https://github.com/dopsi/console-tdm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/console-tdm/">console-tdm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>nodm</b> — 用于自动登录的显示管理器（自 2017 年以来不再维护）。</li></ul>
+<dl><dd><a href="https://github.com/spanezz/nodm">https://github.com/spanezz/nodm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nodm">nodm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgfba2923b2855">Ly</a></b> — 用于 Linux 和 BSD 的 TUI（类似 ncurses）显示管理器。支持 X 和 Wayland 会话。</li></ul>
+<dl><dd><a href="https://github.com/nullgemm/ly">https://github.com/nullgemm/ly</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ly">ly</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>tbsm</b> — Bash 会话或应用程序启动器。支持 X 和 Wayland 会话。</li></ul>
+<dl><dd><a href="https://loh-tar.github.io/tbsm/">https://loh-tar.github.io/tbsm/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tbsm/">tbsm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>emptty</b> — TTY 上的简单 CLI 显示管理器，支持 X 和 Wayland，用Go编写。</li></ul>
+<dl><dd><a href="https://github.com/tvrzna/emptty/">https://github.com/tvrzna/emptty/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=emptty">emptty</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>loginx</b> — 带有友好 curses 用户界面的 getty/login/xinit 组合。</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/loginx/">https://sourceforge.net/projects/loginx/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/loginx/">loginx</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Lemurs</b> — TUI显示管理器，用Rust编写。支持 X、Wayland 和 TTY shell 会话。</li></ul>
+<dl><dd><a href="https://github.com/coastalwhite/lemurs">https://github.com/coastalwhite/lemurs</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lemurs">lemurs</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>lidm</b> — 完全彩色且可定制的 TUI 显示管理器，由 C 语言制作。</li></ul>
+<dl><dd><a href="https://github.com/javalsai/lidm">https://github.com/javalsai/lidm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lidm/">lidm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg30e2075251d0_.E5.9B.BE.E5.BD.A2.E7.95.8C.E9.9D.A2" id="图形界面"><span id=".E5.9B.BE.E5.BD.A2.E7.95.8C.E9.9D.A2"></span>图形界面</h3></div>
+<ul><li><b><a href="#pg6a5c0b105f61">Entrance</a></b> — <a href="#pg6a5c0b105f61">Enlightenment</a> 显示管理器。</li></ul>
+<dl><dd><a href="https://github.com/Obsidian-StudiosInc/entrance">https://github.com/Obsidian-StudiosInc/entrance</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/entrance-git/">entrance-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg89573e816846">GDM</a></b> — <a href="#pg1e095fe2c2a6">GNOME</a> 显示管理器。</li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Projects/GDM">https://wiki.gnome.org/Projects/GDM</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gdm">gdm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg145f4ecf55dc">LightDM</a></b> — 跨桌面显示管理器，可以使用任何工具包编写的各种前端。</li></ul>
+<dl><dd><a href="https://github.com/CanonicalLtd/lightdm/">https://github.com/CanonicalLtd/lightdm/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lightdm">lightdm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg3dd2dbd2a101">LXDM</a></b> — <a href="#pg9ecdb3d7e45b">LXDE</a> 显示管理器。可以独立于 LXDE 桌面环境使用。</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/lxdm/">https://sourceforge.net/projects/lxdm/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lxdm">lxdm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg40f0efb957c9">Plasma 登录管理器</a></b> — Plasma 登录管理器；设计为SDDM的继任者。</li></ul>
+<dl><dd><a href="https://invent.kde.org/plasma/plasma-login-manager/">https://invent.kde.org/plasma/plasma-login-manager/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=plasma-login-manager">plasma-login-manager</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg3438569d0b30">SDDM</a></b> — 基于 QML 的显示管理器，KDM 的继任者；推荐用于 <a href="#pg5b70e23b1711">Plasma</a> 和 <a href="#pge82b8c855868">LXQt</a>。</li></ul>
+<dl><dd><a href="https://github.com/sddm/sddm">https://github.com/sddm/sddm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sddm">sddm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg3cd77fc93ae5">XDM</a></b> — 支持 XDMCP 的 X 显示管理器，适合服务器主机。</li></ul>
+<dl><dd><span class="plainlinks archwiki-template-man" title="$ man 8 xdm"><a href="https://man.archlinux.org/man/xdm.8">xdm(8)</a></span> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xdm">xorg-xdm</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg30e2075251d0_.E7.99.BB.E5.BD.95.E5.AE.88.E6.8A.A4.E8.BF.9B.E7.A8.8B" id="登录守护进程"><span id=".E7.99.BB.E5.BD.95.E5.AE.88.E6.8A.A4.E8.BF.9B.E7.A8.8B"></span>登录守护进程</h3></div>
+<ul><li><b><a href="#pgfb3ddbd14677">greetd</a></b> — 支持控制台和图形欢迎程序的登录守护程序。</li></ul>
+<dl><dd><a href="https://git.sr.ht/~kennylevinsen/greetd">https://git.sr.ht/~kennylevinsen/greetd</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=greetd">greetd</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg30e2075251d0_.E5.8A.A0.E8.BD.BD.E6.98.BE.E7.A4.BA.E7.AE.A1.E7.90.86.E5.99.A8" id="加载显示管理器"><span id=".E5.8A.A0.E8.BD.BD.E6.98.BE.E7.A4.BA.E7.AE.A1.E7.90.86.E5.99.A8"></span>加载显示管理器</h2></div>
+<p>要在启动时启用图形登录，请启用相应的 systemd 服务：
+</p>
+<ul><li>GDM — <code>gdm.service</code></li>
+<li>LightDM — <code>lightdm.service</code></li>
+<li>LXDM — <code>lxdm.service</code></li>
+<li>Plasma 登录管理器 — <code>plasmalogin.service</code></li>
+<li>SDDM — <code>sddm.service</code></li>
+<li>SLiM — <code>slim.service</code></li></ul>
+<ul><li>XDM — <code>xdm.service</code></li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果安装了 xdm-archlinux，请启用 xdm-archlinux.service</div><div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>只应启用一个显示管理器服务。</div>
+<p>如果默认启动目标是<code>graphical.target</code>，应能开箱即用。如果没有，可能需要重置自定义<code>default.target</code>符号链接，指向默认<code>graphical.target</code>。参见 <a href="#pgac06dd8bfe95">systemd#更改开机默认启动目标</a>。
+</p><p>启用显示管理器服务后，应在 <code>/etc/systemd/system/</code> 中设置符号链接<code>display-manager.service</code>。你可能需要用<code>--force</code>来覆盖旧的符号链接。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ /etc/systemd/system/display-manager.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/etc/systemd/system/display-manager.service: symbolic link to /usr/lib/systemd/system/display-manager.service</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg30e2075251d0_.E4.BD.BF.E7.94.A8_systemd-logind" id="使用_systemd-logind"><span id=".E4.BD.BF.E7.94.A8_systemd-logind"></span>使用 systemd-logind</h2></div>
+<p>为了检查用户会话的状态，你可以使用 <i>loginctl</i>。所有 <a href="#pg74611dd9d3c8">Polkit</a> 动作，比如休眠系统或挂载外部驱动器，开箱即用。
+</p>
+<pre>$ loginctl show-session $XDG_SESSION_ID
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg30e2075251d0_.E4.BC.9A.E8.AF.9D.E9.85.8D.E7.BD.AE" id="会话配置"><span id=".E4.BC.9A.E8.AF.9D.E9.85.8D.E7.BD.AE"></span>会话配置</h2></div>
+<p>许多显示管理器会读取 <code>/usr/share/xsessions/</code> 目录来获取可用的会话列表。此目录中包含各个桌面环境或窗口管理器的标准<a href="https://specifications.freedesktop.org/desktop-entry-spec/latest/">桌面文件</a>。一些显示管理器使用单独的 <code>/usr/share/wayland-sessions/</code> 来列出特定于 <a href="#pga21a6be8b605">Wayland</a> 的会话。
+</p><p>要向显示管理器的会话列表添加/删除条目，请根据需要在 <code>/usr/share/xsessions/</code> 中创建/删除 <i>.desktop</i> 文件。典型的 <i>.desktop</i> 文件如下所示：
+</p>
+<pre>[Desktop Entry]
+Name=Openbox
+Comment=Log in using the Openbox window manager (without a session manager)
+Exec=/usr/bin/openbox-session
+TryExec=/usr/bin/openbox-session
+Icon=openbox.png
+Type=Application
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg30e2075251d0_.E8.BF.90.E8.A1.8C_.7E.2F.xinitrc_.E4.BC.9A.E8.AF.9D" id="运行_~/.xinitrc_会话"><span id=".E8.BF.90.E8.A1.8C_.7E.2F.xinitrc_.E4.BC.9A.E8.AF.9D"></span>运行 ~/.xinitrc 会话</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xinit-xsession/">xinit-xsession</a></span><sup><small>AUR</small></sup></span> 后会在显示管理器中提供一个运行 <a href="#pg05a4704b29d5">xinitrc</a> 会话的选项。请确保 <code>~/.xinitrc</code> 可执行，然后在显示管理器中选择 <code>xinitrc</code> 作为会话。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg30e2075251d0_.E6.B2.A1.E6.9C.89.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.90.AF.E5.8A.A8.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="没有窗口管理启动应用程序"><span id=".E6.B2.A1.E6.9C.89.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.90.AF.E5.8A.A8.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>没有窗口管理启动应用程序</h3></div>
+<p>也可以在没有窗口修饰、桌面或窗口管理的情况下启动应用程序。例如，要启动 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/google-chrome/">google-chrome</a></span><sup><small>AUR</small></sup></span>，在 <code>/usr/share/xsessions/</code> 中创建 <code>web-browser.desktop</code>：
+</p>
+<pre>[Desktop Entry]
+Name=Web Browser
+Comment=Use a web browser as your session
+Exec=/usr/bin/google-chrome --auto-launch-at-startup
+TryExec=/usr/bin/google-chrome --auto-launch-at-startup
+Icon=google-chrome
+Type=Application
+</pre>
+<p>在这种情况下，登录后，<code>Exec</code> 中设置的应用程序将立即启动。关闭应用程序后，会和注销桌面环境或窗口管理器一样回到登录管理器。
+</p><p>需要注意的是大部分图形程序都不支持此环境，因此可能需要手动调整或忍受限制（没有窗口管理器，所以不要期望能够移动或调整<i>任何</i>窗口，包括对话框；不过，也许可以在应用程序的配置文件中设置窗口几何形状）。
+</p><p>请参阅 <a href="#pg9fc1e9437ae5">Xinit#在没有窗口管理器的情况下启动应用程序</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg30e2075251d0_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg30e2075251d0_.E8.87.AA.E5.8A.A8.E5.90.AF.E5.8A.A8" id="自动启动"><span id=".E8.87.AA.E5.8A.A8.E5.90.AF.E5.8A.A8"></span>自动启动</h3></div>
+<p>大多数显示管理器都会提供 <code>/etc/xprofile</code>、<code>~/.xprofile</code> 和 <code>/etc/X11/xinit/xinitrc.d/</code>。有关详细信息，请参阅 <a href="#pgde17e8bd8891">xprofile</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg30e2075251d0_.E4.B8.BA.E7.94.A8.E6.88.B7.E4.BC.9A.E8.AF.9D.E8.AE.BE.E7.BD.AE.E8.AF.AD.E8.A8.80" id="为用户会话设置语言"><span id=".E4.B8.BA.E7.94.A8.E6.88.B7.E4.BC.9A.E8.AF.9D.E8.AE.BE.E7.BD.AE.E8.AF.AD.E8.A8.80"></span>为用户会话设置语言</h3></div><p>
+使用 <a href="https://freedesktop.org/wiki/Software/AccountsService/">AccountsService</a> 的显示管理器可以通过以下编辑设置用户会话的<a href="#pg630f3ead5872">区域</a>：</p><pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/var/lib/AccountsService/users/$USER</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[User]
+Language=your_locale</pre>
+<p>其中<i>your_locale</i>的值类似 <code>zh_CN.UTF-8</code>。
+</p><p>也可以使用 <a href="#pg05349798cdb5">D-Bus</a>：
+<code>busctl call org.freedesktop.Accounts /org/freedesktop/Accounts/User$UID org.freedesktop.Accounts.User SetLanguage s your_locale</code>
+</p><p>GNOME和KDE用户也可以在GNOME或KDE设置中设置语言。
+</p><p>注销然后重新登录以使更改生效。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg30e2075251d0_.E7.94.A8LUKS.E8.87.AA.E5.8A.A8.E7.99.BB.E5.BD.95.E6.97.B6.E8.87.AA.E5.8A.A8.E8.A7.A3.E9.94.81GNOME_Keyring.2FKDE_KWallet" id="用LUKS自动登录时自动解锁GNOME_Keyring/KDE_KWallet"><span id=".E7.94.A8LUKS.E8.87.AA.E5.8A.A8.E7.99.BB.E5.BD.95.E6.97.B6.E8.87.AA.E5.8A.A8.E8.A7.A3.E9.94.81GNOME_Keyring.2FKDE_KWallet"></span>用LUKS自动登录时自动解锁GNOME Keyring/KDE KWallet</h2></div>
+
+<p>自 systemd 版本 255 起，<a href="https://www.freedesktop.org/software/systemd/man/latest/pam_systemd_loadkey.html">pam_systemd_loadkey</a> 可用于解锁 GNOME/Kwallet Keyring，前提是用户密码与系统的 LUKS 密码短语相符。要实现这一点，你需要在显示管理器中启用自动登录。
+</p>
+<div class="mw-heading mw-heading1"><h1 data-bm="pg30e2075251d0_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h1></div>
+<ul><li><a href="https://kl.wtf/posts/2022/03/12/login-managers-an-introduction.html#pluggable-authentication-modules">登录管理器：入门介绍</a>——讨论登录管理器的实现</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807035244
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.160 seconds
+Real time usage: 0.166 seconds
+Preprocessor visited node count: 590/1000000
+Revision size: 8004/2097152 bytes
+Post‐expand include size: 11628/2097152 bytes
+Template argument size: 6142/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   45.490      1 -total
+ 36.12%   16.432     17 Template:App
+  8.43%    3.833     11 Template:Pkg
+  7.81%    3.552      1 Template:翻译状态
+  7.74%    3.521      1 Template:Expansion
+  5.10%    2.318     13 Template:Ic
+  4.96%    2.256      8 Template:AUR
+  4.77%    2.170      1 Template:相关文章开始
+  3.85%    1.751      1 Template:Man
+  3.75%    1.704      1 Template:Related
+-->
+<!-- Render ID 72029a0e-9213-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3017:|#|:idhash:canonical!zh-cn and timestamp 20260807035244 and revision id 35051. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

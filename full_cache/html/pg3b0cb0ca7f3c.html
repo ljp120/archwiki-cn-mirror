@@ -1,0 +1,86 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg3b0cb0ca7f3c">KDE 软件打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – KDE – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/KDE_package_guidelines">KDE package guidelines</a>，最近一次同步于 2023-05-24，若英文版本有所<a href="https://wiki.archlinux.org/title/KDE_package_guidelines?diff=0&amp;oldid=779452">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/KDE_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>Arch Linux 上的 <a href="#pg5b70e23b1711">KDE</a> 软件包符合特定的模式。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3b0cb0ca7f3c_.E6.9E.84.E5.BB.BA.E7.9B.AE.E5.BD.95" id="构建目录"><span id=".E6.9E.84.E5.BB.BA.E7.9B.AE.E5.BD.95"></span>构建目录</h2></div>
+<p>构建 <a href="https://zh.wikipedia.org/wiki/CMake">CMake</a> 软件包的推荐做法是在项目根目录之外新建一个构建目录，并从该目录运行 cmake。<a href="#pgf9d748a7b27b">PKGBUILD</a> 应如下所示：
+</p>
+<pre>prepare() {
+  mkdir -p build
+}
+
+build() {
+  cd build
+  cmake ../${pkgname}-${pkgver}
+}
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3b0cb0ca7f3c_.E5.AE.89.E8.A3.85.E6.89.80.E9.9C.80.E7.9A.84.E5.89.8D.E7.BC.80.E5.8F.82.E6.95.B0" id="安装所需的前缀参数"><span id=".E5.AE.89.E8.A3.85.E6.89.80.E9.9C.80.E7.9A.84.E5.89.8D.E7.BC.80.E5.8F.82.E6.95.B0"></span>安装所需的前缀参数</h2></div>
+<p>每个软件包都必须设置 <code>CMAKE_INSTALL_PREFIX</code> 变量，但考虑到 KDE 的自定义构建版本，请使用以下参数：
+</p>
+<pre>-DCMAKE_INSTALL_PREFIX=$(kf5-config --prefix)
+</pre>
+<p>当软件包被移动到 <i>extra</i> 仓库时，上述参数应改为：
+</p>
+<pre>-DCMAKE_INSTALL_PREFIX=/usr
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3b0cb0ca7f3c_.E6.9E.84.E5.BB.BA.E7.B1.BB.E5.9E.8B" id="构建类型"><span id=".E6.9E.84.E5.BB.BA.E7.B1.BB.E5.9E.8B"></span>构建类型</h2></div>
+<p>一般来说不应指定构建类型，这样能使 CMake 接受 <code>CFLAGS</code>、<code>CPPFLAGS</code> 等环境变量。<a href="https://lists.archlinux.org/archives/list/arch-dev-public@lists.archlinux.org/thread/ACV4TTGMC5RRSXYOO2GSI5WFLKQDBEFX/">[1]</a>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3b0cb0ca7f3c_.E5.BC.BA.E5.88.B6.E6.8C.87.E5.AE.9A_Qt_.E7.89.88.E6.9C.AC" id="强制指定_Qt_版本"><span id=".E5.BC.BA.E5.88.B6.E6.8C.87.E5.AE.9A_Qt_.E7.89.88.E6.9C.AC"></span>强制指定 Qt 版本</h2></div>
+
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3b0cb0ca7f3c_KF5_.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.91.BD.E5.90.8D" id="KF5_软件包命名"><span id="KF5_.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.91.BD.E5.90.8D"></span>KF5 软件包命名</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3b0cb0ca7f3c_Plasma_.E6.8C.82.E4.BB.B6" id="Plasma_挂件"><span id="Plasma_.E6.8C.82.E4.BB.B6"></span>Plasma 挂件</h3></div>
+<p>Plasma 挂件 (之前名为 Plasmoids) 软件包应当被命名为 <code>plasma5-applets-<i>widgetname</i></code>，这样能被识别为与 Plasma 5 相关的软件包，且易于与官方软件包区分。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3b0cb0ca7f3c_Runners" id="Runners">Runners</h3></div>
+<p>Plasma runners 软件包应当被命名为 <code>plasma5-runners-<i>runnername</i></code> ，这样能被识别为与 Plasma 5 相关的软件包，且易于与官方软件包区分。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3b0cb0ca7f3c_.E6.9C.8D.E5.8A.A1.E8.8F.9C.E5.8D.95" id="服务菜单"><span id=".E6.9C.8D.E5.8A.A1.E8.8F.9C.E5.8D.95"></span>服务菜单</h3></div>
+<p>服务菜单软件包应当被命名为 <code>kf5-servicemenus-<i>servicename</i></code> ，这样能被识别为与 KF5 相关的软件包。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3b0cb0ca7f3c_.E4.B8.BB.E9.A2.98" id="主题"><span id=".E4.B8.BB.E9.A2.98"></span>主题</h3></div>
+<p>Plasma 主题软件包应当被命名为 <code>plasma5-themes-<i>themename</i></code> ，这样能被识别为与 Plasma 5 相关的软件包。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3b0cb0ca7f3c_.E5.9B.BE.E6.A0.87.E5.92.8C_.desktop_.E6.96.87.E4.BB.B6.E5.AE.89.E8.A3.85" id="图标和_.desktop_文件安装"><span id=".E5.9B.BE.E6.A0.87.E5.92.8C_.desktop_.E6.96.87.E4.BB.B6.E5.AE.89.E8.A3.85"></span>图标和 .desktop 文件安装</h2></div>
+<p>一些 <a href="#pg5b70e23b1711">KDE</a> 软件在 hicolor 图标主题和 <code>.desktop</code> 文件中提供了图标（必须通过 <a href="#pg9ef105bf1e3c">pacman 钩子</a>安装）。应当避免在 <code>.install</code> 中对这些类型的文件使用安装命令，因为这将导致不必要的重复执行。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808035942
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.094 seconds
+Real time usage: 0.098 seconds
+Preprocessor visited node count: 153/1000000
+Revision size: 2244/2097152 bytes
+Post‐expand include size: 3647/2097152 bytes
+Template argument size: 642/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   15.000      1 -total
+ 26.49%    3.974      1 Template:Expansion
+ 20.95%    3.143      1 Template:翻译状态
+ 12.71%    1.906      9 Template:Ic
+ 11.63%    1.744      1 Template:META_Message
+  7.48%    1.122      1 Template:打包准则
+  6.72%    1.008      1 Template:Bc
+-->
+<!-- Render ID 9592170e-92dd-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7567:|#|:idhash:canonical!zh-cn and timestamp 20260808035942 and revision id 33636. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

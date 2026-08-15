@@ -1,0 +1,233 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgb92e07bf7ccb">外接显卡</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pga36c0aff60be">Xorg</a></li>
+<li><a href="#pgb7ad5a571901">PRIME</a></li>
+<li><a href="#pgb8dd8b03023a">Thunderbolt</a></li>
+<li><a href="#pg9ff9e1bc1c96">NVIDIA Optimus</a></li>
+<li><a href="#pgfdf764aa3343">NVIDIA/Tips and tricks</a></li>
+<li><a href="#pg2706af904a4b">Docking</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/External_GPU">External GPU</a>，最近一次同步于 2024-07-20，若英文版本有所<a href="https://wiki.archlinux.org/title/External_GPU?diff=0&amp;oldid=812654">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/External_GPU_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>在搭载了<a href="https://en.wikipedia.org/wiki/Thunderbolt_(interface)#Thunderbolt_3">雷电 3+</a> 或 <a href="https://en.wikipedia.org/wiki/USB4">USB4</a>的设备上，可以通过显卡拓展坞连接一张桌面级的外接显卡（eGPU）。<a href="https://egpu.io/">eGPU.io</a> 是一个专门讨论外接显卡的社区论坛。尽管大多数时候仍需一些手动配置（如下），Linux 对外接显卡的支持相当不错。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>对于搭载了 USB4 的笔记本，其传输速率一般被设置为最小值（20 Gbit/s）。可以手动将其设置得更高（40，80 或更高）来获取更佳的体验。如果您的拓展坞使用雷电接口，可以启用笔记本的 USB4 模式来达到相同效果。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb92e07bf7ccb_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb92e07bf7ccb_.E9.9B.B7.E7.94.B5" id="雷电"><span id=".E9.9B.B7.E7.94.B5"></span>雷电</h3></div>
+<p>使用雷电接口的拓展坞在插入前可能首先需要经过设备认证（取决于 BIOS/UEFI 配置）。详见 <a href="#pgb8dd8b03023a">Thunderbolt#User device authorization</a>。如果成功插入，外接显卡将在 <code>lspci</code> 中显示。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lspci | grep -E 'VGA|3D'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">00:02.0 VGA compatible controller: Intel Corporation UHD Graphics 620 (rev 07)             # 集成显卡
+1a:10.3 VGA compatible controller: NVIDIA Corporation GP107 [GeForce GTX 1050] (rev a1)    # 外接显卡
+</pre>
+<p>根据电脑的硬件和拓展坞的硬件情况，雷电接口会限制主机与外接显卡间的带宽。限制程度取决于 <a href="https://egpu.io/best-laptops-external-gpu/#pcie">PCIe 通道数和封装的DMI互联接口（OPI）模式</a>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg | grep PCIe</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[19888.928225] pci 0000:1a:10.3: 8.000 Gb/s available PCIe bandwidth, limited by 2.5 GT/s PCIe x4 link at 0000:05:01.0 (capable of 126.016 Gb/s with 8.0 GT/s PCIe x16 link)
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb92e07bf7ccb_.E9.A9.B1.E5.8A.A8" id="驱动"><span id=".E9.A9.B1.E5.8A.A8"></span>驱动</h3></div>
+<p>您应该安装与您的外接显卡兼容的驱动程序：
+</p>
+<ul><li><a href="#pg4a4bc5e5df24">AMDGPU</a> AMD 驱动</li>
+<li><a href="#pge12579b7d4ac">NVIDIA</a> 专有 NVIDIA 驱动</li>
+<li><a href="#pg172970a5f8dd">Nouveau</a> 开源 NVIDIA 驱动</li></ul>
+<p>成功安装后，<code>lspci -k</code> 应当显示显卡与驱动已经成功绑定：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lspci -k</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">1a:10.3 VGA compatible controller: NVIDIA Corporation GP107 [GeForce GTX 1050] (rev a1)
+        Subsystem: NVIDIA Corporation GP107 [GeForce GTX 1050]
+        Kernel driver in use: nvidia
+        Kernel modules: nouveau, nvidia_drm, nvidia
+</pre>
+<p>注意，在某些情况下，AMDGPU 驱动（无论使用雷电接口还是 USB4）可能会被设置为错误的 <i>pcie_gen_gap</i> 模式，然后回滚到 PCIe 1.1 的速率。这可能会导致性能严重降低。
+可以通过调整模块参数（见<a href="#pg6dbfce2ea89d">内核模块#使用 /etc/modprobe.d/中的文件</a>) 或传递<a href="#pgec0856954f1c">内核参数</a>来解决以上问题。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/amd-egpu-pcie-speed.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options amdgpu pcie_gen_cap=0x40000
+</pre>
+<p>这会将速率设置为 PCIe 3 模式。完整的参数选项见 <a href="https://github.com/torvalds/linux/blob/master/drivers/gpu/drm/amd/include/amd_pcie.h#L26">amd_pcie.h</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb92e07bf7ccb_.E6.98.BE.E5.8D.A1.E8.AE.A1.E7.AE.97" id="显卡计算"><span id=".E6.98.BE.E5.8D.A1.E8.AE.A1.E7.AE.97"></span>显卡计算</h2></div>
+<p>在完成 #安装之后，像 <a href="#pg9c80e5163dff">GPGPU#CUDA</a> 这样无需在屏幕上显示的纯计算工作，理论上无需额外配置即可使用。<i>nvidia-smi</i> 工具（由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span><sup><small>包</small></sup></span> 提供）在使用专有 NVIDIA 驱动时应该能正常运行。专有的 <a href="https://en.wikipedia.org/wiki/Nvidia_NVENC">NVIDIA NVENC/NVDEC</a> 也应该正常运行（不包括与 OpenGL 的互操作）。
+</p><p>在这种使用场景下，热插拔也应该受支持（对拔出支持取决于驱动程序）。不过，对于 NVIDIA 设备，使用 <code>nvidia-persistenced</code> 会导致热拔出时设备出现故障。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb92e07bf7ccb_Xorg" id="Xorg">Xorg</h2></div>
+<p>通过一些额外配置，您可以将集成显卡（iGPU）和外接显卡（eGPU）结合起来使用。这样配置有其优点，但也会带来一些额外的问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb92e07bf7ccb_Xorg_.E5.9C.A8.E5.A4.96.E6.8E.A5.E6.98.BE.E5.8D.A1.E4.B8.8A.E6.B8.B2.E6.9F.93.EF.BC.8CPRIME_.E6.98.BE.E7.A4.BA.E5.88.86.E8.BD.BD.E5.88.B0.E9.9B.86.E6.88.90.E6.98.BE.E5.8D.A1" id="Xorg_在外接显卡上渲染，PRIME_显示分载到集成显卡"><span id="Xorg_.E5.9C.A8.E5.A4.96.E6.8E.A5.E6.98.BE.E5.8D.A1.E4.B8.8A.E6.B8.B2.E6.9F.93.EF.BC.8CPRIME_.E6.98.BE.E7.A4.BA.E5.88.86.E8.BD.BD.E5.88.B0.E9.9B.86.E6.88.90.E6.98.BE.E5.8D.A1"></span>Xorg 在外接显卡上渲染，PRIME 显示分载到集成显卡</h3></div>
+<ul><li>大多数使用显卡的程序可以正常执行在外接显卡上：<code>glxinfo</code>/<code>glxgears</code>, <code>eglinfo</code>/<code>eglgears_x11</code>, <code>NVENC</code>/<code>NVDEC</code>（包括与 OpenGL 的互操作）。</li>
+<li>Xorg 仅能在外接显卡接入后启动。</li>
+<li>连接到外接显卡上的显示器开箱即用，而 PRIME显示分载适用于连接到集成显卡的显示器（例如笔记本内屏）。</li></ul>
+<p>有关这些内容，见 <a href="#pgb7ad5a571901">PRIME#将独立显卡作为主 GPU</a> 和 <a href="#pgb7ad5a571901">PRIME#反向 PRIME</a>。 同时，NVIDIA 官方驱动文档也有教程： <a href="http://us.download.nvidia.com/XFree86/Linux-x86_64/465.27/README/randr14.html">Chapter 33. Offloading Graphics Display with RandR 1.4</a>.
+</p><p>Xorg 的配置文件应该像如下所示：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/80-egpu-primary-igpu-offload.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Device"
+    Identifier "Device0"
+    Driver     "nvidia"
+    BusID      "PCI:26:16:3"                 # 根据 lspci 填写，将十六进制转换为十进制。
+    Option     "AllowExternalGpus" "True"    # 专有 NVIDIA 
+ 驱动所需。
+EndSection
+
+Section "Module"
+    # 为集成显卡加载 modesetting 模块，其提供程序应当是 XrandR 1.4。
+    Load "modesetting"
+EndSection
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Xorg 使用十进制的总线 ID，但大多数工具使用十六进制。在 <code>xorg.conf</code> 中，必须将形如 <code>1a:10.3</code> 的总线 ID转换为 <code>26:16:3</code>。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>在更新的 Xorg 中，无需指定 <code>ServerLayout</code> 和 <code>Screen</code> 项，这些项将会被自动推断。 第一个定义的 <code>Device</code> 会被首先考虑。</div>
+<p>要<b>确认</b>此次设置是否有效，使用 <code>xrandr --listproviders</code> 检查。输出应当如下：
+</p>
+<pre>Providers: number : 2
+Provider 0: id: 0x1b8 cap: 0x1, Source Output crtcs: 4 outputs: 4 associated providers: 0 name:NVIDIA-0
+Provider 1: id: 0x1f3 cap: 0xf, Source Output, Sink Output, Source Offload, Sink Offload crtcs: 3 outputs: 5 associated providers: 0 name:modesetting
+</pre>
+<p>要<b>输出到笔记本内屏及其他连接到集成显卡上的显示</b>，可以使用 RandR 1.4 PRIME显示分载。请使用 <code>xrandr --listproviders</code> 输出的设备名：
+</p>
+<pre>xrandr --setprovideroutputsource modesetting NVIDIA-0 &amp;&amp; xrandr --auto</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>xrandr --auto</code> 是可选的命令，可以使用其他任何基于 RandR 的显示配置工具替代。这条命令只是防止出现屏幕全黑的情况。</div>
+<p>要在显示管理器弹出登录页面或启动桌面环境之前执行这条命令，见 <a href="#pgaa98d1ed067b">Xrandr#Configuration</a> 和 <a href="#pg9fc1e9437ae5">Xinit</a>。
+</p><p><a href="#pg813471eccd07">Vulkan</a> 可能会自行枚举 Xorg 上的所有显卡，所以如果要在本配置下执行如 <code>vkcube</code> 这样的程序，可能需要传递参数 <code>--gpu_number 1</code>。另外，也可以使用此参数以在枚举期间对显卡重新排序：<code>__NV_PRIME_RENDER_OFFLOAD=1 vkcube</code> 或者等效的 <code>prime-run vkcube</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>在笔记本上使用 <i>optimus-manager</i> 时，仅需将外接显卡的 <code>BusID</code> 放入位于 <code>/etc/optimus-manager/xorg/</code> 下的管理模式与显卡的配置文件中，就可以在外接显卡上渲染。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb92e07bf7ccb_Xorg_.E5.9C.A8.E9.9B.86.E6.88.90.E6.98.BE.E5.8D.A1.E4.B8.8A.E6.B8.B2.E6.9F.93.EF.BC.8CPRIME_.E6.B8.B2.E6.9F.93.E5.88.86.E8.BD.BD.E5.88.B0.E5.A4.96.E6.8E.A5.E6.98.BE.E5.8D.A1" id="Xorg_在集成显卡上渲染，PRIME_渲染分载到外接显卡"><span id="Xorg_.E5.9C.A8.E9.9B.86.E6.88.90.E6.98.BE.E5.8D.A1.E4.B8.8A.E6.B8.B2.E6.9F.93.EF.BC.8CPRIME_.E6.B8.B2.E6.9F.93.E5.88.86.E8.BD.BD.E5.88.B0.E5.A4.96.E6.8E.A5.E6.98.BE.E5.8D.A1"></span>Xorg 在集成显卡上渲染，PRIME 渲染分载到外接显卡</h3></div>
+<ul><li>程序默认在集成显卡上渲染，但 PRIME 渲染分载可以使程序在外接显卡上渲染。</li>
+<li>Xorg 可以在未连接外接显卡时启动，但在连接外接显卡后，必须重启 Xorg 才能使用渲染与显示分载。</li>
+<li>连接到集成显卡上的显示器（例如笔记本内屏）开箱即用，而 PRIME 显示分载适用于连接到外接显卡上的显示器。</li></ul>
+<p>详细内容见 <a href="#pgb7ad5a571901">PRIME#PRIME 显卡分载</a>。NVIDIA 官方驱动文档中也有记录：<a href="http://us.download.nvidia.com/XFree86/Linux-x86_64/465.27/README/primerenderoffload.html">Chapter 34. PRIME Render Offload</a>。
+</p><p>对大多数独立显卡而言，此模式应当是默认模式，无需手动配置 Xorg。如果存在问题，或是在使用专有 NVIDIA 驱动，应当如下配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/80-igpu-primary-egpu-offload.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Device"
+    Identifier "Device0"
+    Driver     "modesetting"
+EndSection
+
+Section "Device"
+    Identifier "Device1"
+    Driver     "nvidia"
+    BusID      "PCI:26:16:3"                 # 根据 lspci 填写，将十六进制转换为十进制。
+    Option     "AllowExternalGpus" "True"    # 专有 NVIDIA 驱动所需。
+EndSection
+</pre>
+<p>要<b>确认</b>是否配置成功，执行 <code>xrandr --listproviders</code> 时，应当显示如下内容：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ xrandr --listproviders</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Providers: number : 2
+Provider 0: id: 0x47 cap: 0xf, Source Output, Sink Output, Source Offload, Sink Offload crtcs: 3 outputs: 5 associated providers: 0 name:modesetting
+Provider 1: id: 0x24a cap: 0x2, Sink Output crtcs: 4 outputs: 4 associated providers: 0 name:NVIDIA-G0
+</pre>
+
+<p>要让某些程序在外接显卡上渲染，可以用以下方式启用 PRIME 渲染分载：
+</p>
+<ul><li>对于专有 NVIDIA 驱动：<pre>$ __NV_PRIME_RENDER_OFFLOAD=1 __VK_LAYER_NV_optimus=NVIDIA_only __GLX_VENDOR_LIBRARY_NAME=nvidia <i>some_program</i></pre></li>
+<li>对于专有 NVIDIA 驱动（封装版）：<pre>$ prime-run <i>some_program</i></pre></li>
+<li>对于开源驱动：<pre>$ DRI_PRIME=1 <i>some_program</i></pre></li></ul>
+<p>要<b>输出到连接至外接显卡的显示器</b>，还可以这样使用 RandR 1.4 PRIME 显示分载：
+</p>
+<pre>$ xrandr --setprovideroutputsource NVIDIA-G0 modesetting &amp;&amp; xrandr --auto
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>提供程序的顺序并不相同，同时 NVIDIA 的命名也稍有不同。</div>
+<p>NVIDIA 驱动版本 460.27.04+ <a href="https://forums.developer.nvidia.com/t/linux-solaris-and-freebsd-driver-460-27-04-beta/163730">优化了在一些特定情形下对渲染和显示分载的结合支持</a>：
+</p>
+<dl><dd>添加了对 “反向 PRIME 绕行”（Reverse PRIME Bypass）的支持，这使得当某一渲染分载程序处于全屏，非重定向，且仅在给定的使用 NVIDIA 驱动的 PRIME 显示分载输出中显示时，可以绕过 PRIME 渲染分载和 PRIME 显示分载的带宽限制。当 X 服务器启用详细日志时，可以在 X 日志中找到此特性的使用情况。</dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb92e07bf7ccb_.E5.9C.A8.E5.A4.96.E6.8E.A5.E6.98.BE.E5.8D.A1.E4.B8.8A.E6.89.A7.E8.A1.8C.E5.A4.9A.E4.B8.AA.E7.8B.AC.E7.AB.8B_Xorg_.E5.AE.9E.E4.BE.8B" id="在外接显卡上执行多个独立_Xorg_实例"><span id=".E5.9C.A8.E5.A4.96.E6.8E.A5.E6.98.BE.E5.8D.A1.E4.B8.8A.E6.89.A7.E8.A1.8C.E5.A4.9A.E4.B8.AA.E7.8B.AC.E7.AB.8B_Xorg_.E5.AE.9E.E4.BE.8B"></span>在外接显卡上执行多个独立 Xorg 实例</h3></div>
+<p>详见 <a href="#pg5a8677d36f71">Nvidia-xrun#External GPU setup</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb92e07bf7ccb_.E5.9C.A8_Xorg_.E4.B8.8A.E4.BD.BF.E7.94.A8.E5.A4.96.E6.8E.A5.E6.98.BE.E5.8D.A1.E7.9A.84.E5.B7.B2.E7.9F.A5.E9.97.AE.E9.A2.98" id="在_Xorg_上使用外接显卡的已知问题"><span id=".E5.9C.A8_Xorg_.E4.B8.8A.E4.BD.BF.E7.94.A8.E5.A4.96.E6.8E.A5.E6.98.BE.E5.8D.A1.E7.9A.84.E5.B7.B2.E7.9F.A5.E9.97.AE.E9.A2.98"></span>在 Xorg 上使用外接显卡的已知问题</h3></div>
+<ul><li>大多数独立显卡的 Xorg 驱动不支持热插入：必须在启动 Xorg 前插入外接显卡。注销后重新登录即可重启 Xorg。</li>
+<li>完全不支持热拔出：这样会导致系统不稳定或卡死（根据 <a href="https://us.download.nvidia.com/XFree86/Linux-x86_64/465.27/README/egpu.html">NVIDIA 官方文档</a>）。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb92e07bf7ccb_Wayland" id="Wayland">Wayland</h2></div>
+<p>有关 Wayland 对外接显卡（或多显卡）支持程度的测试目前尚为数不多，不过理论上其相对于 Xorg 来说配置会更为便捷。
+</p><p>需要注意的是，Wayland 混成器尚无对显卡热插拔的明确支持，不过大多数混成器已经在某种程度上支持了：
+</p>
+<ul><li>KDE's kwin: <a href="https://invent.kde.org/plasma/kwin/-/merge_requests/811">https://invent.kde.org/plasma/kwin/-/merge_requests/811</a></li>
+<li>GNOME's Mutter: <a href="https://gitlab.gnome.org/GNOME/mutter/-/issues/17">https://gitlab.gnome.org/GNOME/mutter/-/issues/17</a>, <a href="https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1562">https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1562</a></li>
+<li>wl-roots: <a href="https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/1278">https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/1278</a></li></ul>
+<p>使用开源驱动时，需要这样执行 DRI 分载：
+</p>
+<pre>$ DRI_PRIME=1 <i>some_program</i>
+</pre>
+<p>一些像 <a href="https://github.com/ewagner12/all-ways-egpu/wiki">all-ways-egpu</a> 这样的项目正致力于在 Wayland 下提供更为便捷的显卡切换方法。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb92e07bf7ccb_.E7.83.AD.E6.8F.92.E6.8B.94_NVIDIA_.E5.A4.96.E6.8E.A5.E6.98.BE.E5.8D.A1" id="热插拔_NVIDIA_外接显卡"><span id=".E7.83.AD.E6.8F.92.E6.8B.94_NVIDIA_.E5.A4.96.E6.8E.A5.E6.98.BE.E5.8D.A1"></span>热插拔 NVIDIA 外接显卡</h3></div>
+<p>Wayland 支持在使用 PRIME 时热插拔外接显卡。NVIDIA 独立显卡对 PRIME 的优秀支持同样适用于外接显卡。
+</p><p>首先，确保没有进程正在使用 NVIDIA 模块。每个 EGL 程序会占用 1MB 的独显显存，即使其运行在集成显卡上。可以通过 <code>nvidia-smi</code> 查看是否有此类进程。 为防止出现此类问题，请将<code>__EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json</code> 设置为<a href="#pg4989d4f46056">环境变量</a>。 不过，最好将其放在 <code>/etc/environment.d/50_mesa.conf</code> 中。
+</p><p>然后，卸载 NVIDIA 模块：
+</p>
+<pre># rmmod nvidia_uvm
+# rmmod nvidia_drm
+# rmmod nvidia_modeset
+# rmmod nvidia
+</pre>
+<p>模块卸载完成后，就可以连接外接显卡。显卡初始化完毕后，使用 <code>modprobe nvidia-drm</code> 或 <code>modprobe nvidia-current-drm</code> 重新加载 NVIDIA 模块。使用哪条命令取决于模块的来源，例如从 NVIDIA 官网下载或是使用软件包管理器直接安装。在某些情况下（例如 GIGABYTE AORUS GAMING BOX）外接显卡可能不兼容专有驱动，因此需要使用开源驱动的命令：<code>modprobe nvidia-current-open-drm</code>。
+</p><p>模块加载成功后，PRIME 就应该能正常使用，不过因为我们设置了 <code>__EGL_VENDOR_LIBRARY_FILENAMES</code> 变量来使用 MESA，所以在启动程序前需要添加 <code>__EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/10_nvidia.json</code>。完整的环境变量列表如下：
+</p>
+<pre>__GLX_VENDOR_LIBRARY_NAME=nvidia __NV_PRIME_RENDER_OFFLOAD=1 __VK_LAYER_NV_optimus=NVIDIA_only __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/10_nvidia.json %command%
+</pre>
+<p>对于 GNOME 用户，可能需要修补 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=switcheroo-control">switcheroo-control</a></span><sup><small>包</small></sup></span> 来将 <code>__EGL_VENDOR_LIBRARY_FILENAMES</code> 包含到环境变量中。这将允许程序原生运行在外接显卡上，不会出现鼠标错位，而且能“使用独立显卡启动”。不过，关于如何修补，就不在本篇文章的讨论范围之内了。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb92e07bf7ccb_.E7.83.AD.E6.8F.92.E6.8B.94_NVIDIA_.E5.A4.96.E6.8E.A5.E6.98.BE.E5.8D.A1.EF.BC.8C.E5.B9.B6.E4.B8.B4.E6.97.B6.E5.81.9C.E7.94.A8_NVIDIA_.E7.8B.AC.E7.AB.8B.E6.98.BE.E5.8D.A1" id="热插拔_NVIDIA_外接显卡，并临时停用_NVIDIA_独立显卡"><span id=".E7.83.AD.E6.8F.92.E6.8B.94_NVIDIA_.E5.A4.96.E6.8E.A5.E6.98.BE.E5.8D.A1.EF.BC.8C.E5.B9.B6.E4.B8.B4.E6.97.B6.E5.81.9C.E7.94.A8_NVIDIA_.E7.8B.AC.E7.AB.8B.E6.98.BE.E5.8D.A1"></span>热插拔 NVIDIA 外接显卡，并临时停用 NVIDIA 独立显卡</h3></div>
+<p>如果您同时拥有集成显卡（iGPU）和 NVIDIA 独立显卡（dGPU），并且尝试连接 NVIDIA 外接显卡（eGPU），显卡间会产生冲突，这会导致只有独立显卡能够使用。要解决冲突，必须临时停用独立显卡，这样 NVIDIA 驱动就不会识别到它。最好的方法就是覆盖驱动。
+</p><p>首先，卸载 NVIDIA 驱动模块：
+</p>
+<pre># rmmod nvidia_uvm
+# rmmod nvidia_drm
+# rmmod nvidia_modeset
+# rmmod nvidia
+</pre>
+<p>然后，使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/driverctl/">driverctl</a></span><sup><small>AUR</small></sup></span> 工具覆盖独立显卡驱动。在下面的例子中，使用 0000:01:00.0 代表独立显卡的地址。您设备的独立显卡地址可以使用 <code>lspci</code> 查看。
+</p>
+<pre># driverctl --nosave set-override 0000:01:00.0 vfio-pci
+</pre>
+<p>建议使用参数 <code>--nosave</code>，否则 driverctl 会在系统启动时覆盖驱动。这样，在出错的时候，仅需重启就可以恢复独立显卡。
+</p><p>独立显卡禁用后，就可以使用 <code>modprobe nvidia-drm</code> 加载内核模块，然后使用 <code>nvidia-smi</code> 检查其显示一张或两张显卡。
+</p><p>重新启动独立显卡有点麻烦，因为它很反直觉。首先，卸载 NVIDIA 模块，拔出外接显卡，然后执行以下命令：
+</p>
+<pre># modprobe nvidia-current
+# driverctl --nosave unset-override 0000:01:00.0
+# modprobe nvidia-current
+# driverctl --nosave unset-override 0000:01:00.0
+# modprobe nvidia-current-modeset
+# modprobe nvidia-current-drm
+</pre>
+<p>前两个命令需要执行两次，这看起来尽管很奇怪，不过只有这样才能重新启动独立显卡。第一次执行命令时可能会报错，不过这并不重要。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807023658
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.166 seconds
+Real time usage: 0.173 seconds
+Preprocessor visited node count: 581/1000000
+Revision size: 15182/2097152 bytes
+Post‐expand include size: 9691/2097152 bytes
+Template argument size: 4920/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   48.290      1 -total
+ 11.20%    5.409     38 Template:Ic
+  8.34%    4.029      1 Template:合并
+  8.06%    3.893      1 Template:翻译状态
+  6.03%    2.913      3 Template:提示
+  5.74%    2.774      6 Template:Related
+  5.45%    2.631      1 Template:相关文章开始
+  5.35%    2.585      7 Template:Hc
+  5.33%    2.576      2 Template:Pkg
+  5.10%    2.463      3 Template:注意
+-->
+<!-- Render ID dc620d0e-9208-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7811:|#|:idhash:canonical!zh-cn and timestamp 20260807023658 and revision id 33741. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

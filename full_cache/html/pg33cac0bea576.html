@@ -1,0 +1,562 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg33cac0bea576">输入法</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Input_method">Input method</a>，最近一次同步于 2024-02-05，若英文版本有所<a href="https://wiki.archlinux.org/title/Input_method?diff=0&amp;oldid=792358">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Input_method_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgb8e819c27b39">字体#非拉丁文字</a></li>
+<li><a href="#pg630f3ead5872">区域</a></li>
+</ul></div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg33cac0bea576_.E8.BE.93.E5.85.A5.E6.B3.95" id="输入法"><span id=".E8.BE.93.E5.85.A5.E6.B3.95"></span>输入法</h2></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果以下文本在屏幕上显示为乱码，请确保系统中安装了中文或日文字体。有关可用字体的非详尽列表，请参阅<a href="#pgb8e819c27b39">字体#中日韩越文字</a>。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>为简单起见，在以下示例中仅提到了键盘，但 IME 实际上可以使用多种输入源，例如使用鼠标或 <a href="#pg5c0db27eda81">Wacom tablet</a> 绘制字符。</div>
+<p>引自 <a href="https://en.wikipedia.org/wiki/Input_method">Wikipedia:Input method</a>：
+</p>
+<dl><dd><b>输入法</b>（或<b>输入法编辑器</b>，常缩写为 IME）是一种操作系统组件或程序，它使用户能够通过使用输入设备上原生的字符序列（或鼠标操作）来生成其输入设备上没有的文字。对于拥有比键盘上的按键更多的字位的语言来说，使用一种输入法通常是必要的。</dd></dl>
+<p>简单来说，IME 是一个允许我们使用拉丁字符输入非拉丁字符的应用程序。
+</p><p>一些 IME 通过一种叫做<a href="https://zh.wikipedia.org/wiki/%E7%BD%97%E9%A9%AC%E5%8C%96">罗马化</a>的过程来实现这一点，即把非拉丁语的声音音译成与之最相近的拉丁语对应物。例如，日语中<a href="https://zh.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E9%85%92">“清酒”</a>或“米酒”的写作<code><b>酒</b></code>，也写成<code><b>さけ</b></code>，并被罗马化为“sake”。IME 的作用是充当键盘和输入字段之间的中间人，因此，当我们输入“sake”时，它将拦截键盘的输入，用 <code><b>酒</b></code> 或 <code><b>さけ</b></code>（由用户选择）替换 “sake”，并为我们输入本地字符而不是我们按下的键。
+</p><p>也有一些 IME 不使用罗马化。其中最突出的是<a href="https://zh.wikipedia.org/wiki/%E5%80%89%E9%A0%A1%E8%BC%B8%E5%85%A5%E6%B3%95">仓颉</a>，它通过将汉字分解为<a href="https://zh.wikipedia.org/wiki/%E5%BA%B7%E7%86%99%E9%83%A8%E9%A6%96">部首</a>，将这些部首与第二套自己的内部部首相匹配，最后再将这些内部部首与拉丁文字相匹配。举例来说，中文的<code><i>酒</i></code>由<a href="https://zh.wikipedia.org/wiki/%E5%BA%B7%E7%86%99%E9%83%A8%E9%A6%96">部首</a> <code><b>氵</b></code>、<code><b>一</b></code>、<code><b>⼉</b></code>、<code><b>口</b></code> 和 <code><b>一</b></code> 组成。仓颉将这些部首与内部部首<code><b>水</b></code>、<code><b>一</b></code>、<code><b>金</b></code>、<code><b>田</b></code> 和 <code><b>一</b></code>匹配，然后将这些部首与拉丁字符 <code>emcw</code> 匹配。这意味着，当我们输入“emcw”时，仓颉会拦截键盘的输入，用 <code><b>酒</b></code> 替换 "emcw"，并在屏幕上输入该字符。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg33cac0bea576_.E8.BE.93.E5.85.A5.E6.B3.95.E6.A1.86.E6.9E.B6" id="输入法框架"><span id=".E8.BE.93.E5.85.A5.E6.B3.95.E6.A1.86.E6.9E.B6"></span>输入法框架</h3></div>
+<p>大多数 IME 是作为<b>输入法框架</b>（常缩写为 IMF）的一部分工作的，它是一个允许用户在不同的 IME 之间轻松切换的应用程序。事实上，这正是我们许多人每天在不同的拉丁语键盘布局（如英语、西班牙语、德语等）之间切换时不知不觉地使用的应用程序。
+</p><p>最常见的 IMF 是 <a href="#pg945bbdd1d2b5">IBus</a>（通常用于基于 <a href="#pg6438c4cbb62c">GTK</a> 的环境，如 <a href="#pg1e095fe2c2a6">GNOME</a>），其次是<a href="#pg370a22d160ed">Fcitx5</a>（大多用于基于 <a href="#pg5016907af879">Qt</a> 的环境，如 <a href="#pg5b70e23b1711">KDE</a>），然后是 <a href="#pg1e5199899b98">Scim</a> 和 <a href="#pg23c0ca0c34df">Fcitx</a>，最后是 <a href="#pg4d4891d5b56d">Uim</a>。非常不常见的包括 <a href="#pg100dd942005b">Gcin</a>、<a href="#pg52e2ff09ebc6">Nimf</a> 和 Hime。<a href="https://pkgstats.archlinux.de/compare/packages#packages=fcitx,fcitx5,gcin,hime,ibus,nimf,scim,uim">[1]</a>此外，<a href="#pg9de7470c4ea9">Emacs</a>是一个非常流行的文本编辑器，它有自己的内部 IMF。
+</p><p>参见 <a href="https://en.wikipedia.org/wiki/List_of_input_methods_for_Unix_platforms">Wikipedia:List of input methods for Unix platforms</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>SCIM 目前缺乏维护，因此不推荐使用。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg33cac0bea576_.E8.BE.93.E5.85.A5.E6.B3.95.E5.88.97.E8.A1.A8" id="输入法列表"><span id=".E8.BE.93.E5.85.A5.E6.B3.95.E5.88.97.E8.A1.A8"></span>输入法列表</h2></div>
+<p>下表显示了 Arch 存储库和 <a href="#pgb0e1a56d1c81">AUR</a> 中当前可用的各种语言的 IME。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在某些情况下，同一个 IME 存在多个软件包。这方面的一个很好的例子是<b>Mozc</b>：作为目前最流行的日语 IME，多年来有多个打包者试图创建一个“完美的”Mozc 包。在下面的表格中，每个 IMF 都包括一个 Mozc 软件包；但这并不意味着这些是用户应该考虑安装的唯一 Mozc 软件包。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>并非所有 IME/IMF 都是最新的；例如，Anthy 不再维护，通常首选 mozc。一些 IME 也相当不受欢迎，并且不提供太多支持。查看相应的 <a href="#pg3c625f401395">Localization</a> 页面了解更多信息。</div>
+<table class="wikitable" style="text-align:center;">
+<tbody><tr>
+<th>
+</th>
+<th><a href="#pg370a22d160ed">Fcitx5</a></th>
+<th><a href="#pg23c0ca0c34df">Fcitx</a></th>
+<th><a href="#pg945bbdd1d2b5">IBus</a></th>
+<th><a href="#pg4d4891d5b56d">uim</a></th>
+<th><a href="#pg9de7470c4ea9">Emacs</a></th>
+<th><a href="#pg1e5199899b98">Scim</a></th>
+<th>Hime</th>
+<th><a href="#pg100dd942005b">gcin</a></th>
+<th><a href="#pg52e2ff09ebc6">Nimf</a>
+</th></tr>
+<tr>
+<th colspan="10">中文
+</th></tr>
+<tr>
+<td><a href="#pg09ecbfe6b022">Rime</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx5-rime">fcitx5-rime</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx-rime">fcitx-rime</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-rime">ibus-rime</a></span><sup><small>包</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td>内置
+</td></tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/%E6%B1%89%E8%AF%AD%E6%8B%BC%E9%9F%B3">拼音</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx5-chinese-addons">fcitx5-chinese-addons</a></span><sup><small>包</small></sup></span>
+</td>
+<td>内置
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-pinyin">ibus-pinyin</a></span><sup><small>包</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/scim-pinyin/">scim-pinyin</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td>内置
+</td></tr>
+<tr>
+<td><a href="https://github.com/chewing/libchewing">注音</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx5-chewing">fcitx5-chewing</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx-chewing">fcitx-chewing</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-chewing">ibus-chewing</a></span><sup><small>包</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=scim-chewing">scim-chewing</a></span><sup><small>包</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td>内置
+</td></tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/%E5%80%89%E9%A0%A1%E8%BC%B8%E5%85%A5%E6%B3%95">仓颉</a><br/><a href="https://zh.wikipedia.org/wiki/%E7%B0%A1%E6%98%93%E8%BC%B8%E5%85%A5%E6%B3%95">简易</a><br/><a href="https://zh.wikipedia.org/wiki/%E5%BF%AB%E9%80%9F%E5%80%89%E9%A0%A1%E8%BC%B8%E5%85%A5%E6%B3%95">快速</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx5-table-extra">fcitx5-table-extra</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx-table-extra">fcitx-table-extra</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-table-chinese">ibus-table-chinese</a></span><sup><small>包</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/scim-tables/">scim-tables</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/%E4%BA%94%E7%AC%94%E5%AD%97%E5%9E%8B%E8%BE%93%E5%85%A5%E6%B3%95">五笔</a>
+</td>
+<td>内置
+</td>
+<td>内置
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-table">ibus-table</a></span><sup><small>包</small></sup></span>
+</td>
+<td>内置
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/scim-tables/">scim-tables</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://github.com/libpinyin/libpinyin">Libpinyin</a>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx-libpinyin">fcitx-libpinyin</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-libpinyin">ibus-libpinyin</a></span><sup><small>包</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://github.com/sunpinyin/sunpinyin">SunPinyin</a>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx-sunpinyin">fcitx-sunpinyin</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-sunpinyin">ibus-sunpinyin</a></span><sup><small>包</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<th colspan="10">日文
+</th></tr>
+<tr>
+<td><a href="#pge8476d80c045">Mozc</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fcitx5-mozc-ut/">fcitx5-mozc-ut</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fcitx-mozc-ut/">fcitx-mozc-ut</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ibus-mozc/">ibus-mozc</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/emacs-mozc/">emacs-mozc</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://github.com/ibus/ibus-anthy">Anthy</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx5-anthy">fcitx5-anthy</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx-anthy">fcitx-anthy</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-anthy">ibus-anthy</a></span><sup><small>包</small></sup></span>
+</td>
+<td><i>内置</i>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/scim-anthy/">scim-anthy</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td><i>内置</i>
+</td>
+<td><i>内置</i>
+</td>
+<td><i>内置</i>
+</td></tr>
+<tr>
+<td><a href="https://github.com/ueno/libskk">SKK</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx5-skk">fcitx5-skk</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx-skk">fcitx-skk</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-skk">ibus-skk</a></span><sup><small>包</small></sup></span>
+</td>
+<td><i>内置</i>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://github.com/ueno/libkkc">KKC</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx5-kkc">fcitx5-kkc</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx-kkc">fcitx-kkc</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-kkc">ibus-kkc</a></span><sup><small>包</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<th colspan="10">韩文
+</th></tr>
+<tr>
+<td><a href="https://github.com/libhangul/libhangul">Libhangul</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx5-hangul">fcitx5-hangul</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx-hangul">fcitx-hangul</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-hangul">ibus-hangul</a></span><sup><small>包</small></sup></span>
+</td>
+<td><i>内置</i>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/scim-hangul/">scim-hangul</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><i>内置</i>
+</td></tr>
+<tr>
+<th colspan="10">越南语
+</th></tr>
+<tr>
+<td><a href="https://www.unikey.org/en/">UniKey</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx5-unikey">fcitx5-unikey</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx-unikey">fcitx-unikey</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-unikey">ibus-unikey</a></span><sup><small>包</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://github.com/BambooEngine/ibus-bamboo">Bamboo</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx5-bamboo">fcitx5-bamboo</a></span><sup><small>包</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ibus-bamboo/">ibus-bamboo</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<th colspan="10">Indic
+</th></tr>
+<tr>
+<td><a href="https://linux.omicronlab.com/">Avro</a> （孟加拉语）
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ibus-avro-git/">ibus-avro-git</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://helakuru.lk/">Helakuru</a>（僧伽罗语）
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ibus-helakuru/">ibus-helakuru</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://www.nongnu.org/m17n/">m17n</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx5-m17n">fcitx5-m17n</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx-m17n">fcitx-m17n</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ibus-m17n">ibus-m17n</a></span><sup><small>包</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/scim-m17n/">scim-m17n</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://openbangla.github.io/">OpenBangla Keyboard</a> （孟加拉语）
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fcitx5-openbangla-git/">fcitx5-openbangla-git</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/openbangla-keyboard/">openbangla-keyboard</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td>Sayura （僧伽罗语）
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx5-sayura">fcitx5-sayura</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fcitx-sayura">fcitx-sayura</a></span><sup><small>包</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://www.varnamproject.com/">Varnam</a>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libvarnam-ibus-git/">libvarnam-ibus-git</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg33cac0bea576_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<p>为了让<a href="#pg712e4adaddad">桌面环境</a>正确地将已安装的输入法框架注册为可用并将其用于处理用户输入，必须相应地配置一组<a href="#pg4989d4f46056">环境变量</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果没有设置这些变量，<a href="#pg6438c4cbb62c">GTK</a> 和 <a href="#pg5016907af879">Qt</a> 都会尝试读取系统的<a href="#pg630f3ead5872">区域</a>设置来决定它们应该使用哪种 IMF，但这个过程依赖于猜测，可能非常容易出错。对于一个正常工作的系统，应该明确地设置这些变量。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果希望完全禁止<a href="#pg712e4adaddad">桌面环境</a>通过 IMF 处理输入（在 <a href="#pg1e095fe2c2a6">GNOME</a> 中<b>不</b>推荐，因为其与 <a href="#pg945bbdd1d2b5">IBus</a> 紧密集成），那么可以不设置这些变量，或者，对于 <a href="#pg6438c4cbb62c">GTK</a> 和 <a href="#pg5016907af879">Qt</a>，可以替换它们的值：<code>GTK_IM_MODULE=gtk-im-context-simple</code> 和 <code>QT_IM_MODULE=simple</code>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg33cac0bea576_Fcitx5" id="Fcitx5">Fcitx5</h3></div>
+<p>有关详细信息，请参阅 <a href="#pg370a22d160ed">Fcitx5#集成</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg33cac0bea576_Fcitx" id="Fcitx">Fcitx</h3></div>
+<p>有关详细信息，请参阅 <a href="#pg23c0ca0c34df">Fcitx</a>。
+</p>
+<pre>GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg33cac0bea576_IBus" id="IBus">IBus</h3></div>
+<p>见 <a href="#pg945bbdd1d2b5">IBus</a> 以获得更多讯息。
+</p>
+<pre>GTK_IM_MODULE=ibus
+QT_IM_MODULE=ibus
+XMODIFIERS=@im=ibus
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg33cac0bea576_Uim" id="Uim">Uim</h3></div>
+<p>见 <a href="#pg4d4891d5b56d">Uim</a> 以获得更多讯息。
+</p>
+<pre>GTK_IM_MODULE=uim
+QT_IM_MODULE=uim
+XMODIFIERS=@im=uim
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg33cac0bea576_Emacs" id="Emacs">Emacs</h3></div>
+
+<p><br/>
+根据<a href="https://fcitx-im.org/wiki/Input_method_related_environment_variables#LC_CTYPE">这个 Fcitx wiki 所述</a>, <i>"（<code>LC_CTYPE</code>）仅适用于一些情况下，包括emacs和java。Emacs 有一个积年的Bug，在 en_US.UTF-8 或类似的区域设置下，它将从不使用XIM（虽然emacs作为一个 gtk 程序，它应使用 XIM）。使用 <code>LC_CTYPE</code> 去修复它是唯一的解决方法。</i>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg33cac0bea576_Scim" id="Scim">Scim</h3></div>
+<p>见<a href="#pg1e5199899b98">Scim</a>获得更多讯息。
+</p>
+<pre>GTK_IM_MODULE=scim
+QT_IM_MODULE=scim
+XMODIFIERS=@im=scim
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg33cac0bea576_Xim" id="Xim">Xim</h3></div>
+<div class="mw-highlight mw-content-ltr" dir="ltr"><pre>GTK_IM_MODULE=xim
+QT_IM_MODULE=xim</pre></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg33cac0bea576_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://fedoraproject.org/wiki/I18N/InputMethods">Fedora:I18N/InputMethods</a></li>
+<li><a href="https://wiki.gentoo.org/wiki/Input_methods">Gentoo:Input methods</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Input_method">Wikipedia:Input method</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807040706
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.270 seconds
+Real time usage: 0.277 seconds
+Preprocessor visited node count: 1144/1000000
+Revision size: 9804/2097152 bytes
+Post‐expand include size: 27758/2097152 bytes
+Template argument size: 3484/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 150/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   88.468      1 -total
+  9.72%    8.597     38 Template:Pkg
+  8.10%    7.166    112 Template:-
+  5.47%    4.836      1 Template:Accuracy
+  4.00%    3.536     16 Template:AUR
+  3.96%    3.502      1 Template:翻译状态
+  3.81%    3.373     21 Template:Ic
+  2.57%    2.273      1 Template:相关文章开始
+  2.48%    2.191      2 Template:Related
+  1.97%    1.746      2 Template:提示
+-->
+<!-- Render ID 73cd5d0e-9215-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3274:|#|:idhash:canonical!zh-cn and timestamp 20260807040706 and revision id 33877. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

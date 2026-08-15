@@ -1,0 +1,95 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgafc953581baa">Emacs/运行</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg9de7470c4ea9">Emacs</a></li>
+<li><a href="#pg66450fb8afdd">Emacs/使用</a></li>
+<li><a href="#pgaa59341f7e53">Emacs/提示与技巧</a></li>
+<li><a href="#pgdff090deed5f">Emacs/疑难解答</a></li>
+<li><a href="#pg14c40a837223">Emacs/软件包</a></li>
+<li><a href="#pg581be9986cc0">文本编辑器</a></li>
+<li><a href="#pg74a2a3e4814c">Vim</a></li>
+</ul></div>
+<p>同 <a href="#pg74a2a3e4814c">Vim</a>、<a href="#pgb11b7c104bf6">Neovim</a> 一样，在启动 emacs 之前，您应该知道如何关闭它（尤其是在终端中运行时）：使用 <code>Ctrl+x</code><code>Ctrl+c</code> 键序。
+</p><p>要启动 Emacs，请运行：
+</p>
+<pre>$ emacs
+</pre>
+<p>如果 <a href="#pg9d8a8632d257">X11</a> 或 <a href="#pga21a6be8b605">Wayland</a> 图形界面可用，此命令将会启动 Emacs 的图形用户界面。在这种情况下，建议运行以下命令以使其在后台运行：
+</p>
+<pre>$ emacs &amp;
+</pre>
+<p>或在纯控制台中使用 Emacs（出于空间原因，菜单通常不会显示，可以按 <code>F10</code> 调出菜单。）：
+</p>
+<pre>$ emacs -nw
+</pre>
+<p>或在命令行中快速加载（无需 .emacs）和编辑：
+</p>
+<pre>$ emacs -Q -nw
+</pre>
+<p>如果安装的是 nox 版本，<code>emacs</code> 和 <code>emacs -nw</code> 将启相同作用。
+</p><p>还可以提供文件名，以便立即打开该文件：
+</p>
+<pre>$ emacs <i>filename.txt</i>
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgafc953581baa_.E6.97.A0.E5.BD.A9.E8.89.B2" id="无彩色"><span id=".E6.97.A0.E5.BD.A9.E8.89.B2"></span>无彩色</h2></div>
+<p>默认情况下，Emacs 启动时的颜色主题显示超链接为深蓝色。要在文本终端上启动 Emacs 而不使用任何颜色主题或方案，请执行下列操作：
+</p>
+<pre>$ emacs -nw --color=no
+</pre>
+<p>这将使所有文本显示为终端的前景色——通常是黑底白字或白底黑字。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgafc953581baa_.E4.BD.9C.E4.B8.BA.E5.AE.88.E6.8A.A4.E8.BF.9B.E7.A8.8B" id="作为守护进程"><span id=".E4.BD.9C.E4.B8.BA.E5.AE.88.E6.8A.A4.E8.BF.9B.E7.A8.8B"></span>作为守护进程</h2></div>
+<p>为了避免每次 Emacs 启动时都重新加载 Emacs 配置文件，可以将 Emacs 作为<a href="#pg78f61917585b">守护进程</a>运行：
+</p>
+<pre>$ emacs --daemon
+</pre>
+<p>然后，您可以连接到守护进程通过运行：
+</p>
+<pre>$ emacsclient -nc
+</pre>
+<p><code>-c</code> 将创建一个新帧缓冲区（如果希望在终端中使用，请使用 <code>-t</code>}），并且不会占用终端 <code>-n</code> <code>--no-wait</code>）。
+</p><p>许多<a href="#pg3d6d7c1e6c7c">窗口管理器</a>、<a href="#pga21a6be8b605">混成器</a>以及<a href="#pg712e4adaddad">桌面环境</a>都实现了 <a href="#pg537a6963395e">XDG Autostart</a> 规范，您可以利用此特性在<a href="#pg712e4adaddad">桌面环境</a>等启动时<a href="#pg9604da0ac74d">自动运行</a> <code>emacs --daemon</code>。
+</p><p>需要注意的是，有些程序（如 <a href="#pg32e9b8e63003">Mutt</a> 或 <a href="#pg0d34da84b694">Git</a>，用于提交信息）会等待编辑器结束，因此不能使用 <code>-n</code> 参数。
+如果你的默认编辑器设置为使用该参数，则必须为这些程序指定替代编辑器（<i>例如</i> <code>emacsclient -a "" -t</code>）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgafc953581baa_.E4.BD.9C.E4.B8.BA_systemd_.E5.8D.95.E5.85.83" id="作为_systemd_单元"><span id=".E4.BD.9C.E4.B8.BA_systemd_.E5.8D.95.E5.85.83"></span>作为 systemd 单元</h2></div>
+<p><a href="https://lists.gnu.org/archive/html/emacs-devel/2018-05/msg00765.html">Emacs 26.1</a> 中包含一个 <a href="#pgac06dd8bfe95">systemd</a> 单元。该单元与 Emacs 一起安装，但必须在<a href="#pg811194d6beaa">安装</a> Emacs 后作为<a href="#pg983913bfd458">用户单元</a>（而非全系统单元）<a href="#pg3ef6532bc644">启用</a>：
+</p>
+<pre>$ systemctl --user enable --now emacs
+</pre>
+<p>服务启动后，Emacs 就准备就绪了。
+</p><p>如果想在 <a href="#pga21a6be8b605">Wayland</a> 上通过 <code>emacsclient</code> 启动图形 emacs 框架，则需要特定的<a href="#pg8c0a8dbf9b36">附加配置片段</a>（除非运行的是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=emacs-wayland">emacs-wayland</a></span><sup><small>包</small></sup></span>），如 <a href="https://www.emacswiki.org/emacs/EmacsAsDaemon#h5o-17">EmacsWiki</a> 所示。
+</p><p>请注意，systemd 用户单元不会从登录 shell（如 <code>~/.bash_profile</code>）继承<a href="#pg4989d4f46056">环境变量</a>。更多信息请参见 <a href="#pg88cdcc283b9b">Systemd/用户#环境变量</a>。
+</p><p>如果将 emacs 作为<a href="#pg78f61917585b">守护进程</a>启动，可能需要将 <code>VISUAL</code> 和 <code>EDITOR</code> 环境变量设置为 <code>emacsclient</code>，这样启动编辑器的程序就会使用 emacsclient，而不是启动编辑器的完整实例。使用外部编辑器的程序包括电子邮件程序（用于编辑邮件）、<a href="#pg0d34da84b694">Git</a>（用于编辑提交信息）和 less（<code>v</code> 命令用于编辑显示的文件）。请勿使用 <code>-n</code>（<code>--nowait</code>）选项，因为程序通常希望编辑器退出时编辑已经完成。
+</p><p>还建议更改 Emacs 的任何图形用户界面开始菜单条目（或类似条目、<a href="#pg39f5c87a7ce6">桌面项</a>），使其指向 emacsclient 而不是 emacs，这样就可以使用 emacs 守护进程而不是启动一个新的 emacs 进程。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808035627
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.077 seconds
+Real time usage: 0.081 seconds
+Preprocessor visited node count: 206/1000000
+Revision size: 3882/2097152 bytes
+Post‐expand include size: 1026/2097152 bytes
+Template argument size: 267/2097152 bytes
+Highest expansion depth: 4/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   17.512      1 -total
+ 18.04%    3.159     20 Template:Ic
+ 14.11%    2.471      1 Template:相关文章开始
+ 11.75%    2.058      1 Template:Pkg
+  8.03%    1.406      7 Template:相关
+  5.57%    0.976      1 Template:META_Related_articles_start
+  4.94%    0.865      1 Template:相关文章结束
+-->
+<!-- Render ID 2157738e-92dd-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8149:|#|:idhash:canonical!zh-cn and timestamp 20260808035627 and revision id 33617. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,141 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg1bd179fbfefb">繁体中文本地化</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="noteTA" id="noteTA-f3e2a619"><div class="noteTA-group"><div data-noteta-group="IT" data-noteta-group-source="module"></div></div></div>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgd45e0fde26a4">简体中文本地化</a></li>
+<li><a href="#pg0d85b8367b38">安装指南</a></li>
+<li><a href="#pg05e53e9f9934">一般建议</a></li>
+</ul></div>
+<p>本篇很大部分参考了 <a href="#pg7ef5cbfa0038">Arch Linux Localization</a>。虽然本地化的流程是相似的，但是繁体中文化所需要的软件和配置文件仍和简体中文化有所不同，故有此篇文章的产生。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1bd179fbfefb_.E5.9F.BA.E6.9C.AC.E4.B8.AD.E6.96.87.E8.AA.9E.E7.B3.BB.E7.92.B0.E5.A2.83" id="基本中文語系環境"><span id=".E5.9F.BA.E6.9C.AC.E4.B8.AD.E6.96.87.E8.AA.9E.E7.B3.BB.E7.92.B0.E5.A2.83"></span>基本中文语系环境</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd179fbfefb_locale_.E8.A8.AD.E7.BD.AE" id="locale_設置"><span id="locale_.E8.A8.AD.E7.BD.AE"></span>locale 设置</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1bd179fbfefb_.E5.AE.89.E8.A3.9D.E4.B8.AD.E6.96.87_locale" id="安裝中文_locale"><span id=".E5.AE.89.E8.A3.9D.E4.B8.AD.E6.96.87_locale"></span>安装中文 locale</h4></div>
+<p>Linux 透过 locale 来设置不同语系的环境。常用的繁体中文 locale 有
+</p>
+<pre>zh_TW.UTF-8
+zh_TW.Big5
+</pre>
+<p>其中较推荐使用 en_US.UTF-8 和 zh_TW.UTF-8 语系。需要修改 <code>/etc/locale.gen</code> 文件，将需要的语系前面的注解 (# 符号)删除。之后执行 locale-gen 指令即可。
+</p><p>如果要查询目前系统所使用的语系环境，可以使用 locale 指令。
+</p>
+<pre># locale
+</pre>
+<p>如果要查询系统所有可用的语系环境，可以使用 locale -a 指令。
+</p>
+<pre># locale -a
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1bd179fbfefb_.E5.95.9F.E5.8B.95.E4.B8.AD.E6.96.87_locale" id="啟動中文_locale"><span id=".E5.95.9F.E5.8B.95.E4.B8.AD.E6.96.87_locale"></span>启动中文 locale</h4></div>
+<p>在 Arch Linux 中，透过设置 <code>/etc/locale.conf</code> 文件，来设置语系环境。
+</p>
+<pre>LANG=en_US.UTF-8
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>不推荐在这里设置中文语系，会导致 tty 终端乱码。如果要在终端里显示和输入中文，需安装 cce、zhcon 或 fbterm</div>
+<p>对于一般用户，还可以在 <code>~/.bashrc</code>、<code>~/.xinitrc</code> 或是 <code>~/.xprofile</code> 中设置语系，其中的不同处在于：
+</p>
+<ul><li>.bashrc: 每次透过终端登录时，读取并运行其中的设置</li>
+<li>.xinitrc: 每次透过 startx 登录时，读取并运行其中的设置</li>
+<li>.xprofile: 每次透过图形登录器 (如 gdm) 登录时，读取并运行其中的设置</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1bd179fbfefb_.E5.9C.A8.E5.9C.96.E5.BD.A2.E4.BB.8B.E9.9D.A2.E4.B8.AD.E5.95.9F.E7.94.A8.E4.B8.AD.E6.96.87_locale" id="在圖形介面中啟用中文_locale"><span id=".E5.9C.A8.E5.9C.96.E5.BD.A2.E4.BB.8B.E9.9D.A2.E4.B8.AD.E5.95.9F.E7.94.A8.E4.B8.AD.E6.96.87_locale"></span>在图形接口中激活中文 locale</h4></div>
+<p>如果是希望在图形接口有中文环境的话，需要修改 <code>~/.xinitrc</code> 或 <code>~/.xprofile</code>，加入
+</p>
+<pre>export LANG=zh_TW.UTF-8
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>该方法适用于 slim 或无图形登录器的场合，如果是 gdm 或 kdm 等可以在 Gnome 或 KDE 中设置语系</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>不推荐在图形接口中设置 LC_ALL ，该变量应当保留用于测试诊断目的。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd179fbfefb_.E4.B8.AD.E6.96.87.E5.AD.97.E9.AB.94" id="中文字體"><span id=".E4.B8.AD.E6.96.87.E5.AD.97.E9.AB.94"></span>中文字体</h3></div>
+<p>除了设置中文 locale，还要安装中文字体，才可显示中文。
+</p><p>常见的免费中文字体有:
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wqy-bitmapfont">wqy-bitmapfont</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wqy-zenhei">wqy-zenhei</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-arphic-ukai">ttf-arphic-ukai</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-arphic-uming">ttf-arphic-uming</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=opendesktop-fonts">opendesktop-fonts</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wqy-microhei">wqy-microhei</a></span><sup><small>包</small></sup></span>（<a href="#pg89cb7b475cfb">AUR</a>中）</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wqy-microhei-lite">wqy-microhei-lite</a></span><sup><small>包</small></sup></span>（<a href="#pg89cb7b475cfb">AUR</a>中）</li></ul>
+<p>系统字体默认安装到<code>/usr/share/fonts</code>。如果没有 root 权限或只打算自己使用某些字体，可以直接复制这些字体到<code>~/.fonts</code>目录（或其子目录）下面，并把该目录加入 <code>/etc/fonts/local.conf</code> 中。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd179fbfefb_.E4.B8.AD.E6.96.87.E8.BC.B8.E5.85.A5.E6.B3.95" id="中文輸入法"><span id=".E4.B8.AD.E6.96.87.E8.BC.B8.E5.85.A5.E6.B3.95"></span>中文输入法</h3></div>
+<p>常用的繁体中文输入法有 <a href="#pg100dd942005b">gcin</a>、<a href="#pg1e5199899b98">scim</a> 以及由 gcin 分支出来的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hime-git/">hime-git</a></span><sup><small>AUR</small></sup></span> (<a href="#pg89cb7b475cfb">AUR</a>中)。推荐使用 gcin 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hime-git/">hime-git</a></span><sup><small>AUR</small></sup></span>。可看该输入法文章，其中有较详细的介绍。
+</p><p>以使用 gcin 为例，安装好后在 <code>~/.xinitrc</code> 或 <code>~/.xprofile</code> 加入以下内容：
+</p>
+<pre>export XMODIFIERS="@im=gcin"
+export XIM_PROGRAM="gcin"
+export GTK_IM_MODULE="gcin"
+export QT_IM_MODULE="gcin"
+gcin &amp;
+</pre>
+<p>之后即可在图形接口中输入中文。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1bd179fbfefb_.E7.B5.82.E7.AB.AF.E6.A9.9F.E7.9A.84.E4.B8.AD.E6.96.87.E5.8C.96" id="終端機的中文化"><span id=".E7.B5.82.E7.AB.AF.E6.A9.9F.E7.9A.84.E4.B8.AD.E6.96.87.E5.8C.96"></span>终端的中文化</h2></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1bd179fbfefb_.E8.BB.9F.E9.AB.94.E7.9A.84.E4.B8.AD.E6.96.87.E5.8C.96" id="軟體的中文化"><span id=".E8.BB.9F.E9.AB.94.E7.9A.84.E4.B8.AD.E6.96.87.E5.8C.96"></span>软件的中文化</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd179fbfefb_Firefox" id="Firefox">Firefox</h3></div>
+<p>繁体中文用户请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=firefox-i18n-zh-tw">firefox-i18n-zh-tw</a></span><sup><small>包</small></sup></span>。
+</p><p>简体中文用户请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=firefox-i18n-zh-cn">firefox-i18n-zh-cn</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd179fbfefb_LibreOffice" id="LibreOffice">LibreOffice</h3></div>
+<p>繁体中文用户请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libreoffice-still-zh-tw">libreoffice-still-zh-tw</a></span><sup><small>包</small></sup></span> 或者 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libreoffice-fresh-zh-tw">libreoffice-fresh-zh-tw</a></span><sup><small>包</small></sup></span>。
+</p><p>简体中文用户请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libreoffice-still-zh-cn">libreoffice-still-zh-cn</a></span><sup><small>包</small></sup></span> 或者 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libreoffice-fresh-zh-cn">libreoffice-fresh-zh-cn</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd179fbfefb_Calligra_.28.E5.8E.9F_KOffice.29" id="Calligra_(原_KOffice)"><span id="Calligra_.28.E5.8E.9F_KOffice.29"></span>Calligra (原 KOffice)</h3></div>
+
+<p>繁体中文用户请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=calligra-l10n-zh_tw">calligra-l10n-zh_tw</a></span><sup><small>包</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>。
+</p><p>简体中文用户请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=calligra-l10n-zh_cn">calligra-l10n-zh_cn</a></span><sup><small>包</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd179fbfefb_PDF_.E9.96.B1.E8.AE.80.E5.99.A8" id="PDF_閱讀器"><span id="PDF_.E9.96.B1.E8.AE.80.E5.99.A8"></span>PDF 阅读器</h3></div>
+<p>Acrobat Reader:，繁体中文用户请装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/acroread-cht/">acroread-cht</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>，简体中文用户请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/acroread-chs/">acroread-chs</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>。
+</p><p>xpdf: 请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xpdf-chinese-traditional">xpdf-chinese-traditional</a></span><sup><small>包</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xpdf-chinese-simplified">xpdf-chinese-simplified</a></span><sup><small>包</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>。
+</p><p>poppler: 请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=poppler-data">poppler-data</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd179fbfefb_Vim" id="Vim">Vim</h3></div>
+<p>如果 locale 是 utf8，打开其他编码的中文文件会有乱码的问题，需要在 <code>~/.vimrc</code>中设置：
+</p>
+<pre>set fileencodings=ucs-bom,utf-8,big5,gbk,latin1
+</pre>
+<p>Vim 即会依序按照设置的编码来打开文件。详细的设置见 vim 中的帮助文件 <code>:help fileencodings</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1bd179fbfefb_.E5.85.B6.E4.BB.96.E4.B8.AD.E6.96.87.E5.8C.96.E5.95.8F.E9.A1.8C" id="其他中文化問題"><span id=".E5.85.B6.E4.BB.96.E4.B8.AD.E6.96.87.E5.8C.96.E5.95.8F.E9.A1.8C"></span>其他中文化问题</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd179fbfefb_MS_Windows_.E5.BA.95.E4.B8.8B.E7.9A.84.E4.B8.AD.E6.96.87.E6.AA.94.E6.A1.88.E5.90.8D.E4.BA.82.E7.A2.BC" id="MS_Windows_底下的中文檔案名亂碼"><span id="MS_Windows_.E5.BA.95.E4.B8.8B.E7.9A.84.E4.B8.AD.E6.96.87.E6.AA.94.E6.A1.88.E5.90.8D.E4.BA.82.E7.A2.BC"></span>MS Windows 底下的中文文件名乱码</h3></div>
+<p>是因为挂载的字符集和 locale 不同所致。可以修改 <code>/etc/fstab</code> 来修正这个问题。如果 locale 是 utf8 的情形下，可能修改为如下的示例 (请根据自己的实际情形略做修改)：
+</p>
+<pre>/dev/sdXX  /mnt/win  ntfs  defaults,iocharset=utf8   0 0
+</pre>
+<p>详细的 <code>/etc/fstab</code> 设置可见 <a href="#pgced0cc449f44">fstab</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807053613
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.425 seconds
+Real time usage: 0.432 seconds
+Preprocessor visited node count: 530/1000000
+Revision size: 5373/2097152 bytes
+Post‐expand include size: 200918/2097152 bytes
+Template argument size: 2463/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 12/5000000 bytes
+Lua time usage: 0.068/7.000 seconds
+Lua memory usage: 2071876/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  136.955      1 -total
+ 70.33%   96.324      1 Template:NoteTA
+  4.02%    5.509     19 Template:Pkg
+  3.08%    4.223      6 Template:Broken_package_link
+  2.62%    3.591      1 Template:过时
+  2.08%    2.844     16 Template:Ic
+  1.86%    2.546      3 Template:Related2
+  1.71%    2.347      1 Template:相关文章开始
+  1.63%    2.235      1 Template:META_Message
+  1.14%    1.556      4 Template:AUR
+-->
+<!-- Render ID e6dcd08e-9221-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3472:|#|:idhash:canonical!zh-cn and timestamp 20260807053613 and revision id 33830. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,109 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgab5c8518328c">系统备份</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/System_backup">System backup</a>，最近一次同步于 2022-11-17，若英文版本有所<a href="https://wiki.archlinux.org/title/System_backup?diff=0&amp;oldid=755273">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/System_backup_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg8581f12fbcf8">同步和备份程序</a></li>
+<li><a href="#pg9a1cc6af125e">系统维护#备份</a></li>
+<li><a href="#pg812206bba43d">静态数据加密#用于磁盘加密场景的数据备份</a></li>
+<li><a href="#pge245372182c5">硬盘克隆</a></li>
+<li><a href="#pg15edc6bdaa6b">迁移到新硬件</a></li>
+<li><a href="#pg7c173bce547a">文件恢复</a></li>
+</ul></div>
+<p>系统备份是<q>备份操作系统、文件和特定于系统的有用的/关键的数据的过程。（系统备份）主要确保除了系统中的用户数据，系统的状态或操作条件也已保存。这有助于使用选择的备份数据将系统恢复到之前保存的状态。</q><a href="https://www.techopedia.com/definition/29387/system-backup">[1]</a>
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgab5c8518328c_.E4.BD.BF.E7.94.A8_Btrfs_.E5.BF.AB.E7.85.A7" id="使用_Btrfs_快照"><span id=".E4.BD.BF.E7.94.A8_Btrfs_.E5.BF.AB.E7.85.A7"></span>使用 Btrfs 快照</h2></div>
+<p>详情请看 <a href="#pg429e7ec45c9c">Btrfs#快照</a>、#快照与 /boot 分区、<a href="#pgb3c697ba5d77">Snapper</a>、<a href="#pgb95c0c0a9bde">Timeshift</a> 与 <a href="#pgcdbb833a7e42">Yabsnap</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgab5c8518328c_.E4.BD.BF.E7.94.A8_LVM_.E5.BF.AB.E7.85.A7" id="使用_LVM_快照"><span id=".E4.BD.BF.E7.94.A8_LVM_.E5.BF.AB.E7.85.A7"></span>使用 LVM 快照</h2></div>
+<p>详情请看 <a href="#pg02cd87050dfd">LVM#Snapshots</a>、<a href="#pge6a3aac0fac7">Create root filesystem snapshots with LVM</a> 和 #快照与 /boot 分区。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgab5c8518328c_.E4.BD.BF.E7.94.A8_rsync" id="使用_rsync"><span id=".E4.BD.BF.E7.94.A8_rsync"></span>使用 rsync</h2></div>
+<p>详情请看 <a href="#pg4bb0ada72a54">rsync#作为备份工具</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgab5c8518328c_.E4.BD.BF.E7.94.A8_tar" id="使用_tar"><span id=".E4.BD.BF.E7.94.A8_tar"></span>使用 tar</h2></div>
+<p>详情请看<a href="#pg394d4c211cda">使用 tar 备份整个系统</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgab5c8518328c_.E4.BD.BF.E7.94.A8_SquashFS" id="使用_SquashFS"><span id=".E4.BD.BF.E7.94.A8_SquashFS"></span>使用 SquashFS</h2></div>
+<p>详情请看 <a href="#pg7e4e7e191e91">Full system backup with SquashFS</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgab5c8518328c_.E5.8F.AF.E5.90.AF.E5.8A.A8.E7.9A.84.E5.A4.87.E4.BB.BD" id="可启动的备份"><span id=".E5.8F.AF.E5.90.AF.E5.8A.A8.E7.9A.84.E5.A4.87.E4.BB.BD"></span>可启动的备份</h2></div>
+<p>在文件系统损坏或系统因更新而损坏的情况下，有一个可启动的备份非常有用。备份还可以启用<i>testing</i>软件仓库，并用于测试更新。在您将系统迁移到不同的分区或驱动器之后，只需更新备份的 <code>/etc/fstab</code> 和引导加载程序的配置文件，就可以从迁移后的系统启动了。
+</p><p>在您在已将系统备份到另一个驱动器或分区，且当前的引导加载程序工作正常的情况下，接下来的操作将指导您如何从备份的系统启动。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgab5c8518328c_.E6.9B.B4.E6.96.B0_fstab" id="更新_fstab"><span id=".E6.9B.B4.E6.96.B0_fstab"></span>更新 fstab</h3></div>
+<p>不需要重新启动，可以通过注释掉或删除任何现有条目来编辑备份的 <a href="#pgced0cc449f44">fstab</a> 文件。为包含备份的分区添加一个条目，如下例所示:
+</p>
+<pre>/dev/sda<i>X</i>    /             <i>ext4</i>      defaults                 0   1
+</pre>
+<p>记得使用正确的设备名和文件系统类型。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgab5c8518328c_.E6.9B.B4.E6.96.B0.E5.BC.95.E5.AF.BC.E7.A8.8B.E5.BA.8F.E7.9A.84.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6" id="更新引导程序的配置文件"><span id=".E6.9B.B4.E6.96.B0.E5.BC.95.E5.AF.BC.E7.A8.8B.E5.BA.8F.E7.9A.84.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6"></span>更新引导程序的配置文件</h3></div>
+<p>对于 <a href="#pg0ca06688075c">Syslinux</a>，你只需复制当前项目，不过使其指向不同的磁盘或分区。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>除了直接编辑 <code>syslinux.cfg</code>，您也可以在启动的时候临时编辑启动菜单。当显示启动菜单的时候，按 <code>Tab</code> 键来编辑对应的启动项。分区从1数起，而驱动器从0数起。</div>
+<p>对于 <a href="#pgca9c4017f7ad">GRUB</a>，建议你自动<a href="#pgca9c4017f7ad">重新生成主配置文件</a>。如果你想将 GRUB 文件全新安装到 <code>/boot</code> 以外的位置（例如 <code>/mnt/newroot/boot</code>），使用 <code>--boot-directory</code> 标志。
+</p><p>请注意检查 <code>/boot/grub/grub.cfg</code> 中的启动项，确保其中的 UUID 与新分区相匹配，否则设备将仍然从原系统中启动。您可以通过 <a href="#pge173af99a32b">lsblk</a> 命令来找到正确的UUID：
+</p>
+<pre>$ lsblk -no NAME,UUID /dev/sd<i>XY</i>
+</pre>
+<p><code>/dev/sd<i>XY</i></code> 是您备份的目标分区 （比如 <code>/dev/sdb3</code>）要列出所有 GRUB 可启动的分区，请使用 <i>grep</i> 命令：
+</p>
+<pre># grep UUID= /boot/grub/grub.cfg
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgab5c8518328c_.E7.AC.AC.E4.B8.80.E6.AC.A1.E5.90.AF.E5.8A.A8" id="第一次启动"><span id=".E7.AC.AC.E4.B8.80.E6.AC.A1.E5.90.AF.E5.8A.A8"></span>第一次启动</h3></div>
+<p>重启计算机并在引导程序中选择正确的项目。系统应该会在第一次启动的时候检测到所有外部设备并填充根目录下的空文件夹。
+</p><p>你现在可以编辑 <code>/etc/fstab</code>，将之前删除的分区和挂载点重新加入。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgab5c8518328c_.E5.BF.AB.E7.85.A7.E4.B8.8E_.2Fboot_.E5.88.86.E5.8C.BA" id="快照与_/boot_分区"><span id=".E5.BF.AB.E7.85.A7.E4.B8.8E_.2Fboot_.E5.88.86.E5.8C.BA"></span>快照与 /boot 分区</h2></div>
+<p>如果你的<a href="#pg6c70b7fdfa57">文件系统</a>支持快照（例如 <a href="#pg02cd87050dfd">LVM</a> 和 <a href="#pg429e7ec45c9c">Btrfs</a>），这些快照将很可能不包含 <code>/boot</code> 分区或 <a href="#pg635d4bd93303">EFI 系统分区</a>。
+</p><p>进行内核升级时，您可以用 <a href="#pg0555f34c327a">pacman hook</a> 来把升级后的内核自动复制启动分区到 <code>root</code> 分区（请确保该钩子文件为 root 所有） :
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.d/hooks/95-bootbackup.hook</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Trigger]
+Operation = Upgrade
+Operation = Install
+Operation = Remove
+Type = Path
+Target = usr/lib/modules/*/vmlinuz
+
+[Action]
+Depends = rsync
+Description = Backing up /boot...
+When = PostTransaction
+Exec = /usr/bin/rsync -a --delete /boot /.bootbackup</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807090156
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.160 seconds
+Real time usage: 0.166 seconds
+Preprocessor visited node count: 209/1000000
+Revision size: 4175/2097152 bytes
+Post‐expand include size: 2334/2097152 bytes
+Template argument size: 875/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   93.551      1 -total
+ 83.60%   78.208      1 Template:翻译状态
+  2.42%    2.268     12 Template:Ic
+  2.38%    2.224      1 Template:相关文章开始
+  1.87%    1.750      1 Template:提示
+  1.43%    1.342      6 Template:相关
+  1.31%    1.228      1 Template:Hc
+  1.00%    0.940      1 Template:META_Related_articles_start
+  0.89%    0.830      1 Template:相关文章结束
+-->
+<!-- Render ID a3dd260e-923e-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3832:|#|:idhash:canonical!zh-cn and timestamp 20260807090156 and revision id 33827. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

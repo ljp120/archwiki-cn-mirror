@@ -1,0 +1,310 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg95bcbd921521">基准测试</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Benchmarking">Benchmarking</a>，最近一次同步于 2026-05-04，若英文版本有所<a href="https://wiki.archlinux.org/title/Benchmarking?diff=0&amp;oldid=873004">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Benchmarking_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg5f7223c277dc">性能优化</a></li>
+<li><a href="#pg7b79ae3ada15">压力测试</a></li>
+</ul></div>
+<p>所谓基准测试，就是通过一个统一的流程来测试性能，并将其结果和其它系统测到的结果或一个被广泛接受的标准相比较的行为。这种计算系统性能的统一流程可以帮助解答一些问题，比如：
+</p>
+<ul><li>系统是否发挥正常？</li>
+<li>用哪个版本的驱动可以达到最佳性能？</li>
+<li>系统能否胜任某任务？</li></ul>
+<p>许多工具可以测试系统性能，下面列出可用的工具。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg95bcbd921521_.E7.8B.AC.E7.AB.8B.E5.B7.A5.E5.85.B7" id="独立工具"><span id=".E7.8B.AC.E7.AB.8B.E5.B7.A5.E5.85.B7"></span>独立工具</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_UnixBench" id="UnixBench">UnixBench</h3></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/unixbench/">unixbench</a></span><sup><small>AUR</small></sup></span>，在终端中运行 <code>ubench</code> 开始基准测试。
+</p><p>另请阅读：
+</p>
+<ul><li><a href="https://github.com/kdlucas/byte-unixbench">https://github.com/kdlucas/byte-unixbench</a></li>
+<li><a href="https://github.com/kdlucas/byte-unixbench/blob/master/UnixBench/USAGE">https://github.com/kdlucas/byte-unixbench/blob/master/UnixBench/USAGE</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_interbench" id="interbench">interbench</h3></div>
+<p>interbench 旨在测试 Linux 的交互性能，设计用于测试修改 Linux 内核设计或系统配置（包括 CPU、I/O 调度器、文件系统及其参数的变更等）后的效果。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可通过更细致的测试来比较不同硬件。</div>
+<p>可通过 <a href="#pg89cb7b475cfb">AUR</a> 获取 interbench：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/interbench/">interbench</a></span><sup><small>AUR</small></sup></span>。
+</p><p>另请阅读：
+</p>
+<ul><li><a href="#pg05e92172930b">实时进程管理</a></li>
+<li><a href="#pg7775f81b87c7">进阶网络流量控制</a></li>
+<li><a href="#pg3473491e6a48">Linux-pf</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_fio" id="fio">fio</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fio">fio</a></span><sup><small>包</small></sup></span>（Flexible I/O Tester）是一个实用工具，可以帮助模拟多种不同的工作负载（比如多个线程使用异步 I/O 发起读请求）。fio 会生成一些线程或进程执行用户指定的 I/O 类型。<a href="https://fio.readthedocs.io/en/latest/fio_doc.html">英文文档</a>
+</p><p>示例用法：
+</p>
+<pre># fio --filename=/mnt/test.fio --size=8GB --direct=1 --rw=randrw --bs=4k --ioengine=libaio --iodepth=256 --runtime=120 --numjobs=4 --time_based --group_reporting --name=iops-test-job --eta-newline=1
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_ttcp" id="ttcp">ttcp</h3></div>
+<p>ttcp（Test TCP）测试任意网络连接的 P2P 带宽。所测试路径两端的设备都需要安装该程序。
+</p><p>可以在 <a href="#pg89cb7b475cfb">AUR</a> 找到不同版本的 ttcp：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttcp/">ttcp</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nuttcp/">nuttcp</a></span><sup><small>AUR</small></sup></span></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_iperf" id="iperf">iperf</h3></div>
+<p>iperf 是一款易用的 P2P 带宽测试工具，支持 TCP 和 UDP。它的输出格式非常好，且带有并行测试模式。
+</p><p>可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iperf">iperf</a></span><sup><small>包</small></sup></span>，或另一版本 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iperf3">iperf3</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_time" id="time">time</h3></div>
+<p><span class="plainlinks archwiki-template-man" title="$ man 1 time"><a href="https://man.archlinux.org/man/time.1">time(1)</a></span> 命令通过显示某条命令从调用到终止之间的时间，提供命令运行的耗时统计信息。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=time">time</a></span><sup><small>包</small></sup></span> 包含了 <code>time</code> 命令，某些命令行解释器也提供了 <code>time</code> 作为内置命令。
+</p>
+<pre>$ time tar -zxvf archive.tar.gz
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_hdparm" id="hdparm">hdparm</h3></div>
+<p><a href="#pg62a34c92338a">hdparm</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hdparm">hdparm</a></span><sup><small>包</small></sup></span>）可用于存储介质的基准测试。<code>-Tt</code> 选项用于测量顺序读取的速度，此方法不受分区对齐影响！
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># hdparm -Tt /dev/sd<i>X</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/sd<i>X</i>:
+Timing cached reads:   x MB in  y seconds = z MB/sec
+Timing buffered disk reads:  x MB in  y seconds = z MB/sec</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>根据 <span class="plainlinks archwiki-template-man" title="$ man 8 hdparm"><a href="https://man.archlinux.org/man/hdparm.8#T">hdparm(8) § T</a></span> 参数的描述，一次测试需要执行上述命令 2-3 次，并手动计算平均值以准确评估读取速度。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_gnome_disks" id="gnome-disks">gnome-disks</h3></div>
+<p>图形化基准测试工具 gnome-disks 可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-disk-utility">gnome-disk-utility</a></span><sup><small>包</small></sup></span> 安装，可以美观地展示最小/最大/平均读取速度以及平均访问时间。此方法不受分区对齐影响！
+</p>
+<pre># gnome-disks
+</pre>
+<p>然后通过图形界面开始基准测试（<b>其他分区选项</b>（<b>▶⃞</b>） &gt; <b>测试分区性能(B)…</b> 或 <b>驱动器选项</b>（<b>⋮</b>） &gt; <b>测试磁盘性能(B)…</b>）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_KDiskMark" id="KDiskMark">KDiskMark</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kdiskmark">kdiskmark</a></span><sup><small>包</small></sup></span> 是一款具有非常友好的图形用户界面的 HDD 和 SSD 基准测试工具。KDiskMark 凭借其预设和强大的图形界面，调用 <a href="#pg95bcbd921521_fio">fio</a> 并处理输出，提供易于查看和解读的全面基准测试结果。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_systemd_analyze" id="systemd-analyze">systemd-analyze</h3></div>
+<pre>$ systemd-analyze plot &gt; boot.svg
+</pre>
+<p>上述命令会把启动顺序画成一个详细的图，包括：内核用的时间、用户态时间、每个服务占用的时间。<a href="https://imgur.com/4ywt1">样例</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_dd" id="dd">dd</h3></div>
+<p><a href="#pge09a1da9829f">dd</a> 实用程序可用于测量读取和写入速度。此方法受分区对齐影响！换句话说，由于是在通过文件系统在已挂载分区上进行读取和写入，没有正确对齐分区导致的性能下降会在此处显现出来。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此方法只能用于测试目标设备上已挂载的分区！</div>
+<p>首先，进入一个至少有 1.1 GB 可用空间的 SSD 上的目录（需要有读、写、执行权限），然后写入一个测试文件，用于测量写入速度，也用于之后从该设备读取：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ dd if=/dev/zero of=<i>/SSD/上/的/目录/</i>tempfile bs=1M count=1024 conv=fdatasync,notrunc status=progress</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">1024+0 records in
+1024+0 records out
+<i>v</i> bytes (<i>w</i> MB, <i>x</i> MiB) copied, <i>y</i> s, <i>z</i> MB/s</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>关于 <code>sync</code> 是否必要以及 <code>dd</code> 的更多相关选项的说明，请参阅 <a href="https://romanrm.net/dd-benchmark">dd-benchmark</a>。</div>
+<p>接下来，清除缓冲区缓存，以便直接从设备准确测量读取速度：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># echo 3 &gt; /proc/sys/vm/drop_caches
+$ dd if=tempfile of=/dev/null bs=1M count=1024 status=progress</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">1024+0 records in
+1024+0 records out
+<i>v</i> bytes (<i>w</i> MB, <i>x</i> MiB) copied, <i>y</i> s, <i>z</i> MB/s</pre>
+<p>现在该文件已经重新存到了缓冲区，重复该命令就可以测试缓存速度：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ dd if=tempfile of=/dev/null bs=1M count=1024 status=progress</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">1024+0 records in
+1024+0 records out
+<i>v</i> bytes (<i>w</i> MB, <i>x</i> MiB) copied, <i>y</i> s, <i>z</i> MB/s</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>为准确评估缓冲区读取速度，应将上述命令运行 4-5 次，然后手动计算平均值。</div>
+<p>最后，删除该临时文件
+</p>
+<pre>$ rm tempfile
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>某些 SSD 控制器具有压缩硬件，可能会使基准测试结果失真。请参阅 <a href="https://www.pugetsystems.com/labs/articles/SSDs-Advertised-vs-Actual-Performance-179/">https://www.pugetsystems.com/labs/articles/SSDs-Advertised-vs-Actual-Performance-179/</a></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_dcfldd" id="dcfldd">dcfldd</h3></div>
+<p>dcfldd 不会像经典的 dd 那样以 MB/s 为单位打印平均速度，但借助 <a href="#pg95bcbd921521_time">time</a> 可以解决这一问题。
+</p><p>测试清除磁盘所需时间：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># time dcfldd if=/dev/zero of=/dev/sdX bs=4M</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">18944 blocks (75776Mb) written.dcfldd:: No space left of device
+real     16m17.033s
+user     0m0.377s
+sys      0m51.160s</pre>
+<p>通过将 dcfldd 命令输出的数据量（单位：M<b>i</b>B，注意 dcfldd 将 B 输出为 b）除以时间（单位：秒）来计算速度。在此示例中：75776 MiB / (16.4 * 60 s)  = 77.0 MiB/s。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_7z" id="7z">7z</h3></div>
+<p>7z 基准测试命令可用于测量 CPU 执行指令的速度（MIPS），也可用于检查内存缺陷。只需安装 <a href="#pgdc1e6cb5e4bc">7-Zip</a> 并运行以下命令。更多详细信息可参阅 <a href="https://7-zip.opensource.jp/chm/cmdline/commands/bench.htm">[1]</a>。
+</p>
+<pre>$ 7z b
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_peakperf" id="peakperf">peakperf</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/peakperf-git/">peakperf-git</a></span><sup><small>AUR</small></sup></span> 是一个微基准测试工具，可让 x86_64 CPU 达到峰值性能。某些问题，例如 CPU 散热不佳，可能会降低 CPU 应有的性能。peakperf 可用于检查 CPU 是否发挥了其全部能力。
+</p><p>CPU 理论上应达到的性能可以自行计算（以 GFLOP/s 衡量，参见 <a href="https://github.com/Dr-Noob/peakperf#understanding-the-microbenchmark">[2]</a>），然后将其与 peakperf 给出的实测性能进行比较。如果两个值相同或非常接近，则说明 CPU 运行正常。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>尽管 peakperf 的目标是测试 CPU，但它也是测试散热的绝佳方式，因为它会使 CPU 达到极限而触发降频。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_cryptsetup" id="cryptsetup">cryptsetup</h3></div>
+<p><a href="#pg30ab431721fb">cryptsetup</a> 基准测试可用于测量进行各种加密算法的速度。
+</p>
+<pre>$ cryptsetup benchmark
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_kcapi" id="kcapi">kcapi</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libkcapi/">libkcapi</a></span><sup><small>AUR</small></sup></span> 允许用户空间访问 Linux 内核加密 API。该软件包提供了多个可执行文件，其中 kcapi-speed 可用于对哈希、对称加密算法、AEAD 加密算法、基于哈希或加密算法的随机数生成器进行基准测试。
+</p><p>列出可用的加密算法：
+</p>
+<pre>$ kcapi-speed -l  
+</pre>
+<p>使用 AES-NI 进行 AES 基准测试的示例（ECB 模式，128 位密钥，测试 3 秒，处理 1024 个块）：
+</p>
+<pre>$ kcapi-speed -c 'AES(AESNI) ECB(ASM) 128' -b 1024 -t 3
+</pre>
+<p>输出分别为解密和加密的测试结果：
+</p>
+<pre>AES(AESNI) ECB(ASM) 128 |d|   16384 bytes|                5.41 GB/s|330631 ops/s
+AES(AESNI) ECB(ASM) 128 |e|   16384 bytes|                5.47 GB/s|334185 ops/s
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg95bcbd921521_.E8.BD.AF.E4.BB.B6.E5.A5.97.E4.BB.B6" id="软件套件"><span id=".E8.BD.AF.E4.BB.B6.E5.A5.97.E4.BB.B6"></span>软件套件</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_Bonnie.2B.2B" id="Bonnie++"><span id="Bonnie.2B.2B"></span>Bonnie++</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bonnie%2B%2B">bonnie++</a></span><sup><small>包</small></sup></span> 是<a href="http://www.textuality.com/bonnie/">Bonnie</a> 基准测试套件的 C++ 重写版本，主要测试硬盘和文件系统性能。
+</p><p>另请阅读： 
+</p>
+<ul><li><a href="https://www.coker.com.au/bonnie++/">作者的网站</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Bonnie%2B%2B">Wikipedia:Bonnie++</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_IOzone" id="IOzone">IOzone</h3></div>
+<p>IOzone 可用于对供应商的计算机平台进行全面的文件系统分析。
+</p><p>该程序可通过 <a href="#pg89cb7b475cfb">AUR</a> 获取：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/iozone/">iozone</a></span><sup><small>AUR</small></sup></span>。
+</p><p>以下命令可以近似模拟 <a href="https://crystalmark.info/en/software/crystaldiskmark/">CrystalDiskMark</a>（一款流行的 Windows 基准测试工具）的若干测试结果：
+</p>
+<ul><li>顺序 1 MiB 读写：<code>iozone -e -I -s 1g -r 1m -i 0 -i 1</code></li>
+<li>顺序 128 KiB 读写：<code>iozone -e -I -s 1g -r 128k -i 0 -i 1</code></li>
+<li>随机 4 KiB 读写：<code>iozone -e -I -s 1g -r 4k -i 0 -i 2 -i 1</code></li></ul>
+<p>结果以 KiB/s 为单位，因此除以 1024 即可转换为 MiB/s。
+</p><p>另请参阅论坛帖子：<a href="https://bbs.archlinux.org/viewtopic.php?pid=969463">iozone to evaluate I/O schedulers... results NOT what you would expect!</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_HardInfo" id="HardInfo">HardInfo</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hardinfo2">hardinfo2</a></span><sup><small>包</small></sup></span> 可以收集系统硬件和操作系统信息，进行基准测试，生成 HTML 或纯文本格式的可打印报表。HardInfo 会测试 CPU 和 FPU，并有简洁的 GTK 界面。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_Phoronix_.E6.B5.8B.E8.AF.95.E5.A5.97.E4.BB.B6" id="Phoronix_测试套件"><span id="Phoronix_.E6.B5.8B.E8.AF.95.E5.A5.97.E4.BB.B6"></span>Phoronix 测试套件</h3></div>
+<p><a href="https://www.phoronix-test-suite.com/">Phoronix 测试套件</a>是目前最全面的测试和基准测试平台，它提供了一个可扩展的框架，可轻松添加新的测试。该软件旨在以简洁、可重现且易用的方式有效进行定性和定量的基准测试。
+</p><p>Phoronix 测试套件基于 Phoronix.com 自 2004 年以来进行的大量测试和内部工具，并得到了主流计算机硬件和软件供应商的支持。该软件是开源软件，采用 GNU GPLv3 许可。
+</p><p>Phoronix 测试套件最初是为 Linux 自动测试而开发的，后来增加了对  OpenSolaris、Apple macOS、Microsoft Windows 和 BSD 系统的支持。Phoronix 测试套件包括一个轻量级处理核心（pts-core），每个测试都由基于 XML 的配置文件和相关资源脚本组成。从安装基准测试到实际进行基准测试，再到重要硬件和软件组件的解析，整个过程高度自动化且完全可重复，用户只需要确认操作。
+</p><p>Phoronix 测试套件与 OpenBenchmarking.org 对接，后者是一个协作式网络平台，有集中存储测试结果、共享测试配置文件和结果、高级分析等功能。Phoromatic 是一个企业组件，具有远程管理功能，可协调多个系统的测试执行。
+</p><p>可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/phoronix-test-suite/">phoronix-test-suite</a></span><sup><small>AUR</small></sup></span> <a href="#pg811194d6beaa">安装</a>该套件。另外也可以通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/phoronix-test-suite-git/">phoronix-test-suite-git</a></span><sup><small>AUR</small></sup></span> 获取开发版本的套件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_S" id="S">S</h3></div>
+<p>I/O 基准测试套件 <a href="https://github.com/Algodev-github/S">S</a>，是一个小型的用于测量存储 I/O 性能的脚本集。
+</p><p>下载或克隆该项目，安装其依赖，并以 root 身份运行（需要更改磁盘调度器的权限）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_s_tui" id="s-tui">s-tui</h3></div>
+<p><a href="https://github.com/amanusk/s-tui">s-tui</a> 是一款美观实用的 curses 风格 TUI 程序，能以图表展示 CPU 频率、利用率、温度、功耗，内置有压力测试工具。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_sysbench" id="sysbench">sysbench</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sysbench">sysbench</a></span><sup><small>包</small></sup></span> 是一款全面的多线程基准测试工具。它使用 C 和 Perl 编写，可直接在命令行中测试文件系统、内存、CPU、线程调度器以及 POSIX 互斥锁的性能，也可作为 Lua 脚本解释器对任意复杂的工作负载进行基准测试。它还提供了一系列用于数据库基准测试的脚本。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_Geekbench" id="Geekbench">Geekbench</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/geekbench/">geekbench</a></span><sup><small>AUR</small></sup></span> 是一个闭源的跨平台基准测试套件，通过模拟各种真实工作负载来测量 CPU、GPU 和内存性能，跑分可以上传到 Geekbench 网站上，（同一版本的跑分）可用于与其他系统进行比较，无论是你自己的还是别人的。
+</p><p>Geekbench 不适合作为独立的客观性能测试工具，因为它给出的分数与任何单个具体任务无关，也无法反映一台电脑在某一项或多项任务中的实际表现；不过，它可以粗略地反映一台计算机相对于其他计算机的性能水平，或者同一台计算机在不同操作系统/发行版或不同条件下的表现。正因如此，它常被用于 CPU 基准测试对比图表中。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg95bcbd921521_.E9.97.AA.E5.AD.98.E4.BB.8B.E8.B4.A8" id="闪存介质"><span id=".E9.97.AA.E5.AD.98.E4.BB.8B.E8.B4.A8"></span>闪存介质</h2></div>
+<p>可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/iozone/">iozone</a></span><sup><small>AUR</small></sup></span> 来量化性能。<b>持续</b>读写的测试数据可以反映一些 I/O 繁重的实际用例情况，但很多情况下需要考虑的是小文件的<b>随机写入</b>速度，例如在系统更新时解压并写入大量文件时。
+</p><p>该示例使用 4 KiB 记录大小测试读写一个 10 MiB 文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ iozone -e -I -a -s 10M -r 4k -i 0 -i 1 -i 2</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+
+                                                                random   random
+              kB  reclen    write  rewrite    read    reread    read     write
+           10240       4      661      649     5802     5822     3892      624
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>输出中数值的单位是 KiB/s。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg95bcbd921521_.E5.9B.BE.E5.BD.A2" id="图形"><span id=".E5.9B.BE.E5.BD.A2"></span>图形</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_Basemark_GPU" id="Basemark_GPU">Basemark GPU</h3></div>
+<p><a href="https://www.basemark.com/products/basemark-gpu/">Basemark GPU</a> 是一个跨移动和桌面平台的闭源评估工具，用于分析和评估图形 API（OpenGL 4.5、OpenGL ES 3.1、Vulkan、Microsoft DirectX 12）性能。Basemark GPU 通过提供高质量和中等质量模式，同时面向桌面和移动平台。高质量模式针对尖端的桌面工作负载，而中等质量模式则针对等效的移动工作负载。
+</p><p>如果使用 AMD GPU 并同时安装了多个 Vulkan 实现，在“Tests”页面的“Graphics Device”列表中这些不同的 Vulkan 实现会显示为独立的 GPU。
+</p><p>Basemark GPU 可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/basemark/">basemark</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_Blender_benchmark" id="Blender-benchmark">Blender-benchmark</h3></div>
+<p><a href="https://opendata.blender.org/">Blender-benchmark</a> 会收集系统信息，如操作系统、内存、显卡、CPU 型号，然后进行系统性能基准测试并记录数据。之后，用户可以在 Blender Open Data 平台上在线分享结果，或将数据保存在本地。
+</p><p>Blender-benchmark 可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/blender-benchmark/">blender-benchmark</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_Furmark" id="Furmark">Furmark</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/furmark/">furmark</a></span><sup><small>AUR</small></sup></span> 会显示一幅能造成极高图形负载的图像并显示其帧率。虽然可以用作 GPU 性能的基准测试工具，但它的主要用途是充当压力测试，旨在将 GPU 使用率推向极致——这使其既适合评估满负载下的系统稳定性，也适合评估显卡的散热性能。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>作为一款压力测试工具，Furmark 本身可能引发系统稳定性问题。尽管大多数现代 GPU 在接近硬件温度极限时会自动降频，但在极少数情况下——尤其是显卡散热不足或存在故障时——可能导致硬件损坏。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_GFXBench" id="GFXBench">GFXBench</h3></div>
+<p><a href="https://gfxbench.com/benchmark.jsp">GFXBench</a> 是一款高端图形基准测试工具，可跨所有平台地测试硬件在下一代图形技术上的表现。作为名副其实的跨 API 基准测试，GFXBench 支持所有行业标准和厂商特定的 API，包括 OpenGL、OpenGL ES、Vulkan、Metal、DirectX/Direct3D、DX12。
+</p><p>Vulkan API 测试目前正在开发中，仅对其企业合作伙伴开放。
+</p><p>GFXBench 可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gfxbench/">gfxbench</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_glmark2" id="glmark2">glmark2</h3></div>
+<p><a href="https://github.com/glmark2/glmark2">glmark2</a> 是一款 OpenGL 2.0 和 OpenGL ES 2.0 基准测试工具。
+</p><p>glmark2 可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glmark2">glmark2</a></span><sup><small>包</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_glxgears" id="glxgears">glxgears</h3></div>
+<p>glxgears 是一款流行的 OpenGL 测试工具，可以渲染非常简单的 OpenGL 测试并输出帧数。虽然 glxgears 可以测试图形驱动程序能否进行直接渲染，但它已经过时，不能代表 GNU/Linux 图形显示的现状和 OpenGL 的整体能力。glxgears 仅测试了游戏中会用到的 OpenGL 功能中的一小部分，因此使用 glxgears 测试出的性能提升可能无法在游戏中得到体现。更多信息请参见<a href="https://wiki.cchtml.com/index.php/Glxgears_is_not_a_Benchmark">这里</a>。
+</p><p>glxgears 可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa-utils">mesa-utils</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-mesa-utils">lib32-mesa-utils</a></span><sup><small>包</small></sup></span>（<a href="#pg9d2c9cc56d04">multilib</a> 仓库）获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_GpuTest" id="GpuTest">GpuTest</h3></div>
+<p><a href="https://www.geeks3d.com/gputest/">GpuTest</a> 是一款跨平台（Windows、Linux 和 Mac OS X）的 GPU 压力测试和 OpenGL 基准测试工具。GpuTest 带有多项 GPU 测试项目，包括一些来自 Windows 世界的热门项目（如 FurMark 或 TessMark）。
+</p><p>GpuTest 可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gputest/">gputest</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_intel_gpu_tools" id="intel-gpu-tools">intel-gpu-tools</h3></div>
+<p><a href="https://gitlab.freedesktop.org/drm/igt-gpu-tools">intel-gpu-tools</a> 能用与 <code>top</code> 命令相似的格式显示集成显卡的实时信息，在诊断 GPU 加速问题时非常有用。
+</p><p>intel-gpu-tools 可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-gpu-tools">intel-gpu-tools</a></span><sup><small>包</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_MangoHud" id="MangoHud">MangoHud</h3></div>
+<p>参见 <a href="#pga77c7547d58b">MangoHud</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_Unigine_.E5.BC.95.E6.93.8E" id="Unigine_引擎"><span id="Unigine_.E5.BC.95.E6.93.8E"></span>Unigine 引擎</h3></div>
+<p><a href="https://www.unigine.com/">Unigine 公司</a>基于他们的图形引擎制造了多个现代化 OpenGL 基准测试，特性如下：
+</p>
+<ul><li>像素动态光照</li>
+<li>普通和视差映射</li>
+<li>64 位 HDR 渲染</li>
+<li>体积雾和光</li>
+<li>强大的粒子系统：火焰、烟、爆炸</li>
+<li>可扩展着色（GLSL/HLSL）</li>
+<li>后处理：景深、折射、辉光、模糊、色彩校正等。</li></ul>
+<p>最近，Unigine 基准测试开始被超频用户使用。尤其是 heaven 被用于超频的初始稳定性测试。
+</p><p>可以在 <a href="#pg89cb7b475cfb">AUR</a> 找到这些基准测试：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/unigine-sanctuary/">unigine-sanctuary</a></span><sup><small>AUR</small></sup></span> (2007)</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/unigine-tropics/">unigine-tropics</a></span><sup><small>AUR</small></sup></span> (2008)</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/unigine-heaven/">unigine-heaven</a></span><sup><small>AUR</small></sup></span> (2009)</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/unigine-valley/">unigine-valley</a></span><sup><small>AUR</small></sup></span> (2013)</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/unigine-superposition/">unigine-superposition</a></span><sup><small>AUR</small></sup></span> (2017)</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_vkmark" id="vkmark">vkmark</h3></div>
+<p><a href="https://github.com/vkmark/vkmark">vkmark</a> 是一款可扩展的 Vulkan 基准测试套件，提供针对性的、可配置的场景。
+</p><p>vkmark 可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vkmark">vkmark</a></span><sup><small>包</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg95bcbd921521_xmrig" id="xmrig">xmrig</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xmrig">xmrig</a></span><sup><small>包</small></sup></span> 是一款高性能、开源、跨平台的 RandomX、KawPow、CryptoNight 和 GhostRider 统一 CPU/GPU 挖矿程序，是 RandomX 基准测试工具。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg95bcbd921521_Radeon_GPU" id="Radeon_GPU">Radeon GPU</h4></div>
+<p>如果使用 Radeon GPU 且使用开源 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-amdgpu">xf86-video-amdgpu</a></span><sup><small>包</small></sup></span> 驱动程序，需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=opencl-mesa">opencl-mesa</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rocm-opencl-runtime">rocm-opencl-runtime</a></span><sup><small>包</small></sup></span>。对 GPU 进行压力测试：
+</p>
+<pre>$ xmrig --stress --no-cpu --opencl
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg95bcbd921521_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://lbs.sourceforge.net/">Linux 基准测试套件主页</a></li>
+<li><a href="https://www.phoronix.com/">Phoronix.com</a></li>
+<li><a href="http://users.on.net/~ckolivas/interbench/">Interbench 主页</a></li>
+<li><a href="https://benchmark.unigine.com">UNIGINE 基准测试</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807041021
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.211 seconds
+Real time usage: 0.218 seconds
+Preprocessor visited node count: 758/1000000
+Revision size: 18496/2097152 bytes
+Post‐expand include size: 13548/2097152 bytes
+Template argument size: 3583/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 1/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   50.141      1 -total
+ 10.50%    5.264     19 Template:Pkg
+  8.05%    4.039     19 Template:AUR
+  6.74%    3.380      1 Template:翻译状态
+  5.59%    2.802      2 Template:Man
+  5.15%    2.584      6 Template:注意
+  4.51%    2.262      1 Template:相关文章开始
+  4.42%    2.218      6 Template:Hc
+  4.28%    2.147      2 Template:Related
+  4.21%    2.111     10 Template:Ic
+-->
+<!-- Render ID e808008e-9215-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2858:|#|:idhash:canonical!zh-cn and timestamp 20260807041021 and revision id 35195. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

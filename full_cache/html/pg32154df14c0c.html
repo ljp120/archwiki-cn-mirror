@@ -1,0 +1,399 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg32154df14c0c">udev</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Udev">Udev</a>，最近一次同步于 2023-01-26，若英文版本有所<a href="https://wiki.archlinux.org/title/Udev?diff=0&amp;oldid=765060">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Udev_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>udev 是一个用户空间的设备管理器，用于为事件设置处理程序。作为守护进程， udev 接收的事件主要由 linux 内核生成，这些事件是外部设备产生的物理事件。总之， udev 探测外设和热插拔，将设备控制权传递给内核，例如加载内核模块或设备固件。
+</p><p><i>udev</i> 是一个用户空间系统，可以让操作系统管理员为事件注册用户空间处理器。为了实现外设侦测和热插拔，<i>udev</i> 守护进程接收 Linux 内核发出的外设相关事件; 加载内核模块、设备固件; 调整设备权限，让普通用户和用户组能够访问设备。
+</p><p>作为 devfsd 和 hotplug 的替代品， udev 还负责管理 <code>/dev</code> 中的设备节点，即添加、链接和重命名节点，取代了 <i>hotplug</i> 和 <i>hwdetect</i>。
+</p><p>udev 并行处理事件，具有潜在的性能优势，但是无法保证每次加载模块的顺序，例如如果有两个硬盘， <code>/dev/sda</code> 在下次启动后可能变成 <code>/dev/sdb</code> 。本文后面有更详细的信息。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg32154df14c0c_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>Udev 现在是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd">systemd</a></span><sup><small>包</small></sup></span> 的组成部分，默认已安装。有关信息请查阅 <code>systemd-udevd.service(8)</code> 的<a href="#pg754181899aac">手册页</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg32154df14c0c_udev_.E8.A7.84.E5.88.99" id="udev_规则"><span id="udev_.E8.A7.84.E5.88.99"></span>udev 规则</h2></div>
+<p>udev 规则以管理员身份编写并保存在 <code>/etc/udev/rules.d/</code> 目录，其文件名必须以 <code>.rules</code> 结尾。各种软件包提供的规则文件位于 <code>/lib/udev/rules.d/</code>。如果 <code>/usr/lib</code> 和 <code>/etc</code> 这两个目录中有同名文件，则 <code>/etc</code> 中的文件优先。
+</p><p>要学习 <i>udev</i> 规则，请参考 <span class="plainlinks archwiki-template-man" title="$ man 7 udev"><a href="https://man.archlinux.org/man/udev.7">udev(7)</a></span> 手册和<a href="http://www.reactivated.net/writing_udev_rules.html">编写 udev 规则</a>及其提供的一些<a href="http://www.reactivated.net/writing_udev_rules.html#example-printer">实用案例</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E7.BC.96.E5.86.99_udev_.E8.A7.84.E5.88.99" id="编写_udev_规则"><span id=".E7.BC.96.E5.86.99_udev_.E8.A7.84.E5.88.99"></span>编写 udev 规则</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>要挂载可移动设备，请<b>不要</b>通过在 udev 规则中调用 <code>mount</code> 命令的方法。对 FUSE 文件系统将会导致 <code>Transport endpoint not connected</code> 错误。应代之以 <a href="#pga29e3f6d2412">udisks</a> 以正确处理自动挂载。或者把挂载动作放在 udev 规则内部：
+<p>将 <code>/usr/lib/systemd/system/systemd-udevd.service</code> 复制到 <code>/etc/systemd/system/systemd-udevd.service</code>，将 <code>MountFlags=slave</code> 替换为 <code>MountFlags=shared</code>。<a href="https://unix.stackexchange.com/a/154318">（来源）</a>
+</p>
+udev 不应该用于启动长期运行的进程.</div>
+<ul><li>要想学习写udev规则，请访问<a href="http://www.reactivated.net/writing_udev_rules.html">编写 udev 规则</a>。</li>
+<li>要想查看 udev 规则的例子，请查阅上述文章的<a href="http://www.reactivated.net/writing_udev_rules.html#example-printer">范例</a>章节。</li></ul>
+<p>下面是一个规则的实例，当接入摄像头时创建符号链接 <code>/dev/video-cam1</code> 。
+</p><p>假设摄像头已经连接，加载的设备为 <code>/dev/video2</code>。编写此规则的原因是下次引导时这个设备名可能变化，比如变成 <code>/dev/video0</code>。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ udevadm info --attribute-walk --path=$(udevadm info --query=path --name=/dev/video2)</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Udevadm info starts with the device specified by the devpath and then walks up the chain of parent devices.
+It prints for every device found, all possible attributes in the udev rules key format.
+A rule to match, can be composed by the attributes of the device and the attributes from one single parent device.
+
+looking at device '/devices/pci0000:00/0000:00:04.1/usb3/3-2/3-2:1.0/video4linux/video2':
+  KERNEL=="video2"
+  SUBSYSTEM=="video4linux"
+   ...
+looking at parent device '/devices/pci0000:00/0000:00:04.1/usb3/3-2/3-2:1.0':
+  KERNELS=="3-2:1.0"
+  SUBSYSTEMS=="usb"
+  ...
+looking at parent device '/devices/pci0000:00/0000:00:04.1/usb3/3-2':
+  KERNELS=="3-2"
+  SUBSYSTEMS=="usb"
+  ATTRS{idVendor}=="05a9"
+  ATTRS{manufacturer}=="OmniVision Technologies, Inc."
+  ATTRS{removable}=="unknown"
+  ATTRS{idProduct}=="4519"
+  ATTRS{bDeviceClass}=="00"
+  ATTRS{product}=="USB Camera"
+  ...</pre>
+<p>为了确认 webcamera 设备，我们使用 <code>KERNEL=="video2"</code> 和 <code>SUBSYSTEM=="video4linux"</code>，向上两极到 <code>SUBSYSTEMS=="usb"</code>，使用厂商和产品 ID 进行定位： <code>ATTRS{idVendor}=="05a9"</code> 和 <code>ATTRS{idProduct}=="4519"</code>。
+</p><p>可以为此设备编写规则:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/83-webcam.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{idVendor}=="05a9", ATTRS{idProduct}=="4519", SYMLINK+="video-cam"</pre>
+<p>这里使用 <code>SYMLINK+="video-cam"</code> 创建了软链接，这样可以设置用户 <code>OWNER="john"</code> 或用户组 <code>GROUP="video"</code> 或者通过 <code>MODE="0660"</code> 设置权限。 
+</p><p>如果要编写设备移除时执行的脚本，请注意此时可能无法访问设备属性。需要使用提前设置的<a href="#pg4989d4f46056">环境变量</a>。要监控这些环境变量，在拔掉设备时执行如下命令：
+</p>
+<pre>$ udevadm monitor --property --udev
+</pre>
+<p>在命令输出中可以看到类似 <code>ID_VENDOR_ID</code> 和 <code>ID_MODEL_ID</code> 这样的值，它们对应 <code>idVendor</code> 和 <code>idProduct</code> 属性。下面是一个使用设备环境变量的规则示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/83-webcam-removed.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="remove", SUBSYSTEM=="usb", ENV{ID_VENDOR_ID}=="05a9", ENV{ID_MODEL_ID}=="4519", RUN+="<i>/path/to/your/script</i>"</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E5.88.97.E5.87.BA.E8.AE.BE.E5.A4.87.E5.B1.9E.E6.80.A7" id="列出设备属性"><span id=".E5.88.97.E5.87.BA.E8.AE.BE.E5.A4.87.E5.B1.9E.E6.80.A7"></span>列出设备属性</h3></div>
+<p>要列出所有设备的属性以用来编写规则的话，运行下面的命令：
+</p>
+<pre>$ udevadm info --attribute-walk --name=<i>device_name</i>
+</pre>
+<p>将 <code>device name</code> 替换为系统中存在的设备，比如 <code>/dev/sda</code> 或 <code>/dev/ttyUSB0</code>。
+</p><p>如果你不知道设备名，你也可以列出某个系统路径的属性：
+</p>
+<pre> $ udevadm info --attribute-walk --path=/sys/class/backlight/acpi_video0
+</pre>
+<p>可以通过类型过滤掉不需要的输出:
+</p>
+<pre>$ ls /dev/<i>class</i>/by-id
+</pre>
+<p>可以在 <code>--name</code> 中使用最终文件或软连接:
+</p>
+<pre>$ udevadm info --attribute-walk --name=/dev/input/by-id/usb-foostan_Corne-event-kbd
+</pre>
+<p>要获得裸 USB 设备(未创建任何子设备) 的信息，需要使用完整的 USB 设备路径, 先启动监控模式，然后插入 USB 设备：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ udevadm monitor</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+KERNEL[26652.638931] add      /devices/pci0000:00/0000:00:01.2/0000:02:00.0/0000:03:05.0/0000:05:00.0/usb1/1-3 (usb)
+KERNEL[26652.639153] add      /devices/pci0000:00/0000:00:01.2/0000:02:00.0/0000:03:05.0/0000:05:00.0/usb1/1-3/1-3:1.0 (usb)
+...</pre>
+<p>可以使用最深的路径， <code><i>--attribute-walk</i></code> 会显示全部父属性：
+</p>
+<pre>$ udevadm info --attribute-walk --path=<i>/devices/pci0000:00/0000:00:01.2/0000:02:00.0/0000:03:05.0/0000:05:00.0/usb1/1-3/1-3:1.0</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E5.8A.A0.E8.BD.BD.E5.89.8D.E6.B5.8B.E8.AF.95.E8.A7.84.E5.88.99" id="加载前测试规则"><span id=".E5.8A.A0.E8.BD.BD.E5.89.8D.E6.B5.8B.E8.AF.95.E8.A7.84.E5.88.99"></span>加载前测试规则</h3></div>
+<pre># udevadm test $(udevadm info --query=path --name=<i>device_name</i>) 2&gt;&amp;1
+</pre>
+<p>这不会运行你的规则中的所有命令，但会处理已有设备的符号连接，如果你不能加载它们这也许会变得方便。也可以直接输入你测试的设备路径：
+</p>
+<pre># udevadm test /sys/class/backlight/acpi_video0/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E5.8A.A0.E8.BD.BD.E6.96.B0.E8.A7.84.E5.88.99" id="加载新规则"><span id=".E5.8A.A0.E8.BD.BD.E6.96.B0.E8.A7.84.E5.88.99"></span>加载新规则</h3></div>
+<p>Udev 自动侦测规则文件的变化，所以修改会立即生效，无需重启 udev。但已接入设备的规则不会自动触发。像 USB 这类热插拔设备也许需要重新插拔才能使新规则生效，也可能需要卸载并重载内核的 ohci-hcd 和 ehci-hcd 模块以重新挂载所有 USB 设备。
+</p><p>如果规则自动重载失败
+</p>
+<pre># udevadm control --reload
+</pre>
+<p>可以手工强制触发规则
+</p>
+<pre># udevadm trigger
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg32154df14c0c_Udisks" id="Udisks">Udisks</h2></div>
+<p>参阅 <a href="#pga29e3f6d2412">Udisks</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg32154df14c0c_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_Mounting_drives_in_rules" id="Mounting_drives_in_rules">Mounting drives in rules</h3></div>
+<p>To mount removable drives, do not call <code>mount</code> from <i>udev</i> rules. This is ill-advised for two reasons: 
+</p>
+<ol><li>systemd by default runs <code>systemd-udevd.service</code> with a separate "mount namespace" (see <span class="plainlinks archwiki-template-man" title="$ man 7 namespaces"><a href="https://man.archlinux.org/man/namespaces.7">namespaces(7)</a></span>), which means that mounts will not be visible to the rest of the system.</li>
+<li>Even if you change the service parameters to fix this (commenting out the <code>PrivateMounts</code> and <code>MountFlags</code> lines), there is another problem which is that processes started from Udev are killed after a few seconds. In case of FUSE filesystems, such as <a href="#pg50f8f3d23b2e">NTFS-3G</a>, <i>mount</i> starts a user-space process to handle the filesystem internals; when this is killed you will get <code>Transport endpoint not connected</code> errors if you try to access the filesystem.</li></ol>
+<p>There are some options that work:
+</p>
+<ul><li>Start a custom systemd service from the Udev rule; the systemd service can invoke a script which can start any number of long-running processes (like FUSE). A concise example which automatically mounts USB disks under <code>/media</code> is <a href="https://github.com/Ferk/udev-media-automount">udev-media-automount</a>. A variant of the same idea is explained in <a href="http://jasonwryan.com/blog/2014/01/20/udev/">this blog post</a>.</li>
+<li>Use <code>systemd-mount</code> instead of <code>mount</code> in your Udev rule. This is <a href="https://github.com/systemd/systemd/issues/11982#issuecomment-472529566">recommended by systemd developers</a>. For example this Udev rule should mount USB disks under <code>/media</code>:</li></ul>
+<dl><dd><pre>ACTION=="add", SUBSYSTEMS=="usb", SUBSYSTEM=="block", ENV{ID_FS_USAGE}=="filesystem", RUN{program}+="/usr/bin/systemd-mount --no-block --automount=yes --collect $devnode /media"</pre></dd></dl>
+<ul><li>Use a package like <a href="#pgfb208edb391c">udisks</a> or <a href="#pge79f1cb832cf">udiskie</a>. These are very powerful, but difficult to set up. Also, they are meant to be used in single user sessions, since they make some filesystems available under the ownership of the unprivileged user whose session is currently active.</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_Allowing_regular_users_to_use_devices" id="Allowing_regular_users_to_use_devices">Allowing regular users to use devices</h3></div>
+<p>When a <a href="#pg79837a9c7434">kernel</a> driver initializes a device, the default state of the device node is to be owned by <code>root:root</code>, with permissions <code>600</code>. <a href="https://github.com/torvalds/linux/blob/v5.19/drivers/base/devtmpfs.c#L11-L13">[1]</a> This makes devices inaccessible to regular users unless the driver changes the default, or a udev rule in userspace changes the permissions.
+</p><p>The <code>OWNER</code>, <code>GROUP</code>, and <code>MODE</code> udev values can be used to provide access, though one encounters the issue of how to make a device usable to all users without an overly permissive mode. Ubuntu's approach is to create a <code>plugdev</code> group that devices are added to, but this practice is not only discouraged by the systemd developers, <a href="https://bugzilla.redhat.com/show_bug.cgi?id=815093">[2]</a> but considered a bug when shipped in udev rules on Arch (<a href="https://bugs.archlinux.org/task/35602">FS#35602</a>). Another approach historically employed, as described in <a href="#pgc5547c3b9e44">Users and groups#Pre-systemd groups</a>, is to have different groups corresponding to categories of devices.
+</p><p>The modern recommended approach for systemd systems is to use a <code>MODE</code> of <code>660</code> to let the group use the device, and then attach a <code>TAG</code> named <code>uaccess</code> <a href="https://github.com/systemd/systemd/blob/main/rules.d/70-uaccess.rules.in">[3]</a>. This special tag makes udev apply a <a href="https://github.com/systemd/systemd/blob/main/src/udev/udev-builtin-uaccess.c">dynamic user ACL</a> to the device node, which coordinates with <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-logind"><a href="https://man.archlinux.org/man/systemd-logind.8">systemd-logind(8)</a></span> to make the device usable to logged-in users. For an example of a udev rule implementing this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/71-device-name.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SUBSYSTEMS=="usb", ATTRS{idVendor}=="<i>vendor_id</i>", ATTRS{idProduct}=="<i>product_id</i>", MODE="0660", TAG+="uaccess"</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_Execute_when_HDMI_cable_is_plugged_in_or" id="Execute_when_HDMI_cable_is_plugged_in_or_unplugged">Execute when HDMI cable is plugged in or unplugged</h3></div>
+<p>Create the rule <code>/etc/udev/rules.d/95-hdmi-plug.rules</code> with the following content:
+</p>
+<pre>ACTION=="change", SUBSYSTEM=="drm", ENV{DISPLAY}=":0", ENV{XAUTHORITY}="/home/<i>username</i>/.Xauthority", RUN+="<i>/path/to/script.sh</i>"
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>If the rule triggers before the X server starts, it may not work as intended. See #X programs in RUN rules hang when no X server is present.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_VGA_.E7.BA.BF.E7.BC.86.E6.8E.A5.E5.85.A5.E6.97.B6.E6.89.A7.E8.A1.8C.E8.A7.84.E5.88.99" id="VGA_线缆接入时执行规则"><span id="VGA_.E7.BA.BF.E7.BC.86.E6.8E.A5.E5.85.A5.E6.97.B6.E6.89.A7.E8.A1.8C.E8.A7.84.E5.88.99"></span>VGA 线缆接入时执行规则</h3></div>
+<p>创建包含下列内容的规则文件 <code>/etc/udev/rules.d/95-monitor-hotplug.rules</code> ，可以在 VGA 线缆插入时执行 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=arandr">arandr</a></span><sup><small>包</small></sup></span>：
+</p>
+<pre>KERNEL=="card0", SUBSYSTEM=="drm", ENV{DISPLAY}=":0", ENV{XAUTHORITY}="/home/<i>username</i>/.Xauthority", RUN+="/usr/bin/arandr"
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>某些显示管理器把 .Xauthority 文件保存在用户家目录以外的位置，需要修改 ENV{XAUTHORITY} 的内容。例如，<a href="#pgf70eda819ae2">GNOME 显示管理器</a> 里的.Xauthority 文件路径如下所示：
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ printenv XAUTHORITY</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/run/user/1000/gdm/Xauthority</pre></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>If the rule triggers before the X server starts, it may not work as intended. See #X programs in RUN rules hang when no X server is present.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E4.BE.A6.E6.B5.8B.E6.96.B0.E7.9A.84_eSATA_.E8.AE.BE.E5.A4.87" id="侦测新的_eSATA_设备"><span id=".E4.BE.A6.E6.B5.8B.E6.96.B0.E7.9A.84_eSATA_.E8.AE.BE.E5.A4.87"></span>侦测新的 eSATA 设备</h3></div>
+<p>If your eSATA drive is not detected when you plug it in, there are a few things you can try. You can reboot with the eSATA plugged in. Or you could try
+</p>
+<pre># echo 0 0 0 &gt; /sys/class/scsi_host/host*/scan
+</pre>
+<p>Or you could install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/scsiadd/">scsiadd</a></span><sup><small>AUR</small></sup></span> (from the AUR) and try
+</p>
+<pre># scsiadd -s
+</pre>
+<p>Hopefully, your drive is now in <code>/dev</code>. If it is not, you could try the above commands while running
+</p>
+<pre># udevadm monitor
+</pre>
+<p>to see if anything is actually happening.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E5.B0.86.E5.86.85.E7.BD.AE_SATA_.E6.8E.A5.E5.8F.A3.E6.A0.87.E8.AE.B0.E4.B8.BA_eSATA" id="将内置_SATA_接口标记为_eSATA"><span id=".E5.B0.86.E5.86.85.E7.BD.AE_SATA_.E6.8E.A5.E5.8F.A3.E6.A0.87.E8.AE.B0.E4.B8.BA_eSATA"></span>将内置 SATA 接口标记为 eSATA</h3></div>
+<p>If you connected a eSATA bay or an other eSATA adapter the system will still recognize this disk as an internal SATA drive. <a href="#pg1e095fe2c2a6">GNOME</a> and <a href="#pg5b70e23b1711">KDE</a> will ask you for your root password all the time. The following rule will mark the specified SATA-Port as an external eSATA-Port. With that, a normal GNOME user can connect their eSATA drives to that port like a USB drive, without any root password and so on.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/10-esata.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">DEVPATH=="/devices/pci0000:00/0000:00:1f.2/host4/*", ENV{UDISKS_SYSTEM}="0"
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>The <code>DEVPATH</code> can be found after connection the eSATA drive with the following commands (replace <code>sdb</code> accordingly):
+<pre># udevadm info -q path -n /dev/sdb
+/devices/pci0000:00/0000:00:1f.2/host4/target4:0:0/4:0:0:0/block/sdb
+</pre>
+<pre># find /sys/devices/ -name sdb
+/sys/devices/pci0000:00/0000:00:1f.2/host4/target4:0:0/4:0:0:0/block/sdb
+</pre>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E8.AE.BE.E7.BD.AE.E9.9D.99.E6.80.81.E8.AE.BE.E5.A4.87.E5.90.8D" id="设置静态设备名"><span id=".E8.AE.BE.E7.BD.AE.E9.9D.99.E6.80.81.E8.AE.BE.E5.A4.87.E5.90.8D"></span>设置静态设备名</h3></div>
+<p>由于 udev 异步加载所有模块，使得它们被初始化的次序不同。这将导致设备会随机改变名称。可以添加一条 udev 规则使得设备使用静态名称。
+</p><p>对于块设备和网络设备的规则配置，请分别参阅<a href="#pgecebd33a4169">块设备持久化命名</a>和<a href="#pgf42a74f3af9c">网络配置-设备命名</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg32154df14c0c_.E8.A7.86.E9.A2.91.E8.AE.BE.E5.A4.87" id="视频设备"><span id=".E8.A7.86.E9.A2.91.E8.AE.BE.E5.A4.87"></span>视频设备</h4></div>
+<p>For setting up the webcam in the first place, refer to <a href="#pg12ddde75c439">网络摄像机配置</a>.
+</p><p>Using multiple webcams will assign video devices as <code>/dev/video*</code> randomly on boot. The recommended solution is to create symlinks using a <i>udev</i> rule as in the #udev rule example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/83-webcam.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{idVendor}=="05a9", ATTRS{idProduct}=="4519", SYMLINK+="video-cam1"
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", SUBSYSTEMS=="usb", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="08f6", SYMLINK+="video-cam2"</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Using names other than <code>/dev/video*</code> will break preloading of <code>v4l1compat.so</code> and perhaps <code>v4l2convert.so</code></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg32154df14c0c_.E6.89.93.E5.8D.B0.E6.9C.BA" id="打印机"><span id=".E6.89.93.E5.8D.B0.E6.9C.BA"></span>打印机</h4></div>
+<p>If you use multiple printers, <code>/dev/lp[0-9]</code> devices will be assigned randomly on boot, which will break e.g. <a href="#pg9c40a97c403d">CUPS</a> configuration. 
+</p><p>You can create following rule, which will create symlinks under <code>/dev/lp/by-id</code> and <code>/dev/lp/by-path</code>, similar to <a href="#pg2636278c0df5">Persistent block device naming</a> scheme:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/60-persistent-printer.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="remove", GOTO="persistent_printer_end"
+
+# This should not be necessary
+#KERNEL!="lp*", GOTO="persistent_printer_end"
+
+SUBSYSTEMS=="usb", IMPORT{builtin}="usb_id"
+ENV{ID_TYPE}!="printer", GOTO="persistent_printer_end"
+
+ENV{ID_SERIAL}=="?*", SYMLINK+="lp/by-id/$env{ID_BUS}-$env{ID_SERIAL}"
+
+IMPORT{builtin}="path_id"
+ENV{ID_PATH}=="?*", SYMLINK+="lp/by-path/$env{ID_PATH}"
+
+LABEL="persistent_printer_end"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_Identifying_a_disk_by_its_serial" id="Identifying_a_disk_by_its_serial">Identifying a disk by its serial</h3></div>
+<p>To perform some action on a specific disk device <code>/dev/sd<i>X</i></code> identified permanently by its unique serial <code>ID_SERIAL_SHORT</code> as displayed with <code>udevadm info /dev/sd<i>X</i></code>, one can use the below rule. It is passing as a parameter the device name found if any to illustrate:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/69-disk.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", KERNEL=="sd[a-z]", ENV{ID_SERIAL_SHORT}=="<i>X5ER1ALX</i>", RUN+="/path/to/script /dev/%k"</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E5.94.A4.E9.86.92.E6.8C.82.E8.B5.B7.E7.9A.84_USB_.E8.AE.BE.E5.A4.87" id="唤醒挂起的_USB_设备"><span id=".E5.94.A4.E9.86.92.E6.8C.82.E8.B5.B7.E7.9A.84_USB_.E8.AE.BE.E5.A4.87"></span>唤醒挂起的 USB 设备</h3></div>
+<p>A udev rule can be useful to enable the <a href="#pgdad8ecea8837">wakeup triggers</a> of a USB device, like a mouse or a keyboard, so that it can be used to wake the system from sleep.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>By default, the USB host controllers are all enabled for wakeup. The status can be checked using <code>cat /proc/acpi/wakeup</code>. The rule below is in this case not necessary but can be used as a template to perform other actions, like disabling the wakeup functionality for example.
+</div>
+<p>First, identify the vendor and product identifiers of the USB device. They will be used to recognize it in the udev rule. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsusb | grep Logitech</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Bus 007 Device 002: ID <b>046d</b>:<b>c52b</b> Logitech, Inc. Unifying Receiver
+</pre>
+<p>Then, find where the device is connected to using:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ grep <i>c52b</i> /sys/bus/usb/devices/*/idProduct</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/sys/bus/usb/devices/<b>1-1.1.1.4/</b>idProduct:c52b
+</pre>
+<p>Now create the rule to change the <code>power/wakeup</code> attribute of both the device and the USB controller it is connected to whenever it is added:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/50-wake-on-device.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", SUBSYSTEM=="usb", DRIVERS=="usb", ATTRS{idVendor}=="<b>046d</b>", ATTRS{idProduct}=="<b>c52b</b>", ATTR{power/wakeup}="enabled", ATTR{driver/<b>1-1.1.1.4</b>/power/wakeup}="enabled"</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E8.A7.A6.E5.8F.91.E4.BA.8B.E4.BB.B6" id="触发事件"><span id=".E8.A7.A6.E5.8F.91.E4.BA.8B.E4.BB.B6"></span>触发事件</h3></div>
+<p>It can be useful to trigger various udev events. For example, you might want to simulate a USB device disconnect on a remote machine. In such cases, use <code>udevadm trigger</code>:
+</p>
+<pre> # udevadm trigger --verbose --type=subsystems --action=remove --subsystem-match=usb --attr-match="idVendor=abcd"
+</pre>
+<p>This command will trigger a USB remove event on all USB devices with vendor ID <code>abcd</code>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_Triggering_desktop_notifications_from_a_" id="Triggering_desktop_notifications_from_a_udev_rule">Triggering desktop notifications from a udev rule</h3></div>
+
+<p><br/>
+Invoking an external script containing calls to <code>notify-send</code> via <i>udev</i> <a href="https://bbs.archlinux.org/viewtopic.php?id=212364">can sometimes be challenging</a> since the notification(s) never display on the Desktop. Here is an example of what commands and environmental variables need to be included in which files for <code>notify-send</code> to successfully be executed from a <i>udev</i> rule.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>A number of variables are hardcoded in this example, thus consider making them portable (i.e., $USER rather than user's shortname) once you understand the example. 
+</div>
+<p>1) The following <i>udev</i> rule executes a script that plays a notification sound and sends a desktop notification when screen brightness is changed according to power state on a laptop. Create the file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-backlight_notification.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Rule for when switching to battery
+ACTION=="change", SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="0", ENV{DISPLAY}=":0", ENV{XAUTHORITY}="/home/USERNAME/.Xauthority" RUN+="/usr/bin/su USERNAME_TO_RUN_SCRIPT_AS -c /usr/local/bin/brightness_notification.sh"
+# Rule for when switching to AC
+ACTION=="change", SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="1", ENV{DISPLAY}=":0", ENV{XAUTHORITY}="/home/USERNAME/.Xauthority" RUN+="/usr/bin/su USERNAME_TO_RUN_SCRIPT_AS -c /usr/local/bin/brightness_notification.sh"</pre>
+<ul><li><code>USERNAME_TO_RUN_SCRIPT_AS</code> and <code>USERNAME</code> need to be changed to that of the shortname for the user of the graphical session where the notification will be displayed;</li>
+<li>the script needs to be executed with <code>/usr/bin/su</code>, which will place its ownership under the user of the graphical session (rather than root/the system) where the notification will be displayed.</li></ul>
+<p>2) Contents of the executable script to be run on trigger of the <i>udev</i> rule:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/brightness_notification.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+
+export XAUTHORITY=/home/USERNAME_TO_RUN_SCRIPT_AS/.Xauthority
+export DISPLAY=:0
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/UID_OF_USER_TO_RUN_SCRIPT_AS/bus"
+
+/usr/bin/sudo -u USERNAME_TO_RUN_SCRIPT_AS /usr/bin/paplay --server=/run/user/UID_OF_USER_TO_RUN_SCRIPT_AS/pulse/native /home/USERNAME/.i3/sounds/Click1.wav &gt; /dev/null 2&gt;&amp;1
+
+/usr/bin/notify-send --icon=/usr/share/icons/gnome/256x256/status/battery-full-charging.png 'Changing Power States' --expire-time=4000</pre>
+<ul><li><code>USERNAME_TO_RUN_SCRIPT_AS</code>, <code>UID_OF_USER_TO_RUN_SCRIPT_AS</code> and <code>USERNAME</code> needs to be changed to that of the shortname for the user and user's UID of the graphical session where the notification will be displayed;</li>
+<li><code>/usr/bin/sudo</code> is needed when playing audio via pulseaudio;</li>
+<li>three environmental variables (i.e., <code>XAUTHORITY</code>, <code>DISPLAY</code> and <code>DBUS_SESSION_BUS_ADDRESS</code>) for the user of the graphical session where the notification will be displayed need to be defined and exported.</li></ul>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>See also <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xpub/">xpub</a></span><sup><small>AUR</small></sup></span> as a method for getting the user's display environment variables and exporting the last into <i>udev</i> rules via <code>IMPORT</code> key.
+</div>
+<p>3) Load/reload the new <i>udev</i> rule (see above) and test it by unplugging the power supply to the laptop.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>If the rule triggers before the X server starts, it may not work as intended. See #X programs in RUN rules hang when no X server is present.</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg32154df14c0c_.E6.8E.92.E9.94.99" id="排错"><span id=".E6.8E.92.E9.94.99"></span>排错</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E5.B1.8F.E8.94.BD.E6.A8.A1.E5.9D.97" id="屏蔽模块"><span id=".E5.B1.8F.E8.94.BD.E6.A8.A1.E5.9D.97"></span>屏蔽模块</h3></div>
+<p>极个别情况下，udev 也会犯错或加载错误的模块。为了防止错误的发生，你可以使用模块禁用列表。只要模块加入该列表，无论是启动时，或者是运行时（如usb硬盘等）udev都不会加载这些模块。参见<a href="#pg3a5d8bdf10b8">blacklisting</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_Debug_output" id="Debug_output">Debug output</h3></div>
+<p>To get hardware debug info, use the <a href="#pgec0856954f1c">内核参数</a> <code>udev.log-priority=debug</code>. Alternatively you can set
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/udev.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">udev_log="debug"</pre>
+<p>This option can also be compiled into your initramfs by adding the config file to your <code>FILES</code> array
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">FILES="... /etc/udev/udev.conf"</pre>
+<p>and then rebuilding the initramfs with
+</p>
+<pre># mkinitcpio -p linux
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_udevd_.E5.BC.95.E5.AF.BC.E6.97.B6.E6.8C.82.E8.B5.B7" id="udevd_引导时挂起"><span id="udevd_.E5.BC.95.E5.AF.BC.E6.97.B6.E6.8C.82.E8.B5.B7"></span>udevd 引导时挂起</h3></div>
+<p>After migrating to LDAP or updating an LDAP-backed system udevd can hang at boot at the message "Starting UDev Daemon". This is usually caused by udevd trying to look up a name from LDAP but failing, because the network is not up yet. The solution is to ensure that all system group names are present locally.
+</p><p>Extract the group names referenced in udev rules and the group names actually present on the system:
+</p>
+<pre># grep -Fr GROUP /etc/udev/rules.d/ /usr/lib/udev/rules.d/ | sed 's:.*GROUP="\([-a-z_]\{1,\}\)".*:\1:' | sort -u &gt;udev_groups
+# cut -d: -f1 /etc/gshadow /etc/group | sort -u &gt;present_groups
+</pre>
+<p>To see the differences, do a side-by-side diff:
+</p>
+<pre># diff -y present_groups udev_groups
+...
+network							      &lt;
+nobody							      &lt;
+ntp							      &lt;
+optical								optical
+power							      |	pcscd
+rfkill							      &lt;
+root								root
+scanner								scanner
+smmsp							      &lt;
+storage								storage
+...
+</pre>
+<p>In this case, the <code>pcscd</code> group is for some reason not present in the system. <a href="#pgc5547c3b9e44">Add the missing groups</a>. Also, make sure that local resources are looked up before resorting to LDAP. <code>/etc/nsswitch.conf</code> should contain the following line:
+</p>
+<pre>group: files ldap
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E4.B8.80.E4.BA.9B.E7.A7.BB.E5.8A.A8.E8.AE.BE.E5.A4.87.E4.B8.8D.E5.8F.AF.E7.A7.BB.E9.99.A4" id="一些移动设备不可移除"><span id=".E4.B8.80.E4.BA.9B.E7.A7.BB.E5.8A.A8.E8.AE.BE.E5.A4.87.E4.B8.8D.E5.8F.AF.E7.A7.BB.E9.99.A4"></span>一些移动设备不可移除</h3></div>
+<p>You need to create a custom <i>udev</i> rule for that particular device. To get definitive information of the device you can use either <code>ID_SERIAL</code> or <code>ID_SERIAL_SHORT</code> (remember to change <code>/dev/sdb</code> if needed):
+</p>
+<pre>$ udevadm info /dev/sdb | grep ID_SERIAL
+</pre>
+<p>Then we set <code>UDISKS_AUTO="1"</code> to mark the device for automounting and <code>UDISKS_SYSTEM="0"</code> to mark the device as "removable". See <span class="plainlinks archwiki-template-man" title="$ man 8 udisks"><a href="https://man.archlinux.org/man/udisks.8">udisks(8)</a></span> for details.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-removable.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ENV{ID_SERIAL_SHORT}=="<i>serial_number</i>", ENV{UDISKS_AUTO}="1", ENV{UDISKS_SYSTEM}="0"</pre>
+<p>Remember to reload <i>udev</i> rules with <code>udevadm control --reload</code>. Next time you plug your device in, it will be treated as an external drive.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E5.A3.B0.E9.9F.B3.E9.97.AE.E9.A2.98.E5.92.8C.E4.B8.80.E4.BA.9B.E4.B8.8D.E8.83.BD.E8.87.AA.E5.8A.A8.E5.8A.A0.E8.BD.BD.E7.9A.84.E6.A8.A1.E5.9D.97" id="声音问题和一些不能自动加载的模块"><span id=".E5.A3.B0.E9.9F.B3.E9.97.AE.E9.A2.98.E5.92.8C.E4.B8.80.E4.BA.9B.E4.B8.8D.E8.83.BD.E8.87.AA.E5.8A.A8.E5.8A.A0.E8.BD.BD.E7.9A.84.E6.A8.A1.E5.9D.97"></span>声音问题和一些不能自动加载的模块</h3></div>
+<p>一些用户发现 <code>/etc/modprobe.d/sound.conf</code> 中的遗留配置会引起这些问题，请清理配置并重试。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>从 <code>udev&gt;=171</code> 开始 OSS 模拟模块(<code>snd_seq_oss, snd_pcm_oss, snd_mixer_oss</code>) 默认不会自动装载。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_IDE_CD.2FDVD_.E9.A9.B1.E5.8A.A8.E5.99.A8.E7.9A.84.E6.94.AF.E6.8C.81" id="IDE_CD/DVD_驱动器的支持"><span id="IDE_CD.2FDVD_.E9.A9.B1.E5.8A.A8.E5.99.A8.E7.9A.84.E6.94.AF.E6.8C.81"></span>IDE CD/DVD 驱动器的支持</h3></div>
+<p>Starting with version 170, udev does not support CD-ROM/DVD-ROM drives that are loaded as traditional IDE drives with the <code>ide_cd_mod</code> module and show up as <code>/dev/hd*</code>. The drive remains usable for tools which access the hardware directly, like <i>cdparanoia</i>, but is invisible for higher userspace programs, like KDE.
+</p><p>A cause for the loading of the ide_cd_mod module prior to others, like sr_mod, could be e.g. that you have for some reason the module piix loaded with your <a href="#pg5409190f7704">initramfs</a>. In that case you can just replace it with ata_piix in your <code>/etc/mkinitcpio.conf</code>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_.E5.85.89.E9.A9.B1.E8.A2.AB.E6.A0.87.E8.AF.86.E4.B8.BA.E7.A3.81.E7.9B.98" id="光驱被标识为磁盘"><span id=".E5.85.89.E9.A9.B1.E8.A2.AB.E6.A0.87.E8.AF.86.E4.B8.BA.E7.A3.81.E7.9B.98"></span>光驱被标识为磁盘</h3></div>
+<p>If the group ID of your optical drive is set to <code>disk</code> and you want to have it set to <code>optical</code>, you have to create a custom udev rule:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># permissions for IDE CD devices
+SUBSYSTEMS=="ide", KERNEL=="hd[a-z]", ATTR{removable}=="1", ATTRS{media}=="cdrom*", GROUP="optical"
+
+# permissions for SCSI CD devices
+SUBSYSTEMS=="scsi", KERNEL=="s[rg][0-9]*", ATTRS{type}=="5", GROUP="optical"</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg32154df14c0c_X_programs_in_RUN_rules_hang_when_no_X_s" id="X_programs_in_RUN_rules_hang_when_no_X_server_is_present">X programs in RUN rules hang when no X server is present</h3></div>
+<p>When <i>xrandr</i> or another X-based program tries to connect to an X server, it falls back to a TCP connection on failure. However, due to <code>IPAddressDeny</code> in the <a href="https://github.com/systemd/systemd/blob/main/units/systemd-udevd.service.in#L43">systemd-udev service configuration</a>, this hangs. Eventually the program will be killed and event processing will resume.
+</p><p>If the rule is for a drm device and the hang causes event processing to complete once the X server has started, this can cause 3D acceleration to stop working with a <code>failed to authenticate magic</code> error.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg32154df14c0c_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><a href="https://www.freedesktop.org/software/systemd/man/udev.html">udev manual</a></li>
+<li><a href="https://opensource.com/article/18/11/udev">An Introduction to udev</a></li>
+<li><a href="http://vger.kernel.org/vger-lists.html#linux-hotplug">udev 邮件列表</a></li>
+<li><a href="http://jasonwryan.com/blog/2014/01/20/udev/">编写 udev 规则</a></li>
+<li><a href="http://www.reactivated.net/writing_udev_rules.html">Writing udev rules</a></li>
+<li><a href="https://www.linuxfromscratch.org/lfs/view/stable/chapter09/udev.html">LFS 系统设备与模块处理</a></li>
+<li><a href="https://github.com/Ventto/xpub">Running GUI or accessing display variables from udev rules</a></li>
+<li><a href="https://doc.opensuse.org/documentation/leap/reference/html/book-reference/cha-udev.html">openSUSE udev documentation</a></li>
+<li>中文读者可参阅<a href="http://www.jinbuguo.com/">金步国</a>先生翻译的 <a href="http://www.jinbuguo.com/systemd/udev.html">udev 中文手册</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807061103
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.253 seconds
+Real time usage: 0.261 seconds
+Preprocessor visited node count: 1354/1000000
+Revision size: 27356/2097152 bytes
+Post‐expand include size: 18131/2097152 bytes
+Template argument size: 9305/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 741/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   79.543      1 -total
+ 16.51%   13.129    108 Template:Ic
+  6.03%    4.797      1 Template:Accuracy
+  5.86%    4.661     19 Template:Hc
+  5.26%    4.187      8 Template:注意
+  4.24%    3.375      4 Template:Man
+  3.98%    3.163      1 Template:翻译状态
+  3.96%    3.152      1 Template:警告
+  3.58%    2.851      1 Template:小写标题
+  2.97%    2.362      2 Template:Pkg
+-->
+<!-- Render ID c499818e-9226-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:5981:|#|:idhash:canonical!zh-cn and timestamp 20260807061103 and revision id 31581. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

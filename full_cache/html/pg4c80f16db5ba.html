@@ -1,0 +1,118 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg4c80f16db5ba">调试</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgcc0723982992">General troubleshooting</a></li>
+<li><a href="#pg7817680d64e1">Reporting bug guidelines</a></li>
+<li><a href="#pgd3ea58bac98d">调试/获取跟踪数据</a></li>
+<li><a href="#pg58fa5cc93778">Debugging/Profiling</a></li>
+<li><a href="#pg1a47aefd4d5a">Boot debugging</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Debugging">Debugging</a>，最近一次同步于 2024-08-28，若英文版本有所<a href="https://wiki.archlinux.org/title/Debugging?diff=0&amp;oldid=815552">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Debugging_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<p>本页主要是关于如何收集与漏洞报告相关的更多信息。尽管使用了 “调试” 一词，但它并不是在开发时如何调试程序的指南。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4c80f16db5ba_.E6.A3.80.E6.9F.A5.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8.E7.9A.84.E5.8F.AF.E7.94.A8.E6.80.A7" id="检查核心转储的可用性"><span id=".E6.A3.80.E6.9F.A5.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8.E7.9A.84.E5.8F.AF.E7.94.A8.E6.80.A7"></span>检查核心转储的可用性</h2></div>
+<p>核心转储是进程意外终止时包含进程地址空间（内存）的文件。如果应用程序以易于调试的方式编译，则可以使用核心转储文件找出问题所在。
+</p><p>核心转储的位置可能因操作系统配置而异。请参阅<a href="#pgd8951e6ec7b8">核心转储</a>以查找系统上是否启用了核心转储文件的生成以及它们的位置。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4c80f16db5ba_.E6.AE.B5.E9.94.99.E8.AF.AF" id="段错误"><span id=".E6.AE.B5.E9.94.99.E8.AF.AF"></span>段错误</h2></div>
+<p>有几种方法可用于找出问题所在。准备好成为一个真正的测试员吧！
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4c80f16db5ba_Gdb" id="Gdb">Gdb</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gdb">gdb</a></span><sup><small>包</small></sup></span> 是一个古老且经过充分测试的调试器。有关如何使用它来获取跟踪的更多说明，请参见<a href="#pgd3ea58bac98d">调试/获取跟踪数据#获取跟踪数据</a>。从 <code>gdb</code> 运行时，您可能必须等待段错误。然后，将跟踪发布到<a href="#pgaf1b27bddf8e">网络剪切板</a>上并将 URL 包含在你的错误报告中。
+</p><p>如果你有一个核心转储文件，它可以与 gdb 一起使用来获得回溯：
+</p>
+<pre>$ gdb <i>appname</i> core
+bt full
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4c80f16db5ba_Valgrind" id="Valgrind">Valgrind</h3></div>
+<p>假设你有一个没有内联函数的未剔除符号表的二进制文件，通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=valgrind">valgrind</a></span><sup><small>包</small></sup></span> 运行该程序也是一个好方法。<i>valgrind</i> 是一个模拟 CPU 的工具，通常显示哪里出了问题，或者为提供一些 gdb 不能提供的附加信息。
+</p>
+<pre>$ valgrind <i>appname</i>
+</pre>
+<p>如果发生崩溃，它将提供许多有用的调试输出。考虑使用 <code>-v</code> 和 <code>--leak-check=full</code> 参数来获取更多信息。
+</p><p>或者使用：
+</p>
+<pre>$ valgrind --tool=callgrind <i>appname</i>
+</pre>
+<p>并通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kcachegrind">kcachegrind</a></span><sup><small>包</small></sup></span> 运行输出，这样就可以以图形方式浏览程序使用的函数。如果程序挂起，这样可以更轻松地查明错误的精确位置。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4c80f16db5ba_.E7.BC.BA.E5.B0.91.E5.BA.93.E6.88.96.E6.96.87.E4.BB.B6" id="缺少库或文件"><span id=".E7.BC.BA.E5.B0.91.E5.BA.93.E6.88.96.E6.96.87.E4.BB.B6"></span>缺少库或文件</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4c80f16db5ba_Strace" id="Strace">Strace</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=strace">strace</a></span><sup><small>包</small></sup></span> 会查找应用程序执行的详细操作。如果应用程序尝试访问不存在的文件，则 strace 将会发现该文件。
+</p><p>要查找名为 <i>appname</i> 的程序尝试访问哪些文件：
+</p>
+<pre>$ strace -eopen <i>appname</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果你想从 strace 的输出中查找特定信息，你可以运行： <code>strace -o /dev/stdout <i>appname</i> | grep <i>string</i></code>。这将返回所有 <i>string</i> 出现位置周围的输出。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4c80f16db5ba_LD_DEBUG" id="LD_DEBUG">LD_DEBUG</h3></div>
+<p>设置 <code>LD_DEBUG=files</code> 同样可以大概了解应用程序正在查找的文件。对于名为 <i>appname</i> 的应用程序，运行：
+</p>
+<pre>$ LD_DEBUG=files <i>appname</i> &gt; <i>appname</i>.log 2&gt;&amp;1
+</pre>
+<p>程序结束后，输出存储在 <code><i>appname</i>.log</code> 中。
+</p><p>对于更相信的信息，参见 <span class="plainlinks archwiki-template-man" title="$ man 8 ld-linux"><a href="https://man.archlinux.org/man/ld-linux.8">ld-linux(8)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4c80f16db5ba_Readelf" id="Readelf">Readelf</h3></div>
+<p>如果您在运行应用程序时收到 <code>no such file or directory</code> 的错误提示，请尝试以下命令：
+</p>
+<pre>$ readelf -a /usr/bin/<i>appname</i> | grep interp
+</pre>
+<p>（将 <code>/usr/bin/<i>appname</i></code> 替换为可执行文件的位置）
+</p><p>确保有问题的解释器（如 <code>/lib/ld-linux-x86-64.so.2</code>）确实存在。如果需要，请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ld-lsb">ld-lsb</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4c80f16db5ba_.E9.9D.9E.E4.BA.8C.E8.BF.9B.E5.88.B6.E6.96.87.E4.BB.B6" id="非二进制文件"><span id=".E9.9D.9E.E4.BA.8C.E8.BF.9B.E5.88.B6.E6.96.87.E4.BB.B6"></span>非二进制文件</h2></div>
+<p>在可执行文件上使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=file">file</a></span><sup><small>包</small></sup></span> 以获取更多信息：
+</p>
+<pre>$ file /usr/bin/<i>appname</i>
+</pre>
+<p>如果它显示 <code>ELF</code>，则它是一个二进制可执行文件。如果它显示 <code>Python script</code>，说明它是一个用 Python 编写的应用程序。
+</p><p>如果它是一个 shell 脚本，请在文本编辑器中打开 shell 脚本，然后查看（通常在文件底部）是否能找到真实应用程序（ELF 文件）的名称。然后，您可以暂时将 “gdb” 放在 shellscript 中可执行文件名称之前，以便进行调试。请参阅前面关于 gdb 的部分。如果需要调试的可执行文件也需要参数，请在命令前加上 <code>gdb --args</code>。
+</p><p>对于纯 shell 脚本，您还可以使用 <code>bash -x <i>script_name</i></code> 或 <code>bash -xv <i>script_name</i></code> 来调试。
+</p><p>对于 Python 应用程序，输出通常会说明崩溃发生在哪个文件和行号。如果您精通 Python，则可以尝试修复此问题并将修复包含在 bug 报告中。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4c80f16db5ba_.E6.8A.A5.E5.91.8A.E6.BC.8F.E6.B4.9E" id="报告漏洞"><span id=".E6.8A.A5.E5.91.8A.E6.BC.8F.E6.B4.9E"></span>报告漏洞</h2></div>
+<p>首先检查有问题的 bug 是否是打包 bug。如果由于 Arch Linux 打包此应用程序的方式不当而引入该漏洞，请向 <a href="https://gitlab.archlinux.org/groups/archlinux/packaging/-/issues">https://gitlab.archlinux.org/groups/archlinux/packaging/-/issues</a> 报告。这还包括库或依赖项的问题（例如，如果其中一个并不是被构建特定功能的所需）。
+</p><p>检查包的 PKGBUILD，这可以通过 <a href="#pg8d559a1b1a4f">Arch 构建系统</a>进行，看看它是如何打包的。
+</p><p>有关更多信息，请参见<a href="#pgbd58e8d9d126">漏洞报告准则#上游还是_Arch？</a>。
+</p><p>如果该漏洞与 Arch Linux 无关，并且可以在其他任何地方重现，则仅将其报告给上游。Arch Linux 无法神奇地修复上游错误。将其报告给 Arch 错误跟踪器无济于事，甚至可能适得其反，因为它往往会错误地浪费管理者的时间。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4c80f16db5ba_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://wiki.gentoo.org/wiki/Project:Quality_Assurance/Backtraces">Gentoo:Project:Quality Assurance/Backtraces</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808041423
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.110 seconds
+Real time usage: 0.114 seconds
+Preprocessor visited node count: 316/1000000
+Revision size: 5526/2097152 bytes
+Post‐expand include size: 4529/2097152 bytes
+Template argument size: 1461/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   34.092      1 -total
+ 19.22%    6.554      1 Template:Expansion
+ 13.91%    4.742      1 Template:Related_articles_start
+ 12.28%    4.186      1 Template:META_Message
+  9.96%    3.397      7 Template:Pkg
+  8.46%    2.883      1 Template:TranslationStatus
+  8.26%    2.815     14 Template:Ic
+  7.29%    2.486      5 Template:Related
+  5.36%    1.829      1 Template:Man
+  5.14%    1.751      1 Template:Related_articles_end
+-->
+<!-- Render ID a2b0058e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7912:|#|:idhash:canonical!zh-cn and timestamp 20260808041423 and revision id 33869. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

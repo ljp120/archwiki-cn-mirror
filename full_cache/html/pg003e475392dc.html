@@ -1,0 +1,87 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg003e475392dc">降级软件包</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Downgrading_packages">Downgrading packages</a>，最近一次同步于 2020-09-12，若英文版本有所<a href="https://wiki.archlinux.org/title/Downgrading_packages?diff=0&amp;oldid=634015">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Downgrading_packages_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg03306a96a891">Arch Build System</a></li>
+<li><a href="#pg9ef105bf1e3c">pacman</a></li>
+<li><a href="#pg34e1f0126c90">Arch Linux Archive</a></li>
+</ul></div>
+<p>在决定降级之前，请小心考虑。如果是因为现有包有Bug，请在<a href="https://bugs.archlinux.org/">Bug追踪系统</a>搜索现有的Bug报告。如果没有，请花上几分钟帮忙把它报告给Arch的Bug追踪系统或软件包的项目地址，或者在论坛中警告其他可能遇到类似问题的用户。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>降级某个软件包可能需要降级相应的依赖包.如果依赖包数量巨大,参见<a href="#pg34e1f0126c90">Arch Linux Archive#How to restore all packages to a specific date</a>.</li>
+<li>在修改配置文件和脚本时请小心.只要我们不绕过pacman的安全措施,它将为我们处理这些问题.</li>
+<li>如果软件包降级会引进 soname 变更，所有依赖包可能都需要降级或<a href="#pg592a5bc93470">重新编译</a>.</li></ul>
+</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg003e475392dc_.E5.A6.82.E4.BD.95.E9.99.8D.E7.BA.A7.E8.BD.AF.E4.BB.B6.E5.8C.85" id="如何降级软件包"><span id=".E5.A6.82.E4.BD.95.E9.99.8D.E7.BA.A7.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>如何降级软件包</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg003e475392dc_.E4.BD.BF.E7.94.A8pacman.E7.9A.84.E4.B8.B4.E6.97.B6.E6.96.87.E4.BB.B6" id="使用pacman的临时文件"><span id=".E4.BD.BF.E7.94.A8pacman.E7.9A.84.E4.B8.B4.E6.97.B6.E6.96.87.E4.BB.B6"></span>使用pacman的临时文件</h3></div>
+<p>如果一个新包刚刚被安装并且没有删除<a href="#pg9ef105bf1e3c">pacman cache</a>,你可以在<code>/var/cache/pacman/pkg/</code>中找到较早版本.
+安装替换现有的版本.<a href="#pg9ef105bf1e3c">pacman</a>会处理依赖包但不会处理依赖库的版本冲突。如果一个其依赖库因该包降级需要降级，你需要手动降级这些包。
+</p>
+<pre> # pacman -U /var/cache/pacman/pkg/<i>package</i>-<i>old_version</i>.pkg.tar.<i>type</i>
+</pre>
+<p>对老的软件包，<code>type</code> 应该是 <code>xz</code>，遵循 <a href="https://archlinux.org/news/now-using-zstandard-instead-of-xz-for-package-compression/">2020 变更</a>的新软件包，<code>type</code> 应该是 <code>zst</code>。
+</p><p>当成功降级该包以后，请暂时将其加入<code>pacman.conf</code>的<a href="#pg9ef105bf1e3c">IgnorePkg section</a>，直到您的问题被解决。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg003e475392dc_.E9.99.8D.E7.BA.A7.E5.86.85.E6.A0.B8" id="降级内核"><span id=".E9.99.8D.E7.BA.A7.E5.86.85.E6.A0.B8"></span>降级内核</h3></div>
+<p>新内核出问题时，可以通过使用 pacman 缓存降级内核。在<code>/var/cache/pacman/pkg</code> 寻找旧版安装包。必须降级的有<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span>， <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-headers">linux-headers</a></span><sup><small>包</small></sup></span>和任何内核模块。举例来说：
+</p>
+<pre># pacman -U linux-4.15.8-1-x86_64.pkg.tar.xz linux-headers-4.15.8-1-x86_64.pkg.tar.xz virtualbox-host-modules-arch-5.2.8-4-x86_64.pkg.tar.xz
+</pre>
+<p>退出并重启。
+</p><p>如果您在升级内核后无法启动，您可以通过使用 live CD 来降级内核。方法类似Arch Linux的安装进程。启动后在<code>/mnt</code>挂载你的根目录文件系统，别忘了挂载其他分区如<code>/boot</code>或<code>/var</code>等等。(例子 <code>mount /dev/sdc3 /mnt/boot</code>)。然后<a href="#pg5d8a2c5e3ac5">chroot</a>进入系统。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg003e475392dc_Arch_Linux_Archive" id="Arch_Linux_Archive">Arch Linux Archive</h3></div>
+<p><a href="#pg34e1f0126c90">Arch Linux Archive</a>是<a href="#pg0a3e16d13281">official repositories</a>的日更快照。
+</p><p><i>ALA</i>能被用来降级包或者还原整个系统到过去版本。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg003e475392dc_.E6.89.8B.E5.8A.A8.E7.BC.96.E8.AF.91" id="手动编译"><span id=".E6.89.8B.E5.8A.A8.E7.BC.96.E8.AF.91"></span>手动编译</h3></div>
+<p>如果找不到编译好的软件包，就需要自己找到 <a href="#pgf9d748a7b27b">PKGBUILD</a> 并通过 <a href="#pg7edcce763396">makepkg</a> 编译。
+</p><p><a href="#pg0a3e16d13281">官方软件仓库</a>中的 PKGBUILD 可以通过 <a href="#pg649c5e3c750b">ABS</a> 获取并修改软件版本。或者访问<a href="https://archlinux.org/packages">软件包</a>页面搜索你需要的降级的软件包，然后点 "查看修改" 链接，选择“查看日志“。找到需要的版本并通过 <i>Tree</i> 视图下载 <code>.tar.gz</code> 快照。
+</p><p>参阅 <a href="#pg03306a96a891">Arch Build System#Checkout an older version of a package</a>.
+</p><p>老的 AUR 软件包可以从 AUR 软件包 git 仓库提出旧版本。如果是 2015 AUR3 之前的 PKGBUILD，请参阅 <a href="#pgb0e1a56d1c81">Arch User Repository#Git repositories for AUR3 packages</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg003e475392dc_.E8.87.AA.E5.8A.A8.E5.8C.96" id="自动化"><span id=".E8.87.AA.E5.8A.A8.E5.8C.96"></span>自动化</h3></div>
+<p><b>downgrade</b> — 基于Bash使用本地缓存和<a href="#pga5304240a94d">Arch Rollback Machine</a>。详见<span class="plainlinks archwiki-template-man" title="$ man 8 downgrade">downgrade(8)</span>。
+</p>
+<dl><dd><a href="https://github.com/pbrisbin/downgrade">https://github.com/pbrisbin/downgrade</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/downgrade/">downgrade</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg003e475392dc_.E4.BB.8E.5Btesting.5D.E4.B8.AD.E8.BF.94.E5.9B.9E" id="从[testing]中返回"><span id=".E4.BB.8E.5Btesting.5D.E4.B8.AD.E8.BF.94.E5.9B.9E"></span>从[testing]中返回</h2></div>
+<p>参见 <a href="#pg0a3e16d13281">Official repositories#Disabling testing repositories</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807024332
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.095 seconds
+Real time usage: 0.098 seconds
+Preprocessor visited node count: 227/1000000
+Revision size: 3973/2097152 bytes
+Post‐expand include size: 3131/2097152 bytes
+Template argument size: 1266/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   26.638      1 -total
+ 20.00%    5.327      1 Template:App
+ 13.52%    3.602      1 Template:翻译状态
+  9.36%    2.494      2 Template:Pkg
+  9.16%    2.440      1 Template:相关文章开始
+  8.29%    2.207     12 Template:Ic
+  8.25%    2.198      3 Template:Related
+  5.54%    1.476      1 Template:Man
+  4.00%    1.065      1 Template:AUR
+  3.60%    0.958      1 Template:META_Related_articles_start
+-->
+<!-- Render ID c739ae0e-9209-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3044:|#|:idhash:canonical!zh-cn and timestamp 20260807024332 and revision id 33890. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

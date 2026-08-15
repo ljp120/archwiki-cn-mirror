@@ -1,0 +1,301 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg407a04ca0d2a">Arch 的 IRC 频道</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Arch_IRC_channels">Arch IRC channels</a>，最近一次同步于 2016-06-27，若英文版本有所<a href="https://wiki.archlinux.org/title/Arch_IRC_channels?diff=0&amp;oldid=439070">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Arch_IRC_channels_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此页面上的内容可能不是最新的，请首先参阅 ArchWiki 上的 <a href="https://wiki.archlinux.org/title/Arch_IRC_channels">Arch IRC channels</a> 。</div>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgb7448ed660b1">ArchWiki:IRC</a></li>
+<li><a href="#pg1cb65ffc6208">International communities</a></li>
+<li><a href="#pg8be543757fb0">phrik</a></li>
+</ul></div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg407a04ca0d2a_.E5.AE.98.E6.96.B9.E9.A2.91.E9.81.93" id="官方频道"><span id=".E5.AE.98.E6.96.B9.E9.A2.91.E9.81.93"></span>官方频道</h2></div>
+<p>这篇条目介绍 Arch Linux 的<a href="https://zh.wikipedia.org/wiki/IRC">IRC</a> 主要支持频道 <b>#archlinux</b> , 主要的交流频道 <b>#archlinux-offtopic</b>。（都在 <a href="https://libera.chat/">Libera Chat</a> 上）
+</p><p><b>#archlinux</b>频道的主要话题是有关 Arch Linux 的支持和总体讨论。频道规则请查看<a href="#pgbbab0d3afce0">Code of conduct</a> 和 <a href="#pge9801b51357e">General guidelines#IRC</a>，常用的缩略语请参看<a href="#pgb50615929a83">Arch terminology</a> 和 <a href="http://www.ircbeginner.com/ircinfo/abbreviations.html">IRC Jargon</a>。
+</p><p>你需要一个IRC客户端才能加入讨论频道。可用的IRC客户端列表请查看<a href="#pg138157ab9926">List of applications/Internet#IRC clients</a> 和 <a href="https://en.wikipedia.org/wiki/Comparison_of_Internet_Relay_Chat_clients">Wikipedia:Comparison of Internet Relay Chat clients</a>。<a href="#pg0d85b8367b38">安装环境</a>中可以使用 <a href="#pg21cdc37a825c">irssi</a> 。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg407a04ca0d2a_.E7.94.A8.E6.88.B7.E5.90.8D.E6.B3.A8.E5.86.8C" id="用户名注册"><span id=".E7.94.A8.E6.88.B7.E5.90.8D.E6.B3.A8.E5.86.8C"></span>用户名注册</h3></div>
+<p><b>#archlinux</b>和<b>archlinux-offtopic</b>当前的频道模式为<code>+r</code>和<code>+q $~a</code>。这意味着你必须通过<code>NickServ</code>的身份验证才能加入个别的频道，发送消息。做这个是为了过滤垃圾信息的骚扰。
+</p><p>需要使用NickServ注册，请参照<a href="https://libera.chat/guides/registration">libera FAQ</a>，当连接上了<i>irc.libera.chat</i>使用<code>NickServ help</code>：
+</p>
+<pre>/query nickserv help register
+/query nickserv help identify
+</pre>
+<p>如果你并没有进行用户注册和验证，你会被转到<b>#archlinux-unregisterd</b>频道。用<code>msg chanserv access #archlinux list</code>指令能得到可以帮助你的人的列表，或者加入#liberachat频道，在那里提问。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>如果<code>/query</code>在你的客户端不起作用，你可以试着用<code>/quote nickserv &lt;command&gt;</code>或<code>/msg nickserv &lt;command&gt;</code>。</li>
+<li>有些客户端会在你通过NickServ验证之前就尝试自动加入频道， 你需要开启SASL来解决这个问题。查看你的IRC客户端文档或者在<a href="https://libera.chat/guides/sasl">SASL page</a>上寻找教程来实现它。</li></ul></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg407a04ca0d2a_.E9.A2.91.E9.81.93.E7.AE.A1.E7.90.86.E5.91.98" id="频道管理员"><span id=".E9.A2.91.E9.81.93.E7.AE.A1.E7.90.86.E5.91.98"></span>频道管理员</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Arch的管理员在<b>#archlinux</b>和<b>#archlinux-offtopic</b>都具有管理员身份。查看下面的列或者在liberachat上用<code>/msg phrik listops</code>指令。</div>
+<p>需要管理员的协助? 别犹豫，直接 <code>/query</code> 或者 <code>/msg</code> 吧。截止到 2021-09-24 , 操作员有这些:
+</p>
+<ul><li>alad</li>
+<li>BrainDamage</li>
+<li>gehidore / man</li>
+<li>grawity</li>
+<li>jelle</li>
+<li>MrElendig / Mion</li>
+<li>Namarrgon</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg407a04ca0d2a_.E5.85.B6.E5.AE.83.E9.A2.91.E9.81.93" id="其它频道"><span id=".E5.85.B6.E5.AE.83.E9.A2.91.E9.81.93"></span>其它频道</h3></div>
+<p>The size of our community led to the creation of multiple IRC channels. To get a list of all channels on <b>irc.libera.chat</b> that contain <code>archlinux</code> in their name, use the command <code>/query alis list *archlinux*</code>.
+</p>
+<table class="wikitable sortable">
+<tbody><tr>
+<th scope="col" width="180px">Channel
+</th>
+<th scope="col" width="500px">Description
+</th></tr>
+<tr>
+<td>#archlinux64
+</td>
+<td>x86_64 specific discussion channel, mostly in English
+</td></tr>
+<tr>
+<td>#archlinux-aur
+</td>
+<td><a href="#pg89cb7b475cfb">AUR</a> general discussion
+</td></tr>
+<tr>
+<td>#archlinux-aurweb
+</td>
+<td><a href="https://gitlab.archlinux.org/archlinux/aurweb">aurweb</a> development discussion
+</td></tr>
+<tr>
+<td>#archlinux-bugs
+</td>
+<td>Bug-centric discussion
+</td></tr>
+<tr>
+<td>#archlinux-classroom
+</td>
+<td>A project that develops and hosts classes for the Arch Linux community.
+</td></tr>
+<tr>
+<td>#archlinux-devops
+</td>
+<td>Arch Linux internal infrastructure and devops discussions.
+</td></tr>
+<tr>
+<td>#archlinux-multilib
+</td>
+<td>Arch Linux Multilib Project discussion and packaging
+</td></tr>
+<tr>
+<td>#archlinux-newbie
+</td>
+<td>A space to learn, try new things, and ask for help without fear of ridicule.
+</td></tr>
+<tr>
+<td>#archlinux-pacman
+</td>
+<td><a href="#pg9ef105bf1e3c">Pacman</a> development and discussion
+</td></tr>
+<tr>
+<td>#archlinux-projects
+</td>
+<td>Projects development and discussion (mkinitcpio, abs, dbscripts, devtools, ...)
+</td></tr>
+<tr>
+<td>#archlinux-reproducible
+</td>
+<td>Discussion channel for achieving reproducible builds.
+</td></tr>
+<tr>
+<td>#archlinux-security
+</td>
+<td>Discussion of security issues within Arch packages.
+</td></tr>
+<tr>
+<td>#archlinux-testing
+</td>
+<td>Discussion channel regarding the testing repositories.
+</td></tr>
+<tr>
+<td>#archlinux-wiki
+</td>
+<td>Discussion about <a href="#pg46c892ca2dc5">ArchWiki</a>, its articles and the <a href="https://bbs.archlinux.org/">Arch Linux Forums</a>.
+</td></tr>
+<tr>
+<td>#archlinux-women
+</td>
+<td>Discussing gender and equality, mostly in English.
+</td></tr>
+<tr>
+<td>#archlinux-proaudio
+</td>
+<td>Discussion of <a href="#pgb3b4b5c595bd">Arch Linux 专业音频</a>. Users also in the unofficial #archaudio
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg407a04ca0d2a_.E5.85.B6.E5.AE.83.E8.AF.AD.E8.A8.80.E7.9A.84_IRC_.E9.A2.91.E9.81.93" id="其它语言的_IRC_频道"><span id=".E5.85.B6.E5.AE.83.E8.AF.AD.E8.A8.80.E7.9A.84_IRC_.E9.A2.91.E9.81.93"></span>其它语言的 IRC 频道</h2></div>
+<p>International discussions are available at the following channels, also located at the irc.libera.chat IRC network, unless stated otherwise.
+</p>
+<table class="wikitable sortable">
+<tbody><tr>
+<th scope="col" width="180px">Channel
+</th>
+<th scope="col" width="500px">Description
+</th></tr>
+<tr>
+<td>#archlinux-za
+</td>
+<td>Discussion (Afrikaans, English)
+</td></tr>
+<tr>
+<td>#archlinux-br
+</td>
+<td>Discussion (Brazilian)
+</td></tr>
+<tr>
+<td>#archlinux-cr
+</td>
+<td>Discussion (Costa Rica)
+</td></tr>
+<tr>
+<td>#archlinux.cz
+</td>
+<td>Discussion (Czech)
+</td></tr>
+<tr>
+<td>#archlinux.dk
+</td>
+<td>Discussion (Danish)
+</td></tr>
+<tr>
+<td>#archlinux.fi
+</td>
+<td>Discussion (Finnish)
+</td></tr>
+<tr>
+<td>#archlinux-fr
+</td>
+<td>Discussion (French)
+</td></tr>
+<tr>
+<td>#archlinux-gaelic
+</td>
+<td>Discussion (Gaelic)
+</td></tr>
+<tr>
+<td>#archlinux.de
+</td>
+<td>Discussion (German)
+</td></tr>
+<tr>
+<td>#archlinux-greece
+</td>
+<td>Discussion (Greek)
+</td></tr>
+<tr>
+<td>#archlinux-il
+</td>
+<td>Discussion (Hebrew)
+</td></tr>
+<tr>
+<td>#archlinux.hu
+</td>
+<td>Discussion (Hungarian)
+</td></tr>
+<tr>
+<td>#archlinux-it
+</td>
+<td>Discussion (Italian); also on <b>irc.azzurra.org#archlinux</b>
+</td></tr>
+<tr>
+<td>#archlinux-nordics
+</td>
+<td>Discussion (the nordics: Danish, Finnish, Norwegian and Swedish)
+</td></tr>
+<tr>
+<td>#archlinux-kr
+</td>
+<td>Discussion (Korean)
+</td></tr>
+<tr>
+<td>#archlinux-ir
+</td>
+<td>Discussion (Persian)
+</td></tr>
+<tr>
+<td>#archlinux.org.pl
+</td>
+<td>Discussion (Polish)
+</td></tr>
+<tr>
+<td>#archlinux-pt
+</td>
+<td>Discussion (Portuguese)
+</td></tr>
+<tr>
+<td>#archlinux.ro
+</td>
+<td>Discussion (Romanian)
+</td></tr>
+<tr>
+<td>#archlinux-ru
+</td>
+<td>Discussion (Russian); also on <b>irc.mibbit.net#archlinux-ru</b>
+</td></tr>
+<tr>
+<td>#archlinux-rs
+</td>
+<td>Discussion (Serbian)
+</td></tr>
+<tr>
+<td>#archlinux-es
+</td>
+<td>Discussion (Spanish)
+</td></tr>
+<tr>
+<td>#archlinux.se
+</td>
+<td>Discussion (Swedish)
+</td></tr>
+<tr>
+<td>#archlinux-tr
+</td>
+<td>Discussion (Turkish)
+</td></tr>
+<tr>
+<td>#archlinux-ve
+</td>
+<td>Discussion (Venezuela)
+</td></tr>
+<tr>
+<td>#archlinuxvn
+</td>
+<td>Discussion (Vietnamese, Tiếng Việt)
+</td></tr></tbody></table>
+<!-- 
+NewPP limit report
+Cached time: 20260807031114
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.139 seconds
+Real time usage: 0.147 seconds
+Preprocessor visited node count: 188/1000000
+Revision size: 7747/2097152 bytes
+Post‐expand include size: 2773/2097152 bytes
+Template argument size: 1065/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   26.918      1 -total
+ 19.73%    5.311      1 Template:翻译状态
+ 15.65%    4.213     13 Template:Ic
+ 15.11%    4.068      3 Template:注意
+ 11.69%    3.147      1 Template:ReferArchWikiFirst
+  9.95%    2.678      3 Template:Related
+  9.47%    2.549      1 Template:相关文章开始
+  3.92%    1.055      1 Template:META_Related_articles_start
+  3.86%    1.038      1 Template:相关文章结束
+-->
+<!-- Render ID a5dac10e-920d-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2760:|#|:idhash:canonical!zh-cn and timestamp 20260807031114 and revision id 35344. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

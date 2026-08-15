@@ -1,0 +1,186 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg6530d8749264">Linux 容器/使用 VPN</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Linux_Containers/Using_VPNs">Linux Containers/Using VPNs</a>，最近一次同步于 2024-4-17，若英文版本有所<a href="https://wiki.archlinux.org/title/Linux_Containers/Using_VPNs?diff=0&amp;oldid=806283">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Linux_Containers_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Using_VPNs_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg6be7d32d4c06">OpenVPN</a></li>
+<li><a href="#pgaad925bc694b">PeerGuardian_Linux</a></li>
+<li><a href="#pgae5b3fd4c0de">ufw</a></li>
+<li><a href="#pgb6e345194870">WireGuard</a></li>
+</ul></div>
+<p><br/>
+本文介绍如何设置 <a href="#pg0063739d82fd">Linux_容器</a>来运行多个带有“终止开关”的 VPN 协议，以实现安全/隐私的互联网使用。  与使用 <a href="#pgbedf72352aa7">VirtualBox</a> 或者 <a href="#pg434f3f4063b1">QEMU</a> 等全套的虚拟化相比， 这样做提供了更小的资源开销和在低功耗设备上运行等明显优势。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6530d8749264_.E9.85.8D.E7.BD.AE.E5.AE.B9.E5.99.A8" id="配置容器"><span id=".E9.85.8D.E7.BD.AE.E5.AE.B9.E5.99.A8"></span>配置容器</h2></div>
+<p>需要对 <a href="#pg0063739d82fd">Linux_容器</a>进行基本配置和了解。  本文假设读者已经设置了可运行的基本LXC。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6530d8749264_.E6.9C.8D.E5.8A.A1.E5.99.A8.E6.A8.A1.E5.BC.8F.E7.9A.84OpenVPN" id="服务器模式的OpenVPN"><span id=".E6.9C.8D.E5.8A.A1.E5.99.A8.E6.A8.A1.E5.BC.8F.E7.9A.84OpenVPN"></span>服务器模式的OpenVPN</h2></div>
+<p>本小节详细介绍了在容器中提供 OpenVPN 服务所需的一些额外设置。  想要使用给出的 OpenVPN 配置文件的用户无需阅读本小节。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6530d8749264_.E4.B8.BB.E6.9C.BA.E8.AE.BE.E7.BD.AE" id="主机设置"><span id=".E4.B8.BB.E6.9C.BA.E8.AE.BE.E7.BD.AE"></span>主机设置</h3></div>
+<ol><li>主机操作系统需要网桥设置才能允许容器运行。请参考 <a href="#pg0063739d82fd">Linux_容器#宿主机网络配置</a>。</li>
+<li>需要启用数据包转发。请参考<a href="#pg8f3ec07897b4">网络分享#启用包转发</a>。</li>
+<li>尽管不是必须的，但强烈建议使用防火墙。</li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6530d8749264_.E5.AE.A2.E6.88.B7.E7.AB.AF.E6.A8.A1.E5.BC.8F.E7.9A.84_OpenVPN" id="客户端模式的_OpenVPN"><span id=".E5.AE.A2.E6.88.B7.E7.AB.AF.E6.A8.A1.E5.BC.8F.E7.9A.84_OpenVPN"></span>客户端模式的 OpenVPN</h2></div>
+<p>需要修改容器的配置才能使用 OpenVPN，如下所示：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/var/lib/lxc/playtime/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+
+## for OpenVPN
+lxc.mount.entry = /dev/net dev/net none bind,create=dir
+lxc.cgroup2.devices.allow = c 10:200 rwm
+</pre>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openvpn">openvpn</a></span><sup><small>包</small></sup></span>. 如果使用容器连接到第三方 VPN 提供商，只需将配置文件 <code>foo.conf</code> 放在 <code>/etc/openvpn/client/foo.conf</code> 即可。  To v要验证容器内的 OpenVPN 功能，请<a href="#pg073992cb666a">启动</a> <code>openvpn-client@foo.service</code> 来开启OpenVPN。一旦对当前配置感到满意，<a href="#pg6bfd324d34c9">启用</a>服务来实现系统启动后自动开启。
+</p><p>有关其他用例和设置，请参阅 <a href="#pg6be7d32d4c06">OpenVPN</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在“非特权”容器中运行 OpenVPN 的用户需要创建一个自定义 systemd 单元才能在容器中启动它。在<a href="#pgac06dd8bfe95">替换单元文件</a>中注释掉以下开头的行：<code>LimitNPROC...</code></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6530d8749264_WireGuard" id="WireGuard">WireGuard</h2></div>
+<p>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wireguard-tools">wireguard-tools</a></span><sup><small>包</small></sup></span>。用户将拥有由第三方 VPN 服务提供的 WireGuard 配置，或者自己设置好的WireGuard 对应的配置。 如果使用容器连接到 VPN 提供商， 只需将配置文件 <code>foo.conf</code> 放入 <code>/etc/wireguard/</code> 。
+</p><p>要验证容器内的 WireGuard 功能，请通过<a href="#pg073992cb666a">启动</a> <code>wg-quick@foo.service</code> 来开启WireGuard。一旦对当前配置感到满意，<a href="#pg6bfd324d34c9">启用</a>服务来实现系统启动后自动开启。
+</p><p>有关其他用例和设置，请参阅 <a href="#pgb6e345194870">WireGuard</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6530d8749264_.E5.AE.B9.E5.99.A8.E5.86.85.E7.9A.84.E9.98.B2.E7.81.AB.E5.A2.99.E9.85.8D.E7.BD.AE" id="容器内的防火墙配置"><span id=".E5.AE.B9.E5.99.A8.E5.86.85.E7.9A.84.E9.98.B2.E7.81.AB.E5.A2.99.E9.85.8D.E7.BD.AE"></span>容器内的防火墙配置</h2></div>
+<p><i>强烈</i>建议在容器内运行正确配置的<a href="#pg6890dbea4fca">防火墙</a>。容器内防火墙的作用有两个：
+</p>
+<ol><li>提供“终止开关”，以便在 VPN 连接失败时维护隐私。</li>
+<li>把不想要东西拒之门外。</li></ol>
+<p>本指南使用易于配置的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ufw">ufw</a></span><sup><small>包</small></sup></span>，当然也可以使用其他防火墙。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>要完全重置 ufw 的配置文件，使用reset: <code>ufw reset</code>.</div>
+<p>设置“终止开关”的方法是通过设置一个拒绝政策然后只允许VPN设备上的特定服务和流量。这样，如果该设备的连接中断时不会出现本地政策回退。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>下面显示的方法的一个限制是 VPN 配置文件不得使用 www.myvpn.com 等域名，它们需要使用相应的 IP 地址。如上所述，当 VPN 未连接时，容器 DNS 解析将被禁用。因此，为了连接，必须提供数字 IP。</div>
+<p>编辑 <code>/etc/default/ufw</code> 并将 DEFAULT_OUTPUT_POLICY 从 "ACCEPT" 更改为 "DROP":
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/ufw</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">DEFAULT_OUTPUT_POLICY="DROP"</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>以下命令调用 <code>ufw</code> 需要以root用户执行； 按照 wiki 标准命令的前缀“#”符号已被省略，以允许干净地复制/粘贴到终端中。</div>
+<p>设置拒绝政策：
+</p>
+<pre>ufw default deny outgoing
+ufw default deny incoming
+</pre>
+<p>（可选）添加例如<code>/etc/ufw/applications.d/custom</code>等文件中定义的任何预定义或自定义规则：
+</p>
+<pre>ufw allow ssh
+ufw allow from my-custom-app1
+ufw allow from my-custom-app2
+</pre>
+<p>（可选）进一步限制来自内部 LAN IP 范围甚至单个 IP 地址的访问：
+</p>
+<pre>ufw allow from 192.168.1.0/24
+</pre>
+<p>WireGuard 用户将拥有一个与相应配置文件，比如<code>/etc/wireguard/foo.conf</code>，同名的接口，而 OpenVPN 用户很可能使用<code>tun0</code>.  在下面的命令中，将“foo”替换为 WireGuard 配置文件的名称（省略 .conf 后缀），或者如果使用 OpenVPN，则将“foo”替换为 tun0 或正在使用的任何设备：
+</p>
+<pre>ufw allow out on foo from any to any
+</pre>
+<p>最后，打开 VPN 提供商的 IP 地址和端口，并定义相对应的协议。在下面的行中，需要考虑三个变量：
+</p>
+<ul><li>“xxx”代表 WireGuard 的 peer 或者 OpenVPN 的服务器的IP地址。它将在 VPN 提供商提供的相应配置文件中。</li>
+<li>“yyy”代表要进行通信的端口。同样，这将位于配置文件中。</li>
+<li>“zzz” 代表要使用的协议，可以从 udp 或 tcp 中选择。请注意，WireGuard 仅支持 udp，而 OpenVPN 两者都支持。</li></ul>
+<pre>ufw allow out to xxx port yyy proto zzz
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果预计使用多个服务器，请对 VPN 提供商定义的每个 IP 地址 (xxx) 重复此操作。</div>
+<p>启动 ufw 并<a href="#pg6bfd324d34c9">启用</a> <code>ufw.service</code> 以实现开机启动。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6530d8749264_.E5.9C.A8.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6.E4.B8.AD.E4.BD.BF.E7.94.A8_VPN_.E5.9F.9F.E5.90.8D.E7.9A.84.E4.B8.80.E4.B8.AA.E9.9D.9E.E6.AD.A3.E5.BC.8F.E6.96.B9.E6.B3.95" id="在配置文件中使用_VPN_域名的一个非正式方法"><span id=".E5.9C.A8.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6.E4.B8.AD.E4.BD.BF.E7.94.A8_VPN_.E5.9F.9F.E5.90.8D.E7.9A.84.E4.B8.80.E4.B8.AA.E9.9D.9E.E6.AD.A3.E5.BC.8F.E6.96.B9.E6.B3.95"></span>在配置文件中使用 VPN 域名的一个非正式方法</h3></div>
+<p>如果需要在 VPN 配置文件中使用域名，主机上的 shell 脚本可以将其预先解析为数字 IP，然后通过将该 IP 地址存储在写在容器中文件的一个变量来将该 IP 地址传递给容器。该文件又可以由修改后的 VPN systemd 服务读取。 它可以用, 但不正规。
+</p><p>编辑两个变量以匹配相对应的容器名称和服务器名称：
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg6530d8749264_.E5.9C.A8.E4.B8.BB.E6.9C.BA.E4.B8.8A" id="在主机上"><span id=".E5.9C.A8.E4.B8.BB.E6.9C.BA.E4.B8.8A"></span>在主机上</h4></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bind">bind</a></span><sup><small>包</small></sup></span> (dig 需要)并创建以下脚本：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/path/to/container-start.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+# this script should be called as root
+container=foo
+server=www.myvpnserver.org
+ 
+if ! systemctl is-active lxc@"$container" &amp;&gt;/dev/null; then
+  ToUse=$(dig +short "$server")
+  [[ -d /var/lib/lxc/$container/rootfs/etc/conf.d ]] || mkdir -p /var/lib/lxc/$container/rootfs/etc/conf.d
+  echo "SERVER=$ToUse" &gt; /var/lib/lxc/$container/rootfs/etc/conf.d/server.hack.txt
+  systemctl start lxc@"$container"
+fi
+</pre>
+<p>从现在开始，调用该脚本来启动容器。它将使用 dig 从域名中获取 IP 地址，然后启动容器。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg6530d8749264_.E4.BB.8E.E5.AE.B9.E5.99.A8.E5.86.85.E9.83.A8" id="从容器内部"><span id=".E4.BB.8E.E5.AE.B9.E5.99.A8.E5.86.85.E9.83.A8"></span>从容器内部</h4></div>
+<p>修改启动 VPN 的 systemd 服务并创建一个框架配置文件，该配置文件可以使用我们刚刚创建的脚本创建的<code>/var/lib/lxc/$container/rootfs/etc/conf.d/server.hack.txt</code> 中定义的 IP 地址进行修改。
+</p><p>要制作框架配置文件，只需将使用的配置文件重命名为另一个名称即可。
+</p><p>例如使用 WireGuard：
+</p>
+<pre>mv /etc/wireguard/foo.conf /etc/wireguard/foo.skel
+</pre>
+<p>现在编辑 <code>/etc/wireguard/foo.skel</code> 以将 <b>Endpoint = www.myvpnserver.org</b> 替换为<b>@@@</b>，例如：
+</p>
+<pre>Endpoint = @@@:51820
+</pre>
+<p>或者如果使用 OpenVPN：
+</p>
+<pre>mv /etc/openvpn/client/foo.conf /etc/openvpn/client/foo.skel
+</pre>
+<p>编辑 <code>/etc/openvpn/client/foo.skel</code> 以将远程<b>www.myvpnserver.org</b>替换为<b>@@@</b>，例如：
+</p>
+<pre>remote @@@
+</pre>
+<p>最后，创建一个<a href="#pgac06dd8bfe95">附加配置片段</a>, 以读取 IP 并将其替换为实际配置文件。 
+</p><p>使用 WireGuard 的示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/wg-quick@foo.service.d/override.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+EnvironmentFile=-/etc/conf.d/server.hack.txt
+ExecStartPre=/bin/bash -ac "sed s/@@@/$SERVER/ &lt;/etc/wireguard/foo.skel &gt;/etc/wireguard/foo.conf"</pre>
+<p>使用 OpenVPN 的示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/openvpn-client@foo.service.d/override.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+EnvironmentFile=-/etc/conf.d/server.hack.txt
+ExecStartPre=/bin/bash -ac "sed s/@@@/$SERVER/ &lt;/etc/openvpn/client/foo.skel &gt;/etc/openvpn/client/foo.conf"</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6530d8749264_.E6.B5.8B.E8.AF.95.E6.9C.8D.E5.8A.A1" id="测试服务"><span id=".E6.B5.8B.E8.AF.95.E6.9C.8D.E5.8A.A1"></span>测试服务</h2></div>
+<p>在正在运行的容器内 (通过 ssh 或者 <code>lxc-attach -n playtime</code>) 通过将浏览器导出到主机的计算机 X server 来测试设置:
+</p>
+<pre>$ DISPLAY=:0 firefox
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>通过 ssh 连接需要允许本地显示接受连接。执行此操作 <code>xhost +SI:localuser:yourusername</code> 然后通过 ssh 连接到容器。</div>
+<p>结果应该是主机的 X server 中出现一个标题为"Mozilla Firefox (playtime)" 的 Firefox 窗口。许多网站可用于验证 IP 地址和 DNS 的状态，例如 <a href="https://ipleak.net">ipleak dot net</a>.
+</p><p>此时，仅应显示与配置文件中定义的条目相对应的 DNS 条目。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807094448
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.108 seconds
+Real time usage: 0.111 seconds
+Preprocessor visited node count: 353/1000000
+Revision size: 8669/2097152 bytes
+Post‐expand include size: 5674/2097152 bytes
+Template argument size: 2213/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 539/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   32.981      1 -total
+  9.88%    3.260      1 Template:翻译状态
+  9.17%    3.023      1 Template:Related_articles_start
+  8.96%    2.955      4 Template:Note
+  8.86%    2.922     19 Template:Ic
+  8.43%    2.780      2 Template:Tip
+  8.04%    2.652      4 Template:Pkg
+  7.22%    2.382      4 Template:Related
+  5.77%    1.904      5 Template:Hc
+  5.17%    1.705      1 Template:Related_articles_end
+-->
+<!-- Render ID a0e5340e-9244-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7635:|#|:idhash:canonical!zh-cn and timestamp 20260807094448 and revision id 33640. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

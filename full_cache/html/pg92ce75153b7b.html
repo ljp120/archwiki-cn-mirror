@@ -1,0 +1,100 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg92ce75153b7b">使用 LVM 为根文件系统创建快照</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Create_root_filesystem_snapshots_with_LVM">Create root filesystem snapshots with LVM</a>，最近一次同步于 2015-12-20，若英文版本有所<a href="https://wiki.archlinux.org/title/Create_root_filesystem_snapshots_with_LVM?diff=0&amp;oldid=413157">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Create_root_filesystem_snapshots_with_LVM_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg02cd87050dfd">LVM</a></li>
+<li><a href="#pg394d4c211cda">使用_tar_备份整个系统</a></li>
+</ul></div>
+<p>本文描述如何在系统启动时为root文件系统做LVM快照，这些快照可以用来在最短时间内进行<a href="#pg66cdd6231f33">全系统备份</a>，或者是测试系统的更新以便于按需回滚。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg92ce75153b7b_.E5.89.8D.E6.8F.90.E6.9D.A1.E4.BB.B6" id="前提条件"><span id=".E5.89.8D.E6.8F.90.E6.9D.A1.E4.BB.B6"></span>前提条件</h2></div>
+<p>你需要一个root文件系统为<a href="#pg02cd87050dfd">LVM</a>分区并且利用<a href="#pgac06dd8bfe95">systemd</a>进行引导的系统，确认<a href="#pg02cd87050dfd">LVM快照</a>相关的前提条件已经正确安装。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg92ce75153b7b_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>在系统启动过程中，利用一个新的systemd service创建一个干净的root卷的快照，创建<code>/etc/systemd/system/mk-lvm-snapshots.service</code> 包含以下内容:
+</p>
+<pre>[Unit]
+Description=make LVM snapshots
+Requires=local-fs-pre.target
+DefaultDependencies=no
+Conflicts=shutdown.target
+After=local-fs-pre.target
+Before=local-fs.target
+
+[Install]
+WantedBy=make-snapshots.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/lvcreate -L10G -n snap-root -s lvmvolume/root</pre>
+<p>将上述<code>lvcreate</code>命令中的root卷的卷组名和卷名改成你系统中的相关名字，如有必要修改上述快照的大小。如果还有其它的文件系统需要进行快照，则将上述<code>ExecStart</code>属性扩展为多条命令，用分号隔开(注意在分号前后均要留有一个空格，详见<a href="https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines">systemd service manual</a>)。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>你可以在运行的系统上测试一下<code># lvcreate</code>命令直到得到的结果如你所需。可以用<code># lvremove</code>删除此快照。在运行的系统上做的快照不如在单用户模式下或是在系统启动时做的快照一致性更好。</div>
+<p>创建一个新的systemd target <code>/etc/systemd/system/make-snapshots.target</code>:
+</p>
+<pre>[Unit]
+Description=Make Snapshots
+Requires=multi-user.target</pre>
+<p>如果<code>multi-user.target</code>不是你的缺省target，则进行相应的修改。
+</p><p>将此新的服务生效：<code># systemctl enable mk-lvm-snapshots.service</code>。
+</p><p>如果系统启动一个新的target，LVM快照会在挂载完本地文件系统后进行创建，为此，创建一个<a href="#pgca9c4017f7ad">GRUB</a> menu entry来启动这个新的target，基于正常启动的<code>grub.cfg</code>创建<code>/boot/grub/custom.cfg</code>，并在其中传递给内核启动<code>make-snapshots.target</code>的参数。
+</p>
+<pre>### make snapshots ###
+menuentry 'Arch GNU/Linux, make snapshots' --class arch --class gnu-linux --class gnu --class os {
+...
+        echo    'Loading Linux core repo kernel ...'
+        linux   /boot/vmlinuz-linux root=/dev/mapper/lvmvolume-root ro <b>systemd.unit=make-snapshots.target</b>
+        echo    'Loading initial ramdisk ...'
+        initrd  /boot/initramfs-linux.img
+} </pre>
+<p>如果{{ic|grub.cfg}发生了变更，记着相应修正<code>custom.cfg</code>。
+</p><p>系统通过此grub entry启动后<code># lvs</code>应该可以看到新创建的快照。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>利用<code># journalctl -u mk-lvm-snapshots.service</code>命令可以看到新的服务启动过程的相关输出。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg92ce75153b7b_.E7.94.A8.E6.B3.95" id="用法"><span id=".E7.94.A8.E6.B3.95"></span>用法</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg92ce75153b7b_.E5.A4.87.E4.BB.BD" id="备份"><span id=".E5.A4.87.E4.BB.BD"></span>备份</h3></div>
+<p>如要进行全系统的备份，首先以上述创建快照的target重启系统，挂载快照卷（and further volumes, if required)，最好以只读的方式 (<code>-o</code>) 挂载，便可以进行全系统备份，例如可以采用<a href="#pg66cdd6231f33">Full system backup with tar</a>文章中的办法进行备份。
+</p><p>在备份的过程中并不影响现有系统的使用，因为所有正常卷的修改都反应在了快照里了。备份完后不要忘记删除这个快照，copy-on-write的快照模式会使正常root卷的所有修改用光你的快照卷空间。如果快照卷空间用光，LVM并不能自动增长快照空间，则LVM会拒绝进一步向正常卷中写入数据或者直接丢掉快照，都应该避免。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg92ce75153b7b_.E6.9B.B4.E6.96.B0.E5.9B.9E.E6.BB.9A" id="更新回滚"><span id=".E6.9B.B4.E6.96.B0.E5.9B.9E.E6.BB.9A"></span>更新回滚</h3></div>
+<p>另外一个LVM快照的用法是进行系统更新的测试和回滚，即为已知正常使用的系统先做一个快照，再进行更新。
+</p><p>如果想要固化更新的内容，则可以通过<code># lvremove</code>删除快照的方式；如果想要回滚到更新前的状态，可以通过<code># lvconvert --merge</code>恢复快照，在下次系统启动时快照会被合并到正常卷中，创建快照之后所有对正常卷的修改均被撤消。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>快照合并会快照卷也将不复存在，如果想进一步测试则必须再创建一个快照卷。</div>
+<!-- 
+NewPP limit report
+Cached time: 20260807170919
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.056 seconds
+Real time usage: 0.058 seconds
+Preprocessor visited node count: 215/1000000
+Revision size: 4683/2097152 bytes
+Post‐expand include size: 3480/2097152 bytes
+Template argument size: 1838/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   16.479      1 -total
+ 15.39%    2.536      1 Template:翻译状态
+ 12.75%    2.100     17 Template:Ic
+  9.53%    1.570      1 Template:Tip_(简体中文)
+  9.33%    1.537      1 Template:相关文章开始
+  9.10%    1.500      2 Template:Related
+  7.45%    1.228      2 Template:注意
+  5.47%    0.902      3 Template:Bc
+  3.68%    0.607      1 Template:META_Related_articles_start
+  3.56%    0.587      1 Template:相关文章结束
+-->
+<!-- Render ID ba0cd58e-9282-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2964:|#|:idhash:canonical!zh-cn and timestamp 20260807170919 and revision id 33701. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

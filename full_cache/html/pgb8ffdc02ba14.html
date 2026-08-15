@@ -1,0 +1,153 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgb8ffdc02ba14">镜像源</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Mirrors">Mirrors</a>，最近一次同步于 2022-03-10，若英文版本有所<a href="https://wiki.archlinux.org/title/Mirrors?diff=0&amp;oldid=717350">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Mirrors_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg7489ef95fc75">非官方镜像源</a></li>
+<li><a href="#pg9ef105bf1e3c">pacman</a></li>
+</ul></div>
+<p>本页面说明如何选择和配置镜像，以及列出可用的镜像。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8ffdc02ba14_.E5.AE.98.E6.96.B9.E9.95.9C.E5.83.8F" id="官方镜像"><span id=".E5.AE.98.E6.96.B9.E9.95.9C.E5.83.8F"></span>官方镜像</h2></div>
+<p>可以通过软件包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacman-mirrorlist">pacman-mirrorlist</a></span><sup><small>包</small></sup></span> 获取官方镜像列表。若要想获得更新的镜像列表，请访问 <a href="https://archlinux.org/mirrorlist/">Pacman Mirrorlist Generator</a> 页面。
+</p><p>访问<a href="https://archlinux.org/mirrors/status/">镜像状态</a>页面来检查镜像的状态。这里推荐使用最新的镜像，或者说是已同步的镜像。
+</p><p>如果想要将自己的镜像添加到官方列表中，参见 <a href="https://wiki.archlinux.org/title/DeveloperWiki:NewMirrors">arch:DeveloperWiki:NewMirrors</a>。同时，请将其添加至<a href="#pg79ade857189e">非官方镜像</a>页面。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8ffdc02ba14_.E6.94.AF.E6.8C.81IPv6.E7.9A.84.E9.95.9C.E5.83.8F" id="支持IPv6的镜像"><span id=".E6.94.AF.E6.8C.81IPv6.E7.9A.84.E9.95.9C.E5.83.8F"></span>支持IPv6的镜像</h3></div>
+<p><a href="https://archlinux.org/mirrorlist/?ip_version=6">Pacman Mirrorlist Generator</a> 也可以用来获取支持IPv6的镜像列表。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8ffdc02ba14_.E5.90.AF.E7.94.A8.E7.89.B9.E5.AE.9A.E7.9A.84.E9.95.9C.E5.83.8F" id="启用特定的镜像"><span id=".E5.90.AF.E7.94.A8.E7.89.B9.E5.AE.9A.E7.9A.84.E9.95.9C.E5.83.8F"></span>启用特定的镜像</h2></div>
+<p>想要启用镜像，打开 <code>/etc/pacman.d/mirrorlist</code> 并定位到你的地理区域。对您想使用的镜像取消注释。例如：
+</p>
+<pre># Any
+# Server = http://mirrors.kernel.org/archlinux/$repo/os/$arch
+<b>Server = https://mirrors.kernel.org/archlinux/$repo/os/$arch</b>
+</pre>
+<p>参见按照速度排序查看帮助选择镜像的工具。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>取消5个你最喜欢的镜像的注释，把他们放在 mirrorlist 文件最上方。这样你就很容易找到它们并且如果第一个镜像出问题可以很容易切换。这也让合并 mirrorlist 更新更容易。</li>
+<li>HTTP 镜像比 FTP 快，因为 HTTP 可以<a href="https://en.wikipedia.org/wiki/HTTP_persistent_connection">保持连接</a>，而使用 FTP 时 <i>pacman</i>每下载一个新软件包就需要重新建立连接，这样也就导致了短暂的停顿。</li>
+<li>HTTPS 镜像比 HTTP 和 FTP 更难受到干扰和篡改，在部分地区的可用性会更高。</li></ul>
+</div>
+<p>也可以在 <code>/etc/pacman.conf</code> 中指定镜像。对于 <i>[core]</i> 仓库，默认设置是：
+</p>
+<pre>[core]
+Include = /etc/pacman.d/mirrorlist
+</pre>
+<p>如果想要使用 <i>HostEurope</i> 镜像作为默认镜像，请把它添加在 <code>Include</code> 行之前：
+</p>
+<pre>[core]
+<b>Server = http://ftp.hosteurope.de/mirror/ftp.archlinux.org/core/os/$arch</b>
+Include = /etc/pacman.d/mirrorlist
+</pre>
+<p>pacman 会首先尝试链接这个镜像。如果需要的话，可以继续修改<i>[testing]</i>, <i>[extra]</i>, 和 <i>[community]</i>部分。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果镜像直接在 <code>pacman.conf</code> 中声明，记得在所有的仓库使用同样的镜像。否则不相容的包就可能被安装。如 <i>[core]</i> 中的 linux 和 <i>[extra]</i> 中的旧的内核模块不相容。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8ffdc02ba14_.E5.BC.BA.E5.88.B6_pacman_.E5.88.B7.E6.96.B0.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.88.97.E8.A1.A8" id="强制_pacman_刷新软件包列表"><span id=".E5.BC.BA.E5.88.B6_pacman_.E5.88.B7.E6.96.B0.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.88.97.E8.A1.A8"></span>强制 pacman 刷新软件包列表</h3></div>
+<p>镜像可能不同步，并且从旧镜像中获取的的软件包列表也可能与新镜像中的软件包列表不一致，即使列表里的日期可能表明它们是一致的。
+</p><p>创建和编辑 <code>/etc/pacman.d/mirrorlist</code> 之后，使用下面命令强制更新镜像：
+</p>
+<pre># pacman -Syyu
+</pre>
+<p>传入两次 <code>--refresh</code> 或 <code>-y</code> 将强制更新所有软件包列表，即使系统认为它们已经是最新。<b>每次修改镜像之后都应该使用 <code>pacman -Syyu</code></b>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>在大多数情况下，如果你强制更新 pacman 数据库，你将需要强制降级任何可能太新的软件包以对应新的镜像所提供的版本。这可以避免软件包升级不一致导致的部分更新问题。
+<pre># pacman -Syyuu
+</pre>
+<p>当正在使用<a href="https://archlinux.org/mirrors/status/#successful">同步成功的镜像</a>或者检查镜像的 <b>lastsync</b> 文件来以确保软件包列表已经更新后，则没有必要使用这条命令。
+</p>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8ffdc02ba14_.E9.95.9C.E5.83.8F.E6.8E.92.E5.BA.8F" id="镜像排序"><span id=".E9.95.9C.E5.83.8F.E6.8E.92.E5.BA.8F"></span>镜像排序</h2></div>
+<p>当下载软件包时，pacman 按照 <code>/etc/pacman.d/mirrorlist</code> 中的顺序来使用镜像。服务器在列表中出现的顺序决定了其优先级。
+</p><p>由于速度最快的服务器可能是不同步的，所以仅基于速度来对镜像进行排序很可能不是最佳方案。取而代之的是，先制作一个按照速度排序的镜像列表，然后根据他们的<a href="https://archlinux.org/mirrors/status/">状态</a>来删除那些不同步的镜像。
+</p><p>建议定期重复这一过程，来保持镜像列表同步。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8ffdc02ba14_.E6.8C.89.E9.80.9F.E5.BA.A6.E6.8E.92.E5.BA.8F" id="按速度排序"><span id=".E6.8C.89.E9.80.9F.E5.BA.A6.E6.8E.92.E5.BA.8F"></span>按速度排序</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8ffdc02ba14_.E6.8E.92.E5.BA.8F.E5.B7.B2.E5.AD.98.E5.9C.A8.E7.9A.84.E9.95.9C.E5.83.8F.E5.88.97.E8.A1.A8" id="排序已存在的镜像列表"><span id=".E6.8E.92.E5.BA.8F.E5.B7.B2.E5.AD.98.E5.9C.A8.E7.9A.84.E9.95.9C.E5.83.8F.E5.88.97.E8.A1.A8"></span>排序已存在的镜像列表</h4></div>
+<p>软件包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacman-contrib">pacman-contrib</a></span><sup><small>包</small></sup></span> 提供了一个 <a href="#pg1ca1e15827ff">Bash</a> 脚本，<code>/usr/bin/rankmirrors</code> 可以根据镜像建立连接的速度对其进行排序，来使用最快的本地镜像。
+</p><p>首先，备份已存在的 <code>/etc/pacman.d/mirrorlist</code>：
+</p>
+<pre># cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
+</pre>
+<p>接下来准备 <code>/etc/pacman.d/mirrorlist.backup</code> 以使用 <i>rankmirrors</i> 进行排序，可执行以下操作：
+</p>
+<ul><li>编辑 <code>/etc/pacman.d/mirrorlist.backup</code> ，将准备测速的镜像取消注释。</li></ul>
+<ul><li>如果文件中的服务器已按照国家或地区分组，则可通过以下命令提取特定国家或地区的所有服务器：<pre>$ awk '/^## <i>Country Name</i>$/{f=1; next}f==0{next}/^$/{exit}{print substr($0, 1);}' /etc/pacman.d/mirrorlist.backup</pre></li></ul>
+<ul><li>若要取消所有的注释，可执行以下 <code>sed</code> 命令：<pre># sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup</pre></li></ul>
+<ul><li>最后，对镜像进行排序，这里使用 <code>-n 6</code> 参数来实现只获取 6 个最快的镜像：<pre># rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup &gt; /etc/pacman.d/mirrorlist</pre></li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8ffdc02ba14_.E8.8E.B7.E5.8F.96.E5.AE.9E.E6.97.B6.E9.95.9C.E5.83.8F.E5.88.97.E8.A1.A8.E5.B9.B6.E5.AF.B9.E5.85.B6.E6.8E.92.E5.BA.8F" id="获取实时镜像列表并对其排序"><span id=".E8.8E.B7.E5.8F.96.E5.AE.9E.E6.97.B6.E9.95.9C.E5.83.8F.E5.88.97.E8.A1.A8.E5.B9.B6.E5.AF.B9.E5.85.B6.E6.8E.92.E5.BA.8F"></span>获取实时镜像列表并对其排序</h4></div>
+<p>可以从 <a href="https://archlinux.org/mirrorlist/">Pacman Mirrorlist Generator</a> 获取一些国家/地区的最新镜像列表来使用 <i>rankmirrors</i>。
+下面的命令会获取位于<i>中国</i>且支持 <i>https</i> 协议的最新镜像的列表，然后将位于列表的服务器取消注释，最后再对其排序后打印输出 5 个最快的镜像。
+</p>
+<pre>$ curl -s "https://archlinux.org/mirrorlist/?country=CN&amp;protocol=https&amp;use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 -
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可以通过使用任何基于文本的浏览器（比如 <span class="plainlinks archwiki-template-man" title="$ man 1 elinks"><a href="https://man.archlinux.org/man/elinks.1">elinks(1)</a></span>）导航至 <code><a href="https://archlinux.org/mirrorlist">https://archlinux.org/mirrorlist</a></code> 来以交互式方式完成这个过程。</div>
+<p>现已存在的工具：
+</p><p><b>Rate Mirrors</b> — 此工具通过获取镜像，跳过不同步或正在同步的镜像，然后使用关于海底电缆和互联网交换的信息在国家或地区之间切换，最终找到快速的镜像。并且足够快以实现在每次更新以前运行。它也支持通过标准输入自定义镜像列表。
+</p>
+<dl><dd><a href="https://github.com/westandskif/rate-mirrors">https://github.com/westandskif/rate-mirrors</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rate-mirrors/">rate-mirrors</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rate-mirrors-bin/">rate-mirrors-bin</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8ffdc02ba14_.E6.9C.8D.E5.8A.A1.E7.AB.AF.E6.8E.92.E5.BA.8F" id="服务端排序"><span id=".E6.9C.8D.E5.8A.A1.E7.AB.AF.E6.8E.92.E5.BA.8F"></span>服务端排序</h2></div>
+<p>官方的 <a href="https://archlinux.org/mirrorlist/">Pacman Mirrorlist Generator</a> 提供了一个简单的方式来获取一个排序过的镜像列表。因为所有排序是在考虑了多种因素的单一服务器上完成的，与在每个单独的客户端上进行排序相比，镜像服务器和客户端的负载量就要低很多。
+</p><p><b><a href="#pgbbe2e08d29f9">Reflector</a></b> — 从<a href="https://archlinux.org/mirrors/status/">镜像状态</a>页面取回最新的镜像列表，过滤后通过速度排序再覆盖写入 <code>/etc/pacman.d/mirrorlist</code>
+</p>
+<dl><dd><a href="https://xyne.dev/projects/reflector/">https://xyne.dev/projects/reflector/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=reflector">reflector</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8ffdc02ba14_.E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3" id="问题解决"><span id=".E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3"></span>问题解决</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8ffdc02ba14_.E9.95.9C.E5.83.8F.E5.88.97.E8.A1.A8.E7.BC.BA.E5.A4.B1" id="镜像列表缺失"><span id=".E9.95.9C.E5.83.8F.E5.88.97.E8.A1.A8.E7.BC.BA.E5.A4.B1"></span>镜像列表缺失</h3></div>
+<p>如果你遇到以下错误：
+</p>
+<pre>error: config file /etc/pacman.d/mirrorlist could not be read: No such file or directory
+</pre>
+<p>可以直接从网站上获取镜像列表：
+</p>
+<pre># curl -o /etc/pacman.d/mirrorlist https://archlinux.org/mirrorlist/all/
+</pre>
+<p>如果碰到 <code>$arch</code> 变量未定义的问题，请在 <code>/etc/pacman.conf</code> 中加入：
+</p>
+<pre>Architecture = auto
+</pre>
+<p>请确认已如上文对首选的镜像取消注释，然后执行：
+</p>
+<pre># pacman -Syu pacman-mirrorlist
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8ffdc02ba14_.E5.BC.82.E5.B8.B8.E7.9A.84.E9.95.9C.E5.83.8F" id="异常的镜像"><span id=".E5.BC.82.E5.B8.B8.E7.9A.84.E9.95.9C.E5.83.8F"></span>异常的镜像</h3></div>
+<p>如果你确定一个镜像运行不正常，并且其没有反映在<a href="https://archlinux.org/mirrors/status/">镜像状态页面</a>上，更换镜像并考虑<a href="#pg5065eaed2cbf">开启一个 bug 报告</a>。关于镜像的问题，issue 应该发在 Arch Linux 项目上（位于登录框下方的列表，或者通过在页面上搜索 switch）
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8ffdc02ba14_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://github.com/archlinux/archweb/blob/master/mirrors/views/mirrorlist.py">GitHub archweb mirrorlist.py</a> - source code of the archweb mirrorlist generator</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807030613
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.116 seconds
+Real time usage: 0.121 seconds
+Preprocessor visited node count: 378/1000000
+Revision size: 8517/2097152 bytes
+Post‐expand include size: 6167/2097152 bytes
+Template argument size: 3466/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 355/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   37.673      1 -total
+ 12.95%    4.878      2 Template:App
+  9.24%    3.480      1 Template:翻译状态
+  8.14%    3.065     19 Template:Ic
+  7.35%    2.770      1 Template:提示
+  6.47%    2.436      3 Template:Pkg
+  5.73%    2.160      1 Template:相关文章开始
+  4.78%    1.800      1 Template:Related2
+  4.77%    1.797      1 Template:小贴士
+  4.65%    1.752      1 Template:Man
+-->
+<!-- Render ID f271cc8e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3523:|#|:idhash:canonical!zh-cn and timestamp 20260807030613 and revision id 33889. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

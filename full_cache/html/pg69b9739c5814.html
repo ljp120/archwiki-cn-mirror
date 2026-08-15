@@ -1,0 +1,206 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg69b9739c5814">窗口管理器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg09a10a393d02">平铺式窗口管理器比较</a></li>
+<li><a href="#pg2980a4fd55f3">Xdg-menu</a></li>
+<li><a href="#pg9fc1e9437ae5">xinit</a></li>
+</ul></div><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Window_manager">Window manager</a>，最近一次同步于 2026-07-22，若英文版本有所<a href="https://wiki.archlinux.org/title/Window_manager?diff=0&amp;oldid=877408">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Window_manager_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>​
+关于 <a href="https://en.wikipedia.org/wiki/Window_manager">窗口管理器</a>:
+</p>
+<dl><dd>窗口管理器是在一个使用<a href="https://en.wikipedia.org/wiki/Graphical_user_interface">图形化界面</a>的<a href="https://en.wikipedia.org/wiki/Windowing_system">窗口系统</a>中控制<a href="https://en.wikipedia.org/wiki/Window_(computing)">窗口</a>的放置与配色的<a href="https://en.wikipedia.org/wiki/System_software">系统软件</a>。</dd></dl>
+<p>​
+这可以是<a href="#pg712e4adaddad">桌面环境</a>的一部分，也可以被单独使用。
+​
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>窗口管理器是 <a href="#pga36c0aff60be">Xorg</a> 特有的。<a href="#pga21a6be8b605">Wayland</a> 下的窗口管理器的类似物被称为<a href="#pga21a6be8b605">混成器</a>，因为它们同时也发挥<a href="https://en.wikipedia.org/wiki/Compositing_window_manager">混成窗口管理器</a>的作用。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg69b9739c5814_.E6.A6.82.E8.BF.B0" id="概述"><span id=".E6.A6.82.E8.BF.B0"></span>概述</h2></div>
+<p>窗口管理器是控制绘制各种图形应用程序的框架（“窗口”）的外观和行为的 X 客户端。它们决定窗口的边框、标题栏、大小和调整大小的能力，并经常提供其他功能，如为粘附像 <a href="#pgdf750911b5b8">Window Maker</a> 这样的 <a href="https://windowmaker.org/dockapps/">dockapps</a> 保留区域，或像 <a href="#pg335e0e02a34a">Fluxbox</a> 那样为窗口做标签。一些窗口管理器甚至包含了一些简单的工具，如启动程序的菜单或配置窗口管理器本身的工具。
+</p><p><a href="https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html">Extended Window Manager Hints</a> 规范用于允许窗口管理器以标准方式与服务器和其他客户端进行交互。
+</p><p>一些窗口管理器是作为更全面的<a href="#pg712e4adaddad">桌面环境</a>的一部分而开发的，通常允许提供的其他应用程序更好地相互交互，从而给用户带来更一致的体验，通过桌面图标、字体、工具栏、墙纸或桌面小部件等功能完善用户体验。
+</p><p>其他窗口管理器则被设计成<i>独立</i>使用，让用户完全自由地选择要使用的其他应用程序。这使得用户可以根据自己的具体需求，创建一个更加轻量级和个性化的环境。如果需要的话，像桌面图标、工具栏、墙纸或桌面小部件等“额外的东西”，将需要依赖于额外的专用应用程序。
+</p><p>一些独立的窗口管理器也可以用来替换桌面环境的默认窗口管理器，就像一些面向桌面环境的窗口管理器也可以独立使用一样。
+</p><p>安装窗口管理器需要能够正常运行的 X 服务器。详细信息请参阅 <a href="#pga36c0aff60be">Xorg</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg69b9739c5814_.E7.B1.BB.E5.9E.8B" id="类型"><span id=".E7.B1.BB.E5.9E.8B"></span>类型</h3></div>
+<ul><li>堆叠（又名悬浮) 窗口管理器提供在 Windows 和 OS X 等商业操作系统中使用的传统桌面隐喻。不同窗口就像桌子上的白纸一样，且可以相互重叠。有关可用的 Arch Wiki 页面，请参见 <a href="#pgb247114b1ed8">分类:堆叠式窗口管理器</a>。</li>
+<li>平铺窗口管理器“平铺”窗口，以便没有重叠。他们通常非常广泛地使用键绑定，并且对鼠标的依赖较少（或不依赖）。平铺窗口管理器可以是手动的，也可以提供预定义的布局，甚至两者兼而有之。有关可用的 Arch Wiki 页面请参见 <a href="#pgc9103e838f3a">分类:平铺式窗口管理器</a>。</li>
+<li>动态窗口管理器可以在平铺或堆叠窗口布局之间动态切换。有关可用的 Arch Wiki 页面请参见 <a href="#pg4d9c27bebaca">分类:动态窗口管理器</a>。</li></ul>
+<p>有关窗口管理器的比较，请参见<a href="#pg09a10a393d02">平铺式窗口管理器比较</a>和 <a href="https://en.wikipedia.org/wiki/Comparison_of_X_window_managers">Wikipedia:窗口管理器对比</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg69b9739c5814_.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8.E5.88.97.E8.A1.A8" id="窗口管理器列表"><span id=".E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8.E5.88.97.E8.A1.A8"></span>窗口管理器列表</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg69b9739c5814_.E5.A0.86.E5.8F.A0.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8" id="堆叠窗口管理器"><span id=".E5.A0.86.E5.8F.A0.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8"></span>堆叠窗口管理器</h3></div>
+<ul><li><b><a href="#pg695b70a34bce">2bwm</a></b> — 快速浮动窗口管理器，其特点是具有两个边框，使用 XCB 库编写，是基于 Michael Cardell 编写的 mcwm 的衍生版本。 在 2bwm 中，所有操作均可通过键盘完成，但也可以使用指示设备来移动、调整大小和提升/降低窗口。 最近，该管理器的名称已从 mcwm-beast 更改为 2bwm。</li></ul>
+<dl><dd><a href="https://github.com/venam/2bwm">https://github.com/venam/2bwm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/2bwm/">2bwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>9wm</b> — 基于 Plan 9 的 rio 窗口管理器的 X11 窗口管理器。</li></ul>
+<dl><dd><a href="https://github.com/9wm/9wm">https://github.com/9wm/9wm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/9wm/">9wm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>aewm++</b> — Minimal window manager based on aewm. It keeps aewm's minimalist look and feel but is written in C++, and adds some modern features like virtual desktops.</li></ul>
+<dl><dd><a href="https://github.com/frankhale/aewmpp">https://github.com/frankhale/aewmpp</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aewm%2B%2B/">aewm++</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/AfterStep">AfterStep</a></b> — AfterStep 是适用于 Unix X 窗口系统的窗口管理器。最初基于 NeXTStep 界面的外观和感觉，它为终端用户提供了一致、清洁和优雅的桌面环境。AfterStep 的目标是提供灵活的桌面配置、改善美观度和高效地利用系统资源。</li></ul>
+<dl><dd><a href="http://www.afterstep.org/">http://www.afterstep.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/afterstep-git/">afterstep-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>berry</b> — Berry 是适用于 Unix 系统的健康、紧凑的窗口管理器，用 C 语言编写。它通过命令行客户端进行控制，允许用户通过热键守护进程，例如 <a href="#pgb45106978707">sxhkd</a> 来控制窗口，或通过 Shell 脚本拓展功能。它提供了可扩展的主题选项，包括双边框、标题栏和窗口文本。Berry 会直观地将新窗口放置在空闲空间中，并支持虚拟桌面。</li></ul>
+<dl><dd><a href="https://berrywm.org/">https://berrywm.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/berry-git/">berry-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgd13b5fa5bab5">Blackbox</a></b> — Blackbox 是 X 窗口系统的快速、轻量级的窗口管理器，没有烦人的库依赖。Blackbox 使用 C++ 构建，并包含完全原创的代码（尽管其图形实现与 WindowMaker 类似）。</li></ul>
+<dl><dd><a href="http://blackboxwm.sourceforge.net/">http://blackboxwm.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=blackbox">blackbox</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgf6b581a7a97d">Compiz</a></b> — 这是一个使用 GLX_EXT_texture_from_pixmap 将重定向的顶层窗口绑定到纹理对象的 OpenGL 合成管理器。它拥有灵活的插件系统，并且设计用于在大多数图形硬件上良好运行。</li></ul>
+<dl><dd><a href="https://launchpad.net/compiz">https://launchpad.net/compiz</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/compiz/">compiz</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/compiz-core/">compiz-core</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/CTWM">CTWM</a></b> — Claude's Tab Window Manager, based on twm. It provides titlebars, shaped windows, virtual screens (workspaces), several forms of icon management, user-defined macro functions, click-to-type and pointer-driven keyboard focus, and user-specified key and pointer button bindings.</li></ul>
+<dl><dd><a href="https://www.ctwm.org/">https://www.ctwm.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ctwm">ctwm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgbd74edaeee0b">cwm</a></b> — 最初是从 evilwm 演变而来，但后来完全重新编写。cwm 的目标是简单，并提供了一些有用的功能，如搜索窗口。</li></ul>
+<dl><dd><a href="https://github.com/chneukirchen/cwm">https://github.com/chneukirchen/cwm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cwm/">cwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg6a5c0b105f61">E16</a></b> — Predecessor of Enlightenment, a fast, flexible and extensible window manager.</li></ul>
+<dl><dd><a href="https://www.enlightenment.org/e16">https://www.enlightenment.org/e16</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=e16">e16</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>eggwm</b> — 一个轻量级的 QT4/QT5  窗口管理器。</li></ul>
+<dl><dd><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/eggwm-qt5/">eggwm-qt5</a></span><sup><small>AUR</small></sup></span> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/eggwm/">eggwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>EMWM</b> — Fork of the Motif Window Manager with fixes and enhancements. Supports Xinerama, Xrandr, UTF-8/Xft, and relevant EWMH.</li></ul>
+<dl><dd><a href="https://fastestcode.org/emwm.html">https://fastestcode.org/emwm.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/emwm/">emwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg6a5c0b105f61">Enlightenment</a></b> — Enlightenment 不仅是 Linux/X11 及其他平台上的窗口管理器，还是一整套库，可帮助您创建美观的用户界面，比传统方式更轻松，无需与传统工具包和窗口管理器进行斗争。</li></ul>
+<dl><dd><a href="https://www.enlightenment.org/">https://www.enlightenment.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=enlightenment">enlightenment</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgf91fe12b1e03">evilwm</a></b> — 这是一款适用于X 窗口系统的极简主义窗口管理器。这里的"极简主义"并不意味着它过于简陋无法使用，而是指它省略了许多使其他窗口管理器<i>难以</i>使用的功能。</li></ul>
+<dl><dd><a href="https://www.6809.org.uk/evilwm/">https://www.6809.org.uk/evilwm/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/evilwm/">evilwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg335e0e02a34a">Fluxbox</a></b> — 这是一个基于 Blackbox 0.61.1 代码的 X 窗口管理器。它对资源要求非常低，并且易于操作，但却具备许多功能，可以提供简单且极快的桌面体验。它使用 C++ 构建，并且根据 MIT 许可证进行许可。</li></ul>
+<dl><dd><a href="https://github.com/fluxbox/fluxbox">https://github.com/fluxbox/fluxbox</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fluxbox">fluxbox</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/FLWM">Flwm</a></b> — 试图将多个窗口管理器的最佳思想结合在一起。主要影响和代码基础来自 Chris Cannam 的 wm2。</li></ul>
+<dl><dd><a href="http://flwm.sourceforge.net/">http://flwm.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/flwm/">flwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgbed7b3bdbe0a">FVWM</a></b> — 这是一个功能非常强大的、符合 ICCCM 标准的多虚拟桌面窗口管理器，适用于 X 窗口系统。开发活跃，支持也非常出色。</li></ul>
+<dl><dd><a href="https://www.fvwm.org/">https://www.fvwm.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fvwm/">fvwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://elementaryos.org/journal/meet-gala-window-manager">Gala</a></b> — 来自 elementaryos 的漂亮窗口管理器，是  <a href="#pgac28063645e3">Pantheon</a> 的一部分。也是个基于libmutter的混成管理器。</li></ul>
+<dl><dd><a href="https://launchpad.net/gala">https://launchpad.net/gala</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gala">gala</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Goomwwm</b> — X11 窗口管理器是用 C 语言实现的，是一个净室软件项目。它以最小的浮动布局管理窗口，同时为窗口的切换、调整大小、移动、标记和平铺提供了灵活的键盘驱动控制。它还具有快速、轻量级、无模式、Xinerama 感知和尽可能兼容 EWMH 的特点。</li></ul>
+<dl><dd><a href="https://github.com/seanpringle/goomwwm">https://github.com/seanpringle/goomwwm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/goomwwm/">goomwwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg933499a8978b">IceWM</a> </b> — Xorg 窗口管理器。 IceWM 的目标是速度、简单性，并且不会妨碍用户</li></ul>
+<dl><dd><a href="https://ice-wm.org/">https://ice-wm.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=icewm">icewm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>jbwm</b> — 基于 evilwm，最小配置大小约为 16kb，专注于小二进制大小和可用性，结合可选的标题栏和 XFT 标题栏字体渲染作为编译时选项，jbwm 还具有比 evilwm 更易于使用键绑定的特征。</li></ul>
+<dl><dd><a href="https://github.com/jefbed/jbwm">https://github.com/jefbed/jbwm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jbwm/">jbwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg3030f4eb0b9c">JWM</a></b> — X11 窗口系统的窗口管理器。JWM 由 C 语言编写，只使用 Xlib。</li></ul>
+<dl><dd><a href="https://joewing.net/projects/jwm/">https://joewing.net/projects/jwm/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=jwm">jwm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Karmen</b> — X 的窗口管理器，由 Johan Veenhuizen 编写。它的设计宗旨是 "只需工作"。它没有配置文件，也不依赖除了 Xlib 之外的其他库。输入焦点模型是点击到焦点。Karmen 的目标是符合 ICCCM 和 EWMH 标准。</li></ul>
+<dl><dd><a href="http://karmen.sourceforge.net/">http://karmen.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/karmen/">karmen</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/KWin">KWin</a></b> — 自 KDE 4.0 以来的标准 KDE 窗口管理器，它也是一个合成管理器。这使得 KWin 能够提供类似于 Compiz 的高级图形效果，同时还提供以前 KDE 版本的所有功能（例如与 KDE 其余部分的非常好的集成、高级可配置性、防止焦点窃取、经过充分测试的窗口管理器、对行为异常的应用程序/工具包的稳健处理等）。还用作 <a href="#pga21a6be8b605">Wayland</a>的合成器。</li></ul>
+<dl><dd><a href="https://techbase.kde.org/Projects/KWin">https://techbase.kde.org/Projects/KWin</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kwin">kwin</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>lwm</b> — Xorg的窗口管理器，它试图避开你的脸。没有图标，没有按钮栏，没有图标停靠，没有根菜单，什么都没有：如果你想要这一切，那么其他程序可以提供它。也没有可配置性：如果你想要，你需要一个不同的窗口管理器;它以磁盘空间的邪恶占用和物理内存吞并的方式帮助你操作系统。</li></ul>
+<dl><dd><a href="http://www.jfc.org.uk/software/lwm.html">http://www.jfc.org.uk/software/lwm.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lwm">lwm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Marco</b> — TMATE 窗口管理器，Metacity 的分支。</li></ul>
+<dl><dd><a href="https://github.com/mate-desktop/marco">https://github.com/mate-desktop/marco</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=marco">marco</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Metacity">Metacity</a></b> — 这个窗口管理器力求安静、小巧、稳定、继续工作，并远离您的注意。它被传统的 GNOME 2 和 GNOME 闪回会话使用，并被 Mutter 取代。</li></ul>
+<dl><dd><a href="https://blogs.gnome.org/metacity/">https://blogs.gnome.org/metacity/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=metacity">metacity</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Mutter_(software)#Muffin">Muffin</a></b> — Cinnamon 的窗口管理器和合成器。基于Clutter，使用OpenGL，是Mutter分支。它不能在 Cinnamon 之外使用。</li></ul>
+<dl><dd><a href="https://github.com/linuxmint/muffin/">https://github.com/linuxmint/muffin/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=muffin">muffin</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Mutter_(window_manager)">Mutter</a></b> — 基于Clutter的 GNOME窗口和合成管理器，使用 OpenGL。还提供 Wayland 合成器。</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/GNOME/mutter/">https://gitlab.gnome.org/GNOME/mutter/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mutter">mutter</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Motif_Window_Manager">MWM</a></b> — Motif 窗口管理器 （MWM） 是基于 Motif 工具包的 X 窗口管理器。</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/motif/">https://sourceforge.net/projects/motif/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openmotif">openmotif</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg8bc45a0eb197">Openbox</a></b> — 高度可配置的窗口管理器，具有广泛的标准支持。*box 视觉样式以其简约的外观而闻名。Openbox 使用 *box 视觉样式，相比比旧版实现，它为主题开发者提供了更多的选项。自 2010 年以来一直是“功能完整”，但继续维护。.</li></ul>
+<dl><dd><a href="http://openbox.org/">http://openbox.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openbox">openbox</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pge14d9d7dd917">PekWM</a></b> — 曾经基于aewm++，现已不再类似于aewm++的窗口管理器。它具有大大扩展的功能集，包括窗口分组（类似于 Ion、PWM 或 Fluxbox）、自动属性、Xinerama、keygrabber that supports keychains，等等。</li></ul>
+<dl><dd><a href="https://www.pekwm.org/">https://www.pekwm.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pekwm">pekwm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>progman</b> — Simple X11 window manager modeled after the Windows 3 era.</li></ul>
+<dl><dd><a href="https://github.com/jcs/progman">https://github.com/jcs/progman</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/progman/">progman</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg21f973efdb80">Sawfish</a></b> — 可扩展的窗口管理器，使用基于 Lisp 的脚本语言。与大多数窗口管理器相比，它的策略非常简单。它的目标只是以最灵活、最有吸引力的方式管理窗口。所有高级窗口管理器功能都是用 Lisp 实现的，以便将来进行扩展或重新定义。</li></ul>
+<dl><dd><a href="https://sawfish.wikia.com/wiki/Main_Page">https://sawfish.wikia.com/wiki/Main_Page</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sawfish/">sawfish</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>sowm</b> — 自用的简单窗口管理器，提供全屏切换、窗口居中和混合工作流程（即鼠标和键盘）。</li></ul>
+<dl><dd><a href="https://github.com/dylanaraps/sowm">https://github.com/dylanaraps/sowm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sowm/">sowm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>TinyWM</b> — 作为极简主义的练习而创建的 Tiny Window Manager。它可能有助于学习创建窗口管理器的一些非常基本的知识。它由大约 50 行 C 组成。还有一个使用 python-xlib 的 Python 版本。</li></ul>
+<dl><dd><a href="http://incise.org/tinywm.html">http://incise.org/tinywm.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tinywm/">tinywm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgc43752c8b507">twm</a></b> — X 的简单窗口管理器，Xorg 自 1989 年以来一直使用的默认/回退。它提供标题栏、形状窗口、多种形式的图标管理、用户定义的宏函数、单击键入和指针驱动的键盘焦点以及用户指定的键和指针按钮绑定。</li></ul>
+<dl><dd><a href="https://gitlab.freedesktop.org/xorg/app/twm/">https://gitlab.freedesktop.org/xorg/app/twm/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-twm">xorg-twm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/UDE">UWM</a></b> — TUDE 的终极窗口管理器。</li></ul>
+<dl><dd><a href="http://udeproject.sourceforge.net/">http://udeproject.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ude/">ude</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Vtwm">VTWM</a></b> — One of many TWM descendants, implements a Virtual Desktop, meaning that what is currently on screen is just a portion of a larger workspace. What portion of the virtual desktop that is displayed, and whatever windows might be visible within it, are simple point-and-click operations within a scaled representation of the workspace.</li></ul>
+<dl><dd><a href="http://www.vtwm.org/">http://www.vtwm.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vtwm/">vtwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>WindowLab</b> — 这是一个小巧简单、设计新颖的窗口管理器。它采用了点击即焦点但不自动提升的策略，窗口大小可通过一次操作改变一个或多个边界，并且创新地将菜单栏与任务栏共享屏幕上的同一部分。通过限制鼠标指针的移动，防止窗口标题栏超出屏幕边缘。而且，在合适的时候，鼠标指针也被限制在任务栏/菜单栏上，以便更容易点击目标菜单项。</li></ul>
+<dl><dd><a href="https://github.com/nickgravgaard/windowlab">https://github.com/nickgravgaard/windowlab</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/windowlab/">windowlab</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgdf750911b5b8">Window Maker</a></b> — 最初设计为提供GNUstep桌面环境的整合支持的X11窗口管理器。它在各个方面都尽可能地复制了NEXTSTEP用户界面的优雅外观和感觉。它快速、功能丰富、易于配置和使用。而且它是自由软件，来自世界各地的程序员做出了贡献。</li></ul>
+<dl><dd><a href="https://windowmaker.org/">https://windowmaker.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/windowmaker/">windowmaker</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>WM2</b> — wm2是一个X的窗口管理器。它提供了独特的窗口装饰风格，并只提供作者认为在窗口管理器中感到舒适的最少功能。wm2不可配置，除非通过编辑源代码并重新编译来实现，它真正适用于那些不希望他们的窗口管理器过于友好的用户。</li></ul>
+<dl><dd><a href="https://www.all-day-breakfast.com/wm2/">https://www.all-day-breakfast.com/wm2/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wm2/">wm2</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>worm</b> — Worm是一个基于标签的X11动态窗口管理器。它支持浮动布局和主栈平铺布局，并采用开放式开发方式。它还使用Nim编程语言编写。</li></ul>
+<dl><dd><a href="https://github.com/codic12/worm">https://github.com/codic12/worm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/worm-git/">worm-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgd4e67068fe27">Xfwm</a></b> — <a href="#pg361394ab1daf">Xfce</a> 窗口管理器负责管理应用程序窗口在屏幕上的放置，提供美丽的窗口装饰，管理工作区或虚拟桌面，并原生支持多屏幕模式。它提供了自己的合成管理器（来源于 X.Org 合成扩展），以实现真正的透明度和阴影效果。Xfce 窗口管理器还包括一个键盘快捷键编辑器，用于用户特定命令和基本窗口操作，并提供了一个高级调整的首选项对话框。</li></ul>
+<dl><dd><a href="https://docs.xfce.org/xfce/xfwm4/start">https://docs.xfce.org/xfce/xfwm4/start</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xfwm4">xfwm4</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg69b9739c5814_.E5.B9.B3.E9.93.BA.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8" id="平铺窗口管理器"><span id=".E5.B9.B3.E9.93.BA.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8"></span>平铺窗口管理器</h3></div>
+<ul><li><b><a href="#pg4755edd2cf81">Bspwm</a></b> — bspwm 是一个平铺式窗口管理器，将窗口表示为完全二叉树的叶子节点。它支持EWMH和多个监视器，并通过消息进行配置和控制。</li></ul>
+<dl><dd><a href="https://github.com/baskerville/bspwm">https://github.com/baskerville/bspwm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bspwm">bspwm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgdcfe04502bc1">EXWM</a></b> — EXWM（Emacs X Window Manager）是一个完整功能的平铺式X窗口管理器，构建在 XELB 之上，专为Emacs设计。它具有完全基于键盘操作的特点，混合布局模式（平铺和堆叠），动态工作区支持，ICCCM/EWMH 兼容，RandR（多显示器）支持，并且内置了系统托盘。</li></ul>
+<dl><dd><a href="https://github.com/ch11ng/exwm">https://github.com/ch11ng/exwm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/emacs-exwm-git/">emacs-exwm-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgdd00ace85194">Herbstluftwm</a></b> — 这是一个使用Xlib和Glib的手动平铺窗口管理器，适用于X11。其布局是基于将框架分割成子框架，这些子框架可以再次分割或填充窗口（类似于i3/musca）。标签（工作区或虚拟桌面等）可以在运行时添加/删除。每个标签都包含自己的布局。每个显示器只显示一个标签。标签与显示器无关（类似于 xmonad）。它通过从herbstclient发出的IPC调用在运行时进行配置。因此，配置文件只是在启动时运行的脚本（类似于wmii/musca）。</li></ul>
+<dl><dd><a href="https://herbstluftwm.org">https://herbstluftwm.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=herbstluftwm">herbstluftwm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg04e8e3ac1488">i3</a></b> — i3 是一个平铺窗口管理器，完全从头开始编写。i3 的创建是因为当时开发人员最喜欢的窗口管理器 wmii 没有提供一些我们想要的功能（例如正确的多监视器支持），存在一些错误，并且在相当长的时间内没有进展，而且不容易进行修改（源码注释/文档完全缺失）。值得注意的区别在于多监视器支持和树形概念。为了速度，i3 没有实现wmii的Plan 9接口。</li></ul>
+<dl><dd><a href="https://i3wm.org/">https://i3wm.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=i3-wm">i3-wm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Larswm</b> — 一个基于9wm的平铺窗口管理器。</li></ul>
+<dl><dd><a href="http://porneia.free.fr/larswm/larswm.html">http://porneia.free.fr/larswm/larswm.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/larswm/">larswm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>LeftWM</b> — 一个用 <a href="#pg802f2550cda0">Rust</a> 编写的平铺窗口管理器。</li></ul>
+<dl><dd><a href="https://leftwm.org">https://leftwm.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/leftwm/">leftwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg5b9c56c000f1">Notion</a></b> — Tiling是一种为X窗口系统设计的平铺式窗口管理器，它利用“平铺”和“选项卡”窗口。
+<ul><li>平铺：您将屏幕分割成不重叠的“瓷砖”。每个窗口占用一个瓷砖，并最大化到该瓷砖。</li>
+<li>标签页：一个瓷砖可以包含多个窗口 - 它们将被“标签页化”。</li>
+<li>静态模式：大多数平铺窗口管理器都是“动态”的，这意味着它们在窗口出现和消失时自动调整大小和移动瓷砖。而Notion则不会自动更改平铺方式，它采用静态方式进行。</li></ul></li></ul>
+<dl><dd>Notion是Ion3的一个分支。</dd>
+<dd><a href="https://notionwm.net/">https://notionwm.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=notion">notion</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg52d2715967a0">Ratpoison</a></b> — Ratpoison 是一个简单的窗口管理器，没有庞大的库依赖，没有花哨的图形界面，没有窗口装饰，也不依赖鼠标。它在很大程度上模仿了在虚拟终端市场上表现出色的 GNU Screen。Ratpoison 通过一个简单的文本文件进行配置。Ratpoison的信息栏有点不同，它只在需要时显示。它既可以作为应用程序启动器，也可以作为一个通知栏。Ratpoison 不包括系统托盘。</li></ul>
+<dl><dd><a href="https://www.nongnu.org/ratpoison/">https://www.nongnu.org/ratpoison/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ratpoison">ratpoison</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg4eecc6b6087b">Stumpwm</a></b> — Stumpwm 是一个完全使用 Common Lisp 编写的平铺式、键盘驱动的X11窗口管理器。Stumpwm 试图在可自定义的同时保持视觉上的最简化。它提供了多种钩子来添加个性化定制，并且可以在运行时重新配置和重新加载。它没有窗口装饰、图标、按钮和系统托盘。它的信息栏可以设置为始终显示或只在需要时显示。</li></ul>
+<dl><dd><a href="https://stumpwm.github.io/">https://stumpwm.github.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=stumpwm">stumpwm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>ZWM</b> — A minimalistic tiling window manager written in C, it uses the XCB api to communicate with Xorg server. It supports multi-monitors, supports a subset of EWMH specs, and offers extensive configurability.</li></ul>
+<dl><dd><a href="https://github.com/Yazeed1s/zwm">https://github.com/Yazeed1s/zwm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zwm-git/">zwm-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg69b9739c5814_.E5.8A.A8.E6.80.81.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8" id="动态窗口管理器"><span id=".E5.8A.A8.E6.80.81.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8"></span>动态窗口管理器</h3></div>
+<ul><li><b><a href="#pg24b8665395f7">awesome</a></b> — Awesome 是一个高度可配置的、面向下一代的X框架窗口管理器。它非常快速、可扩展，并且 在GNU GPLv2 许可下发布。使用 Lua 进行配置，它内置了系统托盘、信息栏和启动器。还可以使用Lua编写扩展。与 Xlib 相比，Awesome 使用 XCB，可能会提高速度。Awesome 还具有其他功能，例如用于通知 -daemon 的早期替代品、类似 *box 窗口管理器的右键菜单等。</li></ul>
+<dl><dd><a href="https://awesomewm.org/">https://awesomewm.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=awesome">awesome</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pga848f338df78">dk</a></b> — A list based tiling window manager in the vein of dwm, bspwm, and xmonad.</li></ul>
+<dl><dd><a href="https://bitbucket.org/natemaia/dk/src/master/">https://bitbucket.org/natemaia/dk/src/master/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dk/">dk</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgd927e4187724">dwm</a></b> — X 的动态窗口管理器。它以平铺、单占据和浮动布局管理窗口。所有布局都可以动态应用，优化正在使用的应用程序和执行的任务的环境。它不包括系统托盘或自动启动器，尽管 dmenu 与其集成得很好，因为它们来自同一作者。它没有文本配置文件。配置必须通过修改 C 源代码完成，每次更改都必须重新编译和重新启动。</li></ul>
+<dl><dd><a href="https://dwm.suckless.org/">https://dwm.suckless.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dwm/">dwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg0de63243282a">echinus</a></b> — echinus 是一个简单且轻量级的 X11 平铺和浮动窗口管理器。它最初是从 dwm 分支出来的，但配置更加简单。随着发展，echinus 成为了一个功能齐全的重新父窗口管理器，并支持 EWMH 协议。它还配备了一个兼容 EWMH 的面板/任务栏，称为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ourico/">ourico</a></span><sup><small>AUR</small></sup></span>。</li></ul>
+<dl><dd><a href="http://plhk.ru">http://plhk.ru</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/echinus/">echinus</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg23c0b511852c">FrankenWM</a></b> — 基本上是 Monsterwm 的浮动布局改进版。在基本的窗口管理器上添加了以下功能：更多的布局选项（斐波那契布局、等分布局、双栈布局），可以动态调整间隔（以及边框），最小化/最大化单个窗口，隐藏/显示所有窗口，可单独调整主窗口和副窗口的大小，反转堆叠次序。</li></ul>
+<dl><dd><a href="https://github.com/sulami/FrankenWM">https://github.com/sulami/FrankenWM</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/frankenwm/">frankenwm</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgbbc1b50bf190">Qtile</a></b> — Qtile是一个功能齐全且可定制的平铺窗口管理器，用Python编写。Qtile 简单、轻巧且可扩展。你可以轻松编写自己的布局、小部件和内置命令。它完全使用 Python 编写和配置，这意味着你可以利用语言的全部能力和灵活性，使其适应你的需求。</li></ul>
+<dl><dd><a href="https://github.com/qtile/qtile">https://github.com/qtile/qtile</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=qtile">qtile</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg5fa16bb228fc">spectrwm</a></b> — 这是一个基于X11的小型动态平铺窗口管理器，主要受到 xmonad 和 dwm 的启发。它试图保持低调，以便宝贵的屏幕空间可以用于更重要的事情。它具有合理的默认设置，并通过文本文件进行配置。它是由黑客编写给黑客的，努力保持小巧、紧凑和快速。它还具有内置状态栏，通过用户定义的脚本进行数据传递。</li></ul>
+<dl><dd><a href="https://github.com/conformal/spectrwm/">https://github.com/conformal/spectrwm/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=spectrwm">spectrwm</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Wingo</b> — Wingo 是一个功能齐全的混合窗口管理器，完全支持多显示器工作区，并且既不是浮动模式也不是平铺模式的思考后想法。这使得你可以在一个工作区使用平铺模式，而在另一个工作区使用浮动模式。Wingo 可以使用自己的命令语言进行脚本编写，具有完全可定制的主题，并支持用户定义的钩子。Wingo 是用 Go 语言编写的，没有运行时依赖。它提供了高度的灵活性和可扩展性，使得用户能够根据自己的需求来定制和扩展窗口管理器的功能。</li></ul>
+<dl><dd><a href="https://github.com/BurntSushi/wingo">https://github.com/BurntSushi/wingo</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wingo-git/">wingo-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg73ce307a54af">xmonad</a></b> — XMonad 是一个动态平铺的 X11 窗口管理器，它使用  <a href="#pgccd29da0297b">Haskell</a> 编写和配置。在普通的窗口管理器中，你要花费大部分时间来调整和搜索窗口的位置。XMonad 通过自动化这些过程来简化工作。XMonad 的配置是使用 Haskell 语言完成的。对于所有的配置更改，必须重新编译 xmonad，因此需要安装 Haskell 编译器（超过100MB）。一个名为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xmonad-contrib">xmonad-contrib</a></span><sup><small>包</small></sup></span> 的大型库提供许多额外的功能和扩展。</li></ul>
+<dl><dd><a href="https://xmonad.org/">https://xmonad.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xmonad">xmonad</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg69b9739c5814_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://www.gilesorr.com/wm/">https://www.gilesorr.com/wm/</a></li>
+<li><a href="https://www.slant.co/topics/390/~best-window-managers-for-linux">https://www.slant.co/topics/390/~best-window-managers-for-linux</a></li>
+<li><a href="https://l3net.wordpress.com/2013/03/17/a-memory-comparison-of-light-linux-desktops/">https://l3net.wordpress.com/2013/03/17/a-memory-comparison-of-light-linux-desktops/</a></li>
+<li><a href="http://www.xwinman.org/others.php">http://www.xwinman.org/others.php</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807023141
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.182 seconds
+Real time usage: 0.190 seconds
+Preprocessor visited node count: 1254/1000000
+Revision size: 24359/2097152 bytes
+Post‐expand include size: 43774/2097152 bytes
+Template argument size: 30811/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   49.938      1 -total
+ 58.13%   29.027     63 Template:App
+ 10.00%    4.993     30 Template:Pkg
+  9.52%    4.756     37 Template:AUR
+  6.96%    3.475      1 Template:Related_articles_start
+  3.64%    1.818      3 Template:Related
+  2.84%    1.419      1 Template:翻译状态
+  2.60%    1.299      1 Template:Related_articles_end
+  1.40%    0.699      1 Template:注意
+  1.37%    0.684      1 Template:META_Related_articles_start
+-->
+<!-- Render ID 1f6fb08e-9208-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3987:|#|:idhash:canonical!zh-cn and timestamp 20260807023141 and revision id 35385. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

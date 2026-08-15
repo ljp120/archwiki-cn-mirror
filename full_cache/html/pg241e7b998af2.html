@@ -1,0 +1,137 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg241e7b998af2">Pacman/恢复本地数据库</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Pacman/Restore_local_database">Pacman/Restore local database</a>，最近一次同步于 2025-02-01，若英文版本有所<a href="https://wiki.archlinux.org/title/Pacman/Restore_local_database?diff=0&amp;oldid=806981">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Pacman_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Restore_local_database_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>如果遇到下面的问题，很可能需要恢复 pacman 本地数据库：
+</p>
+<ul><li><code>pacman -Q</code> 什么都不输出，<code>pacman -Syu</code> 错误地报告系统已为最新。</li>
+<li>使用 <code>pacman -S</code> 安装软件包时，很多已经安装过的依赖提示未安装。</li></ul>
+<p>pacman 储存本地软件包的数据库 <code>/var/lib/pacman/local</code> 很可能已经损坏甚至丢失。这是很严重的问题，请按照如下步骤修复。
+</p><p>首先，确认 pacman 的日志文件还在：
+</p>
+<pre>$ ls /var/log/pacman.log
+</pre>
+<p>如果日志丢失了，那就<i>不能</i>使用本方法修复，可以尝试使用<a href="https://bbs.archlinux.org/viewtopic.php?pid=670876">Xyne的软件包检测脚本</a>重建数据库。要是还行不通，很遗憾，最后的路就是重装系统。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg241e7b998af2_.E7.94.9F.E6.88.90.E8.BD.AF.E4.BB.B6.E5.8C.85.E6.81.A2.E5.A4.8D.E6.B8.85.E5.8D.95" id="生成软件包恢复清单"><span id=".E7.94.9F.E6.88.90.E8.BD.AF.E4.BB.B6.E5.8C.85.E6.81.A2.E5.A4.8D.E6.B8.85.E5.8D.95"></span>生成软件包恢复清单</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>如果出于某些原因，您的 <a href="#pg9ef105bf1e3c">pacman</a> 缓存或 <a href="#pg7edcce763396">makepkg</a> package destination 包含了其他架构的包，请在继续前移除它们。</div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacman-contrib">pacman-contrib</a></span><sup><small>包</small></sup></span> 以获取 <i>paclog-pkglist</i>。
+</p><p>创建日志过滤脚本并使其<a href="#pg778bd495870f">可执行</a>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">pacrecover</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash -e
+
+# load configuration settings from the makepkg configuration file
+. /etc/makepkg.conf
+
+# determine the cache directory from pacman configuration, defaulting to /var/cache/pacman/pkg, remove prefix with sed
+PKGCACHE=$( (grep -m 1 '^CacheDir' /etc/pacman.conf || echo 'CacheDir = /var/cache/pacman/pkg') | sed 's/CacheDir = //')
+
+# define directories to search for package files
+pkgdirs=("$@" "$PKGDEST" "$PKGCACHE")
+
+# read package name and version from input and construct a search pattern for package files
+while read -r -a parampart; do
+
+        # loop through each directory to search for matching package files
+        for pkgdir in "${pkgdirs[@]}"; do
+
+                # check each file matching the pattern in the current directory
+                for i in "$pkgdir"/"${parampart[0]}"-"${parampart[1]}"-*.pkg.tar.{xz,zst} ; do
+
+                        # if a file exists, print its path and stop checking further
+                        [ -f "${i}" ] &amp;&amp; { echo "${i}" ; break; };
+                done
+
+                # If no file is found, output the package name to stderr
+        done || echo "${parampart[0]}" 1&gt;&amp;2 
+done
+</pre>
+<p>运行脚本（可选择将带有包的目录作为参数）：
+</p>
+<pre>$ paclog-pkglist /var/log/pacman.log | ./pacrecover &gt;files.list 2&gt;pkglist.orig
+</pre>
+<p>这样做会创建两个文件：<code>files.list</code> 存储着依然在设备上的软件包的包文件;<code>pkglist.orig</code> 存储着需要下载的包。接下来的操作可能会导致设备上的旧版本包的部分文件与新版不匹配，需要手动干预。
+</p><p>过滤掉第二个列表中无法用软件仓库安装的包：
+</p>
+<pre>$ { cat pkglist.orig; pacman -Slq; } | sort | uniq -d &gt; pkglist
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果失败并返回报错 <code>failed to initialise alpm library</code>，请检查<code>/var/lib/pacman/local/ALPM_DB_VERSION</code> 是否存在。若不存在，请以 root 执行<code>pacman-db-upgrade</code>，然后执行 <code>pacman -Sy</code>，接下来重试之前的命令。</div>
+<p>检查是否缺失一些重要的 <i>base</i> 软件包并将它们加入列表：
+</p>
+<pre>$ comm -23 &lt;({ echo base ; expac -l '\n' '%E' base; } | sort) pkglist.orig &gt;&gt; pkglist
+</pre>
+<p>如果两个列表的内容均就绪，无甚缺漏，就请继续下一步，它们将被用于恢复 pacman 的已安装软件包数据库 <code>/var/lib/pacman/local/</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg241e7b998af2_.E5.BC.80.E5.A7.8B.E6.81.A2.E5.A4.8D" id="开始恢复"><span id=".E5.BC.80.E5.A7.8B.E6.81.A2.E5.A4.8D"></span>开始恢复</h2></div>
+<p>为恢复工作定义一个 <a href="#pg948d0c5654e7">bash 函数</a>。
+</p>
+<pre> recovery-pacman() {
+    pacman "$@"  \
+    --log /dev/null   \
+    --noscriptlet     \
+    --dbonly          \
+    --overwrite "*"   \
+    --nodeps          \
+    --needed
+}
+</pre>
+<p><code>--log /dev/null</code> 参数可以避免污染 pacman 日志；<code>--needed</code> 参数可以跳过数据库中已存在的包以节省时间；<code>--nodeps</code> 参数允许安装已缓存的包，即使已安装的包依赖于更新版本。其余选项用于使 <b>pacman</b> 在进行操作时不读写文件系统。
+</p><p>同步数据库：
+</p>
+<pre># pacman -Sy
+</pre>
+<p>从 <code>files.list</code> 安装本地可用的包以开始生成数据库：
+</p>
+<pre># recovery-pacman -U $(&lt; files.list)
+</pre>
+<p>从 <code>pkglist</code> 安装其余包：
+</p>
+<pre># recovery-pacman -S $(&lt; pkglist)
+</pre>
+<p>更新本地数据库以将不被其它包依赖的包标记为明确按照并将其它包标记为依赖。您将来在移除软件包时需要格外小心，但是原始数据库已丢失，这已经是我们所能做的最好的。
+</p>
+<pre># pacman -D --asdeps $(pacman -Qq)
+# pacman -D --asexplicit $(pacman -Qtq)
+</pre>
+<p>可选检查安装的软件包是否损坏：
+</p>
+<pre># pacman -Qk
+</pre>
+<p>可选参阅 <a href="#pg2749aa4d6728">Pacman/提示和技巧#查找不属于任何软件包的文件</a>。
+</p><p>更新所有软件包：
+</p>
+<pre># pacman -Su
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807041543
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.080 seconds
+Real time usage: 0.087 seconds
+Preprocessor visited node count: 159/1000000
+Revision size: 4912/2097152 bytes
+Post‐expand include size: 2587/2097152 bytes
+Template argument size: 896/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 1151/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   20.372      1 -total
+ 17.20%    3.504      1 Template:翻译状态
+ 16.61%    3.384      1 Template:Note
+ 15.53%    3.165     16 Template:Ic
+ 10.04%    2.046      1 Template:Pkg
+  9.65%    1.966      1 Template:Warning
+  6.09%    1.241      1 Template:Hc
+-->
+<!-- Render ID a7f54d8e-9216-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3658:|#|:idhash:canonical!zh-cn and timestamp 20260807041543 and revision id 33656. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

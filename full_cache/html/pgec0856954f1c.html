@@ -1,0 +1,241 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgec0856954f1c">内核参数</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Kernel_parameters">Kernel parameters</a>，最近一次同步于 2026-06-26，若英文版本有所<a href="https://wiki.archlinux.org/title/Kernel_parameters?diff=0&amp;oldid=871824">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Kernel_parameters_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg79837a9c7434">Kernel</a></li>
+</ul></div>
+<p>共有三种办法向内核传递参数以控制其行为：
+</p>
+<ol><li>在编译内核时：在内核的 <code>config</code> 文件中。详见<a href="#pg3473491e6a48">内核#编译</a>。</li>
+<li>在内核启动时：通过命令行参数（通常通过启动管理器设置，或在<a href="#pg3bddb6ba0c50">统一内核镜像</a>中设置）。</li>
+<li>在运行时：通过 <code>/proc/sys/</code>（参见 <a href="#pg7b7cc2bbe79a">sysctl</a>）和 <code>/sys/</code> 中的文件。</li></ol>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可加载模块的选项可通过 <code>/etc/modprobe.d/</code> 中的 <i>.conf</i> 文件设置。参见 <a href="#pg6dbfce2ea89d">内核模块#使用_/etc/modprobe.d/中的文件</a>。</div>
+<p>不同的方式有不同的命令名称、是否可见以及设置方式。本文仅说明第二种方式(内核命令行)，并记录适用 Arch linux 内核的常用参数。
+</p><p>大部分参数和某个子系统相关，需要在编译或加载时加入子系统，而且相关硬件需要存在。
+</p><p>内核命令行参数的格式为 <code>parameter</code> 或 <code>parameter=value</code>，或 <code>module.parameter=value</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>通过 <code>cat /proc/cmdline</code> 可以查看当前使用的命令行参数，验证修改是否生效。</li>
+<li>所有内核参数均区分大小写。</li></ul>
+</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgec0856954f1c_.E5.90.AF.E5.8A.A8.E7.AE.A1.E7.90.86.E5.99.A8.E9.85.8D.E7.BD.AE" id="启动管理器配置"><span id=".E5.90.AF.E5.8A.A8.E7.AE.A1.E7.90.86.E5.99.A8.E9.85.8D.E7.BD.AE"></span>启动管理器配置</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Arch Linux <a href="https://archlinux.org/download/">安装镜像</a> 在 <a href="#pg46c3147defaf">UEFI</a> 系统上使用 <a href="#pg171755f7b428">systemd-boot</a>，在 <a href="https://en.wikipedia.org/wiki/BIOS">BIOS</a> 系统上使用 <a href="#pg0ca06688075c">Syslinux</a>。</div>
+<p>内核参数可以在启动时临时修改，也可以永久性写到启动管理器的配置文件中，永远起作用。
+</p><p>下面示例：把参数<code>quiet</code> 和 <code>splash</code> 加到启动管理器 <a href="#pg4fa16a81add8">Clover</a>、<a href="#pgca9c4017f7ad">GRUB</a>、<a href="#pg9fa60bf874d4">GRUB Legacy</a>、<a href="#pg789c0f6ec01c">LILO</a>、<a href="#pg7b799300dd78">Limine</a>、<a href="#pg155cf311d887">rEFInd</a>、<a href="#pg0ca06688075c">Syslinux</a> 和 <a href="#pg171755f7b428">systemd-boot</a> 中。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgec0856954f1c_Clover" id="Clover">Clover</h3></div>
+<ul><li>将以下内容添加到 <code><i>esp</i>/EFI/CLOVER/config.plist</code>：</li></ul>
+<dl><dd><pre>&lt;string&gt;initrd=\initramfs-linux.img root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw <b>quiet splash</b>&lt;/string&gt;</pre></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgec0856954f1c_GRUB" id="GRUB">GRUB</h3></div>
+<ul><li>在菜单出现后按 <code>e</code> 然后将它们添加至 <code>linux</code> 行：</li></ul>
+<dl><dd><pre>linux /boot/vmlinuz-linux root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw <b>quiet splash</b></pre></dd></dl>
+<dl><dd>按 <code>Ctrl+x</code> 以便用这些参数启动。</dd></dl>
+<ul><li>要使改变在重启后仍生效，您<i>可以</i>手动编辑 <code>/boot/grub/grub.cfg</code> 中的如上内容。对于初学者，建议：</li></ul>
+<dl><dd>编辑 <code>/etc/default/grub</code> 并将您的内核选项添加至 <code>GRUB_CMDLINE_LINUX_DEFAULT</code> 行：</dd></dl>
+<dl><dd><dl><dd><pre>GRUB_CMDLINE_LINUX_DEFAULT="<b>quiet splash</b>"</pre></dd></dl></dd></dl>
+<dl><dd>然后重新生成 <code>grub.cfg</code> 文件：</dd></dl>
+<dl><dd><dl><dd><pre># grub-mkconfig -o /boot/grub/grub.cfg</pre></dd></dl></dd></dl>
+<p>有关配置GRUB的更多信息，请参阅 <a href="#pgca9c4017f7ad">GRUB</a> 。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgec0856954f1c_GRUB_Legacy" id="GRUB_Legacy">GRUB Legacy</h3></div>
+<ul><li>在菜单出现后按 <code>e</code> 然后将它们添加至 <code>kernel</code> 行：</li></ul>
+<dl><dd><pre>kernel /boot/vmlinuz-linux root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw <b>quiet splash</b></pre></dd></dl>
+<dl><dd>按 <code>b</code> 以便用这些参数启动。</dd></dl>
+<ul><li>要使改变在重启后仍生效，编辑 <code>/boot/grub/menu.lst</code> 并将它们添加至 <code>kernel</code> 行，如上所示。</li></ul>
+<p>有关配置GRUB Legacy的更多信息，请参阅 <a href="#pg9fa60bf874d4">GRUB Legacy</a> 。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgec0856954f1c_LILO" id="LILO">LILO</h3></div>
+<ul><li>将它们添加到 <code>/etc/lilo.conf</code> 中，使用 <code>append</code> 或 <code>addappend</code>：</li></ul>
+<dl><dd><pre>image=/boot/vmlinuz-linux
+        ...
+        append="<b>quiet splash</b>"</pre></dd></dl>
+<p>有关配置LILO的更多信息，请参阅 <a href="#pg789c0f6ec01c">LILO</a> 。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgec0856954f1c_Limine" id="Limine">Limine</h3></div>
+<ul><li>要临时添加内核参数，在启动条目选择屏幕出现时按 <code>e</code> 并修改 <code>cmdline</code> 行：</li></ul>
+<dl><dd><pre>cmdline: root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw <b>quiet splash</b></pre></dd></dl>
+<ul><li>要使更改永久生效，编辑 Limine 配置文件中的 <code>kernel_cmdline</code> 行：</li></ul>
+<dl><dd><pre>/+Arch Linux
+    ...
+    kernel_cmdline: root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw <b>quiet splash</b></pre></dd></dl>
+<p><code>kernel_cmdline</code> 是 <code>cmdline</code> 的别名
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgec0856954f1c_rEFInd" id="rEFInd">rEFInd</h3></div>
+<ul><li>在所需的菜单条目上按 <code>Insert</code>, <code>F2</code>, <code>Tab</code>, 或 <code>+</code>，然后在子菜单条目上再次按下。在字符串末尾添加内核参数：</li></ul>
+<dl><dd><pre>root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw initrd=\boot\initramfs-linux.img <b>quiet splash</b></pre></dd></dl>
+<dl><dd>按 <code>Enter</code> 以使用这些参数启动。</dd></dl>
+<ul><li>要使更改在重启后永久生效，编辑 <code>/boot/refind_linux.conf</code> 并在所有需要的行中的引号之间追加它们，例如：</li></ul>
+<dl><dd><pre>"Boot using default options"   "root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw <b>quiet splash</b>"</pre></dd></dl>
+<ul><li>如果您在 rEFInd 中禁用了操作系统的自动检测，并在 <code><i>esp</i>/EFI/refind/refind.conf</code> 中定义了操作系统条目来加载您的操作系统，您可以像这样编辑它：</li></ul>
+<dl><dd><pre>menuentry "Arch Linux" {
+    ...
+    options  "root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw <b>quiet splash</b>"
+    ...
+}
+</pre></dd></dl>
+<p>有关配置 rEFInd 的更多信息，请参阅 <a href="#pg155cf311d887">rEFInd</a> 。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgec0856954f1c_Syslinux" id="Syslinux">Syslinux</h3></div>
+<ul><li>当出现启动选择菜单的时候，按 <code>Tab</code> 进入修改模式:</li></ul>
+<dl><dd><pre>linux /boot/vmlinuz-linux root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw initrd=/boot/initramfs-linux.img <b>quiet splash</b></pre></dd></dl>
+<dl><dd>按 <code>Enter</code> 键以当前设置启动.</dd></dl>
+<ul><li>要将设置永久生效，编辑 <code>/boot/syslinux/syslinux.cfg</code> 并添加 <code>APPEND</code> 行:</li></ul>
+<dl><dd><pre>APPEND root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw <b>quiet splash</b></pre></dd></dl>
+<p>更多详情请见<a href="#pg0ca06688075c">Syslinux</a> 。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgec0856954f1c_systemd_boot" id="systemd-boot">systemd-boot</h3></div>
+<ul><li>当启动菜单出现时 按 <code>e</code>进入编辑界面:</li></ul>
+<dl><dd><pre>initrd=\initramfs-linux.img root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw <b>quiet splash</b></pre></dd></dl>
+<dl><dd>按 <code>Enter</code> 即可按照输入的参数启动。</dd></dl>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>如果没有设置显示启动菜单,  你需要按住<code>Space</code>启动电脑来进入启动菜单 。</li>
+<li>如果不能够从启动菜单上进行编辑，修改 <code>/boot/loader/loader.conf</code> 加入 <code>editor 1</code> 来开启编辑功能。</li></ul>
+</div>
+<ul><li>如果想永久加入参数，编辑 <code>/boot/loader/entries/arch.conf</code> (假设你已经设置好了 <a href="#pg99a0c4106b90">EFI system partition</a>) 的<code>options</code> 行:</li></ul>
+<dl><dd><pre>options root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw <b>quiet splash</b></pre></dd></dl>
+<ul><li>若使用 <a href="#pgd819314d422c">统一内核映像</a> 启动，请编辑 <code>/etc/kernel/cmdline</code>。</li></ul>
+<p>更多信息请参见 <a href="#pg171755f7b428">systemd-boot</a> .
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgec0856954f1c_dracut" id="dracut">dracut</h2></div>
+<p><a href="#pgb185d4cf00ac">dracut</a> 可以将内核参数嵌入 initramfs，并跳过启动加载器的配置，参考：<a href="#pgb185d4cf00ac">dracut#内核命令行参数</a>。注意这种方式只对 dracut 所能接受的参数生效，例如 <code>root=</code> 和 <code>rd.*</code>，这些参数并不会变成真正的内核参数。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgec0856954f1c_EFI_.E5.90.AF.E5.8A.A8.E5.AD.98.E6.A0.B9" id="EFI_启动存根"><span id="EFI_.E5.90.AF.E5.8A.A8.E5.AD.98.E6.A0.B9"></span>EFI 启动存根</h2></div>
+<p>参阅 <a href="#pg5ccea217f7c7">EFI 启动存根#Using UEFI directly</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgec0856954f1c_.E5.8A.AB.E6.8C.81_cmdline" id="劫持_cmdline"><span id=".E5.8A.AB.E6.8C.81_cmdline"></span>劫持 cmdline</h2></div>
+<p>即使没有访问启动加载器的权限，也可以通过更改内核参数来启用调试（如果您有 root 权限）。这可以通过覆盖存储内核参数的 <code>/proc/cmdline</code> 来实现。然而，<code>/proc/cmdline</code> 即使作为 root 也不可写，因此这个技巧通过使用绑定挂载来掩盖路径。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这种技巧仅劫持读取 <code>/proc/cmdline</code> 的用户空间进程，无法作用于被内核读取的参数。例如，通过这种方式添加 <code>debug</code> 不会使内核进入调试模式。</div>
+<p>首先创建一个包含所需内核参数的文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/root/cmdline</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 ro console=tty1 logo.nologo debug</pre>
+<p>然后使用绑定挂载覆盖参数：
+</p>
+<pre># mount -n --bind -o ro /root/cmdline /proc/cmdline
+</pre>
+<p><code>-n</code> 选项跳过将挂载添加到 <code>/etc/mtab</code>，因此即使根文件系统以只读方式挂载也能工作。您可以通过 <code>cat /proc/cmdline</code> 确认更改是否成功。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgec0856954f1c_.E5.8F.82.E6.95.B0.E5.88.97.E8.A1.A8" id="参数列表"><span id=".E5.8F.82.E6.95.B0.E5.88.97.E8.A1.A8"></span>参数列表</h2></div>
+<p>本表并不完整。除了内核，其他程序也能从 <code>/proc/cmdline</code> 读取参数并受到影响。
+</p>
+<ul><li>所有选项的完整列表请参见<a href="https://docs.kernel.org/admin-guide/kernel-parameters.html">内核文档</a>（包含内核与引导加载程序的可用参数）。<span class="plainlinks archwiki-template-man" title="$ man 7 bootparam"><a href="https://man.archlinux.org/man/bootparam.7">bootparam(7)</a></span> 中有一份基本的参数列表可供参考。</li>
+<li><a href="#pgac06dd8bfe95">systemd</a> 的可用参数请参见 <span class="plainlinks archwiki-template-man" title="$ man 7 kernel-command-line"><a href="https://man.archlinux.org/man/kernel-command-line.7">kernel-command-line(7)</a></span>。</li>
+<li>带有基于 busybox 的 initial ramdisk 的 <a href="#pgbd0f46fbac92">mkinitcpio</a> 的可用参数请参见 <span class="plainlinks archwiki-template-man" title="$ man 8 mkinitcpio"><a href="https://man.archlinux.org/man/mkinitcpio.8#EARLY_INIT_ENVIRONMENT">mkinitcpio(8) § EARLY INIT ENVIRONMENT</a></span> 和 <a href="#pgbd0f46fbac92">mkinitcpio#运行时配置</a>。</li>
+<li><a href="#pgb185d4cf00ac">dracut</a> 的可用参数请参见 <span class="plainlinks archwiki-template-man" title="$ man 7 dracut.cmdline"><a href="https://man.archlinux.org/man/dracut.cmdline.7">dracut.cmdline(7)</a></span>。</li></ul>
+<table class="wikitable">
+<tbody><tr>
+<th>参数</th>
+<th>描述
+</th></tr>
+<tr>
+<td>init</td>
+<td>运行指定的二进制文件而不是 <code>/sbin/init</code> 作为 init 进程。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd-sysvcompat">systemd-sysvcompat</a></span><sup><small>包</small></sup></span> 包将 <code>/sbin/init</code> 符号链接到 <code>/usr/lib/systemd/systemd</code> 以使用 <a href="#pgac06dd8bfe95">systemd</a>。将其设置为 <code>/bin/sh</code> 以启动到 shell。
+</td></tr>
+<tr>
+<td>initrd</td>
+<td>指定初始 ramdisk 的位置。对于 UEFI <a href="#pgd9379ca293c1">启动管理器</a> 和 <a href="#pg5ccea217f7c7">EFI 启动存根</a>，路径必须使用反斜杠 (<code>\</code>) 作为路径分隔符。
+</td></tr>
+<tr>
+<td><a href="#pg52b00790fb44">cryptdevice</a></td>
+<td>指定 <a href="#pg8e3a9446707a">dm-crypt</a> 加密分区的位置以及 <a href="https://en.wikipedia.org/wiki/device_mapper">设备映射器</a> 名称。
+</td></tr>
+<tr>
+<td>debug</td>
+<td>启用内核调试（事件日志级别）。
+</td></tr>
+<tr>
+<td>lsm</td>
+<td>设置 Linux 安全模块的初始化顺序，用于启用 <a href="#pgfe1adbe33dca">AppArmor</a>, <a href="#pg7e957d97ab97">SELinux</a> 或 <a href="#pg713d263ee6c5">TOMOYO</a>。
+</td></tr>
+<tr>
+<td>maxcpus</td>
+<td>SMP 内核在启动期间将启动的最大处理器数量。
+</td></tr>
+<tr>
+<td>mem</td>
+<td>强制使用特定数量的内存。
+</td></tr>
+<tr>
+<td>netdev</td>
+<td>网络设备参数。
+</td></tr>
+<tr>
+<td>nomodeset</td>
+<td>禁用 <a href="#pg1b16260aab54">Kernel mode setting</a>。
+</td></tr>
+<tr>
+<td>panic</td>
+<td>内核崩溃后自动重启的时间。
+</td></tr>
+<tr>
+<td>resume</td>
+<td>指定从 <a href="#pg9565d8ffe96e">休眠</a> 唤醒时使用的交换设备。
+</td></tr>
+<tr>
+<td>ro</td>
+<td>在启动时以只读方式挂载根设备。这是 <a href="#pgbd0f46fbac92">mkinitcpio</a> 的默认值<sup>1</sup>。
+</td></tr>
+<tr>
+<td>root</td>
+<td>根文件系统。参见 <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/init/do_mounts.c#n254">init/do_mounts.c</a> 了解内核支持的设备名称格式。请注意，带有 <a href="#pge009209061ac">udev</a> 的 <a href="#pg5409190f7704">initramfs</a> 支持 <a href="#pg526b0fdce3a2">更多名称格式</a>。与 <a href="#pgac06dd8bfe95">systemd#GPT 分区自动挂载</a> 兼容的设置允许完全省略该参数，或者使用 <code>root=dissect</code>。
+</td></tr>
+<tr>
+<td>rootflags</td>
+<td>根文件系统挂载选项。对于无法通过重新挂载应用的选项（例如，由 <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-remount-fs.service"><a href="https://man.archlinux.org/man/systemd-remount-fs.service.8">systemd-remount-fs.service(8)</a></span> 应用）非常有用。例如，<a href="#pg97815ebb0436">XFS</a> 根卷的 <code>discard</code> 选项或 <a href="#pg429e7ec45c9c">Btrfs 使用子卷作为根</a> 时的 <code>subvol=</code> 选项。
+</td></tr>
+<tr>
+<td>rw</td>
+<td>在启动时以读写方式挂载根设备。这是内核的默认值<sup>1</sup>。
+</td></tr>
+<tr>
+<td>systemd.unit</td>
+<td>启动到指定的 <a href="#pgac06dd8bfe95">目标</a>。
+</td></tr>
+<tr>
+<td>video</td>
+<td>覆盖帧缓冲视频默认值。
+</td></tr></tbody></table>
+<ol><li>如果内核命令行上未明确设置 <code>ro</code> 或 <code>rw</code>，内核将使用 <code>rw</code>（参见 <span class="plainlinks archwiki-template-man" title="$ man 7 bootparam"><a href="https://man.archlinux.org/man/bootparam.7#General_non-device-specific_boot_arguments">bootparam(7) § General non-device-specific boot arguments</a></span>）。然而，<a href="#pgbd0f46fbac92">mkinitcpio</a> 使用 <code>ro</code> 作为默认值，覆盖内核的默认值（参见 <span class="plainlinks archwiki-template-man" title="$ man 8 mkinitcpio"><a href="https://man.archlinux.org/man/mkinitcpio.8#EARLY_INIT_ENVIRONMENT">mkinitcpio(8) § EARLY INIT ENVIRONMENT</a></span>）。启动加载器也可能有自己的配置默认值，例如，<i>grub-mkconfig</i> 使用 <code>rw</code>（参见 <a href="https://bugs.archlinux.org/task/36275">FS#36275</a> 作为参考）。<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>当使用 mkinitcpio 的 <a href="#pg7545319bee41">fsck 钩子</a>（参见 <a href="https://bbs.archlinux.org/viewtopic.php?pid=1303683#p1303683">[1]</a>）或 <a href="#pgac7283731cf0">使用 F2FS 作为根文件系统</a> 时，需要 <code>rw</code>。</div></li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgec0856954f1c_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><span class="plainlinks archwiki-template-man" title="$ man 7 bootparam"><a href="https://man.archlinux.org/man/bootparam.7">bootparam(7)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 7 kernel-command-line"><a href="https://man.archlinux.org/man/kernel-command-line.7">kernel-command-line(7)</a></span></li>
+<li><a href="#pgb9f39acb340e">省电相关内核参数</a></li>
+<li><a href="http://files.kroah.com/lkn/lkn_pdf/ch09.pdf">内核启动命令行参数参考</a>——<a href="http://www.kroah.com/lkn/">Linux Kernel in a Nutshell</a> 的第 9 章，作者 <a href="https://en.wikipedia.org/wiki/Greg_Kroah-Hartman">Greg Kroah-Hartman</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807030634
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.196 seconds
+Real time usage: 0.203 seconds
+Preprocessor visited node count: 1080/1000000
+Revision size: 11799/2097152 bytes
+Post‐expand include size: 9823/2097152 bytes
+Template argument size: 4188/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 335/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   65.106      1 -total
+ 14.42%    9.389     74 Template:Ic
+ 10.80%    7.030      9 Template:Man
+  6.56%    4.274      1 Template:Related_articles_start
+  5.64%    3.671      5 Template:注意
+  5.48%    3.568      1 Template:翻译状态
+  4.75%    3.095     15 Template:Bc
+  2.97%    1.933      1 Template:Pkg
+  2.77%    1.805      1 Template:Related
+  2.65%    1.728      1 Template:Related_articles_end
+-->
+<!-- Render ID fef6250e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3356:|#|:idhash:canonical!zh-cn and timestamp 20260807030634 and revision id 35265. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

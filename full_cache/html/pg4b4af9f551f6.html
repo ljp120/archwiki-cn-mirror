@@ -1,0 +1,774 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg4b4af9f551f6">UEFI/安全启动</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot">Unified Extensible Firmware Interface/Secure Boot</a>，最近一次同步于 2023-02-03，若英文版本有所<a href="https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot?diff=0&amp;oldid=766390">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Secure_Boot_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg7e866ec617d4">Arch 的启动流程</a></li>
+<li><a href="#pgfefbd690c49d">安全</a></li>
+</ul></div>
+<p><a href="https://en.wikipedia.org/wiki/UEFI#Secure_boot">安全启动（Secure Boot）</a>是<a href="#pg46c3147defaf">UEFI</a>标准中的一项安全功能，旨在为<a href="#pg2be54bdacb4c">pre-boot process</a>添加一层保护；通过维护被授权或禁止的在启动时运行的经过加密签署的二进制文件列表，它有助于使得核心引导组件（引导管理器、内核、initramfs）不被篡改。
+</p><p>因此，它可以被视为对个人使用环境的<a href="#pgfefbd690c49d">securing</a>所做努力的延续或补充，减少其他软件安全解决方案（如<a href="#pg29ec7c5af952">系统加密</a>）无法轻易<a href="#pg29ec7c5af952">覆盖</a>的攻击面，同时完全不同且不依赖于它们。安全启动只是作为当前安全实践的一个组成部分独立存在，具有自己的一套优<a href="https://en.wikipedia.org/wiki/UEFI#Secure_Boot_2">缺点</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>为了更深入地了解Linux中的安全启动。见<a href="https://www.rodsbooks.com/efi-bootloaders/secureboot.html">Rodsbooks' Secure Boot</a>与other online resources。文章重点介绍了如何在 Arch Linux 中设置安全启动。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b4af9f551f6_.E6.A3.80.E6.9F.A5.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8.E7.8A.B6.E6.80.81" id="检查安全启动状态"><span id=".E6.A3.80.E6.9F.A5.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8.E7.8A.B6.E6.80.81"></span>检查安全启动状态</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b4af9f551f6_.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.E4.B9.8B.E5.89.8D" id="在启动操作系统之前"><span id=".E5.9C.A8.E5.90.AF.E5.8A.A8.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.E4.B9.8B.E5.89.8D"></span>在启动操作系统之前</h3></div>
+<p>此时，必须查看固件设置。如果机器已启动并正在运行，则在大多数情况下必须重新启动。
+</p><p>您可以在引导过程中通过按特殊键来访问固件配置。使用的特殊键取决于固件。它通常是<code>Esc</code>、<code>F2</code>、<code>Del</code>或者<code>F<i>n</i></code>键中的一个。有时在启动过程中特殊键的名称会显示一小段时间。主板说明书往往有关于此的记载。如果你想要按下特殊键，请在启动机器后立即按下该键，甚至是在屏幕实际显示任何内容之前。
+进入固件设置后，请注意不要擅自更改任何设置。 通常在每个设置的底部都会有导航说明和设置的简短帮助。设置本身可能由几个页面组成，您必须导航到正确的位置。有一些安全启动设置可能简单地表示为安全启动选项，可以将其设置为打开或关闭 .
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b4af9f551f6_.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.E4.B9.8B.E5.90.8E" id="在启动操作系统之后"><span id=".E5.9C.A8.E5.90.AF.E5.8A.A8.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.E4.B9.8B.E5.90.8E"></span>在启动操作系统之后</h3></div>
+<p>使用<a href="#pgac06dd8bfe95">systemd</a>检查系统上的安全启动状态的一种简单方法是使用<span class="plainlinks archwiki-template-man" title="$ man 1 bootctl"><a href="https://man.archlinux.org/man/bootctl.1">bootctl(1)</a></span>：
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>以下命令，并非要求你强制使用systemd-boot,作为你的引导启动管理器，才能正确让你得到你需要的内容（安全启动是否开启），它更类似于其他*ctl systemd实用程序（localectl、timedatectl……），此处即为有关启动事项的综合管理工具，并且不会影响你的配置。</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ bootctl</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">System:
+      Firmware: UEFI 2.80 (American Megatrends 5.26)
+ Firmware Arch: x64
+   Secure Boot: enabled (user)
+  TPM2 Support: yes
+  Measured UKI: yes
+  Boot into FW: supported
+...
+</pre>
+<p>在这里，我们看到安全启动已启用并强制执行用户模式（user mode）。Secure Boot的其他值包括<code>disabled</code>，Setup Mode的其他值包括<code>setup</code><a href="https://github.com/systemd/systemd/issues/8154#issue-296106251">[1]</a>。
+</p><p>检查机器是否使用安全启动的另一种方法是使用以下命令：
+</p><p>$ od --address-radix=n --format=u1 /sys/firmware/efi/efivars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c
+</p><p>如果启用了安全启动，此命令将返回<code>1</code>作为五个列表中的最后一个整数，例如：
+</p>
+<pre>6  0  0  0  1
+</pre>
+<p>但是请注意，如果使用了功能缺失的引导加载程序，内核可能不知道安全引导（即使它在固件中启用）。 这可以通过在系统启动后不久检查内核消息来验证：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># journalctl -kg 'secure boot'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">kernel: Secure boot disabled
+kernel: Secure boot could not be determined
+</pre>
+<p>能启用的内核会打印<code>Secure boot enabled</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b4af9f551f6_.E5.BC.95.E5.AF.BC.E5.AE.89.E8.A3.85.E4.BB.8B.E8.B4.A8" id="引导安装介质"><span id=".E5.BC.95.E5.AF.BC.E5.AE.89.E8.A3.85.E4.BB.8B.E8.B4.A8"></span>引导安装介质</h2></div>
+<p>官方安装镜像不支持安全启动（<a href="https://gitlab.archlinux.org/archlinux/archiso/-/issues/69">archlinux/archiso#69</a>）。对于安全启动的支持最早在 <code>archlinux-2013.07.01-dual.iso</code> 中引入，但随后在 <code>archlinux-2016.06.01-dual.iso</code> 中被移除。当时，<i>prebootloader</i> 被替换为了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=efitools">efitools</a></span><sup><small>包</small></sup></span>，尽管后者使用的是未签名的 EFI 二进制文件。自那之后，官方安全介质就再未支持过安全启动。
+</p><p>为了在开启安全启动的系统上引导安装介质，你需要禁用安全启动，或者修改镜像以添加已签名的引导加载程序（Bootloader）。
+</p><p><a href="https://archboot.com">Archboot</a> 镜像提供了一种在安装介质中使用安全启动的方式。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b4af9f551f6_.E7.A6.81.E7.94.A8.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8" id="禁用安全启动"><span id=".E7.A6.81.E7.94.A8.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8"></span>禁用安全启动</h3></div>
+<p>可以通过 UEFI 固件接口禁用安全启动功能。如何访问固件配置请访问#在启动操作系统之前.
+</p><p>如果使用热键不起作用并且您可以启动 Windows，您可以通过以下方式强制重新启动到固件配置（对于 Windows 10）：<i>设置 &gt; 更新和安全 &gt; 恢复 &gt; 高级启动（立即重新启动）&gt; 故障排除 &gt; 高级选项 &gt; UEFI 固件设置 &gt; 重启</i>。
+</p><p>请注意，某些主板（Packard Bell 笔记本电脑就是这种情况）只有在您设置了管理员密码（之后可以删除）时才允许禁用安全启动。 另请参阅 <a href="https://www.rodsbooks.com/efi-bootloaders/secureboot.html#disable">Rod Smith 的禁用安全启动</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b4af9f551f6_.E9.87.8D.E6.96.B0.E6.89.93.E5.8C.85.E5.AE.89.E8.A3.85.E9.95.9C.E5.83.8F" id="重新打包安装镜像"><span id=".E9.87.8D.E6.96.B0.E6.89.93.E5.8C.85.E5.AE.89.E8.A3.85.E9.95.9C.E5.83.8F"></span>重新打包安装镜像</h3></div>
+<p>参见#ISO 重新打包。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b4af9f551f6_.E7.BC.96.E8.BE.91.E5.AE.89.E8.A3.85.E4.BB.8B.E8.B4.A8" id="编辑安装介质"><span id=".E7.BC.96.E8.BE.91.E5.AE.89.E8.A3.85.E4.BB.8B.E8.B4.A8"></span>编辑安装介质</h3></div>
+<p>如果使用的是 <a href="#pge7b390d21a8a">U 盘安装介质</a>，则可以通过手动编辑介质上的 <a href="#pg635d4bd93303">EFI 系统分区</a>来添加对安全启动的支持。
+</p><p>插入 U 盘，然后<a href="#pgaacf649200cb">挂载</a>该分区：
+</p>
+<pre># mount /dev/disk/by-label/ARCHISO_EFI /mnt
+</pre>
+<p>接着按照使用自己的密钥中的说明安装任意已签名的 Bootloader。例如，若要安装 <a href="#pg4b4af9f551f6_PreLoader">#PreLoader</a>：
+</p>
+<pre># mv /mnt/EFI/BOOT/BOOTx64.EFI /mnt/EFI/BOOT/loader.efi
+# cp /usr/share/preloader-signed/PreLoader.efi /mnt/EFI/BOOT/BOOTx64.EFI
+# cp /usr/share/preloader-signed/HashTool.efi /mnt/EFI/BOOT/HashTool.efi
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b4af9f551f6_.E5.AE.9E.E6.96.BD.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8" id="实施安全启动"><span id=".E5.AE.9E.E6.96.BD.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8"></span>实施安全启动</h2></div>
+<p>为了确保理想的<i>安全启动</i>设置，有以下几个特定条件：
+</p>
+<ol><li>UEFI基本被认为是可信的（尽管有一些众所周知的<a href="https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface#Criticism">批评</a>和漏洞<a href="https://www.UEFI.org/sites/default/files/resources/UEFI%20firmware%20-%20security%20concerns%20and%20best%20practices.pdf">[2]</a>），且必须被强密码保护。</li>
+<li>不使用默认的制造商或第三方密钥，因为它们被证明会大大削弱安全启动的安全模型<a href="https://habr.com/ru/post/446238/">[3]</a>。</li>
+<li>UEFI直接加载用户签名的、兼容<span class="ilh-all" data-foreign-title="EFI boot stub" data-lang-code="en" data-lang-name="英语" data-orig-title="EFI boot stub"><span class="ilh-page"><a href="#pg20728dc42f15">EFI boot stub</a></span></span>的<a href="#pg3bddb6ba0c50">统一内核镜像</a>（无需引导加载程序），包含微码（如果适用）以及 initramfs。以便在整个启动过程维持安全启动建立的信任链并减少攻击面。</li>
+<li>使用<a href="#pg29ec7c5af952">完整驱动器加密</a>，这样在创建内核镜像和签署的过程中所涉及的工具与文件就无法被具有机器物理访问权限的人访问并篡改。</li>
+<li>可以使用<a href="#pg3760f6882d85">TPM（可信平台模块）</a>获得进一步的提升。</li></ol>
+<p>#使用自己的密钥中描述了一个简单且完全自力更生的设置，而#使用已签署的引导加载程序使用了第三方签署的中间工具。
+</p><p>使用 <a href="#pgca9c4017f7ad">GRUB</a> 引导加载程序在启用安全启动前需要额外的步骤，参见<a href="#pgca9c4017f7ad">GRUB#启用安全启动</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b4af9f551f6_.E4.BD.BF.E7.94.A8.E8.87.AA.E5.B7.B1.E7.9A.84.E5.AF.86.E9.92.A5" id="使用自己的密钥"><span id=".E4.BD.BF.E7.94.A8.E8.87.AA.E5.B7.B1.E7.9A.84.E5.AF.86.E9.92.A5"></span>使用自己的密钥</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>使用自定义密钥替换平台密钥（PK）会瘫痪某些机器（比如笔记本）上的硬件，甚至无法进入UEFI/BIOS设置恢复。这是因为某些硬件（例如显卡）的固件（<a href="https://en.wikipedia.org/wiki/OpROM">OpROMs</a>）在启动时微软使用微软第三方 CA 证书进行签署。许多<a href="https://forums.lenovo.com/t5/Other-Linux-Discussions/Reports-of-custom-secure-boot-keys-bricking-recent-X-P-and-T-series-laptops/m-p/5105571">联想 Thinkpad X、P 和 T 系列笔记本电脑</a>以及华硕 TUF Gaming 笔记本电脑均属于这种情况。</div>
+<p>实现安全启动需要下列密钥：
+</p>
+<dl><dt>平台密钥 Platform Key （PK）：最高级的密钥。</dt>
+<dt>密钥交换密钥 Key Exchange Key （KEK）：用于签署签名数据库和禁止的签名数据库更新的密钥。</dt>
+<dt>签名数据库 Signature Database （db）：包含密钥和/或被允许的EFI二进制文件的散列值。</dt>
+<dt>禁止的签名数据库 Forbidden Signatures Database （dbx）：包含密钥和/或被禁止的EFI二进制文件的散列值。</dt></dl>
+<p>详细解释请阅读<a href="https://blog.hansenpartnership.com/the-meaning-of-all-the-uefi-keys/">所有UEFI密钥的含义</a>。
+</p><p>为了使用安全启动，你至少需要<b>PK</b>，<b>KEK</b>和<b>db</b>密钥。 虽然你可以添加多个KEK，db和dbx证书，但只允许一个平台密钥（PK）。
+</p><p>一旦安全启动处于“用户模式”，密钥只能通过用更高级别的密钥签署（使用<i>sign-efi-sig-list</i>）来更新。平台密钥可以自己签署。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b4af9f551f6_.E7.A1.AE.E5.AE.9A_OpROM_.E7.AD.BE.E5.90.8D" id="确定_OpROM_签名"><span id=".E7.A1.AE.E5.AE.9A_OpROM_.E7.AD.BE.E5.90.8D"></span>确定 OpROM 签名</h4></div>
+<p>按以下步骤检查是否拥有任何已签名的 OpROM。
+</p><p>列出所有带 OpROM 的设备：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ find /sys/devices/ -name rom</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/sys/devices/pci0000:80/0000:80:01.0/0000:81:00.0/rom
+...
+</pre>
+<p>以上展示了一个带有已签名 EFI ROM 的 Intel DC SSD 示例。对每个设备重复以下步骤。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lspci -s 81:00.0</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">81:00.0 Non-Volatile memory controller: Intel Corporation PCIe Data Center SSD (rev 01)
+</pre>
+<p>转储（Dump）ROM 内容：
+</p>
+<pre># echo 1 &gt; /sys/devices/pci0000:80/0000:80:01.0/0000:81:00.0/rom
+# cat /sys/devices/pci0000:80/0000:80:01.0/0000:81:00.0/rom &gt; ~/intel_ssd.rom
+# echo 0 &gt; /sys/devices/pci0000:80/0000:80:01.0/0000:81:00.0/rom
+</pre>
+<p>获取并编译 TianoCore 的 <a href="https://github.com/tianocore/edk2.git">EDK II 工具</a>：
+</p>
+<pre>$ make -C BaseTools
+</pre>
+<p>解析 ROM 文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ./BaseTools/Source/C/bin/EfiRom -d ~/intel_ssd.rom</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Image 1 -- Offset 0x0
+  ROM header contents
+    Signature              0xAA55
+    PCIR offset            0x001C
+    Signature               PCIR
+    Vendor ID               0x8086
+    Device ID               0x0953
+    Length                  0x001C
+    Revision                0x0003
+    DeviceListOffset        0x00
+    Class Code              0x000000
+    Image size              0x6A00
+    Code revision:          0x0000
+    MaxRuntimeImageLength   0x00
+    ConfigUtilityCodeHeaderOffset 0x00
+    DMTFCLPEntryPointOffset 0x00
+    Indicator               0x80   (last image)
+    Code type               0x03   (EFI image)
+  EFI ROM header contents
+    EFI Signature          0x0EF1
+    Compression Type       0x0001 (compressed)
+    Machine type           0x8664 (X64)
+    Subsystem              0x000B (EFI boot service driver)
+    EFI image offset       0x0038 (@0x38)
+</pre>
+<p>结果显示，该 OpROM 在偏移量（Offset）0x0 处的 Image 1 偏移量 0x0038 位置包含一个压缩的 EFI 镜像。提取该 EFI 区域：
+</p><p><br/>
+</p>
+<pre>$ dd if=intel_ssd.rom ibs=1 skip=$(( 0x00 + 0x38 )) of=intel_ssd.rom.efi.compressed
+</pre>
+<p>解压缩该镜像：
+</p>
+<pre>$ ./BaseTools/Source/C/bin/TianoCompress -d --uefi -v ~/intel_ssd.rom.efi.compressed -o ~/intel_ssd.rom.efi
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ file ../intel_ssd.rom.efi</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">../intel_ssd.rom.efi: PE32+ executable for EFI (boot service driver), x86-64, 6 sections
+</pre>
+<p>使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sbsigntools">sbsigntools</a></span><sup><small>包</small></sup></span> 检查签名，可以看到它是使用微软的 DB 证书签名的：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ sbverify --list ~/intel_ssd.rom.efi</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">signature 1
+image signature issuers:
+ - /C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Corporation UEFI CA 2011
+image signature certificates:
+ - subject: /C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/OU=MOPR/CN=Microsoft Windows UEFI Driver Publisher
+   issuer:  /C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Corporation UEFI CA 2011
+ - subject: /C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Corporation UEFI CA 2011
+   issuer:  /C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Corporation Third Party Marketplace Root</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>为了防止设备软变砖（Soft brick），如果发现显卡带有已签名的 ROM，请确保在录入自定义密钥后，你的 Secure Boot DB（允许数据库）中依然保留了必要签发者（Issuers）证书。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b4af9f551f6_.E5.A4.87.E4.BB.BD.E5.BD.93.E5.89.8D.E5.8F.98.E9.87.8F" id="备份当前变量"><span id=".E5.A4.87.E4.BB.BD.E5.BD.93.E5.89.8D.E5.8F.98.E9.87.8F"></span>备份当前变量</h4></div>
+<p>在创建新的密钥和修改EFI变量之前，建议备份当前的变量，以便在发生错误时可以恢复。
+</p><p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=efitools">efitools</a></span><sup><small>包</small></sup></span> 软件包后，运行以下命令来备份所有四个主要的安全启动变量。
+</p>
+<pre>$ for var in PK KEK db dbx ; do efi-readvar -v $var -o old_${var}.esl ; done
+</pre>
+<p>如果你在新电脑或主板上执行这条命令，你提取的变量很可能是微软提供的。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b4af9f551f6_.E5.88.9B.E5.BB.BA.E5.AF.86.E9.92.A5" id="创建密钥"><span id=".E5.88.9B.E5.BB.BA.E5.AF.86.E9.92.A5"></span>创建密钥</h4></div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E6.89.8B.E5.8A.A8.E6.B5.81.E7.A8.8B" id="手动流程"><span id=".E6.89.8B.E5.8A.A8.E6.B5.81.E7.A8.8B"></span>手动流程</h5></div>
+<p>要生成密钥，请执行以下步骤。
+</p><p>你将需要多种格式的私钥和证书。
+</p>
+<dl><dt><i>.key</i></dt>
+<dd>PEM格式的<b>私钥</b>，用于签署EFI二进制和EFI签名列表。</dd>
+<dt><i>.crt</i></dt>
+<dd>PEM格式的证书，用于<span class="plainlinks archwiki-template-man" title="$ man 1 sbsign"><a href="https://man.archlinux.org/man/sbsign.1">sbsign(1)</a></span>、<span class="plainlinks archwiki-template-man" title="$ man 1 sbvarsign"><a href="https://man.archlinux.org/man/sbvarsign.1">sbvarsign(1)</a></span>与<span class="plainlinks archwiki-template-man" title="$ man 1 sign-efi-sig-list"><a href="https://man.archlinux.org/man/sign-efi-sig-list.1">sign-efi-sig-list(1)</a></span>。</dd>
+<dt><i>.cer</i></dt>
+<dd>DER格式的证书，用于固件。</dd>
+<dt><i>.esl</i></dt>
+<dd>EFI签名列表的证书，用于<span class="plainlinks archwiki-template-man" title="$ man 1 sbvarsign"><a href="https://man.archlinux.org/man/sbvarsign.1">sbvarsign(1)</a></span>、<span class="plainlinks archwiki-template-man" title="$ man 1 efi-updatevar"><a href="https://man.archlinux.org/man/efi-updatevar.1">efi-updatevar(1)</a></span>、<i>KeyTool</i>与固件。</dd>
+<dt><i>.auth</i></dt>
+<dd>EFI签名列表中的证书，带有认证头（即签名的证书更新文件），用于<span class="plainlinks archwiki-template-man" title="$ man 1 efi-updatevar"><a href="https://man.archlinux.org/man/efi-updatevar.1">efi-updatevar(1)</a></span>、<i>sbkeysync</i>、<i>KeyTool</i>与固件。</dd></dl>
+<p>创建一个<a href="https://en.wikipedia.org/wiki/Globally_unique_identifier">GUID</a>用于自我识别：
+</p>
+<pre>$ uuidgen --random &gt; GUID.txt
+</pre>
+<p>平台密钥：
+</p>
+<pre>$ openssl req -newkey rsa:4096 -nodes -keyout PK.key -new -x509 -sha256 -days <i>3650</i> -subj "/CN=<i>my Platform Key</i>/" -out PK.crt
+$ openssl x509 -outform DER -in PK.crt -out PK.cer
+$ cert-to-efi-sig-list -g "$(&lt; GUID.txt)" PK.crt PK.esl
+$ sign-efi-sig-list -g "$(&lt; GUID.txt)" -k PK.key -c PK.crt PK PK.esl PK.auth
+</pre>
+<p>签署一个空白文件用来在“用户模式”中移除平台密钥：
+</p>
+<pre>$ sign-efi-sig-list -g "$(&lt; GUID.txt)" -c PK.crt -k PK.key PK /dev/null no_PK.auth
+</pre>
+<p>密钥交换密钥：（生成KEK.auth的指令没有加-a，所以文件只能用来update KEK实现替换。如果要生成用于add添加的KEK.auth，则需要在指令里添加-a，同理db等。PK只能有一个所以直接替换就好，删除的话用本页面介绍的指令生成的rm_PK.auth。）
+</p>
+<pre>$ openssl req -newkey rsa:4096 -nodes -keyout KEK.key -new -x509 -sha256 -days <i>3650</i> -subj "/CN=<i>my Key Exchange Key</i>/" -out KEK.crt
+$ openssl x509 -outform DER -in KEK.crt -out KEK.cer
+$ cert-to-efi-sig-list -g "$(&lt; GUID.txt)" KEK.crt KEK.esl
+$ sign-efi-sig-list -g "$(&lt; GUID.txt)" -k PK.key -c PK.crt KEK KEK.esl KEK.auth
+</pre>
+<p>签名数据库密钥：
+</p>
+<pre>$ openssl req -newkey rsa:4096 -nodes -keyout db.key -new -x509 -sha256 -days <i>3650</i> -subj "/CN=<i>my Signature Database key</i>/" -out db.crt
+$ openssl x509 -outform DER -in db.crt -out db.cer
+$ cert-to-efi-sig-list -g "$(&lt; GUID.txt)" db.crt db.esl
+$ sign-efi-sig-list -g "$(&lt; GUID.txt)" -k KEK.key -c KEK.crt db db.esl db.auth
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E8.BE.85.E5.8A.A9.E8.84.9A.E6.9C.AC" id="辅助脚本"><span id=".E8.BE.85.E5.8A.A9.E8.84.9A.E6.9C.AC"></span>辅助脚本</h5></div>
+<p>关于这个主题的参考页<a href="https://www.rodsbooks.com/efi-bootloaders/controlling-sb.html#creatingkeys">[4]</a>的作者提供了一个辅助/快捷脚本（需要<a href="#pgf6d3de5ccfac">python</a>)。一个轻度修改的版本也被打包为<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sbkeys/">sbkeys</a></span><sup><small>AUR</small></sup></span>。
+</p><p>为了使用它，请在安全位置创建一个文件夹（比如<code>/etc/efi-keys/</code>，如果你接下来计划统一内核镜像的创建与签署自动化过程）并且运行：
+</p>
+<pre># mkdir /etc/efi-keys
+# cd !$
+# curl -L -O <a href="https://www.rodsbooks.com/efi-bootloaders/mkkeys.sh">https://www.rodsbooks.com/efi-bootloaders/mkkeys.sh</a>
+# chmod +x mkkeys.sh
+# ./mkkeys.sh
+&lt;输入一个通用名，以嵌入至密钥中，比如 "Secure Boot"&gt;
+</pre>
+<p>这将产生所需的不同格式的文件。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E6.9B.B4.E6.96.B0.E5.AF.86.E9.92.A5" id="更新密钥"><span id=".E6.9B.B4.E6.96.B0.E5.AF.86.E9.92.A5"></span>更新密钥</h5></div>
+<p>一旦安全启动进入“用户模式”，任何对KEK、db以及dbx的改变都需要更高级的密钥签署。
+</p><p>比如，如果你想要更新你的db密钥：
+</p>
+<ol><li>创建新的密钥，</li>
+<li>转换其为EFI签名列表，</li>
+<li>签署EFI签名列表，</li>
+<li>登记已签署的证书更新文件。</li></ol>
+<pre>$ cert-to-efi-sig-list -g "$(&lt; GUID.txt)" <i>new_db</i>.crt <i>new_db</i>.esl
+$ sign-efi-sig-list -g "$(&lt; GUID.txt)" -k KEK.key -c KEK.crt db <i>new_db</i>.esl <i>new_db</i>.auth
+</pre>
+<p>如果你想<b>添加</b>另一个密钥至签名数据库中且不替换你的db密钥，你需要使用选项<code>-a</code>（请看<span class="plainlinks archwiki-template-man" title="$ man 1 sign-efi-sig-list"><a href="https://man.archlinux.org/man/sign-efi-sig-list.1">sign-efi-sig-list(1)</a></span>）：
+</p>
+<pre>$ sign-efi-sig-list <b>-a</b> -g "$(&lt; GUID.txt)" -k KEK.key -c KEK.crt db <i>new_db</i>.esl <i>new_db</i>.auth
+</pre>
+<p>当<code><i>new_db</i>.auth</code>被创建，登记它。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b4af9f551f6_.E7.AD.BE.E7.BD.B2EFI.E4.BA.8C.E8.BF.9B.E5.88.B6.E6.96.87.E4.BB.B6" id="签署EFI二进制文件"><span id=".E7.AD.BE.E7.BD.B2EFI.E4.BA.8C.E8.BF.9B.E5.88.B6.E6.96.87.E4.BB.B6"></span>签署EFI二进制文件</h4></div>
+<p>当<i>安全启动</i>激活时（比如在“用户模式”中），只有已被签署的EFI二进制文件（比如应用程序、<a href="#pg759eb38b76cf">驱动</a>、<a href="#pg3bddb6ba0c50">统一内核镜像</a>）可以被启动。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E4.BD.BF.E7.94.A8sbsigntools.E6.89.8B.E5.8A.A8.E6.93.8D.E4.BD.9C" id="使用sbsigntools手动操作"><span id=".E4.BD.BF.E7.94.A8sbsigntools.E6.89.8B.E5.8A.A8.E6.93.8D.E4.BD.9C"></span>使用sbsigntools手动操作</h5></div>
+<p>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sbsigntools">sbsigntools</a></span><sup><small>包</small></sup></span>来使用<span class="plainlinks archwiki-template-man" title="$ man 1 sbsign"><a href="https://man.archlinux.org/man/sbsign.1">sbsign(1)</a></span>签署EFI二进制文件。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>为了检查一个二进制文件是否被签署并列出它的签名，使用<code>sbverify --list <i>/path/to/binary</i></code>。</li>
+<li><a href="#pg155cf311d887">rEFInd</a>启动管理器的<code>refind-install</code>脚本可以签署rEFInd的EFI二进制文件并把它们与db证书一起拷贝到ESP中。 请参考<a href="#pg155cf311d887">rEFInd#使用你自己的密钥</a>。</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果不带<code>--output</code>使用<i>sbsign</i>的话，生成文件将会是<code><i>filename</i>.signed</code>。详情请看<span class="plainlinks archwiki-template-man" title="$ man 1 sbsign"><a href="https://man.archlinux.org/man/sbsign.1">sbsign(1)</a></span>。</div>
+<p>使用<i>sbsign</i>来签署你的内核与启动管理器，比如：
+</p>
+<pre># sbsign --key db.key --cert db.crt --output /boot/vmlinuz-linux /boot/vmlinuz-linux
+# sbsign --key db.key --cert db.crt --output <i>esp</i>/EFI/BOOT/BOOTx64.EFI <i>esp</i>/EFI/BOOT/BOOTx64.EFI
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>只对内核进行签署并不能保护initramfs不被篡改。查看<a href="#pg3bddb6ba0c50">统一内核镜像</a>以了解如何生成一个组合镜像并通过<i>sbsign</i>手动签署。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E4.BD.BF.E7.94.A8pacman.E9.92.A9.E5.AD.90.E7.AD.BE.E7.BD.B2.E5.86.85.E6.A0.B8" id="使用pacman钩子签署内核"><span id=".E4.BD.BF.E7.94.A8pacman.E9.92.A9.E5.AD.90.E7.AD.BE.E7.BD.B2.E5.86.85.E6.A0.B8"></span>使用pacman钩子签署内核</h5></div>
+<p>你也可使用mkinitcpio的<a href="#pg9ef105bf1e3c">pacman钩子</a>在安装与更新时签署一个内核。
+</p><p>复制<code>/usr/share/libalpm/hooks/90-mkinitcpio-install.hook</code>到<code>/etc/pacman.d/hooks/90-mkinitcpio-install.hook</code>以及复制 <code>/usr/share/libalpm/scripts/mkinitcpio-install</code>到<code>/usr/local/share/libalpm/scripts/mkinitcpio-install</code>。
+</p><p>在<code>/etc/pacman.d/hooks/90-mkinitcpio-install.hook</code>里，将：
+</p>
+<pre>Exec = /usr/share/libalpm/scripts/mkinitcpio-install
+</pre>
+<p>替换为：
+</p>
+<pre>Exec = /usr/local/share/libalpm/scripts/mkinitcpio-install
+</pre>
+<p>在<code>/usr/local/share/libalpm/scripts/mkinitcpio-install</code>里，将：
+</p>
+<pre>install -Dm644 "${line}" "/boot/vmlinuz-${pkgbase}"
+</pre>
+<p>替换为：
+</p>
+<pre>sbsign --key <i>/path/to/</i>db.key --cert <i>/path/to/</i>db.crt --output "/boot/vmlinuz-${pkgbase}" "${line}"
+</pre>
+<p>如果你正在使用systemd-boot，有一个<a href="#pg171755f7b428">专用的pacman钩子</a>会半自动的做这个任务。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E7.94.A8sbupdate.E5.85.A8.E8.87.AA.E5.8A.A8.E7.94.9F.E6.88.90.E5.92.8C.E7.AD.BE.E7.BD.B2.E7.BB.9F.E4.B8.80.E5.86.85.E6.A0.B8" id="用sbupdate全自动生成和签署统一内核"><span id=".E7.94.A8sbupdate.E5.85.A8.E8.87.AA.E5.8A.A8.E7.94.9F.E6.88.90.E5.92.8C.E7.AD.BE.E7.BD.B2.E7.BB.9F.E4.B8.80.E5.86.85.E6.A0.B8"></span>用sbupdate全自动生成和签署统一内核</h5></div>
+<p><a href="https://github.com/andreyv/sbupdate">sbupdate</a>是一个专门为在Arch Linux上自动生成和签署统一内核镜像而制作的工具。它通过<a href="#pg9ef105bf1e3c">Pacman#钩子</a>处理内核的安装、移除和更新。
+</p><p>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sbupdate-git/">sbupdate-git</a></span><sup><small>AUR</small></sup></span>并按照项目主页上的说明进行配置。<a href="https://github.com/andreyv/sbupdate#sbupdate">[5]</a>
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果正在使用<a href="#pg171755f7b428">systemd-boot</a>，设置<code>OUT_DIR="EFI/Linux"</code>可以让你的已签署的内核镜像直接被识别而不需要必须的配置。请看<span class="plainlinks archwiki-template-man" title="$ man 7 systemd-boot"><a href="https://man.archlinux.org/man/systemd-boot.7#FILES">systemd-boot(7) § FILES</a></span>与<a href="#pg171755f7b428">Systemd-boot#增加启动选项</a>。</div>
+<p>一旦完成配置，只需要以root运行<code>sbupdate</code>以完成首次镜像生成。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><i>sbupdate</i>的输出经常包含错误比如<code>warning: data remaining[26413568 vs 26423180]: gaps between PE/COFF sections?</code>。那些是无害的且可以被安全的无视掉。<a href="https://github.com/andreyv/sbupdate/issues/30">[6]</a></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b4af9f551f6_.E5.B0.86.E5.9B.BA.E4.BB.B6.E7.BD.AE.E4.BA.8E_.22.E8.AE.BE.E7.BD.AE.E6.A8.A1.E5.BC.8F_.22.E4.B8.8B" id='将固件置于_"设置模式_"下'><span id=".E5.B0.86.E5.9B.BA.E4.BB.B6.E7.BD.AE.E4.BA.8E_.22.E8.AE.BE.E7.BD.AE.E6.A8.A1.E5.BC.8F_.22.E4.B8.8B"></span>将固件置于 "设置模式 "下</h4></div>
+<p>当平台密钥被删除时，安全启动处于设置模式。要将固件置于设置模式，请进入固件设置工具，并找到删除或清除证书的选项。#在启动操作系统之前中介绍了如何进入设置工具。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b4af9f551f6_.E5.9C.A8.E5.9B.BA.E4.BB.B6.E4.B8.AD.E7.99.BB.E8.AE.B0.E5.AF.86.E9.92.A5" id="在固件中登记密钥"><span id=".E5.9C.A8.E5.9B.BA.E4.BB.B6.E4.B8.AD.E7.99.BB.E8.AE.B0.E5.AF.86.E9.92.A5"></span>在固件中登记密钥</h4></div>
+<p>使用下列某种方式登记'<i>db<b>、</b>KEK<b>和</b>PK</i>证书。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果<b>dbx</b>（禁止的签名数据库）是空白的，在下面的说明中，它可以被安全地排除在外。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>登记平台密钥会使安全启动进入“用户模式”，也就意味着会离开“设置模式”，所以登记应该完成在所有流程的最后。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E4.BD.BF.E7.94.A8sbkeysync" id="使用sbkeysync"><span id=".E4.BD.BF.E7.94.A8sbkeysync"></span>使用sbkeysync</h5></div>
+<p>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sbsigntools">sbsigntools</a></span><sup><small>包</small></sup></span>。按照以下目录结构创建文件夹<code>/etc/secureboot/keys</code> -
+</p>
+<pre>/etc/secureboot/keys
+├── db
+├── dbx
+├── KEK
+└── PK
+</pre>
+<p>比如，这样用：
+</p>
+<pre># mkdir -p /etc/secureboot/keys/{db,dbx,KEK,PK}
+</pre>
+<p>接下来复制之前生成的每一个<i>.auth</i>文件到它们所对应的位置（比如，把<code>PK.auth</code>放进<code>/etc/secureboot/keys/PK</code>，以此类推）。
+</p><p>检查<code>sbkeysync</code>会对你系统的UEFI密钥库做什么改变。
+</p>
+<pre># sbkeysync --pk --dry-run --verbose
+</pre>
+<p>最后，使用<code>sbkeysync</code>来登记你的密钥。
+</p>
+<pre># sbkeysync --verbose
+# sbkeysync --verbose --pk
+</pre>
+<p><br/>
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>如果<code>sbkeysync</code>返回了写错误，那么在执行<code>sbkeysync</code>前先运行<code>chattr -i /sys/firmware/efi/efivars/{PK,KEK,db}*</code>来暂时改变文件属性，使EFI密钥可以写入<code>efivars</code>目录中。详情见<span class="plainlinks archwiki-template-man" title="$ man 1 chattr"><a href="https://man.archlinux.org/man/chattr.1">chattr(1)</a></span>。</li>
+<li>如果为<code>PK.auth</code>得到了一个<code>permission denied</code>错误，你可以使用命令<code>efi-updatevar -f /etc/secureboot/keys/PK/PK.auth PK</code>登记密钥。</li>
+<li>如果都失败了，这可能是因为固件对BIOS设置上锁了。对于戴尔和联想的系统，你或许需要重置你的BIOS密码：<a href="https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-firmware-attributes">Sysfs固件认证文档</a></li></ul>
+<p>对于联想系统：
+</p>
+<pre># cat &gt; /sys/class/firmware-attributes/thinklmi/authentication/Admin/current_password 
+my-super-secret-password
+<span style="color:#ebf1f5; background-color:#222222;">^D</span>
+</pre>
+<p>对于戴尔系统：
+</p>
+<pre># cat &gt; /sys/class/firmware-attributes/dell-wmi-sysman/authentication/Admin/current_password 
+my-super-secret-password
+<span style="color:#ebf1f5; background-color:#222222;">^D</span>
+</pre>
+然后再次尝试。</div>
+<p>下一次启动时，UEFI应该会切回用户模式并且执行安全启动策略。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E4.BD.BF.E7.94.A8.E5.9B.BA.E4.BB.B6.E8.AE.BE.E7.BD.AE.E5.B7.A5.E5.85.B7" id="使用固件设置工具"><span id=".E4.BD.BF.E7.94.A8.E5.9B.BA.E4.BB.B6.E8.AE.BE.E7.BD.AE.E5.B7.A5.E5.85.B7"></span>使用固件设置工具</h5></div>
+<p>复制所有的<code>*.cer</code>、<code>*.esl</code>、<code>*.auth</code>文件（<b>除了</b><code>noPK.auth</code>）到一个<a href="#pg30cebfcdd710">FAT</a>格式的文件系统（你可以使用<a href="#pg635d4bd93303">EFI 系统分区</a>）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><b>不要</b>把<code>noPK.auth</code>文件复制到你个人电脑的<a href="#pg635d4bd93303">EFI 系统分区</a>（ESP）！如果你这样做了，假如有人偷了你的电脑，这个人可以删除UEFI安全启动固件中的个人平台密钥，再一次打开你电脑上的“设置模式”，然后用他们自己的平台密钥替换你的安全启动密钥（PK、KEK、db、dbx），这将完全违背UEFI安全启动的目的。 应当只有你自己可以替换平台密钥，只有你自己可以访问<code>noPK.auth</code>文件。因此把<code>noPK.auth</code>文件保存在一个只有你自己能访问的安全的地方。这些地方对于<code>noPK.auth</code>文件来说都可以是安全的：
+<ul><li>当你使用<code>KeyTool</code>时，可以使用带有<a href="#pg635d4bd93303">EFI 系统分区</a>的外部U盘。要注意，<code>KeyTool</code>只能读取未加密存储中的文件。</li>
+<li>当你使用<code>sbkeysync</code>时，运用<a href="#pg812206bba43d">静态数据加密</a>。</li></ul>
+<p>个人电脑的<a href="#pg635d4bd93303">EFI 系统分区</a>一定要按照UEFI的规范进行加密，否则就可以在另一台电脑上被挂载且被读取（如果你的电脑被偷了，硬盘可以被取出来挂载到另一台电脑上）。复制<code>noPK.auth</code>到你电脑的ESP后再删除也是不可取的，因为在FAT32格式的<a href="#pg635d4bd93303">EFI 系统分区</a>上被删除的文件<a href="#pg9c024ee102b3">可以通过像是PhotoRec这样的工具被还原</a>。
+</p>
+</div>
+<p>启动固件设置工具，登记<b>db</b>、<b>KEK</b>与<b>PK</b>证书。
+固件会有各种不同的界面，请看<a href="https://www.rodsbooks.com/efi-bootloaders/controlling-sb.html#setuputil">使用固件的设置工具更换密钥</a>，以了解如何登记密钥。
+</p><p>如果使用的工具支持，最好使用<i>.auth</i>和<i>.esl</i>而不是<i>.cer</i>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E4.BD.BF.E7.94.A8KeyTool" id="使用KeyTool"><span id=".E4.BD.BF.E7.94.A8KeyTool"></span>使用KeyTool</h5></div>
+<p><code>KeyTool.efi</code>包含在<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=efitools">efitools</a></span><sup><small>包</small></sup></span>包中，复制它到ESP。为了能在登记密钥后使用它，请用<code>sbsign</code>对它签署。
+</p>
+<pre># sbsign --key db.key --cert db.crt --output <i>esp</i>/KeyTool-signed.efi /usr/share/efitools/efi/KeyTool.efi
+</pre>
+<p>使用固件设置工具，引导加载程序或者<a href="#pg46c3147defaf">UEFI Shell</a>启动<code>KeyTool-signed.efi</code>，然后登记密钥。
+</p><p>参见<a href="https://www.rodsbooks.com/efi-bootloaders/controlling-sb.html#keytool">使用KeyTool更换密钥</a>了解KeyTool的菜单选项。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b4af9f551f6_.E4.B8.8E.E5.85.B6.E4.BB.96.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.E8.BF.9B.E8.A1.8C.E5.8F.8C.E9.87.8D.E5.90.AF.E5.8A.A8" id="与其他操作系统进行双重启动"><span id=".E4.B8.8E.E5.85.B6.E4.BB.96.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.E8.BF.9B.E8.A1.8C.E5.8F.8C.E9.87.8D.E5.90.AF.E5.8A.A8"></span>与其他操作系统进行双重启动</h4></div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E5.BE.AE.E8.BD.AF_Windows" id="微软_Windows"><span id=".E5.BE.AE.E8.BD.AF_Windows"></span>微软 Windows</h5></div>
+
+<p>通常情况下，启用安全引导下，仅使用私人自定义密钥签署微软引导程序（<code>EFI/Microsoft/Boot/bootmgfw.efi</code>）而没有在UEFI安全启动变量中登记“Microsoft Windows Production PCA 2011”<b>不可能</b>启动Windows：
+</p>
+<ul><li>如果<code>bootmgfw.efi</code><b>同时</b>包含来自“Microsoft Windows Production PCA 2011”<b>和</b>你自己的安全启动数据库密钥（也就是说有<b>两个签名</b>），那么UEFI固件实现（比如<i>INSYDE Corp. 4096.01 (UEFI Version 2.31, Version F.70, Release Date: 07/18/2016, BIOS Revision 15.112, Firmware Revision: 29.66)</i>）将不会启动<code>bootmgfw.efi</code>，并且会抛出一个安全违规错误（<b><code>Selected boot image did not authenticate. Press ENTER to continue.</code></b>）。像是这样的UEFI固件实现可能只能读取<b>第一个</b>签名而忽略<b>第二个</b>。只有第二个签名的证书被注册到UEFI安全启动变量中，所以安全启动验证失败。</li></ul>
+<ul><li>如果从<code>bootmgfw.efi</code>中剥离/移除“Microsoft Windows Production PCA 2011”证书，而只在文件中添加了你自己的安全启动数据库密钥的签名，虽然UEFI会启动该文件但Windows将启动一个恢复/修复环境。Windows会抱怨说：Windows的安装被破坏了（因为<code>bootmgfw.efi</code>中缺失了“Microsoft Windows Production PCA 2011”证书）。</li></ul>
+<p>所以为了<a href="#pg4d5a3358c464">实现双系统</a>：
+</p>
+<ul><li>你必须把<code>bootmgfw.efi</code>的散列值添加到<code>DB</code>变量中允许的散列值列表中，而且每次Windows更新改变<code>bootmgfw.efi</code>时，你都必须更新DB变量。这非常繁琐，容易出错，而且不被微软支持，例如，Bitlocker在这种设置下将无法正常工作（Bitlocker每次解密Windows分区时都会要求你提供恢复密码）。</li>
+<li>或者你必须将微软的证书添加到UEFI安全启动的变量中，<a href="https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-secure-boot-key-creation-and-management-guidance#14-signature-databases-db-and-dbx">微软有两个<code>DB</code>证书和一个<code>KEK</code>证书</a>：</li></ul>
+<ul><li><ul><li>为了使Windows操作系统可以被引导，<a href="https://www.microsoft.com/pkiops/certs/MicWinProPCA2011_2011-10-19.crt">Microsoft Windows Production PCA 2011 证书</a>必须被包含进<code>DB</code>变量。</li>
+<li>为了使用第三方二进制，比如UEFI驱动、其他ROM、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=shim">shim</a></span><sup><small>包</small></sup></span>等，<a href="https://www.microsoft.com/pkiops/certs/MicCorUEFCA2011_2011-06-27.crt">Microsoft Corporation UEFI CA 2011 证书</a>（又叫作微软第三方UEFI CA证书）必须被包含进<code>DB</code>变量。</li>
+<li>为了“通过更新<code>DBX</code>和潜在更新<code>DB</code>来撤销不良镜像对新的Windows签名镜像做准备”，<a href="https://www.microsoft.com/pkiops/certs/MicCorKEKCA2011_2011-06-24.crt">Microsoft Corporation KEK CA 2011 证书</a>应当被包含进<code>KEK</code>变量。然而没有“Microsoft Corporation KEK CA 2011”证书，Windows也可以启动。</li></ul></li></ul>
+<p>使用微软的GUID（<code>77fa9abd-0359-4d32-bd60-28f4e78f784b</code>），根据微软的多个DER格式的<code>DB</code>证书创建多个EFI签名列表。然后为了方便，把它们合并进一个文件中：
+</p>
+<pre>$ sbsiglist --owner 77fa9abd-0359-4d32-bd60-28f4e78f784b --type x509 --output MS_Win_db.esl MicWinProPCA2011_2011-10-19.crt
+$ sbsiglist --owner 77fa9abd-0359-4d32-bd60-28f4e78f784b --type x509 --output MS_UEFI_db.esl MicCorUEFCA2011_2011-06-27.crt
+$ cat MS_Win_db.esl MS_UEFI_db.esl &gt; MS_db.esl
+</pre>
+<p>可选操作（为了严格符合的微软UEFI安全启动要求）：使用微软的GUID（<code>77fa9abd-0359-4d32-bd60-28f4e78f784b</code>），根据微软的KEK格式的<code>DB</code>证书创建EFI签名列表：
+</p>
+<pre> $ sbsiglist --owner 77fa9abd-0359-4d32-bd60-28f4e78f784b --type x509 --output MS_Win_KEK.esl MicCorKEKCA2011_2011-06-24.crt
+</pre>
+<p>使用你自己的<code>KEK</code>签署一个<code>DB</code>变量更新。使用带有<code>-a</code>选项的<code>sign-efi-sig-list</code>来<b>添加</b>而不是替换一个<code>DB</code>证书：
+</p>
+<pre>$ sign-efi-sig-list -a -g 77fa9abd-0359-4d32-bd60-28f4e78f784b -k KEK.key -c KEK.crt db MS_db.esl add_MS_db.auth
+</pre>
+<p>可选操作（为了严格符合微软的UEFI安全启动要求）：使用你自己的<code>PK</code>签署一个<code>KEK</code>变量更新。使用带有<code>-a</code>选项的<code>sign-efi-sig-list</code>来<b>添加</b>而不是替换一个<code>KEK</code>证书：
+</p>
+<pre>$ sign-efi-sig-list -a -g 77fa9abd-0359-4d32-bd60-28f4e78f784b -k PK.key -c PK.crt KEK MS_Win_KEK.esl add_MS_Win_KEK.auth
+</pre>
+<p>按照#在固件中登记密钥的内容来登记<code>add_MS_db.auth</code>，为了严格符合微软的UEFI安全启动要求，将<code>add_MS_Win_KEK.auth</code>放入UEFI安全启动数据库的变量中。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b4af9f551f6_.E4.BD.BF.E7.94.A8.E5.B7.B2.E7.AD.BE.E7.BD.B2.E7.9A.84.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F" id="使用已签署的引导加载程序"><span id=".E4.BD.BF.E7.94.A8.E5.B7.B2.E7.AD.BE.E7.BD.B2.E7.9A.84.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F"></span>使用已签署的引导加载程序</h3></div>
+<p>使用已签署的引导加载程序意味着使用由<b>微软的密钥签署的</b>引导加载程序。有两个已知的签署的引导加载程序：PreLoader和shim。它们的目的是连锁加载其他EFI二进制文件（通常是<a href="#pg7e866ec617d4">引导加载程序</a>）。由于微软不会签署一个自动启动任何未签署的二进制文件的引导加载程序，PreLoader和shim使用一个叫做机器所有者密钥列表的白名单，缩写为MokList。如果二进制文件的SHA256散列值（Preloader和shim）或签署二进制文件的密钥（shim）在MokList中，它们就执行它，如果没有，他们就启动一个密钥管理工具，允许注册散列值或密钥。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>微软所谓的“Secured-core PCs”在出厂时并没有登记微软第三方UEFI CA证书（Microsoft Corporation UEFI CA 2011） <a href="https://docs.microsoft.com/en-us/windows/security/information-protection/secure-the-windows-10-boot-process#secure-boot">[7]</a>。唯一登记的DB证书是Microsoft Windows Production PCA 2011证书，该证书专门用于签署Windows的引导加载程序。
+<p>微软第三方UEFI CA证书的登记需要在固件设置中启用，以启动用该证书签署的EFI二进制文件和OpROM。
+</p>
+</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b4af9f551f6_PreLoader" id="PreLoader">PreLoader</h4></div>
+<p>运行时，PreLoader尝试启动<code>loader.efi</code>。如果<code>loader.efi</code>的散列值不在MokList中，PreLoader将会启动<code>HashTool.efi</code>。在HashTool中，你必须登记你想要启动的EFI二进制的散列值，也就是你的<a href="#pgee8f2050088a">引导加载程序</a>（<code>loader.efi</code>）以及内核的散列值。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>每次你更新任何二进制文件（如引导加载程序或内核）时，你都需要登记它们的新散列值。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><a href="#pg155cf311d887">rEFInd</a>加载管理程序的<code>refind-install</code>脚本可以复制rEFInd与PreLoader的EFI二进制文件到ESP。请看<a href="#pg155cf311d887">REFInd#使用_PreLoader</a>。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E8.AE.BE.E7.BD.AEPreLoader" id="设置PreLoader"><span id=".E8.AE.BE.E7.BD.AEPreLoader"></span>设置PreLoader</h5></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=efitools">efitools</a></span><sup><small>包</small></sup></span>包中的<code>PreLoader.efi</code>与<code>HashTool.efi</code>没有被签署，所以它们的作用是有限的。你可以从<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/preloader-signed/">preloader-signed</a></span><sup><small>AUR</small></sup></span>获取被签署的<code>PreLoader.efi</code>与<code>HashTool.efi</code>，或者<a href="https://blog.hansenpartnership.com/linux-foundation-secure-boot-system-released/">手动下载它们</a>。</div>
+<p><a href="#pg811194d6beaa">安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/preloader-signed/">preloader-signed</a></span><sup><small>AUR</small></sup></span>和<code>HashTool.efi</code>然后复制<code>PreLoader.efi</code>和<code>HashTool.efi</code>到<a href="#pgee8f2050088a">引导加载程序</a>目录中。对于<a href="#pg171755f7b428">systemd-boot</a>，使用：
+</p>
+<pre># cp /usr/share/preloader-signed/{PreLoader,HashTool}.efi <i>esp</i>/EFI/systemd
+</pre>
+<p>现在复制一份引导加载程序的二进制文件并重命名为<code>loader.efi</code>。对于<a href="#pg171755f7b428">systemd-boot</a>，使用：
+</p>
+<pre># cp <i>esp</i>/EFI/systemd/systemd-bootx64.efi <i>esp</i>/EFI/systemd/loader.efi
+</pre>
+<p>最终，创建一个新的NVRAM引导项来启动<code>PreLoader.efi</code>：
+</p>
+<pre># efibootmgr --unicode --disk /dev/sd<i><b>X</b></i> --part <i><b>Y</b></i> --create --label "PreLoader" --loader /EFI/systemd/PreLoader.efi
+</pre>
+<p>把<code><i>X</i></code>替换为驱动器字符并把<code><i>Y</i></code>替换为<a href="#pg635d4bd93303">EFI 系统分区</a>的分区号。
+</p><p>这个启动项应当添加进启动列表中并作为第一项启动，用<code>efibootmgr</code>命令检查，必要时调整启动顺序。
+</p>
+<div class="mw-heading mw-heading6"><h6 data-bm="pg4b4af9f551f6_.E5.9B.9E.E6.92.A4" id="回撤"><span id=".E5.9B.9E.E6.92.A4"></span>回撤</h6></div>
+<p>如果启动这个自定义NVRAM启动项时出现问题，复制<code>HashTool.efi</code>和<code>loader.efi</code>到UEFI系统自动启动的默认加载程序位置：
+</p>
+<pre># cp /usr/share/preloader-signed/HashTool.efi <i>esp</i>/EFI/BOOT/
+# cp <i>esp</i>/EFI/systemd/systemd-bootx64.efi <i>esp</i>/EFI/BOOT/loader.efi
+</pre>
+<p>复制一份<code>PreLoader.efi</code>并重命名：
+</p>
+<pre># cp /usr/share/preloader-signed/PreLoader.efi <i>esp</i>/EFI/BOOT/BOOTx64.EFI
+</pre>
+<p>对于特别顽固的UEFI实现，可以将<code>PreLoader.efi</code>复制到Windows系统使用的默认加载程序位置：
+</p>
+<pre># mkdir -p <i>esp</i>/EFI/Microsoft/Boot
+# cp /usr/share/preloader-signed/PreLoader.efi <i>esp</i>/EFI/Microsoft/Boot/bootmgfw.efi
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果与Windows双启动，请先备份原始的<code>bootmgfw.efi</code>，因为替换它可能会导致Windows更新的问题。</div>
+<p>如前所述，将<code>HashTool.efi</code>和<code>loader.efi</code>复制到<code>'esp<i>/EFI/Microsoft/Boot/</i></code><i>。</i>
+</p><p>当系统在启用安全启动下启动时，按照上述步骤登记<code>loader.efi</code>和<code>/vmlinuz-linux</code>（或任何使用的内核镜像）。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E5.A6.82.E4.BD.95.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E4.BD.BF.E7.94.A8.EF.BC.9F" id="如何在启动时使用？"><span id=".E5.A6.82.E4.BD.95.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E4.BD.BF.E7.94.A8.EF.BC.9F"></span>如何在启动时使用？</h5></div>
+<p>当出现一条消息说：<code>Failed to Start loader... I will now execute HashTool.</code>。要使用HashTool来登记<code>loader.efi</code>和<code>vmlinuz.efi</code>的散列值，请遵循以下步骤。这些步骤假定了一个重制的archiso安装介质的项目。你得到的确切的项目取决于你的引导加载程序的设置。
+</p>
+<ul><li>选择 <i>OK</i></li>
+<li>在HashTool的主菜单，选择<i>Enroll Hash</i>，选择<code>\loader.efi</code>然后选<i>Yes</i>确认。同样，再选择<i>Enroll Hash</i>和<code>archiso</code>来进入archiso的目录，然后选择<code>vmlinuz.efi</code>，用<i>Yes</i>确认。接下来选择<i>Exit</i>返回至启动设备选单。</li>
+<li>在启动设备选单中选择<i>Arch Linux archiso x86_64 UEFI CD</i></li></ul>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E7.A7.BB.E9.99.A4PreLoader" id="移除PreLoader"><span id=".E7.A7.BB.E9.99.A4PreLoader"></span>移除PreLoader</h5></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>既然你要删除东西，那么最好先备份。</div>
+<p><a href="#pg8b741e1a21da">卸载</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/preloader-signed/">preloader-signed</a></span><sup><small>AUR</small></sup></span>然后
+</p><p>并简单地删除复制的文件并恢复配置。 对于<a href="#pg171755f7b428">systemd-boot</a>使用：
+</p>
+<pre># rm <i>esp</i>/EFI/systemd/{PreLoader,HashTool}.efi
+# rm <i>esp</i>/EFI/systemd/loader.efi
+# efibootmgr --unicode --bootnum <i>N</i> --delete-bootnum
+# bootctl update
+</pre>
+<p>这里<code><i>N</i></code>指的是用来启动<code>PreLoader.efi</code>所创建的NVRAM启动项。
+如有必要，用<i>efibootmgr</i>命令检查并调整启动顺序。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>上述命令涵盖了最简单的情况；如果你创建、复制、重命名或编辑了更多的文件，那么你也必须处理它们。如果PreLoader是你的操作引导项，你还需要#禁用安全启动。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E5.88.A0.E9.99.A4.E5.B7.B2.E7.99.BB.E8.AE.B0.E7.9A.84.E6.95.A3.E5.88.97.E5.80.BC" id="删除已登记的散列值"><span id=".E5.88.A0.E9.99.A4.E5.B7.B2.E7.99.BB.E8.AE.B0.E7.9A.84.E6.95.A3.E5.88.97.E5.80.BC"></span>删除已登记的散列值</h5></div>
+<p>在MOK数据库中登记的每一条散列值都会吃掉NVRAM的一小块空间。你可能想删除无用的散列值，以释放空间并防止过时的程序启动。
+</p><p><a href="#pg811194d6beaa">安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=efitools">efitools</a></span><sup><small>包</small></sup></span>然后复制<code>KeyTool.efi</code>：
+</p>
+<pre># cp /usr/share/efitools/efi/KeyTool.efi <i>esp</i>/EFI/systemd/KeyTool.efi
+</pre>
+<p>引导启动至Preloader，你会看到KeyTool引导项。然后你就可以在MOK数据库中编辑散列值。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b4af9f551f6_shim" id="shim">shim</h4></div>
+
+<p>在运行时，shim会尝试启动<code>grubx64.efi</code>。如果MokList没有包含<code>grubx64.efi</code>的散列值或它所签署的密钥，shim将会启动MokManager（<code>mmx64.efi</code>）。你必须在MokManager里登记你想要启动的EFI二进制文件（你的<a href="#pgee8f2050088a">引导加载程序</a><code>grubx64.efi</code>与内核）的散列值，或者登记你想要签署的密钥。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>如果你使用#shim与散列值，每次你升级任何二进制文件（比如引导加载程序或内核）后都需要重新登记它们的散列值。</li>
+<li>在版本15.3之后，shim不再启动没有合法<code>.sbat</code>部分的EFI二进制文件。想要验证一个EFI二进制文件是否具有这个部分，运行<code>objdump -j .sbat -s <i>/path/to/binary.efi</i></code>。详情看：<a href="https://github.com/rhboot/shim/blob/main/SBAT.md">SBAT文档</a>。</li>
+<li>或许值得注意的是，说实话，如果你对安全启动带来的安全性并不感兴趣，之所以想要开启它仅仅是为了满足Windows 11的要求，你或许可以考虑关闭shim的验证过程：<code>mokutil --disable-validation</code>。这种情况下你不必签署grub（或许sbat仍然需要）以及内核镜像，且还可以通过<code>chainloader</code>从grub启动Windows。</li></ul>
+</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E8.AE.BE.E7.BD.AEshim" id="设置shim"><span id=".E8.AE.BE.E7.BD.AEshim"></span>设置shim</h5></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><a href="#pg155cf311d887">rEFInd</a>引导程序中的<code>refind-install</code>脚本可以签署rEFInd的EFI二进制文件并与shim和MOK证书一并复制到ESP中。详情见<a href="#pg155cf311d887">rEFInd#使用 shim</a>。</div>
+<p><a href="#pg811194d6beaa">安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/shim-signed/">shim-signed</a></span><sup><small>AUR</small></sup></span>.
+</p><p>重命名当前的<a href="#pgee8f2050088a">引导加载程序</a>为<code>grubx64.efi</code>
+</p>
+<pre># mv <i>esp</i>/EFI/BOOT/BOOTx64.EFI <i>esp</i>/EFI/BOOT/grubx64.efi
+</pre>
+<p>复制<i>shim</i>与<i>MokManager</i>到ESP中的启动引导文件夹，然后将<code>shimx64.efi</code>重命名为引导加载程序之前的文件名：
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>确保你<b>不要复制</b>同一目录下的fbx64.efi，除非你真的有一个有效的bootx64.csv可以使用。否则shim不会执行grubx64.efi，这将无法正常工作，只会重置机器。</li></ul>
+</div>
+<pre># cp /usr/share/shim-signed/shimx64.efi <i>esp</i>/EFI/BOOT/BOOTx64.EFI
+# cp /usr/share/shim-signed/mmx64.efi <i>esp</i>/EFI/BOOT/
+</pre>
+<p>最终，创建一个新的NVRAM引导项来启动<code>BOOTx64.EFI</code>：
+</p>
+<pre># efibootmgr --unicode --disk /dev/sd<i><b>X</b></i> --part <i><b>Y</b></i> --create --label "Shim" --loader /EFI/BOOT/BOOTx64.EFI
+</pre>
+<p><i>shim</i>可以通过机器所有者密钥或MokList所存储的散列值验证二进制文件。
+</p>
+<dl><dt>机器所有者密钥 - Machine Owner Key (MOK)</dt>
+<dd>一个由用户生成并被用来签署EFI二进制文件的密钥。</dd>
+<dt>散列值 - hash</dt>
+<dd>一个EFI二进制文件的SHA256散列值。</dd></dl>
+<p>使用散列值更简单但是每次升级你的引导加载器或内核后需要添加它们新的散列值进MokManager。而使用MOK你只需要添加密钥一次，但是每次引导加载器或内核升级后都需要重新签署。
+</p>
+<div class="mw-heading mw-heading6"><h6 data-bm="pg4b4af9f551f6_shim.E4.B8.8E.E6.95.A3.E5.88.97.E5.80.BC" id="shim与散列值"><span id="shim.E4.B8.8E.E6.95.A3.E5.88.97.E5.80.BC"></span>shim与散列值</h6></div>
+<p>如果<i>shim</i>无法找到在MokList中找到<code>grubx64.efi</code>的SHA256散列值，它将会启动MokManager（<code>mmx64.efi</code>）。
+</p><p>在<i>MokManager</i>中选择<i>Enroll hash from disk</i>，找到<code>grubx64.efi</code>然后添加它到MokList。重复这一步骤添加你的内核<code>vmlinuz-linux</code>。完成之后，选择<i>Continue boot</i>，你的引导加载程序便会启动并成功加载内核。
+</p>
+<div class="mw-heading mw-heading6"><h6 data-bm="pg4b4af9f551f6_shim.E4.B8.8E.E5.AF.86.E9.92.A5" id="shim与密钥"><span id="shim.E4.B8.8E.E5.AF.86.E9.92.A5"></span>shim与密钥</h6></div>
+<p>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sbsigntools">sbsigntools</a></span><sup><small>包</small></sup></span>。
+</p><p>你需要：
+</p>
+<dl><dt><i>.key</i></dt>
+<dd>PEM格式的<b>私有</b>密钥，用于签署EFI二进制文件。</dd>
+<dt><i>.crt</i></dt>
+<dd>PEM格式的证书，用于<i>sbsign</i>。</dd>
+<dt><i>.cer</i></dt>
+<dd>DER格式的证书，用于<i>MokManager</i>。</dd></dl>
+<p>创建一个机器所有者密钥（MOK）：
+</p>
+<pre>$ openssl req -newkey rsa:4096 -nodes -keyout MOK.key -new -x509 -sha256 -days <i>3650</i> -subj "/CN=<i>my Machine Owner Key</i>/" -out MOK.crt
+$ openssl x509 -outform DER -in MOK.crt -out MOK.cer
+</pre>
+<p>签署你的引导加载程序（名为<code>grubx64.efi</code>）以及内核：
+</p>
+<pre># sbsign --key MOK.key --cert MOK.crt --output /boot/vmlinuz-linux /boot/vmlinuz-linux
+# sbsign --key MOK.key --cert MOK.crt --output <i>esp</i>/EFI/BOOT/grubx64.efi <i>esp</i>/EFI/BOOT/grubx64.efi
+</pre>
+<p>每次它们更新后你都需要这么做。你可以使用一个<a href="#pg9ef105bf1e3c">Pacman钩子</a>自动化签署过程，比如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.d/hooks/999-sign_kernel_for_secureboot.hook</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = linux
+Target = linux-lts
+Target = linux-hardened
+Target = linux-zen
+
+[Action]
+Description = Signing kernel with Machine Owner Key for Secure Boot
+When = PostTransaction
+Exec = /usr/bin/find /boot/ -maxdepth 1 -name 'vmlinuz-*' -exec /usr/bin/sh -c 'if ! /usr/bin/sbverify --list {} 2&gt;/dev/null | /usr/bin/grep -q "signature certificates"; then /usr/bin/sbsign --key MOK.key --cert MOK.crt --output {} {}; fi' ;
+Depends = sbsigntools
+Depends = findutils
+Depends = grep</pre>
+<p>或者使用一个 <a href="#pgbd0f46fbac92">mkinitcpio钩子</a>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/initcpio/post/kernel-sbsign</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/env bash
+
+kernel="$1"
+[[ -n "$kernel" ]] || exit 0
+
+# use already installed kernel if it exists
+[[ ! -f "$KERNELDESTINATION" ]] || kernel="$KERNELDESTINATION"
+
+keypairs=(<i>/path/to/</i>db.key <i>/path/to/</i>db.crt)
+
+for (( i=0; i&lt;${#keypairs[@]}; i+=2 )); do
+    key="${keypairs[$i]}" cert="${keypairs[(( i + 1 ))]}"
+    if ! sbverify --cert "$cert" "$kernel" &amp;&gt;/dev/null; then
+        sbsign --key "$key" --cert "$cert" --output "$kernel" "$kernel"
+    fi
+done</pre>
+<p>复制<code>MOK.cer</code>到一个<a href="#pg30cebfcdd710">FAT</a>格式的文件系统（你可以使用<a href="#pg635d4bd93303">EFI 系统分区</a>）。
+</p><p>重新启动并启用“安全启动”。如果<i>shim</i>未能找到在MokList中找到签署的<code>grubx64.efi</code>证书，它将启动MokManager（<code>mmx64.efi</code>）。
+</p><p>在<i>MokManager</i>中选择<i>Enroll key from disk</i>，找到<code>MOK.cer</code>并把它添加到MokList。完成之后，选择<i>Continue boot</i>，你的引导加载程序便会启动并成功加载任何由你的机器所有者密钥签署的二进制文件。
+</p>
+<div class="mw-heading mw-heading6"><h6 data-bm="pg4b4af9f551f6_shim.E4.B8.8E.E5.AF.86.E9.92.A5.E5.92.8CGRUB" id="shim与密钥和GRUB"><span id="shim.E4.B8.8E.E5.AF.86.E9.92.A5.E5.92.8CGRUB"></span>shim与密钥和GRUB</h6></div>
+
+
+<p>只有GRUB的EFI二进制文件包含所有能够读取<a href="#pgc66c8898d8fa">vmlinuz</a>与<a href="#pg5409190f7704">initramfs</a>镜像所在文件系统的模块，才能在安全启动模式下成功启动。
+</p><p>从GRUB版本<code>2.06.r261.g2f4430cc0</code>之后，通过<code>insmod</code>在安全启动下读取模块不再被允许，因为这将违反不侧载任意代码的构想。如果GRUB模块没有被嵌入进EFI二进制文件，GRUB会尝试通过<code>insmod</code>侧载它们，这会在启动时报出如下错误信息：
+</p>
+<pre>error: prohibited by secure boot policy
+</pre>
+<p>根据<a href="https://git.launchpad.net/~ubuntu-core-dev/grub/+git/ubuntu/tree/debian/build-efi-images?h=debian/2.06-2ubuntu12">Ubuntu的官方构建脚本</a>，Ubuntu嵌入了下列GRUB模块在它已签署的GRUB EFI二进制文件<code>grubx64.efi</code>中。
+</p>
+<ul><li><a href="https://git.launchpad.net/~ubuntu-core-dev/grub/+git/ubuntu/tree/debian/build-efi-images?h=debian/2.06-2ubuntu12#n87">“base”模块</a>，为了从CD或者单一分区硬盘中启动所必需含有： <code>all_video</code>, <code>boot</code>, <code>btrfs</code>, <code>cat</code>, <code>chain</code>, <code>configfile</code>, <code>echo</code>, <code>efifwsetup</code>, <code>efinet</code>, <code>ext2</code>, <code>fat</code>, <code>font</code>, <code>gettext</code>, <code>gfxmenu</code>, <code>gfxterm</code>, <code>gfxterm_background</code>, <code>gzio</code>, <code>halt</code>, <code>help</code>, <code>hfsplus</code>, <code>iso9660</code>, <code>jpeg</code>, <code>keystatus</code>, <code>loadenv</code>, <code>loopback</code>, <code>linux</code>, <code>ls</code>, <code>lsefi</code>, <code>lsefimmap</code>, <code>lsefisystab</code>, <code>lssal</code>, <code>memdisk</code>, <code>minicmd</code>, <code>normal</code>, <code>ntfs</code>, <code>part_apple</code>, <code>part_msdos</code>, <code>part_gpt</code>, <code>password_pbkdf2</code>, <code>png</code>, <code>probe</code>, <code>reboot</code>, <code>regexp</code>, <code>search</code>, <code>search_fs_uuid</code>, <code>search_fs_file</code>, <code>search_label</code>, <code>sleep</code>, <code>smbios</code>, <code>squash4</code>, <code>test</code>, <code>true</code>, <code>video</code>, <code>xfs</code>, <code>zfs</code>, <code>zfscrypt</code>, <code>zfsinfo</code></li>
+<li><a href="https://git.launchpad.net/~ubuntu-core-dev/grub/+git/ubuntu/tree/debian/build-efi-images?h=debian/2.06-2ubuntu12#n147">“platform-specific”模块</a>，为了x86_64-efi架构所必需含有，例如：
+<ul><li><code>play</code>：为了在启动中播放声音</li>
+<li><code>cpuid</code>：为了启动中的CPU支持</li>
+<li><code>linuxefi</code>：为了支持UEFI启动</li>
+<li><code>tpm</code>：为了支持度量启动（Measured boot）与<a href="#pg3760f6882d85">可信平台模块</a></li></ul></li>
+<li><a href="https://git.launchpad.net/~ubuntu-core-dev/grub/+git/ubuntu/tree/debian/build-efi-images?h=debian/2.06-2ubuntu12#n159">“advanced”模块</a>，包含下列模块：
+<ul><li><code>cryptodisk</code>：为了从<a href="#pg8e3a9446707a">plain模式加密的</a>硬盘启动</li>
+<li><code>gcry_<i>algorithm</i></code>：为了支持特定的散列和加密算法</li>
+<li><code>luks</code>：为了从<a href="#pg6d9ea5c03b02">LUKS</a>加密的硬盘启动</li>
+<li><code>lvm</code>：为了从<a href="#pg02cd87050dfd">LVM</a>逻辑分卷硬盘启动</li>
+<li><code>mdraid09</code>, <code>mdraid1x</code>, <code>raid5rec</code>, <code>raid6rec</code>：为了从<a href="#pg1b71ce42139c">RAID</a>虚拟硬盘中启动</li></ul></li></ul>
+<p>你必须以一个shell变量的形式构建你的GRUB模块列表，我们将它表示为<code>GRUB_MODULES</code>。你可以使用<a href="https://git.launchpad.net/~ubuntu-core-dev/grub/+git/ubuntu/tree/debian/build-efi-images">最新的Ubuntu脚本</a>作为一个出发点，并修剪掉你系统中不需要的模块。修剪模块将使启动过程相对更快，并在ESP分区上节省一些空间。
+</p><p>如果GRUB从UEFI shim加载器启动，为了提高安全性，你还需要在EFI二进制文件中包含一个<a href="https://github.com/rhboot/shim/blob/main/SBAT.md">安全启动高级目标（SBAT）</a>文件/部分。这个SBAT文件/部分包含了关于GRUB二进制文件的元数据（版本、维护者、开发者、上游URL），并且使shim更容易阻止某些有安全漏洞的GRUB版本被加载<a href="https://eclypsium.com/2020/07/29/theres-a-hole-in-the-boot/#additional">[8]</a><a href="https://wiki.ubuntu.com/SecurityTeam/KnowledgeBase/GRUB2SecureBootBypass2021">[9]</a>，正如<a href="https://github.com/rhboot/shim/blob/main/SBAT.md">UEFI shim引导加载程序的安全启动生命流程的提升</a>文档中所解释的那样。
+</p><p>如果<code>grubx64.efi</code>中的SBAT部分丢失，UEFI shim引导加载程序的第一阶段将无法启动<code>grubx64.efi</code>。
+</p><p>如果安装了GRUB，<code>/usr/share/grub/sbat.csv</code>中提供了一个SBAT的<i>.csv</i>文件样本。
+</p><p>使用提供的<code>/usr/share/grub/sbat.csv</code>文件和所有需要的<code>GRUB_MODULES</code>重新安装GRUB并签署：
+</p>
+<pre># grub-install --target=x86_64-efi --efi-directory=<i>esp</i> --modules=${GRUB_MODULES} --sbat /usr/share/grub/sbat.csv
+# sbsign --key MOK.key --cert MOK.crt --output <i>esp</i>/EFI/GRUB/grubx64.efi <i>esp</i>/EFI/GRUB/grubx64.efi
+# cp <i>esp</i>/GRUB/grubx64.efi <i>esp</i>/boot/grubx64.efi
+</pre>
+<p>重新启动，在<i>MokManager</i>中选择密钥，安全启动就应该可以工作了。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4b4af9f551f6_.E7.A7.BB.E9.99.A4shim" id="移除shim"><span id=".E7.A7.BB.E9.99.A4shim"></span>移除shim</h5></div>
+<p><a href="#pg8b741e1a21da">卸载</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/shim-signed/">shim-signed</a></span><sup><small>AUR</small></sup></span>，移除被复制的<i>shim</i>与<i>MokManager</i>文件并重命名为你的引导加载程序默认名。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b4af9f551f6_.E4.BF.9D.E6.8A.A4.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8" id="保护安全启动"><span id=".E4.BF.9D.E6.8A.A4.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8"></span>保护安全启动</h2></div>
+<p>防止有物理访问权限的人禁用安全启动的唯一方法是用密码保护固件设置。
+</p><p>大多数UEFI固件提供这样的功能，通常列在固件设置中的“安全”部分。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b4af9f551f6_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b4af9f551f6_sbctl" id="sbctl">sbctl</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sbctl">sbctl</a></span><sup><small>包</small></sup></span>是一种用户友好的设置安全启动和签署文件方式。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>sbctl并不能在所有的硬件上工作。它的实际工作效果取决于制造商。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b4af9f551f6_.E5.88.9B.E5.BB.BA.E5.B9.B6.E7.99.BB.E8.AE.B0.E5.AF.86.E9.92.A5" id="创建并登记密钥"><span id=".E5.88.9B.E5.BB.BA.E5.B9.B6.E7.99.BB.E8.AE.B0.E5.AF.86.E9.92.A5"></span>创建并登记密钥</h4></div>
+<p>在开始之前，进入你的固件设置将安全启动模式设置为<i>设置模式</i>。每个设备都有所不同。
+</p><p>当你重新登录后，检查安全启动的状态：
+</p>
+<pre>$ sbctl status
+</pre>
+<p>你应当看到sbctl并未安装，并且“设置模式”（Setup Mode）已经开启，以及安全启动已关闭。
+</p><p>若显示“设置模式”（Setup Mode）关闭，请进入BIOS手动重置进入Setup Mode。
+</p><p>接下来创建你的自定义安全启动密钥：
+</p>
+<pre># sbctl create-keys
+</pre>
+<p>（在sbctl 0.8以及更新版本之后，执行此命令默认会把密钥创建在/var/lib/sbctl/keys/文件夹内）
+</p><p>将你的密钥与微软的密钥登记入UEFI中：
+</p>
+<pre># sbctl enroll-keys -m
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>启用安全启动时，一些固件会用微软的密钥进行签署和验证。不对设备进行验证可能会使它们变砖。如果想仅登记你的密钥而不登记微软的，请运行：<code># sbctl enroll-keys</code>。<b>只有在你清楚了解自己在做什么的情况下才可以这样做。</b></div>
+<p>再次检查安全启动状态：
+</p>
+<pre>$ sbctl status
+</pre>
+<p>sbctl现在应该已经安装好了，但是在用你刚刚创建的密钥对启动文件进行签署之前，安全启动将无法工作。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b4af9f551f6_.E7.AD.BE.E7.BD.B2" id="签署"><span id=".E7.AD.BE.E7.BD.B2"></span>签署</h4></div>
+<p>为了安全启动工作，检查需要被签署的文件：
+</p>
+<pre># sbctl verify
+</pre>
+<p>现在签署所有的未被签署的文件。通常是<a href="#pg3473491e6a48">内核</a>与<a href="#pgee8f2050088a">引导加载程序</a>需要被签署。比如：
+</p>
+<pre># sbctl sign -s /boot/vmlinuz-linux
+# sbctl sign -s /boot/EFI/BOOT/BOOTX64.EFI
+</pre>
+<p>需要被签署的文件将取决与你系统的结构，内核以及引导加载程序。
+</p><p>现在万事大吉！重新启动你的系统，并在固件设置中重新打开安全启动。如果引导加载程序与操作系统被加载，安全启动应当开始工作了。用下列命令确认：
+</p>
+<pre>$ sbctl status
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4b4af9f551f6_.E4.BD.BF.E7.94.A8pacman.E9.92.A9.E5.AD.90.E8.87.AA.E5.8A.A8.E7.AD.BE.E7.BD.B2" id="使用pacman钩子自动签署"><span id=".E4.BD.BF.E7.94.A8pacman.E9.92.A9.E5.AD.90.E8.87.AA.E5.8A.A8.E7.AD.BE.E7.BD.B2"></span>使用pacman钩子自动签署</h4></div>
+<p>sbctl带有一个<a href="#pg9ef105bf1e3c">Pacman钩子</a>可以在<a href="#pg3473491e6a48">内核</a>、<a href="#pgac06dd8bfe95">systemd</a>或者<a href="#pgee8f2050088a">引导加载程序</a>更新后自动地签署所有的新文件。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果你通过<a href="#pg171755f7b428">Systemd-boot</a>启用了<code>systemd-boot-update.service</code>，那么<a href="#pgee8f2050088a">引导加载程序</a>只会在重启后升级，导致sbctl的<a href="#pg9ef105bf1e3c">Pacman钩子</a>因此而不签署新的文件。 变通的方法是直接在<code>/usr/lib/</code>中小心的签署<a href="#pgee8f2050088a">引导加载程序</a>，这样<code>bootctl install</code>与<code>update</code>将会自动识别并复制<i>.efi.signed</i>（如果有的话）到<a href="#pgc551b9cd7a20">ESP</a>，而不是普通的<i>.efi</i>文件。详情见<span class="plainlinks archwiki-template-man" title="$ man 1 bootctl"><a href="https://man.archlinux.org/man/bootctl.1">bootctl(1)</a></span>。
+<pre># sbctl sign -s -o /usr/lib/systemd/boot/efi/systemd-bootx64.efi.signed /usr/lib/systemd/boot/efi/systemd-bootx64.efi
+</pre>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4b4af9f551f6_.E7.94.A8.E8.87.AA.E5.AE.9A.E4.B9.89.E5.AF.86.E9.92.A5.E7.AD.BE.E7.BD.B2.E5.AE.98.E6.96.B9ISO" id="用自定义密钥签署官方ISO"><span id=".E7.94.A8.E8.87.AA.E5.AE.9A.E4.B9.89.E5.AF.86.E9.92.A5.E7.AD.BE.E7.BD.B2.E5.AE.98.E6.96.B9ISO"></span>用自定义密钥签署官方ISO</h3></div>
+<p>使用自定义密钥的安全启动支持可以添加到官方ISO中，只需提取出引导加载程序（<code>BOOTx64.EFI</code>与<code>BOOTIA32.EFI</code>）、内核与UEFI Shell，并对它们进行签署，然后用被签署的文件重新打包ISO。
+</p><p><a href="#pg811194d6beaa">安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libisoburn">libisoburn</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mtools">mtools</a></span><sup><small>包</small></sup></span>与<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sbsigntools">sbsigntools</a></span><sup><small>包</small></sup></span>。
+</p><p>首先解压出相关的文件以及El-Torito启动镜像：
+</p>
+<pre>$ osirrox -indev archlinux-<i>YYYY.MM.DD</i>-x86_64.iso \
+	-extract_boot_images ./ \
+	-extract /EFI/BOOT/BOOTx64.EFI BOOTx64.EFI \
+	-extract /EFI/BOOT/BOOTIA32.EFI BOOTIA32.EFI \
+	-extract /shellx64.efi shellx64.efi \
+	-extract /shellia32.efi shellia32.efi \
+	-extract /arch/boot/x86_64/vmlinuz-linux vmlinuz-linux
+</pre>
+<p><i>mkarchiso</i>所使用的，<span class="plainlinks archwiki-template-man" title="$ man 1 xorrisofs"><a href="https://man.archlinux.org/man/xorrisofs.1">xorrisofs(1)</a></span>的<code>-rational-rock</code>选项，会使ISO 9660中的文件变为只读，且在解压后仍然如此。我们需要让这些文件变为可写，以便它们可以被修改：
+</p>
+<pre>$ chmod +w BOOTx64.EFI BOOTIA32.EFI shellx64.efi shellia32.efi vmlinuz-linux
+</pre>
+<p>使用一个已登记的数据库密钥和证书签署这些文件：
+</p>
+<pre>$ sbsign --key db.key --cert db.crt --output BOOTx64.EFI BOOTx64.EFI
+$ sbsign --key db.key --cert db.crt --output BOOTIA32.EFI BOOTIA32.EFI
+$ sbsign --key db.key --cert db.crt --output shellx64.efi shellx64.efi
+$ sbsign --key db.key --cert db.crt --output shellia32.efi shellia32.efi
+$ sbsign --key db.key --cert db.crt --output vmlinuz-linux vmlinuz-linux
+</pre>
+<p>将引导加载程序与UEFI Shell复制到<code>eltorito_img2_uefi.img</code>中。它将被用作为EFI系统分区，并被列为一个El-Torito UEFI启动镜像。<code>eltorito_img2_uefi.img</code>的大小是固定的，但<i>mkarchiso</i>增加了1 MiB的空余空间，用于对齐以及为后续的扇区保留，所以签署所带来的大小增加应该不是问题。
+</p>
+<pre>$ mcopy -D oO -i eltorito_img2_uefi.img BOOTx64.EFI BOOTIA32.EFI ::/EFI/BOOT/
+$ mcopy -D oO -i eltorito_img2_uefi.img shellx64.efi shellia32.efi ::/
+</pre>
+<p>使用修改过的El-Torito UEFI引导映像，重新打包ISO，并在ISO 9660中加入签署的引导加载程序文件、UEFI Shell和内核。
+</p>
+<pre>$ xorriso -indev archlinux-<i>YYYY.MM.DD</i>-x86_64.iso \
+	-outdev archlinux-<i>YYYY.MM.DD</i>-x86_64-Secure_Boot.iso \
+	-boot_image any replay \
+	-append_partition 2 0xef eltorito_img2_uefi.img \
+	-map BOOTx64.EFI /EFI/BOOT/BOOTx64.EFI \
+	-map BOOTIA32.EFI /EFI/BOOT/BOOTIA32.EFI \
+	-map shellx64.efi /shellx64.efi \
+	-map shellia32.efi /shellia32.efi \
+	-map vmlinuz-linux /arch/boot/x86_64/vmlinuz-linux
+</pre>
+<p>启动生成的<code>archlinux-<i>YYYY.MM.DD</i>-x86_64-Secure_Boot.iso</code>文件。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4b4af9f551f6_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://edk2-docs.gitbook.io/understanding-the-uefi-secure-boot-chain/">Understanding the UEFI Secure Boot Chain</a> by tianocore</li>
+<li><a href="https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface#Secure_boot">Wikipedia:Unified Extensible Firmware Interface#Secure boot</a></li>
+<li><a href="https://www.rodsbooks.com/efi-bootloaders/secureboot.html">Dealing with Secure Boot</a> by Rod Smith</li>
+<li><a href="https://www.rodsbooks.com/efi-bootloaders/controlling-sb.html">Controlling Secure Boot</a> by Rod Smith</li>
+<li><a href="https://mjg59.dreamwidth.org/5850.html">UEFI secure booting (part 2)</a> by Matthew Garrett</li>
+<li><a href="https://blog.hansenpartnership.com/uefi-secure-boot/">UEFI Secure Boot</a> by James Bottomley</li>
+<li><a href="https://git.kernel.org/cgit/linux/kernel/git/jejb/efitools.git/tree/README">efitools README</a></li>
+<li><a href="https://www.fsf.org/campaigns/secure-boot-vs-restricted-boot">Will your computer's "Secure Boot" turn out to be "Restricted Boot"?</a> — Free Software Foundation</li>
+<li><a href="https://www.fsf.org/campaigns/secure-boot-vs-restricted-boot/statement/campaigns/secure-boot-vs-restricted-boot/whitepaper-web">Free Software Foundation recommendations for free operating system distributions considering Secure Boot</a></li>
+<li><a href="https://web.archive.org/web/20150928202110/https://firmware.intel.com/messages/219">Intel's UEFI Secure Boot Tutorial</a></li>
+<li><a href="https://web.archive.org/web/20200205044007/http://dreamhack.it/linux/2015/12/03/secure-boot-signed-modules-and-signed-elf-binaries.html">Secure Boot, Signed Modules and Signed ELF Binaries</a></li>
+<li>National Security Agency docs: <a href="https://www.nsa.gov/Portals/70/documents/what-we-do/cybersecurity/professional-resources/ctr-uefi-defensive-practices-guidance.pdf">UEFI Defensive Practices Guidance</a> and unclassified <a href="https://media.defense.gov/2020/Sep/15/2002497594/-1/-1/0/CTR-UEFI-SECURE-BOOT-CUSTOMIZATION-20200915.PDF/CTR-UEFI-SECURE-BOOT-CUSTOMIZATION-20200915.PDF">UEFI Secure Boot customization</a></li>
+<li><a href="http://jk.ozlabs.org/docs/sbkeysync-maintaing-uefi-key-databases/">sbkeysync &amp; maintaining uefi key databases</a> by Jeremy Kerr</li>
+<li><a href="https://nwildner.com/posts/2020-07-04-secure-your-boot-process/">Secure your boot process: UEFI + Secureboot + EFISTUB + Luks2 + lvm + Arch Linux</a> (2020-07)</li>
+<li><a href="https://security.stackexchange.com/questions/29122/how-is-hibernation-supported-on-machines-with-uefi-secure-boot">How is hibernation supported, on machines with UEFI Secure Boot?</a> (Security StackExchange)</li>
+<li><a href="http://0pointer.net/blog/authenticated-boot-and-disk-encryption-on-linux.html">Authenticated Boot and Disk Encryption on Linux</a> by Lennart Poettering (2021-09-23)</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807025941
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.506 seconds
+Real time usage: 0.518 seconds
+Preprocessor visited node count: 2778/1000000
+Revision size: 55578/2097152 bytes
+Post‐expand include size: 37965/2097152 bytes
+Template argument size: 19796/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 141/5000000 bytes
+Lua time usage: 0.009/7.000 seconds
+Lua memory usage: 540879/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  182.180      1 -total
+ 15.38%   28.020      1 Template:Link-en
+ 14.81%   26.982    233 Template:Ic
+  5.16%    9.392     14 Template:Man
+  4.37%    7.968     12 Template:注意
+  4.20%    7.645      5 Template:Tip
+  3.37%    6.132      3 Template:Expansion
+  2.47%    4.506     14 Template:Pkg
+  2.39%    4.359      2 Template:Tip_(简体中文)
+  2.39%    4.346      4 Template:Warning
+-->
+<!-- Render ID 08cb588e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3919:|#|:idhash:canonical!zh-cn and timestamp 20260807025941 and revision id 35406. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,194 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg9a390c77b366">可变刷新率</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><br/>
+</p>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgaa98d1ed067b">Xrandr</a></li>
+<li><a href="#pga36c0aff60be">Xorg</a></li>
+<li><a href="#pg4a4bc5e5df24">AMDGPU</a></li>
+<li><a href="#pge12579b7d4ac">NVIDIA</a></li>
+<li><a href="#pg7c25baec4c3f">Sway</a></li>
+</ul></div>
+<p><a href="https://en.wikipedia.org/wiki/Variable_refresh_rate">可变刷新率</a> (VRR)，也被叫做自适应同步，该技术允许显示器根据输出信号来调整它的刷新率。这可以让用户在玩游戏时消除屏幕撕裂，同时减少 Vsync 的常见缺点（例如卡顿）。要全面了解 VRR，请参阅 <a href="https://pcgamingwiki.com/wiki/Glossary:Variable_refresh_rate_(VRR)">PC Gaming Wiki</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9a390c77b366_.E6.A6.82.E8.BF.B0" id="概述"><span id=".E6.A6.82.E8.BF.B0"></span>概述</h2></div>
+
+<p>VRR的具体实现有很多种:
+</p>
+<ul><li><a href="https://en.wikipedia.org/wiki/FreeSync">FreeSync</a> 是 AMD 对 VESA's VRR 的标准实现, 这些词语经常会替换使用。FreeSync 品牌显示器被要求和所有 VESA 兼容驱动程序兼容。</li>
+<li><a href="https://en.wikipedia.org/wiki/G-SYNC">G-SYNC</a> 是 NVIDIA 在 VRR 方面的专有硬件和软件实现方案。</li>
+<li>Intel 计划在<a href="https://software.intel.com/content/www/us/en/develop/articles/enabling-intel-adaptive-sync-with-11th-generation-intel-processor-graphics-and-microsoft.html">他们即将推出的 11 代处理器上</a>和 独立显卡上 实现 VESA 的标准。</li></ul>
+<p>出于设置目的，有必要区分许可 Nvidia 自有芯片的“原生”G-SYNC 显示器和“G-SYNC 兼容”显示器，即支持 G-SYNC 功能子集的 FreeSync 显示器。 <a href="https://www.howtogeek.com/755346/g-sync-compatible-vs-g-sync-whats-the-difference/">[1]</a> 在 G-SYNC Compatible 显示器类别中，显示器可能经过验证，也可能未经过NVIDIA验证。 <a href="https://www.nvidia.com/en-us/geforce/news/g-sync-ces-2019-announcements/">[2]</a> <a href="https://www.nvidia.com/en-us/geforce/news/g">-sync-compatible-validation/</a> 即使 VRR 显示器没有通过 NVIDIA 的验证（因此在营销材料中不会被称为 G-SYNC Compatible），您仍然可以将它与 G-SYNC 一起使用。
+</p><p><b>VRR 兼容性和相关实现</b>
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>Driver
+</th>
+<th>VESA
+</th>
+<th>G-SYNC
+</th></tr>
+<tr>
+<th><a href="#pg4a4bc5e5df24">AMDGPU</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">FreeSync
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="#pg7b57f700d367">Intel</a>
+</th>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">Planned
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="#pg172970a5f8dd">Nouveau</a>
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="#pge12579b7d4ac">NVIDIA</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">G-SYNC Compatible
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">G-SYNC
+</td></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>早于 10 系列的 Nvidia GPU 不支持 G-SYNC Compatible 显示器。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9a390c77b366_Xorg_.E9.85.8D.E7.BD.AE" id="Xorg_配置"><span id="Xorg_.E9.85.8D.E7.BD.AE"></span>Xorg 配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9a390c77b366_.E5.9C.A8_AMDGPU_.E4.B8.8A.E5.90.AF.E7.94.A8" id="在_AMDGPU_上启用"><span id=".E5.9C.A8_AMDGPU_.E4.B8.8A.E5.90.AF.E7.94.A8"></span>在 AMDGPU 上启用</h3></div>
+<p>FreeSync 只能在<a href="https://www.amd.com/en/products/freesync-monitors">支持FreeSync的显示器</a>以及您的<a href="https://www.amd.com/en/technologies/free-sync-faq#faq-Which-products-support-AMD-FreeSync%E2%84%A2-technology?">支持FreeSync的显卡</a>上运行。
+</p><p>如果您使用的是笔记本电脑，则可以检查您的<a href="https://www.amd.com/en/products/freesync-laptops">笔记本电脑是否与 FreeSync 兼容</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9a390c77b366_.E4.BD.BF.E7.94.A8_Xorg_.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6" id="使用_Xorg_配置文件"><span id=".E4.BD.BF.E7.94.A8_Xorg_.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6"></span>使用 Xorg 配置文件</h4></div>
+<p>在你的 AMDGPU <a href="#pg4a4bc5e5df24">.conf</a> 文件中的 <code>Section "Device"</code> 区块中添加一行:
+</p>
+<pre>Option "VariableRefresh" "true"
+</pre>
+<p>使用<a href="#pgaa98d1ed067b">xrandr</a>验证 <i>vrr_capable</i> 项是否被设置为 <i>1</i>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ xrandr --props</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">vrr_capable: 1
+        range: (0, 1)
+</pre>
+<p>xrandr 会显示所有视频输出端口的属性； 确保查看的是实际连接到显示器的那个 - 其他的显示器输出会打印 vrr_capable: 0。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9a390c77b366_.E5.9C.A8_NVIDIA_.E4.B8.8A.E5.90.AF.E7.94.A8" id="在_NVIDIA_上启用"><span id=".E5.9C.A8_NVIDIA_.E4.B8.8A.E5.90.AF.E7.94.A8"></span>在 NVIDIA 上启用</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9a390c77b366_.E4.BD.BF.E7.94.A8_Xorg_.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6_2" id="使用_Xorg_配置文件_2"><span id=".E4.BD.BF.E7.94.A8_Xorg_.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6_2"></span>使用 Xorg 配置文件</h4></div>
+
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9a390c77b366_.E4.BD.BF.E7.94.A8_nvidia-settings" id="使用_nvidia-settings"><span id=".E4.BD.BF.E7.94.A8_nvidia-settings"></span>使用 nvidia-settings</h4></div>
+<p>“原生”G-SYNC 和经过验证的 G-SYNC 兼容显示器会自动启用 VRR。 要检查显示器的状态，可以打开 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-settings">nvidia-settings</a></span><sup><small>包</small></sup></span> 并导航到您的 GPU（例如<i>GPU 0</i>），在其下每个活动显示器都有一个节点（例如<i>DP-0</i>，<i>HDMI-0</i>）。 在每个监视器帧中，<i>G-SYNC Mode Available</i>表示 G-SYNC 的支持状态，可以参考：<a href="https://github.com/NVIDIA/nvidia-settings/blob/510/src/gtk+">-2.x/ctkdisplaydevice.c#L872-L905</a> <a href="https://github.com/NVIDIA/nvidia-settings/blob/510/src/libXNVCtrl/NVCtrl.h#L3541-L3551">[3]</a>
+</p>
+<ul><li><i>G-SYNC</i>, 表明这是一个“原生”G-SYNC 显示器。 默认情况下启用完整的 G-SYNC 支持。</li>
+<li><i>G-SYNC Compatible</i>, 表明这是经过验证的 G-SYNC Compatible 显示器。 默认启用 G-SYNC 支持。</li>
+<li><i>G-SYNC Unvalidated</i>, 表示这是未经验证的 G-SYNC Compatible 显示器。 默认情况下不启用 G-SYNC 支持。<a href="https://github.com/NVIDIA/nvidia-settings/blob/510/src/gtk+-2.x/ctkdisplayconfig.c#L4628-L4674">[4]</a></li>
+<li><i>None</i>, 说明这个显示器完全不支持G-SYNC。请注意，有些 FreeSync VRR 显示器也完全不兼容 G-SYNC。<a href="https://www.howtogeek.com/755346/g-sync-compatible-vs-g-sync-whats-the-difference/">[5]</a></li></ul>
+<p>如果您有未经验证的 G-SYNC Compatible 显示器，您可以覆盖 NVIDIA 的默认值并使用它启用 VRR：
+</p>
+<ul><li>在软件 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-settings">nvidia-settings</a></span><sup><small>包</small></sup></span> 中找到 "X Server Display Configuration" 页, 然后勾选<i>高级</i>按钮下的<i>允许在未验证为 G-SYNC 兼容的显示器上使用 G-SYNC</i>选项，单击<i>应用</i>。</li>
+<li>然后，在 OpenGL 设置下，选中“允许 G-SYNC/G-SYNC 兼容”。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果显示器确实未通过 NVIDIA 的 G-SYNC 兼容认证，则可能会出现图像质量差、闪烁或由于刷新率范围有限而无法激活 VRR 等体验问题。<a href="https://www.nvidia.com/en-us/geforce/news/g-sync-compatible-validation/">[6]</a></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>在同一菜单中，您可以选中“显示 G-SYNC 指示器”选项以启用在右上角显示 G-SYNC 是否正在工作的指示器。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9a390c77b366_Wayland.E9.85.8D.E7.BD.AE" id="Wayland配置"><span id="Wayland.E9.85.8D.E7.BD.AE"></span>Wayland配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9a390c77b366_GNOME" id="GNOME">GNOME</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>GNOME 的 VRR 补丁仍在 <a href="https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1154">开发中</a>，可能会出现错误或导致崩溃。</div>
+<p>需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mutter-vrr/">mutter-vrr</a></span><sup><small>AUR</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gnome-control-center-vrr/">gnome-control-center-vrr</a></span><sup><small>AUR</small></sup></span> 才可以在 <a href="#pg1e095fe2c2a6">GNOME</a> 中使用 VRR。需要在“显示设置”中为每个支持的显示器启用 VRR。 在支持和启用的显示器上运行时，GNOME 会自动为所有全屏应用程序启用 VRR。
+</p><p>
+在最新的 <a href="#pg1e095fe2c2a6">GNOME 46</a> 版本中，只需运行</p><div class="mw-highlight mw-content-ltr" dir="ltr"><pre>gsettings set org.gnome.mutter experimental-features "['variable-refresh-rate']"</pre></div><p>即可在 GNOME 的 Wayland 会话下使用实验性质的VRR。
+</p><div class="mw-heading mw-heading3"><h3 data-bm="pg9a390c77b366_KDE" id="KDE">KDE</h3></div>
+<p>KDE Wayland 会为全屏应用程序自动启用 VRR <a href="https://www.reddit.com/r/kde/comments/nwxxgy/how_does_the_automatic_vrr_mode_on_wayland_work/h1bvfuo">[7]</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9a390c77b366_Sway" id="Sway">Sway</h3></div>
+<p>Sway 支持可变刷新率。要为所有输出启用它，您可以将以下内容添加到sway配置中，或将设置应用于每个输出：
+</p>
+<pre>output * adaptive_sync on
+</pre>
+<p>您可以验证您的显示器是否支持与 swaymsg 的自适应同步：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ swaymsg -t get_outputs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Output DP-1 'Display Name'
+  Adaptive sync: enabled
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9a390c77b366_.E6.B5.8B.E8.AF.95" id="测试"><span id=".E6.B5.8B.E8.AF.95"></span>测试</h2></div>
+<p><a href="https://github.com/Nixola/VRRTest">VRRTest</a> 是一个简单的测试工具，应该适用于 FreeSync 和 G-Sync。 安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vrrtest-git/">vrrtest-git</a></span><sup><small>AUR</small></sup></span> 或者，手动安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=love">love</a></span><sup><small>包</small></sup></span> 包，克隆存储库，然后运行
+</p>
+<pre>$ love /path/to/cloned/repository
+</pre>
+<p>在关闭 VRR 的情况下，如果应用程序的 FPS 低于显示器的本机刷新率，则由于跳过了帧，条形图会断断续续很多。在启用 VRR 的情况下，由于屏幕的刷新率与应用程序的刷新率相匹配，条形图将始终在屏幕上平滑移动。当然即便开启了 VRR 功能，您也可能会遇到撕裂，在这种情况下，您还可以为 AMDGPU 启用<a href="#pg4a4bc5e5df24">无撕裂渲染</a>选项；两者都启用时，应该既没有口吃也没有撕裂（nvidia显卡这样的功能在哪里呢？）。
+</p><p>如果您使用的是 Nvidia GPU，您可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gl-gsync-demo/">gl-gsync-demo</a></span><sup><small>AUR</small></sup></span> 测试 G-SYNC 兼容性。 该程序将允许您测试 VRR 和 Vsync，以便您可以观察产生的效果。 有关详细信息，请参阅项目的<a href="https://github.com/dahenry/gl-gsync-demo/blob/master/README.md">自述文件</a>。
+</p><p>根据<a href="https://linuxreviews.org/HOWTO_enable_Adaptive_Vertical_Sync_(Freesync)_on_AMD_GPUs#Get_ready_for_much_disappointment_once_you_have_it_working">这个页面</a>：“gl-gsync-demo 是使用 G-SYNC 制作的，但这并不重要，它将很好地测试 AMD 自适应同步”。 但是，对于 FreeSync 测试，它可能仍无法按预期工作。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9a390c77b366_.E4.BF.AE.E6.94.B9_FreeSync_.E6.98.BE.E7.A4.BA.E5.99.A8.E7.9A.84_VRR_.E8.8C.83.E5.9B.B4" id="修改_FreeSync_显示器的_VRR_范围"><span id=".E4.BF.AE.E6.94.B9_FreeSync_.E6.98.BE.E7.A4.BA.E5.99.A8.E7.9A.84_VRR_.E8.8C.83.E5.9B.B4"></span>修改 FreeSync 显示器的 VRR 范围</h2></div>
+<p>Freesync 显示器的 VRR 范围通常有限，远低于其最大刷新率。可以对显示器进行超频以更改 Freesync 范围。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>对显示器进行超频可能会导致显示器过热并可能造成硬件损坏。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9a390c77b366_.E7.BC.96.E8.BE.91_EDID_.E6.96.87.E4.BB.B6" id="编辑_EDID_文件"><span id=".E7.BC.96.E8.BE.91_EDID_.E6.96.87.E4.BB.B6"></span>编辑 EDID 文件</h3></div>
+<p>外部显示器识别数据 (EDID) 保存了显示器相关的驱动程序信息。默认情况下，EDID在接上显示器/开机启动时由显卡驱动从显示器读取到系统。可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=read-edid">read-edid</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-settings">nvidia-settings</a></span><sup><small>包</small></sup></span> 之类的软件来提取EDID。然后安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wxedid/">wxedid</a></span><sup><small>AUR</small></sup></span> 来编辑 EDID。
+</p>
+
+<p>您可以遵循更改 Windows 上的 freesync 范围的人员指南之一：<a href="https://www.reddit.com/r/Amd/comments/5iux1q/updated_tutorial_on_increasing_and_decreasing/">[8]</a><a href="https://wccftech.com/amd-freesync">-hack-expands-refresh-rate-range/</a>。
+</p><p>在 Linux 上超频的过程（仅适用于 NVidia GPU）：<a href="https://forum.level1techs.com/t/overclock-your-monitor-with-nvidia-windows-and-linux/109323">[9]</a>。
+</p><p>为您的显示器创建一个 Xorg <a href="#pga36c0aff60be">.conf</a> 文件，并添加一个指向您已编辑的自定义 EDID 文件的路径。
+参考 <a href="#pgaa98d1ed067b">xrandr</a> 来查找有关您显示器的其他信息。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/10-monitor.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Screen"
+    Identifier "Screen0"
+    Device "nvidia" # e.g. Radeon, nvidia
+    Monitor "DP1"
+    Option “CustomEDID” “MONITOR:/home/USER/Desktop/modified-edid.bin”
+EndSection</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>将文件中的“MONITOR”编辑为正确的显示ID。可以用 <code>xrandr -–query</code> 命令获取显示ID。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9a390c77b366_.E6.8A.80.E5.B7.A7.E5.92.8C.E5.BB.BA.E8.AE.AE" id="技巧和建议"><span id=".E6.8A.80.E5.B7.A7.E5.92.8C.E5.BB.BA.E8.AE.AE"></span>技巧和建议</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9a390c77b366_.E4.BB.8E.E9.BB.91.E5.90.8D.E5.8D.95.E4.B8.AD.E5.88.A0.E9.99.A4.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="从黑名单中删除应用程序"><span id=".E4.BB.8E.E9.BB.91.E5.90.8D.E5.8D.95.E4.B8.AD.E5.88.A0.E9.99.A4.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>从黑名单中删除应用程序</h3></div>
+<p>Mesa 有一个应用程序黑名单用来避免非预期的应用程序行为，可以在这个文件中编辑这个黑名单：
+</p>
+<pre>/usr/share/drirc.d/00-mesa-defaults.conf
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9a390c77b366_.E9.99.90.E5.88.B6" id="限制"><span id=".E9.99.90.E5.88.B6"></span>限制</h2></div>
+<ul><li><a href="#pga21a6be8b605">Wayland</a> 从 KDE 5.22（任何兼容的 GPU）和 Sway（非 Nvidia）开始支持 <a href="https://invent.kde.org/plasma/kwin/-/merge_requests/718">[10]</a> <a href="https://gitlab">.freedesktop.org/wayland/wayland/issues/84</a>。GNOME Wayland 还没有支持 <a href="https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1154">[11]</a>。</li>
+<li>显示器必须通过 DisplayPort（DP口）与电脑显卡连接。一些实现（部分）HDMI 2.1 规范的显示器也支持 HDMI 上的 VRR。<a href="https://www.phoronix.com/scan.php?page=news_item&amp;px=NVIDIA-440.31-Linux-Release">这篇文章</a>列举了支持的 Nvidia 驱动程序并且在 5.13及之后版本的内核 和 AMD 驱动程序（pre HDMI 2.1）中得到支持 <a href="https://www.phoronix.com/scan.php?page=news_item&amp;px=Linux-5.13-Released">[12]</a>。</li>
+<li>如果您想在 X11 上使用 G-SYNC 和可能的 Freesync，则只需连接 G-SYNC/Freesync 显示器。
+<ul><li>在 X11 上，多个显示器接入同一个 X 显示服务器中会破坏 G-SYNC/Freesync，不过这个问题在 Wayland 上不存在。</li>
+<li>设置为主显示器镜像的辅助显示器不会破坏主显示器上的 G-SYNC/Freesync。</li>
+<li>在 X11 上，如果您想使用多个显示器并仍然使用 G-SYNC/Freesync，您可以创建一个新的 X 显示服务器，它只连接 G-SYNC/Freesync 显示器并在那里运行游戏。</li></ul></li>
+<li>很可能需要在启动 OpenGl/Vulkan 程序之前禁用合成器（在 Wayland 上禁用合成器是不相关的或没有必要的 <a href="https://mastransky.wordpress.com/2021/01/10/firefox-were-finally-getting-hw-acceleration-on-linux/#comment-15517">[13]</a>）。</li>
+<li>在 X11 上，Mesa 黑名单中包括视频播放器在内的应用程序不能开启G-SYNC/Freesync。</li>
+<li>虽然撕裂在较高刷新率下不太明显，但 FreeSync 显示器的 90Hz VRR 范围通常有限，这可能远低于其最大刷新率。请参阅修改 FreeSync 显示器的 VRR 范围。</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807110531
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.164 seconds
+Real time usage: 0.169 seconds
+Preprocessor visited node count: 529/1000000
+Revision size: 12108/2097152 bytes
+Post‐expand include size: 9671/2097152 bytes
+Template argument size: 3285/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 196/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   56.340      1 -total
+ 16.35%    9.211      4 Template:No
+  9.35%    5.266      3 Template:G
+  8.16%    4.595      3 Template:R
+  7.22%    4.070      2 Template:Expansion
+  6.96%    3.923      7 Template:META_Table_cell
+  5.56%    3.131      1 Template:过时
+  5.21%    2.936      3 Template:META_Message
+  5.21%    2.935      5 Template:Pkg
+  4.38%    2.469      1 Template:相关文章开始
+-->
+<!-- Render ID e78c5b8e-924f-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:5908:|#|:idhash:canonical!zh-cn and timestamp 20260807110531 and revision id 33725. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

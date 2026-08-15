@@ -1,0 +1,57 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgc6e2daf482c3">Arch Linux 中文社区仓库</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><b>Arch Linux 中文社区仓库</b>（也可简称为 archlinuxcn 或 archcn 仓库）是由 Arch Linux 中文社区驱动的<a href="#pg0d7058d394f2">非官方软件仓库</a>，包含许多官方仓库未提供的额外的软件包，以及已有软件的 git 版本等变种。一部分软件包的打包脚本来源于 <a href="#pg89cb7b475cfb">AUR</a>，但也有许多包与 AUR 不一样。
+</p><p>查看打包脚本及可用包列表、报告问题、申请打包新软件包，请访问<a href="https://github.com/archlinuxcn/repo">在 GitHub 上的项目</a>。
+</p><p>仓库主地址：<code><a href="https://repo.archlinuxcn.org/">https://repo.archlinuxcn.org/</a></code>
+</p><p>（仓库服务器位于欧洲，中国大陆、香港、美国、欧洲等地均有镜像。）
+</p><p>使用方法：在 <code>/etc/pacman.conf</code> 文件末尾添加以下两行（或者从<a href="https://github.com/archlinuxcn/mirrorlist-repo">这里</a>选择一个镜像）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[archlinuxcn]
+Server = <a href="https://repo.archlinuxcn.org/$arch">https://repo.archlinuxcn.org/$arch</a></pre>
+<p>之后安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/archlinuxcn-keyring">archlinuxcn-keyring</a></span><sup><small>CNRepo</small></sup></span> 包以导入 <a href="#pge293c5f6dad1">GPG 密钥</a>。安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/archlinuxcn-mirrorlist-git">archlinuxcn-mirrorlist-git</a></span><sup><small>CNRepo</small></sup></span> 包可以获得一份<a href="#pgb8ffdc02ba14">镜像源</a>列表，以便在 <code>pacman.conf</code> 中直接引入。推荐同时更新系统：
+</p>
+<ol>
+<li>更新数据库并安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/archlinuxcn-keyring">archlinuxcn-keyring</a></span><sup><small>CNRepo</small></sup></span>：</li>
+<pre> # pacman -Sy archlinuxcn-keyring
+</pre>
+<li>更新系统并安装镜像仓库列表。分为两步是为了让安装的 keyring 生效：</li>
+<pre> # pacman -Su archlinuxcn-mirrorlist-git
+</pre>
+<li>
+在 <code>/etc/pacman.conf</code> 文件<code>[archlinuxcn]</code>处添加以下内容，以启用镜像列表
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Include = /etc/pacman.d/archlinuxcn-mirrorlist
+</pre>
+</li></ol>
+<p>本仓库同时提供 <a href="https://wiki.archlinux.org/title/Debuginfod">debuginfod</a> 服务（支持部分有调试符号的包；不可用镜像站点的地址），设置以下<a href="#pg4989d4f46056">环境变量</a>即可（此环境变量会被 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/archlinuxcn-mirrorlist-git">archlinuxcn-mirrorlist-git</a></span><sup><small>CNRepo</small></sup></span> 自动设置，但有些情况可能并不生效）：
+</p>
+<pre>DEBUGINFOD_URLS="<a href="https://debuginfod.archlinux.org">https://debuginfod.archlinux.org</a> <a href="https://repo.archlinuxcn.org">https://repo.archlinuxcn.org</a>"
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807030446
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.058 seconds
+Real time usage: 0.063 seconds
+Preprocessor visited node count: 78/1000000
+Revision size: 2240/2097152 bytes
+Post‐expand include size: 1704/2097152 bytes
+Template argument size: 436/2097152 bytes
+Highest expansion depth: 4/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 100/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%    8.225      1 -total
+ 21.99%    1.809      2 Template:Hc
+ 20.87%    1.717      5 Template:Ic
+ 17.48%    1.438      4 Template:Cnrepo
+-->
+<!-- Render ID be96a70e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:5565:|#|:idhash:canonical!zh-cn and timestamp 20260807030446 and revision id 34855. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

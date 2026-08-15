@@ -1,0 +1,54 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg67c32f06fb3f">联想 ThinkPad L380 Yoga</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_L380_Yoga">Lenovo ThinkPad L380 Yoga</a>，最近一次同步于 2020-04-10，若英文版本有所<a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_L380_Yoga?diff=0&amp;oldid=605270">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_L380_Yoga_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>为确保您拥有此笔记本，<a href="#pg811194d6beaa">安装</a>软件包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dmidecode">dmidecode</a></span><sup><small>包</small></sup></span> 然后运行:
+</p>
+<pre># dmidecode -t system | grep Version
+
+Version: ThinkPad L380 Yoga
+</pre>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg67c32f06fb3f_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg67c32f06fb3f_SD_.E5.8D.A1" id="SD_卡"><span id="SD_.E5.8D.A1"></span>SD 卡</h3></div>
+<p>开箱即用，只是不要忘记 exfat-utils。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg67c32f06fb3f_Wacom" id="Wacom">Wacom</h3></div>
+<p>开箱即用。
+</p><p>有关更多配置，请参见<a href="#pg30d802a38d4d">Tablet PC</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg67c32f06fb3f_.E9.99.84.E5.8A.A0.E5.8A.9F.E8.83.BD" id="附加功能"><span id=".E9.99.84.E5.8A.A0.E5.8A.9F.E8.83.BD"></span>附加功能</h2></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iio-sensor-proxy">iio-sensor-proxy</a></span><sup><small>包</small></sup></span> 以便在GNOME下自动旋转屏幕和调节亮度。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/thinkpad-yoga-scripts-git/">thinkpad-yoga-scripts-git</a></span><sup><small>AUR</small></sup></span> 不能很好的工作，因为触摸板和指点杆制造商改变。而是使用 <a href="https://github.com/ffejery/thinkpad-l380-yoga-scripts">https://github.com/ffejery/thinkpad-l380-yoga-scripts</a> ，有关如何构建的信息，请参见<a href="#pg7edcce763396">makepkg</a>。还有一个AUR包: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/thinkpad-l380-yoga-scripts-git/">thinkpad-l380-yoga-scripts-git</a></span><sup><small>AUR</small></sup></span>。请把<code>/opt/thinkpad-l380-yoga-scripts/rotate/thinkpad-rotate.py</code> 按照自述文件中的提示进行编辑，因为您可能希望触摸屏和笔与屏幕一起旋转。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808041350
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.057 seconds
+Real time usage: 0.060 seconds
+Preprocessor visited node count: 76/1000000
+Revision size: 1058/2097152 bytes
+Post‐expand include size: 1912/2097152 bytes
+Template argument size: 404/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   12.956      1 -total
+ 27.50%    3.563      1 Template:翻译状态
+ 19.64%    2.545      2 Template:Pkg
+ 17.40%    2.255      1 Template:Bc
+  9.94%    1.287      2 Template:AUR
+  7.90%    1.024      1 Template:Ic
+-->
+<!-- Render ID 8f049f0e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3389:|#|:idhash:canonical!zh-cn and timestamp 20260808041350 and revision id 33846. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

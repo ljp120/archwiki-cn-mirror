@@ -1,0 +1,338 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg330220651d48">联想 ThinkPad X13 Gen 1 (AMD)</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_X13_Gen_1_(AMD)">Lenovo ThinkPad X13 Gen 1 (AMD)</a>，最近一次同步于 2021-03-30，若英文版本有所<a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_X13_Gen_1_(AMD)?diff=0&amp;oldid=656130">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_X13_Gen_1_(AMD)_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<table class="wikitable" style="float: right;">
+<tbody><tr>
+<th>硬件</th>
+<th>PCI/USB ID</th>
+<th>是否正常工作
+</th></tr>
+<tr>
+<td>触摸板</td>
+<td></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>触摸板按键</td>
+<td></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>键盘</td>
+<td></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>显卡</td>
+<td><code>8086:2723</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>摄像头</td>
+<td><code>04f2:b6d0</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>有线局域网</td>
+<td><code>10ec:8168</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>蓝牙</td>
+<td><code>8086:2723</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>电源管理</td>
+<td></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>USB接口</td>
+<td><code>10ec:816d</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>SD读卡器</td>
+<td><code></code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>HDMI接口</td>
+<td></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>声卡</td>
+<td><code>1022:15e3</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>无线局域网</td>
+<td><code>8086:2723</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>指纹传感器</td>
+<td><code>06cb:00bd</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>可信平台模块（TPM）</td>
+<td></td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">未测试
+</td></tr></tbody></table>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg330220651d48_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>安装过程中无任何特殊步骤。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg330220651d48_BIOS" id="BIOS">BIOS</h3></div>
+<p>建议将BIOS更新至最新版本，本条目撰写时所使用的最新版本为1.30
+</p><p>BIOS更新文件可以从<a href="https://pcsupport.lenovo.com/mx/en/products/laptops-and-netbooks/thinkpad-x-series-laptops/thinkpad-x13-type-20uf-20ug/downloads/ds544980-bios-update-utility-bootable-cd-for-windows-10-64-bit-thinkpad-t14s-x13">X13支持页面</a>以<a href="https://download.lenovo.com/pccbbs/mobiles/r1cuj60wd.iso">ISO镜像文件</a>的形式下载并复制到一个优盘中。
+</p><p>BIOS中有一个可自定义的电源配置默认是为<code>Windows 10</code>设定的。建议将其改成为<code>Linux</code>设定，可以减少#电源管理方面的问题。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg330220651d48_.E8.BE.85.E5.8A.A9.E5.8A.9F.E8.83.BD" id="辅助功能"><span id=".E8.BE.85.E5.8A.A9.E5.8A.9F.E8.83.BD"></span>辅助功能</h2></div>
+<p>BIOS提供两种操作模式，<b>图形模式</b>和<b>纯文本模式</b>。
+</p><p>在图形模式下，可以使用键盘选择各种选项。<b>左</b>和<b>右</b>两个方向键用来选择选项，<b>空格</b>用来激活选项。
+</p><p>如果像更流畅的使用键盘设定BIOS，推荐使用纯文本模式。
+</p><p>以下步骤可以将BIOS设置为纯文本模式：
+</p>
+<ul><li>在<b>Setup</b>选项卡下的左侧栏里选择<b>Config</b></li>
+<li>用<b>右方向键</b>定位至右侧栏里的<b>Setup UI</b></li>
+<li>选择<b>Simple Text</b>模式</li>
+<li>按下<b>F10</b>保存BIOS选项并重启。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>视力障碍用户可能需要一个视力正常的人来帮助更改BIOS设定</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg330220651d48_.E7.A1.AC.E4.BB.B6" id="硬件"><span id=".E7.A1.AC.E4.BB.B6"></span>硬件</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg330220651d48_.E6.98.BE.E7.A4.BA" id="显示"><span id=".E6.98.BE.E7.A4.BA"></span>显示</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg330220651d48_Lightdm" id="Lightdm">Lightdm</h4></div>
+<p>Lightdm会因为amdgpu显卡驱动加载过晚而发生问题，使用KMS将显卡驱动加载至initramfs
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">MODULES=(amdgpu)</pre>
+<p>之后重新生成initramfs
+</p>
+<pre># mkinitcpio -P
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg330220651d48_.E4.BA.AE.E5.BA.A6.E6.8E.A7.E5.88.B6" id="亮度控制"><span id=".E4.BA.AE.E5.BA.A6.E6.8E.A7.E5.88.B6"></span>亮度控制</h4></div>
+<p>在内核版本5.9下使用原生亮度控制
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/grub</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">GRUB_CMDLINE_LINUX_DEFAULT=".... acpi_backlight=native ...."</pre>
+<p>之后重建GRUB配置
+</p>
+<pre># grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg330220651d48_.E5.A3.B0.E5.8D.A1" id="声卡"><span id=".E5.A3.B0.E5.8D.A1"></span>声卡</h3></div>
+<p>PulseAudio无需任何设定就可以正常工作，但是其默认选择的ALSA音频设备可能不正确。可能需要通过如下文件更改默认设别：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/asound.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">defaults.pcm.card 2
+defaults.ctl.card 2
+</pre>
+<p>记得使用alsamixer应用取消静音：
+</p>
+<pre>$ alsamixer
+</pre>
+<p>使用alsactl应用永久保留设置：
+</p>
+<pre># alsactl store
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg330220651d48_.E5.9B.BA.E4.BB.B6" id="固件"><span id=".E5.9B.BA.E4.BB.B6"></span>固件</h2></div>
+<p><a href="#pg8f5df3654778">fwupd</a> 暂不支持此设备。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg330220651d48_.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86" id="电源管理"><span id=".E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86"></span>电源管理</h2></div>
+<p>此设备从休眠中恢复存在很多问题，为了解决这些问题，请参考<a href="#pg330220651d48_BIOS">#BIOS</a>章节中的方法。
+</p><p>如果系统使用sd-encrypt进行了全盘加密，建议切换至使用<code>encrypt</code>的mkinitcpio钩子。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg330220651d48_.E5.8A.9F.E8.83.BD.E9.94.AE" id="功能键"><span id=".E5.8A.9F.E8.83.BD.E9.94.AE"></span>功能键</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>按键
+</th>
+<th>可见？<sup>1</sup>
+</th>
+<th>图标？<sup>2</sup>
+</th>
+<th>效果
+</th></tr>
+<tr>
+<td><code>Fn</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td><code>XF86WakeUp</code>
+</td></tr>
+<tr>
+<td><code>Fn+Esc</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>开启Fn锁
+</td></tr>
+<tr>
+<td><code>Fn+F1</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86AudioMute</code>
+</td></tr>
+<tr>
+<td><code>Fn+F2</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86AudioLowerVolume</code>
+</td></tr>
+<tr>
+<td><code>Fn+F3</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86AudioRaiseVolume</code>
+</td></tr>
+<tr>
+<td><code>Fn+F4</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86AudioMicMute</code>
+</td></tr>
+<tr>
+<td><code>Fn+F5</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>降低显示器亮度
+</td></tr>
+<tr>
+<td><code>Fn+F6</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>提高显示器亮度
+</td></tr>
+<tr>
+<td><code>Fn+F7</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86Display</code>
+</td></tr>
+<tr>
+<td><code>Fn+F8</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86WLAN</code><sup>3</sup>
+</td></tr>
+<tr>
+<td><code>Fn+F9</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>
+</td></tr>
+<tr>
+<td><code>Fn+F10</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>
+</td></tr>
+<tr>
+<td><code>Fn+F11</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>
+</td></tr>
+<tr>
+<td><code>Fn+F12</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86Favorites</code>
+</td></tr>
+<tr>
+<td><code>Fn+Space</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>开启/关闭键盘灯
+</td></tr>
+<tr>
+<td><code>Fn+4</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td><code>XF86Sleep</code><sup>3</sup>
+</td></tr>
+<tr>
+<td><code>Fn+B</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td><code>Ctrl_L + Break</code>
+</td></tr>
+<tr>
+<td><code>Fn+P</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td><code>Pause</code>
+</td></tr>
+<tr>
+<td><code>Fn+K</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td><code>Scroll Lock</code>
+</td></tr>
+<tr>
+<td><code>Fn+Left</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td><code>Home</code>
+</td></tr>
+<tr>
+<td><code>Fn+Right</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td><code>End</code>
+</td></tr>
+<tr>
+<td><code>Fn+S</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td><code>Alt_L + SysRq </code>
+</td></tr>
+<tr>
+<td><code>Fn+End</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td><code>Ins</code>
+</td></tr></tbody></table>
+<ol><li>按键可以通过<code>xev</code>或类似工具被探测到。</li>
+<li>物理按键上有显示其功能的图标</li>
+<li>默认由systemd-logind管理</li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg330220651d48_.E5.8F.82.E8.80.83" id="参考"><span id=".E5.8F.82.E8.80.83"></span>参考</h2></div>
+<ul><li>产品配置: <a href="https://psref.lenovo.com/syspool/Sys/PDF/ThinkPad/ThinkPad_x13_Gen_1_AMD/ThinkPad_x13_Gen_1_AMD_Spec.PDF">https://psref.lenovo.com/syspool/Sys/PDF/ThinkPad/ThinkPad_x13_Gen_1_AMD/ThinkPad_x13_Gen_1_AMD_Spec.PDF</a></li>
+<li>官方维护手册: <a href="https://download.lenovo.com/pccbbs/mobiles_pdf/t14s_gen1_x13_gen1_hmm_en.pdf">https://download.lenovo.com/pccbbs/mobiles_pdf/t14s_gen1_x13_gen1_hmm_en.pdf</a></li>
+<li><a href="https://certification.ubuntu.com/hardware/202006-27979">https://certification.ubuntu.com/hardware/202006-27979</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807232535
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.163 seconds
+Real time usage: 0.168 seconds
+Preprocessor visited node count: 715/1000000
+Revision size: 5366/2097152 bytes
+Post‐expand include size: 11048/2097152 bytes
+Template argument size: 1131/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   50.365      1 -total
+ 13.19%    6.641     52 Template:Ic
+ 12.28%    6.185     44 Template:是
+  8.22%    4.142     16 Template:否
+  6.89%    3.470      1 Template:G
+  6.25%    3.147      1 Template:翻译状态
+  4.76%    2.398      1 Template:R
+  4.27%    2.150      3 Template:META_Table_cell
+  3.14%    1.583      1 Template:Y
+  2.83%    1.426      3 Template:Hc
+-->
+<!-- Render ID 4a650d8e-92b7-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3393:|#|:idhash:canonical!zh-cn and timestamp 20260807232535 and revision id 33850. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

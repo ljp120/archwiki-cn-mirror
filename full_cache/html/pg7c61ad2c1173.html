@@ -1,0 +1,199 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg7c61ad2c1173">路由器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Router">Router</a>，最近一次同步于 2020-04-26，若英文版本有所<a href="https://wiki.archlinux.org/title/Router?diff=0&amp;oldid=442356">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Router_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>此文章是将一台电脑配置为一台网关/路由器的指南。为加强安全性，不应在此机器上运行对外服务。对于局域网（LAN），只运行特定的网关服务而不运行httpd、ftpd、samba、nfsd等属于局域网服务器的服务，因为这样会带来风险。
+</p><p>此文章不涉及如何设置两台PC用交叉网线进行网络连接共享。简单网络连接共享，参见<a href="#pg48560ebc1733">Internet sharing</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在本文中，<b>intern0</b>和<b>extern0</b>是网络接口的名称。进一步说明参见#网络接口名称约定.</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7c61ad2c1173_.E7.A1.AC.E4.BB.B6.E9.9C.80.E6.B1.82" id="硬件需求"><span id=".E7.A1.AC.E4.BB.B6.E9.9C.80.E6.B1.82"></span>硬件需求</h2></div>
+<ul><li>至少 1GB 硬盘空间。基本安装约需 500MB 硬盘空间，如果使用web代理缓存还需额外预留缓存空间。</li>
+<li>至少两个实体网络接口：网关要将两个网络彼此连通（实际上路由器可以用一个物理网络接口实现两个<a href="#pg4063816c9354">VLAN</a>接口并连接到VLAN交换机，这称为单臂路由/router-on-a-stick，但本文不讨论这种情况）。需要将两个网络连接到同一台实体机器，其中一个网口连接到外部网络，另一个连接内部网络。其中一个接口必须连接到外部网络，其他接口连接到内部网络。</li>
+<li>一个集线器、交换机或UTP线缆：将其他机器连接到网关。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7c61ad2c1173_.E7.BD.91.E7.BB.9C.E6.8E.A5.E5.8F.A3.E9.85.8D.E7.BD.AE" id="网络接口配置"><span id=".E7.BD.91.E7.BB.9C.E6.8E.A5.E5.8F.A3.E9.85.8D.E7.BD.AE"></span>网络接口配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_.E7.BD.91.E7.BB.9C.E6.8E.A5.E5.8F.A3.E5.90.8D.E7.A7.B0.E7.BA.A6.E5.AE.9A" id="网络接口名称约定"><span id=".E7.BD.91.E7.BB.9C.E6.8E.A5.E5.8F.A3.E5.90.8D.E7.A7.B0.E7.BA.A6.E5.AE.9A"></span>网络接口名称约定</h3></div>
+<p>Systemd 会自动为网口选择唯一接口名称。命名是持续不变的，直到重启。你可能希望更改接口名称，以便标记不同的网络接口。在以下的说明中，我们约定使用以下名称：
+</p>
+<ul><li><b>intern0</b>：连接到局域网（LAN）的网络接口。真实名称可能是 enp2s0、enp1s1 等等。</li>
+<li><b>extern0</b>：连接到外部网络或广域网的网络接口。真实名字可能是 enp2s0、enp1s1 等等。</li></ul>
+<p>你可以通过<a href="#pg30593d9cf652">Systemd-networkd#Renaming an interface</a>中说明的方法使用<a href="#pg30593d9cf652">Systemd-networkd</a>的配置文件，或通过<a href="#pgf42a74f3af9c">网络配置#Change interface name</a>中说明的方法使用<a href="#pge009209061ac">udev</a>规则重新分配设备名称。由于本文是示例性质，使用以上约定名称。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_IP_.E9.85.8D.E7.BD.AE" id="IP_配置"><span id="IP_.E9.85.8D.E7.BD.AE"></span>IP 配置</h3></div>
+<p>首先需要配置网络接口。配置网络接口最好的方式是编辑 <a href="#pgab24d2b1ec71">netctl</a> 配置文件。下面需要创建两个配置文件。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果仅通过PPPoE连接到互联网（只有一个广域网接口），则<b>不要</b>设置或启用外网口配置文件（extern0-profile）。参见#PPPoE配置</div>
+<ul><li><code>/etc/netctl/extern0-profile</code></li></ul>
+<pre>Description='Public Interface.'
+Interface=extern0
+Connection=ethernet
+IP='dhcp'
+</pre>
+<ul><li><code>/etc/netctl/intern0-profile</code></li></ul>
+<pre>Description='Private Interface'
+Interface=intern0
+Connection=ethernet
+IP='static'
+Address=('10.0.0.1/24')
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>上面示例中假定路由器面向整个子网。如果只要面向少数几台机器，可以修改 <a href="https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing">CIDR</a> 后缀缩减范围。例如 <code>/27</code> 是限定范围在 <code>10.0.0.1</code> 至 <code>10.0.0.30</code>。有很多在线CIDR计算器可用，例如<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sipcalc">sipcalc</a></span><sup><small>包</small></sup></span>。</div>
+<p>下一步是用 netctl 启用网络接口配置。
+</p>
+<pre># netctl enable extern0-profile
+# netctl enable intern0-profile
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7c61ad2c1173_ADSL.E8.BF.9E.E6.8E.A5.2FPPPoE" id="ADSL连接/PPPoE"><span id="ADSL.E8.BF.9E.E6.8E.A5.2FPPPoE"></span>ADSL连接/PPPoE</h2></div>
+<p>可以用 rp-pppoe 将防火墙的 <code>extern0</code> 接口连接到ADSL modem并管理该连接。确认已将modem设置为<i>桥接</i>（或半桥接或RFC1483）模式，否则modem工作于路由器模式。<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rp-pppoe">rp-pppoe</a></span><sup><small>包</small></sup></span> 包。
+</p><p>需要注意的是：如果仅能通过PPPoE连接到互联网（除了能连接modem之外没有其它广域网接口），则不必启用 <code>extern0-profile</code> ，因为此时外网口使用名为 ppp0 的伪接口。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_PPPoE.E9.85.8D.E7.BD.AE" id="PPPoE配置"><span id="PPPoE.E9.85.8D.E7.BD.AE"></span>PPPoE配置</h3></div>
+<p>可以使用 netctl 设置 pppoe 连接。首先，
+</p>
+<pre># cp /etc/netctl/examples/pppoe /etc/netctl/
+</pre>
+<p>然后编辑它。选择连接到modem的接口并配置。如果你仅仅通过PPPoE连接到互联网，这就是 <code>extern0</code> 接口。其他字段填入ISP的信息。详情参阅 <span class="plainlinks archwiki-template-man" title="$ man 5 netctl.profile"><a href="https://man.archlinux.org/man/netctl.profile.5">netctl.profile(5)</a></span> 手册。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7c61ad2c1173_DNS_.E5.92.8C_DHCP" id="DNS_和_DHCP"><span id="DNS_.E5.92.8C_DHCP"></span>DNS 和 DHCP</h2></div>
+<p>可以使用专为小型站点设计的 <a href="#pg72acb6a2ac2c">dnsmasq</a> 为局域网提供DNS和DHCP服务。<a href="#pg3296932e5bbe">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dnsmasq">dnsmasq</a></span><sup><small>包</small></sup></span> 包即可。
+</p><p>Dnsmasq 要配置为DHCP服务器。编辑 <code>/etc/dnsmasq.conf</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dnsmasq.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">interface=intern0 # 使dnsmasq只侦听来自内网口（intern0，即局域网）的请求
+expand-hosts      # 为 /etc/hosts 中的主机名添加一个域名
+domain=foo.bar    # 允许DHCP主机的完全限定域名（需要启用“expand-hosts”）
+dhcp-range=10.0.0.2,10.0.0.255,255.255.255.0,1h # 定义局域网中DHCP地址范围：从 10.0.0.2 至10.0.0.255，子网掩码为 255.255.255.0，DHCP 租期为 1 小时 （可按需修改）
+</pre>
+<p>下面将看到，只能添加<i><b>静态</b></i>DHCP租约。例如，分配一个IP地址给局域网中某一台指定MAC地址的机器。这样，无论这台机器何时请求DHCP，都获得同一个IP地址。对于需要DNS记录的网络服务来说这非常有用。这也可以拒绝特定MAC的机器获取IP地址。
+</p><p>现在<a href="#pgac06dd8bfe95">启动</a> <code>dnsmasq.service</code> 服务。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7c61ad2c1173_.E8.BF.9E.E6.8E.A5.E5.85.B1.E4.BA.AB" id="连接共享"><span id=".E8.BF.9E.E6.8E.A5.E5.85.B1.E4.BA.AB"></span>连接共享</h2></div>
+<p>现在可以连通两个网络接口。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_Manual" id="Manual">Manual</h3></div>
+<p>首先，需要允许数据包从一个网络接口跳转到另一个网络接口。这样需要通过内核中的 <span class="plainlinks archwiki-template-man" title="$ man 8 sysctl"><a href="https://man.archlinux.org/man/sysctl.8">sysctl(8)</a></span> 功能启用包转发功能。详情参阅 <a href="#pg48560ebc1733">Internet sharing#Enable packet forwarding</a>。
+</p><p>假设 <code>net.**forwarding</code> 设置正确（即设置为 <code>1</code>），数据包仍需要正确地发送和接收。因此，必须在外部网路和内部子网之间转换IP地址。这种技术称为“钳制”（<i>masquerading</i>）。还需要两个转发规则保持连接，并使LAN能够转发到WAN。为此，我们可以使用<a href="#pg5d43226b0584">iptables</a>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/iptables/iptables.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">*nat
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+-A POSTROUTING -o extern0 -j MASQUERADE
+COMMIT
+
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -i intern0 -o extern0 -j ACCEPT
+COMMIT
+</pre>
+<p>如果通过PPPoE连接，还需要将 mss 钳制到 pmtu，防止产生碎片：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/iptables/iptables.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+*mangle
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+-A FORWARD -o ppp0 -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+COMMIT
+</pre>
+<p><a href="#pg073992cb666a">Start</a> 和 <a href="#pg6bfd324d34c9">enable</a> <code>iptables.service</code>。路由器现在应该完全正常运行，并路由数据。但是，要面向公共Internet使用，还需要通过<a href="#pg4b3eb4ac08ff">Simple stateful firewall</a>进行额外的保护。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_.E7.94.A8shorewall.E5.85.B1.E4.BA.AB.E8.BF.9E.E6.8E.A5" id="用shorewall共享连接"><span id=".E7.94.A8shorewall.E5.85.B1.E4.BA.AB.E8.BF.9E.E6.8E.A5"></span>用shorewall共享连接</h3></div>
+<p>详细配置说明参见<a href="#pg4ec999cb5b6b">Shorewall</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7c61ad2c1173_IPv6.E8.AF.B4.E6.98.8E" id="IPv6说明"><span id="IPv6.E8.AF.B4.E6.98.8E"></span>IPv6说明</h2></div>
+<p>很有用的参考： <a href="#pg8f9147d5b2cb">IPv6</a> 和 <a href="https://en.wikipedia.org/wiki/IPv6">wikipedia:IPv6</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_.E5.94.AF.E4.B8.80.E6.9C.AC.E5.9C.B0.E5.9C.B0.E5.9D.80" id="唯一本地地址"><span id=".E5.94.AF.E4.B8.80.E6.9C.AC.E5.9C.B0.E5.9C.B0.E5.9D.80"></span>唯一本地地址</h3></div>
+<p>即使ISP没有提供IPv6地址，仍然可以将路由器设置为IPv6模式。除非禁用IPv6，否则所有接口都会分配唯一的 <code>fe80::/10</code> 地址。
+</p>
+
+<p>对于内部网络，已保留地址块 <code>fc00::/7</code>。这些地址保证是唯一的，且不可从开放的互联网路由。属于 <code>fc00::/7</code> 的地址称为 <a href="https://en.wikipedia.org/wiki/Unique_local_address">Unique Local Addresses</a>。要在内部网络生成和使用 <a href="https://www.simpledns.com/private-ipv6.aspx">generate a ULA /64 block</a>，如希望使用 <code>fd00:aaaa:bbbb:cccc::/64</code>，我们首先要在内部接口上分配静态IPv6地址。修改上面的 <code>intern0-profile</code>，添加以下一行：
+</p>
+<pre> Address6=('fd00:aaaa:bbbb:cccc::1/64')
+</pre>
+<p>这样将ULA添加到内部网络接口。就路由器而言，这是唯一需要配置的地方。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_.E5.85.A8.E5.B1.80.E5.8D.95.E6.92.AD.E5.9C.B0.E5.9D.80" id="全局单播地址"><span id=".E5.85.A8.E5.B1.80.E5.8D.95.E6.92.AD.E5.9C.B0.E5.9D.80"></span>全局单播地址</h3></div>
+<p>如果ISP或WAN网络可以访问IPv6 Internet，则可以将全局链路地址分配给路由器，并通过 SLAAC传播到内部网络。全局单播前缀通常是<i>静态</i>或通过<i>前缀委派</i>提供的。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg7c61ad2c1173_.E9.9D.99.E6.80.81IPv6.E5.89.8D.E7.BC.80" id="静态IPv6前缀"><span id=".E9.9D.99.E6.80.81IPv6.E5.89.8D.E7.BC.80"></span>静态IPv6前缀</h4></div>
+<p>如果ISP提供静态前缀，则编辑 <code>/etc/netctl/extern0-profile</code>配置文件，简单添加IPv6地址和前缀即可：
+</p>
+<pre> Address6=('2002:1:2:3:4:5:6:7/64')
+</pre>
+<p>可以在使用上述ULA地址之外，同时使用此功能。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg7c61ad2c1173_.E9.80.9A.E8.BF.87DHCPv6-PD.E8.8E.B7.E5.8F.96IPv6.E5.89.8D.E7.BC.80" id="通过DHCPv6-PD获取IPv6前缀"><span id=".E9.80.9A.E8.BF.87DHCPv6-PD.E8.8E.B7.E5.8F.96IPv6.E5.89.8D.E7.BC.80"></span>通过DHCPv6-PD获取IPv6前缀</h4></div>
+<p>如果ISP通过前缀委派处理IPv6，则可以按照<a href="#pg8f9147d5b2cb">main IPv6 article</a>中的说明进行操作。按照本说明的约定，WAN接口为 <code>extern0</code>（或如果通过PPPoE连接时是 <code>ppp0</code>），LAN接口为 <code>intern0</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_.E8.B7.AF.E7.94.B1.E9.80.9A.E5.91.8A.E4.B8.8E.E6.97.A0.E7.8A.B6.E6.80.81.E8.87.AA.E5.8A.A8.E9.85.8D.E7.BD.AE.28SLAAC.29" id="路由通告与无状态自动配置(SLAAC)"><span id=".E8.B7.AF.E7.94.B1.E9.80.9A.E5.91.8A.E4.B8.8E.E6.97.A0.E7.8A.B6.E6.80.81.E8.87.AA.E5.8A.A8.E9.85.8D.E7.BD.AE.28SLAAC.29"></span>路由通告与无状态自动配置(SLAAC)</h3></div>
+<p>要向网络客户端正确分发IPv6，需要使用通告守护进程。按照 <a href="#pg8f9147d5b2cb">main IPv6 article</a> 中关于如何设置 <code>radvd</code>的说明进行操作。按照本说明的约定，LAN接口是 <code>intern0</code>。可以通告所有前缀，或选择哪些前缀分配给本地网络。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7c61ad2c1173_.E5.8F.AF.E9.80.89.E9.99.84.E5.8A.A0.E5.8A.9F.E8.83.BD" id="可选附加功能"><span id=".E5.8F.AF.E9.80.89.E9.99.84.E5.8A.A0.E5.8A.9F.E8.83.BD"></span>可选附加功能</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_UPnP" id="UPnP">UPnP</h3></div>
+<p>上述 shorewall 的配置不包含 <a href="https://en.wikipedia.org/wiki/UPnP">UPnP</a> 支持。尽管可能使路由器遭到来自局域网内部的攻击，然而某些应用要求必须使用UPnP。
+</p><p>要在路由器上启用UPnP，需要安装一个UPnP<a href="https://en.wikipedia.org/wiki/Internet_Gateway_Device_Protocol">Internet Gateway Device (IGD) protocol</a>。可从<a href="#pg0a3e16d13281">官方仓库</a>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=miniupnpd">miniupnpd</a></span><sup><small>包</small></sup></span> 。
+</p><p>更详细信息请查阅 <a href="http://www.shorewall.net/UPnP.html">Shorewall guide on UPnP</a> 。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_.E8.BF.9C.E7.A8.8B.E7.AE.A1.E7.90.86" id="远程管理"><span id=".E8.BF.9C.E7.A8.8B.E7.AE.A1.E7.90.86"></span>远程管理</h3></div>
+<p><a href="#pgf572ecc9f480">OpenSSH</a> 可用于远程管理路由器，十分适合运行在“<b>无头</b>”模式（无显示器或输入设备）的机器。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_.E7.BC.93.E5.AD.98.E7.BD.91.E9.A1.B5.E4.BB.A3.E7.90.86" id="缓存网页代理"><span id=".E7.BC.93.E5.AD.98.E7.BD.91.E9.A1.B5.E4.BB.A3.E7.90.86"></span>缓存网页代理</h3></div>
+<p>参阅 <a href="#pg78fbeb65acbc">Squid</a> 如何配置代理为网页浏览加速和/或添加额外的安全层。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_.E6.97.B6.E9.97.B4.E6.9C.8D.E5.8A.A1.E5.99.A8" id="时间服务器"><span id=".E6.97.B6.E9.97.B4.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>时间服务器</h3></div>
+<p>将路由器用作一台时间服务器，参阅<a href="#pg9dcc5acb2bd6">系统时间#时间同步</a>，配置网络时间协议（NTP）服务器。
+</p><p>然后配置 shorewall 或者 iptables 允许 NTP 流量流出。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_.E5.86.85.E5.AE.B9.E8.BF.87.E6.BB.A4" id="内容过滤"><span id=".E5.86.85.E5.AE.B9.E8.BF.87.E6.BB.A4"></span>内容过滤</h3></div>
+<p>如果需要内容过滤，可以安装配置 <a href="#pg5ab49adeafb6">DansGuardian</a> 或者 <a href="#pgc6a332fcd4b6">Privoxy</a> 。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7c61ad2c1173_.E6.B5.81.E9.87.8F.E5.85.B1.E4.BA.AB" id="流量共享"><span id=".E6.B5.81.E9.87.8F.E5.85.B1.E4.BA.AB"></span>流量共享</h3></div>
+<p>流量共享很有用，尤其当局域网中不止一台机器时。基本思路是为不同类型的流量分配优先级。交互型流量（ssh、在线游戏等）可能需要高优先级，而 P2P 流量可分配低优先级。其他流量介于二者之间。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7c61ad2c1173_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><a href="#pg4b3eb4ac08ff">Simple stateful firewall</a></li>
+<li><a href="#pg48560ebc1733">Internet sharing</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808041425
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.138 seconds
+Real time usage: 0.143 seconds
+Preprocessor visited node count: 456/1000000
+Revision size: 10662/2097152 bytes
+Post‐expand include size: 5111/2097152 bytes
+Template argument size: 1671/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 997/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   30.067      1 -total
+ 15.31%    4.602      3 Template:注意
+ 13.46%    4.046      1 Template:Expansion
+ 12.84%    3.861     24 Template:Ic
+ 11.45%    3.443      1 Template:翻译状态
+  9.37%    2.817      4 Template:Pkg
+  7.80%    2.346      2 Template:Man
+  5.60%    1.685      1 Template:META_Message
+  5.56%    1.672      3 Template:Hc
+-->
+<!-- Render ID a3e1328e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3750:|#|:idhash:canonical!zh-cn and timestamp 20260808041425 and revision id 33871. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

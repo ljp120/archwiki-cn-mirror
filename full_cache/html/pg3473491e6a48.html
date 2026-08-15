@@ -1,0 +1,219 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg3473491e6a48">内核</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Kernel">Kernel</a>，最近一次同步于 2026-05-01，若英文版本有所<a href="https://wiki.archlinux.org/title/Kernel?diff=0&amp;oldid=871171">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Kernel_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg6dbfce2ea89d">内核模块</a></li>
+<li><a href="#pgc7edd86a6841">编译内核模块</a></li>
+<li><a href="#pg7b7cc2bbe79a">sysctl</a></li>
+</ul></div>
+<p>根据维基百科：
+</p>
+<dl><dd><a href="https://zh.wikipedia.org/wiki/Linux_%E5%86%85%E6%A0%B8">Linux 内核</a>是一个开源的、类 Unix 的、操作系统宏内核。</dd></dl>
+<p><a href="#pg83506eae4ba0">Arch Linux</a> 基于 Linux 内核。除了最新的稳定内核之外，还有许多各种各样的 Linux 内核可供选择。本文列出了仓库中提供的一些选择，并对它们简要介绍。本文还介绍了一些可用的内核补丁。文章的最后总览了自行编译内核的方法，并包含各种方法的链接。
+</p><p>内核包<a href="#pg811194d6beaa">安装</a>在 <code>/usr/lib/modules/</code> 路径下，随后其包含的 <a href="https://zh.wikipedia.org/wiki/vmlinuz">vmlinuz</a> 可执行镜像<a href="https://archlinux.org/news/new-kernel-packages-and-mkinitcpio-hooks/">[1]</a>会被复制到 <code>/boot/</code> 目录。安装新的内核包后，需重新配置<a href="#pgee8f2050088a">引导加载程序</a>以适配变更。若需降级内核，请参阅<a href="#pg003e475392dc">降级软件包#降级内核</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3473491e6a48_.E5.AE.98.E6.96.B9.E6.94.AF.E6.8C.81.E7.9A.84.E5.86.85.E6.A0.B8" id="官方支持的内核"><span id=".E5.AE.98.E6.96.B9.E6.94.AF.E6.8C.81.E7.9A.84.E5.86.85.E6.A0.B8"></span>官方支持的内核</h2></div>
+<p>官方支持的内核可通过<a href="https://bbs.archlinux.org/viewforum.php?id=22">论坛</a>和<a href="#pgbd58e8d9d126">漏洞报告</a>获取社区支持。
+</p>
+<ul><li><b>Stable</b> — 采用了一些补丁的原版 Linux 内核和模块。</li></ul>
+<dl><dd><a href="https://www.kernel.org/">https://www.kernel.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Hardened</b> — 注重安全的 Linux 内核，采用一系列加固补丁以缓解内核和用户空间漏洞。和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 相比，它启用了上游更多的内核加固功能。</li></ul>
+<dl><dd><a href="https://github.com/anthraxx/linux-hardened">https://github.com/anthraxx/linux-hardened</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Longterm</b> — 长期支持（LTS）的 Linux 内核及模块，提供针对服务器使用场景优化的配置选项。</li></ul>
+<dl><dd><a href="https://www.kernel.org/">https://www.kernel.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-lts">linux-lts</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><span class="ilh-all" data-foreign-title="Realtime kernel" data-lang-code="en" data-lang-name="英语" data-orig-title="Realtime kernel"><span class="ilh-page"><a href="#pg9743197ff846">Realtime kernel</a></span></span></b> — 由 Ingo Molnar 领导的核心开发者小组维护。该补丁使内核的几乎所有部分可被抢占（除少量“raw_spinlock critical regions”（“原始自旋锁关键区域”）代码段外），通过将大多数内核自旋锁替换为支持优先级继承的互斥锁，并将所有硬件中断和软件中断迁移至内核线程处理实现。</li></ul>
+<dl><dd><a href="https://wiki.linuxfoundation.org/realtime/start">https://wiki.linuxfoundation.org/realtime/start</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-rt">linux-rt</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-rt-lts">linux-rt-lts</a></span><sup><small>包</small></sup></span></dd>
+<dd><div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>实时内核支持已并入 <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=baeb9a7d8b60b021d907127509c44507539c15e5">Linux 6.12</a></div></dd></dl>
+<ul><li><b>Zen Kernel</b> — 一些内核黑客合作的结果，致力于提供最适合日常使用的内核。详细信息请参阅<a href="https://github.com/zen-kernel/zen-kernel/wiki/FAQ">常见问题解答</a>和<a href="https://github.com/zen-kernel/zen-kernel/wiki/Detailed-Feature-List">详细特性列表</a>。</li></ul>
+<dl><dd><a href="https://github.com/zen-kernel/zen-kernel">https://github.com/zen-kernel/zen-kernel</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-zen">linux-zen</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3473491e6a48_.E7.BC.96.E8.AF.91" id="编译"><span id=".E7.BC.96.E8.AF.91"></span>编译</h2></div>
+<p>可通过以下方式编译内核：
+</p>
+<dl><dt><a href="#pg4d320abd2187">/Arch 构建系统</a></dt>
+<dd>利用已有的高质量的 <code>linux</code> <a href="#pgf9d748a7b27b">PKGBUILD</a> 且可受益于<a href="https://zh.wikipedia.org/wiki/%E8%BD%AF%E4%BB%B6%E5%8C%85%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F">包管理系统</a>。</dd>
+<dt><a href="#pgc75a8294650a">/传统编译</a></dt>
+<dd>需要手动下载内核源代码包，并以普通用户身份在自己的主目录中进行编译。</dd></dl>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>使用自定义内核可能会引起各种稳定性和可靠性问题，包括数据丢失。强烈建议操作前进行<a href="#pg0f443cb01702">备份</a>。</li>
+<li>Arch Linux 仅对 #官方支持的内核提供官方支持。若使用非官方支持的内核，务必在请求支持时提及。</li></ul></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>提高系统速度的最佳方法是先根据架构和处理器类型定制内核配置。</li>
+<li>可以通过移除不使用的功能模块来减小内核体积（从而缩短编译时间）。例如禁用蓝牙、video4linux、千兆以太网等支持。</li></ul>
+Arch 内核包的 <code>config</code> 文件位于 Arch 软件包的源文件中（例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 链接到的 <a href="https://gitlab.archlinux.org/archlinux/packaging/packages/linux">[2]</a>）。如果启用了 <code>CONFIG_IKCONFIG_PROC</code> 内核选项，当前运行的内核的 <code>config</code> 文件也可通过 <code>/proc/config.gz</code> 路径获取。</div>
+<p>部分列出的软件包也可通过<a href="#pgef9a589efc8b">非官方用户仓库</a>获取预编译版本。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3473491e6a48_kernel.org_.E5.86.85.E6.A0.B8" id="kernel.org_内核"><span id="kernel.org_.E5.86.85.E6.A0.B8"></span>kernel.org 内核</h3></div>
+<ul><li><b>Git</b> — 使用 Linus Torvalds Git 仓库源码构建的 Linux 内核及模块。</li></ul>
+<dl><dd><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-git/">linux-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Mainline</b> — 每 2～3 个月发布一次的引入所有新功能的内核。</li></ul>
+<dl><dd><a href="https://www.kernel.org/">https://www.kernel.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-mainline/">linux-mainline</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Next</b> — 包含待合并至下个 Mainline 版本的功能的前沿内核。</li></ul>
+<dl><dd><a href="https://www.kernel.org/doc/man-pages/linux-next.html">https://www.kernel.org/doc/man-pages/linux-next.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-next-git/">linux-next-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>DRM</b> — 包含前沿 GPU 驱动程序的 Linux 内核。</li></ul>
+<dl><dd><a href="https://gitlab.freedesktop.org/drm">https://gitlab.freedesktop.org/drm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-drm-tip-git/">linux-drm-tip-git</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-drm-next-git/">linux-drm-next-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Longterm</b> — 长期支持（LTS）的 Linux 内核和模块。</li></ul>
+<dl><dd><a href="https://www.kernel.org/">https://www.kernel.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-lts612/">linux-lts612</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-lts66/">linux-lts66</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-lts61/">linux-lts61</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-lts515/">linux-lts515</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-lts510/">linux-lts510</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3473491e6a48_.E9.9D.9E.E5.AE.98.E6.96.B9.E5.86.85.E6.A0.B8" id="非官方内核"><span id=".E9.9D.9E.E5.AE.98.E6.96.B9.E5.86.85.E6.A0.B8"></span>非官方内核</h3></div>
+<ul><li><b>linux-lily</b> — 本站站长 <a href="#pg9b5acf2122f6">Lilydjwg</a> 使用的内核，包含 cjktty、Android binder 和默认 BBR。这是一个较少更新的内核包，可以通过添加 <a href="#pg89d12f7bfda9">archlinuxcn</a> 仓库来安装。</li></ul>
+<dl><dd><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/linux-lily">https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/linux-lily</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/linux-lily">linux-lily</a></span><sup><small><a href="#pgc6e2daf482c3">CNRepo</a></small></sup></span></dd></dl>
+<ul><li><b><a href="https://zh.wikipedia.org/wiki/Linux-libre">Libre</a></b> — 移除了所有<a href="https://zh.wikipedia.org/wiki/%E4%B8%93%E6%9C%89%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F">专有</a>或被<a href="https://zh.wikipedia.org/wiki/%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86">混淆</a>的设备驱动的纯净内核。</li></ul>
+<dl><dd><a href="https://www.fsfla.org/ikiwiki/selibre/linux-libre/">https://www.fsfla.org/ikiwiki/selibre/linux-libre/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-libre/">linux-libre</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Liquorix</b> — 基于 Zen 内核源码并使用 Debian 配置方案构建的替代内核，专为桌面、多媒体和游戏场景优化，常用作 Debian 性能增强内核。维护者 Damentz 同时也是 Zen 补丁集的开发者。</li></ul>
+<dl><dd><a href="https://liquorix.net">https://liquorix.net</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-lqx/">linux-lqx</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>pf-kernel</b> — 包含多项未合并入主线的前沿特性，由内核工程师维护。若补丁未正式移植到新版内核，项目将提供支持。当前主要特性包含 UKSM、DDCCI、v4l2loopback 和 BBRv3。</li></ul>
+<dl><dd><a href="https://pfkernel.natalenko.name">https://pfkernel.natalenko.name</a> || 软件包：
+<ul><li>通过 <a href="#pgef9a589efc8b">post-factum kernels 仓库</a>获取或使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-pf/">linux-pf</a></span><sup><small>AUR</small></sup></span>（由开发者 <a href="https://aur.archlinux.org/account/post-factum">post-factum</a> 维护）</li></ul></dd></dl>
+<ul><li><b>Project C</b> — 包含 Alfred Chen 的 Project C 补丁集（含 BMQ 和 PDS 调度器）。</li></ul>
+<dl><dd><a href="https://gitlab.com/alfredchen/projectc">https://gitlab.com/alfredchen/projectc</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-prjc/">linux-prjc</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Nitrous</b> — 针对 Skylake 及更新架构优化的修改版内核。</li></ul>
+<dl><dd><a href="https://gitlab.com/xdevs23/linux-nitrous">https://gitlab.com/xdevs23/linux-nitrous</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-nitrous/">linux-nitrous</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Tachyon</b> — Intel Clear Linux 项目的补丁，由于 Clear Linux 项目已被放弃，现已交接给新项目。提供性能和安全优化。</li></ul>
+<dl><dd><a href="https://git.staropensource.de/StarOpenSource/Linux-Tachyon">https://git.staropensource.de/StarOpenSource/Linux-Tachyon</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-tachyon/">linux-tachyon</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul>
+<li><b>tkg</b> — 高度可定制的内核构建系统，提供多项性能优化补丁和调校选项（含 CFS、Project C PDS/BMQ、MuQSS 和 CacULE 调度器），由 Etienne Juvigny 维护。</li></ul>
+<dl><dd><a href="https://github.com/Frogging-Family/linux-tkg">https://github.com/Frogging-Family/linux-tkg</a> || 通过 <a href="#pgef9a589efc8b">chaotic-aur</a> 获取</dd></dl>
+<ul><li><b>VFIO</b> — 包含 Alex Williamson 开发的补丁（acs override 和 i915），用于在特定设备上实现 KVM PCI 直通功能。</li></ul>
+<dl><dd><a href="https://lwn.net/Articles/499240/">https://lwn.net/Articles/499240/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-vfio/">linux-vfio</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-vfio-lts/">linux-vfio-lts</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>XanMod</b> — 专为高性能工作站、游戏主机和媒体中心优化，采用 BFQ I/O 调度器、<a href="https://github.com/google/bbr/tree/v3">TCP BBRv3</a> 拥塞控制、x86_64 高级指令集支持和部分 Clear Linux 补丁集。</li></ul>
+<dl><dd><a href="https://xanmod.org/">https://xanmod.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-xanmod/">linux-xanmod</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-xanmod-lts/">linux-xanmod-lts</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-xanmod-rt/">linux-xanmod-rt</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-xanmod-bore/">linux-xanmod-bore</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>linux-cachyos</b> — 由 CachyOS 开发的 SCHED-EXT + BORE + Cachy Sauce 增强内核，包含多项优化补丁。</li></ul>
+<dl><dd><a href="https://github.com/CachyOS/linux-cachyos">https://github.com/CachyOS/linux-cachyos</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-cachyos/">linux-cachyos</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<p>这里的许多非官方内核都包含需要手动启用的功能，请阅读补丁内附带的文档（其中许多已经包含了对内核源码的 <code>Documentation/</code> 目录的更改）或在网络上搜索补丁名称。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3473491e6a48_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3473491e6a48_.E5.86.85.E6.A0.B8_panic" id="内核_panic"><span id=".E5.86.85.E6.A0.B8_panic"></span>内核 panic</h3></div>
+<p>当 Linux 内核进入不可恢复的故障状态时，会触发内核 panic（<i>kernel panic</i>）。该状态通常由存在缺陷的硬件驱动引发，导致系统死锁、无响应并需强制重启。在死锁发生前，内核会生成诊断信息，包含以下内容：故障发生时的机器状态（<i>machine state</i>）、指向识别故障的内核函数的调用轨迹（<i>call trace</i>），以及当前已加载的模块列表。值得庆幸的是，使用主线版本内核（例如官方仓库所提供的）时，内核 panic 概率较低。但仍需掌握遭遇此情况时的应对方法。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>内核 panic 有时也被称作 oops 或内核 oops（<i>kernel oops</i>）。尽管 panic 和 oops 均由故障状态引发，但 oops 的范畴更广——其<b>不一定</b>导致系统死锁：某些情况下内核可通过终止问题进程继续运行。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>通过以下方式之一可将可恢复的 oops 强制转为 panic：
+<ul><li>启动时添加内核参数 <code>oops=panic</code></li>
+<li>向 <code>/proc/sys/kernel/panic_on_oops</code> 写入 <code>1</code></li></ul>
+此设置适用于需严格排查因 oops 恢复可能导致的隐蔽性系统不稳定的场景。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg3473491e6a48_.E6.A3.80.E6.9F.A5_panic_.E4.BF.A1.E6.81.AF" id="检查_panic_信息"><span id=".E6.A3.80.E6.9F.A5_panic_.E4.BF.A1.E6.81.AF"></span>检查 panic 信息</h4></div>
+<p>若内核 panic 发生在启动流程早期，控制台可能显示含“Kernel panic - not syncing:”的提示信息，而一旦 <a href="#pgac06dd8bfe95">Systemd</a> 开始运行，内核消息<b>应</b>被捕获并写入系统日志。然而，由于 panic 发生时系统会在 <code>system-journald</code> 记录前即死锁，故内核输出的诊断信息<b>几乎从不</b>写入磁盘日志。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg3473491e6a48_.E8.93.9D.E5.B1.8F.E4.BA.8C.E7.BB.B4.E7.A0.81" id="蓝屏二维码"><span id=".E8.93.9D.E5.B1.8F.E4.BA.8C.E7.BB.B4.E7.A0.81"></span>蓝屏二维码</h5></div>
+<p>自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 6.10（引入了 <code>drm_panic</code>）起，内核默认会以蓝屏<a href="https://en.wikipedia.org/wiki/QR_code">二维码</a>的形式显示 panic，可通过二维码提供的 URL 查看<i>堆栈回溯</i>。对于 Arch Linux，其是指向 <a href="https://panic.archlinux.org/panic_report">https://panic.archlinux.org/panic_report</a> 的链接。该 URL 包含多种信息以及经 gzip 压缩并编码在 <a href="https://en.wikipedia.org/wiki/URL_fragment">URL 片段</a>中的堆栈回溯，这些数据不会被发送到服务器（仅在客户端处理）。
+</p><p>可在这篇<a href="https://bbs.archlinux.org/viewtopic.php?pid=2256536#p2256536">论坛帖子</a>查看附有链接和截图的 panic 示例。
+</p><p>欲回到旧方式，请向 <code>drm</code> 内核模块传递 <code>panic_screen=kmsg</code> 参数（或直接传递 <code>drm.panic_screen=kmsg</code> <a href="#pgec0856954f1c">内核参数</a>）以在控制台显示堆栈回溯。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg3473491e6a48_C.E6.8E.A7.E5.88.B6.E5.8F.B0" id="C控制台"><span id="C.E6.8E.A7.E5.88.B6.E5.8F.B0"></span>C控制台</h5></div>
+<p>在触发时通过控制台实时观察以查看 panic 信息（不配置 <i>kdump crashkernel</i> 的情况下）的旧方式依旧可行。可通过以下内核参数启动系统，并尝试在 tty1 复现 panic：
+</p>
+<pre>systemd.journald.forward_to_console=1 console=tty1
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若 panic 信息滚动过快难以查看，可尝试添加内核参数 <code>pause_on_oops=<i>seconds</i></code>（<i>seconds</i> 为暂停秒数）来冻结屏幕输出。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg3473491e6a48_.E7.A4.BA.E4.BE.8B.EF.BC.9A.E9.97.AE.E9.A2.98.E6.A8.A1.E5.9D.97.E5.88.86.E6.9E.90" id="示例：问题模块分析"><span id=".E7.A4.BA.E4.BE.8B.EF.BC.9A.E9.97.AE.E9.A2.98.E6.A8.A1.E5.9D.97.E5.88.86.E6.9E.90"></span>示例：问题模块分析</h5></div>
+<p>通过诊断信息可推测引发 panic 的子系统或模块。本例展示某虚拟设备启动时发生的 panic，请关注<b>粗体</b>标记的关键行：
+</p>
+<pre><b>kernel: BUG: unable to handle kernel NULL pointer dereference at (null)</b> <sup>1</sup>
+<b>kernel: IP: fw_core_init+0x18/0x1000 [firewire_core]</b> <sup>2</sup>
+kernel: PGD 718d00067
+kernel: P4D 718d00067
+kernel: PUD 7b3611067
+kernel: PMD 0
+kernel:
+kernel: Oops: 0002 [#1] PREEMPT SMP
+<b>kernel: Modules linked in: firewire_core(+) crc_itu_t cfg80211 rfkill ipt_REJECT nf_reject_ipv4 nf_log_ipv4 nf_log_common xt_LOG nf_conntrack_ipv4 ...</b> <sup>3</sup>
+kernel: CPU: 6 PID: 1438 Comm: modprobe Tainted: P           O    4.13.3-1-ARCH #1
+kernel: Hardware name: Gigabyte Technology Co., Ltd. H97-D3H/H97-D3H-CF, BIOS F5 06/26/2014
+kernel: task: ffff9c667abd9e00 task.stack: ffffb53b8db34000
+kernel: RIP: 0010:fw_core_init+0x18/0x1000 [firewire_core]
+kernel: RSP: 0018:ffffb53b8db37c68 EFLAGS: 00010246
+kernel: RAX: 0000000000000000 RBX: 0000000000000000 RCX: 0000000000000000
+kernel: RDX: 0000000000000000 RSI: 0000000000000008 RDI: ffffffffc16d3af4
+kernel: RBP: ffffb53b8db37c70 R08: 0000000000000000 R09: ffffffffae113e95
+kernel: R10: ffffe93edfdb9680 R11: 0000000000000000 R12: ffffffffc16d9000
+kernel: R13: ffff9c6729bf8f60 R14: ffffffffc16d5710 R15: ffff9c6736e55840
+kernel: FS:  00007f301fc80b80(0000) GS:ffff9c675dd80000(0000) knlGS:0000000000000000
+kernel: CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+kernel: CR2: 0000000000000000 CR3: 00000007c6456000 CR4: 00000000001406e0
+kernel: Call Trace:
+<b>kernel:  do_one_initcall+0x50/0x190</b> <sup>4</sup>
+kernel:  ? do_init_module+0x27/0x1f2
+kernel:  do_init_module+0x5f/0x1f2
+kernel:  load_module+0x23f3/0x2be0
+kernel:  SYSC_init_module+0x16b/0x1a0
+kernel:  ? SYSC_init_module+0x16b/0x1a0
+kernel:  SyS_init_module+0xe/0x10
+kernel:  entry_SYSCALL_64_fastpath+0x1a/0xa5
+kernel: RIP: 0033:0x7f301f3a2a0a
+kernel: RSP: 002b:00007ffcabbd1998 EFLAGS: 00000246 ORIG_RAX: 00000000000000af
+kernel: RAX: ffffffffffffffda RBX: 0000000000c85a48 RCX: 00007f301f3a2a0a
+kernel: RDX: 000000000041aada RSI: 000000000001a738 RDI: 00007f301e7eb010
+kernel: RBP: 0000000000c8a520 R08: 0000000000000001 R09: 0000000000000085
+kernel: R10: 0000000000000000 R11: 0000000000000246 R12: 0000000000c79208
+kernel: R13: 0000000000c8b4d8 R14: 00007f301e7fffff R15: 0000000000000030
+kernel: Code: &lt;c7&gt; 04 25 00 00 00 00 01 00 00 00 bb f4 ff ff ff e8 73 43 9c ec 48
+kernel: RIP: fw_core_init+0x18/0x1000 [firewire_core] RSP: ffffb53b8db37c68
+kernel: CR2: 0000000000000000
+kernel: ---[ end trace 71f4306ea1238f17 ]---
+<b>kernel: Kernel panic - not syncing: Fatal exception</b> <sup>5</sup>
+kernel: Kernel Offset: 0x80000000 from 0xffffffff810000000 (relocation range: 0xffffffff800000000-0xfffffffffbffffffff
+kernel: ---[ end Kernel panic - not syncing: Fatal exception</pre>
+<ol><li>指出引发 panic 的错误类型，本例为程序缺陷</li>
+<li>显示 panic 发生在 <code>firewire_core</code> 模块的 <code>fw_core_init</code> 函数</li>
+<li>显示最近加载的模块是 <code>firewire_core</code></li>
+<li>显示调用 <code>fw_core_init</code> 的上层函数是 <code>do_one_initcall</code></li>
+<li>确认该 oops 实际已成为 panic，系统进入死锁</li></ol>
+<p>由此可推断 panic 发生于 <code>firewire_core</code> 模块加载时的初始化例程（可能是该版本 FireWire 驱动存在程序错误，导致与硬件不兼容）。临时解决方案是阻止该模块加载：
+</p>
+<ul><li>若模块在 initramfs 阶段加载：使用内核参数 <code>rd.blacklist=firewire_core</code> 重启</li>
+<li>其他情况：使用内核参数 <code>module_blacklist=firewire_core</code> 重启</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3473491e6a48_.E8.B0.83.E8.AF.95.E5.9B.9E.E5.BD.92.E9.97.AE.E9.A2.98" id="调试回归问题"><span id=".E8.B0.83.E8.AF.95.E5.9B.9E.E5.BD.92.E9.97.AE.E9.A2.98"></span>调试回归问题</h3></div>
+<p>参见<a href="#pga57cd4863e73">常规故障排除#处理软件倒退问题</a>。
+</p><p>可尝试安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-mainline/">linux-mainline</a></span><sup><small>AUR</small></sup></span> 以确认问题是否已在上游修复。软件包评论区置顶说明中提及的预编译内核仓库可避免耗时的手动编译。
+</p><p>若问题非近期出现，建议测试 <a href="#pg34e1f0126c90">Arch Linux Archive</a> 中的旧版 LTS 内核（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-lts">linux-lts</a></span><sup><small>包</small></sup></span>）。
+</p><p>若问题仍存，请对 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-git/">linux-git</a></span><sup><small>AUR</small></sup></span> 内核进行<span class="ilh-all" data-foreign-title="bisect" data-lang-code="en" data-lang-name="英语" data-orig-title="二分排查"><span class="ilh-page"><a href="#pga7bd0971d12c">二分排查</a></span></span>（bisect），并按内核项目<a href="https://docs.kernel.org/translations/zh_CN/admin-guide/reporting-regressions.html">回归问题报告流程</a>提交错误报告。具体报告途径需根据 <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/MAINTAINERS"><code>MAINTAINERS</code> 文件</a>中标注的 Bugtracker（<code>B:</code> 条目）选择：子系统邮件列表、Kernel Bugzilla 或 DRM Gitlab 等平台。测试时需确保使用未打补丁的“原版”内核以排除第三方修改影响。若确认补丁引发问题，请直接联系补丁作者。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>由于需要多次编译不同版本内核，内核二分排查可能耗时较长。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg3473491e6a48_.E7.B2.BE.E7.AE.80.E5.86.85.E6.A0.B8.E6.9E.84.E5.BB.BA" id="精简内核构建"><span id=".E7.B2.BE.E7.AE.80.E5.86.85.E6.A0.B8.E6.9E.84.E5.BB.BA"></span>精简内核构建</h4></div>
+<p>通过以下方式可显著缩短内核编译时间：
+</p>
+<ul><li>使用 <span class="ilh-all" data-foreign-title="modprobed-db" data-lang-code="en" data-lang-name="英语" data-orig-title="modprobed-db"><span class="ilh-page"><a href="#pg735803738b44">modprobed-db</a></span></span> 工具仅编译本地系统所需的模块</li>
+<li>运行 <code>make localmodconfig</code> 自动生成最小化配置</li></ul>
+<p>调试特定子系统时（如网络问题），可完全移除无关驱动（例如声卡驱动）以进一步精简配置。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3473491e6a48_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="http://www.kroah.com/lkn/">O'Reilly - Linux Kernel in a Nutshell</a>（免费电子书）</li>
+<li><a href="http://kroah.com/log/blog/2018/08/24/what-stable-kernel-should-i-use/">What Stable Kernel Should I Use?</a>（Greg Kroah-Hartman 撰文）</li>
+<li><a href="https://docs.kernel.org/translations/zh_CN/index.html">Linux 内核官方文档</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807023008
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.263 seconds
+Real time usage: 0.271 seconds
+Preprocessor visited node count: 889/1000000
+Revision size: 16482/2097152 bytes
+Post‐expand include size: 26640/2097152 bytes
+Template argument size: 15752/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 3/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.016/7.000 seconds
+Lua memory usage: 664731/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  100.470      1 -total
+ 51.89%   52.139     20 Template:App
+ 37.88%   38.063      3 Template:Link-en
+  5.11%    5.131     25 Template:AUR
+  4.58%    4.597     28 Template:Ic
+  4.00%    4.019      2 Template:提示
+  3.89%    3.906     10 Template:Pkg
+  3.43%    3.445      1 Template:翻译状态
+  2.30%    2.313      3 Template:Related
+  2.25%    2.261      1 Template:相关文章开始
+-->
+<!-- Render ID e801040e-9207-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3340:|#|:idhash:canonical!zh-cn and timestamp 20260807023008 and revision id 35343. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

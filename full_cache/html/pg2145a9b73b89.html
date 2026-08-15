@@ -1,0 +1,412 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg2145a9b73b89">在 ZFS 上安装 Arch Linux</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgefb77a75bb9b">ZFS</a></li>
+<li><a href="#pg367e96a59949">ZFS/虚拟磁盘</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Install_Arch_Linux_on_ZFS">Install Arch Linux on ZFS</a>，最近一次同步于 2026-08-05，若英文版本有所<a href="https://wiki.archlinux.org/title/Install_Arch_Linux_on_ZFS?diff=0&amp;oldid=882705">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Install_Arch_Linux_on_ZFS_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>这篇文章详细描述了将 Arch Linux 安装在 ZFS 文件系统上所需的步骤。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2145a9b73b89_.E5.88.9B.E5.BB.BA.E8.87.AA.E5.AE.9A.E4.B9.89_ISO" id="创建自定义_ISO"><span id=".E5.88.9B.E5.BB.BA.E8.87.AA.E5.AE.9A.E4.B9.89_ISO"></span>创建自定义 ISO</h2></div>
+<p>要在 <a href="#pgefb77a75bb9b">ZFS</a> 上安装 <a href="#pg83506eae4ba0">Arch Linux</a>，您需要使用带有 ZFS <a href="#pg6dbfce2ea89d">内核模块</a>的<a href="#pge7b390d21a8a">安装介质</a>。
+</p><p>请按照 <a href="#pg2da385a25e75">archiso#安装</a> 的步骤操作。
+</p><p>接下来，依照 <a href="#pg2da385a25e75">archiso#准备自定义配置文件</a> 来准备一个自定义的配置文件（下文中以 <code>archlive</code> 为例），另请参阅 <a href="#pg2da385a25e75">archiso#ArchZFS_实例</a>。
+</p><p>下一步，编辑软件包列表 <code>packages.x86_64</code> 并在其中加入 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-lts">linux-lts</a></span><sup><small>包</small></sup></span> 内核与下列 ZFS 软件包：
+</p>
+
+<p><br/>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">packages.x86_64</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+linux-lts
+linux-lts-headers
+libunwind
+zfs-utils
+zfs-dkms
+</pre>
+<p>请确保从列表中移除 <code>linux</code> 与 <code>broadcom-wl</code> (后者会拉取 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 包)，并将 <code>airootfs/etc/mkinitcpio.d/linux.preset</code> 删除。
+</p><p>您还需要编辑 <code>pacman.conf</code> 并在其中加入：
+</p>
+
+<pre>...
+[archzfs]
+SigLevel = TrustAll Optional
+Server = https://github.com/archzfs/archzfs/releases/download/experimental
+</pre>
+<p>您还需要编辑引导加载器的配置文件，以将 <code>vmlinuz-linux</code> 与 <code>initramfs-linux.img</code> 的条目分别改为 <code>vmlinuz-linux-lts</code> 和 <code>initramfs-linux-lts.img</code>:
+</p>
+<pre>$ sed -i -E 's/(vmlinuz|initramfs)-linux/&amp;-lts/g' archlive/efiboot/loader/entries/*.conf archlive/syslinux/*.cfg archlive/grub/*.cfg
+</pre>
+<p>接下来，开始镜像的构建过程：
+</p>
+<pre>$ mkarchiso -v -r -w /tmp/archiso-tmp -o isobuild ~/archlive
+</pre>
+<p>现在，您的 <code>archlive/isobuild</code> 目录下应该已经出现了<code>archlinux-<i>YYYY</i>.<i>MM</i>.<i>DD</i>.x86_64.iso</code>。
+</p><p>请将该文件烧录至您选择使用的安装介质。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>如果在系统更新后，<code>zpool status -v</code> 的输出显示您的存储池需要升级以支持新的特性，您可能需要重新制作上述安装介质。</li>
+<li>在实际安装时，您应该使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-lts">linux-lts</a></span><sup><small>包</small></sup></span> 与 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-lts-headers">linux-lts-headers</a></span><sup><small>包</small></sup></span> 来保证最大兼容性。</li>
+<li>您应从<a href="#pgef9a589efc8b">非官方的 archzfs 仓库</a>而非 AUR 获取 <i>zfs-utils</i> 与 <i>zfs-dkms</i> 的更新。如果您选择使用 AUR 中的版本，则可能出现当前的主线或 zen 内核不被 ZFS 支持的情况，从而导致您的系统无法启动。因此，在实际操作时，建议您使用 linux-lts 内核。</li></ul>
+</div>
+<p>请确保先在虚拟机中测试您的 ISO。只需运行：
+</p>
+<pre># modprobe zfs
+# zpool status
+</pre>
+<p>如果命令执行失败，则您的 ZFS 模块并未成功构建，您需要重新尝试。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>请勿分发您的自定义 ISO 镜像，否则您将<a href="https://en.wikipedia.org/wiki/Common_Development_and_Distribution_License#ZFS_in_the_Linux_kernel">违反</a><a href="https://en.wikipedia.org/wiki/GNU_General_Public_License"> GNU 通用公共许可证</a> (GPL) 与<a href="https://en.wikipedia.org/wiki/Common_Development_and_Distribution_License">通用开发和发行许可证</a> (CDDL)。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2145a9b73b89_.E5.88.86.E5.8C.BA" id="分区"><span id=".E5.88.86.E5.8C.BA"></span>分区</h2></div>
+<p>ZFS 支持 GUID 分区图与主引导记录分区表。要决定使用哪种分区图，请参考<a href="#pg8edad8d1135b">分区#选择_GPT_还是_MBR</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>虽然您可以为旧设备创建基于主引导记录的可引导 ZFS 根分区，但更建议您使用 GUID 分区图。</li>
+<li>推荐您使用单独的 <code>/boot</code> 分区以避免有关<a href="#pgee8f2050088a">引导加载程序</a>的问题，同时保证最好的兼容性。</li></ul>
+</div>
+<p>ZFS 会管理自己的分区，所以只需创建一个最简单的分区类型即可。创建 ZFS 文件系统的分区类型应为类型 <code>bf00</code> ，或“ Solaris 根目录分区”：
+</p>
+<pre>Part     Size   Type
+----     ----   -------------------------
+   1       1G   EFI system partition (ef00)
+   2     XXXG   Solaris Root (bf00)
+</pre>
+<p>在 BIOS（或一台以 Legacy 模式启动的）设备上使用 GUID 分区图与 <a href="#pgca9c4017f7ad">GRUB</a> 启动引导器的示例：
+</p>
+<pre>Part     Size   Type
+----     ----   -------------------------
+   1       2M   BIOS boot partition (ef02)
+   2       1G   Linux Partition (8300)
+   3     XXXG   Solaris Root (bf00)
+</pre>
+<p>您可以选择创建独立的 linux 交换分区或将 zvol 用作交换空间，后者详见 <a href="#pgefb77a75bb9b">ZFS#交换卷</a>。
+</p><p>如果您想要创建一个传统的交换分区，详见 <a href="#pg8edad8d1135b">分区#布局示例</a>。
+</p><p>若您创建了单独的 boot 分区以及其他非 ZFS 分区，请将其<a href="#pg6c70b7fdfa57">格式化</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2145a9b73b89_.E8.AE.BE.E7.BD.AE_ZFS_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="设置_ZFS_文件系统"><span id=".E8.AE.BE.E7.BD.AE_ZFS_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>设置 ZFS 文件系统</h2></div>
+<p>首先，确认 ZFS 内核模块已经被加载，
+</p>
+<pre># modprobe zfs
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2145a9b73b89_.E5.88.9B.E5.BB.BA.E6.A0.B9.E5.AD.98.E5.82.A8.E6.B1.A0" id="创建根存储池"><span id=".E5.88.9B.E5.BB.BA.E6.A0.B9.E5.AD.98.E5.82.A8.E6.B1.A0"></span>创建根存储池</h3></div>
+<p>创建存储池并设置好数据集的默认选项。存储池上新创建的任何数据集都会保留这个存储池创建时使用 <code>-O</code> 设定的选项。默认选项在<a href="https://openzfs.github.io/openzfs-docs/Getting%20Started/Debian/Debian%20Buster%20Root%20on%20ZFS.html#step-2-disk-formatting">在 ZFS 上安装 Debian Buster # 第二步: 磁盘格式化</a>中有详细说明。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>物理扇区大小为512字节的磁盘驱动器应使用 <code>-o ashift=9</code> 参数，而物理扇区大小为4096字节的磁盘驱动器应使用 <code>-o ashift=12</code> 参数。要获得每个 SCSI/SATA 磁盘驱动器的物理扇区大小，可以运行 <code>lsblk -S -o NAME,PHY-SEC</code>。如果想查看所有设备的物理扇区大小，可从命令中删去 <code>-S</code>。若使用 NVMe 驱动器，使用 <code>nvme id-ns /dev/nvmeXnY -H | grep "LBA Format"</code> 来获取正在使用的逻辑块地址。大部分 NVMe 驱动器使用512字节的逻辑块大小，见 <a href="https://openzfs.github.io/openzfs-docs/Performance%20and%20Tuning/Hardware.html#nvme-low-level-formatting">OpenZFS: NVMe low level formatting</a> 以将其大小改为4096字节。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>应始终注意现代的大部分设备的物理扇区大小为4096字节，但有些设备会将自己的物理扇区大小报告为512字节，尤其是固态驱动器（SSD）。即使在报告扇区大小为512字节、实际物理扇区大小为4096字节的设备上选择 <code>ashift=9</code> 也<b>一定会</b>导致严重的性能下降。在物理扇区大小为512字节的设备上选择 <code>ashift=12</code> 不会导致性能下降，但可能使磁盘实际可用的空间减少。如果您不确定的话，对于现代设备，应使用 <code>ashift=12</code>，或者您可以搜索您设备对应的正确值。对于有关的讨论，参见 <a href="https://github.com/openzfs/zfs/issues/967">OpenZFS issue #967</a> ；对设置较高的 ashift 值可能出现的问题，见 <a href="https://github.com/openzfs/zfs/issues/2497">OpenZFS issue #2497</a> 。
+</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong> 接下来创建存储池时，如果使用例如 <i>/dev/nvme0n1p2</i> 的一般设备名而不是 <i>/dev/disk/by-id/&lt;device number&gt;</i> 来创建存储池，则有可能会使存储池的导入出现问题。若要在下一部分开始前知晓您设备的正确 <a href="#pgd2fddf50b50f">by-id</a> 名称，请运行：
+<p><code>ls -lh /dev/disk/by-id/</code>
+</p><p>并记录您将要使用的正确 <i>by-id</i> 名称，而非标准设备名，如：
+</p><p><code>lrwxrwxrwx 1 root root  9 Aug 12 16:26 ata-ST3000DM001-9YN166_S1F0JKRR -&gt; ../../sdc</code>
+</p>
+</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2145a9b73b89_.E4.BD.BF.E7.94.A8.E5.8E.8B.E7.BC.A9.E4.B8.8E_TRIM" id="使用压缩与_TRIM"><span id=".E4.BD.BF.E7.94.A8.E5.8E.8B.E7.BC.A9.E4.B8.8E_TRIM"></span>使用压缩与 TRIM</h4></div>
+<pre># zpool create -f -o ashift=12         \
+             -o autotrim=on            \
+             -O acltype=posixacl       \
+             -O relatime=on            \
+             -O xattr=sa               \
+             -O dnodesize=auto       \
+             -O normalization=formD    \
+             -O mountpoint=none        \
+             -O canmount=off           \
+             -O devices=off            \
+             -R /mnt                   \
+             -O compression=lz4        \
+             zroot /dev/disk/by-id/<i>id-to-partition-partx</i></pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2145a9b73b89_.E4.BD.BF.E7.94.A8.E5.8E.8B.E7.BC.A9.2C_TRIM_.E4.B8.8E.E5.8E.9F.E7.94.9F.E5.8A.A0.E5.AF.86" id="使用压缩,_TRIM_与原生加密"><span id=".E4.BD.BF.E7.94.A8.E5.8E.8B.E7.BC.A9.2C_TRIM_.E4.B8.8E.E5.8E.9F.E7.94.9F.E5.8A.A0.E5.AF.86"></span>使用压缩, TRIM 与原生加密</h4></div>
+<p>以下命令创建的存储池会在所有数据集上默认启用压缩与原生加密：
+</p>
+<pre># zpool create -f -o ashift=12         \
+             -o autotrim=on            \
+             -O acltype=posixacl       \
+             -O relatime=on            \
+             -O xattr=sa               \
+             -O dnodesize=auto       \
+             -O normalization=formD    \
+             -O mountpoint=none        \
+             -O canmount=off           \
+             -O devices=off            \
+             -R /mnt                   \
+             -O compression=lz4        \
+             -O encryption=aes-256-gcm \
+             -O keyformat=passphrase   \
+             -O keylocation=prompt     \
+             zroot /dev/disk/by-id/<i>id-to-partition-partx</i></pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<p>前述所有选项对 GNU/Linux 系统都有意义，而且它们中的大部分在根文件系统上必须被使用，尤其是 <code>canmount</code> 与 <code>mountpoint</code>，这点与通常的存储设备设置方式不同。<code>xattr</code>, <code>dnodesize</code> 与 <code>normalization</code> 为可选项。
+</p><p>加密与压缩为可选项，但本教程推荐您启用压缩。为了在数据无损压缩存储的情况下避免性能损失，建议使用 lz4 算法。较为均衡的 zstd 算法是默认压缩选项。
+</p><p>您可以在<span class="plainlinks archwiki-template-man" title="$ man 7 zfsprops"><a href="https://openzfs.github.io/openzfs-docs/man/master/7/zfsprops.7.html">手册页面 zfsprops(7)</a></span>找到关于这些选项的详细解释。
+</p>
+</div>
+<p><code>-O</code> 之后的参数将控制 ZFS 的行为。
+您可以在 <span class="plainlinks archwiki-template-man" title="$ man 7 zfsprops"><a href="https://openzfs.github.io/openzfs-docs/man/master/7/zfsprops.7.html">zfsprops(7)</a></span> 手册页面中找到关于这些参数的详细解释。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>由于在不使用 spl hostid 与 zpool.cache 文件的情况下导入 ZFS 存储池存在较多问题，且可能会导致存储池损坏，本教程不使用 canmount=on 选项。如果您未设置 spl hostid 并使用 zfs-zed 加载您的存储池，您在跨系统使用存储池的情况下将面临存储池损坏的风险。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>使用 ZFS 时应始终使用设备的 id 名称，否则导入存储池时会发生错误。</li>
+<li>除使用 by-id 名称外，也可以考虑使用 <a href="#pgd2fddf50b50f">by-partuuid</a> 或 <a href="#pgd2fddf50b50f">by-uuid</a> 名称，因为即使一个内置磁盘驱动器被移入USB移动硬盘盒，这些名称的值也不会发生改变，反之亦然（这仅当 ZFS 在磁盘上的某个分区中才有效，若 ZFS 占据整个磁盘则无效）。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2145a9b73b89_.E5.88.9B.E5.BB.BA.E6.82.A8.E7.9A.84.E6.95.B0.E6.8D.AE.E9.9B.86" id="创建您的数据集"><span id=".E5.88.9B.E5.BB.BA.E6.82.A8.E7.9A.84.E6.95.B0.E6.8D.AE.E9.9B.86"></span>创建您的数据集</h3></div>
+<p>ZFS 使用数据集的概念来管理您的存储设备，而非使用传统的磁盘分区。与磁盘分区不同，数据集没有固定的大小，每个数据集也可以有各自不同的属性，例如压缩。普通的 ZFS 数据集由 ZFS 自动挂载，而传统类型的数据集则需由 fstab 或 使用 mount 命令挂载。
+</p><p>ZFS 最实用的功能之一便是启动环境。启动环境使您可以创建系统的可引导快照，您也可以通过简单地重启到某启动环境来将整个系统回滚到那个快照。这使得系统更新变得更加安全，对软件开发与测试来讲也十分有用。要使用如 <a href="https://github.com/b333z/beadm">beadm</a>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zectl/">zectl</a></span><sup><small>AUR</small></sup></span> (用于 systemd-boot), or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zedenv/">zedenv</a></span><sup><small>AUR</small></sup></span> (用于 GRUB) 等的启动环境管理器来管理启动环境，您的数据集必须有正确的配置。其关键是将您存放数据的目录 (如 <code>/home</code>) 与系统数据分别放在相互独立的不同数据集中，且不要在存储池根目录中存放数据，因为放在存储池根目录的数据以后将不能被移动。
+</p><p>您总是至少应该为您的根目录创建一个数据集，且多数情况下您也会想要把 <code>/home</code> 存放在一个单独的数据集中。您也可以自行选择是否要无视启动环境而始终保留完整的日志文件。如果您使用的某些软件会在 <code>/home</code> 之外存放数据 (如数据库服务器)，您应整理数据集的结构，使得这些软件的数据目录与根目录数据集分离开来。
+</p><p>以下的示例命令会创建一个只分根目录数据集与 <code>/home</code> 数据集的最基本可用于启动环境使用的配置。数据集使用其所在的存储池在<a href="#pg2145a9b73b89">创建</a>时设定的默认选项。
+</p>
+<pre># zfs create -o mountpoint=none zroot/data
+# zfs create -o mountpoint=none zroot/ROOT
+# zfs create -o mountpoint=/ -o canmount=noauto zroot/ROOT/default
+# zfs create -o mountpoint=/home zroot/data/home
+</pre>
+<p>创建根目录数据集时您也可以不将挂载点指定为 / ，毕竟无论如何 GRUB 启动引导器会将其挂载至 / 。这也使得您可以通过克隆旧版数据集并将其放入 GRUB 启动菜单来直接从旧版的根目录启动。这种情况下，您可以使用以下命令来创建您的根目录数据集：
+</p>
+<pre># zfs create -o mountpoint=/roots/default zroot/ROOT/default
+</pre>
+<p>您可以将 <code>/root</code> 存储在您的 <code>zroot/data/home</code> 数据集中。
+</p>
+<pre># zfs create -o mountpoint=/root zroot/data/home/root
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2145a9b73b89_.E7.B3.BB.E7.BB.9F.E6.95.B0.E6.8D.AE.E9.9B.86" id="系统数据集"><span id=".E7.B3.BB.E7.BB.9F.E6.95.B0.E6.8D.AE.E9.9B.86"></span>系统数据集</h4></div>
+<p>为系统目录创建数据集时，请使用<code>canmount=off</code>选项。
+</p><p>示例请参见 <a href="https://openzfs.github.io/openzfs-docs/Getting%20Started/Debian/Debian%20Buster%20Root%20on%20ZFS.html#step-3-system-installation">在 ZFS 上安装 Debian Buster # 第三步：安装系统</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>若要将如 <code>zroot/var/log</code> 的数据集挂载至 <code>/var/log</code>，应考虑使用 <i>zfs-mount-generator</i> 而非 <code>zfs-mount.service</code>。这会修复文件系统挂载顺序，在 <a href="https://openzfs.github.io/openzfs-docs/Getting%20Started/Debian/Debian%20Buster%20Root%20on%20ZFS.html#step-5-grub-installation">这里</a> 有详细介绍。</div>
+<pre># zfs create -o mountpoint=/var -o canmount=off                 zroot/var
+# zfs create                                                    zroot/var/log
+# zfs create -o mountpoint=/var/log/journal -o acltype=posixacl zroot/var/log/journal
+# zfs create -o mountpoint=/var/lib -o canmount=off             zroot/var/lib
+# zfs create                                                    zroot/var/lib/libvirt
+# zfs create                                                    zroot/var/lib/docker
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>systemd-journald 需要您为 /var/log/journal/ 启用 POSIX 访问控制列表，即为该目录所在的数据集设置 acltype=posix，否则 systemd-journald.service 将无法启动。详见 <a href="#pgac06dd8bfe95">systemd#systemd-tmpfiles-setup.service在系统启动时失败</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2145a9b73b89_.E5.AF.BC.E5.87.BA.E5.B9.B6.E5.AF.BC.E5.85.A5.E6.82.A8.E7.9A.84.E5.AD.98.E5.82.A8.E6.B1.A0" id="导出并导入您的存储池"><span id=".E5.AF.BC.E5.87.BA.E5.B9.B6.E5.AF.BC.E5.85.A5.E6.82.A8.E7.9A.84.E5.AD.98.E5.82.A8.E6.B1.A0"></span>导出并导入您的存储池</h3></div>
+<p>要验证您的设置，将您所有的 ZFS 存储池先导出后再重新导入。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不要跳过这一步，否则您再导入存储池时必须使用 <code>-f</code> 参数。这会使导入的存储池卸载。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果您使用交换分区的话，这一步可能会失败。您需要先使用 <i>swapoff</i> 命令将其关闭。</div>
+<pre># zpool export zroot
+# zpool import -d /dev/disk/by-id -R /mnt zroot -N
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>-d</code> 并不是设备的实际 ID，而是包含着符号链接的 <code>/dev/by-id</code> 目录。
+<p>如果这个命令执行失败并且您被要求使用数字 ID 来导入某个存储池，运行 <code>zpool import</code> 来找到您存储池的 ID，然后使用类似下方的命令导入存储池：
+</p>
+<pre># zpool import 9876543212345678910 -R /mnt zroot
+</pre>
+</div>
+<p>如果您启用了原生加密选项，请加载 ZFS 密钥。
+</p>
+<pre># zfs load-key zroot
+</pre>
+<p>由于根目录数据集使用 <code>canmount=noauto</code> 参数，您需要先将其手动挂载，然后再挂载其他数据集。
+</p>
+<pre># zfs mount zroot/ROOT/default
+# zfs mount -a
+</pre>
+<p>现在，您的 ZFS 文件系统已准备就绪。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2145a9b73b89_.E9.85.8D.E7.BD.AE.E6.A0.B9.E7.9B.AE.E5.BD.95.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="配置根目录文件系统"><span id=".E9.85.8D.E7.BD.AE.E6.A0.B9.E7.9B.AE.E5.BD.95.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>配置根目录文件系统</h3></div>
+<p>如果您使用了传统类型的数据集，则您需要将其写入 <code>/etc/fstab</code>。
+</p><p>为根目录所在的子文件系统设置 bootfs（启动文件系统）属性，以便<a href="#pgee8f2050088a">引导加载程序</a>找到操作系统。
+</p>
+<pre># zpool set bootfs=zroot/ROOT/default zroot
+</pre>
+<p>如果您还没有 <code>/etc/zfs/zpool.cache</code>，请手动创建：
+</p>
+<pre># zpool set cachefile=/etc/zfs/zpool.cache zroot
+</pre>
+<p>切记要将 <code>zpool.cache</code> 文件放入您的新系统中。稍后 ZFS 守护进程启动时需要这个文件。
+</p>
+<pre># mkdir -p /mnt/etc/zfs
+# cp /etc/zfs/zpool.cache /mnt/etc/zfs/zpool.cache
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2145a9b73b89_.E5.AE.89.E8.A3.85.E5.B9.B6.E9.85.8D.E7.BD.AE_Arch_Linux" id="安装并配置_Arch_Linux"><span id=".E5.AE.89.E8.A3.85.E5.B9.B6.E9.85.8D.E7.BD.AE_Arch_Linux"></span>安装并配置 Arch Linux</h2></div>
+<p>按照<a href="#pgbdbcbed611fc">安装指南</a>安装系统。若有涉及 ZFSonLinux 所需的特殊操作，将会在此列出。
+</p>
+<ul><li>首先使用 mount 命令挂载所有的传统类型数据集以及非 ZFS 的引导或系统分区。</li></ul>
+<ul><li>安装基本系统。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>您可能想要在 <code>pacstrap</code> 操作时使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-lts">linux-lts</a></span><sup><small>包</small></sup></span> 作为您的内核。同时请确保使用 pacstrap 安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libunwind">libunwind</a></span><sup><small>包</small></sup></span> 从而为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zfs-utils/">zfs-utils</a></span><sup><small>AUR</small></sup></span> 解析依赖项目。</div>
+<ul><li><a href="#pgbdbcbed611fc">安装指南#生成 fstab 文件</a>中所描述的方式对 ZFS 来说并非必要。通常 ZFS 会自行挂载自己的分区，所以除非用户为系统目录使用了传统类型数据集，<code>fstab</code> 文件中不需要任何有关 ZFS 的部分。 要为文件系统生成 <code>fstab</code>，运行：</li></ul>
+<pre># genfstab -U -p /mnt &gt;&gt; /mnt/etc/fstab
+</pre>
+<ul><li>依照<a href="#pgbdbcbed611fc">安装指南#chroot 到新安装的系统</a>中的方法将根目录切换至新安装的系统内。</li></ul>
+<pre># arch-chroot /mnt
+</pre>
+<ul><li>编辑 <code>/etc/fstab</code>：</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>如果您选择为系统目录创建传统类型数据集，则请在 <code>fstab</code> 中保留这些数据集。</li>
+<li>将除交换空间与 EFI 系统分区以外的所有非传统类型数据集注释掉。传统做法是，可以使用较简单的 <code>/dev/zvol/zroot/swap</code> 来取代交换空间的 UUID。</li></ul>
+</div>
+<ul><li>在更新 ramdisk 并启用 ZFS 支持前，您需要在 <code>/etc/pacman.conf</code> 中加入 <a href="#pgef9a589efc8b">archzfs</a> 仓库，将其<a href="#pge293c5f6dad1">签名</a>并在 arch-chroot 环境下<a href="#pg54c3351b3e3b">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zfs-dkms/">zfs-dkms</a></span><sup><small>AUR</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zfs-utils/">zfs-utils</a></span><sup><small>AUR</small></sup></span>。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>出于简洁性以及兼容性考虑，本指南建议您使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zfs-dkms/">zfs-dkms</a></span><sup><small>AUR</small></sup></span> 与 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-lts">linux-lts</a></span><sup><small>包</small></sup></span>。</div>
+<ul><li>创建初始 ramdisk 前，请先编辑 <code>/etc/mkinitcpio.conf</code>，并将 <code>zfs</code> 加至 <code>MODULES</code>:</li></ul>
+<pre>MODULES=(zfs)
+</pre>
+<p>接下来在 <code>HOOKS</code> 中将 <code>zfs</code> 加至 filesystems 前，并将 <code>systemd</code> 切换为 <code>udev</code>。您的 <code>HOOKS</code> 一行看起来应类似如下示例：
+</p>
+<pre>HOOKS=(base udev ... block <b>zfs</b> filesystems)
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>默认情况下，根文件系统为 ZFS 的情况下，不支持在 initramfs 中使用 systemd。使用 systemd 会导致 root 文件系统无法挂载，从而导致系统无法启动。要解决这个问题，请将 mkinitcpio 使用的所有 systemd HOOK 更换为 <a href="#pgbd0f46fbac92">mkinitcpio#常用钩子</a>中描述的基于 Busybox 的 hook。如果您仍然想要在 initramfs 中使用 systemd，请阅读下文中关于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-sd-zfs/">mkinitcpio-sd-zfs</a></span><sup><small>AUR</small></sup></span> 的信息。</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zfs-utils/">zfs-utils</a></span><sup><small>AUR</small></sup></span> 提供了一个开箱即用且适用于基于 systemd 的 initramfs 的 <a href="#pgb185d4cf00ac">dracut</a> hook。</li>
+<li>由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zfs-utils/">zfs-utils</a></span><sup><small>AUR</small></sup></span> 提供的 <a href="#pgbd0f46fbac92">mkinitcpio</a> 的 ZFS hook 仅兼容基于 busybox 的 initramfs 镜像。</li>
+<li>对于使用了 ZFS 加密的用户，建议您将 <code>keyboard</code> 移至 <code>autodetect</code> 前，以防止在输入密码时出现问题。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-sd-zfs/">mkinitcpio-sd-zfs</a></span><sup><small>AUR</small></sup></span> 提供了与 systemd 兼容的 mkinitcpio initramfs 的 ZFS hook。请注意，"sd-zfs" hook 未经过完整测试，并且可能不兼容启用了加密的文件系统。</li></ul>
+</div>
+<ul><li><a href="#pgbd0f46fbac92">重新生成 initramfs</a>。</li></ul>
+<ul><li>将 ZFS 添加至您的内核参数。</li></ul>
+<p>现在，请设置您的 <a href="#pgee8f2050088a">引导加载程序</a>。要使得 ZFS 可以启动，您还需要以下的<a href="#pgec0856954f1c">内核参数</a>：
+</p>
+<pre>root=ZFS=zroot/ROOT/default rw
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2145a9b73b89_.E8.AE.BE.E7.BD.AE_hostid" id="设置_hostid"><span id=".E8.AE.BE.E7.BD.AE_hostid"></span>设置 hostid</h2></div>
+<p>为了使您的系统能够顺利启动，您还需要设置 hostid。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>本章节的内容假设您仍处在 <code>arch-chroot</code> 环境中。</li>
+<li>虽然 zpool.cache 正待废弃，但zfs-utils 仍需要 zpool.cache 来获得可以启动的系统，故现在这仍是取得可启动的系统的默认以及建议方式。[详见: <a href="https://github.com/openzfs/zfs/issues/1035">https://github.com/openzfs/zfs/issues/1035</a>]</li></ul>
+</div>
+<p>对每个您想自动挂载的存储池运行以下命令：
+</p>
+<pre># zpool set cachefile=/etc/zfs/zpool.cache <i>pool</i>
+</pre>
+<p>当根目录文件系统为 ZFS 时，本机的 hostid 在挂载时将不可见。解决方案有两种。您可以在<a href="#pgee8f2050088a">引导加载程序</a>中将您的 spl hostid 写入 <a href="#pgec0856954f1c">内核参数</a>中，例如 <code>spl.spl_hostid=0x00bab10c</code>。要确定您的 hostid，请运行 <code>hostid</code>。
+</p><p>另一种，同时也是推荐的解决方案，是保证 <code>/etc/hostid</code> 中写入了 hostid，并重新生成 initramfs 以将其拷贝至 initramfs 镜像内。要安全地写入 hostid 文件，请使用 <code>zgenhostid</code>。
+</p><p>要使用 libc 生成的 hostid（建议的操作）：
+</p>
+<pre># zgenhostid $(hostid)
+</pre>
+<p>要使用自定义的 hostid，运行以下命令（注意，hostid 必须是8个字符的十六进制数）：
+</p>
+<pre># zgenhostid deadbeef
+</pre>
+<p>完成后请勿忘记<a href="#pgbd0f46fbac92">重新生成 initramfs</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2145a9b73b89_.E9.85.8D.E7.BD.AE_ZFS_.E6.8C.82.E8.BD.BD_.EF.BC.88.E9.80.82.E7.94.A8.E4.BA.8E_systemd.EF.BC.89" id="配置_ZFS_挂载_（适用于_systemd）"><span id=".E9.85.8D.E7.BD.AE_ZFS_.E6.8C.82.E8.BD.BD_.EF.BC.88.E9.80.82.E7.94.A8.E4.BA.8E_systemd.EF.BC.89"></span>配置 ZFS 挂载 （适用于 systemd）</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<p>这一章节仅适用于 systemd，即 Arch Linux 默认使用的 init 系统。
+</p>
+</div>
+<p>要自动挂载存储池，您需要启用 <code>zfs.target</code>。
+</p><p><a href="#pg6bfd324d34c9">启用</a> <code>zfs.target</code>
+</p><p>要在系统启动时自动挂载 ZFS 存储池，您需要<a href="#pg6bfd324d34c9">启用</a> <code>zfs-import-cache.service</code>、<code>zfs-mount.service</code> 与 <code>zfs-import.target</code>。 
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2145a9b73b89_.E9.85.8D.E7.BD.AE_ZFS_.E6.8C.82.E8.BD.BD_.EF.BC.88.E9.80.82.E7.94.A8.E4.BA.8E_OpenRC.EF.BC.89" id="配置_ZFS_挂载_（适用于_OpenRC）"><span id=".E9.85.8D.E7.BD.AE_ZFS_.E6.8C.82.E8.BD.BD_.EF.BC.88.E9.80.82.E7.94.A8.E4.BA.8E_OpenRC.EF.BC.89"></span>配置 ZFS 挂载 （适用于 OpenRC）</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<p>本章节适用于 OpenRC init 与服务管理系统的用户。OpenRC 仅在 AUR 可用，Arch Linux 对其没有官方支持。根据 <a href="#pg753297455480">OpenRC</a> 页面，当向他人求助时，您应声明自己在使用 OpenRC。
+</p>
+</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<p>虽然 Arch Linux 的默认 init 系统是 systemd，本章节仍出于文档完整性的目的提供。
+</p>
+</div>
+<p>您需要将 <code>zfs-import</code> 与 <code>zfs-mount</code> init 脚本添加至 boot runlevel。
+</p>
+<pre># rc-update add zfs-import boot
+</pre>
+<pre># rc-update add zfs-mount boot
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<p>如果您启用了 ZFS 加密并且希望在启动时解锁您的 ZFS 分区，还应将 zfs-load-key 添加至 boot runlevel。
+</p>
+<pre># rc-update add zfs-load-key boot
+</pre>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2145a9b73b89_.E5.8D.B8.E8.BD.BD.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E5.B9.B6.E9.87.8D.E6.96.B0.E5.90.AF.E5.8A.A8" id="卸载文件系统并重新启动"><span id=".E5.8D.B8.E8.BD.BD.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E5.B9.B6.E9.87.8D.E6.96.B0.E5.90.AF.E5.8A.A8"></span>卸载文件系统并重新启动</h2></div>
+<p>我们离成功不远了！如果您使用传统类型的启动引导分区，先运行： 
+</p>
+<pre># umount /mnt/boot 
+</pre>
+<p>如果未使用传统的单独引导分区，直接运行： 
+</p>
+<pre># zfs umount -a
+# zfs umount zroot/ROOT/default
+# zpool export zroot
+</pre>
+<p>现在，重新启动系统。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>如果您没有正确将存储池导出，重新启动后 ZFS 将拒绝在 ramdisk 环境中导入存储池，从而使您卡在 busybox 终端界面。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2145a9b73b89_.E4.BB.8E_USB_.E5.AD.98.E5.82.A8.E8.AE.BE.E5.A4.87.E5.8A.A0.E8.BD.BD.E5.AF.86.E9.92.A5" id="从_USB_存储设备加载密钥"><span id=".E4.BB.8E_USB_.E5.AD.98.E5.82.A8.E8.AE.BE.E5.A4.87.E5.8A.A0.E8.BD.BD.E5.AF.86.E9.92.A5"></span>从 USB 存储设备加载密钥</h3></div>
+<p>可以将密钥存储在 USB 存储设备上并在启动时加载：
+</p><p>在 USB 存储介质的初始字节处存储密钥：
+</p>
+<pre># dd if=<i>your_password_file (您的密钥文件)</i> bs=32 count=1 of=/dev/disk/by-id/<i>usb_stick (USB 存储设备)</i>
+</pre>
+<p>要创建 ZFS 分区，您可以使用上文所述的输入密钥的方式，或直接使用 <a href="#pge09a1da9829f">dd</a> 命令配合管道写入 USB 存储设备中存储的密钥：
+</p>
+<pre># dd if=/dev/disk/by-id/<i>usb_stick</i> bs=32 count=1 | zfs create -o encryption=on -o keyformat=<i>passphrase</i> zroot/ROOT
+</pre>
+<p>下一步就要更改 zfs hook。zfs 默认会询问密钥。您需要将获取密钥的方式改为通过从您存放着密钥的 USB 设备中 dd 来获取。要达成这个目的，将 <code>/usr/lib/initcpio/hooks/zfs</code> 中的以下行：
+</p>
+<pre># ! eval zfs load-key "${encryptionroot}"; do
+</pre>
+<p>改为：
+</p>
+<pre># ! eval dd if=/dev/disk/by-id/<i>usb_stick</i> bs=32 count=1 | zfs load-key "${encryptionroot}"; do
+</pre>
+<p>您刚刚更改了您的 zfs hook，所以不要忘记<a href="#pgbd0f46fbac92">重新生成 initramfs</a>。现在 zfs 应该能在启动时从您的 USB 设备中加载密钥。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2145a9b73b89_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2145a9b73b89_.E7.B3.BB.E7.BB.9F.E5.9B.A0_.22.E6.97.A0.E6.B3.95.E5.AF.BC.E5.85.A5_zroot.EF.BC.9A.E5.AD.98.E5.82.A8.E6.B1.A0.E4.B8.8D.E5.AD.98.E5.9C.A8.EF.BC.88cannot_import_zroot:_no_such_pool_available.EF.BC.89.22_.E8.80.8C.E6.97.A0.E6.B3.95.E5.90.AF.E5.8A.A8" id='系统因_"无法导入_zroot：存储池不存在（cannot_import_zroot:_no_such_pool_available）"_而无法启动'><span id=".E7.B3.BB.E7.BB.9F.E5.9B.A0_.22.E6.97.A0.E6.B3.95.E5.AF.BC.E5.85.A5_zroot.EF.BC.9A.E5.AD.98.E5.82.A8.E6.B1.A0.E4.B8.8D.E5.AD.98.E5.9C.A8.EF.BC.88cannot_import_zroot:_no_such_pool_available.EF.BC.89.22_.E8.80.8C.E6.97.A0.E6.B3.95.E5.90.AF.E5.8A.A8"></span>系统因 "无法导入 zroot：存储池不存在（cannot import zroot: no such pool available）" 而无法启动</h3></div>
+<p>您可以尝试以下步骤，看看是否有帮助。
+</p>
+<ul><li>使用 <a href="#pgef9a589efc8b">archzfs 仓库</a>中提供的内核模块，不要使用 dkms 版本。您可以在成功启动后再改为使用 dkms 变种。</li>
+<li>移除 <code>/etc/zfs/zpool.cache</code> 并运行：<pre># zpool set cachefile=none zroot</pre></li>
+<li>移除 <code>/etc/hostid</code>。</li>
+<li><a href="#pgbd0f46fbac92">重新生成 initramfs</a>。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2145a9b73b89_zpool_.E5.9B.A0.E4.B8.BA.E5.BF.99.E7.A2.8C.E8.80.8C.E6.8B.92.E7.BB.9D.E5.AF.BC.E5.87.BA" id="zpool_因为忙碌而拒绝导出"><span id="zpool_.E5.9B.A0.E4.B8.BA.E5.BF.99.E7.A2.8C.E8.80.8C.E6.8B.92.E7.BB.9D.E5.AF.BC.E5.87.BA"></span>zpool 因为忙碌而拒绝导出</h3></div>
+<p>Arch-chroot 会在系统里挂在特定的内核空间文件系统。如果没有卸载这些文件系统，存储池可能会拒绝导出。此时，请重新挂载 ZFS 分区，并运行 <code>findmnt -R /mnt</code>
+</p><p>然后运行对于每个仍然挂载的文件系统，运行 <code>umount -f <i>/path/to/partition</i></code>。
+</p><p>之后您应当能够正常导出您的存储池。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2145a9b73b89_.E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85" id="另请参阅"><span id=".E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85"></span>另请参阅</h2></div>
+<ul><li><a href="https://kiljan.org/2018/09/23/a-reference-guide-to-zfs-on-arch-linux/">A reference guide to ZFS on Arch Linux</a></li>
+<li><a href="https://pthree.org/2012/04/17/install-zfs-on-debian-gnulinux/">Aaron Toponce Install ZFS on Debian GNU/Linux</a></li>
+<li><a href="https://ramsdenj.com/2016/06/23/arch-linux-on-zfs-part-2-installation.html">Arch Linux On ZFS</a></li>
+<li><a href="https://openzfs.github.io/openzfs-docs/Getting%20Started/Arch%20Linux/Root%20on%20ZFS.html">Arch Linux Root on ZFS</a></li>
+<li><a href="https://www.freebsd.org/doc/handbook/zfs.html">FreeBSD ZFS Handbook</a></li>
+<li><a href="https://www.funtoo.org/ZFS_Install_Guide">Funtoo:ZFS Install Guide</a></li>
+<li><a href="https://github.com/dajhorn/pkg-zfs/wiki/HOWTO-install-Ubuntu-to-a-Native-ZFS-Root-Filesystem">HOWTO install Ubuntu to a Native ZFS Root</a></li>
+<li><a href="https://www.youtube.com/watch?v=mLbtJQmfumI">Open-ZFS Bootcamp</a></li>
+<li><a href="http://open-zfs.org/wiki/System_Administration">OpenZFS wiki</a></li>
+<li><a href="https://lildude.co.uk/zfs-cheatsheet">ZFS cheatsheet</a></li>
+<li><a href="https://github.com/zfsonlinux/zfs/wiki">ZFSOnLinux wiki</a></li>
+<li><a href="https://wiki.gentoo.org/wiki/ZFS">Gentoo ZFS Wiki</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807031003
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.266 seconds
+Real time usage: 0.277 seconds
+Preprocessor visited node count: 1140/1000000
+Revision size: 26095/2097152 bytes
+Post‐expand include size: 25934/2097152 bytes
+Template argument size: 15689/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 446/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   91.505      1 -total
+ 19.68%   18.007     15 Template:Note
+ 12.63%   11.556     86 Template:Ic
+  7.38%    6.752      9 Template:Warning
+  6.37%    5.828      1 Template:Accuracy
+  5.92%    5.413      1 Template:Related_articles_start
+  4.72%    4.321      1 Template:Merge
+  4.15%    3.802      2 Template:META_Message
+  4.08%    3.736      8 Template:Pkg
+  2.84%    2.600     10 Template:AUR
+-->
+<!-- Render ID 7b89038e-920d-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7694:|#|:idhash:canonical!zh-cn and timestamp 20260807031003 and revision id 35531. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

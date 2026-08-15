@@ -1,0 +1,156 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg8f3ec07897b4">网络分享</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Internet_sharing">Internet sharing</a>，最近一次同步于 2017-06-28，若英文版本有所<a href="https://wiki.archlinux.org/title/Internet_sharing?diff=0&amp;oldid=480589">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Internet_sharing_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg5152cc48b5d3">Android tethering</a></li>
+<li><a href="#pg3ccf0d5298af">Software access point</a></li>
+<li><a href="#pg793c391d7bf9">Bridge with netctl</a></li>
+<li><a href="#pg658839f030ad">Ad-hoc networking</a></li>
+<li><a href="#pg60cd43e9c7ad">Sharing PPP Connection</a></li>
+<li><a href="#pg4b3eb4ac08ff">Simple stateful firewall</a></li>
+<li><a href="#pg052d670480b9">Router</a></li>
+<li><a href="#pg91061b0cdcb1">USB 3G Modem</a></li>
+</ul></div>
+<p>这篇文章解释了如何从一台机器向其他机器分享网络连接。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8f3ec07897b4_.E4.BE.9D.E8.B5.96" id="依赖"><span id=".E4.BE.9D.E8.B5.96"></span>依赖</h2></div>
+<p>作为服务器的机器应该有一个额外的网络设备。这个网络设备需要一个<a href="https://en.wikipedia.org/wiki/data_link_layer">数据链路层</a>来连接到将要获得网络访问的机器：
+</p>
+<ul><li>如果想给若干台机器分享网络连接，<a href="https://en.wikipedia.org/wiki/Network_switch">交换机</a>可以提供数据连接。</li>
+<li>一个无线设备同样可以给若干台机器分享网络访问，参见<a href="#pg3ccf0d5298af">Software access point</a>。</li>
+<li>如果只需分享网络给一台机器，一根<a href="https://en.wikipedia.org/wiki/Ethernet_crossover_cable">交叉网线</a>就可以了。 如果两台电脑的网卡支持<a href="https://en.wikipedia.org/wiki/Medium_Dependent_Interface#Auto_MDI-X">MDI-X</a>，交叉网线也不是必须的，一根普通直连网线也可以。 运行 <code>ethtool <i>interface</i> | grep MDI</code> 确认网卡是否支持MDI-X。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8f3ec07897b4_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<p>这个章节假定，连接到客户机的网络设备被命名为 <i><b>net0</b></i>而连接到互联网的网络设备被命名为<i><b>internet0</b></i>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>为了此事，你可以使用<a href="#pge009209061ac">Udev#Setting static device names</a>所述的方法重命名你的设备。</div>
+<p>所有的配置都是在服务器计算机上完成的，除了最后一步#给客户机分配IP地址.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8f3ec07897b4_.E9.9D.99.E6.80.81IP.E5.9C.B0.E5.9D.80" id="静态IP地址"><span id=".E9.9D.99.E6.80.81IP.E5.9C.B0.E5.9D.80"></span>静态IP地址</h3></div>
+<p>在服务器计算机上，给要连接到其他机器的网卡分配一个静态的IP地址。IP地址的前3个字节不能和其他网卡的一模一样，除非两个网卡都有一个严格大于/24的子网掩码。
+</p>
+<pre># ip link set up dev net0
+# ip addr add 192.168.123.100/24 dev net0 # arbitrary address
+</pre>
+<p>为了使你的静态IP在启动时被分配，你可以使用<a href="#pg3d6df3561234">network manager</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8f3ec07897b4_.E5.90.AF.E7.94.A8.E5.8C.85.E8.BD.AC.E5.8F.91" id="启用包转发"><span id=".E5.90.AF.E7.94.A8.E5.8C.85.E8.BD.AC.E5.8F.91"></span>启用包转发</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>如果没有正确配置<a href="#pg4afb09a98033">防火墙</a>则会有安全隐患。</div>
+<p>检查当前的包转发设置：
+</p>
+<pre># sysctl -a | grep forward
+</pre>
+<p>这将显示全局和端口默认转发设置以及每个接口分别的 IPv4 和 IPv6 转发设置。<a href="https://docs.kernel.org/networking/ip-sysctl.html">内核文档（英文）</a>中有各个选项的详细描述。
+</p><p>要启用 IPv4 和 IPv6 包转发，<a href="#pg7b7cc2bbe79a">配置 sysctl</a> 并设置这些选项：
+</p>
+<pre>net.ipv4.ip_forward = 1
+net.ipv4.conf.all.forwarding = 1
+net.ipv6.conf.all.forwarding = 1
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>要只为某个接口启用包转发，设置 <code>net.<i>ipv[46]</i>.conf.<i>interface_name</i>.forwarding=1</code>。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>如果系统使用了<a href="#pg30593d9cf652">systemd-networkd</a>来控制网卡，就不能为单个网卡配置 IPv4 的设置，换言之，systemd 的操作规则会将所有配置过的转发发送到一个全局（针对所有网卡）的 IPv4 的设置。建议的变通方法是使用防火墙在选中的网卡上禁止转发。参考 <span class="plainlinks archwiki-template-man" title="$ man 5 systemd.network"><a href="https://man.archlinux.org/man/systemd.network.5">systemd.network(5)</a></span> 手册页以获取更多信息。在之前的 systemd 220/221 版本中引入的执行内核设置的 <code>IPForward=kernel</code> 已不再适用。<a href="https://github.com/poettering/systemd/commit/765afd5c4dbc71940d6dd6007ecc3eaa5a0b2aa1">[1]</a> <a href="https://github.com/systemd/systemd/blob/a2088fd025deb90839c909829e27eece40f7fce4/NEWS">[2]</a></div>
+<p>要是更改在重启后仍生效，见 <a href="#pg7b7cc2bbe79a">Sysctl#配置</a>。可以考虑将设置写到 <code>/etc/sysctl.d/30-ipforward.conf</code> 这种有描述性文件名的文件中。
+</p><p>建议在重启之后再次检查，确认转发已经按要求启用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8f3ec07897b4_.E5.90.AF.E7.94.A8_NAT" id="启用_NAT"><span id=".E5.90.AF.E7.94.A8_NAT"></span>启用 NAT</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8f3ec07897b4_.E4.BD.BF.E7.94.A8_iptables" id="使用_iptables"><span id=".E4.BD.BF.E7.94.A8_iptables"></span>使用 iptables</h4></div>
+<p><a href="#pg811194d6beaa">安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iptables">iptables</a></span><sup><small>包</small></sup></span>包。使用iptables来启用NAT：
+</p>
+<pre># iptables -t nat -A POSTROUTING -o internet0 -j MASQUERADE
+# iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+# iptables -A FORWARD -i net0 -o internet0 -j ACCEPT
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>当然了，这对移动宽带连接（一般在电脑上叫做ppp0）也有用。</div>
+<p>阅读<a href="#pg5d43226b0584">iptables</a>的文章以获取更多信息（特别是关于保存规则并在重启之后应用的东西）。 还有一篇关于iptables的很好的文章：<a href="#pg4b3eb4ac08ff">Simple stateful firewall</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8f3ec07897b4_.E4.BD.BF.E7.94.A8_nftables" id="使用_nftables"><span id=".E4.BD.BF.E7.94.A8_nftables"></span>使用 nftables</h4></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nftables">nftables</a></span><sup><small>包</small></sup></span>包。要通过<a href="#pg7bf4c060a5c1">nftables</a>启用NAT，你必须在一个新的或者现有的表中创建prerouting和postrouting链（即使它们是空的你也还是需要这两个链）：
+</p>
+<pre># nft add table ip nat
+# nft add chain ip nat prerouting { type nat hook prerouting priority 0 \; }
+# nft add chain ip nat postrouting { type nat hook postrouting priority 100 \; }
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果想要使用IPv6，你需要将所有的<code>ip</code>替换为<code>ip6</code>。</div>
+<p>然后，你还要将<code>net0</code>的地址转换为<code>internet0</code>的地址（这里就是网络地址转换NAT了）：
+</p>
+<pre># nft add rule nat postrouting oifname internet0 masquerade
+</pre>
+<p>你可能还需在forwarding链上添加更多的防火墙显示（假如filter表已经存在，就像<a href="#pg7bf4c060a5c1">Nftables#Server</a>中配置的那样）：
+</p>
+<pre># nft add chain inet filter forward { type filter hook forward priority 0 \; policy drop}
+# nft add rule filter forward ct state related,established accept
+# nft add rule filter forward iifname net0 oifname internet0 accept
+</pre>
+<p><br/>
+你可以在<a href="https://wiki.nftables.org/wiki-nftables/index.php/Performing_Network_Address_Translation_(NAT)">nftables Wiki</a>找到更多的关于nftables中的NAT的信息。如果你想要持久化这些更改，照着<a href="#pg7bf4c060a5c1">nftables</a>说的做。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8f3ec07897b4_.E7.BB.99.E5.AE.A2.E6.88.B7.E6.9C.BA.E5.88.86.E9.85.8DIP.E5.9C.B0.E5.9D.80" id="给客户机分配IP地址"><span id=".E7.BB.99.E5.AE.A2.E6.88.B7.E6.9C.BA.E5.88.86.E9.85.8DIP.E5.9C.B0.E5.9D.80"></span>给客户机分配IP地址</h3></div>
+<p>如果你计划经常要有几台机器使用这台电脑共享的网络，那么建议你安装一个<a href="https://en.wikipedia.org/wiki/DHCP">DHCP</a>服务器，比如<a href="#pg8bb29e660272">dhcpd</a> 或者 <a href="#pg72acb6a2ac2c">dnsmasq</a>。然后在每一台连这个网的电脑上配置DHCP客户端（比如说<a href="#pg0d07347d2df8">dhcpcd</a>）。
+</p>
+
+<p>必须把67端口的UDP传入连接开给DHCP服务器。为了允许DNS请求，还要打开53端口的UDP/TCP传入连接。
+</p>
+<pre># iptables -I INPUT -p udp --dport 67 -i net0 -j ACCEPT
+# iptables -I INPUT -p udp --dport 53 -s 192.168.123.0/24 -j ACCEPT
+# iptables -I INPUT -p tcp --dport 53 -s 192.168.123.0/24 -j ACCEPT
+</pre>
+<p>如果你不打算经常使用这套配置，你也可以手动给每台电脑配置IP。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8f3ec07897b4_.E6.89.8B.E5.8A.A8.E6.B7.BB.E5.8A.A0IP.E5.9C.B0.E5.9D.80" id="手动添加IP地址"><span id=".E6.89.8B.E5.8A.A8.E6.B7.BB.E5.8A.A0IP.E5.9C.B0.E5.9D.80"></span>手动添加IP地址</h4></div>
+
+<p>除了使用DHCP，你还可以在每台客户端电脑上添加IP地址和默认网关：
+</p>
+<pre># ip addr add 192.168.123.201/24 dev eth0  # 地址随便填，但是网段和子网掩码必须和服务端在这个子网的配置一样
+# ip link set up dev eth0
+# ip route add default via 192.168.123.100 dev eth0   # 服务端的地址
+</pre>
+<p>为每一个客户端电脑配置DNS服务器, 细节位于<a href="#pg19b81e84aba4">resolv.conf</a>。
+</p><p>搞定。客户端电脑现在应该有网了。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8f3ec07897b4_.E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3" id="问题解决"><span id=".E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3"></span>问题解决</h2></div>
+<p>如果你可以连接两台电脑但没法传输数据（比如说，客户端发送了DHCP请求给服务器，服务器受到了并且给了一个IP，但是客户端没收到，最后超时了），检查以确保你没有其他<a href="#pg5d43226b0584">Iptables</a>规则在<a href="https://bbs.archlinux.org/viewtopic.php?pid=1093208">干扰</a>。
+</p><p><b>客户端无法连接Wi-Fi或者无法上网</b>
+</p><p>问题还包括：很久都拿不到ip，DHCP offer穿不过虚拟网桥，设备ping电脑的时候得到"host is down", ping外部网络的时候得到"no route to host"……
+</p><p>目前已知<a href="#pg06238a3e6183">docker</a>可能导致这个问题。禁用docker.service和docker.socket就可以解决了。
+</p><p><a href="https://github.com/moby/moby/issues/43719">在github上的issue</a>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8f3ec07897b4_.E5.8F.A6.E8.AF.B7.E5.8F.82.E8.A7.81" id="另请参见"><span id=".E5.8F.A6.E8.AF.B7.E5.8F.82.E8.A7.81"></span>另请参见</h2></div>
+<ul><li><a href="https://xyne.dev/notes/network/dhcp_with_dns.html">Xyne关于设置一个有DHCP和DNS服务器的子网的指引和脚本</a></li>
+<li><a href="#pg5e6298ca298f">NetworkManager</a> 可以用来配置网络共享。</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807063258
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.147 seconds
+Real time usage: 0.154 seconds
+Preprocessor visited node count: 353/1000000
+Revision size: 8171/2097152 bytes
+Post‐expand include size: 7429/2097152 bytes
+Template argument size: 3228/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 1/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   35.538      1 -total
+ 13.35%    4.743      2 Template:Style
+ 10.06%    3.576      2 Template:警告
+  9.54%    3.391      1 Template:翻译状态
+  9.06%    3.219      3 Template:META_Message
+  8.62%    3.062      1 Template:糟糕的翻译
+  7.45%    2.647      8 Template:Related
+  6.66%    2.367      2 Template:Pkg
+  6.08%    2.161      1 Template:相关文章开始
+  5.60%    1.989      9 Template:Ic
+-->
+<!-- Render ID d466950e-9229-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3311:|#|:idhash:canonical!zh-cn and timestamp 20260807063258 and revision id 33836. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,153 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg7159ef654a5d">dm-crypt/准备磁盘</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/dm-crypt/Drive_preparation">dm-crypt/Drive preparation</a>，最近一次同步于 2026-06-29，若英文版本有所<a href="https://wiki.archlinux.org/title/dm-crypt/Drive_preparation?diff=0&amp;oldid=839285">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/dm-crypt_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Drive_preparation_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg812206bba43d">静态数据加密#准备磁盘</a></li>
+<li><a href="#pg8e3f3779e38c">安全地擦除磁盘</a></li>
+</ul></div>
+<p>在加密一个驱动器前，建议先用随机的数据将设备内容覆写来安全地擦除磁盘内容。要想避免加密攻击或不必要的<a href="#pg9c024ee102b3">文件恢复</a>，写入的数据最好与之后 dm-crypt 写入的数据难以区分。关于更深入的讨论，请见<a href="https://wiki.archlinux.org/title/Data-at-rest_encryption#Preparing_the_disk">静态数据加密#准备磁盘</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7159ef654a5d_.E5.AE.89.E5.85.A8.E6.93.A6.E9.99.A4.E9.A9.B1.E5.8A.A8.E5.99.A8.E6.95.B0.E6.8D.AE" id="安全擦除驱动器数据"><span id=".E5.AE.89.E5.85.A8.E6.93.A6.E9.99.A4.E9.A9.B1.E5.8A.A8.E5.99.A8.E6.95.B0.E6.8D.AE"></span>安全擦除驱动器数据</h2></div>
+<p>在决定使用何种方式安全擦除驱动器数据时，记住：如果驱动器要持续地作为加密设备使用，这只需要执行一次。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>在开始前对必要数据进行恰当的备份！！</li>
+<li>如果您要<a href="#pg2d5af776f6fd">使用 TRIM</a>，切勿用随机数据覆写<a href="#pgcb28ba980ed7">固态硬盘</a>。第一次执行 TRIM 后，未使用的块将被标记为空，并最终被擦除，使已执行的操作失效。</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在清除大量数据时，这个过程会耗费数小时至数天</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>继续操作前，请检查您的先进格式化设备是否采用<a href="#pg1e179f17182c">最佳逻辑扇区大小</a>。出于加密性能的考虑，cryptsetup 强烈推荐将磁盘的逻辑扇区大小改为 4096 字节。</li>
+<li>在数 TB 的设备上，填充加密驱动器的过程可能需要耗费一整天。为了不让机器在操作过程中无法使用，从已经安装在另一个驱动器上的系统中执行此操作，比在 Arch 安装用的 live 系统中执行此操作要好。</li>
+<li>对于<a href="#pgcb28ba980ed7">固态硬盘</a>,要想尽量减少<a href="#pg8e3f3779e38c">闪存</a>的缓存，可以考虑按 <a href="https://wiki.archlinux.org/title/SSD_memory_cell_clearing">固态硬盘记忆单元清理</a> 中的 <i>优先</i> 节执行。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7159ef654a5d_.E9.80.9A.E7.94.A8.E6.96.B9.E6.A1.88" id="通用方案"><span id=".E9.80.9A.E7.94.A8.E6.96.B9.E6.A1.88"></span>通用方案</h3></div>
+<p>关于如何擦除并准备好驱动器的详细指导，参考<a href="#pg8e3f3779e38c">安全地擦除磁盘#闪存</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7159ef654a5d_dm-crypt_.E4.B8.93.E7.94.A8.E6.96.B9.E6.A1.88" id="dm-crypt_专用方案"><span id="dm-crypt_.E4.B8.93.E7.94.A8.E6.96.B9.E6.A1.88"></span>dm-crypt 专用方案</h2></div>
+<p>下面两个方案专门用于 dm-crypt ，之所以提到它们是因为它们很快而且可以在分区设置后执行。
+</p><p><a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#2-setup">cryptsetup 常见疑问</a>(item 2.19 "<i>How can I wipe a device with crypto-grade randomness?</i>")提到了一个非常简单的操作可以使用一个已存在的 dm-crypt 卷，像一个简单的伪随机数生成器生成随机数据来擦除一个底层块设备上所有可访问的空闲空间。而且据说这可以避免使用方式的暴露。这是因为加密数据实际上与随机数据难以区分。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg7159ef654a5d_dm-crypt_.E6.93.A6.E9.99.A4.E7.A9.BA.E8.AE.BE.E5.A4.87.E6.88.96.E5.88.86.E5.8C.BA" id="dm-crypt_擦除空设备或分区"><span id="dm-crypt_.E6.93.A6.E9.99.A4.E7.A9.BA.E8.AE.BE.E5.A4.87.E6.88.96.E5.88.86.E5.8C.BA"></span>dm-crypt 擦除空设备或分区</h4></div>
+<p>首先，在待加密的单个分区（格式为 <code>sdXY</code>）或整个设备（格式为 <code>sdX</code>）上创建临时加密容器:
+</p>
+<pre> # cryptsetup open --type plain --key-file /dev/urandom --sector-size 4096 /dev/<i>block-device</i> to_be_wiped
+</pre>
+<p>可以这样验证它是否存在:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># lsblk</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME          MAJ:MIN RM  SIZE RO TYPE  MOUNTPOINT
+sda             8:0    0  1.8T  0 disk
+└─to_be_wiped 252:0    0  1.8T  0 crypt
+</pre>
+<p>用0擦除容器。不需要使用 <code>if=/dev/urandom</code> 因为加密密钥已经将数据变成随机的了。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dd if=/dev/zero of=/dev/mapper/to_be_wiped status=progress bs=1M</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">dd: writing to ‘/dev/mapper/to_be_wiped’: No space left on device</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>要想对操作进行检查,在创建擦除容器前将分区清零。在执行擦除命令后 <code>blockdev --getsize64 <i>/dev/mapper/container</i></code> 可以作为 root 获取准确的容器大小。在容器被关闭后 <i>od</i> 可以用于检查擦除操作是否覆盖了被清零的分区。举个例子,执行命令 <code># od -j $((<i>containersize - blocksize</i>)) /dev/nvme0n1</code> 来从头至尾检查擦除是否执行。</div>
+<p>最后，关闭临时的容器:
+</p>
+<pre># cryptsetup close to_be_wiped
+</pre>
+<p>在加密整个系统时，下一步是#分区。如果只是加密一个分区，继续按照<a href="#pgb01e3fe42629">加密非 root 文件系统#分区</a>执行。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg7159ef654a5d_dm-crypt_.E5.9C.A8.E5.AE.89.E8.A3.85.E5.90.8E.E6.93.A6.E9.99.A4.E5.8F.AF.E7.94.A8.E7.A9.BA.E9.97.B4" id="dm-crypt_在安装后擦除可用空间"><span id="dm-crypt_.E5.9C.A8.E5.AE.89.E8.A3.85.E5.90.8E.E6.93.A6.E9.99.A4.E5.8F.AF.E7.94.A8.E7.A9.BA.E9.97.B4"></span>dm-crypt 在安装后擦除可用空间</h4></div>
+<p>在<a href="#pg29ec7c5af952">安装</a>前没时间执行擦除步骤的用户，即使在加密系统已启动，文件系统已挂载的情况下也可以做到类似的效果。但请注意相关文件系统是否有保留空间，例如，对于 root 用户，或即使是 root 用户执行的擦除操作也会被限制的其他<a href="https://wiki.archlinux.org/title/disk_quota">磁盘配额</a>机制：底层块设备的一些部分可能完全不会写入。
+</p><p>要想执行擦除操作，通过在加密容器写入一个文件来临时填充分区的剩余可用空间:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dd if=/dev/zero of=/file/in/container status=progress</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">dd: writing to ‘/file/in/container’: No space left on device</pre>
+<p>缓存同步到磁盘，然后删除文件来回收可用空间。
+</p>
+<pre># sync
+# rm /file/in/container
+</pre>
+<p>对每个块设备的分区和其中的文件系统都要重复一次以上操作。举个例子，设置 <a href="#pg29ec7c5af952">LUKS 上的 LVM</a> 时，对每个逻辑卷都要执行这个操作。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg7159ef654a5d_dm-crypt_.E5.9C.A8.E5.AE.89.E8.A3.85.E5.90.8E.E6.93.A6.E9.99.A4.E5.8F.AF.E7.94.A8.E7.A9.BA.E9.97.B4.28.E9.80.9A.E8.BF.87.E9.87.8D.E6.96.B0.E5.8A.A0.E5.AF.86.29" id="dm-crypt_在安装后擦除可用空间(通过重新加密)"><span id="dm-crypt_.E5.9C.A8.E5.AE.89.E8.A3.85.E5.90.8E.E6.93.A6.E9.99.A4.E5.8F.AF.E7.94.A8.E7.A9.BA.E9.97.B4.28.E9.80.9A.E8.BF.87.E9.87.8D.E6.96.B0.E5.8A.A0.E5.AF.86.29"></span>dm-crypt 在安装后擦除可用空间(通过重新加密)</h4></div>
+<p>作为替代，对于想要在不重新安装的情况下完全擦除可用空间的用户，可以通过<a href="#pg88d6e7a842ae">重新加密 LUKS 设备</a>来达成。需要在每个 LUKS 设备上执行一次。但是请注意这个过程可能很慢(在桌面 HDD 上大约 50MB/s)。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7159ef654a5d_.E6.93.A6.E9.99.A4_LUKS_header" id="擦除_LUKS_header"><span id=".E6.93.A6.E9.99.A4_LUKS_header"></span>擦除 LUKS header</h3></div>
+<p>使用 LUKS 的分区由两部分组成：标头和加密数据。标头包含密钥和加密参数，如果没有这些密钥和参数，几乎不可能恢复数据。如果创建新分区或停用硬盘，只需删除该部分而无需擦除整个设备。注意事项参见本小节末。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>操作是不可逆的，请小心执行。</div>
+<p>要想擦除所有密钥，使用下列命令:
+</p>
+<pre># cryptsetup erase <i>device</i>
+</pre>
+<p>通过以下命令确保没有激活的密钥槽:
+</p>
+<pre># cryptsetup luksDump <i>device</i>
+</pre>
+<p>此外，通过在密钥被擦除后调用 <a href="https://wiki.archlinux.org/title/wipefs">arch:wipefs</a> 可以移除 LUKS header 本身以避免 <code>cryptsetup</code> 之后检测到它:
+</p>
+<pre># wipefs -a <i>device</i>
+</pre>
+<p>加密数据保留在原位。截至2020年，没有已知的实用方法解密这些数据，但是在未来可能会有所不同。由用户来衡量安全，隐私与正确擦除整个设备的时间。
+</p><p>在某些存储介质（尤其是闪存介质）上，可能无法可靠地覆盖数据。带有密钥的 LUKS 标头可能会保存在操作系统无法访问的位置（如驱动器缓存）。如果担心出现这种情况，则必须使用<a href="#pg8e3f3779e38c">ATA 安全擦除</a>。该操作会擦除设备上的所有区块，包括软件看不到的区块。详情请参见 <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#5-security-aspects">cryptsetup FAQ 5.19</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7159ef654a5d_.E5.88.86.E5.8C.BA" id="分区"><span id=".E5.88.86.E5.8C.BA"></span>分区</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果您要使用<a href="https://wiki.archlinux.org/title/Self-encrypting_drives#Using_cryptsetup">OPAL 硬件加密</a>，且之前未为硬盘设置 OPAL 管理密码，则需要使用 <span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup-erase"><a href="https://man.archlinux.org/man/cryptsetup-erase.8">cryptsetup-erase(8)</a></span> 删除硬盘上的所有数据，才能创建新的 OPAL 管理密码。请按照<a href="https://wiki.archlinux.org/title/Self-encrypting_drives#Secure_disk_erasure">arch:Self-encrypting drives#Secure disk erasure</a>中的说明，在分区前执行擦除操作。</div>
+<p>只有在加密整个系统时，才需用到本节。在安全地覆写驱动器后，必须慎重选择一个恰当的分区方案：要考虑到 dm-crypt 的要求，以及各种抉择对管理目标系统的影响。
+</p><p>还要考虑另一个重要因素：如何处理交换分区和系统挂起？参见 <a href="#pg766573d7bb8e">Dm-crypt/交换分区加密</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7159ef654a5d_.E5.90.AF.E5.8A.A8.E5.88.86.E5.8C.BA.E4.B8.8E_EFI_.E7.B3.BB.E7.BB.9F.E5.88.86.E5.8C.BA" id="启动分区与_EFI_系统分区"><span id=".E5.90.AF.E5.8A.A8.E5.88.86.E5.8C.BA.E4.B8.8E_EFI_.E7.B3.BB.E7.BB.9F.E5.88.86.E5.8C.BA"></span>启动分区与 EFI 系统分区</h3></div>
+<p>在几乎所有情况下，必须单独留一个盛装内核与 initramfs 的未加密分区，以供<a href="#pgee8f2050088a">引导加载程序</a>访问（启动过程各部分的详情，参见<a href="#pg7e866ec617d4">Arch_的启动流程</a>） 。
+</p><p>鉴于 <a href="#pgbd0f46fbac92">mkinitcpio</a> 默认把内核与 initramfs 置于 <code>/boot/</code> 下，因而通常把这个未加密的分区挂载在 <code>/boot</code> 下。对于 <code>/boot</code> 分区的要求与限制的解释，见于<a href="#pg8edad8d1135b">分区##/boot</a>。
+</p><p>在 UEFI 系统上，可以把 <a href="#pg635d4bd93303">EFI 系统分区挂载在 /boot 下</a>。鉴于按照定义，EFI 系统分区必须是主分区表中的未加密物理分区，这样做可以避免创建额外的未加密分区。EFI 系统分区特有的要求与限制，见于 <a href="#pg635d4bd93303">EFI 系统分区</a>一文。将 EFI 系统分区挂载在 <code>/boot</code> 下时，其同时也受 boot 分区的要求制约。
+</p><p>如果您仍然担忧留一个未加密分区的安全问题，参见 <a href="#pg2d5af776f6fd">Dm-crypt/特殊应用#保护未加密的boot分区</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7159ef654a5d_.E7.89.A9.E7.90.86.E5.88.86.E5.8C.BA" id="物理分区"><span id=".E7.89.A9.E7.90.86.E5.88.86.E5.8C.BA"></span>物理分区</h3></div>
+<p>在最简单的情况下，加密层可以直接基于物理分区;对于如何创建物理分区，请见<a href="#pg33ead49dca67">分区</a>。就像在未加密系统中，一个 root 分区就足够了，此外还需要一个上述的 <code>/boot</code> 分区。使用这个方法可以选择哪些分区加密，哪些分区不加密，无论涉及的磁盘数量多少，都可以正常工作。之后还可以添加或移除分区，但是调整分区的大小会被分区所基于的磁盘限制。最后请注意每个加密分区的开启都需要单独的密钥，即使这可以通过使用 <code>crypttab</code> 文件在启动时自动化，请见 <a href="#pg52b00790fb44">Dm-crypt/系统配置#crypttab</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7159ef654a5d_.E5.A0.86.E5.8F.A0.E5.9D.97.E8.AE.BE.E5.A4.87" id="堆叠块设备"><span id=".E5.A0.86.E5.8F.A0.E5.9D.97.E8.AE.BE.E5.A4.87"></span>堆叠块设备</h3></div>
+<p>如果需要更高的灵活性，dm-crypt 可以和其他例如 <a href="#pg02cd87050dfd">LVM</a> 和 <a href="#pg1b71ce42139c">RAID</a>的堆叠块设备共存。加密容器可以位于其他堆叠块设备的之下或基于其他堆叠块设备上:
+</p>
+<ul><li>如果 LVM/RAID 设备创建在加密层上，那么在同一加密分区中可以自由地添加，移除文件系统和调整文件系统大小，所有的存储设备都只需要一个密钥或密码。因为加密层基于物理分区，但是这样就不能使用 LVM 和 RAID 跨越多个磁盘的能力。</li>
+<li>如果加密层创建在 LVM/RAID 设备上，它之后依然有可能重组文件系统，但是复杂性会提高，因为加密层需要相应地调整。而且，每个加密设备的打开都需要一个密钥或密码。不过这是在跨越多个磁盘上创建加密文件系统的唯一选择。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7159ef654a5d_Btrfs_.E5.AD.90.E5.8D.B7" id="Btrfs_子卷"><span id="Btrfs_.E5.AD.90.E5.8D.B7"></span>Btrfs 子卷</h3></div>
+<p><a href="#pg429e7ec45c9c">Btrfs</a> 的内建<a href="#pg429e7ec45c9c">子卷功能</a>可以和 dm-crypt 一起使用，如果不需要其他文件系统，则完全取代对 LVM 的需求。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7159ef654a5d_.E5.8A.A0.E5.AF.86.E7.9A.84.E5.90.AF.E5.8A.A8.E5.88.86.E5.8C.BA_.28GRUB.29" id="加密的启动分区_(GRUB)"><span id=".E5.8A.A0.E5.AF.86.E7.9A.84.E5.90.AF.E5.8A.A8.E5.88.86.E5.8C.BA_.28GRUB.29"></span>加密的启动分区 (GRUB)</h3></div>
+<p>无需未加密分区的例外情况：在 BIOS/MBR 上使用 GRUB 时。此时 GRUB （未加密地）储存在 <a href="#pg8edad8d1135b">MBR 引导代码区域</a>，而 MBR 之后的间隔，以及其他分区均可加密。
+</p><p>参见 <a href="#pg29ec7c5af952">dm-crypt/加密整个系统#加密的boot分区(GRUB)</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807070408
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.129 seconds
+Real time usage: 0.136 seconds
+Preprocessor visited node count: 298/1000000
+Revision size: 10916/2097152 bytes
+Post‐expand include size: 5439/2097152 bytes
+Template argument size: 2843/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   36.151      1 -total
+ 10.56%    3.818      1 Template:小写标题
+ 10.47%    3.786      1 Template:Note
+  9.32%    3.370      1 Template:翻译状态
+  7.62%    2.756      1 Template:相关文章开始
+  7.11%    2.571     12 Template:Ic
+  6.68%    2.416      2 Template:Related
+  5.91%    2.137      1 Template:Man
+  5.48%    1.980      1 Template:Tip
+  4.65%    1.681      3 Template:Hc
+-->
+<!-- Render ID 2f01f00e-922e-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3029:|#|:idhash:canonical!zh-cn and timestamp 20260807070408 and revision id 35290. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

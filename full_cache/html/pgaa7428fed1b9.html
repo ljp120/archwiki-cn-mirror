@@ -1,0 +1,92 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgaa7428fed1b9">垃圾管理</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Trash_management">Trash management</a>，最近一次同步于 2025-1-17，若英文版本有所<a href="https://wiki.archlinux.org/title/Trash_management?diff=0&amp;oldid=818459">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Trash_management_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>为防止误删文件，可以使用垃圾桶。为确保多个应用程序之间的兼容性，可以使用遵循 <a href="https://specifications.freedesktop.org/trash-spec/latest">FreeDesktop.org's Trash specification</a> 的软件（CLI、GUI 或库）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>某些应用程序可以在每个文件系统中使用一个垃圾桶（请参阅规范）。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>删除其他文件系统上的文件时，由于文件会在文件系统之间传输，因此使用垃圾桶可能会导致一些延迟。在这种情况下，你可能需要为每个文件系统创建一个垃圾文件夹（参见规范中的 <code>Trash directories</code>）。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa7428fed1b9_.E5.88.9B.E5.BB.BA.E5.9E.83.E5.9C.BE.E6.A1.B6" id="创建垃圾桶"><span id=".E5.88.9B.E5.BB.BA.E5.9E.83.E5.9C.BE.E6.A1.B6"></span>创建垃圾桶</h2></div>
+
+<p>一些 GUI 文件管理器，如 <a href="#pg3e4423e83620">GNOME Files</a> 和 <a href="#pgf86b19d3a75a">Dolphin</a> 本身就支持将文件移入垃圾桶。还有一些 CLI 工具：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glib2">glib2</a></span><sup><small>包</small></sup></span> 提供了一条 <code>gio trash <i>file...</i></code>命令，用于将文件移入垃圾桶，而 <code>gio trash --empty</code> 则会清空垃圾桶。另请参见 <span class="plainlinks archwiki-template-man" title="$ man 1 gio"><a href="https://man.archlinux.org/man/gio.1#COMMANDS">gio(1) § COMMANDS</a></span> 中的 "trash"。要通过 <code>gio trash</code> 命令完全支持垃圾管理，需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs">gvfs</a></span><sup><small>包</small></sup></span> 软件包。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kde-cli-tools">kde-cli-tools</a></span><sup><small>包</small></sup></span> 提供了一条 <code>kioclient5</code> 命令，可以使用 <code>kioclient5 move <i>file</i> trash:/</code> 将 <code><i>file</i></code> 移至垃圾桶。</li>
+<li><b>trash-cli</b> — 实现 <a href="https://specifications.freedesktop.org/trash-spec/latest">FreeDesktop.org's Trash specification</a> 的命令行界面。</li></ul>
+<dl><dd><a href="https://github.com/andreafrancia/trash-cli">https://github.com/andreafrancia/trash-cli</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=trash-cli">trash-cli</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>trashman</b> — 一个 Python 垃圾管理器。</li></ul>
+<dl><dd><a href="https://github.com/Kwpolska/trashman">https://github.com/Kwpolska/trashman</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/trashman/">trashman</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>rmtrash</b> — trash-put 与 GNUs rm 和 rmdir 兼容。</li></ul>
+<dl><dd><a href="https://github.com/PhrozenByte/rmtrash">https://github.com/PhrozenByte/rmtrash</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rmtrash/">rmtrash</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>trash-d</b> — GNU rm 的直接替代品，注重兼容性，性能更好，用 D 语言编写。</li></ul>
+<dl><dd><a href="https://github.com/rushsteve1/trash-d">https://github.com/rushsteve1/trash-d</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/trash-d/">trash-d</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>trashy</b> — 用 rust 写成的 rm 和 trash-cli 简单、快速、功能丰富的替代品</li></ul>
+<dl><dd><a href="https://github.com/oberblastmeister/trashy">https://github.com/oberblastmeister/trashy</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/trashy/">trashy</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>gtrash</b> — 用 Go 编写的功能丰富的 CLI 垃圾管理器</li></ul>
+<dl><dd><a href="https://github.com/umlx5h/gtrash">https://github.com/umlx5h/gtrash</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gtrash-bin/">gtrash-bin</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>rmw（ReMove to Waste）</b> — 一个可配置的 CLI 垃圾管理工具，可在 X 天后清除垃圾，并与 <a href="https://specifications.freedesktop.org/trash-spec/latest">FreeDesktop.org's Trash specification</a> 集成，用 C 语言编写</li></ul>
+<dl><dd><a href="https://theimpossibleastronaut.com/rmw-website/">https://theimpossibleastronaut.com/rmw-website/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rmw/">rmw</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa7428fed1b9_.E5.9E.83.E5.9C.BE.E7.A9.BA.E9.97.B4.E4.BD.BF.E7.94.A8.E7.AE.A1.E7.90.86" id="垃圾空间使用管理"><span id=".E5.9E.83.E5.9C.BE.E7.A9.BA.E9.97.B4.E4.BD.BF.E7.94.A8.E7.AE.A1.E7.90.86"></span>垃圾空间使用管理</h2></div>
+<p>为了防止垃圾桶占用过多空间，您可以自己清空垃圾桶，或者制定清理政策
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaa7428fed1b9_.E8.BD.AF.E4.BB.B6.E5.88.97.E8.A1.A8" id="软件列表"><span id=".E8.BD.AF.E4.BB.B6.E5.88.97.E8.A1.A8"></span>软件列表</h3></div>
+<ul><li><b>autotrash</b> — 自动清除旧垃圾文件的工具</li></ul>
+<dl><dd><a href="https://github.com/bneijt/autotrash">https://github.com/bneijt/autotrash</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/autotrash/">autotrash</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaa7428fed1b9_.E6.A0.87.E5.87.86" id="标准"><span id=".E6.A0.87.E5.87.86"></span>标准</h3></div>
+
+<ul><li>确保至少有 x MB 的可用空间</li>
+<li>删除超过 x 天的文件</li>
+<li>只有当可用空间小于 x MB 时才会清空（结合前面的标准很有用）</li>
+<li>垃圾桶最大大小</li>
+<li>文件大小</li>
+<li>文件类型</li>
+<li>原始路径</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaa7428fed1b9_.E8.87.AA.E5.8A.A8.E5.8C.96" id="自动化"><span id=".E8.87.AA.E5.8A.A8.E5.8C.96"></span>自动化</h3></div>
+<p>要自动清空垃圾桶，可以使用 <a href="#pg093fe1353c86">cron</a>、<a href="#pgda7c331fa9af">systemd/Timers</a> 或 <a href="#pg50b714cf720a">inotify</a>（使用 inotify，只有新的删除才会触发垃圾桶自动清空）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaa7428fed1b9_.E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3" id="问题解决"><span id=".E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3"></span>问题解决</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaa7428fed1b9_.E6.97.A0.E6.B3.95.E6.89.BE.E5.88.B0.E6.88.96.E5.88.9B.E5.BB.BA.E5.9E.83.E5.9C.BE.E7.9B.AE.E5.BD.95" id="无法找到或创建垃圾目录"><span id=".E6.97.A0.E6.B3.95.E6.89.BE.E5.88.B0.E6.88.96.E5.88.9B.E5.BB.BA.E5.9E.83.E5.9C.BE.E7.9B.AE.E5.BD.95"></span>无法找到或创建垃圾目录</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgaa7428fed1b9_.E5.A4.96.E7.BD.AE.E7.A1.AC.E7.9B.98" id="外置硬盘"><span id=".E5.A4.96.E7.BD.AE.E7.A1.AC.E7.9B.98"></span>外置硬盘</h4></div>
+<p><code>/etc/fstab</code> 可能未正确设置。请注意，<code>ID</code> 必须用自己的用户 ID 替换通过 <code>$ id</code>。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># &lt;device&gt;                                &lt;dir&gt;              &lt;type&gt;    &lt;options&gt;         &lt;dump&gt; &lt;fsck&gt;
+UUID=75667752-8b06-11ea-bc55-0242ac130003 /externalDrive     ntfs-3g   defaults,uid=ID   0      1</pre>
+<p>确保驱动器根目录包含 <code>~/.Trash-1000/{expunged,files,info</code> 并为该目录和子目录设置相关读取权限。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807102225
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.195 seconds
+Real time usage: 0.200 seconds
+Preprocessor visited node count: 394/1000000
+Revision size: 3889/2097152 bytes
+Post‐expand include size: 8618/2097152 bytes
+Template argument size: 3908/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 8/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  116.753      1 -total
+ 70.96%   82.846      1 Template:翻译状态
+  6.48%    7.570      8 Template:App
+  4.43%    5.169      2 Template:Expansion
+  2.91%    3.395      1 Template:Warning
+  2.46%    2.868      4 Template:Pkg
+  1.99%    2.321      1 Template:Man
+  1.90%    2.214     11 Template:Ic
+  1.87%    2.185      2 Template:META_Message
+  1.87%    2.179      1 Template:Note
+-->
+<!-- Render ID e22c128e-9249-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7881:|#|:idhash:canonical!zh-cn and timestamp 20260807102225 and revision id 33737. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

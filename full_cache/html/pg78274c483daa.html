@@ -1,0 +1,130 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg78274c483daa">笔记本电脑/富士通</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Laptop/Fujitsu">Laptop/Fujitsu</a>，最近一次同步于 2020-04-30，若英文版本有所<a href="https://wiki.archlinux.org/title/Laptop/Fujitsu?diff=0&amp;oldid=608807">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Laptop_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Fujitsu_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<div class="archwiki-template-box archwiki-template-box-navigation" style="text-align: center;"><a href="#pgd87c0e8f487f">宏碁</a> – <a href="#pg723f7ed62e98">苹果</a> – <a href="#pgc3714be81017">华硕</a> – <a href="#pga56ab09876a6">戴尔</a> – 富士通 – <a href="#pg0ce6708e6b11">惠普</a> – <a href="#pgfe5aa3ca089d">IBM/联想</a> – <a href="#pg3a6d1c9c2b35">微星</a> – <a href="#pg5c7afd7e8ea9">三星</a> – <a href="#pg9e6cc7a70cfb">索尼</a> – <a href="#pg2aab1b5456aa">东芝</a> – <a href="#pge2b0642d65e4">其他</a></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg78274c483daa_.E5.9E.8B.E5.8F.B7.E5.88.97.E8.A1.A8" id="型号列表"><span id=".E5.9E.8B.E5.8F.B7.E5.88.97.E8.A1.A8"></span>型号列表</h2></div>
+<table class="wikitable sortable">
+<tbody><tr>
+<th>型号版本</th>
+<th>日期</th>
+<th>视频</th>
+<th>音频</th>
+<th>以太网</th>
+<th>无线</th>
+<th>蓝牙</th>
+<th>电源管理</th>
+<th>其他</th>
+<th>注释
+</th></tr>
+<tr>
+<td>Lifebook T902
+</td>
+<td>2017.08.01
+</td>
+<td>mesa 工作得很棒（Intel）
+</td>
+<td>工作（Intel）
+</td>
+<td>工作（Intel）
+</td>
+<td>工作（wifi-menu 以及 networkmanager）（Intel）
+</td>
+<td>工作
+</td>
+<td><a href="#pg10f1d5521407">TLP</a> 工作
+</td>
+<td>未经测试
+</td>
+<td>触摸屏/笔可安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-wacom">xf86-input-wacom</a></span><sup><small>包</small></sup></span> 使用，但<a href="https://github.com/link07/Arch-Makepkgs-not-in-AUR/tree/master/wacom-touchscreen-fix">在挂起后需要手动删除并读取驱动程序</a>.
+<p>指纹扫描仪可使用 <a href="#pgb8b247e2c1dc">fprint</a> 。
+</p>
+</td>
+<td>尚未找到通过电源按钮对按钮面板进行编程的方法。声音按钮有效，超级键按钮有效（至少在kde中有效），但旋转锁定，A和B按钮无效。
+<p>还没有找到一种方法，当切换到平板电脑模式时，会自动旋转屏幕并自动禁用键盘/触摸板，从而使平板电脑模式实质上无法使用。
+</p>
+</td></tr>
+<tr>
+<td>Lifebook T904
+</td>
+<td>大约 2014 年
+</td>
+<td>??
+</td>
+<td>??
+</td>
+<td>??
+</td>
+<td>工作（Intel）
+</td>
+<td>??
+</td>
+<td>??
+</td>
+<td>??
+</td>
+<td>根据 <a href="#pgb8b247e2c1dc">Fprint wiki</a>，阅读器似乎不是<a href="https://www.freedesktop.org/wiki/Software/fprint/libfprint/Supported_devices/">受支持的型号</a>。如果未使用阅读器，则建议在BIOS中将设备物理禁用。
+</td>
+<td>风扇噪音是BIOS初始版本中的一个问题。
+<p>BIOS版本1.08的更改日志记录了风扇设置更新，此更新已解决了风扇噪音问题。
+</p><p>在发布 #540 <a href="http://forum.tabletpcreview.com/fujitsu/61570-official-t904-thread-54.html#post391747">[1]</a> 之后，可以找到该修复程序的用户确认。
+</p>
+</td></tr>
+<tr>
+<td>Amilo Se 1520
+</td>
+<td>大约 2007 年
+</td>
+<td>工作
+</td>
+<td>与 <a href="#pgb16dfd48462f">ALSA</a> 的配合不好。SPDIF 和外部麦克风均不起作用。LCD 上方的内置麦克风正常工作，但是无法更改音量或禁用麦克风。
+</td>
+<td>??
+</td>
+<td>工作（ipw3945 芯片组，请见 <a href="#pgf204aa4045fd">Wireless network configuration#iwlegacy</a>）
+</td>
+<td>??
+</td>
+<td>工作
+</td>
+<td>??
+</td>
+<td>使用 <a href="#pg52268a3c1d7c">Synaptics</a> 触控板工作
+</td>
+<td><code>Alt</code>+<code>Function</code> 键命令可以使用，但是键盘左侧的特殊按钮不能直接使用。
+</td></tr>
+</tbody></table>
+<!-- 
+NewPP limit report
+Cached time: 20260807110112
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.097 seconds
+Real time usage: 0.106 seconds
+Preprocessor visited node count: 76/1000000
+Revision size: 2218/2097152 bytes
+Post‐expand include size: 3047/2097152 bytes
+Template argument size: 566/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   18.095      1 -total
+ 26.96%    4.878      1 Template:Bad_translation
+ 23.07%    4.174      1 Template:翻译状态
+ 14.37%    2.600      1 Template:Pkg
+ 11.40%    2.063      1 Template:META_Message
+  6.70%    1.212      2 Template:Ic
+  6.68%    1.209      1 Template:笔记本电脑导航
+  5.95%    1.076      1 Template:笔记本电脑表格标题
+-->
+<!-- Render ID 4d2c180e-924f-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3380:|#|:idhash:canonical!zh-cn and timestamp 20260807110112 and revision id 33822. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

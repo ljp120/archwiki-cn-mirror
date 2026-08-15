@@ -1,0 +1,237 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgc288aa4bd2bf">无盘系统</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Diskless_system">Diskless system</a>，最近一次同步于 2020-05-13，若英文版本有所<a href="https://wiki.archlinux.org/title/Diskless_system?diff=0&amp;oldid=607493">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Diskless_system_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg09db98375319">NFS</a></li>
+<li><a href="#pg11ab7120281d">NFS Troubleshooting</a></li>
+<li><a href="#pgfaa07640fea0">PXE</a></li>
+<li><a href="#pgbd0f46fbac92">Mkinitcpio#Using_net</a></li>
+<li><a href="#pg91deaec02b29">iSCSI Boot</a></li>
+</ul></div>
+<p>引用自 <a href="https://wiki.gentoo.org/wiki/Diskless_nodes/zh-cn">Gentoo Wiki:无盘节点</a>
+</p>
+<dl><dd><i>一台无盘机器是一台没有任何诸如硬盘、软盘驱动器或CD-ROM等常见引导设备的PC。无盘节点引导自网络，并需要一台服务器来提供当作本地硬盘来使用的存储空间。</i></dd></dl>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc288aa4bd2bf_.E6.9C.8D.E5.8A.A1.E7.AB.AF.E9.85.8D.E7.BD.AE" id="服务端配置"><span id=".E6.9C.8D.E5.8A.A1.E7.AB.AF.E9.85.8D.E7.BD.AE"></span>服务端配置</h2></div>
+<p>首先我们应当安装如下组件:
+</p>
+<ul><li>用于向无盘节点分配IP地址的 <a href="#pg8bb29e660272">DHCP</a> 服务端。</li>
+<li>用于分发启动镜像的 <a href="#pg0e1c8c6cdc7b">TFTP</a> 服务端 （所有PXE镜像必需）。</li>
+<li>选择 (<a href="#pg09db98375319">NFS</a> 或 NBD) 中的一种作为存放和传输无盘节点的 Arch 安装副本的网络存储服务。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dnsmasq">dnsmasq</a></span><sup><small>包</small></sup></span> 能够同时兼任 DHCP 和 TFTP 服务器。更多信息请见 <a href="#pg72acb6a2ac2c">Dnsmasq</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc288aa4bd2bf_DHCP" id="DHCP">DHCP</h3></div>
+<p>安装并配置 ISC <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dhcp">dhcp</a></span><sup><small>包</small></sup></span>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dhcpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">allow booting;
+allow bootp;
+
+authoritative;
+
+option domain-name-servers 10.0.0.1;
+
+option architecture code 93 = unsigned integer 16;
+
+group {
+    next-server 10.0.0.1;
+
+    if option architecture = 00:07 {
+        filename "/grub/x86_64-efi/core.efi";
+    } else {
+        filename "/grub/i386-pc/core.0";
+    }
+
+    subnet 10.0.0.0 netmask 255.255.255.0 {
+        option routers 10.0.0.1;
+        range 10.0.0.128 10.0.0.254;
+    }
+}</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>next-server</code> 应为 TFTP 服务端监听的IP地址; 你需要酌情更改配置中的地址以匹配你已有的网络环境。</div>
+<p>RFC 4578 定义了"客户机架构类型（Client System Architecture Type）" 的 dhcp 参数。在如上配置中，如果 PXE 客户机（暨无盘系统）请求了 x86_64-efi 镜像 (类型 0x7) 服务端将返回对应的文件, 否则自动回落到 legacy 镜像。这样，同一网络中的 UEFI 和 legacy BIOS 均能正常启动。
+</p><p>然后启动 ISC DHCP <a href="#pgac06dd8bfe95">systemd</a> 服务。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc288aa4bd2bf_TFTP" id="TFTP">TFTP</h3></div>
+<p>TFTP 用于向无盘系统传输 启动器、内核以及 initramfs。
+</p><p>将 TFTP 根目录设置为 <code>/srv/arch/boot</code>。参阅 <a href="#pg43f95b441875">Tftpd server</a> 配置安装并配置。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc288aa4bd2bf_.E7.BD.91.E7.BB.9C.E5.AD.98.E5.82.A8" id="网络存储"><span id=".E7.BD.91.E7.BB.9C.E5.AD.98.E5.82.A8"></span>网络存储</h3></div>
+<p>NFS 与 NBD 的主要区别是，尽管两者均允许你为多个无盘系统使用同一份安装完毕的 Arch Linux，在使用 NBD 时 (由于其直接与文件系统交互的本质) 你将必需使用 <code>CopyOnWrite</code> 的模式, 并将导致在无盘系统断开连接时丢弃所有改动。然而在一些场景中，这是一项不可多得的优势。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc288aa4bd2bf_NFS" id="NFS">NFS</h4></div>
+<p>在服务端安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nfs-utils">nfs-utils</a></span><sup><small>包</small></sup></span>。
+</p><p>你需要将 Arch 安装副本的根目录加入 <a href="#pg09db98375319">NFS</a> 的共享（“导出”）列表:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/exports</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/srv       *(rw,fsid=0,no_root_squash,no_subtree_check)
+/srv/arch  *(rw,no_root_squash,no_subtree_check)</pre>
+<p>然后启动 NFS 服务: <code>rpc-idmapd</code> <code>rpc-mountd</code>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc288aa4bd2bf_NBD" id="NBD">NBD</h4></div>
+<p>安装并配置 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nbd">nbd</a></span><sup><small>包</small></sup></span>。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nbd-server/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[generic]
+    user = nbd
+    group = nbd
+[arch]
+    exportname = /srv/arch.img
+    copyonwrite = false</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>如果你需要多台无盘系统同时启动改镜像，请将 <code>copyonwrite</code> 设为 <code>true</code>；详情请参阅 <span class="plainlinks archwiki-template-man" title="$ man 5 nbd-server"><a href="https://man.archlinux.org/man/nbd-server.5">nbd-server(5)</a></span>。</li>
+<li>可能需要使用 <a href="#pg842e8a871f3c">chown</a> 将 exportname 目录的所有权赋予 <code>nbd</code> 用户。</li></ul></div>
+<p>启动 <code>nbd</code> systemd 服务。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc288aa4bd2bf_.E6.97.A0.E7.9B.98.E7.B3.BB.E7.BB.9F.E9.85.8D.E7.BD.AE" id="无盘系统配置"><span id=".E6.97.A0.E7.9B.98.E7.B3.BB.E7.BB.9F.E9.85.8D.E7.BD.AE"></span>无盘系统配置</h2></div>
+<p>接下来我们将在服务器端的子目录中创建一个完整的 Arch Linux 安装副本。启动无盘机时，其将从 DHCP 服务器获取一个 IP 地址，而后通过 PXE 启动并挂载这份安装副本作为根目录。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc288aa4bd2bf_.E5.AE.89.E8.A3.85.E7.9B.AE.E5.BD.95.E5.88.9B.E5.BB.BA" id="安装目录创建"><span id=".E5.AE.89.E8.A3.85.E7.9B.AE.E5.BD.95.E5.88.9B.E5.BB.BA"></span>安装目录创建</h3></div>
+<p>创建一个至少 1GB 的 <a href="https://en.wikipedia.org/wiki/Sparse_file">sparse file</a> 并格式化为 btrfs。 (你当然也可以使用其他块设备如实体硬盘或 <a href="#pg02cd87050dfd">LVM</a>)。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>对于 NBD，创建一个单独的文件系统是必须的；但对于 NFS 这是可选的，故可酌情忽略或跳过。</div>
+<pre># truncate -s 1G /srv/arch.img
+# mkfs.btrfs /srv/arch.img
+# export root=/srv/arch
+# mkdir -p "$root"
+# mount -o loop,compress=lzo /srv/arch.img "$root"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc288aa4bd2bf_Bootstrap_.E5.AE.89.E8.A3.85" id="Bootstrap_安装"><span id="Bootstrap_.E5.AE.89.E8.A3.85"></span>Bootstrap 安装</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=devtools">devtools</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=arch-install-scripts">arch-install-scripts</a></span><sup><small>包</small></sup></span>, 然后运行 <code>pacstrap</code> 以为无盘系统<a href="#pg0d85b8367b38">安装必须的软件包</a>:
+</p>
+<pre># pacstrap -d "$root" base linux linux-firmware mkinitcpio-nfs-utils nfs-utils
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在任何配置中 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-nfs-utils">mkinitcpio-nfs-utils</a></span><sup><small>包</small></sup></span> 都必须安装：它将提供早期启动过程中所需的 <code>ipconfig</code>。</div>
+<p>现在应当生成好 initramfs。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc288aa4bd2bf_NFS" id="NFS_2">NFS</h4></div>
+<p>要使 NFSv4 挂载正常工作，需要轻微改动 <code>net</code> hook (这不被默认的<code>net</code> hook：<code>nfsmount</code> 所支持)。
+</p>
+<pre># sed s/nfsmount/mount.nfs4/ "$root/usr/lib/initcpio/hooks/net" &gt; "$root/usr/lib/initcpio/hooks/netnfs4"
+# cp $root/usr/lib/initcpio/install/net{,nfs4}
+</pre>
+<p>此时需要备份 <code>net</code> 以防止其在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-nfs-utils">mkinitcpio-nfs-utils</a></span><sup><small>包</small></sup></span> 升级时被覆盖.
+</p><p>Edit <code>$root/etc/mkinitcpio.conf</code> and add <code>nfsv4</code> to <code>MODULES</code>, <code>netnfs4</code> to <code>HOOKS</code>, and <code>/usr/bin/mount.nfs4</code> to <code>BINARIES</code>.
+</p><p>然后 <a href="#pg5d8a2c5e3ac5">chroot</a> 到安装副本的根目录并执行 <i>mkinitcpio</i>:
+</p>
+<pre># arch-chroot "$root" mkinitcpio -p linux
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc288aa4bd2bf_NBD" id="NBD_2">NBD</h4></div>
+<p>在无盘系统的 Arch 安装副本中安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-nbd/">mkinitcpio-nbd</a></span><sup><small>AUR</small></sup></span>。使用 <a href="#pg7edcce763396">makepkg</a> 构建并安装它：
+</p>
+<pre># pacman --root "$root" --dbpath "$root/var/lib/pacman" -U mkinitcpio-nbd-0.4-1-any.pkg.tar.xz
+</pre>
+<p>然后你需要将 <code>HOOKS</code> array 中 <code>net</code> 之后加入 <code>nbd</code>； <code>net</code> 将负责配置网络, 但只要不在 kernel 行中指定，它不会尝试 NFS 挂载。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc288aa4bd2bf_.E9.85.8D.E7.BD.AE.E6.97.A0.E7.9B.98.E7.B3.BB.E7.BB.9F" id="配置无盘系统"><span id=".E9.85.8D.E7.BD.AE.E6.97.A0.E7.9B.98.E7.B3.BB.E7.BB.9F"></span>配置无盘系统</h2></div>
+<p>在上述步骤完成后，你仍需要时情况完成主机名，时区，区域设置，键盘布局等其他 <a href="#pg0d85b8367b38">Installation guide</a> 提及的配置步骤。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc288aa4bd2bf_.E5.90.AF.E5.8A.A8.E5.99.A8" id="启动器"><span id=".E5.90.AF.E5.8A.A8.E5.99.A8"></span>启动器</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc288aa4bd2bf_GRUB" id="GRUB">GRUB</h4></div>
+<p>尽管没有详细文档, GRUB 支持从 PXE 加载：
+</p>
+<pre># pacman --root "$root" --dbpath "$root/var/lib/pacman" -S grub
+</pre>
+<p>使用 <code>grub-mknetdir</code> 在目标系统（无盘系统的 Arch 安装副本）中创建一个 grub prefix：
+</p>
+<pre># arch-chroot "$root" grub-mknetdir --net-directory=/boot --subdir=grub
+</pre>
+<p>幸运的是，<code>grub-mknetdir</code> 为所有已编译/安装的目标创建 prefix, 且 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=grub">grub</a></span><sup><small>包</small></sup></span> 的维护者在同一包中提供了两种架构, 所以 <code>grub-mknetdir</code> 仅需执行一次。
+</p><p>现在我们创建一个 GRUB 配置:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># vim "$root/boot/grub/grub.cfg"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">menuentry "Arch Linux" {
+    linux /vmlinuz-linux quiet add_efi_memmap ip=:::::eth0:dhcp nfsroot=10.0.0.1:/arch
+    initrd /initramfs-linux.img
+}</pre>
+<p><a href="#pgca9c4017f7ad">GRUB</a> 黑魔法将会自动设置 <code>set root=(tftp,10.0.0.1)</code>，这样内核和 initramfs 将自动通过 TFTP 传输过来，不过当你有其他非 TFTP 的启动项时，你仍希望显式声明这些配置。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>根据需要依照<a href="#pg9505bec2de2d">PXELINUX</a>修改你的于NBD相关的内核行配置。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc288aa4bd2bf_PXELINUX" id="PXELINUX">PXELINUX</h4></div>
+<p>PXELINUX 由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=syslinux">syslinux</a></span><sup><small>包</small></sup></span> 提供，详见 <a href="#pg9505bec2de2d">PXELINUX</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc288aa4bd2bf_.E9.A2.9D.E5.A4.96.E7.9A.84.E6.8C.82.E8.BD.BD.E7.82.B9" id="额外的挂载点"><span id=".E9.A2.9D.E5.A4.96.E7.9A.84.E6.8C.82.E8.BD.BD.E7.82.B9"></span>额外的挂载点</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc288aa4bd2bf_NBD_.E6.A0.B9" id="NBD_根"><span id="NBD_.E6.A0.B9"></span>NBD 根</h4></div>
+<p>late boot 时你需要将根分区的文件系统切换为可读写（<code>rw</code>）并且启动 <code>compress=lzo</code> 以获得相较于 NFS 可观的性能提升。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># vim "$root/etc/fstab"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/nbd0  /  btrfs  rw,noatime,compress=lzo  0 0</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc288aa4bd2bf_.E7.A8.8B.E5.BA.8F.E7.8A.B6.E6.80.81.E7.9B.AE.E5.BD.95" id="程序状态目录"><span id=".E7.A8.8B.E5.BA.8F.E7.8A.B6.E6.80.81.E7.9B.AE.E5.BD.95"></span>程序状态目录</h4></div>
+
+<p><br/>
+你可以将 <code>/var/log</code> 挂载为例如 tmpfs 的文件系统，这样多台主机的日志将不会意外混杂在一起。对于 <code>/var/spool/cups</code> 亦可实行此操作，这样 20 个使用相同 spool 的 CUPS 不会互相打架然后执行进行 1498 份打印工作并在一夜之间吃掉整摞纸（或更糟：墨盒）。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># vim "$root/etc/fstab"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">tmpfs   /var/log        tmpfs     nodev,nosuid    0 0
+tmpfs   /var/spool/cups tmpfs     nodev,nosuid    0 0</pre>
+<p>对于有某种唯一状态或数据库的软件，最好的配置是为每台无盘主机配置唯一的储存目录。例，如果你想要运行 <a href="http://puppetlabs.com/">puppet</a> 你可以简单地在 puppet 的 systemd unit file 中使用 <code>%H</code> 标识符:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># vim "$root/etc/systemd/system/puppetagent.service"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Puppet agent
+Wants=basic.target
+After=basic.target network.target
+
+[Service]
+Type=forking
+PIDFile=/run/puppet/agent.pid
+ExecStartPre=/usr/bin/install -d -o puppet -m 755 /run/puppet
+ExecStart=/usr/bin/puppet agent --vardir=/var/lib/puppet-%H --ssldir=/etc/puppet/ssl-%H
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>Puppet-agent 将会在 vardir 或 ssldir 不存在时自动创建之。
+</p><p>如果上述方法都不适用，你还可以选择使用  <a href="https://www.freedesktop.org/wiki/Software/systemd/Generators">systemd generator</a> 来针对当前主机创建一个 mount unit，不幸的是 <i>%H</i> 标识符无法使用。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc288aa4bd2bf_.E6.97.A0.E7.9B.98.E6.9C.BA.E5.90.AF.E5.8A.A8" id="无盘机启动"><span id=".E6.97.A0.E7.9B.98.E6.9C.BA.E5.90.AF.E5.8A.A8"></span>无盘机启动</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc288aa4bd2bf_NBD" id="NBD_3">NBD</h3></div>
+
+<p><br/>
+当使用 NBD 作为网络存储服务时，你需要无盘系统启动前确保卸载（<code>umount</code>）安装副本所在的块设备。
+</p><p>这一特性使得内核更新的过程十分有趣：当客户机开机时你不能挂载它所使用的文件系统, 这意味着你需要用一个单独的内核来执行内核更新。
+</p><p>首先从客户端安装副本复制 <code>$root/boot</code> 到你的 tftp 根目录 (通常即 <code>/srv/boot</code>).
+</p>
+<pre># cp -r "$root/boot" /srv/boot
+</pre>
+<p>然后在客户机启动前卸载 <code>$root</code>。
+</p>
+<pre># umount "$root"
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如上配置中如需升级内核,你需要在开始内核更新前于无盘机中使用 <a href="#pg09db98375319">NFS</a> 在 <a href="#pgced0cc449f44">fstab</a> 中挂载 <code>/srv/boot</code>，或是在客户机于NBD断开后手动挂载客户机文件系统。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc288aa4bd2bf_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><a href="https://docs.kernel.org/admin-guide/nfs/nfsroot.html">kernel.org: Mounting the root filesystem via NFS (nfsroot)</a></li>
+<li><a href="https://wiki.syslinux.org/wiki/index.php/PXELINUX">syslinux.org: pxelinux FAQ</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808041225
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.172 seconds
+Real time usage: 0.178 seconds
+Preprocessor visited node count: 716/1000000
+Revision size: 10246/2097152 bytes
+Post‐expand include size: 11836/2097152 bytes
+Template argument size: 4685/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   53.358      1 -total
+ 18.67%    9.962      7 Template:注意
+ 12.74%    6.799      2 Template:Accuracy
+ 10.84%    5.786     40 Template:Ic
+  7.39%    3.942     10 Template:Pkg
+  6.67%    3.561      1 Template:翻译状态
+  4.81%    2.568      5 Template:Related
+  4.65%    2.481      7 Template:Hc
+  4.54%    2.422      2 Template:META_Message
+  4.41%    2.353      1 Template:相关文章开始
+-->
+<!-- Render ID 5c5aa68e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3010:|#|:idhash:canonical!zh-cn and timestamp 20260808041225 and revision id 33789. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

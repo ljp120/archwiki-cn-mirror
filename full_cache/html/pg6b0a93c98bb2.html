@@ -1,0 +1,82 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg6b0a93c98bb2">CUE 分割</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p>这篇文章描述了如何利用CUE文件的元数据来分割音频文件。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6b0a93c98bb2_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/shntool/">shntool</a></span><sup><small>AUR</small></sup></span> 以分割音频文件。 对于ISO内的CD镜像或其它原始数据则需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bchunk">bchunk</a></span><sup><small>包</small></sup></span> 。
+</p><p>原生支持WAV格式的输入与输出。对于其它格式则需要对应的编解码器如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=flac">flac</a></span><sup><small>包</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mac">mac</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wavpack">wavpack</a></span><sup><small>包</small></sup></span>。
+</p><p>标记音频文件则需要其它软件 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cuetools">cuetools</a></span><sup><small>包</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mp3info">mp3info</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vorbis-tools">vorbis-tools</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6b0a93c98bb2_.E5.88.86.E5.89.B2" id="分割"><span id=".E5.88.86.E5.89.B2"></span>分割</h2></div>
+<p>使用 <i>shnsplit</i> 命令分割 <i>.wav</i> 文件：
+</p>
+<pre>$ shnsplit -f file.cue file.wav
+</pre>
+<p>使用 <i>bchunk</i> 命令分割 <i>.bin</i> 文件并转换为 <i>.wav</i> 格式:
+</p>
+<pre>$ bchunk -v -w file.bin file.cue out
+</pre>
+<p>输出文件名可利用 <code>-t</code> 进行格式化 (<code>%p</code> 艺术家, <code>%a</code> 专辑, <code>%t</code> 标题, 以及 <code>%n</code> 轨数):
+</p>
+<pre>$ shnsplit -f file.cue -t "%n %t" file.wav
+</pre>
+<p><i>shnsplit</i> 支持许多无损格式（参见 <code>shntool(1)</code>）。 以 <i>.flac</i> 格式为例：
+</p>
+<pre>$ shnsplit -f file.cue -o flac file.flac
+</pre>
+<p>输出格式，包括编码器，可用 <code>-o</code> 命令指定 (参见 <code>shntool(1)</code>):
+</p>
+<pre>$ shnsplit -f file.cue -o "flac flac -s -8 -o %f -" file.flac
+</pre>
+<p>可用 <code>shntool -a</code> 命令查看 <i>shntool</i> 原生支持的格式和编码器。如果没有原生支持，可以手动指定。例如输出ogg格式：
+</p>
+<pre>$ shnsplit -f file.cue -o "cust ext=ogg oggenc -b 192 -o %f -" file.ape
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6b0a93c98bb2_.E6.A0.87.E8.AE.B0" id="标记"><span id=".E6.A0.87.E8.AE.B0"></span>标记</h2></div>
+<p>需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cuetools">cuetools</a></span><sup><small>包</small></sup></span> 来运行 <i>cuetag.sh</i>。
+</p><p>可以用以下命令复制 <i>.cue</i> 的元数据至 <i>.mp3</i> 文件。
+</p>
+<pre>$ cuetag.sh file.cue *.mp3
+</pre>
+<p>或指定某些文件:
+</p>
+<pre>$ cuetag.sh file.cue track01.mp3 track02.mp3 track03.mp3 track04.mp3
+</pre>
+<p><i>cuetag.sh</i> 支持 <i>.mp3</i> 文件的 id3 标签和 <i>.ogg</i> 和 <i>.flac</i> 文件的 vorbis 标签。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6b0a93c98bb2_.E6.9B.BF.E4.BB.A3" id="替代"><span id=".E6.9B.BF.E4.BB.A3"></span>替代</h2></div>
+<ul><li>自动分割并标记 <i>.flac</i> 文件的脚本：<a href="https://bbs.archlinux.org/viewtopic.php?id=75774。">https://bbs.archlinux.org/viewtopic.php?id=75774。</a></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/flacon/">flacon</a></span><sup><small>AUR</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/flacon-git/">flacon-git</a></span><sup><small>AUR</small></sup></span> 是基于Qt框架，有图形界面的分割重编码软件。它们还具有 CUE 文件的自动字符集检测功能。</li>
+<li>对于有损格式，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mp3splt-gtk">mp3splt-gtk</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mp3splt">mp3splt</a></span><sup><small>包</small></sup></span> 可用于直接切割mp3文件以避免重编码带来的音质下降。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6b0a93c98bb2_References" id="References">References</h2></div>
+<ul><li><a href="https://en.wikipedia.org/wiki/Monkey%27s_Audio">What is APE?</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Cue_file">What is CUE?</a></li>
+<li><a href="#pgeae1a9d8349a">Rip Audio CDs</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808035407
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.079 seconds
+Real time usage: 0.082 seconds
+Preprocessor visited node count: 186/1000000
+Revision size: 2363/2097152 bytes
+Post‐expand include size: 2456/2097152 bytes
+Template argument size: 234/2097152 bytes
+Highest expansion depth: 4/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   16.991      1 -total
+ 30.91%    5.251     10 Template:Pkg
+ 14.27%    2.424      9 Template:Ic
+ 14.13%    2.401      3 Template:AUR
+-->
+<!-- Render ID cde5258e-92dc-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2894:|#|:idhash:canonical!zh-cn and timestamp 20260808035407 and revision id 33596. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

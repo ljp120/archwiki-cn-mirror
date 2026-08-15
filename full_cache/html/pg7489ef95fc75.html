@@ -1,0 +1,105 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg7489ef95fc75">非官方镜像源</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Unofficial_mirrors">Unofficial mirrors</a>，最近一次同步于 2024-08-01，若英文版本有所<a href="https://wiki.archlinux.org/title/Unofficial_mirrors?diff=0&amp;oldid=813529">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Unofficial_mirrors_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg61db3d3fc575">Mirrors</a></li>
+</ul></div>
+<p><code>/etc/pacman.d/mirrorlist</code> 中<b>没有</b>默认列出这些<a href="#pg61db3d3fc575">镜像源</a>，也没有在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacman-mirrorlist">pacman-mirrorlist</a></span><sup><small>包</small></sup></span> 发行。
+</p><p><br/>
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>镜像源列表仅包括镜像源 URL，当添加到 <code>/etc/pacman.d/mirrorlist</code> 中时，需追加 <code>$repo/os/$arch</code>。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7489ef95fc75_.E6.9C.80.E6.96.B0" id="最新"><span id=".E6.9C.80.E6.96.B0"></span>最新</h2></div>
+<p>最新镜像源有最新的包，并与官方 Arch 仓库保持同步。这些镜像源可类比任何在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacman-mirrorlist">pacman-mirrorlist</a></span><sup><small>包</small></sup></span> 中发行的镜像源使用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E5.85.A8.E4.B8.96.E7.95.8C" id="全世界"><span id=".E5.85.A8.E4.B8.96.E7.95.8C"></span>全世界</h3></div>
+<ul><li><a href="https://cloudflaremirrors.com/archlinux/">https://cloudflaremirrors.com/archlinux/</a> - <i>CloudFlare运行的是准镜像服务，其将已有的镜像放到其全球CDN前端（pacman下可能无法正常工作，见<a href="https://bugs.archlinux.org/task/67865">FS#67865</a>)</i>。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E6.AF.94.E5.88.A9.E6.97.B6" id="比利时"><span id=".E6.AF.94.E5.88.A9.E6.97.B6"></span>比利时</h3></div>
+<ul><li><a href="https://ftp.belnet.be/mirror/archlinux.org/pub/linux/archlinux/archlinux/">https://ftp.belnet.be/mirror/archlinux.org/pub/linux/archlinux/archlinux/</a> - <i>Belnet</i></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E6.99.BA.E5.88.A9" id="智利"><span id=".E6.99.BA.E5.88.A9"></span>智利</h3></div>
+<ul><li><a href="http://ip62.inf.utfsm.cl/">http://ip62.inf.utfsm.cl/</a> <i>UTFSM #62</i></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E4.B8.AD.E5.9B.BD" id="中国"><span id=".E4.B8.AD.E5.9B.BD"></span>中国</h3></div>
+<p><b>CDN</b>
+</p>
+<ul><li><a href="https://mirrors.cloud.tencent.com/archlinux/">https://mirrors.cloud.tencent.com/archlinux/</a> - <i>腾讯云</i></li>
+<li><a href="https://repo.huaweicloud.com/archlinux/">https://repo.huaweicloud.com/archlinux/</a> - <i>华为云</i></li></ul>
+<p><b>教育网</b>
+</p>
+<ul><li><a href="https://mirror.bit.edu.cn/archlinux/">https://mirror.bit.edu.cn/archlinux/</a> - <i>北京理工大学</i></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E8.8A.AC.E5.85.B0" id="芬兰"><span id=".E8.8A.AC.E5.85.B0"></span>芬兰</h3></div>
+<ul><li><a href="https://arch.kyberorg.fi">https://arch.kyberorg.fi</a> - <i>IPv4, HTTP, HTTPS</i></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E6.B3.95.E5.9B.BD" id="法国"><span id=".E6.B3.95.E5.9B.BD"></span>法国</h3></div>
+<ul><li><a href="https://mirror.lesviallon.fr">https://mirror.lesviallon.fr</a> - <i>仅支持 https，1Gb/s</i></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E6.97.A5.E6.9C.AC" id="日本"><span id=".E6.97.A5.E6.9C.AC"></span>日本</h3></div>
+<ul><li><a href="http://ftp.nara.wide.ad.jp/pub/Linux/archlinux/">http://ftp.nara.wide.ad.jp/pub/Linux/archlinux/</a> - <i>奈良先端科学技术大学院大学（仅支持 http，支持 IPv4/IPv6）</i></li>
+<li><a href="https://ftp.kddilabs.jp/Linux/packages/archlinux/">https://ftp.kddilabs.jp/Linux/packages/archlinux/</a> - <i>（支持 http &amp; https，仅 IPv4）</i></li>
+<li><a href="http://srv2.ftp.ne.jp/Linux/packages/archlinux/">http://srv2.ftp.ne.jp/Linux/packages/archlinux/</a> - <i>（支持 http &amp; https，仅 IPv4）</i></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E8.8D.B7.E5.85.B0" id="荷兰"><span id=".E8.8D.B7.E5.85.B0"></span>荷兰</h3></div>
+<ul><li><a href="https://mirror.transip.net/archlinux/">https://mirror.transip.net/archlinux/</a> <i>TransIP B.V.（支持 http &amp; https，支持 IPv4/IPv6）</i></li>
+<li><a href="https://mirror.previder.nl/archlinux/">https://mirror.previder.nl/archlinux/</a> <i>Previder B.V.（支持 http &amp; https，支持 IPv4/IPv6）</i></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E6.96.B0.E8.A5.BF.E5.85.B0" id="新西兰"><span id=".E6.96.B0.E8.A5.BF.E5.85.B0"></span>新西兰</h3></div>
+<ul><li><a href="https://mirror.ece.auckland.ac.nz/archlinux/">https://mirror.ece.auckland.ac.nz/archlinux/</a> <i>仅限新西兰</i></li>
+<li><a href="https://mirror.ece.auckland.ac.nz/archlinux/">https://mirror.ece.auckland.ac.nz/archlinux/</a> <i>仅限新西兰</i></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E4.BF.84.E7.BD.97.E6.96.AF" id="俄罗斯"><span id=".E4.BF.84.E7.BD.97.E6.96.AF"></span>俄罗斯</h3></div>
+<ul><li><a href="http://mirror.kpfu.ru/archlinux/">http://mirror.kpfu.ru/archlinux/</a></li>
+<li><a href="https://mirror.kpfu.ru/archlinux/">https://mirror.kpfu.ru/archlinux/</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E5.8D.97.E9.9D.9E" id="南非"><span id=".E5.8D.97.E9.9D.9E"></span>南非</h3></div>
+<ul><li><a href="http://ftp.leg.uct.ac.za/pub/linux/arch/">http://ftp.leg.uct.ac.za/pub/linux/arch/</a> - <i>开普敦大学</i></li>
+<li><a href="https://mirror.ufs.ac.za/archlinux/">https://mirror.ufs.ac.za/archlinux/</a> - <i>自由州大学</i></li>
+<li><a href="http://archlinux.mirror.ac.za">http://archlinux.mirror.ac.za</a> - <i>TENET - 南非高等教育和研究网络</i></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E6.B3.B0.E5.9B.BD" id="泰国"><span id=".E6.B3.B0.E5.9B.BD"></span>泰国</h3></div>
+<ul><li><a href="http://mirror1.ku.ac.th/archlinux/">http://mirror1.ku.ac.th/archlinux/</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E8.8B.B1.E5.9B.BD" id="英国"><span id=".E8.8B.B1.E5.9B.BD"></span>英国</h3></div>
+<ul><li><a href="https://repo.slithery.uk/">https://repo.slithery.uk/</a></li>
+<li><a href="https://mirrors.polarian.dev/archlinux/">https://mirrors.polarian.dev/archlinux/</a><sup title="最后检查状态：domain name not resolved">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2024-07-30 ⓘ]</sup> - <i>网速太慢而不能成为官方镜像；用于由 Polarian 维护或使用的 AUR 软件包的构建。(IPv4/IPv6) (HTTP/HTTPS)</i></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E7.BE.8E.E5.9B.BD" id="美国"><span id=".E7.BE.8E.E5.9B.BD"></span>美国</h3></div>
+<ul><li><a href="http://mirror.pointysoftware.net/archlinux/">http://mirror.pointysoftware.net/archlinux/</a></li>
+<li><a href="http://mirror.ziemer.bz/archlinux">http://mirror.ziemer.bz/archlinux</a></li>
+<li><a href="https://lug.mines.edu/mirrors/archlinux/">https://lug.mines.edu/mirrors/archlinux/</a></li>
+<li><a href="http://mirror.cs.umn.edu/arch/">http://mirror.cs.umn.edu/arch/</a></li>
+<li><a href="https://arch.linux.ucla.edu/">https://arch.linux.ucla.edu/</a> - 洛杉矶加利福尼亚大学</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E4.B9.8C.E5.85.B9.E5.88.AB.E5.85.8B.E6.96.AF.E5.9D.A6" id="乌兹别克斯坦"><span id=".E4.B9.8C.E5.85.B9.E5.88.AB.E5.85.8B.E6.96.AF.E5.9D.A6"></span>乌兹别克斯坦</h3></div>
+<ul><li><a href="http://mirror.dc.uz/arch/">http://mirror.dc.uz/arch/</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg7489ef95fc75_.E8.BF.87.E6.97.B6" id="过时"><span id=".E8.BF.87.E6.97.B6"></span>过时</h2></div>
+<p>过时镜像源没有最新的包，有的不再维护，有的着力于留存被最新镜像源淘汰的包。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E4.B8.96.E7.95.8C" id="世界"><span id=".E4.B8.96.E7.95.8C"></span>世界</h3></div>
+<ul><li><a href="https://sourceforge.net/projects/archlinux/files/">https://sourceforge.net/projects/archlinux/files/</a> - <i>仅 ISO 文件；自 2006 没有新版本。仅用作获取 ISO。</i></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg7489ef95fc75_.E6.99.BA.E5.88.A9_2" id="智利_2"><span id=".E6.99.BA.E5.88.A9_2"></span>智利</h3></div>
+<ul><li><a href="http://ip62.inf.utfsm.cl/">http://ip62.inf.utfsm.cl/</a> <i>UTFSM #62</i> 自从 2022-12-04 过时。</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807030554
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.109 seconds
+Real time usage: 0.114 seconds
+Preprocessor visited node count: 176/1000000
+Revision size: 3472/2097152 bytes
+Post‐expand include size: 2209/2097152 bytes
+Template argument size: 475/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 2/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   21.148      1 -total
+ 18.13%    3.835      1 Template:翻译状态
+ 12.44%    2.631      1 Template:Dead_link
+ 11.66%    2.465      2 Template:Pkg
+ 10.38%    2.195      1 Template:相关文章开始
+  8.79%    1.859      1 Template:Related
+  8.27%    1.750      1 Template:注意
+  6.09%    1.287      3 Template:Ic
+  4.45%    0.940      1 Template:Bug
+  4.01%    0.847      1 Template:META_Related_articles_start
+-->
+<!-- Render ID e71ea10e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3925:|#|:idhash:canonical!zh-cn and timestamp 20260807030554 and revision id 33895. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

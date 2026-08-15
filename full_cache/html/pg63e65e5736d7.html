@@ -1,0 +1,546 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg63e65e5736d7">Samba/Active Directory 域控制器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg53a7a4ed20fa">Active Directory Integration</a></li>
+<li><a href="#pg3a2ac70f3f85">Samba</a></li>
+<li><a href="#pgf1eeaad2be2a">SOGo</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Samba/Active_Directory_domain_controller">Samba/Active Directory domain controller</a>，最近一次同步于 2024-05-04，若英文版本有所<a href="https://wiki.archlinux.org/title/Samba/Active_Directory_domain_controller?diff=0&amp;oldid=805451">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Samba_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Active_Directory_domain_controller_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文描述了如何使用 <a href="#pg3a2ac70f3f85">Samba</a> 搭建 Active Directory 域控制器。它假设所有配置文件都处于安装后的状态，未作任何更改。文章内容已在全新安装系统上验证过，没有（也不需要）除静态 IPv4 地址外的其它网络配置。最后，下面的大多数命令都需要提权。在不考虑操作规范的前提下，使用根用户会话运行命令会比按需提权更方便些。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg63e65e5736d7_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>确保在你的网络上可以通过主机名访问到服务器。详细信息请查看<a href="#pgf42a74f3af9c">网络配置#局域网主机名解析</a>。</div>
+<p>除 Samba 的自带程序外，一个完整可用的 samba 域控制器还需要一些其它软件。先从官方仓库<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=krb5">krb5</a></span><sup><small>包</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ntp">ntp</a></span><sup><small>包</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-dnspython">python-dnspython</a></span><sup><small>包</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-markdown">python-markdown</a></span><sup><small>包</small></sup></span>,<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openresolv">openresolv</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=samba">samba</a></span><sup><small>包</small></sup></span>。
+</p><p>Samba 内置了一个全功能的 DNS 服务器，但如果你需要为外部域名维护 DNS 域，强烈建议换用 <a href="#pg3a18c7c41942">BIND</a>。如果需要共享打印机，同时也要用到 <a href="#pg9c40a97c403d">CUPS</a>。如有这些需要，请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bind">bind</a></span><sup><small>包</small></sup></span> 和/或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cups">cups</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg63e65e5736d7_.E5.88.9B.E5.BB.BA.E6.96.B0.E7.9B.AE.E5.BD.95" id="创建新目录"><span id=".E5.88.9B.E5.BB.BA.E6.96.B0.E7.9B.AE.E5.BD.95"></span>创建新目录</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg63e65e5736d7_.E7.BD.AE.E5.A4.87" id="置备"><span id=".E7.BD.AE.E5.A4.87"></span>置备</h3></div>
+<p>创建 Active Directory 域的第一步是进行置备。这包括配置内部 <a href="#pgab99e5ba37a2">LDAP</a>、<a href="#pg3ac39333c5e1">Kerberos</a> 和 DNS 服务器，并按目录需求进行基础设置。如果你有配置目录服务器的经验，那你肯定知道多组件协同工作很可能会产生些问题。这也是为什么 Samba 的开发者选择提供内置版本的这些组件，上面安装的服务器包仅作为客户端工具进行安装。为 Samba 进行置备较为简单，只需执行以下命令：
+</p>
+<pre># samba-tool domain provision --use-rfc2307 --interactive
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_.E5.8F.82.E6.95.B0.E8.AF.B4.E6.98.8E" id="参数说明"><span id=".E5.8F.82.E6.95.B0.E8.AF.B4.E6.98.8E"></span>参数说明</h4></div>
+<dl><dt>--use-rfc2307</dt>
+<dd>该参数将 POSIX 属性（UID/GID）添加到了 AD Schema 中。如果你需要认证 Linux，BSD 或是 macOS 客户端（包括本地主机），就需用到该参数。</dd></dl>
+<dl><dt>--interactive</dt>
+<dd>该参数强制置备脚本以交互模式运行。</dd></dl>
+<p>你也可以使用 <code>samba-tool domain provision --help</code> 查看置备步骤的文档。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_Interactive_provision_explanations" id="Interactive_provision_explanations">Interactive provision explanations</h4></div>
+<dl><dt>Realm</dt>
+<dd><b>INTERNAL.DOMAIN.COM</b> - This should be the same as the DNS domain in all caps. It is common to use an internal-only sub-domain to separate your internal domain from your external DNS domains, but it is not required.</dd></dl>
+<dl><dt>Domain</dt>
+<dd><b>INTERNAL</b> - This will be the NetBIOS domain name, usually the leftmost DNS sub-domain but can be anything you like. For example, the name INTERNAL would not be very descriptive. Perhaps company name or initials would be appropriate. This should be entered in all caps, and should have a 15 character maximum length for compatibility with older clients.</dd></dl>
+<dl><dt>Server Role</dt>
+<dd><b>dc</b> - This article assumes that your are installing the first DC in a new domain. If you select anything different, the rest of this article will likely be useless to you.</dd></dl>
+<dl><dt>DNS Backend</dt>
+<dd><b>BIND9_DLZ</b> or <b>SAMBA_INTERNAL</b> - This is down to personal preference of the server admin. Again, if you are hosting DNS for external domains, you are strongly encouraged to use the <b>BIND9_DLZ</b> backend so that flat zone files can continue to be used and existing transfer rules can co-exist with the internal DNS server. If unsure, use the <b>SAMBA_INTERNAL</b> backend.</dd></dl>
+<dl><dt>DNS forwarder IP address</dt>
+<dd><b>xxx.xxx.xxx.xxx</b> or <b>none</b> - This option is only presented when using the SAMBA_INTERNAL DNS backend. Supply the IP address of a DNS server for forwarding non local DNS queries, or use the string <b>none</b> to always do root lookups.</dd></dl>
+<dl><dt>Administrator password</dt>
+<dd><b>xxxxxxxx</b> - You must select a <i>strong</i> password for the administrator account. The minimum requirements are one uppercase letter, one number, and at least eight characters. If you attempt to use a password that does not meet the complexity requirements, provisioning will fail.</dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg63e65e5736d7_.E9.85.8D.E7.BD.AE.E5.AE.88.E6.8A.A4.E8.BF.9B.E7.A8.8B" id="配置守护进程"><span id=".E9.85.8D.E7.BD.AE.E5.AE.88.E6.8A.A4.E8.BF.9B.E7.A8.8B"></span>配置守护进程</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_NTPD" id="NTPD">NTPD</h4></div>
+<p>为你网络下的时间服务器创建 NTP 配置文件。相关介绍及额外配置可参考 <a href="#pgacfb0b28272f">Network Time Protocol daemon</a> 一文。
+</p><p>按照如下内容修改 <code>/etc/ntp.conf</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ntp.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Please consider joining the pool:
+#
+#     http://www.pool.ntp.org/join.html
+#
+# For additional information see:
+# - https://wiki.archlinux.org/index.php/Network_Time_Protocol_daemon
+# - http://support.ntp.org/bin/view/Support/GettingStarted
+# - the ntp.conf man page
+
+# 关联到 Arch 的 NTP 池
+server 0.arch.pool.ntp.org
+server 1.arch.pool.ntp.org
+server 2.arch.pool.ntp.org
+server 3.arch.pool.ntp.org
+
+# 限制
+restrict default kod limited nomodify notrap nopeer mssntp
+restrict 127.0.0.1
+restrict ::1
+restrict 0.arch.pool.ntp.org mask 255.255.255.255 nomodify notrap nopeer noquery
+restrict 1.arch.pool.ntp.org mask 255.255.255.255 nomodify notrap nopeer noquery
+restrict 2.arch.pool.ntp.org mask 255.255.255.255 nomodify notrap nopeer noquery
+restrict 3.arch.pool.ntp.org mask 255.255.255.255 nomodify notrap nopeer noquery
+
+# 偏移文件位置
+driftfile /var/lib/ntp/ntpd.drift
+
+# Location of the update directory
+ntpsigndsocket /var/lib/samba/ntp_signd/
+</pre>
+<p>创建状态目录并配置权限：
+</p>
+<pre># install -d /var/lib/samba/ntp_signd
+# chown root:ntp /var/lib/samba/ntp_signd
+# chmod 0750 /var/lib/samba/ntp_signd
+</pre>
+<p>启用并启动 <code>ntpd.service</code>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_BIND" id="BIND">BIND</h4></div>
+<p>如果你选择了 <b>BIND9_DLZ</b> 作为 DNS 后端，需要<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bind">bind</a></span><sup><small>包</small></sup></span> 并创建如下 BIND 配置，相关介绍及额外配置可参考 <a href="#pg3a18c7c41942">BIND</a> 一文。别忘了将 <b>x</b> 替换成实际值：
+</p><p>创建 <code>/etc/named.conf</code> 文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/named.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">// vim:set ts=4 sw=4 et:
+acl local-networks {
+    127.0.0.0/8;
+    xxx.xxx.xxx.xxx/xx;
+// 如要使用 IPv6，需移除下面的注释
+    //::1/128;
+    //xxxx:xxxx:xxxx:xxxx::/64;
+};
+
+options {
+    directory "/var/named";
+    pid-file "/run/named/named.pid";
+    session-keyfile "/run/named/session.key";
+
+    // 将该行取消注释以启用 IPv6 连接支持
+    //  listen-on-v6 { any; };
+    // 为无 IPv4 环境添加该行：
+    //  listen-on { none; };
+
+    // 将允许的子网或主机加入到 local-networks acl 中
+    allow-query       { local-networks; };
+    allow-recursion   { local-networks; };
+    allow-query-cache { local-networks; };
+    allow-transfer    { none; };
+    allow-update      { none; };
+
+    version none;
+    hostname none;
+    server-id none;
+
+    auth-nxdomain yes;
+    datasize default;
+    empty-zones-enable no;
+    tkey-gssapi-keytab "/var/lib/samba/bind-dns/dns.keytab";
+
+    // 将该行取消注释以使用 ISP 的转发器
+    //  forwarders { xxx.xxx.xxx.xxx; xxx.xxx.xxx.xxx; };
+};
+
+zone "localhost" IN {
+    type master;
+    file "localhost.zone";
+};
+
+zone "0.0.127.in-addr.arpa" IN {
+    type master;
+    file "127.0.0.zone";
+};
+
+zone "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa" {
+    type master;
+    file "localhost.ip6.zone";
+};
+
+// 加载 AD 内置区域
+include "/var/lib/samba/bind-dns/named.conf";
+
+//zone "example.org" IN {
+//    type slave;
+//    file "example.zone";
+//    masters {
+//        192.168.1.100;
+//    };
+//    allow-query { any; };
+//    allow-transfer { any; };
+//};
+
+logging {
+    channel xfer-log {
+        file "/var/log/named.log";
+            print-category yes;
+            print-severity yes;
+            severity info;
+        };
+        category xfer-in { xfer-log; };
+        category xfer-out { xfer-log; };
+        category notify { xfer-log; };
+};
+</pre>
+<p>配置权限：
+</p>
+<pre># chgrp named /var/lib/samba/private/dns.keytab
+# chmod g+r /var/lib/samba/private/dns.keytab
+# touch /var/log/named.log
+# chown root:named /var/log/named.log
+# chmod 664 /var/log/named.log
+</pre>
+<p>启用并启动 <code>named.service</code>。
+</p><p>转发器值可以选用你的 ISP 的 DNS 服务器，谷歌（8.8.8.8，8.8.4.4，2001:4860:4860::8888 和 2001:4860:4860::8844）及 OpenDNS（208.67.222.222，208.67.220.220，2620:0:ccc::2 和 2620:0:ccd::2）也免费提供了公共 DNS 服务器，具体最佳值取决于你的现有网络。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_Kerberos_.E5.AE.A2.E6.88.B7.E7.AB.AF.E5.B7.A5.E5.85.B7" id="Kerberos_客户端工具"><span id="Kerberos_.E5.AE.A2.E6.88.B7.E7.AB.AF.E5.B7.A5.E5.85.B7"></span>Kerberos 客户端工具</h4></div>
+<p>上面的置备步骤会创建一个可与 Samba 域控制器搭配使用的 krb5.conf 文件。使用如下命令进行安装：
+</p>
+<pre># mv /etc/krb5.conf{,.default}
+# cp /var/lib/samba/private/krb5.conf /etc
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_DNS" id="DNS">DNS</h4></div>
+<p>你现在需要使用本地 DNS 服务器了，重新配置 resolvconf 以仅使用 localhost 进行 DNS 查询。创建 <code>/etc/resolv.conf.tail</code> 文件（不要忘了将 <b>internal.domain.tld</b> 替换为你的内部域名）：
+</p>
+<pre># Samba 配置
+search <b>internal.domain.tld</b>
+# 如要使用 IPv6，需移除下行注释
+#nameserver ::1
+nameserver 127.0.0.1
+</pre>
+<p>配置权限并生成新的 <code>/etc/resolv.conf</code> 文件：
+</p>
+<pre># chmod 644 /etc/resolv.conf.tail
+# resolvconf -u
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_Samba" id="Samba">Samba</h4></div>
+<p>启用并启动 <code>samba.service</code>。如果你想使用 LDB 工具，需额外通过创建 <code>/etc/profile.d/sambaldb.sh</code> 来设置 <b>LDB_MODULES_PATH</b>：
+</p>
+<pre>export LDB_MODULES_PATH="${LDB_MODULES_PATH}:/usr/lib/samba/ldb"
+</pre>
+<p>设置权限并对其使用 source：
+</p>
+<pre># chmod 0755 /etc/profile.d/sambaldb.sh
+# . /etc/profile.d/sambaldb.sh
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg63e65e5736d7_.E6.B5.8B.E8.AF.95" id="测试"><span id=".E6.B5.8B.E8.AF.95"></span>测试</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_DNS" id="DNS_2">DNS</h4></div>
+<p>首先验证 DNS 是否正常。执行如下命令，将 <b>internal.domain.com</b> 和 <b>server</b> 替换为对应的值：
+</p>
+<pre># host -t SRV _ldap._tcp.<b>internal.domain.com</b>.
+# host -t SRV _kerberos._udp.<b>internal.domain.com</b>.
+# host -t A <b>server</b>.<b>internal.domain.com</b>.
+</pre>
+<p>输出应该如下：
+</p>
+<pre>_ldap._tcp.internal.domain.com has SRV record 0 100 389 server.internal.domain.com.
+_kerberos._udp.internal.domain.com has SRV record 0 100 88 server.internal.domain.com.
+server.internal.domain.com has address xxx.xxx.xxx.xxx</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_NT_.E8.AE.A4.E8.AF.81" id="NT_认证"><span id="NT_.E8.AE.A4.E8.AF.81"></span>NT 认证</h4></div>
+<p>接着，确认密码认证是否正常工作：
+</p>
+<pre># smbclient //localhost/netlogon -U Administrator -c 'ls'
+</pre>
+<p>将会出现提示要求输入密码（即你之前设定的密码），并将出现如下目录列表：
+</p>
+<pre>  .                                   D        0  Wed Nov 27 23:59:07 2013
+  ..                                  D        0  Wed Nov 27 23:59:12 2013
+
+		50332 blocks of size 2097152. 47185 blocks available</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_Kerberos" id="Kerberos">Kerberos</h4></div>
+<p>现在验证 KDC 是否正常工作。确保替换了 <b>INTERNAL.DOMAIN.COM</b>，并且使用了全大写字符：
+</p>
+<pre># kinit administrator@<b>INTERNAL.DOMAIN.COM</b>
+</pre>
+<p>将会出现提示要求输入密码，并产生如下输出：
+</p>
+<pre>Warning: Your password will expire in 41 days on Wed 08 Jan 2014 11:59:11 PM CST</pre>
+<p>检查是否确实拿到了票据：
+</p>
+<pre># klist
+</pre>
+<p>输出应该如下：
+</p>
+<pre>Ticket cache: FILE:/tmp/krb5cc_0
+Default principal: administrator@INTERNAL.DOMAIN.COM
+
+Valid starting       Expires              Service principal
+11/28/2013 00:22:17  11/28/2013 10:22:17  krbtgt/INTERNAL.DOMAIN.COM@INTERNAL.DOMAIN.COM
+	renew until 11/29/2013 00:22:14</pre>
+<p>最后，通过 smbclient 使用刚拿到的票据进行验证。将 <b>server</b> 替换为对应的服务器名：
+</p>
+<pre># smbclient //<b>server</b>/netlogon -k -c 'ls'
+</pre>
+<p>输出应与上述密码认证测试的输出一致。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg63e65e5736d7_Additional_configuration" id="Additional_configuration">Additional configuration</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_DNS" id="DNS_3">DNS</h4></div>
+<p>You will also need to create a reverse lookup zone for each subnet in your environment in DNS. It is important that this is kept in Samba's DNS as opposed to BIND to allow for dynamic updates by cleints. For each subnet, create a reverse lookup zone with the following commands. Replace <b>server</b>.<b>internal</b>.<b>domain</b>.<b>tld</b> and <b>xxx</b>.<b>xxx</b>.<b>xxx</b> with appropriate values. For <b>xxx</b>.<b>xxx</b>.<b>xxx</b>, use the first three octets of the subnet in reverse order (for example: 192.168.0.0/24 becomes 0.168.192):
+</p>
+<pre># samba-tool dns zonecreate <b>server</b>.<b>internal</b>.<b>domain</b>.<b>tld</b> <b>xxx</b>.<b>xxx</b>.<b>xxx</b>.in-addr.arpa -U Administrator
+</pre>
+<p>Now, add a record for you server (if your server is multi-homed, add for each subnet) again substituting appropriate values as above. <b>zzz</b> will be replaced by the fourth octet of the IP for the server:
+</p>
+<pre># samba-tool dns add <b>server</b>.<b>internal</b>.<b>domain</b>.<b>tld</b> <b>xxx</b>.<b>xxx</b>.<b>xxx</b>.in-addr.arpa <b>zzz</b> PTR <b>server</b>.<b>internal</b>.<b>domain</b>.<b>tld</b> -U Administrator
+</pre>
+<p>Finally, test the lookup. Replace <b>xxx</b>.<b>xxx</b>.<b>xxx</b>.<b>xxx</b> with the IP of your server:
+</p>
+<pre># host -t PTR <b>xxx</b>.<b>xxx</b>.<b>xxx</b>.<b>xxx</b>
+</pre>
+<p>You should get output similar to the following:
+</p>
+<pre>xxx.xxx.xxx.xxx.in-addr.arpa domain name pointer server.internal.domain.tld.
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_TLS" id="TLS">TLS</h4></div>
+<p>默认不启用 TLS，但在初始化 DC 时会创建一个默认证书。从 Samba 4.3.8 和 4.2.2 开始，默认禁用非加密 LDAP 绑定。在不影响安全性的前提下，你必须要配置 TLS 才能将 Samba 作为认证源使用。如要使用默认证书，请将下列内容添加到 <code>/etc/samba/smb.conf</code> 的“[global]”部分下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/samba/smb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[global]
+tls enabled  = yes
+tls keyfile  = tls/key.pem
+tls certfile = tls/cert.pem
+tls cafile   = tls/ca.pem</pre>
+<p>如果需要可信证书，请创建一个签名密钥和一个证书请求（详细步骤参见 <a href="#pgb4be337c4999">OpenSSL</a>）。让你选择的证书机构对请求签名，然后将其放置在配置的文件夹下。如果证书机构要求使用中间证书，可以将证书串在一起（先是服务器证书，然后是中间证书），然后将 <b>tls cafile</b> 留空。
+</p><p>重启 <code>samba</code> 以应用更改。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg63e65e5736d7_Adding_a_second_domain_controller_to_an_" id="Adding_a_second_domain_controller_to_an_existing_domain">Adding a second domain controller to an existing domain</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg63e65e5736d7_Prerequisites" id="Prerequisites">Prerequisites</h3></div>
+<p>As with the provisioning setup when setting up a new domain, you must have <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ntp">ntp</a></span><sup><small>包</small></sup></span> configured per <a href="#pg63e65e5736d7_NTPD">the above instructions</a>. Additionally, some of the arguments and parameters on the original domain setup must be replicated here.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg63e65e5736d7_Argument_explanations" id="Argument_explanations">Argument explanations</h4></div>
+<dl><dt>--option='idmap_ldb:use rfc2307 = yes'</dt>
+<dd>this is required if you elected to include Unix UID/GID support on your existing domain (using the <b>--use-rfc2307</b> option for Samba's provision step or applied the RFC 2307 schema extensions).</dd></dl>
+<dl><dt>--dns-backend=<b>DNSTYPE</b></dt>
+<dd>replace <b>DNSTYPE</b> with <b>BIND9_DLZ</b> or <b>SAMBA_INTERNAL</b> - This is again down to personal preference of the server admin. If using <b>BIND9_DLZ</b> backend, you will need to configure <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bind">bind</a></span><sup><small>包</small></sup></span> as per <a href="#pg63e65e5736d7_BIND">the above instructions</a> after joining the domain.</dd></dl>
+<dl><dt>--option="dns forwarder="<b>xxx.xxx.xxx.xxx</b>"</dt>
+<dd>this is only valid for the SAMBA_INTERNAL DNS backend which allows you to specify a DNS forwarder. Replace <b>xxx.xxx.xxx.xxx</b> with appropriate value.</dd></dl>
+<dl><dt>--site=<b>SITE</b></dt>
+<dd>if you have multiple sites defined, use this to join directly in that site.</dd></dl>
+<p>See the output of <code>samba-tool domain join --help</code> for additional options.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg63e65e5736d7_Joining_an_existing_domain_as_a_new_DC" id="Joining_an_existing_domain_as_a_new_DC">Joining an existing domain as a new DC</h3></div>
+<p>Execute the following command (adding any necessary parameters above to the end of the command):
+</p>
+<pre># samba-tool domain join <b>internal.domain.tld</b> DC -U"<b>INTERNAL</b>\<b>administrator</b>"
+</pre>
+<p>Now copy the <code>krb5.conf</code>:
+</p>
+<pre># cp /var/lib/samba/private/krb5.conf /etc/krb5.conf
+</pre>
+<p>If you used the RFC 2307 schema extensions, you need to copy the idmap from an existing DC. If using Samba, execute the following command from another DC:
+</p>
+<pre># tdbbackup -s .bak /var/lib/samba/private/idmap.ldb
+</pre>
+<p>This will generate a file <code>/var/lib/samba/private/idmap.ldb.bak</code>, transfer this file to the new server in the <code>/var/lib/samba/private</code> directory, removing the .bak extension. If you intend to keep multiple DCs, you will need to automate this process going forward using one of the methods listed on the Samba website <a href="https://wiki.samba.org/index.php/Joining_a_Samba_DC_to_an_Existing_Active_Directory#Built-in_User_.26_Group_ID_Mappings">here</a>. This also applies to transferring the idmap from Windows DCs.
+</p><p>Enable and start the <code>samba.service</code> unit.
+</p><p>If using BIND9_DLZ DNS backend, you'll need to follow the <a href="#pg63e65e5736d7_BIND">BIND</a> section above. Check if the <code>/var/lib/samba/private/dns</code> directory is created, and if not, run the following command (ignore warning about updating named.conf):
+</p>
+<pre># samba_upgradedns --dns-backend=BIND9_DLZ
+</pre>
+<p>Restart the <code>named.service</code> and then update the DNS records with the following command:
+</p>
+<pre># samba_dnsupdate --all-names --use-samba-tool --verbose
+</pre>
+<p>Now proceed with LDB configuration and testing as with a new domain <a href="#pg63e65e5736d7_Samba">here</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg63e65e5736d7_Transferring_the_FSMO_roles" id="Transferring_the_FSMO_roles">Transferring the FSMO roles</h3></div>
+<p>If this is intended to replace an existing domain controller, you will need to transfer the FSMO roles before demoting the existing DC. This is currently outside the scope of this document. See the Samba wiki <a href="https://wiki.samba.org/index.php/Transferring_and_Seizing_FSMO_Roles">here</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg63e65e5736d7_.E9.A2.9D.E5.A4.96.E6.9C.8D.E5.8A.A1" id="额外服务"><span id=".E9.A2.9D.E5.A4.96.E6.9C.8D.E5.8A.A1"></span>额外服务</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg63e65e5736d7_.E6.89.93.E5.8D.B0" id="打印"><span id=".E6.89.93.E5.8D.B0"></span>打印</h3></div>
+<p>作为域控制器的 Samba 服务器默认不会启用打印服务。你需要在 <code>/etc/samba/smb.conf</code> 的 global 部分添加下列内容：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/samba/smb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[global]
+...
+        rpc_server:spoolss = external
+        rpc_daemon:spoolssd = fork
+        printing = CUPS
+...
+[printers]
+       path = /var/spool/samba/
+       printable = yes
+</pre>
+<p>以上示例会为所有 CUPS 打印队列启用自动共享。如果你只想共享特定打印队列，可以添加如下内容（先将上面的 <b>[printers]</b> 共享移除）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/samba/smb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[global]
+...
+        load printers = no
+...
+# 打印共享示例
+[HPDJ3050]
+       path = /var/spool/samba/
+       printable = yes
+       printer name = hpdj3050
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg63e65e5736d7_Tips_and_tricks" id="Tips_and_tricks">Tips and tricks</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg63e65e5736d7_DHCP_with_dynamic_DNS_updates" id="DHCP_with_dynamic_DNS_updates">DHCP with dynamic DNS updates</h3></div>
+<p>It should be noted that using this method will affect functionality of windows clients, as they will still attempt to update DNS on their own. When this occurs, the machine will be denied permission to do so as the record will be owned by the dhcp user rather than the machine account. While this is essentially harmless, it will generate warnings in the system log of the offending machine. You should create a GPO to overcome this, but unfortunately, Samba does not yet have a command line utility to modify GPOs. You will need a Windows PC with the RSAT tools installed. Simply create a dedicated GPO with the Group Policy Editor, and apply only to OUs that contain workstations using DHCP (so that Samba/Windows servers and statically configured Samba/Windows clients can still update using 'ipconfig /registerdns') and configure the following settings:
+</p>
+<pre>Computer Configuration
+  Policies
+    Administrative Templates
+      Network
+        DNS Client
+          Dynamic Update = Disabled
+          Register PTR Records = Disabled</pre>
+<p><a href="#pg54c3351b3e3b">Install</a> the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dhcp">dhcp</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sudo">sudo</a></span><sup><small>包</small></sup></span>, and the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/samba-dhcpd-update/">samba-dhcpd-update</a></span><sup><small>AUR</small></sup></span> packages.
+</p><p>Create an unprivileged user in AD for performing the updates. When prompted for password, use a secure password. 63 random, mixed case, alpha-numeric characters is sufficient. Optionally samba-tool also takes a random argument:
+</p>
+<pre># samba-tool user create dhcp --description="Unprivileged user for DNS updates via DHCP server"
+</pre>
+<p>Since this is a service account, disabling password expiration on the user account is recommended, but not required:
+</p>
+<pre># samba-tool user setexpiry dhcp --noexpiry
+</pre>
+<p>Give the user privileges to administer DNS:
+</p>
+<pre># samba-tool group addmembers DnsAdmins dhcp
+</pre>
+<p>Create an SPN and export the users credentials to a private keytab:
+</p>
+<pre># samba-tool spn add <b>server</b>/<b>server</b>.<b>internal</b>.<b>domain</b>.<b>tld</b>@<b>INTERNAL</b>.<b>DOMAIN</b>.<b>TLD</b> dhcp
+# samba-tool domain exportkeytab --principal=dhcp@<b>INTERNAL</b>.<b>DOMAIN</b>.<b>TLD</b> dhcpd.keytab
+# install -vdm 755 /etc/dhcpd
+# mv dhcpd.keytab /etc/dhcpd
+# chown root:root /etc/dhcpd/dhcpd.keytab
+# chmod 400 /etc/dhcpd/dhcpd.keytab
+</pre>
+<p>Modify the <code>dhcpd-update-samba-dns.conf</code> file with the following commands (substituting correct values for <b>server</b>, <b>internal</b>.<b>domain</b>.<b>tld</b>, and <b>INTERNAL</b>.<b>DOMAIN</b>.<b>TLD</b>):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dhcpd/dhcpd-update-samba-dns.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Variables
+KRB5CC="/tmp/dhcpd4.krb5cc"
+KEYTAB="/etc/dhcpd/dhcpd.keytab"
+DOMAIN="<b>internal</b>.<b>domain</b>.<b>tld</b>"
+REALM="<b>INTERNAL</b>.<b>DOMAIN</b>.<b>TLD</b>"
+PRINCIPAL="dhcp@${REALM}"
+NAMESERVER="<b>server</b>.${DOMAIN}"
+ZONE="${DOMAIN}"
+</pre>
+<p>Grant the dhcp user account permissions to run the update script without a password prompt (replace <b>server</b> with the hostname of the server):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sudoers.d/dhcp-update</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">dhcp <b>server</b> = (root) NOPASSWD: /usr/bin/dhcpd-update-samba-dns.sh
+</pre>
+<p>Configure the dhcpd server following the <a href="#pg8bb29e660272">dhcpd</a> article and add the following to all subnet declarations in the <code>/etc/dhcpd.conf</code> file that provide DHCP service:
+</p>
+<pre>  on commit {
+    set ClientIP = binary-to-ascii(10, 8, ".", leased-address);
+    set ClientName = pick-first-value(option host-name, host-decl-name);
+    execute("/usr/bin/sudo", "/usr/bin/dhcpd-update-samba-dns.sh", "add", ClientIP, ClientName);
+  }
+
+  on release {
+    set ClientIP = binary-to-ascii(10, 8, ".", leased-address);
+    set ClientName = pick-first-value(option host-name, host-decl-name);
+    execute("/usr/bin/sudo", "/usr/bin/dhcpd-update-samba-dns.sh", "delete", ClientIP, ClientName);
+  }
+
+    on expiry {
+    set ClientIP = binary-to-ascii(10, 8, ".", leased-address);
+    set ClientName = pick-first-value(option host-name, host-decl-name);
+    execute("/usr/bin/sudo", "/usr/bin/dhcpd-update-samba-dns.sh", "delete", ClientIP, ClientName);
+</pre>
+<p>Here is a complete example <code>/etc/dhcpd.conf</code> file for reference:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dhcpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+subnet <b>192.168.1.0</b> netmask <b>255.255.255.0</b> {
+  range <b>192.168.1.100</b> <b>192.168.1.199</b>;
+  option subnet-mask <b>255.255.255.0</b>;
+  option routers <b>192.168.1.254</b>;
+  option domain-name "<b>internal.domain.tld</b>";
+  option domain-name-servers <b>192.168.1.1</b>;
+  option broadcast-address <b>192.168.1.255</b>;
+  default-lease-time 28800;
+  max-lease-time 43200;
+  authoritative;
+
+  on commit {
+    set ClientIP = binary-to-ascii(10, 8, ".", leased-address);
+    set ClientName = pick-first-value(option host-name, host-decl-name);
+    execute("/usr/bin/sudo", "/usr/bin/dhcpd-update-samba-dns.sh", "add", ClientIP, ClientName);
+  }
+
+  on release {
+    set ClientIP = binary-to-ascii(10, 8, ".", leased-address);
+    set ClientName = pick-first-value(option host-name, host-decl-name);
+    execute("/usr/bin/sudo", "/usr/bin/dhcpd-update-samba-dns.sh", "delete", ClientIP, ClientName);
+  }
+
+    on expiry {
+    set ClientIP = binary-to-ascii(10, 8, ".", leased-address);
+    set ClientName = pick-first-value(option host-name, host-decl-name);
+    execute("/usr/bin/sudo", "/usr/bin/dhcpd-update-samba-dns.sh", "delete", ClientIP, ClientName);
+  }
+}
+</pre>
+<p>Finally, enable and start (or restart) the <code>dhcpd4</code> service.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg63e65e5736d7_Transferring_users_from_one_directory_to" id="Transferring_users_from_one_directory_to_another">Transferring users from one directory to another</h3></div>
+<p>Unfortunately, there is no built-in utility to export users from one directory to another. This is one way, albeit exceptionally ugly, to get the user specific fields out of your existing SAM and into a suitable LDIF format for ldbmodify:
+</p>
+<pre># ldbsearch -H /var/lib/samba/private/sam.ldb \
+    -s sub -b cn=Users,dc=<i>internal</i>,dc=<i>domain</i>,dc=<i>tld</i> '(objectClass=user)' | \
+    grep -e "^\# record" -e "^accountExpires:" -e "^c:" -e "^cn:" -e "^co:" -e "^codePage:" \
+         -e "^comment:" -e "^company:" -e "^countryCode:" -e "^department:" \
+         -e "^description:" -e "^displayName" -e "^displayNamePrintable:" \
+         -e "^distinguishedName" -e "^division:" -e "^dn:" -e "^employeeID:" \
+         -e "^facsimileTelephoneNumber:" -e "^generationQualifier:" \
+         -e "^givenName" -e "^homeDirectory:" -e "^homeDrive:" -e "^homePhone:" \
+         -e "^homePostalAddress:" -e "^info:" -e "^initials:" \
+         -e "^internationalISDNNumber:" -e "^ipPhone:" -e "^l:" -e "^mail:" \
+         -e "^manager:" -e "^middleName:" -e "^mobile:" -e "^name:" -e "^o:" \
+         -e "^objectClass" -e "^otherFacsimileTelephoneNumber:" \
+         -e "^otherHomePhone:" -e "^otherIpPhone:" -e "^otherMailbox:" \
+         -e "^otherMobile:" -e "^otherPager:" -e "^otherTelephone:" -e "^pager:" \
+         -e "^personalTitle:" -e "^physicalDeliveryOfficeName:" -e "^postalAddress:" \
+         -e "^postalCode:" -e "^postOfficeBox:" -e "^proxyAddresses\: SMTP" \
+         -e "^proxyAddresses: smtp" -e "^referredDeliveryMethod:" \
+         -e "^primaryInternationalISDNNumber:" -e "^primaryTelexNumber:" \
+         -e "^profilePath:" -e "^registeredAddress:" -e "^sAMAccountName:" \
+         -e "^scriptPath:" -e "^sn:" -e "^st:" -e "^street:" -e "^streetAddress:" \
+         -e "^telephoneNumber:" -e "^teletexTerminalIdentifier:" \
+         -e "^telexNumber:" -e "^title:" -e "^userAccountControl:" -e "^userPrincipalName:"\
+         -e "^url:" -e "^userSharedFolder:" -e "^userSharedFolderOther:" -e "^wWWHomePage:" | \
+    sed '/^dn:.*/ a\changetype: add' | sed '/^# record/ i\\n' &gt; user-export.ldif
+</pre>
+<p>Explanation: Run an ldbsearch in the users container only, using sub-tree search for objectclass=user. If you need the whole directory, you can modify the search base to use the root or some other OU. The output from ldbsearch is then piped into a really long grep command that returns only appropriate attributes to keep in the new directory. This is obviously subjective, and probably should be tailored to your specific use case. Finally, we use sed to insert the changetype line (needed to tell ldbmodify that we are adding a user), and prefix with a blank line (to make it easier to read) for each exported object.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>You will need to modify the output file and remove any objects that you do not want transferred. The output file will contain objects (service users, built-ins, etc.) that can break your new directory if you fail to remove them! It will also contain the old domain in both the "dn" and "distinguishedName" attributies that must be changed before import.</div>
+<p>To import, after editing the file and transferring to the new server, simply run the following command on your new samba domain controller:
+</p>
+<pre># ldbmodify -H /var/lib/samba/private/sam.ldb user-export.ldif
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg63e65e5736d7_.E5.AF.86.E7.A0.81.E5.A4.8D.E6.9D.82.E5.BA.A6" id="密码复杂度"><span id=".E5.AF.86.E7.A0.81.E5.A4.8D.E6.9D.82.E5.BA.A6"></span>密码复杂度</h3></div>
+<p>Samba 默认要求使用强密码。使用以下命令可以禁用复杂度检查：
+</p>
+<pre># samba-tool domain passwordsettings set --complexity=off
+</pre>
+<p>详细信息请参考 Samba 维基的<a href="https://wiki.samba.org/index.php/Password_Settings_Objects">密码设置对象</a>一节。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807051747
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.172 seconds
+Real time usage: 0.177 seconds
+Preprocessor visited node count: 628/1000000
+Revision size: 27035/2097152 bytes
+Post‐expand include size: 8836/2097152 bytes
+Template argument size: 3476/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 5154/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   41.577      1 -total
+ 10.80%    4.492     13 Template:Pkg
+  8.50%    3.534     23 Template:Ic
+  7.78%    3.235      1 Template:翻译状态
+  7.44%    3.093      8 Template:Hc
+  6.13%    2.547      1 Template:相关文章开始
+  5.48%    2.277      3 Template:Related
+  5.31%    2.206      2 Template:Note
+  4.28%    1.779      6 Template:Bc
+  2.51%    1.045      1 Template:AUR
+-->
+<!-- Render ID 53a29b8e-921f-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7737:|#|:idhash:canonical!zh-cn and timestamp 20260807051747 and revision id 33666. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

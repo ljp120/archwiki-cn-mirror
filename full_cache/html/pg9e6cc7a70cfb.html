@@ -1,0 +1,107 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg9e6cc7a70cfb">笔记本电脑/索尼</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN">
+<div class="archwiki-template-box archwiki-template-box-navigation" style="text-align: center;"><a href="#pgd87c0e8f487f">宏碁</a> – <a href="#pg723f7ed62e98">苹果</a> – <a href="#pgc3714be81017">华硕</a> – <a href="#pga56ab09876a6">戴尔</a> – <a href="#pg78274c483daa">富士通</a> – <a href="#pg0ce6708e6b11">惠普</a> – <a href="#pgfe5aa3ca089d">IBM/联想</a> – <a href="#pg3a6d1c9c2b35">微星</a> – <a href="#pg5c7afd7e8ea9">三星</a> – 索尼 – <a href="#pg2aab1b5456aa">东芝</a> – <a href="#pge2b0642d65e4">其他</a></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9e6cc7a70cfb_Vaio" id="Vaio">Vaio</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9e6cc7a70cfb_.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86.2F.E6.8C.82.E8.B5.B7.E5.92.8C.E4.BC.91.E7.9C.A0.E9.97.AE.E9.A2.98" id="电源管理/挂起和休眠问题"><span id=".E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86.2F.E6.8C.82.E8.B5.B7.E5.92.8C.E4.BC.91.E7.9C.A0.E9.97.AE.E9.A2.98"></span>电源管理/挂起和休眠问题</h3></div>
+<p>您可能必须将<a href="#pgec0856954f1c">内核参数</a> <code>acpi_sleep=nonvs</code> 添加到引导加载程序中。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9e6cc7a70cfb_Vaio_.E5.9E.8B.E5.8F.B7.E6.A6.82.E8.BF.B0.E5.92.8C.E6.94.AF.E6.8C.81.E7.8A.B6.E6.80.81" id="Vaio_型号概述和支持状态"><span id="Vaio_.E5.9E.8B.E5.8F.B7.E6.A6.82.E8.BF.B0.E5.92.8C.E6.94.AF.E6.8C.81.E7.8A.B6.E6.80.81"></span>Vaio 型号概述和支持状态</h3></div>
+<table class="wikitable sortable">
+<tbody><tr>
+<th>型号版本</th>
+<th>日期</th>
+<th>视频</th>
+<th>音频</th>
+<th>以太网</th>
+<th>无线</th>
+<th>蓝牙</th>
+<th>电源管理</th>
+<th>其他</th>
+<th>注释
+</th></tr>
+<tr>
+<td>Vaio VGN-C2Z</td>
+<td>任何</td>
+<td>3D 图形使用 nvidia 驱动程序</td>
+<td>Intel audio with <a href="#pgb16dfd48462f">ALSA</a></td>
+<td>是</td>
+<td>是，ipw3945</td>
+<td>模块看起来不错，但是缺少未经测试的蓝牙客户端</td>
+<td>使用 vanilla 内核和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-ck/">linux-ck</a></span><sup><small>AUR</small></sup></span> 挂起到 RAM</td>
+<td>未经测试</td>
+<td>记忆棒读取器未经测试</td>
+<td>其他所有功能（Fn 键，DVDRW 驱动器，Firewire ...）都能顺利运行
+</td></tr>
+<tr>
+<td>Vaio VGN-NR320FH</td>
+<td>2008-06</td>
+<td>Intel GMA965/X3100 （<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> 驱动程序）</td>
+<td>带有 ALSA 的 Intel 音频</td>
+<td>未知，但是开箱即用</td>
+<td>Atheros AR5006EG/AR242x (madwifi 0.9.4.3844-2)</td>
+<td>否</td>
+<td>acpi_cpufreq, sony-laptop</td>
+<td>未经测试</td>
+<td>记忆棒可能会起作用</td>
+<td>Fn 键带有 sony-laptop 和 sonypid。在 <a href="#pgca9c4017f7ad">GRUB</a> 内核行中使用 <code>vga</code> 选项 可能会带来解析问题。很酷的笔记本电脑，除了我需要进行一些研究的 Fn 键外，其他所有功能都可以直接使用。
+</td></tr>
+<tr>
+<td>Vaio SV-S1511X9E/B</td>
+<td>任何</td>
+<td>nouveau 内核模块仅通过选项 config=NvBios=PLATFORM 加载</td>
+<td>带有 ALSA 的 Intel 音频</td>
+<td>是</td>
+<td>是</td>
+<td>是</td>
+<td>挂起至 RAM 完美。休眠未经测试。磁盘下降未测试。</td>
+<td>未经测试</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<td>Vaio SVT13 Touch</td>
+<td>任何</td>
+<td>Intel HD Graphics 4000 （<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> 驱动程序）</td>
+<td>带有 ALSA 的 Intel 音频</td>
+<td>是</td>
+<td>是</td>
+<td>是</td>
+<td>挂起至 RAM 工作（手动和盖关闭），温度，电池电量工作，不受硬件支持的风扇速度控制</td>
+<td>无法使用</td>
+<td>SD 卡读取器有效，记忆棒未经测试，触摸板有效</td>
+<td>动作键似乎有效，但是只有 WEB 映射到浏览器，ASSIST 发送波浪号（〜），而 VAIO 则不执行任何操作。Fn 键有效，但触摸板禁用似乎无济于事
+</td>
+</tr>
+</tbody></table>
+<!-- 
+NewPP limit report
+Cached time: 20260808041313
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.079 seconds
+Real time usage: 0.086 seconds
+Preprocessor visited node count: 78/1000000
+Revision size: 2138/2097152 bytes
+Post‐expand include size: 2469/2097152 bytes
+Template argument size: 538/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   21.260      1 -total
+ 28.02%    5.958      1 Template:Bad_translation
+ 15.10%    3.211      2 Template:Pkg
+ 12.55%    2.668      1 Template:笔记本电脑表格标题
+ 12.23%    2.601      1 Template:笔记本电脑导航
+  8.59%    1.826      1 Template:META_Message
+  6.17%    1.311      2 Template:Ic
+  5.39%    1.146      1 Template:AUR
+-->
+<!-- Render ID 78f6de8e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3383:|#|:idhash:canonical!zh-cn and timestamp 20260808041313 and revision id 33824. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

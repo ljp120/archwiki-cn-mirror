@@ -1,0 +1,65 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pga9b6ecbccf54">重置 root 密码</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Reset_lost_root_password">Reset lost root password</a>，最近一次同步于 2025-01-09，若英文版本有所<a href="https://wiki.archlinux.org/title/Reset_lost_root_password?diff=0&amp;oldid=807035">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Reset_lost_root_password_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本指南介绍了在遗忘 <a href="#pg09ac28aa217b">root</a> 密码后，重置密码的几种方法。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>攻击者可以使用以下部分方法攻入系统。除非使用<a href="#pg812206bba43d">静态数据加密</a>，否则无论系统和密码有多安全可靠，只要攻击者可以物理接触设备，就能启动到其它系统并导出数据。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga9b6ecbccf54_.E4.BD.BF.E7.94.A8_sudo" id="使用_sudo"><span id=".E4.BD.BF.E7.94.A8_sudo"></span>使用 sudo</h2></div>
+<p>如果你安装了 <a href="#pg023562413be7">sudo</a>，并对 <code>wheel</code> 用户组或其它你记得密码的用户授予了权限，那可以使用 <code>sudo passwd root</code> 命令修改 root 密码。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga9b6ecbccf54_.E4.BD.BF.E7.94.A8_debug_shell" id="使用_debug_shell"><span id=".E4.BD.BF.E7.94.A8_debug_shell"></span>使用 debug shell</h2></div>
+<ol><li>将 <code>systemd.debug_shell</code> 附加到<a href="#pgec0856954f1c">内核参数</a>。</li>
+<li>系统将会正常启动，但同时会启动 <code>debug-shell.service</code> 服务，并在 <code>tty9</code> 开启一个 root shell（<code>/bin/sh</code>），按下 <code>Ctrl+Alt+F9</code> 可以进行访问。</li>
+<li>使用 <a href="#pg82abbe6fe69f">passwd</a> 命令为 root 用户创建新密码。</li>
+<li>完成后，<a href="#pgf3eef0cda9d4">停止</a> <code>debug-shell.service</code>。</li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga9b6ecbccf54_.E7.94.A8_Bash_.E4.BD.9C.E4.B8.BA_Init" id="用_Bash_作为_Init"><span id=".E7.94.A8_Bash_.E4.BD.9C.E4.B8.BA_Init"></span>用 Bash 作为 Init</h2></div>
+<ol><li>将 <code>init=/bin/bash</code> <a href="#pgec0856954f1c">内核参数</a>附加到启动加载器的启动项。</li>
+<li>根文件系统应该是只读挂载，需要以可读写模式重新挂载：<code>mount -n -o remount,rw /</code></li>
+<li>用 <a href="#pg82abbe6fe69f">passwd</a> 创建新的管理员密码。</li>
+<li>通过 <code>reboot -f</code> 重启，不要再次忘记你的密码。</li></ol>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>使用此法时有的键盘不能被初始系统正确加载，可能无法在 bash 提示符后进行输入。如果出现这种情况，你只能使用其他方法。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga9b6ecbccf54_.E4.BD.BF.E7.94.A8_LiveCD" id="使用_LiveCD"><span id=".E4.BD.BF.E7.94.A8_LiveCD"></span>使用 LiveCD</h2></div>
+<p>通过 <a href="#pge7b390d21a8a">LiveCD</a> 可以使用好几种方法：chroot 并使用 <code>passwd</code> 命令，或者编辑密码文件直接删掉密码项。除使用 chroot 时架构必须与已安装的系统匹配外，可以使用任何 Linux 的 LiveCD。这里仅介绍 chroot 方式，因为这个方法更不容易出错。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga9b6ecbccf54_Change_Root" id="Change_Root">Change Root</h3></div>
+<ol><li>启动 LiveCD, <a href="#pgaacf649200cb">挂载</a>主系统的根文件系统。</li>
+<li>然后通过下列命令重置密码（不会出现要求输入旧密码的提示）：</li></ol>
+<pre><code>passwd --root <i>根文件系统挂载点</i> <i>用户名</i></code>
+</pre>
+<ol><li>卸载根文件系统。</li>
+<li>重启并输入你的新密码。</li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga9b6ecbccf54_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><a href="https://www.howtoforge.com/how-to-reset-a-forgotten-root-password-with-knoppix-p2">如何用 Knoppix 重置忘记的密码</a></li>
+<li><a href="https://systemd.io/DEBUGGING/#early-debug-shell">启动早期 Debug Shell</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807040250
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.079 seconds
+Real time usage: 0.083 seconds
+Preprocessor visited node count: 156/1000000
+Revision size: 2498/2097152 bytes
+Post‐expand include size: 1914/2097152 bytes
+Template argument size: 715/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   12.348      1 -total
+ 29.01%    3.582      1 Template:翻译状态
+ 20.14%    2.487     13 Template:Ic
+  8.15%    1.006      1 Template:警告
+  7.75%    0.957      1 Template:注意
+-->
+<!-- Render ID db36dd0e-9214-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3743:|#|:idhash:canonical!zh-cn and timestamp 20260807040250 and revision id 33886. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

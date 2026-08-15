@@ -1,0 +1,117 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgbfbed22dc9f6">火焰截图</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Flameshot">Flameshot</a>，最近一次同步于 2025-01-30，若英文版本有所<a href="https://wiki.archlinux.org/title/Flameshot?diff=0&amp;oldid=826139">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Flameshot_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgf706a2a21e2d">屏幕捕获</a></li>
+</ul></div>
+<p><a href="https://flameshot.org">火焰截图（Flameshot）</a>是一款屏幕截图工具。该程序提供了交互式图形界面及多种控制功能，用户可选取指定捕获区域、移动并调整捕获窗口尺寸、使用常见绘图工具（铅笔、直线、矩形、圆形、模糊（像素化）、撤销/重做）进行编辑，并选择输出方式（复制到剪贴板、保存至磁盘、上传至 <a href="https://imgur.com">Imgur</a>、通过其他程序打开）。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbfbed22dc9f6_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=flameshot">flameshot</a></span><sup><small>包</small></sup></span> 软件包。若需开发版本，可安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/flameshot-git/">flameshot-git</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbfbed22dc9f6_.E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3" id="问题解决"><span id=".E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3"></span>问题解决</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbed22dc9f6_.E5.AD.90.E5.91.BD.E4.BB.A4.E7.AB.8B.E5.8D.B3.E9.80.80.E5.87.BA.E8.80.8C.E6.97.A0.E8.BE.93.E5.87.BA" id="子命令立即退出而无输出"><span id=".E5.AD.90.E5.91.BD.E4.BB.A4.E7.AB.8B.E5.8D.B3.E9.80.80.E5.87.BA.E8.80.8C.E6.97.A0.E8.BE.93.E5.87.BA"></span>子命令立即退出而无输出</h3></div>
+<p>在 X 会话期间随时将火焰截图作为后台进程启动：
+</p>
+<pre>$ flameshot &amp;
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbed22dc9f6_.E6.97.A0.E6.89.98.E7.9B.98.E5.9B.BE.E6.A0.87" id="无托盘图标"><span id=".E6.97.A0.E6.89.98.E7.9B.98.E5.9B.BE.E6.A0.87"></span>无托盘图标</h3></div>
+<p>可通过多种方式解决，此处提供一种方案：
+</p><p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gnome-shell-extension-topicons-plus/">gnome-shell-extension-topicons-plus</a></span><sup><small>AUR</small></sup></span>。
+</p><p>然后在 GNOME Tweaks 应用程序中（若未安装需先下载）：
+</p>
+<ol><li>点击“扩展”选项卡。</li>
+<li>启用“Topicons plus”以将传统托盘图标移至顶部面板。</li>
+<li>完成！</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbed22dc9f6_.E7.81.AB.E7.84.B0.E6.88.AA.E5.9B.BE.E6.97.A0.E6.B3.95.E8.AF.86.E5.88.AB.E5.BD.93.E5.89.8D.E5.8F.AF.E8.A7.81.E7.AA.97.E5.8F.A3" id="火焰截图无法识别当前可见窗口"><span id=".E7.81.AB.E7.84.B0.E6.88.AA.E5.9B.BE.E6.97.A0.E6.B3.95.E8.AF.86.E5.88.AB.E5.BD.93.E5.89.8D.E5.8F.AF.E8.A7.81.E7.AA.97.E5.8F.A3"></span>火焰截图无法识别当前可见窗口</h3></div>
+<p>若安装了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> 可能出现此问题。
+</p><p>移除 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> 软件包，并确保 <code>/etc/X11/xorg.conf.d/</code> 目录下无该软件包的残留 X11 配置。
+</p><p>随后重启系统。
+</p><p>此问题曾在火焰截图 GitHub 仓库讨论：<a href="https://github.com/flameshot-org/flameshot/issues/1677">[1]</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbed22dc9f6_Wayland_.E4.B8.8B.E7.81.AB.E7.84.B0.E6.88.AA.E5.9B.BE.E9.80.89.E5.8C.BA.E6.93.8D.E4.BD.9C.E5.8D.A1.E9.A1.BF" id="Wayland_下火焰截图选区操作卡顿"><span id="Wayland_.E4.B8.8B.E7.81.AB.E7.84.B0.E6.88.AA.E5.9B.BE.E9.80.89.E5.8C.BA.E6.93.8D.E4.BD.9C.E5.8D.A1.E9.A1.BF"></span>Wayland 下火焰截图选区操作卡顿</h3></div>
+<p><a href="https://github.com/flameshot-org/flameshot/pull/2766">PR #2766</a> 导致在 Wayland 中选择截图区域时出现严重卡顿。该问题正在 <a href="https://github.com/flameshot-org/flameshot/issues/3039">issue #3039</a> 中追踪，<a href="https://github.com/flameshot-org/flameshot/pull/3059">PR #3059</a> 可能包含修复方案。临时解决方案是使用无此问题的 12.1.0-1 版本。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbed22dc9f6_Sway.2Fwlroots_.E7.8E.AF.E5.A2.83.E4.B8.8B.E7.81.AB.E7.84.B0.E6.88.AA.E5.9B.BE.E5.90.AF.E5.8A.A8.E6.8A.A5.E9.94.99" id="Sway/wlroots_环境下火焰截图启动报错"><span id="Sway.2Fwlroots_.E7.8E.AF.E5.A2.83.E4.B8.8B.E7.81.AB.E7.84.B0.E6.88.AA.E5.9B.BE.E5.90.AF.E5.8A.A8.E6.8A.A5.E9.94.99"></span>Sway/wlroots 环境下火焰截图启动报错</h3></div>
+<p>截图时可能显示以下错误：
+</p>
+<pre>flameshot: error: Unable to capture screen
+flameshot: error: Unable to capture screen
+qt.qpa.wayland: Wayland does not support QWindow::requestActivate()
+flameshot: info: Screenshot aborted.
+</pre>
+<p>需安装以下软件包使火焰截图在 Wayland 下正常工作：
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal">xdg-desktop-portal</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-wlr">xdg-desktop-portal-wlr</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=grim">grim</a></span><sup><small>包</small></sup></span>。
+</p><p>安装完成后即可正常启动火焰截图。
+</p><p>更多信息请参阅 <a href="https://github.com/flameshot-org/flameshot/blob/master/docs/Sway%20and%20wlroots%20support.md">Sway 维基页面</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbed22dc9f6_.E7.81.AB.E7.84.B0.E6.88.AA.E5.9B.BE.E5.9C.A8_KDE_Plasma_Wayland_.E5.A4.9A.E6.98.BE.E7.A4.BA.E5.99.A8.E7.8E.AF.E5.A2.83.E4.B8.8B.E5.8F.AA.E8.83.BD.E5.9C.A8.E5.8D.95.E4.B8.AA.E5.B1.8F.E5.B9.95.E7.94.9F.E6.95.88" id="火焰截图在_KDE_Plasma_Wayland_多显示器环境下只能在单个屏幕生效"><span id=".E7.81.AB.E7.84.B0.E6.88.AA.E5.9B.BE.E5.9C.A8_KDE_Plasma_Wayland_.E5.A4.9A.E6.98.BE.E7.A4.BA.E5.99.A8.E7.8E.AF.E5.A2.83.E4.B8.8B.E5.8F.AA.E8.83.BD.E5.9C.A8.E5.8D.95.E4.B8.AA.E5.B1.8F.E5.B9.95.E7.94.9F.E6.95.88"></span>火焰截图在 KDE Plasma Wayland 多显示器环境下只能在单个屏幕生效</h3></div>
+<p>火焰截图覆盖层仅在单个显示器显示。GitHub 仓库中有人建议了<a href="https://github.com/flameshot-org/flameshot/issues/3073#issuecomment-1740187784">解决方案</a>。
+</p><p>基本思路是用 KDE Plasma 配置覆盖火焰截图叠加窗口的初始位置，这样火焰截图叠加窗口才能显示在所有连接的显示器上。为此，启动“窗口规则”应用程序，并创建一个新的窗口规则，设置如下：  
+</p>
+<ul><li><b>窗口类 (应用程序)</b>：flameshot</li>
+<li><b>窗口类型</b>：正常窗口</li>
+<li><b>窗口标题</b>：完全匹配：flameshot</li>
+<li><b>位置</b>：强制 0x0</li>
+<li><b>全屏</b>：强制 否</li>
+<li><b>遵守大小和位置限制</b>：强制 是</li>
+<li><b>窗口置顶</b>：强制 是</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbed22dc9f6_.E7.81.AB.E7.84.B0.E6.88.AA.E5.9B.BE.E5.9C.A8_Sway_.E7.9A.84.E5.A4.9A.E6.98.BE.E7.A4.BA.E5.99.A8.E7.8E.AF.E5.A2.83.E4.B8.8B.E5.8F.AA.E8.83.BD.E5.9C.A8.E5.8D.95.E4.B8.AA.E5.B1.8F.E5.B9.95.E7.94.9F.E6.95.88" id="火焰截图在_Sway_的多显示器环境下只能在单个屏幕生效"><span id=".E7.81.AB.E7.84.B0.E6.88.AA.E5.9B.BE.E5.9C.A8_Sway_.E7.9A.84.E5.A4.9A.E6.98.BE.E7.A4.BA.E5.99.A8.E7.8E.AF.E5.A2.83.E4.B8.8B.E5.8F.AA.E8.83.BD.E5.9C.A8.E5.8D.95.E4.B8.AA.E5.B1.8F.E5.B9.95.E7.94.9F.E6.95.88"></span>火焰截图在 Sway 的多显示器环境下只能在单个屏幕生效</h3></div>
+<p>火焰截图覆盖层仅在单个显示器显示。GitHub 仓库中有人建议了<a href="https://github.com/flameshot-org/flameshot/issues/2364#issuecomment-1086129055">解决方案</a>。
+</p><p>该解决方案的核心是强制火焰截图窗口/覆盖层以浮动模式启动，而不是全屏模式。可以在 Sway 配置文件中添加以下行来实现：
+</p>
+<pre>for_window [app_id="flameshot"] border pixel 0, floating enable, fullscreen disable, move absolute position 0 0
+</pre>
+<p>另外，也可以强制 Flameshot 运行在 XWayland 模式下：
+</p>
+<pre><code>QT_QPA_PLATFORM=xcb flameshot gui</code>
+</pre>
+<p>但需要注意，此方法虽然修复了多显示器问题，但会导致键盘快捷键失效，导致火焰截图只能通过鼠标操作。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbed22dc9f6_.E7.81.AB.E7.84.B0.E6.88.AA.E5.9B.BE.E5.9C.A8_KDE_Dolphin_.E4.B8.AD.E6.97.A0.E6.B3.95.E7.94.9F.E6.88.90.E7.BC.A9.E7.95.A5.E5.9B.BE" id="火焰截图在_KDE_Dolphin_中无法生成缩略图"><span id=".E7.81.AB.E7.84.B0.E6.88.AA.E5.9B.BE.E5.9C.A8_KDE_Dolphin_.E4.B8.AD.E6.97.A0.E6.B3.95.E7.94.9F.E6.88.90.E7.BC.A9.E7.95.A5.E5.9B.BE"></span>火焰截图在 KDE Dolphin 中无法生成缩略图</h3></div>
+<p>在 Plasma 6 中，使用 Dolphin 文件选择器保存截图时，如果目录中存在其他图片文件，则不会显示缩略图。在终端中运行 Flameshot 时，会看到以下错误信息：
+</p>
+<pre>kf.service.services: KServiceTypeTrader: serviceType "ThumbCreator" not found
+</pre>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kio5-extras">kio5-extras</a></span><sup><small>包</small></sup></span> 可解决该问题。<a href="https://forums.opensuse.org/t/dolphin-cant-create-photo-thumbnails-servicetype-thumbcreator-not-found/170259/4.">[2]</a>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbfbed22dc9f6_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://flameshot.org">官方网站</a></li>
+<li>声明使用“dbus-launch”可以修复子命令问题的评论：<code><a href="https://github.com/lupoDharkael/flameshot/issues/168#issuecomment-377851744">xmonad</a></code>、<code><a href="https://github.com/lupoDharkael/flameshot/issues/90#issuecomment-398322771">i3</a></code></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808041249
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.095 seconds
+Real time usage: 0.099 seconds
+Preprocessor visited node count: 181/1000000
+Revision size: 5116/2097152 bytes
+Post‐expand include size: 3285/2097152 bytes
+Template argument size: 773/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   28.752      1 -total
+ 12.92%    3.714      7 Template:Pkg
+ 11.65%    3.350      1 Template:翻译状态
+  7.55%    2.172      1 Template:相关文章开始
+  6.34%    1.822      1 Template:Related
+  6.13%    1.762      4 Template:Ic
+  4.66%    1.340      2 Template:AUR
+  4.47%    1.285      1 Template:Bc
+  3.07%    0.884      1 Template:META_Related_articles_start
+  2.81%    0.808      1 Template:相关文章结束
+-->
+<!-- Render ID 6aa8c28e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8132:|#|:idhash:canonical!zh-cn and timestamp 20260808041249 and revision id 34244. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,958 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgb2825ad9a35a">PDF、PS 与 DjVu</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/PDF,_PS_and_DjVu">PDF, PS and DjVu</a>，最近一次同步于 2025-01-12，若英文版本有所<a href="https://wiki.archlinux.org/title/PDF,_PS_and_DjVu?diff=0&amp;oldid=824943">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/PDF,_PS_and_DjVu_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文涵盖用于查看、编辑和转换 <a href="https://en.wikipedia.org/wiki/PDF">PDF</a>、<a href="https://en.wikipedia.org/wiki/PostScript">PostScript</a>（PS）、<a href="https://en.wikipedia.org/wiki/DjVu">DjVu</a>（<i>déjà vu</i>）与 <a href="https://en.wikipedia.org/wiki/Open_XML_Paper_Specification">XPS</a>文件的软件。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2825ad9a35a_.E5.BC.95.E6.93.8E" id="引擎"><span id=".E5.BC.95.E6.93.8E"></span>引擎</h2></div>
+<ul><li><b>DjVuLibre</b> — 该套件用于创建、操作和查看 DjVu 文档。</li></ul>
+<dl><dd><a href="https://djvu.sourceforge.net/">https://djvu.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=djvulibre">djvulibre</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Ghostscript">Ghostscript</a></b> — PostScript 和 PDF 的解释器。提供 <span class="plainlinks archwiki-template-man" title="$ man 1 gs"><a href="https://man.archlinux.org/man/gs.1">gs(1)</a></span> 命令行界面，另请参阅 <code>/usr/share/doc/ghostscript/*/Use.htm</code>（<a href="https://ghostscript.readthedocs.io/en/latest/Use.html">在线阅读</a>），以及许多封装脚本，如 <i>ps2pdf</i> 和 <i>pdf2ps</i>。</li></ul>
+<dl><dd><a href="https://ghostscript.com/">https://ghostscript.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ghostscript">ghostscript</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>libgxps</b> — 基于 GObject 的库，用于处理和渲染 XPS 文档。</li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Projects/libgxps">https://wiki.gnome.org/Projects/libgxps</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libgxps">libgxps</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>libspectre</b> — 用于渲染 Postscript 文档的小型库。</li></ul>
+<dl><dd><a href="https://www.freedesktop.org/wiki/Software/libspectre">https://www.freedesktop.org/wiki/Software/libspectre</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libspectre">libspectre</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/MuPDF">Mupdf</a></b> —  MuPDF 是一款轻量级 PDF、XPS 和 EPUB 阅读器，由软件库、命令行工具和阅读器组成。</li></ul>
+<dl><dd><a href="https://mupdf.com/">https://mupdf.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libmupdf">libmupdf</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Poppler_(software)">Poppler</a></b> — 基于 Xpdf 的 PDF 渲染库。要使 Poppler 支持中日韩（中文、日文、韩文）语言，请<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=poppler-data">poppler-data</a></span><sup><small>包</small></sup></span>。</li></ul>
+<dl><dd><a href="https://poppler.freedesktop.org/">https://poppler.freedesktop.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=poppler">poppler</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2825ad9a35a_.E6.9F.A5.E7.9C.8B.E5.99.A8" id="查看器"><span id=".E6.9F.A5.E7.9C.8B.E5.99.A8"></span>查看器</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_.E5.B8.A7.E7.BC.93.E5.86.B2.E5.8C.BA" id="帧缓冲区"><span id=".E5.B8.A7.E7.BC.93.E5.86.B2.E5.8C.BA"></span>帧缓冲区</h3></div>
+<ul><li><b>fbgs</b> — 用于 linux 帧缓冲控制台的勉强可用的 PostScript/pdf 查看器。</li></ul>
+<dl><dd><a href="https://www.kraxel.org/blog/linux/fbida/">https://www.kraxel.org/blog/linux/fbida/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fbida">fbida</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>fbpdf</b> — 基于 MuPDF 的小型帧缓冲 PDF 与 DjVu 查看器，带有 <a href="#pg74a2a3e4814c">Vim</a> 键绑定，用 C 语言编写。</li></ul>
+<dl><dd><a href="https://repo.or.cz/w/fbpdf.git">https://repo.or.cz/w/fbpdf.git</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fbpdf-git/">fbpdf-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>jfbview</b> — 帧缓冲 PDF 和图像浏览器。其功能包括类似 Vim 的控件、缩放至合适、TOC（大纲）视图和快速多线程渲染。</li></ul>
+<dl><dd><a href="https://github.com/jichu4n/jfbview">https://github.com/jichu4n/jfbview</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jfbview/">jfbview</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_.E5.9B.BE.E5.BD.A2.E5.8C.96" id="图形化"><span id=".E5.9B.BE.E5.BD.A2.E5.8C.96"></span>图形化</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>某些<a href="#pg9de800147241">网络浏览器</a>可以显示 PDF 文件，例如使用 <a href="https://github.com/mozilla/pdf.js">PDF.js</a>。</div>
+<ul><li><b>apvlv</b> — 轻量级文档查看器，使用 GTK 库与 <a href="#pg74a2a3e4814c">Vim</a> 键绑定。支持 PDF、DjVu、EPUB、HTML 和 TXT。</li></ul>
+<dl><dd><a href="https://naihe2010.github.io/apvlv/">https://naihe2010.github.io/apvlv/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/apvlv/">apvlv</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Atril</b> — 适用于 MATE 的简单多页文档查看器。支持 DjVu、DVI、EPS、EPUB、PDF、PostScript、TIFF、XPS 和 Comicbook。</li></ul>
+<dl><dd><a href="https://github.com/mate-desktop/atril">https://github.com/mate-desktop/atril</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=atril">atril</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>CorePDF</b> — 基于 Qt 和 poppler 的简单轻量级 PDF 查看器。是 C-Suite 的一部分。</li></ul>
+<dl><dd><a href="https://cubocore.gitlab.io/">https://cubocore.gitlab.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/corepdf/">corepdf</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Deepin Document Viewer</b> — A一款简单的 PDF 和 DjVu 阅读器，支持书签、高亮显示和注释。</li></ul>
+<dl><dd><a href="https://github.com/linuxdeepin/deepin-reader">https://github.com/linuxdeepin/deepin-reader</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=deepin-reader">deepin-reader</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>DjView</b> — DjVu 文档查看器</li></ul>
+<dl><dd><a href="https://djvu.sourceforge.net/djview4.html">https://djvu.sourceforge.net/djview4.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=djview">djview</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg9de7470c4ea9">Emacs</a></b> — 另请参阅 <a href="https://github.com/vedang/pdf-tools">pdf-tools</a>，了解改进后的 pdf 支持（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/emacs-pdf-tools-git/">emacs-pdf-tools-git</a></span><sup><small>AUR</small></sup></span>），以及 <a href="https://elpa.gnu.org/packages/djvu.html">djvu 软件包</a>，了解对 djvu 的支持。</li></ul>
+<dl><dd><a href="https://www.gnu.org/software/emacs/">https://www.gnu.org/software/emacs/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=emacs">emacs</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>ePDFView</b> — 使用 Poppler 和 GTK 库的轻量级 PDF 文档查看器。已停止开发。</li></ul>
+<dl><dd><a href="http://freecode.com/projects/epdfview">http://freecode.com/projects/epdfview</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/epdfview-git/">epdfview-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Foxit_Reader">Foxit Reader</a></b> — 小巧、快速（与 Acrobat 相比）的专有 PDF 查看器。发布时间（安全更新除外）为 <a href="https://web.archive.org/web/20221006020600/https://forums.foxitsoftware.com/forum/portable-document-format-pdf-tools/foxit-reader/180532-linux-how-to-get-automatically-updates-for-foxit-reader-free-version#post186480">Linux 版已停止开发（2020 年 11 月）</a>。</li></ul>
+<dl><dd><a href="https://www.foxitsoftware.com/pdf-reader/">https://www.foxitsoftware.com/pdf-reader/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/foxitreader/">foxitreader</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg5c90e1bfc3a0">GNOME Document Viewer</a></b> — 使用 GTK 的 GNOME 文档查看器。支持 DjVu、DVI、EPS、PDF、PostScript、TIFF、XPS 和 Comicbook。是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/gnome/">gnome</a></span><sup><small>包组</small></sup></span> 的一部分。</li></ul>
+<dl><dd><a href="https://apps.gnome.org/Evince/">https://apps.gnome.org/Evince/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=evince">evince</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>gv</b> — Ghostscript 解释器的图形用户界面，允许查看和浏览 PostScript 和 PDF 文档。</li></ul>
+<dl><dd><a href="https://www.gnu.org/software/gv/">https://www.gnu.org/software/gv/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gv/">gv</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg6935b7aa014b">llpp</a></b> — 基于 MuPDF 的快速 PDF 阅读器，支持连续滚动页面、书签和全文搜索。</li></ul>
+<dl><dd><a href="https://repo.or.cz/w/llpp.git">https://repo.or.cz/w/llpp.git</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/llpp/">llpp</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg287937d0a59e">MuPDF</a></b> — 使用可移植 C 语言编写的快速 EPUB、FictionBook、PDF、XPS 和 Comicbook 查看器。支持中日韩字体并具有类似 vim 的绑定功能。</li></ul>
+<dl><dd><a href="https://mupdf.com/">https://mupdf.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mupdf">mupdf</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Okular">Okular</a></b> — KDE 的通用文档查看器。支持 CHM、Comicbook、DjVu、DVI、EPUB、FictionBook、Mobipocket、ODT、PDF、Plucker、PostScript、TIFF 和 XPS。是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/kde-graphics/">kde-graphics</a></span><sup><small>包组</small></sup></span> 的一部分。</li></ul>
+<dl><dd><a href="https://okular.kde.org/">https://okular.kde.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=okular">okular</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Papers</b> — 使用 GTK 的 GNOME 文档查看器。支持 DjVu、PDF、TIFF 与 Comicbook。</li></ul>
+<dl><dd><a href="https://apps.gnome.org/Papers/">https://apps.gnome.org/Papers/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=papers">papers</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>pdfpc</b> — Presenter console with multi-monitor support for PDF files.</li></ul>
+<dl><dd><a href="https://pdfpc.github.io/">https://pdfpc.github.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdfpc">pdfpc</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>qpdfview</b> — 标签式文档查看器。它使用 Poppler 支持 PDF，使用 libspectre 支持 PS，使用 DjVuLibre 支持 DjVu，使用 CUPS 支持打印，并使用 Qt 工具包制作界面。</li></ul>
+<dl><dd><a href="https://launchpad.net/qpdfview">https://launchpad.net/qpdfview</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qpdfview/">qpdfview</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Sioyek</b> — 基于 MuPDF 的轻量级 PDF 阅读器，具有专为阅读研究论文和技术书籍而设计的功能，如标记、书签、高亮显示、可搜索命令调色板、跳转到参考文献等。</li></ul>
+<dl><dd><a href="https://sioyek.info/">https://sioyek.info/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sioyek/">sioyek</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Xpdf">Xpdf</a></b> — 可解码 LZW 和读取加密 PDF 的阅读器。</li></ul>
+<dl><dd><a href="https://www.xpdfreader.com/">https://www.xpdfreader.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xpdf">xpdf</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Xreader</b> — X-Apps 项目的文档查看器。支持 DjVu、DVI、EPUB、PDF、PostScript、TIFF、XPS 和 Comicbook。</li></ul>
+<dl><dd><a href="https://github.com/linuxmint/xreader/">https://github.com/linuxmint/xreader/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xreader">xreader</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg4147456ced3d">Zathura</a></b> — 高度可定制、功能强大的文档查看器（基于插件）。支持 PDF、DjVu、PostScript 和 Comicbook。</li></ul>
+<dl><dd><a href="https://pwmt.org/projects/zathura/">https://pwmt.org/projects/zathura/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=zathura">zathura</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb2825ad9a35a_.E6.AF.94.E8.BE.83" id="比较"><span id=".E6.AF.94.E8.BE.83"></span>比较</h4></div>
+
+<p><br/>
+</p>
+<table class="wikitable sortable" style="text-align:center;">
+<tbody><tr>
+<th>名称</th>
+<th>PDF</th>
+<th>PostScript</th>
+<th>DjVu</th>
+<th>XPS</th>
+<th>PDF 表格</th>
+<th>PDF 注释</th>
+<th>非矩形选择</th>
+<th>许可证
+</th></tr>
+<tr>
+<th><a href="https://en.wikipedia.org/wiki/Adobe_Reader">Adobe Reader</a>
+</th>
+<td>定制的</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-violet" data-sort-value="7" style="vertical-align: middle; text-align: center;">专有
+</td></tr>
+<tr>
+<th>apvlv
+</th>
+<td>Poppler</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td>DjVuLibre</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否 (至少没有默认)</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv2
+</td></tr>
+<tr>
+<th>Atril
+</th>
+<td>Poppler</td>
+<td>libspectre</td>
+<td>DjVuLibre</td>
+<td>libgxps</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv2
+</td></tr>
+<tr>
+<th>DjView
+</th>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td>DjVuLibre</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv2
+</td></tr>
+<tr>
+<th><a href="#pg9de7470c4ea9">Emacs</a>
+</th>
+<td colspan="2">Ghostscript<sup>1</sup></td>
+<td>DjVuLibre<sup>1</sup></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv3
+</td></tr>
+<tr>
+<th>Emacs pdf-tools
+</th>
+<td>Poppler</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv3
+</td></tr>
+<tr>
+<th>ePDFView
+</th>
+<td>Poppler</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv2
+</td></tr>
+<tr>
+<th><a href="https://en.wikipedia.org/wiki/Foxit_Reader">Foxit Reader</a>
+</th>
+<td>定制的</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-violet" data-sort-value="7" style="vertical-align: middle; text-align: center;">专有
+</td></tr>
+<tr>
+<th><a href="#pg5c90e1bfc3a0">GNOME Document Viewer</a>
+</th>
+<td>Poppler</td>
+<td>libspectre</td>
+<td>DjVuLibre</td>
+<td>libgxps</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv2
+</td></tr>
+<tr>
+<th>gv
+</th>
+<td colspan="2">Ghostscript</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv3
+</td></tr>
+<tr>
+<th><a href="#pg6935b7aa014b">llpp</a>
+</th>
+<td>libmupdf</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td>libmupdf</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv3
+</td></tr>
+<tr>
+<th><a href="#pg287937d0a59e">MuPDF</a>
+</th>
+<td>定制的</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td>Custom</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是 (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mupdf-gl">mupdf-gl</a></span><sup><small>包</small></sup></span>)</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是 (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mupdf-gl">mupdf-gl</a></span><sup><small>包</small></sup></span>)</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是 (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mupdf-gl">mupdf-gl</a></span><sup><small>包</small></sup></span>)</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">AGPLv3
+</td></tr>
+<tr>
+<th><a href="https://en.wikipedia.org/wiki/Okular">Okular</a>
+</th>
+<td>Poppler</td>
+<td>libspectre</td>
+<td>DjVuLibre</td>
+<td>定制的</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPL、LGPL
+</td></tr>
+<tr>
+<th>PDF4QT
+</th>
+<td>定制的</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">LGPLv3
+</td></tr>
+<tr>
+<th>pdfpc
+</th>
+<td>Poppler</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv2
+</td></tr>
+<tr>
+<th>qpdfview
+</th>
+<td>Poppler</td>
+<td>libspectre<sup>1</sup></td>
+<td>DjVuLibre<sup>1</sup></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv2
+</td></tr>
+<tr>
+<th><a href="https://en.wikipedia.org/wiki/Xpdf">Xpdf</a>
+</th>
+<td>定制的</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv3
+</td></tr>
+<tr>
+<th>Xreader
+</th>
+<td>Poppler</td>
+<td>libspectre<sup>1</sup></td>
+<td>DjVuLibre<sup>1</sup></td>
+<td>libgxps<sup>1</sup></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">GPLv2
+</td></tr>
+<tr>
+<th><a href="#pg4147456ced3d">Zathura</a>
+</th>
+<td>libmupdf<sup>1</sup> / Poppler<sup>1</sup></td>
+<td>libspectre<sup>1</sup></td>
+<td>DjVuLibre<sup>1</sup></td>
+<td>libmupdf<sup>1</sup></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-blue" data-sort-value="6" style="vertical-align: middle; text-align: center;">zlib
+</td></tr></tbody></table>
+<ol><li>需要安装可选依赖项</li></ol>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb2825ad9a35a_PDF_forms" id="PDF_forms">PDF forms</h4></div>
+<p>The <i>PDF forms</i> column in the above table refers to <a href="https://en.wikipedia.org/wiki/PDF#Forms">AcroForms</a> support. If you do not need your input to be directly extractable from the PDF, you can also use the applications in <a href="#pgb2825ad9a35a_Graphical_PDF_editing">#Graphical PDF editing</a> to put text on top of a PDF. PDF forms can be created with <a href="#pgaa27357d651e">LibreOffice Writer</a> (<i>View &gt; Toolbars &gt; Form Controls</i>) and the <a href="#pgb2825ad9a35a_Advanced_editors">advanced PDF editors</a>.
+</p><p>The proprietary and deprecated <a href="https://en.wikipedia.org/wiki/XFA">XFA</a> format for forms is not fully supported by Poppler<a href="https://gitlab.freedesktop.org/poppler/poppler/issues/199">[1]</a><a href="https://gitlab.freedesktop.org/poppler/poppler/issues/530">[2]</a> and only supported by Adobe Reader and <a href="#pgb2825ad9a35a_Advanced_editors">Master PDF Editor</a>.
+</p><p>Alternatively, web browsers such as <a href="#pg9b5d7fec8088">Firefox</a> or <a href="#pgad69d7c7a814">Chromium</a> feature a built-in PDF viewer capable of filling out forms.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2825ad9a35a_Graphical_PDF_editing" id="Graphical_PDF_editing">Graphical PDF editing</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Editors_that_can_import_PDF_files" id="Editors_that_can_import_PDF_files">Editors that can import PDF files</h3></div>
+<ul><li><a href="#pgef97c3dd30d5">Scribus</a> can import and export PDF; text is imported as polygons.<a href="https://wiki.scribus.net/canvas/Importing_PDF_files_as_Vector_Graphics">[3]</a></li>
+<li><a href="#pgaa27357d651e">LibreOffice Draw</a> can import and export PDF; text is imported as text; embedded fonts are substituted.<a href="https://bugs.documentfoundation.org/show_bug.cgi?id=82163">[4]</a><a href="https://ask.libreoffice.org/en/question/38991/garbled-text-when-opening-pdfs-in-draw/">[5]</a></li>
+<li><a href="#pg246741cb8f7c">Inkscape</a> can import and export PDF; text is imported as cloned glyphs or text; with the latter embedded fonts are substituted.</li>
+<li>Graphics editors like <a href="#pg4ddbe8a586a4">GIMP</a> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=krita">krita</a></span><sup><small>包</small></sup></span> can also import and export PDFs at the cost of <a href="https://en.wikipedia.org/wiki/Raster_graphics">rasterization</a>.</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Basic_editors" id="Basic_editors">Basic editors</h3></div>
+<ul><li><b>flpsed</b> — A PostScript and PDF annotator, only supports text boxes.</li></ul>
+<dl><dd><a href="https://flpsed.org/flpsed.html">https://flpsed.org/flpsed.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/flpsed/">flpsed</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>HandyOutliner for DjVu / PDF</b> — Make easier and faster the process of creating bookmarks for DjVu and PDF documents.</li></ul>
+<dl><dd><a href="https://handyoutlinerfo.sourceforge.net">https://handyoutlinerfo.sourceforge.net</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/handyoutliner-bin/">handyoutliner-bin</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>jPDF Tweak</b> — Java Swing application that can combine, split, rotate, reorder, watermark, encrypt, sign, and otherwise tweak PDF files.</li></ul>
+<dl><dd><a href="https://jpdftweak.sourceforge.net/">https://jpdftweak.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jpdftweak/">jpdftweak</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Paper Clip</b> — PDF document metadata editor to edit the title, author, keywords and more details.</li></ul>
+<dl><dd><a href="https://apps.gnome.org/PdfMetadataEditor/">https://apps.gnome.org/PdfMetadataEditor/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=paper-clip">paper-clip</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>PDF Arranger</b> — Helps merge or split pdf documents and rotate, crop and rearrange pages. It is a maintained fork of PDF-Shuffler.</li></ul>
+<dl><dd><a href="https://github.com/jeromerobert/pdfarranger">https://github.com/jeromerobert/pdfarranger</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdfarranger">pdfarranger</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>PDF Chain</b> — GTK front-end for PDFtk, written in C++, supporting concatenation, burst, watermarks, attaching files and more.</li></ul>
+<dl><dd><a href="https://pdfchain.sourceforge.net/">https://pdfchain.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pdfchain/">pdfchain</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>PdfJumbler</b> — Simple tool to rearrange, merge, delete and rotate pages in PDF files.</li></ul>
+<dl><dd><a href="https://github.com/mgropp/pdfjumbler">https://github.com/mgropp/pdfjumbler</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pdfjumbler/">pdfjumbler</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>PDF Mix Tool</b> — Qt front-end for <a href="#pgb2825ad9a35a_Libraries">PoDoFo</a>, written in C++, supports splitting, merging, rotating and mixing PDF files.</li></ul>
+<dl><dd><a href="https://scarpetta.eu/pdfmixtool/">https://scarpetta.eu/pdfmixtool/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdfmixtool">pdfmixtool</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>PDFsam</b> — Open source application, written in Java, supports merging, splitting and rotating.</li></ul>
+<dl><dd><a href="https://pdfsam.org/">https://pdfsam.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pdfsam/">pdfsam</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>PDF Slicer</b> — Simple application to extract, merge, rotate and reorder pages of PDF documents.</li></ul>
+<dl><dd><a href="https://junrrein.github.io/pdfslicer/">https://junrrein.github.io/pdfslicer/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdfslicer">pdfslicer</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>PDF Tricks</b> — Simple, efficient application for small manipulations in PDF files using Ghostscript.</li></ul>
+<dl><dd><a href="https://github.com/muriloventuroso/pdftricks">https://github.com/muriloventuroso/pdftricks</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdftricks">pdftricks</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Cropping_tools" id="Cropping_tools">Cropping tools</h3></div>
+<ul><li><b>briss</b> — Java GUI to crop pages of PDF documents to one or more regions selected.</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/briss/">https://sourceforge.net/projects/briss/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/briss/">briss</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>krop</b> — Simple graphical tool to crop the pages of PDF files.</li></ul>
+<dl><dd><a href="https://arminstraub.com/software/krop">https://arminstraub.com/software/krop</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/krop/">krop</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>pdfCropMargins</b> — Automatically crops the margins of PDF files.</li></ul>
+<dl><dd><a href="https://github.com/abarker/pdfCropMargins">https://github.com/abarker/pdfCropMargins</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pdfcropmargins/">pdfcropmargins</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>PdfHandoutCrop</b> — Tool to crop pdf handout with multiple pages per sheet.</li></ul>
+<dl><dd><a href="https://cges30901.github.io/pdfhandoutcrop/">https://cges30901.github.io/pdfhandoutcrop/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pdfhandoutcrop/">pdfhandoutcrop</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Advanced_editors" id="Advanced_editors">Advanced editors</h3></div>
+<ul><li><b>Master PDF Editor</b> — Functional proprietary PDF editor. Latest version free for non-commercial use. The <i>-free</i> package is outdated but lacks a watermark.</li></ul>
+<dl><dd><a href="https://code-industry.net/free-pdf-editor/">https://code-industry.net/free-pdf-editor/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/masterpdfeditor/">masterpdfeditor</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/masterpdfeditor-free/">masterpdfeditor-free</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgc12f5236fc33">PDF Studio</a></b> — All-in-one proprietary PDF editor similar to Adobe Acrobat.</li></ul>
+<dl><dd><a href="https://www.qoppa.com/pdfstudio/">https://www.qoppa.com/pdfstudio/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pdfstudio-bin/">pdfstudio-bin</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>PDF4QT</b> — Open source PDF editor.</li></ul>
+<dl><dd><a href="https://jakubmelka.github.io/">https://jakubmelka.github.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pdf4qt/">pdf4qt</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb2825ad9a35a_Comparison_of_advanced_editors" id="Comparison_of_advanced_editors">Comparison of advanced editors</h4></div>
+<table class="wikitable sortable" style="text-align:center;">
+<tbody><tr>
+<th>Name</th>
+<th>Cost (USD, lifetime)</th>
+<th>Page Labels</th>
+<th>Form Designer</th>
+<th>Content Editing (Text and Images)</th>
+<th>Optimize PDFs</th>
+<th>Digitally Sign PDFs</th>
+<th>License
+</th></tr>
+<tr>
+<th>Master PDF Editor
+</th>
+<td>85.34</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-violet" data-sort-value="7" style="vertical-align: middle; text-align: center;">proprietary
+</td></tr>
+<tr>
+<th>Qoppa PDF Studio Standard
+</th>
+<td>99</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-violet" data-sort-value="7" style="vertical-align: middle; text-align: center;">proprietary
+</td></tr>
+<tr>
+<th>Qoppa PDF Studio Pro
+</th>
+<td>139</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-violet" data-sort-value="7" style="vertical-align: middle; text-align: center;">proprietary
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2825ad9a35a_PDF_.E5.B7.A5.E5.85.B7" id="PDF_工具"><span id="PDF_.E5.B7.A5.E5.85.B7"></span>PDF 工具</h2></div>
+<p>参见 Ghostscript。
+</p>
+<ul><li><b>Camelot</b> — Camelot: 为人类提取 PDF 表格。</li></ul>
+<dl><dd><a href="https://github.com/atlanhq/camelot">https://github.com/atlanhq/camelot</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/python-camelot/">python-camelot</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/python-camelot-git/">python-camelot-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Coherent PDF</b> — 专有的非自由命令行工具，用于处理 PDF 文件，包括合并、加密、解密、缩放、裁剪、旋转、书签、印章、徽标和页码。</li></ul>
+<dl><dd><a href="https://community.coherentpdf.com/">https://community.coherentpdf.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cpdf/">cpdf</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>DiffPDF</b> — 比较两个 PDF 文件中每一页的文本或视觉外观。</li></ul>
+<dl><dd><a href="https://gitlab.com/eang/diffpdf">https://gitlab.com/eang/diffpdf</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=diffpdf">diffpdf</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>mupdf-tools</b> — 作为 MuPDF 的一部分而开发的工具，包含 <span class="plainlinks archwiki-template-man" title="$ man 1 mutool"><a href="https://man.archlinux.org/man/mutool.1">mutool(1)</a></span> 和 <i>muraster</i>。</li></ul>
+<dl><dd><a href="https://mupdf.com">https://mupdf.com</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mupdf-tools">mupdf-tools</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>pdfcpu</b> — 用于创建和修改 PDF 的命令行工具。</li></ul>
+<dl><dd><a href="https://github.com/pdfcpu/pdfcpu">https://github.com/pdfcpu/pdfcpu</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pdfcpu-bin/">pdfcpu-bin</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>pdf_extbook</b> — 提取已添加书签的 PDF 页面</li></ul>
+<dl><dd><a href="https://github.com/raffaem/pdf_extbook">https://github.com/raffaem/pdf_extbook</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pdf_extbook-git/">pdf_extbook-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>pdfgrep</b> — 命令行实用程序，用于搜索 PDF 文件中的文本。</li></ul>
+<dl><dd><a href="https://pdfgrep.org/">https://pdfgrep.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdfgrep">pdfgrep</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>pdfjam</b> — 可用于将 PDF 文件放大、连接、旋转和翻转，并将其排列成适合书籍装帧的格式。</li></ul>
+<dl><dd><a href="https://github.com/DavidFirth/pdfjam">https://github.com/DavidFirth/pdfjam</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=texlive-binextra">texlive-binextra</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>pdfminer.six</b> — 由社区维护的 PDF 文档文本提取工具 pdfminer 的分叉版。</li></ul>
+<dl><dd><a href="https://github.com/pdfminer/pdfminer.six">https://github.com/pdfminer/pdfminer.six</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-pdfminer">python-pdfminer</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>pdf2svg</b> — 将 PDF 文件转换为 SVG 文件。</li></ul>
+<dl><dd><a href="http://www.cityinthesky.co.uk/opensource/pdf2svg/">http://www.cityinthesky.co.uk/opensource/pdf2svg/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdf2svg">pdf2svg</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/PDFtk">PDFtk</a></b> — 用于处理 PDF 文档日常事务的简易工具。</li></ul>
+<dl><dd><a href="https://gitlab.com/pdftk-java/pdftk">https://gitlab.com/pdftk-java/pdftk</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdftk">pdftk</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/QPDF">QPDF</a></b> — 内容保护型 PDF 转换系统</li></ul>
+<dl><dd><a href="https://github.com/qpdf/qpdf">https://github.com/qpdf/qpdf</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=qpdf">qpdf</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Stapler</b> — 使用 <a href="#pgb2825ad9a35a_Python">PyPDF2</a> 库的 PDFtk 轻型替代程序。</li></ul>
+<dl><dd><a href="https://github.com/hellerbarde/stapler">https://github.com/hellerbarde/stapler</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/stapler/">stapler</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/stapler-git/">stapler-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Tabula</b> — Tabula 是一款用于释放被困在 PDF 文件中的数据表的工具。</li></ul>
+<dl><dd><a href="https://tabula.technology">https://tabula.technology</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tabula/">tabula</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tabula-java/">tabula-java</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Vector Slicer</b> — 从 SVG 导出多页 PDF。</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/World/design/vector-slicer">https://gitlab.gnome.org/World/design/vector-slicer</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vector-slicer">vector-slicer</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>verapdf</b> — 专用的开放源代码文件格式验证器，涵盖所有 PDF/A 和 PDF/UA 部分和一致性级别。</li></ul>
+<dl><dd><a href="https://verapdf.org">https://verapdf.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/verapdf/">verapdf</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2825ad9a35a_Command_snippets" id="Command_snippets">Command snippets</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Create_a_PDF_from_images" id="Create_a_PDF_from_images">Create a PDF from images</h3></div>
+<p>With <a href="#pg44e3a22ce3c2">GraphicsMagick</a>:
+</p>
+<pre>$ gm convert 1.jpg 2.jpg 3.jpg out.pdf
+</pre>
+<p>With <a href="#pgf78d157d5450">ImageMagick</a>:
+</p>
+<pre>$ magick 1.jpg 2.jpg 3.jpg out.pdf
+</pre>
+<p>Note that ImageMagick's output is lossy. For lossless PDF creation from jpeg, use <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=img2pdf">img2pdf</a></span><sup><small>包</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Concatenate_PDFs" id="Concatenate_PDFs">Concatenate PDFs</h3></div>
+<p>With Ghostscript:
+</p>
+<pre>$ gs -dNOPAUSE -sDEVICE=pdfwrite -sOUTPUTFILE=out.pdf -dBATCH 1.pdf 2.pdf 3.pdf
+</pre>
+<p>With PDFtk:
+</p>
+<pre>$ pdftk 1.pdf 2.pdf 3.pdf cat output out.pdf
+</pre>
+<p>With Poppler:
+</p>
+<pre>$ pdfunite 1.pdf 2.pdf 3.pdf out.pdf
+</pre>
+<p>With QPDF:
+</p>
+<pre>$ qpdf --empty --pages 1.pdf 2.pdf 3.pdf -- out.pdf
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Extract_text_from_PDF" id="Extract_text_from_PDF">Extract text from PDF</h3></div>
+<p>With Poppler and maintaining the layout:
+</p>
+<pre>$ pdftotext -layout in.pdf out.txt
+</pre>
+<p>See also <span class="plainlinks archwiki-template-man" title="$ man 1 pdftotext"><a href="https://man.archlinux.org/man/pdftotext.1">pdftotext(1)</a></span>.
+</p><p>With <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=calibre">calibre</a></span><sup><small>包</small></sup></span>:
+</p>
+<pre>$ ebook-convert in.pdf out.txt
+</pre>
+<p>Results vary between applications, depending on the PDF file.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Decrypt_a_PDF" id="Decrypt_a_PDF">Decrypt a PDF</h3></div>
+<p>This section lists commands to decrypt a PDF to an unencrypted file.  Note that most PDF viewers also support encrypted PDFs.
+</p><p>With PDFtk:
+</p>
+<pre>$ pdftk in.pdf input_pw <i>password</i> output out.pdf
+</pre>
+<p>With Poppler to PostScript:
+</p>
+<pre>$ pdftops -upw <i>password</i> in.pdf out.ps
+</pre>
+<p>With QPDF:
+</p>
+<pre>$ qpdf --decrypt --password=<i>password</i> in.pdf out.pdf
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>Forgotten passwords might be recovered with <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdfcrack">pdfcrack</a></span><sup><small>包</small></sup></span>, see <span class="plainlinks archwiki-template-man" title="$ man 1 pdfcrack"><a href="https://man.archlinux.org/man/pdfcrack.1">pdfcrack(1)</a></span>.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Encrypt_a_PDF" id="Encrypt_a_PDF">Encrypt a PDF</h3></div>
+<p>The <i>user password</i> is used for encryption, the <i>owner password</i> to restrict operations once the document is decrypted, for more information, see <a href="https://en.wikipedia.org/wiki/PDF#Encryption_and_signatures">Wikipedia:PDF#Encryption and signatures</a>.
+</p><p>With PDFtk:
+</p>
+<pre>$ pdftk in.pdf output out.pdf user_pw <i>password</i>
+</pre>
+<p>With <a href="#pgb2825ad9a35a_Libraries">PoDoFo</a>:
+</p>
+<pre>$ podofoencrypt -u <i>user_password</i> -o <i>owner_password</i> in.pdf out.pdf
+</pre>
+<p>With QPDF:
+</p>
+<pre>$ qpdf --encrypt <i>user_password</i> <i>owner_password</i> <i>key_length</i> -- in.pdf out.pdf
+</pre>
+<p>where <code><i>key_length</i></code> can be 40, 128 or 256.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Extract_images_from_a_PDF" id="Extract_images_from_a_PDF">Extract images from a PDF</h3></div>
+<p>With <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=poppler">poppler</a></span><sup><small>包</small></sup></span>, saving images as JPEG:
+</p>
+<pre>$ pdfimages <i>infile</i>.pdf -j <i>outfileroot</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Extract_page_range_from_PDF.2C_split_multipage_PDF_document" id="Extract_page_range_from_PDF,_split_multipage_PDF_document"><span id="Extract_page_range_from_PDF.2C_split_multipage_PDF_document"></span>Extract page range from PDF, split multipage PDF document</h3></div>
+<p>With Ghostscript as a single file<a href="https://forums.freebsd.org/threads/split-pdf-file.58902/#post-336971">[6]</a>
+</p>
+<pre>$ gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -dFirstPage=<i>first</i> -dLastPage=<i>last</i> -sOutputFile=<i>outfile</i>.pdf <i>infile</i>.pdf
+</pre>
+<p>With PDFtk as a single file:
+</p>
+<pre>$ pdftk <i>infile</i>.pdf cat <i>first</i>-<i>last</i> output <i>outfile</i>.pdf
+</pre>
+<p>With Poppler as separate files:
+</p>
+<pre>$ pdfseparate -f <i>first</i> -l <i>last</i> <i>infile</i>.pdf <i>outfileroot</i>-%d.pdf
+</pre>
+<p>With QPDF as a single file:
+</p>
+<pre>$ qpdf --empty --pages <i>infile</i>.pdf <i>first</i>-<i>last</i> -- <i>outfile</i>.pdf
+</pre>
+<p>With mutool as a single file:
+</p>
+<pre>$ mutool clean -g <i>infile</i>.pdf <i>outfile</i>.pdf <i>first</i>-<i>last</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Impose_a_PDF_.28nup.29" id="Impose_a_PDF_(nup)"><span id="Impose_a_PDF_.28nup.29"></span>Impose a PDF (nup)</h3></div>
+<p>PDF <a href="https://en.wikipedia.org/wiki/Imposition">Imposition</a> is the process by which multiple input pages are combined into one output page, layed out into a <i>rows</i>x<i>columns</i> grid.
+</p><p>It can be done with pdfjam (notice that wrapper scripts such as <i>pdfnup</i> and <i>pdfbook</i> are deprecated): 
+</p>
+<pre>$ pdfjam --nup <i>rows</i>x<i>columns</i> <i>input.pdf</i> --outfile <i>output.pdf</i>
+</pre>
+<p>or with <a href="https://github.com/raffaem/pdfsak">pdfsak</a>:
+</p>
+<pre>$ pdfsak --input-file <i>input.pdf</i> --output <i>output.pdf</i> --nup <i>rows</i> <i>columns</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Inspect_metadata" id="Inspect_metadata">Inspect metadata</h3></div>
+<p>With <a href="#pgb2c7c859e968">ExifTool</a>:
+</p>
+<pre>$ exiftool -All file.pdf
+</pre>
+<p>With Poppler:
+</p>
+<pre>$ pdfinfo file.pdf
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Remove_metadata" id="Remove_metadata">Remove metadata</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb2825ad9a35a_Using_ExifTool" id="Using_ExifTool">Using ExifTool</h4></div>
+<p>With <a href="#pgb2c7c859e968">ExifTool</a>:
+</p>
+<pre>$ exiftool -All= -overwrite_original input.pdf
+$ mv input.pdf /tmp/temp.pdf
+$ qpdf --linearize /tmp/temp.pdf input.pdf
+</pre>
+<p>The linearize step is needed to prevent recovery of deleted metadata. See <a href="https://superuser.com/q/1482619/400542">this SuperUser question</a> and the related <a href="https://exiftool.org/forum/index.php/topic,3943.msg54610.html#msg54610">ExifTool forum thread</a>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb2825ad9a35a_Using_pdftk" id="Using_pdftk">Using pdftk</h4></div>
+<p>Many  PDFs  store document metadata using both an Info dictionary (old school) and an XMP stream (new school). This pdftk command remove the XMP stream from the PDF altogether. It does not remove the Info dictionary.
+</p><p>Note that objects inside the PDF might have their own, separate XMP metadata streams, and that this command does not remove those. It only removes the PDF’s document‐level XMP stream.
+</p>
+<pre>$ pdftk <i>input.pdf</i> drop_xmp output <i>output.pdf</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Reduce_size_of_a_PDF" id="Reduce_size_of_a_PDF">Reduce size of a PDF</h3></div>
+<p>PDF size can be reduced by setting an appropriate optimization or compression level.
+</p><p>With Ghostscript one of:
+</p>
+<pre>$ ps2pdf -dPDFSETTINGS=/screen in.pdf out.pdf
+</pre>
+<p>or
+</p>
+<pre>$ gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/printer -sOutputFile=out.pdf in.pdf
+</pre>
+<p>For different settings see the <a href="https://ghostscript.readthedocs.io/en/latest/VectorDevices.html#controls-and-features-specific-to-postscript-and-pdf-input">documentation</a>.
+</p><p>There is also <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/shrinkpdf/">shrinkpdf</a></span><sup><small>AUR</small></sup></span>, a script wrapping gs.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Rasterize_a_PDF" id="Rasterize_a_PDF">Rasterize a PDF</h3></div>
+<p>These commands will convert your PDF into images.
+</p><p>With <a href="#pg44e3a22ce3c2">GraphicsMagick</a> to convert a specific page into an image file:
+</p>
+<pre>$ gm convert -density <i>dpi</i> <i>infile</i>.pdf[<i>page</i>] <i>outfile</i>.jpg
+</pre>
+<p>With <a href="#pgf78d157d5450">ImageMagick</a> to convert a specific page into an image file:
+</p>
+<pre>$ magick convert -density <i>dpi</i> <i>infile</i>.pdf[<i>page</i>] <i>outfile</i>.jpg
+
+</pre>
+<p>With <a href="#pgf78d157d5450">ImageMagick</a> to convert all pages into another PDF file composed by an image file per page:
+</p>
+<pre>$ magick convert -density <i>dpi</i> <i>infile</i>.pdf <i>outfile</i>.pdf
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>This will increase the file size of your PDF substantially. Use it for example if your printer is not able to print your PDF correctly.</div>
+<p>With Poppler to convert all pages into one image file per page:
+</p>
+<pre>$ pdftoppm -jpeg -r <i>dpi</i> <i>infile</i>.pdf <i>outfileroot</i>
+</pre>
+<p>With Poppler to convert a specific page into an image file:
+</p>
+<pre>$ pdftoppm -jpeg -r <i>dpi</i> -f <i>page</i> -singlefile <i>infile</i>.pdf <i>outfileroot</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Split_PDF_pages" id="Split_PDF_pages">Split PDF pages</h3></div>
+<p>With mupdf-tools to split every page vertically into two pages:
+</p>
+<pre>$ mutool poster -y 2 in.pdf out.pdf
+</pre>
+<p>Can be used to undo simple imposition.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Add_an_image" id="Add_an_image">Add an image</h3></div>
+<p>Adding an image to any location in a PDF can be done
+</p>
+<ul><li>with <a href="#pgf78d157d5450">ImageMagick</a> (convert), <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xv/">xv</a></span><sup><small>AUR</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdftk">pdftk</a></span><sup><small>包</small></sup></span>. (<a href="http://emmanuel.branlard.free.fr/work/linux/dev/SignPDF/SignPDF">Wrapper script</a>)</li>
+<li>with <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xournal/">xournal</a></span><sup><small>AUR</small></sup></span></li>
+<li>with <a href="#pgaa27357d651e">LibreOffice</a></li></ul>
+<p>Details on these and other solutions can be found <a href="https://unix.stackexchange.com/questions/85873/how-can-i-add-a-signature-png-to-a-pdf-in-linux">on StackExchange</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Add_digital_signature_to_PDF" id="Add_digital_signature_to_PDF">Add digital signature to PDF</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jsignpdf/">jsignpdf</a></span><sup><small>AUR</small></sup></span> can digitally sign PDF files with X.509 certificates in GUI and CLI.
+</p><p>Readers such as Okular and MuPDF can sign PDFs with digital signatures. This requires a PFX certificate, which can be created with an <a href="#pgb4be337c4999">OpenSSL command</a>:
+</p>
+<pre>$ openssl req -x509 -days 365 -newkey rsa:2048 -keyout <i>cert.pem</i> -out <i>cert.pem</i>
+$ openssl pkcs12 -export -in <i>cert.pem</i> -out <i>cert.pfx</i>
+</pre>
+<p>MuPDF users can then sign PDFs with the <code><i>cert.pfx</i></code> using the graphical interface, or its <a href="https://mupdf.readthedocs.io/en/latest/mutool-sign.html">mutool-sign</a> tool.
+</p><p>Okular users must import <code><i>cert.pfx</i></code> into a certificate store such as the one in the default Firefox profile.<a href="https://docs.kde.org/trunk5/en/okular/okular/signatures.html">[7]</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2024-01-13 ⓘ]</sup> With Firefox this is done through <i>Settings &gt; Privacy &amp; Security &gt; View Certificates &gt; Your Certificates &gt; Import</i> and selecting <i>cert.pfx</i>. Afterwards Okular will offer this certificate to be used when signing PDFs.
+</p><p>Libreoffice can also sign PDFs.<a href="https://help.libreoffice.org/6.3/en-US/text/shared/guide/digital_signatures.html">[8]</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Removing_annotations_from_a_PDF" id="Removing_annotations_from_a_PDF">Removing annotations from a PDF</h3></div>
+<p>With <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdftk">pdftk</a></span><sup><small>包</small></sup></span> <a href="https://stackoverflow.com/questions/49598797/remove-pdf-annotations-via-command-line/49614525#49614525">[9]</a>:
+</p>
+<pre>$ pdftk in.pdf output - uncompress | sed '/^\/Annots/d' | pdftk - output out.pdf compress
+</pre>
+<p>With <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/perl-cam-pdf/">perl-cam-pdf</a></span><sup><small>AUR</small></sup></span>:
+</p>
+<pre>$ rewritepdf.pl -C in.pdf out.pdf
+</pre>
+<p>See <a href="https://superuser.com/a/1051543">https://superuser.com/a/1051543</a> for more information.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Add_page_numbers" id="Add_page_numbers">Add page numbers</h3></div>
+<p>With <a href="https://github.com/raffaem/pdfsak">pdfsak</a>:
+</p>
+<pre>$ pdfsak --input-file input.pdf --output output.pdf --text "\large \$page/\$pages" br 0.99 0.99 --latex-engine xelatex --font "Noto Regular"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Add_page_labels" id="Add_page_labels">Add page labels</h3></div>
+<p>Page labels are logical page numbers shown in the navigation bar of your PDF reader. They are useful for example if the first pages of the PDF are indices numbered with roman numbers (I, II, etc.), while the page numbered "1" corresponds to a PDF page greater than 1, and you want the page number shown in the navigation bar to corresponds to the page number shown in the physical page. 
+</p><p>This should not be confused with adding page numbers into a physical page. See <a href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf#page=382">section 12.4.2 of PDF reference</a> to better understand page labels.
+</p>
+<ol><li>Using <a href="https://github.com/lovasoa/pagelabels-py">pagelabels-py</a>, let's say we have a PDF named <code>my_document.pdf</code>, that has 12 pages.
+<ul><li>Pages 1 to 4 should be labelled <code>Intro I</code> to <code>Intro IV</code>.</li>
+<li>Pages 5 to 9 should be labelled <code>2</code> to <code>6</code>.</li>
+<li>Pages 10 to 12 should be labelled <code>Appendix A</code> to <code>Appendix C</code></li>
+<li>We can issue the following list of commands: <pre>$ python3 -m pagelabels --delete "my_document.pdf"
+$ python3 -m pagelabels --startpage 1 --prefix "Intro " --type "roman uppercase" "my_document.pdf"
+$ python3 -m pagelabels --startpage 5 --firstpagenum 2 "my_document.pdf"
+$ python3 -m pagelabels --startpage 10 --prefix "Appendix " --type "letters uppercase" "my_document.pdf" </pre></li>
+<li><div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>pagelabels-py will convert your file to PDF 1.3 specification</div></li></ul></li>
+<li>Using <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdftk">pdftk</a></span><sup><small>包</small></sup></span>, create a <code>metadata.txt</code> file with labels: <pre>PageLabelBegin
+PageLabelNewIndex: 1
+PageLabelStart: 1
+PageLabelPrefix: Cover
+PageLabelNumStyle: NoNumber
+PageLabelBegin
+PageLabelNewIndex: 2
+PageLabelStart: 1
+PageLabelPrefix: Back Cover
+PageLabelNumStyle: NoNumber
+PageLabelBegin
+PageLabelNewIndex: 3
+PageLabelStart: 1
+PageLabelNumStyle: LowercaseRomanNumerals
+PageLabelBegin
+PageLabelNewIndex: 27
+PageLabelStart: 1
+PageLabelNumStyle: DecimalArabicNumerals </pre>
+<ul><li>Where:
+<dl><dt>PageLabelBegin</dt>
+<dd>signal a new page label definition will follow</dd>
+<dt>PageLabelNewIndex</dt>
+<dd>is the PDF page index from which the numbering style applies, counting from one. The numbering style will continue until the next page label or, if there are no more page labels, until the end of the document.</dd>
+<dt>PageLabelStart</dt>
+<dd>is the starting number. For example, if you specify 5 here, the pages will be numbered 5, 6, 7, ...</dd>
+<dt>PageLabelPrefix</dt>
+<dd>a text to put before the number in page labels.</dd>
+<dt>PageLabelNumStyle</dt>
+<dd>can be <code>DecimalArabicNumerals</code>, <code>UppercaseRomanNumerals</code>, <code>LowercaseRomanNumerals</code>, <code>UppercaseLetters</code>, <code>LowercaseLetters</code> or <code>NoNumber</code>.</dd></dl></li>
+<li>Then use: <pre>pdftk book.pdf update_info_utf8 metadata.txt output book-with-metadata.pdf</pre></li></ul></li></ol>
+<p>See <a href="https://superuser.com/questions/232553/how-to-change-internal-page-numbers-in-the-meta-data-of-a-pdf">this SuperUser question</a> for more details.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Extract_bookmarks" id="Extract_bookmarks">Extract bookmarks</h3></div>
+<p>With pdftk:
+</p>
+<pre>$ pdftk file.pdf dump_data_utf8 | grep '^Bookmark'
+</pre>
+<p>With qpdf:
+</p>
+<pre>$ qpdf --json --json-key=outlines file.pdf
+</pre>
+<p>See <a href="https://unix.stackexchange.com/questions/143886/how-to-extract-bookmarks-from-a-pdf-file">https://unix.stackexchange.com/questions/143886/how-to-extract-bookmarks-from-a-pdf-file</a> for more information.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Add_bookmarks" id="Add_bookmarks">Add bookmarks</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb2825ad9a35a_With_pdftk" id="With_pdftk">With pdftk</h4></div>
+<p>Create a text file <code>bookmark_definitions.txt</code> with bookmark definitions in the following format:
+</p>
+<pre>BookmarkBegin
+BookmarkTitle: Chapter 1
+BookmarkLevel: 1
+BookmarkPageNumber: 1
+BookmarkBegin
+BookmarkTitle: Chapter 1.1
+BookmarkLevel: 2
+BookmarkPageNumber: 2
+BookmarkBegin
+BookmarkTitle: Chapter 1.2
+BookmarkLevel: 2
+BookmarkPageNumber: 3
+BookmarkBegin
+BookmarkTitle: Chapter 1.3
+BookmarkLevel: 2
+BookmarkPageNumber: 4
+BookmarkBegin
+BookmarkTitle: Chapter 1.3.1
+BookmarkLevel: 3
+BookmarkPageNumber: 5
+BookmarkBegin
+BookmarkTitle: Chapter 2
+BookmarkLevel: 1
+BookmarkPageNumber: 6
+</pre>
+<p>Where
+</p>
+<dl><dt>BookmarkBegin</dt>
+<dd>signal a new bookmark definition</dd>
+<dt>BookmarkTitle</dt>
+<dd>the title of the bookmark</dd>
+<dt>BookmarkLevel</dt>
+<dd>the level of the bookmark in the hierarchy</dd>
+<dt>BookmarkPageNumber</dt>
+<dd>the page number the bookmark redirects to</dd></dl>
+<p>In this example, the above file will create the following bookmark structure:
+</p>
+<ul><li>Chapter 1
+<ul><li>Chapter 1.1</li>
+<li>Chapter 1.2</li>
+<li>Chapter 1.3
+<ul><li>Chapter 1.3.1</li></ul></li></ul></li>
+<li>Chapter 2</li></ul>
+<p>Apply the bookmarks with the following command:
+</p>
+<pre>$ pdftk <i>input.pdf</i> update_info_utf8 <i>bookmark_definitions.txt</i> output <i>output.pdf</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Extract_pages_contained_within_a_bookmar" id="Extract_pages_contained_within_a_bookmark">Extract pages contained within a bookmark</h3></div>
+<p>To extract the pages contained within a bookmark, you can use <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pdf_extbook-git/">pdf_extbook-git</a></span><sup><small>AUR</small></sup></span>.
+</p><p>With <code>pdf_extbook <i>file</i></code> you will be prompted on what bookmark whose pages you want to extract and where to save it. To extract all bookmarks of a given hierarchical level:
+</p>
+<pre>$ pdf_extbook <i>file</i> -a <i>level</i> <i>output_file_stem</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Remove_blank_pages" id="Remove_blank_pages">Remove blank pages</h3></div>
+<p>One can use the following script to remove blank pages form a PDF file (credit: <a href="https://superuser.com/a/1307895">SuperUser post</a>):
+</p>
+<pre>#!/bin/sh
+
+IN="$1"
+filename=$(basename "${IN}")
+filename="${filename%.*}"
+PAGES=$(pdfinfo "$IN" | grep ^Pages: | tr -dc '0-9')
+
+non_blank() {
+	for i in $(seq 1 $PAGES); do
+		PERCENT=$(gs -o - -dFirstPage=${i} -dLastPage=${i} -sDEVICE=ink_cov "$IN" | grep CMYK | nawk 'BEGIN { sum=0; } {sum += $1 + $2 + $3 + $4;} END { printf "%.5f\n", sum } ')
+		if [ $(echo "$PERCENT &gt; 0.001" | bc) -eq 1 ]; then
+			echo $i
+			#echo $i 1&gt;&amp;2
+		fi
+		echo -n . 1&gt;&amp;2
+	done | tee "$filename.tmp"
+	echo 1&gt;&amp;2
+}
+
+set +x
+pdftk "${IN}" cat $(non_blank) output "${filename}_noblanks.pdf"
+</pre>
+<p>Use it like <code>pdf_remove_blank_pages input.pdf</code>.
+</p><p>The script needs <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdftk">pdftk</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nawk">nawk</a></span><sup><small>包</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ghostscript">ghostscript</a></span><sup><small>包</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Find_fonts_used_in_a_PDF" id="Find_fonts_used_in_a_PDF">Find fonts used in a PDF</h3></div>
+<p>The <span class="plainlinks archwiki-template-man" title="$ man 1 pdffonts"><a href="https://man.archlinux.org/man/pdffonts.1">pdffonts(1)</a></span> command (from <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=poppler">poppler</a></span><sup><small>包</small></sup></span>), can be used to find which fonts a PDF uses and if they have been embedded in it or not: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ pdffonts <i>file</i>.pdf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+Times-Roman                          Type 1            Custom           no  no  no       8  0
+Times-Italic                         Type 1            Standard         no  no  no       9  0
+Times-Bold                           Type 1            Standard         no  no  no       7  0
+Helvetica                            Type 1            Standard         no  no  no      34  0
+Helvetica-Bold                       Type 1            Standard         no  no  no      35  0
+</pre>
+<p>This can be used when having issues displaying properly the text in a PDF, to determine if missing <a href="#pg7830c089a224">fonts</a> or their <a href="#pg6a086b931dd9">metric-compatible equivalent</a> need to be installed.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Repair_broken_PDF_file" id="Repair_broken_PDF_file">Repair broken PDF file</h3></div>
+<p>With <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ghostscript">ghostscript</a></span><sup><small>包</small></sup></span>:
+</p>
+<pre>$ gs -o <i>repaired.pdf</i> -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress <i>corrupted.pdf</i>
+</pre>
+<p>With <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=poppler">poppler</a></span><sup><small>包</small></sup></span>:
+</p>
+<pre>$ pdftocairo -pdf <i>corrupted.pdf</i> <i>repaired.pdf</i>
+</pre>
+<p>With <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mupdf-tools">mupdf-tools</a></span><sup><small>包</small></sup></span>:
+</p>
+<pre>$ mutool clean <i>corrupted.pdf</i> <i>repaired.pdf</i>
+</pre>
+<p>Reference: <a href="https://superuser.com/q/278562">https://superuser.com/q/278562</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Convert_PDF_to_PDF.2FA_standard" id="Convert_PDF_to_PDF/A_standard"><span id="Convert_PDF_to_PDF.2FA_standard"></span>Convert PDF to PDF/A standard</h3></div>
+<p>With <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ghostscript">ghostscript</a></span><sup><small>包</small></sup></span>:
+</p>
+<pre>$ gs -dPDFA -dBATCH -dNOPAUSE -sColorConversionStrategy=UseDeviceIndependentColor -sDEVICE=pdfwrite -dPDFACompatibilityPolicy=2 -sOutputFile=<i>document_pdfa.pdf</i> <i>document.pdf</i>
+</pre>
+<p>Reference: <a href="https://stackoverflow.com/a/56459053">https://stackoverflow.com/a/56459053</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Validate_PDF.2FA_compliance" id="Validate_PDF/A_compliance"><span id="Validate_PDF.2FA_compliance"></span>Validate PDF/A compliance</h3></div>
+<p>Using <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/verapdf/">verapdf</a></span><sup><small>AUR</small></sup></span> you can validate the compliance of your PDF to different flavours of the PDF/A standard:
+</p>
+<pre>$ verapdf --flavour 1a --format text <i>document.pdf</i>
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2825ad9a35a_DjVu_tools" id="DjVu_tools">DjVu tools</h2></div>
+<ul><li>DjVuLibre provides many command-line tools, like <span class="plainlinks archwiki-template-man" title="$ man 1 ddjvu"><a href="https://man.archlinux.org/man/ddjvu.1">ddjvu(1)</a></span> for example.</li>
+<li><b>img2djvu</b> — Single-pass DjVu encoder based on DjVu Libre and ImageMagick.</li></ul>
+<dl><dd><a href="https://github.com/ashipunov/img2djvu">https://github.com/ashipunov/img2djvu</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/img2djvu-git/">img2djvu-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>pdf2djvu</b> — Creates DjVu files from PDF files.</li></ul>
+<dl><dd><a href="https://jwilk.net/software/pdf2djvu">https://jwilk.net/software/pdf2djvu</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pdf2djvu/">pdf2djvu</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Convert_DjVu_to_images" id="Convert_DjVu_to_images">Convert DjVu to images</h3></div>
+<p>Break Djvu into separate pages:
+</p>
+<pre>$ djvmcvt -i input.djvu /path/to/out/dir output-index.djvu
+</pre>
+<p>Convert Djvu pages into images:
+</p>
+<pre>$ ddjvu --format=tiff page.djvu page.tiff
+</pre>
+<p>Convert Djvu pages into PDF:
+</p>
+<pre>$ ddjvu --format=pdf inputfile.djvu ouputfile.pdf
+</pre>
+<p>You can also use <i>--page</i> to export specific pages:
+</p>
+<pre>$ ddjvu --format=tiff --page=1-10 input.djvu output.tiff
+</pre>
+<p>this will convert pages from 1 to 10 into one tiff file.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Processing_images" id="Processing_images">Processing images</h3></div>
+<p>You can use <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=scantailor-advanced">scantailor-advanced</a></span><sup><small>包</small></sup></span> to:
+</p>
+<ul><li>fix orientation</li>
+<li>split pages</li>
+<li>deskew</li>
+<li>crop</li>
+<li>adjust margins</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Make_DjVu_from_images" id="Make_DjVu_from_images">Make DjVu from images</h3></div>
+<p>There is a useful script <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/img2djvu-git/">img2djvu-git</a></span><sup><small>AUR</small></sup></span>.
+</p>
+<pre>$ img2djvu -c1 -d600 -v1 ./out
+</pre>
+<p>it will create 600 DPI <code>out.djvu</code> from all files in <code>./out</code> directory.
+</p><p>Alternatively, you can try <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/didjvu/">didjvu</a></span><sup><small>AUR</small></sup></span>, which seems to create smaller files especially on images with well defined background.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2825ad9a35a_PostScript_tools" id="PostScript_tools">PostScript tools</h2></div>
+<ul><li><b>pstotext</b> — Converts PostScript files to text.</li></ul>
+<dl><dd><a href="https://www.cs.wisc.edu/~ghost/doc/pstotext.htm">https://www.cs.wisc.edu/~ghost/doc/pstotext.htm</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pstotext/">pstotext</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li>Ghostscript</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_ps2pdf" id="ps2pdf">ps2pdf</h3></div>
+<p><i>ps2pdf</i> is a wrapper around ghostscript to convert PostScript to PDF:
+</p>
+<pre>$ ps2pdf -sPAPERSIZE=a4 -dOptimize=true -dEmbedAllFonts=true YourPSFile.ps
+</pre>
+<p>Explanation:
+</p>
+<ul><li>with <code>-sPAPERSIZE=something</code> you define the paper size. For valid PAPERSIZE values, see <a href="https://ghostscript.com/doc/current/Use.htm#Known_paper_sizes">[10]</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2022-09-22 ⓘ]</sup>.</li>
+<li><code>-dOptimize=true</code> lets the created PDF be optimised for loading.</li>
+<li><code>-dEmbedAllFonts=true</code> makes the fonts look always nice.</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>You cannot choose the paper orientation in ps2pdf. If your input PS file is healthy, it already contains the orientation information. If you are trying to use an Encapsulated PS file, you will have problems, if it does not fit in the <code>-sPAPERSIZE</code> you specified, because EPS files usually do not contain paper orientation information. A workaround is creating a new paper in ghostscript settings (call it e.g. "slide") and use it as <code>-sPAPERSIZE=slide</code>.</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2825ad9a35a_Libraries" id="Libraries">Libraries</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_C.2FC.2B.2B" id="C/C++"><span id="C.2FC.2B.2B"></span>C/C++</h3></div>
+<ul><li><b>libharu</b> — C library for generating PDF documents.</li></ul>
+<dl><dd><a href="https://github.com/libharu/libharu">https://github.com/libharu/libharu</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libharu">libharu</a></span><sup><small>包</small></sup></span>, Lua binding: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lua-hpdf/">lua-hpdf</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>PoDoFo</b> — A C++ library to work with the PDF file format.</li></ul>
+<dl><dd><a href="https://podofo.sourceforge.net">https://podofo.sourceforge.net</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=podofo">podofo</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Python" id="Python">Python</h3></div>
+<ul><li><b>borb</b> — borb is a library for reading, creating and manipulating PDF files in python.</li></ul>
+<dl><dd><a href="https://borbpdf.com/">https://borbpdf.com/</a>, <a href="https://github.com/jorisschellekens/borb">https://github.com/jorisschellekens/borb</a> || <small>未被打包？<a href="https://aur.archlinux.org/packages/">在 AUR 里搜索</a></small></dd></dl>
+<ul><li><b>pdfrw</b> — A pure Python library that reads and writes PDFs.</li></ul>
+<dl><dd><a href="https://github.com/pmaupin/pdfrw">https://github.com/pmaupin/pdfrw</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-pdfrw">python-pdfrw</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>PyPDF</b> — A pure-Python library built as a PDF toolkit.</li></ul>
+<dl><dd><a href="https://github.com/py-pdf/pypdf">https://github.com/py-pdf/pypdf</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-pypdf">python-pypdf</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>PyX</b> — Python library for the creation of PostScript and PDF files.</li></ul>
+<dl><dd><a href="https://pyx.sourceforge.net">https://pyx.sourceforge.net</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-pyx">python-pyx</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>ReportLab</b> — A proven industry-strength PDF generating solution</li></ul>
+<dl><dd><a href="https://www.reportlab.com/">https://www.reportlab.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-reportlab">python-reportlab</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2825ad9a35a_Java" id="Java">Java</h3></div>
+<ul><li><b>iText Core</b> — iText is a more versatile, programmable and enterprise-grade PDF solution that allows you to embed its functionalities within your own software for digital transformation.</li></ul>
+<dl><dd><a href="https://itextpdf.com/products/itext-core">https://itextpdf.com/products/itext-core</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/itext-rups-bin/">itext-rups-bin</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>OpenPDF</b> — OpenPDF is a free Java library for creating and editing PDF files with a LGPL and MPL open source license. OpenPDF is based on a fork of iText.</li></ul>
+<dl><dd><a href="https://github.com/LibrePDF/OpenPDF">https://github.com/LibrePDF/OpenPDF</a> || <small>未被打包？<a href="https://aur.archlinux.org/packages/">在 AUR 里搜索</a></small></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2825ad9a35a_See_also" id="See_also">See also</h2></div>
+<ul><li><a href="#pg4886dc47f318">List of applications/Documents#OCR software</a></li>
+<li><a href="#pg4886dc47f318">List of applications/Documents#Readers and viewers</a></li>
+<li><a href="#pg4886dc47f318">List of applications/Documents#Stylus note-taking</a></li>
+<li><a href="https://en.wikipedia.org/wiki/List_of_PDF_software">Wikipedia:List of PDF software</a></li>
+<li>PDF References
+<ul><li><a href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf">PDF Reference and Adobe Extensions to the PDF Specification</a></li>
+<li><a href="https://en.wikipedia.org/wiki/PDF#Further_reading">Wikipedia:PDF#Further reading</a></li></ul></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807082425
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.531 seconds
+Real time usage: 0.544 seconds
+Preprocessor visited node count: 3261/1000000
+Revision size: 36620/2097152 bytes
+Post‐expand include size: 71891/2097152 bytes
+Template argument size: 31550/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 2526/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  194.554      1 -total
+ 29.96%   58.290     75 Template:App
+  7.20%   13.999     17 Template:B
+  6.51%   12.669     60 Template:Pkg
+  5.29%   10.292     25 Template:META_Table_cell
+  4.28%    8.318     46 Template:AUR
+  3.46%    6.736     38 Template:Yes
+  3.02%    5.880     15 Template:No
+  2.46%    4.792      1 Template:Accuracy
+  2.41%    4.686     53 Template:-
+-->
+<!-- Render ID 6629ce8f-9239-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8013:|#|:idhash:canonical!zh-cn and timestamp 20260807082425 and revision id 33660. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

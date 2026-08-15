@@ -1,0 +1,237 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg2e2005378336">光标主题</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p>显示服务器有着一个从各方面帮助GUI界面导航和操作的<i>光标主题</i>。显示服务器自带一个光标主题,但依然可以安装并使用其他光标主题。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2e2005378336_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>可以通过软件包安装,也可以下载光标主题并解压到恰当的路径来安装。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_.E9.80.9A.E8.BF.87.E8.BD.AF.E4.BB.B6.E5.8C.85" id="通过软件包"><span id=".E9.80.9A.E8.BF.87.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>通过软件包</h3></div>
+<p>下列链接提供可用的光标主题软件包:
+</p>
+<ul><li><a href="#pg15c7e809c461">官方仓库</a>——<a href="https://archlinux.org/packages/?sort=&amp;q=xcursor-&amp;maintainer=&amp;last_update=&amp;flagged=&amp;limit=50">"xcursor-" search</a>.</li>
+<li><a href="#pg89cb7b475cfb">AUR</a>——<a href="https://aur.archlinux.org/packages?O=0&amp;L=0&amp;C=17&amp;K=cursor&amp;SeB=nd&amp;SB=n&amp;SO=a&amp;PP=50&amp;do_Search=Go">"cursor" search</a>.</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_.E6.89.8B.E5.8A.A8.E5.AE.89.E8.A3.85" id="手动安装"><span id=".E6.89.8B.E5.8A.A8.E5.AE.89.E8.A3.85"></span>手动安装</h3></div>
+<p>在官方仓库或AUR中没有的光标主题可以手动安装。许多网站都有可下载的光标主题。下载之后它们需要被放进<i>icons</i>目录(因为光标可以和图标主题绑定在一起)。
+</p><p>一些有光标主题的网站:
+</p>
+<ul><li><a href="https://www.gnome-look.org/browse/cat/107/ord/latest/">GNOME Look</a></li>
+<li><a href="https://www.deviantart.com/browse/all/customization/skins/linuxutil/x11cursors/">Deviant Art</a></li>
+<li><a href="https://www.opendesktop.org/browse/cat/107/">Open Desktop</a></li></ul>
+<p>如果想要<i>为指定用户</i>安装,使用 <code>~/.local/share/icons/</code> 或 <code>~/.icons/</code> 目录。用以下命令可以解压大多数归档:
+</p>
+<pre>$ tar xvf foobar-cursor-theme.tar.gz -C ~/.local/share/icons
+</pre>
+<p>光标主题的目录结构为 <code>theme-name/cursors</code>,举个例子: <code>~/.local/share/icons/<i>theme</i>/cursors/</code>; 请确保解压出文件也是这样的结构。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果想要<i>系统范围</i>安装,使用 <code>/usr/share/icons</code> 目录。不推荐直接将文件解压到这个目录,  因为手动添加的文件不会被 <a href="#pg9ef105bf1e3c">pacman</a> 追踪;建议给光标主题创建一个 <a href="#pgf9d748a7b27b">package</a> 。</div>
+<p>已经安装的光标主题可以通过这条命令查看:
+</p>
+<pre>find /usr/share/icons ~/.local/share/icons ~/.icons -type d -name "cursors"
+</pre>
+<p>如果软件包包含一个 <code>index.theme</code> 文件,检查里面是否有 "Inherits" 这一行。如果有,检查继承的主题是否也存在(有必要时重命名)。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2e2005378336_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<p>有许多方法设置光标主题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_XDG_.E8.A7.84.E8.8C.83" id="XDG_规范"><span id="XDG_.E8.A7.84.E8.8C.83"></span>XDG 规范</h3></div>
+<p>这个方法对 <a href="#pg9d8a8632d257">X11</a> 和 <a href="#pga21a6be8b605">Wayland</a> 光标主题都有效。
+</p><p>如果想要<i>为指定用户</i>配置,创建并编辑 <code>~/.icons/default/index.theme</code>;如果想要<i>系统范围</i>配置,编辑 <code>/usr/share/icons/default/index.theme</code>。
+</p><p><code>[icon theme]</code> 部分中的 <code>Inherits</code> 选项必须被设置为X光标主题的目录名<code><i>cursor_theme_name</i></code>,举个例子 <code>xcursor-breeze-snow</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.icons/default/index.theme</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[icon theme] 
+Inherits=<i>cursor_theme_name</i></pre>
+<p>然后你应该编辑 <code>~/.config/gtk-3.0/settings.ini</code>, 将 <code><i>cursor_theme_name</i></code> 替换为你选择的主题:  
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/gtk-3.0/settings.ini</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Settings]
+gtk-cursor-theme-name=<i>cursor_theme_name</i></pre>
+<p>重启 X 以应用更改。
+</p><p>如果还是没用,试着创建一个将<code>~/.icons/default/cursors</code> (假设<i>为指定用户</i>安装)指向<code>.local/share/icons/<i>cursor_theme_name</i>/cursors</code>的符号链接然后再次重启 X。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_LXAppearance" id="LXAppearance">LXAppearance</h3></div>
+<p><a href="#pg9ecdb3d7e45b">LXAppearance</a>通过创建 <code>~/.icons/default/index.theme</code>设置默认光标主题:如果你手动编辑它,LXAppearance 会覆写它。记得还要按照 #XDG 规范手动编辑 <code>~/.config/gtk-3.0/settings.ini</code>,因为有些应用,如 Firefox ,使用这个设置文件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83" id="桌面环境"><span id=".E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83"></span>桌面环境</h3></div>
+<p><a href="#pg712e4adaddad">桌面环境</a>使用 <a href="https://specifications.freedesktop.org/xsettings-spec/xsettings-latest.html">X设置协议</a>,通常通过设置守护进程达到效果。虽然这允许即时更改光标,但应用的主题在不同应用中可能不一致, 另见 #XDG 规范来手动更改光标主题.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2e2005378336_GNOME" id="GNOME">GNOME</h4></div>
+<p>在 <a href="#pg1e095fe2c2a6">GNOME</a> 中更改主题, 使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-tweaks">gnome-tweaks</a></span><sup><small>包</small></sup></span> ,或用这条命令直接设置:
+</p>
+<pre>$ gsettings set org.gnome.desktop.interface cursor-theme <i>cursor_theme_name</i>
+</pre>
+<p>用这条命令修改尺寸(尺寸有 24,32,48,64,因主题而不同):
+</p>
+<pre>$ gsettings set org.gnome.desktop.interface cursor-size <i>cursor_theme_size</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在 Wayland 上, Gnome 应用默认无法显示位于<code>~/.local/share/icons</code>的光标主题。作为一种解决方法,你可以 add that path to XCURSOR_PATH.</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2e2005378336_MATE" id="MATE">MATE</h4></div>
+<p>在 MATE 中可以使用 mate-control-center 或 gsettings 来修改主题:
+</p>
+<pre>gsettings set org.mate.peripherals-mouse cursor-theme <i>cursor_theme_name</i>
+</pre>
+<p>修改尺寸:
+</p>
+<pre>gsettings set org.mate.peripherals-mouse <i>theme-size</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2e2005378336_XFCE" id="XFCE">XFCE</h4></div>
+<p>修改 X光标主题 , 使用:
+</p>
+<pre>xfconf-query --channel xsettings --property /Gtk/CursorThemeName --set <i>cursor_theme_name</i>
+</pre>
+<p>修改尺寸:
+</p>
+<pre>xfconf-query --channel xsettings --property /Gtk/CursorThemeSize --set <i>cursor_theme_size</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_X_resources" id="X_resources">X resources</h3></div>
+<p>要想在本地命名光标主题,将下面这一行添加到 <code>~/.Xresources</code> 文件:
+</p>
+<pre>Xcursor.theme: cursor-theme
+</pre>
+<p>要想正确地加载光标主题需要通过窗口管理器完成;如果窗口管理器无法完成,可以在输入 <code>~/.xinitrc</code> 或 <a href="#pga70b945285c5">.xprofile</a> (使用哪个取决于个人配置)中添加以下命令强制在窗口管理器之前加载:
+</p>
+<pre>$ xrdb ~/.Xresources
+</pre>
+<p>可选地,如果你的光标主题支持多个尺寸,在 <code>~/.Xresources</code> 中添加下面这一行:
+</p>
+<pre>Xcursor.size: 16
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>32, 48 或 64 也可能是适用的尺寸</div>
+<p>如果对支持的光标大小有疑问,在没有这个设置的情况下启动 X 并让它自动选择光标尺寸(查阅你的窗口管理器文档以获得更多细节)。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_.E7.8E.AF.E5.A2.83.E5.8F.98.E9.87.8F" id="环境变量"><span id=".E7.8E.AF.E5.A2.83.E5.8F.98.E9.87.8F"></span>环境变量</h3></div>
+<p>你可以使用一个<a href="#pg4989d4f46056">环境变量</a>来为单个应用暂时设置主题,举个例子:
+</p>
+<pre>$ XCURSOR_THEME=SomeThemeName xclock
+</pre>
+<p>XCURSOR_SIZE 是可选的,如果你的光标主题支持多个尺寸就可以使用。
+</p><p>如果你的光标主题安装在 <code>~/.local/share/icons</code>,为了避免潜在的问题,将该路径添加到 XCURSOR_PATH 。举个例子:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bash_profile</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">export XCURSOR_PATH=${XCURSOR_PATH}:~/.local/share/icons</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_.E6.98.BE.E7.A4.BA.E7.AE.A1.E7.90.86.E5.99.A8" id="显示管理器"><span id=".E6.98.BE.E7.A4.BA.E7.AE.A1.E7.90.86.E5.99.A8"></span>显示管理器</h3></div>
+<p>光标主题通常可以通过显示管理器设置,但注意光标主题可能不会跨用户会话延续。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2e2005378336_GDM" id="GDM">GDM</h4></div>
+<p>请见 <a href="#pg89573e816846">GDM#更改光标主题</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2e2005378336_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_.E5.88.9B.E5.BB.BA.E4.B8.A2.E5.A4.B1.E5.85.89.E6.A0.87.E7.9A.84.E9.93.BE.E6.8E.A5" id="创建丢失光标的链接"><span id=".E5.88.9B.E5.BB.BA.E4.B8.A2.E5.A4.B1.E5.85.89.E6.A0.87.E7.9A.84.E9.93.BE.E6.8E.A5"></span>创建丢失光标的链接</h3></div>
+<p>当缺少一些光标时,应用可能使用默认光标。这可以通过创建丢失光标的链接来纠正。举个例子: 
+</p>
+<pre>$ cd ~/.icons/<i>theme</i>/cursors/
+$ ln -s right_ptr arrow
+$ ln -s cross crosshair
+$ ln -s right_ptr draft_large
+$ ln -s right_ptr draft_small
+$ ln -s cross plus
+$ ln -s left_ptr top_left_arrow
+$ ln -s cross tcross
+$ ln -s hand hand1
+$ ln -s hand hand2
+$ ln -s left_side left_tee
+$ ln -s left_ptr ul_angle
+$ ln -s left_ptr ur_angle
+$ ln -s left_ptr_watch 08e8e1c95fe2fc01f976f1e063a24ccd
+</pre>
+<p>如果以上命令没能解决问题,看看 <code>/usr/share/icons/whiteglass/cursors</code> 来获取你的主题丢失的光标,并且给它们也创建链接。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>你也可以移除不想要的光标。移除 "watch" 光标的例子:
+<pre>$ cd ~/.icons/<i>theme</i>/cursors/
+$ rm watch left_ptr_watch
+$ ln -s left_ptr watch
+$ ln -s left_ptr left_ptr_watch
+</pre>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_.E6.8F.90.E4.BE.9B.E4.B8.A2.E5.A4.B1.E7.9A.84.E5.85.89.E6.A0.87" id="提供丢失的光标"><span id=".E6.8F.90.E4.BE.9B.E4.B8.A2.E5.A4.B1.E7.9A.84.E5.85.89.E6.A0.87"></span>提供丢失的光标</h3></div>
+<p>一些程序设置了它们特制的光标 <code>~/.Xresources</code> ,你可能想要覆盖它们。一个常见的例子是 rdesktop,它与 Microsoft Windows 电脑连接并使用远程机器的光标,这个光标因协议限制导致转译质量差,通常很难看清。
+</p><p>这可以通过用相同(或另一个)光标主题替换这些光标来解决。想要达成目的,必须获得图像的<b>hash</b>。这可以通过在启动设置这些光标的程序前设置 <code>XCURSOR_DISCOVER</code> 环境变量来完成:
+</p>
+<pre>$ XCURSOR_DISCOVER=1 rdesktop ...
+</pre>
+<p>在首次(而且只有首次)光标设置时,一些细节会被展示出来,像这样
+</p>
+<pre>Cursor image name: 24020000002800000528000084810000
+...
+Cursor image name: 7bf1cc07d310bf080118007e08fc30ff
+...
+Cursor hash 24020000002800000528000084810000 returns 0x0
+</pre>
+<p>当X光标寻找丢失的光标时,搜索的路径包含了<code>~/.icons/default/cursors</code> 所以这里可以放置用于X光标搜索的图像。首先,如果还没有这个目录就创建它:
+</p>
+<pre>$ mkdir -p ~/.icons/default/cursors
+</pre>
+<p>然后将hash链接到目标图像。这里我们使用来自 <code>Vanilla-DMZ</code> 光标主题的 <code>left_ptr</code> 图像
+</p>
+<pre>$ ln -s /usr/share/icons/Vanilla-DMZ/cursors/left_ptr ~/.icons/default/cursors/24020000002800000528000084810000
+</pre>
+<p>应用重启后就可以看到更改效果。不需要特殊的启动应用的方法。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2e2005378336_rdesktop" id="rdesktop">rdesktop</h4></div>
+<p>这里有一些 rdesktop 连接运行 Windows 7 的远程机器时常见的 Microsoft Windows 光标。不幸的是,动态光标难以被覆盖因为它们是被逐帧发送的,所以每一帧都需要一个映射!
+</p>
+<pre>$ ln -s /usr/share/icons/$THEME/cursors/xterm          ~/.icons/default/cursors/00000000017e000002fc000000000000
+$ ln -s /usr/share/icons/$THEME/cursors/right_ptr      ~/.icons/default/cursors/00000093000010860000631100006609
+$ ln -s /usr/share/icons/$THEME/cursors/plus           ~/.icons/default/cursors/01e00000201c00004038000080300000
+$ ln -s /usr/share/icons/$THEME/cursors/left_ptr       ~/.icons/default/cursors/24020000002800000528000084810000
+$ ln -s /usr/share/icons/$THEME/cursors/left_ptr_watch ~/.icons/default/cursors/6ce0180090108e0005814700a0021400
+$ ln -s /usr/share/icons/$THEME/cursors/hand           ~/.icons/default/cursors/d2201000a2c622004385440041308800
+$ ln -s /usr/share/icons/$THEME/cursors/watch          ~/.icons/default/cursors/fc618c00da110f0034fd0e004e082400
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_.E6.9B.B4.E6.94.B9.E9.BB.98.E8.AE.A4_X_.E5.BD.A2.E5.85.89.E6.A0.87" id="更改默认_X_形光标"><span id=".E6.9B.B4.E6.94.B9.E9.BB.98.E8.AE.A4_X_.E5.BD.A2.E5.85.89.E6.A0.87"></span>更改默认 X 形光标</h3></div>
+<p>默认的 X 形光标出现在没有设置默认光标为 left_ptr 的窗口管理器或用 XCB 代替 Xlib 的窗口管理器(如 <a href="#pg24b8665395f7">awesome</a>)中。
+</p><p>要想修复只需将下列内容添加到你的 <code>~/.xinitrc</code> ,X会话 或 窗口管理器启动配置(如果可以的话,例如 bspwm 的 bspwmrrc)。
+</p>
+<pre>$ xsetroot -cursor_name left_ptr
+</pre>
+<p>光标风格列表在 X 协议的 <a href="https://tronche.com/gui/x/xlib/appendix/b/">appendix B</a> 中。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336__Xdefaults" id=".Xdefaults">.Xdefaults</h3></div>
+<p>如果你有冲突的光标,它可能是因为一个不同的光标已经在 <code>~/.Xdefaults</code> 文件中被设置。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_.E5.85.89.E6.A0.87.E5.A4.A7.E5.B0.8F.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E4.B8.8D.E4.BC.9A.E6.94.B9.E5.8F.98" id="光标大小在启动时不会改变"><span id=".E5.85.89.E6.A0.87.E5.A4.A7.E5.B0.8F.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E4.B8.8D.E4.BC.9A.E6.94.B9.E5.8F.98"></span>光标大小在启动时不会改变</h3></div>
+<p>如果你正试着通过你的 <code>~/.xinitrc</code> 中的 <code>~/.Xresources</code> 并且它没用的话,确保 xrandr 在加载 <code>~/.Xresources</code> 运行。
+</p><p>确保你的 <code>~/.xinitrc</code> 看起来类似于下面这样
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xinitrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">xrandr
+...
+xrdb -merge ~/.Xresources
+exec <i>wm</i></pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2e2005378336_Plasma_.28Wayland.29_.E4.B8.8A.E7.9A.84.E5.85.89.E6.A0.87.E5.A4.A7.E5.B0.8F.E6.88.96.E4.B8.BB.E9.A2.98.E4.B8.8D.E5.8F.98" id="Plasma_(Wayland)_上的光标大小或主题不变"><span id="Plasma_.28Wayland.29_.E4.B8.8A.E7.9A.84.E5.85.89.E6.A0.87.E5.A4.A7.E5.B0.8F.E6.88.96.E4.B8.BB.E9.A2.98.E4.B8.8D.E5.8F.98"></span>Plasma (Wayland) 上的光标大小或主题不变</h3></div>
+<p>在使用 <a href="#pga21a6be8b605">Wayland</a> 下的 <a href="#pgb8d7c68cf276">Plasma</a> 修改光标尺寸或主题时,确保在应用更改后重启。<a href="https://community.kde.org/Plasma/Wayland_Showstoppers#KWin.2Fcompositing.2Fwindow_management">[1]</a> <a href="https://bugs.kde.org/show_bug.cgi?id=420859">[2]</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2e2005378336_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><span class="plainlinks archwiki-template-man" title="$ man 3 Xcursor"><a href="https://man.archlinux.org/man/Xcursor.3">Xcursor(3)</a></span>——获取有关 X 中光标的更多信息(支持的 目录, 格式, 兼容性等等)。</li>
+<li>要想创作光标文件, 请见 <a href="#pg661d5263c09b">Xcursorgen</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807040109
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.143 seconds
+Real time usage: 0.148 seconds
+Preprocessor visited node count: 430/1000000
+Revision size: 11111/2097152 bytes
+Post‐expand include size: 3637/2097152 bytes
+Template argument size: 1671/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   37.916      1 -total
+ 20.56%    7.795     35 Template:Ic
+  9.94%    3.768      2 Template:Tip
+  8.72%    3.307      1 Template:Pkg
+  7.47%    2.833      2 Template:注意
+  7.08%    2.686      4 Template:Hc
+  5.67%    2.148      1 Template:Man
+-->
+<!-- Render ID 9f037c8e-9214-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2971:|#|:idhash:canonical!zh-cn and timestamp 20260807040109 and revision id 33707. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

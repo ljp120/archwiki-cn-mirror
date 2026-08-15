@@ -1,0 +1,92 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pge17107b5e009">ThinkPad 静音键</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN">
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/ThinkPad_mute_button">ThinkPad mute button</a>，最近一次同步于 2021-03-04，若英文版本有所<a href="https://wiki.archlinux.org/title/ThinkPad_mute_button?diff=0&amp;oldid=657483">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/ThinkPad_mute_button_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge17107b5e009_.E9.97.AE.E9.A2.98" id="问题"><span id=".E9.97.AE.E9.A2.98"></span>问题</h2></div>
+<p>当使用较新的内核时，绝大多数ThinkPad和IdeaPad上的静音键无法正常工作。具体表现为：
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge17107b5e009_.E9.9D.99.E9.9F.B3.E9.94.AE.E5.AE.8C.E5.85.A8.E4.B8.8D.E5.B7.A5.E4.BD.9C" id="静音键完全不工作"><span id=".E9.9D.99.E9.9F.B3.E9.94.AE.E5.AE.8C.E5.85.A8.E4.B8.8D.E5.B7.A5.E4.BD.9C"></span>静音键完全不工作</h3></div>
+<p>静音键没有任何反应：键盘上的LED指示灯不亮（部分ThinkPad的静音键上有一个指示静音状态的LED灯），同时扬声器的音量也没有任何变化。在这种情况下，只有按了静音键之后再按音量键小键，才能真正静音。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge17107b5e009_.E5.A4.96.E6.8E.A5.E9.9F.B3.E9.A2.91.E8.AE.BE.E5.A4.87.E4.B8.8D.E9.9D.99.E9.9F.B3" id="外接音频设备不静音"><span id=".E5.A4.96.E6.8E.A5.E9.9F.B3.E9.A2.91.E8.AE.BE.E5.A4.87.E4.B8.8D.E9.9D.99.E9.9F.B3"></span>外接音频设备不静音</h3></div>
+<p>按下静音键后，内置扬声器被静音了（静音键上的LED指示灯状态也正确改变），但是外接音频设备依然未被静音。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge17107b5e009_.E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88" id="解决方案"><span id=".E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88"></span>解决方案</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge17107b5e009_.E6.97.A7.E5.9E.8B.E5.8F.B7.E7.9A.84IBM_ThinkPad" id="旧型号的IBM_ThinkPad"><span id=".E6.97.A7.E5.9E.8B.E5.8F.B7.E7.9A.84IBM_ThinkPad"></span>旧型号的IBM ThinkPad</h3></div>
+<p>尝试这个页面提供的解决方案："<a href="https://www.thinkwiki.org/wiki/Mute_button">https://www.thinkwiki.org/wiki/Mute_button</a>"
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge17107b5e009_.E9.9D.99.E9.9F.B3.E9.94.AE.E5.AE.8C.E5.85.A8.E4.B8.8D.E5.B7.A5.E4.BD.9C_2" id="静音键完全不工作_2"><span id=".E9.9D.99.E9.9F.B3.E9.94.AE.E5.AE.8C.E5.85.A8.E4.B8.8D.E5.B7.A5.E4.BD.9C_2"></span>静音键完全不工作</h3></div>
+<p>编辑<code>/etc/modprobe.d/modprobe.conf</code>，添加以下内容：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/modprobe.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+options thinkpad_acpi enabled=0 # enables Mute-Button on ThinkPads with IdeaPad-Firmware</pre>
+<p>保存后重启，检查静音键是否正确工作。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge17107b5e009_.E5.A4.96.E6.8E.A5.E9.9F.B3.E9.A2.91.E8.AE.BE.E5.A4.87.E4.B8.8D.E9.9D.99.E9.9F.B3_2" id="外接音频设备不静音_2"><span id=".E5.A4.96.E6.8E.A5.E9.9F.B3.E9.A2.91.E8.AE.BE.E5.A4.87.E4.B8.8D.E9.9D.99.E9.9F.B3_2"></span>外接音频设备不静音</h3></div>
+<p>从<a href="#pg89cb7b475cfb">AUR</a>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tpb/">tpb</a></span><sup><small>AUR</small></sup></span>，并创建文件<code>/root/.tpbrc</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/root/.tpbrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#tpb-Settings:
+CALLBACK "/root/tp-key-handler"
+OSD off
+</pre>
+<p>然后创建文件<code>/root/tp-key-handler</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/root/tp-key-handler</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+echo $1 $2
+if [ $1 = mute ]; then
+	if [ $2 = on ]; then
+		mset="off";
+	else
+		mset="on";
+	fi
+	sudo -u USERNAME amixer sset Master $mset; # I had to sudo to me, because I use PulseAudio
+fi</pre>
+<p>创建后还需要给<code>/root/tp-key-handler</code>增加可执行权限：
+</p>
+<pre>chmod +x /root/tp-key-handler 
+</pre>
+<p>由于tpb和<a href="#pg77b3799bdb30">X</a>一样需要root权限，启动tpb需要在<code>.xinitrc</code>添加<code>sudo tpb</code>，并且需要编辑<a href="#pg023562413be7">sudo</a>设置（使用<code>visudo</code>），或者在任何的X启动脚本中增加<code>gksudo tpb</code>（这个方法会在系统启动时要求输入密码）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge17107b5e009_.E5.A4.96.E6.8E.A5.E9.9F.B3.E9.A2.91.E8.AE.BE.E5.A4.87.E4.B8.8D.E9.9D.99.E9.9F.B3.EF.BC.88Xfce.E7.8E.AF.E5.A2.83.EF.BC.89" id="外接音频设备不静音（Xfce环境）"><span id=".E5.A4.96.E6.8E.A5.E9.9F.B3.E9.A2.91.E8.AE.BE.E5.A4.87.E4.B8.8D.E9.9D.99.E9.9F.B3.EF.BC.88Xfce.E7.8E.AF.E5.A2.83.EF.BC.89"></span>外接音频设备不静音（Xfce环境）</h3></div>
+<p>前往“应用程序-设置-键盘-应用程序快捷键”选项卡。点击“添加”，在“命令”处输入<code>amixer sset Master toggle</code>，在“按键”处按下静音键。温馨提示：为了确保静音键上的LED指示灯的状态和系统静音状态保持一致，在设定快捷键前请将静音键上的LED指示灯与系统静音状态保持相反（译者注：即静音键LED指示灯亮起的同时系统处于未静音状态，或静音键LED指示灯熄灭的同时系统处于静音状态）。如此，在设定快捷键后，静音键上的LED指示灯与系统静音状态才能保持一致。如果恰好弄反了，重启电脑，在进入<a href="#pg361394ab1daf">Xfce</a>会话前将静音键上的LED指示灯熄灭即可。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807070157
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.088 seconds
+Real time usage: 0.095 seconds
+Preprocessor visited node count: 207/1000000
+Revision size: 2959/2097152 bytes
+Post‐expand include size: 4428/2097152 bytes
+Template argument size: 1333/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   21.250      1 -total
+ 25.90%    5.504      1 Template:过时
+ 17.98%    3.821      2 Template:META_Message
+ 14.80%    3.144      1 Template:翻译状态
+ 12.89%    2.740      1 Template:Style
+  9.79%    2.080      9 Template:Ic
+  7.40%    1.573      3 Template:Hc
+  5.00%    1.063      1 Template:AUR
+  4.82%    1.024      1 Template:META_Unexplained_Status_Template
+-->
+<!-- Render ID e0ecec8e-922d-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6795:|#|:idhash:canonical!zh-cn and timestamp 20260807070157 and revision id 33674. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

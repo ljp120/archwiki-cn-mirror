@@ -1,0 +1,668 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg09673ef0d876">字体配置/中文</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN">
+<p>全局修改字体配置，修改 <code>/etc/fonts/local.conf</code>。配置用户字体，修改 <code>$XDG_CONFIG_HOME/fontconfig/fonts.conf</code>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09673ef0d876_Android_.E6.98.BE.E7.A4.BA.E6.95.88.E6.9E.9C.E7.9A.84.E5.AD.97.E4.BD.93.E5.8F.82.E8.80.83.E9.85.8D.E7.BD.AE" id="Android_显示效果的字体参考配置"><span id="Android_.E6.98.BE.E7.A4.BA.E6.95.88.E6.9E.9C.E7.9A.84.E5.AD.97.E4.BD.93.E5.8F.82.E8.80.83.E9.85.8D.E7.BD.AE"></span>Android 显示效果的字体参考配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09673ef0d876_.E5.AE.89.E8.A3.85.E5.AD.97.E4.BD.93" id="安装字体"><span id=".E5.AE.89.E8.A3.85.E5.AD.97.E4.BD.93"></span>安装字体</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-roboto">ttf-roboto</a></span><sup><small>包</small></sup></span> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=noto-fonts">noto-fonts</a></span><sup><small>包</small></sup></span> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=noto-fonts-cjk">noto-fonts-cjk</a></span><sup><small>包</small></sup></span> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-han-sans-cn-fonts">adobe-source-han-sans-cn-fonts</a></span><sup><small>包</small></sup></span> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-han-serif-cn-fonts">adobe-source-han-serif-cn-fonts</a></span><sup><small>包</small></sup></span> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-dejavu">ttf-dejavu</a></span><sup><small>包</small></sup></span>。
+</p><p>see <a href="https://wiki.archlinux.org/title/Localization/Chinese">archlinux wiki</a> for detail
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09673ef0d876_.E6.B7.BB.E5.8A.A0.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6" id="添加配置文件"><span id=".E6.B7.BB.E5.8A.A0.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6"></span>添加配置文件</h3></div>
+<p><code>~/.config/fontconfig/fonts.conf</code> 或 <code>/etc/fonts/local.conf</code>：</p><div class="mw-highlight mw-highlight-lang-xml mw-content-ltr" dir="ltr"><pre><span></span><span class="cp">&lt;?xml version="1.0"?&gt;</span>
+<span class="cp">&lt;!DOCTYPE fontconfig SYSTEM "fonts.dtd"&gt;</span>
+<span class="nt">&lt;fontconfig&gt;</span>
+<span class="w">  </span><span class="nt">&lt;its:rules</span><span class="w"> </span><span class="na">xmlns:its=</span><span class="s">"http://www.w3.org/2005/11/its"</span><span class="w"> </span><span class="na">version=</span><span class="s">"1.0"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;its:translateRule</span>
+<span class="w">      </span><span class="na">translate=</span><span class="s">"no"</span>
+<span class="w">      </span><span class="na">selector=</span><span class="s">"/fontconfig/*[not(self::description)]"</span>
+<span class="w">    </span><span class="nt">/&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/its:rules&gt;</span>
+
+<span class="w">  </span><span class="nt">&lt;description&gt;</span>Android<span class="w"> </span>Font<span class="w"> </span>Config<span class="nt">&lt;/description&gt;</span>
+
+<span class="w">  </span><span class="cm">&lt;!-- Font directory list --&gt;</span>
+
+<span class="w">  </span><span class="nt">&lt;dir&gt;</span>/usr/share/fonts<span class="nt">&lt;/dir&gt;</span>
+<span class="w">  </span><span class="nt">&lt;dir&gt;</span>/usr/local/share/fonts<span class="nt">&lt;/dir&gt;</span>
+<span class="w">  </span><span class="nt">&lt;dir</span><span class="w"> </span><span class="na">prefix=</span><span class="s">"xdg"</span><span class="nt">&gt;</span>fonts<span class="nt">&lt;/dir&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!-- the following element will be removed in the future --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;dir&gt;</span>~/.fonts<span class="nt">&lt;/dir&gt;</span>
+
+<span class="w">  </span><span class="cm">&lt;!-- 关闭内嵌点阵字体 --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"font"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"embeddedbitmap"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;bool&gt;</span>false<span class="nt">&lt;/bool&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+
+<span class="w">  </span><span class="cm">&lt;!-- 英文默认字体使用 Roboto 和 Noto Serif ,终端使用 DejaVu Sans Mono. --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>serif<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"prepend"</span><span class="w"> </span><span class="na">binding=</span><span class="s">"strong"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Noto<span class="w"> </span>Serif<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>sans-serif<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"prepend"</span><span class="w"> </span><span class="na">binding=</span><span class="s">"strong"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Roboto<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>monospace<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"prepend"</span><span class="w"> </span><span class="na">binding=</span><span class="s">"strong"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>DejaVu<span class="w"> </span>Sans<span class="w"> </span>Mono<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+
+<span class="w">  </span><span class="cm">&lt;!-- 中文默认字体使用思源黑体和思源宋体,不使用　Noto Sans CJK SC 是因为这个字体会在特定情况下显示片假字. --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"lang"</span><span class="w"> </span><span class="na">compare=</span><span class="s">"contains"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>zh<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>serif<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"prepend"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Source<span class="w"> </span>Han<span class="w"> </span>Serif<span class="w"> </span>CN<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"lang"</span><span class="w"> </span><span class="na">compare=</span><span class="s">"contains"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>zh<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>sans-serif<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"prepend"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Source<span class="w"> </span>Han<span class="w"> </span>Sans<span class="w"> </span>CN<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"lang"</span><span class="w"> </span><span class="na">compare=</span><span class="s">"contains"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>zh<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>monospace<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"prepend"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Noto<span class="w"> </span>Sans<span class="w"> </span>Mono<span class="w"> </span>CJK<span class="w"> </span>SC<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+
+<span class="w">  </span><span class="cm">&lt;!-- Windows &amp; Linux Chinese fonts. --&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!-- 把所有常见的中文字体映射到思源黑体和思源宋体，这样当这些字体未安装时会使用思源黑体和思源宋体.</span>
+<span class="cm">解决特定程序指定使用某字体，并且在字体不存在情况下不会使用fallback字体导致中文显示不正常的情况. --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>WenQuanYi<span class="w"> </span>Zen<span class="w"> </span>Hei<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">binding=</span><span class="s">"same"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Source<span class="w"> </span>Han<span class="w"> </span>Sans<span class="w"> </span>CN<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>WenQuanYi<span class="w"> </span>Micro<span class="w"> </span>Hei<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">binding=</span><span class="s">"same"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Source<span class="w"> </span>Han<span class="w"> </span>Sans<span class="w"> </span>CN<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>WenQuanYi<span class="w"> </span>Micro<span class="w"> </span>Hei<span class="w"> </span>Light<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">binding=</span><span class="s">"same"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Source<span class="w"> </span>Han<span class="w"> </span>Sans<span class="w"> </span>CN<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Microsoft<span class="w"> </span>YaHei<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">binding=</span><span class="s">"same"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Source<span class="w"> </span>Han<span class="w"> </span>Sans<span class="w"> </span>CN<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>SimHei<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">binding=</span><span class="s">"same"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Source<span class="w"> </span>Han<span class="w"> </span>Sans<span class="w"> </span>CN<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>SimSun<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">binding=</span><span class="s">"same"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Source<span class="w"> </span>Han<span class="w"> </span>Serif<span class="w"> </span>CN<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+<span class="w">  </span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>SimSun-18030<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">binding=</span><span class="s">"same"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Source<span class="w"> </span>Han<span class="w"> </span>Serif<span class="w"> </span>CN<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+
+<span class="w">  </span><span class="cm">&lt;!-- Load local system customization file --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;include</span><span class="w"> </span><span class="na">ignore_missing=</span><span class="s">"yes"</span><span class="nt">&gt;</span>conf.d<span class="nt">&lt;/include&gt;</span>
+
+<span class="w">  </span><span class="cm">&lt;!-- Font cache directory list --&gt;</span>
+
+<span class="w">  </span><span class="nt">&lt;cachedir&gt;</span>/var/cache/fontconfig<span class="nt">&lt;/cachedir&gt;</span>
+<span class="w">  </span><span class="nt">&lt;cachedir</span><span class="w"> </span><span class="na">prefix=</span><span class="s">"xdg"</span><span class="nt">&gt;</span>fontconfig<span class="nt">&lt;/cachedir&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!-- the following element will be removed in the future --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;cachedir&gt;</span>~/.fontconfig<span class="nt">&lt;/cachedir&gt;</span>
+
+<span class="w">  </span><span class="nt">&lt;config&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- Rescan configuration every 30 seconds when FcFontSetList is called --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;rescan&gt;</span>
+<span class="w">      </span><span class="nt">&lt;int&gt;</span>30<span class="nt">&lt;/int&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/rescan&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/config&gt;</span>
+<span class="nt">&lt;/fontconfig&gt;</span>
+</pre></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09673ef0d876_Windows_.E6.98.BE.E7.A4.BA.E6.95.88.E6.9E.9C.E7.9A.84.E5.AD.97.E4.BD.93.E5.8F.82.E8.80.83.E9.85.8D.E7.BD.AE" id="Windows_显示效果的字体参考配置"><span id="Windows_.E6.98.BE.E7.A4.BA.E6.95.88.E6.9E.9C.E7.9A.84.E5.AD.97.E4.BD.93.E5.8F.82.E8.80.83.E9.85.8D.E7.BD.AE"></span>Windows 显示效果的字体参考配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09673ef0d876_.E5.AE.89.E8.A3.85_MS_core_fonts" id="安装_MS_core_fonts"><span id=".E5.AE.89.E8.A3.85_MS_core_fonts"></span>安装 MS core fonts</h3></div>
+<p>参见<a href="#pg40371f3dc11a">微软字体</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09673ef0d876_.E5.8A.A0.E5.85.A5.E9.85.8D.E7.BD.AE" id="加入配置"><span id=".E5.8A.A0.E5.85.A5.E9.85.8D.E7.BD.AE"></span>加入配置</h3></div>
+<div class="mw-highlight mw-highlight-lang-xml mw-content-ltr" dir="ltr"><pre><span></span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"font"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"autohint"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>false<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"hinting"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>true<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"antialias"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>true<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="cm">&lt;!--</span>
+<span class="cm">    Synthetic emboldening for fonts that do not have bold face available</span>
+<span class="cm"> --&gt;</span>
+
+<span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"font"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!-- check to see if the font is just regular --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"weight"</span><span class="w"> </span><span class="na">compare=</span><span class="s">"less_eq"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;const&gt;</span>medium<span class="nt">&lt;/const&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!-- check to see if the pattern requests bold --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="w"> </span><span class="na">name=</span><span class="s">"weight"</span><span class="w"> </span><span class="na">compare=</span><span class="s">"more"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;const&gt;</span>medium<span class="nt">&lt;/const&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!--</span>
+<span class="cm">      set the embolden flag</span>
+<span class="cm">      needed for applications using cairo, e.g. gucharmap, gedit, ...</span>
+<span class="cm">  --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"embolden"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>true<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!--</span>
+<span class="cm">      set weight to bold</span>
+<span class="cm">      needed for applications using Xft directly, e.g. Firefox, ...</span>
+<span class="cm">  --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"weight"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;const&gt;</span>bold<span class="nt">&lt;/const&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"font"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="w"> </span><span class="na">name=</span><span class="s">"lang"</span><span class="w"> </span><span class="na">compare=</span><span class="s">"contains"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>zh<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>ja<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>ko<span class="nt">&lt;/string&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"spacing"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;const&gt;</span>proportional<span class="nt">&lt;/const&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"globaladvance"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>false<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>SimSun<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>SimSun-18030<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>ShanHeiSun<span class="w"> </span>Uni<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>New<span class="w"> </span>Sung<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>MingLiU<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>PMingLiU<span class="nt">&lt;/string&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">binding=</span><span class="s">"strong"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"prepend"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Tahoma<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Arial<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Verdana<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>DejaVu<span class="w"> </span>Sans<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Bitstream<span class="w"> </span>Vera<span class="w"> </span>Sans<span class="nt">&lt;/string&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"font"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>ShanHeiSun<span class="w"> </span>Uni<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>New<span class="w"> </span>Sung<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>SimSun<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>NSimSun<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>MingLiu<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>PMingLiu<span class="nt">&lt;/string&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"pixelsize"</span><span class="w"> </span><span class="na">compare=</span><span class="s">"less_eq"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;double&gt;</span>12<span class="nt">&lt;/double&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"pixelsize"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;double&gt;</span>12<span class="nt">&lt;/double&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"font"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">compare=</span><span class="s">"eq"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>宋体<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>新宋体<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>SimSun<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>NSimSun<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>宋体-18030<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>新宋体-18030<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>SimSun-18030<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>NSimSun-18030<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>ShanHeiSun<span class="w"> </span>Uni<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>New<span class="w"> </span>Sung<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>MingLiU<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>PMingLiU<span class="nt">&lt;/string&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">compare=</span><span class="s">"less_eq"</span><span class="w"> </span><span class="na">name=</span><span class="s">"pixelsize"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;double&gt;</span>16<span class="nt">&lt;/double&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">name=</span><span class="s">"hinting"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>true<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">name=</span><span class="s">"autohint"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>false<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"antialias"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>false<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">name=</span><span class="s">"hintstyle"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;const&gt;</span>hintslight<span class="nt">&lt;/const&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"font"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Andale<span class="w"> </span>Mono<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Arial<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Comic<span class="w"> </span>Sans<span class="w"> </span>MS<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Georgia<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Impact<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Trebuchet<span class="w"> </span>MS<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Verdana<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Courier<span class="w"> </span>New<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Times<span class="w"> </span>New<span class="w"> </span>Roman<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Tahoma<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Webdings<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Albany<span class="w"> </span>AMT<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Thorndale<span class="w"> </span>AMT<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Cumberland<span class="w"> </span>AMT<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Andale<span class="w"> </span>Sans<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Andy<span class="w"> </span>MT<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Bell<span class="w"> </span>MT<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Monotype<span class="w"> </span>Sorts<span class="nt">&lt;/string&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"pixelsize"</span><span class="w"> </span><span class="na">compare=</span><span class="s">"less_eq"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;double&gt;</span>16<span class="nt">&lt;/double&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"autohint"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>false<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"antialias"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>false<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="nt">&lt;alias&gt;</span>
+<span class="w">  </span><span class="nt">&lt;family&gt;</span>serif<span class="nt">&lt;/family&gt;</span>
+<span class="w">  </span><span class="nt">&lt;prefer&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Times<span class="w"> </span>New<span class="w"> </span>Roman<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Thorndale<span class="w"> </span>AMT<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Nimbus<span class="w"> </span>Roman<span class="w"> </span>No9<span class="w"> </span>L<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>DejaVu<span class="w"> </span>Serif<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Bitstream<span class="w"> </span>Vera<span class="w"> </span>Serif<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Luxi<span class="w"> </span>Serif<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Likhan<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FreeSerif<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Times<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>SimSun<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>SimSun-18030<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>MingLiU<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>WenQuanYi<span class="w"> </span>Bitmap<span class="w"> </span>Song<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>ShanHeiSun<span class="w"> </span>Uni<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>New<span class="w"> </span>Sung<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FZSongTi<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FZMingTiB<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>SungtiL<span class="w"> </span>GB<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>Mingti2L<span class="w"> </span>Big5<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Kochi<span class="w"> </span>Mincho<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>UnBatang<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Baekmuk<span class="w"> </span>Batang<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>HanyiSong<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>ZYSong18030<span class="nt">&lt;/family&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/prefer&gt;</span>
+<span class="nt">&lt;/alias&gt;</span>
+<span class="nt">&lt;alias&gt;</span>
+<span class="w">  </span><span class="nt">&lt;family&gt;</span>sans-serif<span class="nt">&lt;/family&gt;</span>
+<span class="w">  </span><span class="nt">&lt;prefer&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Arial<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Albany<span class="w"> </span>AMT<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Nimbus<span class="w"> </span>Sans<span class="w"> </span>L<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Verdana<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>DejaVu<span class="w"> </span>Sans<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Bitstream<span class="w"> </span>Vera<span class="w"> </span>Sans<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Luxi<span class="w"> </span>Sans<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FreeSans<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Helvetica<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>SimSun<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>SimSun-18030<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>MingLiU<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>WenQuanYi<span class="w"> </span>Bitmap<span class="w"> </span>Song<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>ShanHeiSun<span class="w"> </span>Uni<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>New<span class="w"> </span>Sung<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FZSongTi<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FZMingTiB<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>SungtiL<span class="w"> </span>GB<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>Mingti2L<span class="w"> </span>Big5<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Kochi<span class="w"> </span>Gothic<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>UnDotum<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Baekmuk<span class="w"> </span>Gulim<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Baekmuk<span class="w"> </span>Dotum<span class="nt">&lt;/family&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/prefer&gt;</span>
+<span class="nt">&lt;/alias&gt;</span>
+<span class="nt">&lt;alias&gt;</span>
+<span class="w">  </span><span class="nt">&lt;family&gt;</span>monospace<span class="nt">&lt;/family&gt;</span>
+<span class="w">  </span><span class="nt">&lt;prefer&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Courier<span class="w"> </span>New<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Cumberland<span class="w"> </span>AMT<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Nimbus<span class="w"> </span>Mono<span class="w"> </span>L<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Andale<span class="w"> </span>Mono<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>DejaVu<span class="w"> </span>Sans<span class="w"> </span>Mono<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Bitstream<span class="w"> </span>Vera<span class="w"> </span>Sans<span class="w"> </span>Mono<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Luxi<span class="w"> </span>Mono<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FreeMono<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>NSimSun<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>NSimSun-18030<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>PMingLiU<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>WenQuanYi<span class="w"> </span>Bitmap<span class="w"> </span>Song<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>ShanHeiSun<span class="w"> </span>Uni<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>New<span class="w"> </span>Sung<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FZSongTi<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FZMingTiB<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>SungtiL<span class="w"> </span>GB<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>Mingti2L<span class="w"> </span>Big5<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Kochi<span class="w"> </span>Gothic<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>UnDotum<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Baekmuk<span class="w"> </span>Gulim<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Baekmuk<span class="w"> </span>Dotum<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>HanyiSong<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>ZYSong18030<span class="nt">&lt;/family&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/prefer&gt;</span>
+<span class="nt">&lt;/alias&gt;</span>
+</pre></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09673ef0d876_.E5.8F.8D.E9.94.AF.E9.BD.BF.E6.95.88.E6.9E.9C.E7.9A.84.E5.AD.97.E4.BD.93.E5.8F.82.E8.80.83.E9.85.8D.E7.BD.AE" id="反锯齿效果的字体参考配置"><span id=".E5.8F.8D.E9.94.AF.E9.BD.BF.E6.95.88.E6.9E.9C.E7.9A.84.E5.AD.97.E4.BD.93.E5.8F.82.E8.80.83.E9.85.8D.E7.BD.AE"></span>反锯齿效果的字体参考配置</h2></div>
+<div class="mw-highlight mw-highlight-lang-xml mw-content-ltr" dir="ltr"><pre><span></span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"font"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"autohint"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>true<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"hintstyle"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;const&gt;</span>hintfull<span class="nt">&lt;/const&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"antialias"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>true<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"font"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!-- check to see if the font is just regular --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"weight"</span><span class="w"> </span><span class="na">compare=</span><span class="s">"less_eq"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;const&gt;</span>medium<span class="nt">&lt;/const&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!-- check to see if the pattern requests bold --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="w"> </span><span class="na">name=</span><span class="s">"weight"</span><span class="w"> </span><span class="na">compare=</span><span class="s">"more"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;const&gt;</span>medium<span class="nt">&lt;/const&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!--</span>
+<span class="cm">      set the embolden flag</span>
+<span class="cm">      needed for applications using cairo, e.g. gucharmap, gedit, ...</span>
+<span class="cm">  --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"embolden"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>true<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!--</span>
+<span class="cm">      set weight to bold</span>
+<span class="cm">      needed for applications using Xft directly, e.g. Firefox, ...</span>
+<span class="cm">  --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"weight"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;const&gt;</span>bold<span class="nt">&lt;/const&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"font"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="w"> </span><span class="na">name=</span><span class="s">"lang"</span><span class="w"> </span><span class="na">compare=</span><span class="s">"contains"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>zh<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>ja<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>ko<span class="nt">&lt;/string&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"spacing"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;const&gt;</span>proportional<span class="nt">&lt;/const&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"globaladvance"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>false<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"pattern"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>SimSun<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>SimSun-18030<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>ShanHeiSun<span class="w"> </span>Uni<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>New<span class="w"> </span>Sung<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>MingLiU<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>PMingLiU<span class="nt">&lt;/string&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">binding=</span><span class="s">"strong"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"prepend"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Tahoma<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Arial<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Verdana<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>DejaVu<span class="w"> </span>Sans<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>Bitstream<span class="w"> </span>Vera<span class="w"> </span>Sans<span class="nt">&lt;/string&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"font"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>ShanHeiSun<span class="w"> </span>Uni<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>New<span class="w"> </span>Sung<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>SimSun<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>NSimSun<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>MingLiu<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>PMingLiu<span class="nt">&lt;/string&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">name=</span><span class="s">"pixelsize"</span><span class="w"> </span><span class="na">compare=</span><span class="s">"less_eq"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;double&gt;</span>12<span class="nt">&lt;/double&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"pixelsize"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;double&gt;</span>12<span class="nt">&lt;/double&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"font"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">compare=</span><span class="s">"eq"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>宋体<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>新宋体<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>SimSun<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>NSimSun<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>宋体-18030<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>新宋体-18030<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>SimSun-18030<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>NSimSun-18030<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>ShanHeiSun<span class="w"> </span>Uni<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>New<span class="w"> </span>Sung<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>MingLiU<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;string&gt;</span>PMingLiU<span class="nt">&lt;/string&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">compare=</span><span class="s">"less_eq"</span><span class="w"> </span><span class="na">name=</span><span class="s">"pixelsize"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;double&gt;</span>16<span class="nt">&lt;/double&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">name=</span><span class="s">"hinting"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>true<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">name=</span><span class="s">"autohint"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>false<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"antialias"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;bool&gt;</span>false<span class="nt">&lt;/bool&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">mode=</span><span class="s">"assign"</span><span class="w"> </span><span class="na">name=</span><span class="s">"hintstyle"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;const&gt;</span>hintslight<span class="nt">&lt;/const&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/edit&gt;</span>
+<span class="nt">&lt;/match&gt;</span>
+
+<span class="nt">&lt;alias&gt;</span>
+<span class="w">  </span><span class="nt">&lt;family&gt;</span>serif<span class="nt">&lt;/family&gt;</span>
+<span class="w">  </span><span class="nt">&lt;prefer&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Nimbus<span class="w"> </span>Roman<span class="w"> </span>No9<span class="w"> </span>L<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Thorndale<span class="w"> </span>AMT<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>DejaVu<span class="w"> </span>Serif<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Bitstream<span class="w"> </span>Vera<span class="w"> </span>Serif<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Times<span class="w"> </span>New<span class="w"> </span>Roman<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Luxi<span class="w"> </span>Serif<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Likhan<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FreeSerif<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Times<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>SimSun<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>SimSun-18030<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>MingLiU<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>WenQuanYi<span class="w"> </span>Bitmap<span class="w"> </span>Song<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>ShanHeiSun<span class="w"> </span>Uni<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>New<span class="w"> </span>Sung<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FZSongTi<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FZMingTiB<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>SungtiL<span class="w"> </span>GB<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>Mingti2L<span class="w"> </span>Big5<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Kochi<span class="w"> </span>Mincho<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>UnBatang<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Baekmuk<span class="w"> </span>Batang<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>HanyiSong<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>ZYSong18030<span class="nt">&lt;/family&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/prefer&gt;</span>
+<span class="nt">&lt;/alias&gt;</span>
+<span class="nt">&lt;alias&gt;</span>
+<span class="w">  </span><span class="nt">&lt;family&gt;</span>sans-serif<span class="nt">&lt;/family&gt;</span>
+<span class="w">  </span><span class="nt">&lt;prefer&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>DejaVu<span class="w"> </span>Sans<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Bitstream<span class="w"> </span>Vera<span class="w"> </span>Sans<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Luxi<span class="w"> </span>Sans<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Arial<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Verdana<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Albany<span class="w"> </span>AMT<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Nimbus<span class="w"> </span>Sans<span class="w"> </span>L<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FreeSans<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Helvetica<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>SimSun<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>SimSun-18030<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>MingLiU<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>WenQuanYi<span class="w"> </span>Bitmap<span class="w"> </span>Song<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>ShanHeiSun<span class="w"> </span>Uni<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>New<span class="w"> </span>Sung<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FZSongTi<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FZMingTiB<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>SungtiL<span class="w"> </span>GB<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>Mingti2L<span class="w"> </span>Big5<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Kochi<span class="w"> </span>Gothic<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>UnDotum<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Baekmuk<span class="w"> </span>Gulim<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Baekmuk<span class="w"> </span>Dotum<span class="nt">&lt;/family&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/prefer&gt;</span>
+<span class="nt">&lt;/alias&gt;</span>
+<span class="nt">&lt;alias&gt;</span>
+<span class="w">  </span><span class="nt">&lt;family&gt;</span>monospace<span class="nt">&lt;/family&gt;</span>
+<span class="w">  </span><span class="nt">&lt;prefer&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>DejaVu<span class="w"> </span>Sans<span class="w"> </span>Mono<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Bitstream<span class="w"> </span>Vera<span class="w"> </span>Sans<span class="w"> </span>Mono<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Luxi<span class="w"> </span>Mono<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Courier<span class="w"> </span>New<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Cumberland<span class="w"> </span>AMT<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Nimbus<span class="w"> </span>Mono<span class="w"> </span>L<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Andale<span class="w"> </span>Mono<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FreeMono<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>NSimSun<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>NSimSun-18030<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>PMingLiU<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>WenQuanYi<span class="w"> </span>Bitmap<span class="w"> </span>Song<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>ShanHeiSun<span class="w"> </span>Uni<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>New<span class="w"> </span>Sung<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FZSongTi<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>FZMingTiB<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>SungtiL<span class="w"> </span>GB<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>AR<span class="w"> </span>PL<span class="w"> </span>Mingti2L<span class="w"> </span>Big5<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Kochi<span class="w"> </span>Gothic<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>UnDotum<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Baekmuk<span class="w"> </span>Gulim<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>Baekmuk<span class="w"> </span>Dotum<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>HanyiSong<span class="nt">&lt;/family&gt;</span>
+<span class="w">    </span><span class="nt">&lt;family&gt;</span>ZYSong18030<span class="nt">&lt;/family&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/prefer&gt;</span>
+<span class="nt">&lt;/alias&gt;</span>
+</pre></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09673ef0d876_.E7.A6.81.E7.94.A8.E4.B8.AD.E6.96.87.E6.96.9C.E4.BD.93" id="禁用中文斜体"><span id=".E7.A6.81.E7.94.A8.E4.B8.AD.E6.96.87.E6.96.9C.E4.BD.93"></span>禁用中文斜体</h2></div><p>
+针对中文字体添加“斜体”属性，即可让此字体的“斜体”不再倾斜（注意替换你所使用的中文字体名）。更改此项配置之后需要执行 <code>fc-cache -f</code>。</p><div class="mw-highlight mw-highlight-lang-xml mw-content-ltr" dir="ltr"><pre><span></span><span class="w">  </span><span class="nt">&lt;match</span><span class="w"> </span><span class="na">target=</span><span class="s">"scan"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;test</span><span class="w"> </span><span class="na">qual=</span><span class="s">"any"</span><span class="w"> </span><span class="na">name=</span><span class="s">"family"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>Noto<span class="w"> </span>Sans<span class="w"> </span>CJK<span class="w"> </span>SC<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/test&gt;</span>
+<span class="w">    </span><span class="nt">&lt;edit</span><span class="w"> </span><span class="na">name=</span><span class="s">"slant"</span><span class="w"> </span><span class="na">binding=</span><span class="s">"same"</span><span class="w"> </span><span class="na">mode=</span><span class="s">"append"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;const&gt;</span>Italic<span class="nt">&lt;/const&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/edit&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/match&gt;</span>
+</pre></div>
+<!-- 
+NewPP limit report
+Cached time: 20260807024232
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.295 seconds
+Real time usage: 1.377 seconds
+Preprocessor visited node count: 137/1000000
+Revision size: 18403/2097152 bytes
+Post‐expand include size: 2419/2097152 bytes
+Template argument size: 616/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 4/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 80140/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   11.530      1 -total
+ 41.01%    4.728      1 Template:Style
+ 27.34%    3.152      6 Template:Pkg
+ 15.42%    1.778      1 Template:META_Message
+  9.94%    1.146      2 Template:Ic
+-->
+<!-- Render ID a376680e-9209-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6044:|#|:idhash:canonical!zh-cn and timestamp 20260807024232 and revision id 33748. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

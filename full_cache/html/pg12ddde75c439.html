@@ -1,0 +1,268 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg12ddde75c439">网络摄像机配置</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN">
+
+<p>本文将帮助你在 Arch Linux 中安装网络摄像机。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg12ddde75c439_.E8.AF.86.E5.88.AB.E4.BD.A0.E7.9A.84.E7.BD.91.E7.BB.9C.E6.91.84.E5.83.8F.E6.9C.BA" id="识别你的网络摄像机"><span id=".E8.AF.86.E5.88.AB.E4.BD.A0.E7.9A.84.E7.BD.91.E7.BB.9C.E6.91.84.E5.83.8F.E6.9C.BA"></span>识别你的网络摄像机</h2></div>
+<p>识别你的网络摄像机的名称并使用恰当的驱动程序。 下面列出部分网络摄像机的名称，以及它们所需的驱动程序。点击设备名称右边的链接以获取编译模块所需信息及其他相关信息。如果你正确设置并使用其他网络摄像机，请将其名称和驱动程序添加到列表中！
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_pwc" id="pwc">pwc</h3></div>
+<ul><li>Creative Labs Webcam Pro Ex （创新实验室网络摄像机专家加强版）</li>
+<li>Logitech QuickCam Notebook Pro（罗技快看笔记本专用专家版，仅适用于“专家版”机型）</li>
+<li>Logitech Quickcam Pro 4000</li>
+<li>Philips ToUCams (not confirmed at the moment, but it is using the pwc driver if I remember correctly)</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_qc_usb" id="qc-usb">qc-usb</h3></div>
+<ul><li>Dexxa Webcam （Dexxa 网络摄像机）</li>
+<li>Labtec Webcam (old model) （Labtec 网络摄像机，旧机型）</li>
+<li>LegoCam</li>
+<li>Logitech Quickcam Express (old model)（罗技快看加强版，旧机型）</li>
+<li>Logitech QuickCam Notebook （罗技快看笔记本专用版，非“专家版”机型）</li>
+<li>Logitech Quickcam Web （罗技快看网络版）</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_qc_usb_messenger" id="qc-usb-messenger">qc-usb-messenger</h3></div>
+<ul><li>Logitech Quickcam Messenger</li>
+<li>Logitech Quickcam Communicate</li></ul>
+<p>It is now in the community repo.
+</p><p><b>说明：</b>如果使用模块 gspca 不能使 qc-usb-messenger 正常工作，安装软件包 gspcav1。<br/>
+<b>说明:</b> 现在这驱动已经成为 kernel 2.6.27 的一个模块
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_zr364xx" id="zr364xx">zr364xx</h3></div>
+<p>这个驱动可以应用于很多电脑摄像头，比如:
+</p>
+<ul><li>Aiptek PocketDV 3300</li>
+<li>Creative PC-CAM 880</li>
+<li>Konica Revio 2</li>
+<li>Genius Digital Camera</li>
+<li>Maxell Maxcam PRO DV3</li></ul>
+<p>你可以在这里找到它所支持全部设备的列表：<a href="http://royale.zerezo.com/zr364xx/">here</a>. 你可以在这里找到一个此驱动的PKGBUILD：<a href="https://aur.archlinux.org/">AUR</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_sn9c102" id="sn9c102">sn9c102</h3></div>
+<ul><li>Trust Spacecam series</li>
+<li>Maxell Smartcam (for notebooks): 352x288 max. resolution @ 3fps</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_gspca" id="gspca">gspca</h3></div>
+<p>支持的列表位于<a href="https://www.kernel.org/doc/html/latest/admin-guide/media/gspca-cardlist.html">[1]</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此驱动不支持 V4L1。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_stv680" id="stv680">stv680</h3></div>
+<p>最近两年产于亚洲国家的一些没有产品名的廉价摄像机多使用 stv680 芯片组。绝大多数此类摄像机均为新奇的玩意儿（即 Pencam、 SpyC@m 和 LegoCam）。
+</p>
+<ul><li>Aiptek PenCam 系列</li>
+<li>Digitaldream 系列</li>
+<li>Dolphin Peripherals 系列</li>
+<li>Trust SpyC@m 系列</li>
+<li>Lego LegoCam</li>
+<li>Welback Coolcam</li></ul>
+<p>想要查阅更完整的使用 stv680 芯片组的网络摄像机列表请点击<a href="http://webcam-osx.sourceforge.net/cameras/index.php?orderBy=controller">这里</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_linux_uvc" id="linux-uvc">linux-uvc</h3></div>
+<ul><li>Logitech Quickcam Pro 5000</li>
+<li>Logitech Quickcam Pro 9000</li>
+<li>Logitech Quickcam Orbit MP</li>
+<li>Microdia Pavilion Webcam (on MSI PR200)</li></ul>
+<p>You can find a full list of supported UVC devices <a href="http://linux-uvc.berlios.de/">here</a>.
+</p><p>自从 kernel 2.6.26 开始，linux-uvc 已经是kernel的一部分。只需要加载模块 uvcvideo 即可。
+</p><p><i><b>Note:</b> 但此驱动不支持V4L1。</i>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_ov51x_jpeg" id="ov51x-jpeg">ov51x-jpeg</h3></div>
+<ul><li>Sony EyeToy</li>
+<li>Chicony DC-2120</li>
+<li>Chicony DC-2120 pro</li>
+<li>Trust Spacecam 320</li>
+<li>Hercules Webcam Deluxe</li>
+<li>Hercules Webcam Classic</li>
+<li>Creative Live! Cam Notebook Pro VF0400</li>
+<li>Creative Live! Cam Vista IM</li>
+<li>Creative Live! Cam Vista IM VF0420</li>
+<li>Creative Vista Webcam VF0330</li>
+<li>ASUS webcam Model?</li>
+<li>Philips PCVC820K/00</li>
+<li>NGS showtime plus</li>
+<li>HP VGA Webcam with Integrated Microphone</li></ul>
+<p>This is a kernel module found in the AUR with some additions to the original driver that provide jpeg decompression.
+</p><p>For me to get my "Creative Live! Cam Vista IM" working with Skype I had to add this line to /etc/modprobe.d/modprobe.conf
+</p>
+<pre>options ov51x-jpeg forceblock=1
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_r5u870_.28Ricoh.29" id="r5u870_(Ricoh)"><span id="r5u870_.28Ricoh.29"></span>r5u870 (Ricoh)</h3></div>
+<ul><li>HP Pavilion Webcam</li>
+<li>HP Webcam 1000</li>
+<li>Sony VAIO VGP-VCCx</li></ul>
+<p>绝大部分索尼的笔记本电脑采用Ricoh的网络摄像机.
+</p><p>请安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/r5u87x/">r5u87x</a></span><sup><small>AUR</small></sup></span> (同时提供了固件) 并运行 <code>loader</code> 命令。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_stk11xx_.28Syntek.29" id="stk11xx_(Syntek)"><span id="stk11xx_.28Syntek.29"></span>stk11xx (Syntek)</h3></div>
+<ul><li>Integrated camera in lot of Asus laptops</li>
+<li>Asus A8J, F3S, F5R, F9E, VX2S, V1S, A6T</li></ul>
+<p>Just install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/stk11xx-svn/">stk11xx-svn</a></span><sup><small>AUR</small></sup></span>. It contains the right kernel module.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg12ddde75c439_.E7.A1.AE.E5.AE.9A.E4.B8.BA.E4.BD.A0.E7.9A.84.E7.BD.91.E7.BB.9C.E6.91.84.E5.83.8F.E6.9C.BA.E5.8A.A0.E8.BD.BD.E6.89.80.E9.9C.80.E7.9A.84.E6.A8.A1.E5.9D.97" id="确定为你的网络摄像机加载所需的模块"><span id=".E7.A1.AE.E5.AE.9A.E4.B8.BA.E4.BD.A0.E7.9A.84.E7.BD.91.E7.BB.9C.E6.91.84.E5.83.8F.E6.9C.BA.E5.8A.A0.E8.BD.BD.E6.89.80.E9.9C.80.E7.9A.84.E6.A8.A1.E5.9D.97"></span>确定为你的网络摄像机加载所需的模块</h2></div>
+<p>将网络摄像头的<a href="#pga016157dc9e9">内核模块</a>加入 <code>/etc/modules-load.d/webcam.conf</code>。这样一来，当系统启动时，你的网络摄像机模块就会加载到内核中。
+</p><p>如果你的摄像头是使用USB接口，系统<i>应该会</i>自动加载合适的驱动。 如果成功，可以在你插入摄像头之后检查dmesg，应该可以看到如下面的信息.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg | tail</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">sn9c102: V4L2 driver for SN9C10x PC Camera Controllers v1:1.24a
+usb 1-1: SN9C10[12] PC Camera Controller detected (vid/pid 0x0C45/0x600D)
+usb 1-1: PAS106B image sensor detected
+usb 1-1: Initialization succeeded
+usb 1-1: V4L2 device registered as /dev/video0
+usb 1-1: Optional device control through 'sysfs' interface ready
+usbcore: registered new driver sn9c102
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg12ddde75c439_.E6.9D.83.E9.99.90" id="权限"><span id=".E6.9D.83.E9.99.90"></span>权限</h2></div>
+<p>要使用摄像头，首先必须让用户对<code>/dev/video0</code>具备权限.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_udev" id="udev">udev</h3></div>
+<p>如果你使用udev (在kernel 2.6.13里是默认的)，你只需把用户加到组<b>video</b>中：
+</p>
+<pre>$ groups
+</pre>
+<p>用root权限把用户添加到组中：
+</p>
+<pre># gpasswd -a &lt;username&gt; video
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_devfs" id="devfs">devfs</h3></div>
+<p>将以下两行添加到你的<code>/etc/devfsd.conf</code>. 文件中。这将允许普通用户使用<code>/dev/video0</code> （你的网络摄像机）。
+</p>
+<pre># Give normal users access to webcam
+REGISTER        video0       PERMISSIONS     root.users 0660
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg12ddde75c439_.E8.8E.B7.E5.8F.96.E8.BD.AF.E4.BB.B6.E4.BB.A5.E4.BD.BF.E7.94.A8.E4.BD.A0.E7.9A.84.E7.BD.91.E7.BB.9C.E6.91.84.E5.83.8F.E6.9C.BA" id="获取软件以使用你的网络摄像机"><span id=".E8.8E.B7.E5.8F.96.E8.BD.AF.E4.BB.B6.E4.BB.A5.E4.BD.BF.E7.94.A8.E4.BD.A0.E7.9A.84.E7.BD.91.E7.BB.9C.E6.91.84.E5.83.8F.E6.9C.BA"></span>获取软件以使用你的网络摄像机</h2></div>
+<p>Version 2.6.27 of the Linux kernel supports <a href="http://mxhaard.free.fr/spca5xx.html">many new webcam drivers</a>.  Legacy Video4Linux API has been dropped, and these drivers now only support Video4Linux version 2.  Pixel format decoding has been pushed to user space, since Video4Linux version 2 does not support kernel space decoding.  The libv4l library provides userland applications with pixel decoding services and will be used by most programs.  Other compatibility layers are also available.
+</p><p><b>If your device is created but your image looks strange (mine was nearly completely green), you probably need this.</b>
+</p><p>If the application has V4L2 support but no pixelformat support (eg: cheese) then use the following command:
+</p>
+<pre> LD_PRELOAD=/usr/lib/libv4l/v4l2convert.so cheese
+</pre>
+<p>If the application only supports the older version of V4L (skype is the most popular of this kind of software) then use this command:
+</p>
+<pre> LD_PRELOAD=/usr/lib/libv4l/v4l1compat.so skype
+</pre>
+<p><b>Hint:</b>
+为了不用每次都输入长长的命令，根据使用摄像机的类型，可以在~/.bashrc或~/.xinitrc里添加一条命令。比如：
+</p>
+<pre> export LD_PRELOAD=/usr/lib/libv4l/v4l2convert.so
+</pre>
+<p>或者
+</p>
+<pre> export LD_PRELOAD=/usr/lib/libv4l/v4l1compat.so
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_Cheese" id="Cheese">Cheese</h3></div>
+<p>Cheese is the GNOME photo/video taking client.  It is  similar to Photo Booth in Mac OS X. It is now in extra and is also part of the gnome-extra group
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_GTK.2B_UVC_Viewer_.28guvcview.29" id="GTK+_UVC_Viewer_(guvcview)"><span id="GTK.2B_UVC_Viewer_.28guvcview.29"></span>GTK+ UVC Viewer (guvcview)</h3></div>
+<p><a href="http://guvcview.berlios.de/">guvcview</a> is a simple GTK interface for capturing (with sound!) and viewing video from devices supported by the linux UVC driver. Available in the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=guvcview">guvcview</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_Kopete" id="Kopete">Kopete</h3></div>
+<p>Kopete is the <a href="#pg5b70e23b1711">KDE</a> instant messaging (IM) client. As of KDE 3.5, it has support for MSN and Yahoo! webcams, but not every cam works yet. It is included in the kdenetwork package.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_Kamoso" id="Kamoso">Kamoso</h3></div>
+<p>Application to take pictures and videos out of your webcam for KDE. Available in the AUR: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kamoso">kamoso</a></span><sup><small>包</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_xawtv" id="xawtv">xawtv</h3></div>
+<p>这是一个基本的 Video4Linux 设备查看器，尽管它专用于电视调节卡，但其亦可很好地管理网络摄像机。它会在窗口中显示你的网络摄像机所看到的一切。可以使用以下命令安装：
+</p>
+<pre># pacman -S xawtv
+</pre>
+<p>运行以下命令： 
+</p>
+<pre>$ xawtv -c /dev/video0
+</pre>
+<p>If you are using an nVidia graphic card, and you get an error like
+</p>
+<pre>X Error of failed request:  XF86DGANoDirectVideoMode
+ Major opcode of failed request:  139 (XFree86-DGA)
+ Minor opcode of failed request:  1 (XF86DGAGetVideoLL)
+ Serial number of failed request:  69
+ Current serial number in output stream:  69
+</pre>
+<p>you should instead run it as:
+</p>
+<pre>$ xawtv -nodga
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_VLC" id="VLC">VLC</h3></div>
+<p>VLC can also be used to view and record your webcam. In VLC's file menu, open the 'Capture Device...' dialog and enter the video and audio device files. Or from the command line, do:
+</p>
+<pre>$ vlc v4l:// :v4l-vdev="/dev/video0" :v4l-adev="/dev/audio2"
+</pre>
+<p>This will make VLC mirror your webcam. To take stills, simply choose 'Snapshot' in the 'Video' menu. To record the stream, you add a --sout argument, e.g.
+</p>
+<pre>$ vlc v4l:// :v4l-vdev="/dev/video0" :v4l-adev="/dev/audio2" --sout "#transcode{vcodec=mp1v,vb=1024,scale=1,acodec=mpga,ab=192,channels=2}:duplicate{dst=std{access=file,mux=mpeg1,dst=/tmp/test.mpg}}"
+</pre>
+<p>(Obviously a bit overkill with regard to the bitrates but it is fine for testing purposes.) Notice that this will not produce a mirror on the display - in order to see what you are recording, you would need to add the display as a destination to the argument:
+</p>
+<pre>... :duplicate{dst=display,dst=std{access= ....
+</pre>
+<p>(Though this can tax older hardware somewhat...)
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_MPlayer" id="MPlayer">MPlayer</h3></div>
+<p>使用 <a href="#pgb6ea2b1dfebb">MPlayer</a>来给摄像头截屏，需要在终端中运行下列命令：
+</p>
+<pre>$ mplayer tv:// -tv driver=v4l2:width=640:height=480:device=/dev/video0 -fps 15 -vf screenshot
+</pre>
+<p>From here you have to press <code>s</code> to take the snapshot. The snapshot will be saved in your current folder as <b>shotXXXX.png</b>.
+使用如下命令，来录制视频：
+</p>
+<pre>$ mencoder tv:// -tv driver=v4l2:width=640:height=480:device=/dev/video0:forceaudio:adevice=/dev/dsp -ovc lavc -oac mp3lame -lameopts cbr:br=64:mode=3 -o &lt;filename&gt;.avi
+</pre>
+<p>按Ctrl+Z停止录制。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_FFmpeg" id="FFmpeg">FFmpeg</h3></div>
+<p>参见 <a href="#pgd5cab245336d">FFmpeg#Recording webcam</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_ekiga" id="ekiga">ekiga</h3></div>
+<p>这是一款非常类似于 Microsoft Netmeeting 的软件，以前名叫gnomemeeting。 
+可以使用以下命令安装： 
+</p>
+<pre># pacman -S ekiga
+</pre>
+<p>该程序会自动为你设置好一切。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_Sonic_snap" id="Sonic-snap">Sonic-snap</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sonic-snap/">sonic-snap</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> <a href="https://www.stolk.org/sonic-snap/">[2]</a> is a viewer/grabber for sn9c102-based webcams <b>only</b>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12ddde75c439_Skype" id="Skype">Skype</h3></div>
+<p>新版的skype具备视频支持。 在选项设置中，测试摄像头，可双击全屏。使用一下命令安装：
+</p>
+<pre># pacman -S skype
+</pre>
+<p>如果从 skype 中获得的图片出现颜色不正常，请阅读使用网络摄像头软件.
+</p><p>如果运行 x86-64，需要<a href="#pg811194d6beaa">安装</a> Multilib 仓库中的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-v4l-utils">lib32-v4l-utils</a></span><sup><small>包</small></sup></span>，并用下面命令运行 skype：
+</p>
+<pre>LD_PRELOAD=/usr/lib32/libv4l/v4l1compat.so skype
+</pre>
+<p>可以设置 skype 别名或修改 Skype 图标的命令行以方便使用。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807062033
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.182 seconds
+Real time usage: 0.189 seconds
+Preprocessor visited node count: 270/1000000
+Revision size: 10971/2097152 bytes
+Post‐expand include size: 4599/2097152 bytes
+Template argument size: 1421/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 16/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   86.318      1 -total
+ 76.25%   65.820      1 Template:Bad_translation_(简体中文)
+  5.19%    4.481      1 Template:过时
+  4.08%    3.524      2 Template:META_Message
+  3.15%    2.716      3 Template:Pkg
+  2.44%    2.102      1 Template:Broken_package_link_(简体中文)
+  1.88%    1.625      1 Template:Hc
+  1.84%    1.588      6 Template:Ic
+  1.52%    1.313      3 Template:AUR
+  1.06%    0.918      1 Template:META_Unexplained_Status_Template
+-->
+<!-- Render ID 18589a8e-9228-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6665:|#|:idhash:canonical!zh-cn and timestamp 20260807062033 and revision id 33838. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

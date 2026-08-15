@@ -1,0 +1,472 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg5622270e5836">域名解析</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Domain_name_resolution">Domain name resolution</a>，最近一次同步于 2024-11-22，若英文版本有所<a href="https://wiki.archlinux.org/title/Domain_name_resolution?diff=0&amp;oldid=819490">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Domain_name_resolution_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>通常，一个<a href="https://en.wikipedia.org/wiki/Domain_name">域名</a>代表了一个 IP 地址，并在<a href="https://en.wikipedia.org/wiki/Domain_Name_System">域名系统</a>（Domain Name System，DNS）中与其关联。本文将介绍如何配置域名解析和解析域名。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5622270e5836_.E5.90.8D.E7.A7.B0.E6.9C.8D.E5.8A.A1.E8.BD.AC.E6.8D.A2.EF.BC.88NSS.EF.BC.89" id="名称服务转换（NSS）"><span id=".E5.90.8D.E7.A7.B0.E6.9C.8D.E5.8A.A1.E8.BD.AC.E6.8D.A2.EF.BC.88NSS.EF.BC.89"></span>名称服务转换（NSS）</h2></div>
+<p><a href="https://en.wikipedia.org/wiki/Name_Service_Switch">名称服务转换</a>（Name Service Switch，NSS）工具是 GNU C 库（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glibc">glibc</a></span><sup><small>包</small></sup></span>）的一部分，支持 <span class="plainlinks archwiki-template-man" title="$ man 3 getaddrinfo"><a href="https://man.archlinux.org/man/getaddrinfo.3">getaddrinfo(3)</a></span> API，用于解析域名。NSS 允许系统数据库由单独的服务提供，其搜索顺序可由管理员在 <span class="plainlinks archwiki-template-man" title="$ man 5 nsswitch.conf"><a href="https://man.archlinux.org/man/nsswitch.conf.5">nsswitch.conf(5)</a></span> 中配置。负责响应域名解析的数据库是 <i>hosts</i> 数据库，glibc 为此提供了下列服务：
+</p>
+<ul><li><i>files</i>（文件）：读取 <code>/etc/hosts</code> 文件，参见 <span class="plainlinks archwiki-template-man" title="$ man 5 hosts"><a href="https://man.archlinux.org/man/hosts.5">hosts(5)</a></span></li>
+<li><i>dns</i>：读取 <code>/etc/resolv.conf</code> 的 glibc 解析器，参见 <span class="plainlinks archwiki-template-man" title="$ man 5 resolv.conf"><a href="https://man.archlinux.org/man/resolv.conf.5">resolv.conf(5)</a></span></li></ul>
+<p><a href="#pgac06dd8bfe95">systemd</a> 为主机名解析提供了三项 NSS 服务：
+</p>
+<ul><li><span class="plainlinks archwiki-template-man" title="$ man 8 nss-resolve"><a href="https://man.archlinux.org/man/nss-resolve.8">nss-resolve(8)</a></span>——缓存 DNS 存根解析器，<a href="#pg2aac0c15b133">systemd-resolved</a> 一文中有描述</li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 8 nss-myhostname"><a href="https://man.archlinux.org/man/nss-myhostname.8">nss-myhostname(8)</a></span>——无需编辑 <code>/etc/hosts</code> 即可提供本地主机名解析，<a href="#pgf42a74f3af9c">网络配置#Local hostname resolution</a> 一文中有描述</li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 8 nss-mymachines"><a href="https://man.archlinux.org/man/nss-mymachines.8">nss-mymachines(8)</a></span>——为本地 <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-machined"><a href="https://man.archlinux.org/man/systemd-machined.8">systemd-machined(8)</a></span> 容器的名称提供本地主机名解析</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5622270e5836_.E4.BD.BF.E7.94.A8_NSS_.E8.A7.A3.E6.9E.90.E5.9F.9F.E5.90.8D" id="使用_NSS_解析域名"><span id=".E4.BD.BF.E7.94.A8_NSS_.E8.A7.A3.E6.9E.90.E5.9F.9F.E5.90.8D"></span>使用 NSS 解析域名</h3></div>
+<p>NSS 数据库可使用 <span class="plainlinks archwiki-template-man" title="$ man 1 getent"><a href="https://man.archlinux.org/man/getent.1">getent(1)</a></span> 查询。可以使用以下命令通过 NSS 解析域名：
+</p>
+<pre>$ getent ahosts <i>domain_name（域名）</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>虽然大多数程序使用 NSS 解析域名，但是有些程序可能会直接读取 <code>/etc/resolv.conf</code> 和/或 <code>/etc/hosts</code>。参见 <a href="#pgf42a74f3af9c">网络配置#局域网主机名解析</a>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5622270e5836_Glibc_.E8.A7.A3.E6.9E.90.E5.99.A8" id="Glibc_解析器"><span id="Glibc_.E8.A7.A3.E6.9E.90.E5.99.A8"></span>Glibc 解析器</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5622270e5836_.E8.A6.86.E7.9B.96_.2Fetc.2Fresolv.conf" id="覆盖_/etc/resolv.conf"><span id=".E8.A6.86.E7.9B.96_.2Fetc.2Fresolv.conf"></span>覆盖 /etc/resolv.conf</h3></div>
+<p><a href="#pg3d6df3561234">网络管理器</a>们会有意覆盖 <code>/etc/resolv.conf</code>，具体细节请参见相应文章章节：
+</p>
+<ul><li><a href="#pg0d07347d2df8">dhcpcd#/etc/resolv.conf</a></li>
+<li><a href="#pgab24d2b1ec71">Netctl#/etc/resolv.conf</a></li>
+<li><a href="#pg5e6298ca298f">NetworkManager#/etc/resolv.conf</a></li>
+<li><a href="#pgdcf318d43727">ConnMan#/etc/resolv.conf</a></li></ul>
+<p>要防止程序覆盖 <code>/etc/resolv.conf</code>，还可以通过设置不可变<a href="#pg7c99a107e16b">文件属性</a>来为其建立写保护：
+</p>
+<pre># chattr +i /etc/resolv.conf
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果想要多个进程写入 <code>/etc/resolv.conf</code>，可以使用 <a href="#pg4a19a3856585">resolvconf</a>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5622270e5836_.E4.BD.BF.E7.94.A8_nmcli_.E7.9A.84.E6.9B.BF.E4.BB.A3.E6.96.B9.E6.A1.88" id="使用_nmcli_的替代方案"><span id=".E4.BD.BF.E7.94.A8_nmcli_.E7.9A.84.E6.9B.BF.E4.BB.A3.E6.96.B9.E6.A1.88"></span>使用 nmcli 的替代方案</h4></div>
+
+<p>如果使用 <a href="#pg5e6298ca298f">NetworkManager</a>，可以使用 <span class="plainlinks archwiki-template-man" title="$ man 1 nmcli"><a href="https://man.archlinux.org/man/nmcli.1">nmcli(1)</a></span> 为 <code>/etc/resolv.conf</code> 设置持久选项。将下面的<i>Wired</i>改为连接名称。例如
+</p>
+<pre># nmcli con mod <i>Wired</i> +ipv4.dns-options 'rotate,single-request,timeout:1'
+</pre>
+<p>有关更多选项，请参阅手册 <span class="plainlinks archwiki-template-man" title="$ man 1 nmcli"><a href="https://man.archlinux.org/man/nmcli.1">nmcli(1)</a></span>、<span class="plainlinks archwiki-template-man" title="$ man 5 nm-settings-nmcli"><a href="https://man.archlinux.org/man/nm-settings-nmcli.5">nm-settings-nmcli(5)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 5 resolv.conf"><a href="https://man.archlinux.org/man/resolv.conf.5">resolv.conf(5)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5622270e5836_.E9.99.90.E5.88.B6.E6.9F.A5.E6.89.BE.E6.97.B6.E9.97.B4" id="限制查找时间"><span id=".E9.99.90.E5.88.B6.E6.9F.A5.E6.89.BE.E6.97.B6.E9.97.B4"></span>限制查找时间</h3></div>
+<p>如果您遇到了非常长时间查找主机名的情况（可能是在 <a href="#pg9ef105bf1e3c">pacman</a> 里或者在浏览网页时），定义一个小的超时时间通常能对问题有所帮助，在此之后系统会使用备用域名服务器（nameserver）。为此，请在 <code>/etc/resolv.conf</code> 中添加以下内容。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/resolv.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options timeout:1</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5622270e5836_IPv6_.E4.B8.BB.E6.9C.BA.E5.90.8D.E6.9F.A5.E6.89.BE.E5.BB.B6.E8.BF.9F" id="IPv6_主机名查找延迟"><span id="IPv6_.E4.B8.BB.E6.9C.BA.E5.90.8D.E6.9F.A5.E6.89.BE.E5.BB.B6.E8.BF.9F"></span>IPv6 主机名查找延迟</h3></div>
+<p>如果在解析主机名时遇到 5 秒延迟的情况，原因可能是 DNS 服务器/防火墙行为不当，只对并行的 A 和 AAAA 请求给出了一个回应。<a href="https://udrepper.livejournal.com/20948.html">[1]</a> 可以在 <code>/etc/resolv.conf</code> 中设置以下选项来修复问题：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/resolv.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options single-request</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5622270e5836_.E6.9C.AC.E5.9C.B0.E5.9F.9F.E5.90.8D" id="本地域名"><span id=".E6.9C.AC.E5.9C.B0.E5.9F.9F.E5.90.8D"></span>本地域名</h3></div>
+<p>为了能够使用本地机器名称的主机名，而无需使用格式完全合格的域名，请在 <code>/etc/resolv.conf</code> 中添加一行本地域名，如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/resolv.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">search <i>example.org</i></pre>
+<p>这样当使用 <i>ssh</i> 命令时，可以把 <code>mainmachine1.example.org</code> 这样的本地主机简单地称为 <code>mainmachine1</code>，不过使用 drill 命令时仍需要格式完全合格的域名以便查找。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5622270e5836_.E6.9F.A5.E6.89.BE.E5.AE.9E.E7.94.A8.E5.B7.A5.E5.85.B7" id="查找实用工具"><span id=".E6.9F.A5.E6.89.BE.E5.AE.9E.E7.94.A8.E5.B7.A5.E5.85.B7"></span>查找实用工具</h2></div>
+<p>要查询特定的 DNS 服务器和 DNS/<a href="#pge1e95b2c1d6a">DNSSEC</a> 记录，可以使用专用 DNS 查询实用工具。这些工具自身实现了 DNS 功能，不使用 NSS。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ldns">ldns</a></span><sup><small>包</small></sup></span> 软件包提供了 <span class="plainlinks archwiki-template-man" title="$ man 1 drill"><a href="https://man.archlinux.org/man/drill.1">drill(1)</a></span> 命令，是一个旨在检索 DNS 信息的工具。
+</p><p>例如，要用 <i>drill</i> 查询特定名称服务器（nameserver）获取一个域名的 TXT 记录，可执行：
+</p>
+<pre>$ drill @<i>nameserver</i> TXT <i>domain（域名）</i>
+</pre>
+<p>除非指定了一个 DNS 服务器，否则 <i>drill</i> 将使用 <code>/etc/resolv.conf</code> 中定义的名称服务器。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>一些 DNS 服务器附带它们自己的 DNS 查找实用工具。例如：
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=knot">knot</a></span><sup><small>包</small></sup></span> 软件包提供了 <span class="plainlinks archwiki-template-man" title="$ man 1 khost"><a href="https://man.archlinux.org/man/khost.1">khost(1)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 1 kdig"><a href="https://man.archlinux.org/man/kdig.1">kdig(1)</a></span> 命令。</li>
+<li><a href="#pg8323da89a762">Unbound</a> 有 <span class="plainlinks archwiki-template-man" title="$ man 1 unbound-host"><a href="https://man.archlinux.org/man/unbound-host.1">unbound-host(1)</a></span>。</li>
+<li><a href="#pg3a18c7c41942">BIND</a> 有 <span class="plainlinks archwiki-template-man" title="$ man 1 dig"><a href="https://man.archlinux.org/man/dig.1">dig(1)</a></span>、<span class="plainlinks archwiki-template-man" title="$ man 1 host"><a href="https://man.archlinux.org/man/host.1">host(1)</a></span>、<span class="plainlinks archwiki-template-man" title="$ man 1 nslookup"><a href="https://man.archlinux.org/man/nslookup.1">nslookup(1)</a></span> 和一堆 <code>dnssec-</code> 工具。</li>
+<li><a href="#pg2aac0c15b133">systemd-resolved</a> 有 <span class="plainlinks archwiki-template-man" title="$ man 1 resolvectl"><a href="https://man.archlinux.org/man/resolvectl.1">resolvectl(1)</a></span>，它提供了用于DNS 查找的<code>query</code>子命令。</li></ul>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5622270e5836_.E8.A7.A3.E6.9E.90.E5.99.A8.E6.80.A7.E8.83.BD" id="解析器性能"><span id=".E8.A7.A3.E6.9E.90.E5.99.A8.E6.80.A7.E8.83.BD"></span>解析器性能</h2></div>
+<p>Glibc 不缓存查询结果。要实现本地缓存，请使用 <a href="#pg2aac0c15b133">systemd-resolved</a> 或者配置一个本地缓存 DNS 服务器将其用作服务器，方法是在 <code>/etc/resolv.conf</code>（如果使用 <a href="#pg641257d147d4">openresolv</a>，则在 <code>/etc/resolvconf.conf</code>）中设置 <code>127.0.0.1</code> 和 <code>::1</code> 为名称服务器。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li><i>drill</i> 或 <i>dig</i> 查找实用工具能报告查询时间。</li>
+<li>路由器通常将自己的缓存解析器设置为网络的 DNS 服务器，从而为整个网络提供 DNS 缓存。</li>
+<li>如果切换到下一个 DNS 服务器的时间过长，可以尝试减少超时时间。</li></ul></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5622270e5836_.E9.9A.90.E7.A7.81.E4.B8.8E.E5.AE.89.E5.85.A8" id="隐私与安全"><span id=".E9.9A.90.E7.A7.81.E4.B8.8E.E5.AE.89.E5.85.A8"></span>隐私与安全</h2></div>
+<p>传统的 DNS 协议是没有加密的，并且不会考虑传输的机密性、完整性和身份验证问题，所以如果您在使用不受信任的网络或者有恶意行为的网络服务供应商（ISP），您的 DNS 查询可能会被窃听并响应<a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">他人的操纵</a>。此外，DNS 服务器可进行 <a href="https://en.wikipedia.org/wiki/DNS_hijacking">DNS 劫持</a>。
+</p><p>您需要相信您的 DNS 服务器处理您的查询时能够保密。网络服务供应商和第三方会提供 DNS 服务器。  另外您也可以运营自己的递归名称服务器，但这需要花费更多精力。  如果您在不受信任的网络中使用 <a href="#pg0f0d64a70672">DHCP</a> 客户端，请一定要设置静态名称服务器，以避免使用和受制于任意 DNS 服务器。  为了保证您与远程 DNS 服务器的通信安全，您可以使用加密协议，例如 <a href="https://en.wikipedia.org/wiki/DNS_over_TLS">DNS over TLS</a>（<a href="https://tools.ietf.org/html/rfc7858">RFC 7858</a>）、<a href="https://en.wikipedia.org/wiki/DNS_over_HTTPS">DNS over HTTPS</a>（<a href="https://tools.ietf.org/html/rfc8484">RFC 8484</a>）或 <a href="https://en.wikipedia.org/wiki/DNSCrypt">DNSCrypt</a>，前提是上游服务器和您的解析器都支持该协议。  另一种方法是使用专用软件来加密和解密通信，例如 <a href="#pg781051d7ae75">stunnel</a>。 要验证响应是否来自权威的名称服务器，您可以验证 DNSSEC 记录，前提是上游服务器和您的解析器都支持它。
+</p><p>虽然可以使用加密 DNS 解析器，但浏览器在请求网站证书时仍会泄漏<a href="https://en.wikipedia.org/wiki/Server_Name_Indication">服务器名称指示（Server Name Indication, SNI）</a>中的域名。可以使用 <a href="#pg7f2e1d3f678d">Wireshark</a> 过滤器 <code>tls.handshake.extensions_server_name_len &gt; 0</code> 或者下面的命令检查这种泄漏。建议的解决方案是使用<a href="https://en.wikipedia.org/wiki/Server_Name_Indication#Encrypted_Client_Hello">ECH (Encrypted Client Hello)</a>，这是 TLS 1.3 协议的扩展。
+</p>
+<pre># tshark -p -Tfields -e tls.handshake.extensions_server_name -Y 'tls.handshake.extensions_server_name_len&gt;0'
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5622270e5836_.E5.BA.94.E7.94.A8.E7.BA.A7_DNS" id="应用级_DNS"><span id=".E5.BA.94.E7.94.A8.E7.BA.A7_DNS"></span>应用级 DNS</h3></div>
+<p>值得注意的是，一些客户端软件，例如主流的网页浏览器<a href="https://support.mozilla.org/en-US/kb/firefox-dns-over-https">[2]</a><a href="https://www.chromium.org/developers/dns-over-https">[3]</a>，都在开始实现 DNS over HTTPS 功能。虽然一般来说，提供加密查询可以视为一种善举，但这也同时意味着软件可以绕过系统解析器配置，另辟蹊径进行查询。<a href="https://blog.powerdns.com/2019/09/25/centralised-doh-is-bad-for-privacy-in-2019-and-beyond/">[4]</a>
+</p><p><a href="#pg9b5d7fec8088">Firefox</a> 提供了<a href="https://support.mozilla.org/en-US/kb/firefox-dns-over-https#w_manually-enabling-and-disabling-dns-over-https">配置选项</a>来启用或禁用 DNS over HTTPS 和选择 DNS 服务器。Mozilla 设立了<a href="#pg5cc59e2910b1">可信递归解析器 (TRR)</a> 计划，并提供了默认提供商的透明度信息。这里要注意，Firefox 支持并自动为 TRR 提供商启用 ECH，请参阅 <a href="#pg5cc59e2910b1">Firefox/隐私#加密客户端问候</a>。
+</p><p><a href="#pgad69d7c7a814">Chromium</a> 会检查用户的系统解析器，如果得知系统解析器地址也提供 DNS over HTTPS 支持，则启用 DNS over HTTPS 功能。请参见<a href="https://blog.chromium.org/2020/05/a-safer-and-more-private-browsing-DoH.html">这篇博文</a>获取更多信息，了解如何禁用 DNS over HTTPS。
+</p><p>Mozilla <a href="https://support.mozilla.org/en-US/kb/configuring-networks-disable-dns-over-https">提议</a>，如果系统解析器无法解析域名 <code>use-application-dns.net</code>，就普遍禁用应用级 DNS。目前，这一功能仅在 Firefox 中实现了。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5622270e5836_.E9.81.97.E5.BF.98.E5.BC.8F_DNS" id="遗忘式_DNS"><span id=".E9.81.97.E5.BF.98.E5.BC.8F_DNS"></span>遗忘式 DNS</h3></div>
+<p>遗忘式 DNS（Oblivious DNS，ODNS；<a href="https://tools.ietf.org/html/rfc9230">RFC:9230</a>）是一套解决了若干 DNS 关切隐私问题的系统。参见 <a href="https://blog.cloudflare.com/oblivious-dns/">Cloudflare 的文章（英文）</a>获取更多信息。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5622270e5836_.E7.AC.AC.E4.B8.89.E6.96.B9_DNS_.E6.9C.8D.E5.8A.A1" id="第三方_DNS_服务"><span id=".E7.AC.AC.E4.B8.89.E6.96.B9_DNS_.E6.9C.8D.E5.8A.A1"></span>第三方 DNS 服务</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在使用第三方 DNS 服务前，请检查其隐私政策，了解其如何处理用户数据。用户数据是有价值的，可以出售给其他各方。</div>
+<p>现在有各种<a href="https://en.wikipedia.org/wiki/Public_recursive_name_server#List_of_public_DNS_service_operators">第三方 DNS 服务</a>可用，其中有一些还有专用软件：
+</p>
+<ul><li><b><a href="#pg82e6c28aa666">cloudflared</a></b> — Clondflare DNS over HTTPS 的 DNS 客户端</li></ul>
+<dl><dd><a href="https://developers.cloudflare.com/1.1.1.1/dns-over-https/cloudflared-proxy">https://developers.cloudflare.com/1.1.1.1/dns-over-https/cloudflared-proxy</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cloudflared">cloudflared</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>dingo</b> — Google DNS over HTTPS 的 DNS 客户端</li></ul>
+<dl><dd><a href="https://github.com/pforemski/dingo">https://github.com/pforemski/dingo</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dingo-git/">dingo-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>opennic-up</b> — 可以自动更新为反应最迅速的 OpenNIC DNS 服务器</li></ul>
+<dl><dd><a href="https://github.com/kewlfft/opennic-up">https://github.com/kewlfft/opennic-up</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/opennic-up/">opennic-up</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>nextdns</b> — NextDNS 的 DNS-over-HTTPS 命令行客户端</li></ul>
+<dl><dd><a href="https://github.com/nextdns/nextdns">https://github.com/nextdns/nextdns</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nextdns/">nextdns</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<p>可以使用 <a href="https://github.com/cleanbrowsing/dnsperftest">dnsperftest</a> 从您所在位置来测试主流 DNS 解析器们的性能。<a href="https://www.dnsperf.com/#!dns-resolvers">dnsperf.com</a> 提供了全球 DNS 服务供应商的基准。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5622270e5836_DNS_.E6.9C.8D.E5.8A.A1.E5.99.A8" id="DNS_服务器"><span id="DNS_.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>DNS 服务器</h2></div>
+<p>DNS 服务器有<a href="https://en.wikipedia.org/wiki/Authoritative_name_server">权威式</a>和<a href="https://en.wikipedia.org/wiki/Name_server#Recursive_query">递归式</a>。如果两个都不是，则称为<b>根解析器</b>，只将所有查询转发到其他的递归名称服务器。根解析器典型用途是在本地主机或网络上引入 DNS 缓存机制。请注意，同样的功能可以通过技术完全成熟的名称服务器来实现。本小节我们比较了可用的 DNS 服务器，如需更详细的比较，请参考<a href="https://en.wikipedia.org/wiki/Comparison_of_DNS_server_software">维基百科：DNS 服务器软件比较</a>。
+</p>
+
+<div style="overflow-x: scroll">
+<table class="wikitable sortable" style="text-align:center;">
+<tbody><tr>
+<th rowspan="2">名称</th>
+<th rowspan="2">软件包</th>
+<th colspan="4">功能兼容性</th>
+<th rowspan="2"><a href="#pg4a19a3856585">resolvconf</a></th>
+<th colspan="5">受支持的协议
+</th></tr>
+<tr>
+<th><a href="https://en.wikipedia.org/wiki/Authoritative_name_server">权威式</a></th>
+<th><a href="https://en.wikipedia.org/wiki/Name_server#Recursive_query">递归式</a></th>
+<th><a href="https://en.wikipedia.org/wiki/Name_server#Caching_name_server">缓存式</a></th>
+<th> <a href="https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions#The_lookup_procedure">验证</a><br/><a href="#pge1e95b2c1d6a">DNSSEC</a></th>
+<th><a href="https://en.wikipedia.org/wiki/Domain_Name_System">DNS</a></th>
+<th><a href="https://en.wikipedia.org/wiki/DNSCrypt">DNSCrypt</a></th>
+<th><a href="https://en.wikipedia.org/wiki/DNS_over_TLS">DNS<br/>over TLS</a></th>
+<th><a href="https://en.wikipedia.org/wiki/DNS_over_HTTPS">DNS<br/>over HTTPS</a></th>
+<th><a href="https://datatracker.ietf.org/doc/html/rfc9250">DNS<br/>over QUIC</a>
+</th></tr>
+<tr>
+<th><a href="#pg3a18c7c41942">BIND</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bind">bind</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="#pg641257d147d4">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">服务器<sup>1</sup></td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">服务器</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://gitlab.isc.org/isc-projects/bind9/-/issues/3635">否</a>
+</td></tr>
+<tr>
+<th><a href="#pg4f3042f052d7">CoreDNS</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/coredns/">coredns</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/coredns/coredns/issues/5583">否</a>
+</td></tr>
+<tr>
+<th><a href="#pg0bd0dffbf2ff">DNS-over-HTTPS</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dns-over-https">dns-over-https</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>?</td>
+<td>?</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/m13253/dns-over-https/issues/104">否</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/m13253/dns-over-https/issues/129">否</a>
+</td></tr>
+<tr>
+<th><a href="https://maradns.samiam.org/deadwood/doc/Deadwood.html">Deadwood</a> (<a href="https://en.wikipedia.org/wiki/MaraDNS">MaraDNS</a> recursor)
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/maradns/">maradns</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="#pg08fa1d547840">dnscrypt-proxy</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dnscrypt-proxy">dnscrypt-proxy</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">服务器</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">解析器</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/DNSCrypt/dnscrypt-proxy/issues/1124">否</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>?
+</td></tr>
+<tr>
+<th><a href="#pg72acb6a2ac2c">dnsmasq</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dnsmasq">dnsmasq</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">部分<sup>2</sup></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="#pg641257d147d4">是</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://lists.thekelleys.org.uk/pipermail/dnsmasq-discuss/2018q2/012131.html">否</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="https://github.com/AdguardTeam/dnsproxy">dnsproxy</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dnsproxy/">dnsproxy</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/AdguardTeam/dnsproxy/issues/10">否</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th><a href="#pg0f5fbcd8de3f">Knot Resolver</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=knot-resolver">knot-resolver</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="https://knot-resolver.readthedocs.io/en/stable/daemon-bindings-net_tlssrv.html#dns-over-https-doh">服务器</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://gitlab.nic.cz/knot/knot-resolver/-/issues/548">否</a>
+</td></tr>
+<tr>
+<th><a href="#pgf9995f3c8af0">pdnsd</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pdnsd">pdnsd</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">部分<sup>2</sup></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">永久</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="#pg641257d147d4">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="https://en.wikipedia.org/wiki/PowerDNS#Recursor">PowerDNS Recursor</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=powerdns-recursor">powerdns-recursor</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="#pg641257d147d4">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="https://github.com/PowerDNS/pdns/pull/10338">部分</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>?
+</td></tr>
+<tr>
+<th><a href="#pg0d48ebb831ea">Rescached</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rescached-git/">rescached-git</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/shuLhan/rescached-go#integration-with-openresolv">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="https://github.com/folbricht/routedns">RouteDNS</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/routedns-git/">routedns-git</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<sup>3</sup></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/folbricht/routedns/issues/123">否</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th><a href="https://github.com/pymumu/smartdns">SmartDNS</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=smartdns">smartdns</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/pymumu/smartdns/issues/19">否</a></td>
+<td>?</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">解析器</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">解析器</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="#pga5b2f4d75122">Stubby</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=stubby">stubby</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">服务器</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">解析器</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/getdnsapi/stubby/issues/278">否</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/getdnsapi/stubby/issues/288">否</a>
+</td></tr>
+<tr>
+<th style="white-space: nowrap;"><a href="#pg2aac0c15b133">systemd-resolved</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd">systemd</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="#pgd22d660cf698">是</a></td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">解析器和<a href="https://github.com/systemd/systemd/issues/4621#issuecomment-260050033">有限的服务器</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">解析器</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/systemd/systemd/issues/8639">否</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/systemd/systemd/issues/23770">否</a>
+</td></tr>
+<tr>
+<th><a href="#pg8323da89a762">Unbound</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=unbound">unbound</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">部分</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<sup>3</sup></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="#pg641257d147d4">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">服务器</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="https://github.com/NLnetLabs/unbound/issues/308">服务器</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/NLnetLabs/unbound/issues/743">否</a>
+</td></tr></tbody></table>
+</div>
+<ol><li>BIND 可以为 DNS over TLS 和 DNS over HTTPS 提供服务（请参阅 <a href="https://downloads.isc.org/isc/bind9/9.18.0/doc/arm/html/reference.html#tls">tls{}</a> 和<a href="https://downloads.isc.org/isc/bind9/9.18.0/doc/arm/html/reference.html#interfaces">listen-on</a>)），但尚无法将查询转发到 DNS over TLS/DNS over HTTPS 上游。 <i>dig</i> 工具可以通过 DNS over TLS 和 DNS over HTTPS（使用 <code>+tls</code> 和 <code>+https</code> 选项）进行查询，但<a href="https://gitlab.isc.org/isc-projects/bind9/-/issues/3163">没有任何证书检查</a>。</li>
+<li>根据<a href="https://en.wikipedia.org/wiki/Comparison_of_DNS_server_software#cite_note-masqauth-32">维基百科</a>：对权威式名称服务器功能支持有限，是旨在为内部网络使用而不是公共互联网使用。</li>
+<li>支持使用 <a href="#pg27c39b20cf9e">Redis</a> 后端进行持久缓存。</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5622270e5836_.E4.BB.85.E6.9D.83.E5.A8.81.E5.BC.8F.E6.9C.8D.E5.8A.A1.E5.99.A8" id="仅权威式服务器"><span id=".E4.BB.85.E6.9D.83.E5.A8.81.E5.BC.8F.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>仅权威式服务器</h3></div>
+<table class="wikitable sortable" style="text-align:center">
+<tbody><tr>
+<th>名称</th>
+<th>软件包</th>
+<th> <a href="#pge1e95b2c1d6a">DNSSEC</a></th>
+<th>地理负载均衡
+</th></tr>
+<tr>
+<th>gdnsd
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gdnsd">gdnsd</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th><a href="https://en.wikipedia.org/wiki/Knot_DNS">Knot DNS</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=knot">knot</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://www.knot-dns.cz/docs/latest/singlehtml/#geoip-geography-based-responses">是</a>
+</td></tr>
+<tr>
+<th><a href="https://en.wikipedia.org/wiki/MaraDNS">MaraDNS</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/maradns/">maradns</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>？
+</td></tr>
+<tr>
+<th><a href="#pg24a5fe80fd35">NSD</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nsd">nsd</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="#pg820064e283af">PowerDNS</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=powerdns">powerdns</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5622270e5836_.E6.9D.A1.E4.BB.B6.E8.BD.AC.E5.8F.91" id="条件转发"><span id=".E6.9D.A1.E4.BB.B6.E8.BD.AC.E5.8F.91"></span>条件转发</h3></div>
+<p>在查询特定域名时，可以使用特定的 DNS 解析器。这在连接到虚拟专用网络（VPN）时特别有用，这样，对 VPN 网络的查询由 VPN 的 DNS 解析，而对普通互联网的查询仍由标准 DNS 解析器解析（分流）。这也可以用于本地网络中。
+</p><p>要实现这个目的，您需要使用本地解析器，因为 glibc 并不支持这样做。
+</p><p>在动态环境中（笔记本和某种程度的台式机），需要根据所连接的网络来配置解析器。最好的方式是使用 <a href="#pg641257d147d4">openresolv</a>，因为它支持<a href="#pg641257d147d4">多个订阅器</a>。一些<a href="#pg3d6df3561234">网络管理器</a>会通过 openresolv 或者直接通过配置解析器来支持此功能。NetworkManager <a href="#pg5e6298ca298f">支持条件转发而无需 openresolv</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>虽然您可以使用其他条件进行转发（比如源 IP 地址），但是“条件转发”一名似乎更用于描述“域名查询”这一条件。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5622270e5836_.E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85" id="另请参阅"><span id=".E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85"></span>另请参阅 </h2></div>
+<ul><li><a href="https://www.tldp.org/LDP/nag2/x-087-2-resolv.html">Linux 网络管理员指南（英文）</a></li>
+<li><a href="https://www.debian.org/doc/manuals/debian-handbook/sect.hostname-name-service.en.html#sect.name-resolution">Debian 手册（英文）</a></li>
+<li><a href="https://tools.ietf.org/html/rfc7706">RFC:7706</a> - 通过在回环上运行一个根服务器来减少对根服务器的访问时间（Decreasing Access Time to Root Servers by Running One on Loopback，英文）</li>
+<li><a href="http://linux-ip.net/pages/diagrams.html#domain-name-system-overview">域名系统概览（英文）</a> - DNS 有关图表</li>
+<li><a href="#pg7603012dfd20">备用 DNS 服务</a></li>
+<li><a href="https://www.copahost.com/blog/what-does-dns-stand-for/">What does DNS stand for</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807044625
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.382 seconds
+Real time usage: 0.392 seconds
+Preprocessor visited node count: 2712/1000000
+Revision size: 19452/2097152 bytes
+Post‐expand include size: 50815/2097152 bytes
+Template argument size: 15506/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  151.433      1 -total
+ 13.94%   21.109     79 Template:否
+ 11.97%   18.121     44 Template:META_Table_cell
+  8.95%   13.546     16 Template:R
+  7.93%   12.001     21 Template:Man
+  7.76%   11.754     17 Template:Y
+  7.46%   11.290     11 Template:G
+  5.97%    9.039     60 Template:是
+  5.10%    7.727      3 Template:提示
+  3.80%    5.750     19 Template:Pkg
+-->
+<!-- Render ID f1e0328e-921a-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3041:|#|:idhash:canonical!zh-cn and timestamp 20260807044625 and revision id 33738. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,158 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg62d8ae6446b3">AUR 扫除日</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/AUR_Cleanup_Day">AUR Cleanup Day</a>，最近一次同步于 2025-10-23，若英文版本有所<a href="https://wiki.archlinux.org/title/AUR_Cleanup_Day?diff=0&amp;oldid=850339">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/AUR_Cleanup_Day_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg62d8ae6446b3_.E5.85.B3.E4.BA.8E" id="关于"><span id=".E5.85.B3.E4.BA.8E"></span>关于</h2></div>
+<p>AUR 扫除日（AUR Cleanup Day）是隔年（奇数年）9 月 20 号进行一次的活动。
+</p><p><a href="#pg89cb7b475cfb">AUR</a> 上存在大量可清理的过时软件包。你可以使用以下模板，将建议清理的软件包提交到公告邮件中提供的协作文档中，也可以将它们提交到 <a href="https://lists.archlinux.org/mailman3/lists/aur-general.lists.archlinux.org/">aur-general 邮件列表</a>，或是直接发起<a href="#pge327f4597f76">请求</a>。<a href="#pg773d97dbc20d">软件包维护者</a>们会共同决定要被移除的软件包清单。
+</p><p>请加入 <a href="#pg407a04ca0d2a">#archlinux-aur</a> 进行协作和探讨。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg62d8ae6446b3_.E6.A8.A1.E6.9D.BF" id="模板"><span id=".E6.A8.A1.E6.9D.BF"></span>模板</h2></div>
+<div class="mw-collapsible mw-collapsed">
+<pre># AUR Cleanup Day September 20th 20XY
+
+## About
+
+AUR Cleanup Day is a bi-yearly (odd years) event on the 20th of September.
+
+The [AUR](https://wiki.archlinux.org/title/Arch_User_Repository) has a large number of obsolete packages which could use cleaning up. Post suggestions of packages below, submit them to the [aur-general mailing list](https://lists.archlinux.org/listinfo/aur-general), or file [requests](https://wiki.archlinux.org/title/AUR_submission_guidelines#Requests) directly. [Package Maintainers](https://wiki.archlinux.org/title/Package_Maintainers) will get together and confirm which packages should be removed.
+
+Join [#archlinux-aur](https://wiki.archlinux.org/title/Arch_IRC_channels) to collaborate and chat.
+
+## Template (Package list)
+
+### Candidates
+
+Check for the package in the sorted lists below before adding.
+
+- [PKGNAME](https://aur.archlinux.org/packages/PKGNAME) - Reason
+
+#### Informative heading
+
+- [PKGBASE](https://aur.archlinux.org/pkgbase/PKGBASE) - Reason
+
+### Possible reasons
+
+- Does not work anymore
+
+- Deprecated by [PKGNAME](https://aur.archlinux.org/packages/PKGNAME)
+
+- Obsoleted by [PKGNAME](https://aur.archlinux.org/packages/PKGNAME)
+
+- Replaced by [PKGNAME](https://aur.archlinux.org/packages/PKGNAME)
+
+- Duplicate of [PKGNAME](https://aur.archlinux.org/packages/PKGNAME)
+
+- Project page and sources are not available
+
+- "Dead" project; it's very old and does not work with the latest versions of its dependencies
+
+- "Dead" project and too old to be useful
+
+- Project page and sources are not available
+
+- Not needed anymore (it's for old PKGNAME), broken source link
+
+- Old dev-version (CVS/SVN/etc), PKGNAME project uses Git now
+
+- Is it needed in Arch Linux?
+
+- Broken links (see comment by USERNAME)
+
+- Outdated for a long time
+
+- This one should be renamed
+
+- Deprecated by upstream
+
+- Outdated, orphaned
+
+- Broken links, too old, not maintained
+
+- Included in extra/PKGNAME
+
+- Already included in core/PKGNAME
+
+- Old beta version, broken source link, replaced by [PKGNAME](https://aur.archlinux.org/packages/PKGNAME)
+
+- Maintainer wrote that it may be deleted
+
+- Dropped upstream
+
+- Depends on [PKGNAME](https://aur.archlinux.org/packages/PKGNAME) and has not been updated for N years...
+
+- Development discontinued, project page deleted and current version does not work
+
+- Too old to be useful, broken source link -- hm, what is USERNAME's Opinion?
+
+- This package is no longer needed (see comments)
+
+## Template (TU)
+
+**For editing by TUs only!**
+
+### Packages to Remove
+
+In extra:
+
+- [PKGNAME](https://aur.archlinux.org/packages/PKGNAME) - Replaced by PKGNAME
+
+### Packages to Keep
+
+- [PKGNAME](https://aur.archlinux.org/packages/PKGNAME) - Reason
+
+#### Possible reasons
+
+- It is for compiling old stuff, let's keep it, does not harm
+
+- Seems to be actively maintained
+
+- Still useful, because ...
+
+- So this package should maybe be orphaned, no obvious reason to delete it
+
+- Needed by PKGNAME
+
+- Package has new and active maintainer
+
+- Seems to be down sometimes, but sometimes it works again. Package is maintained and has votes
+
+- Should be rewritten, not dropped
+
+- I orphaned the package
+
+- It's not dead, it only needs some changes to work again
+
+- Package builds with little tweaking
+
+- Builds fine with a little patch in pkgrel N
+
+</pre>
+</div>
+<!-- 
+NewPP limit report
+Cached time: 20260807090917
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.044 seconds
+Real time usage: 0.048 seconds
+Preprocessor visited node count: 35/1000000
+Revision size: 4114/2097152 bytes
+Post‐expand include size: 836/2097152 bytes
+Template argument size: 76/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 3301/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%    3.394      1 Template:翻译状态
+100.00%    3.394      1 -total
+-->
+<!-- Render ID aab8688e-923f-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8474:|#|:idhash:canonical!zh-cn and timestamp 20260807090917 and revision id 34978. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

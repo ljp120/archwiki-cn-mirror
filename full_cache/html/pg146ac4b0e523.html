@@ -1,0 +1,542 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg146ac4b0e523">电源管理/挂起与休眠</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate">Power management/Suspend and hibernate</a>，最近一次同步于 2025-04-12，若英文版本有所<a href="https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate?diff=0&amp;oldid=830864">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Power_management_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Suspend_and_hibernate_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgac06dd8bfe95">systemd</a></li>
+<li><a href="#pga6e29fecd7a5">电源管理</a></li>
+<li><a href="#pgb0e48b0a2dc6">电源管理/唤醒触发器</a></li>
+<li><a href="#pgad14227759fd">Swap</a></li>
+</ul></div>
+<p>有<a href="https://docs.kernel.org/admin-guide/pm/sleep-states.html">多种方法</a>可用于挂起，特别是：
+</p>
+<dl><dt>Suspend to idle（挂起到空闲状态）</dt>
+<dd>英特尔称之为 <a href="https://www.intel.com/content/www/us/en/docs/vtune-profiler/user-guide/2023-0/s0ix-states.html">S0ix</a>，微软称之为<a href="https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/modern-standby">现代待机</a>（以前是“保持网络连接的待机”），内核称之为 <a href="https://docs.kernel.org/admin-guide/pm/sleep-states.html#suspend-to-idle">S2Idle</a>。设计用于替代 <b>S3</b> <a href="https://en.wikipedia.org/wiki/ACPI#Global_states">睡眠状态</a>的支持系统，提供相同的节能，但大大减少了唤醒时间。<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>虽然这种状态会导致 <a href="https://www.dell.com/support/kbdoc/en-us/000143524/the-battery-drains-quicker-than-expected-on-a-dell-notebook-with-modern-standby-mode-enabled">Windows</a> 或 <a href="https://support.apple.com/guide/mac-help/mh40773/mac">macOS</a> 上的电池消耗问题，因为它们支持在这种状态下唤醒设备进行网络活动，但 Linux 软件生态系统目前没有使用这种特性，应该不会受到影响。</div></dd>
+<dt>Suspend to RAM（挂起到内存，通称挂起）</dt>
+<dd>ACPI 定义的 <b>S3</b> 睡眠状态。通过将机器中大多数和 RAM 不相关的部件断电来工作，RAM 是恢复机器状态所必需的。由于可以节省大量电力，建议笔记本电脑在使用电池运行且盖子关闭时（或用户在一段时间内处于非活动状态）自动进入此模式。</dd>
+<dt>Suspend to disk（挂起到硬盘，通称休眠）</dt>
+<dd>ACPI 定义的 <b>S4</b> 睡眠状态。将机器状态保存到<a href="#pgad14227759fd">交换空间</a>并关闭机器。再次开机后，恢复状态。直到开机前，机器都<a href="https://en.wikipedia.org/wiki/Standby_power">不会有任何待机功耗</a>。</dd>
+<dt>Hybrid suspend（混合挂起）</dt>
+<dd>挂起和休眠的混合，有时称为<b>挂起到两者</b>。将机器状态保存到交换空间，但并不关闭电脑，而是调用默认的挂起机制，从而使未掉电的电脑能立刻恢复。如果电脑掉电（断电且电池耗尽），系统也可以从硬盘的交换空间中恢复，尽管比从内存中恢复慢一些。</dd></dl>
+<p>以上三者均由内核提供基础功能，再由高级接口进行了一定调整，以适配一些较为复杂的硬件与内核模块（如显卡唤醒后的重新初始化）
+</p><p><br/>
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg146ac4b0e523_.E5.86.85.E6.A0.B8.E6.8E.A5.E5.8F.A3_.28swsusp.29" id="内核接口_(swsusp)"><span id=".E5.86.85.E6.A0.B8.E6.8E.A5.E5.8F.A3_.28swsusp.29"></span>内核接口 (swsusp)</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>尽管可以直接使用内核接口，这更快，因为不需要额外的用户空间处理，但建议使用高级接口。它通过执行额外的安全检查以及提供预挂起和后挂起钩子机制来更好地设置硬件时钟、恢复无线等，从而做得更好。</div>
+<p>可以通过直接告知内核中的软件挂起代码（swsusp）进入挂起状态，具体的方法和状态取决于硬件支持的程度。在现代内核中，向 <code>/sys/power/state</code> 写入特定字符串是触发此挂起的主要机制。
+</p><p>更多信息详见<a href="https://docs.kernel.org/admin-guide/pm/sleep-states.html#basic-sysfs-interfaces-for-system-suspend-and-hibernation">内核文档</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg146ac4b0e523_.E9.AB.98.E7.BA.A7.E6.8E.A5.E5.8F.A3_.28systemd.29" id="高级接口_(systemd)"><span id=".E9.AB.98.E7.BA.A7.E6.8E.A5.E5.8F.A3_.28systemd.29"></span>高级接口 (systemd)</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>高级接口旨在提供可执行的二进制文件/脚本，用于执行挂起/休眠操作，并提供将额外的准备/清理工作挂钩到所述进程的方法。有关电源按钮、菜单点击或笔记本盖事件自动进入睡眠状态，请参阅 <a href="#pg3bfeacfb89ba">Power management#ACPI events</a>。</div>
+<p><a href="#pgac06dd8bfe95">systemd</a> 提供了用于挂起、休眠和混合挂起的原生命令。这是 Arch Linux 中使用的默认接口。
+</p><p><code>systemctl suspend</code> 开箱即用。要使 <code>systemctl hibernate</code> 在你的系统上运行，你可能需要遵循 #休眠中的说明。
+</p><p>还有两种结合挂起和休眠的模式：
+</p>
+<ul><li><code>systemctl hybrid-sleep</code> 将系统同时挂起到 RAM 和磁盘，因此完全断电不会导致数据丢失。 此模式也称为“同时挂起”。</li></ul>
+<ul><li><code>systemctl suspend-then-hibernate</code> 最初会尽可能将系统挂起到 RAM 中，然后使用 RTC 警报将其唤醒并休眠。RTC 警报由 <span class="plainlinks archwiki-template-man" title="$ man 5 systemd-sleep.conf"><a href="https://man.archlinux.org/man/systemd-sleep.conf.5">systemd-sleep.conf(5)</a></span> 中的 <code>HibernateDelaySec</code> 设置。默认值通过估计电池放电率来设置，以使系统保持 5% 的电池电量，或者在没有电池的情况下保持两小时。 估计值是根据 <span class="plainlinks archwiki-template-man" title="$ man 5 systemd-sleep.conf"><a href="https://man.archlinux.org/man/systemd-sleep.conf.5">systemd-sleep.conf(5)</a></span> 中 <code>SuspendEstimationSec</code> 指定的时间后电池电量变化获得的，该系统将短暂唤醒进行测量（如果系统从挂起中手动唤醒，也会进行测量）。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>systemd v256 支持使用新的 <code>systemctl sleep</code> 命令自动选择最合适的睡眠操作。默认情况下，使用 <code>suspend-then-hibernate</code>，如果不支持则回退到 <code>suspend</code> 和 <code>hibernate</code>。更多信息请参见 <span class="plainlinks archwiki-template-man" title="$ man 1 systemctl"><a href="https://man.archlinux.org/man/systemctl.1">systemctl(1)</a></span>。</div>
+<p>关于配置睡眠或休眠钩子，详见<a href="#pga6e29fecd7a5">电源管理#睡眠钩子</a>。又见 <span class="plainlinks archwiki-template-man" title="$ man 1 systemctl"><a href="https://man.archlinux.org/man/systemctl.1">systemctl(1)</a></span>、<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-sleep"><a href="https://man.archlinux.org/man/systemd-sleep.8">systemd-sleep(8)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 7 systemd.special"><a href="https://man.archlinux.org/man/systemd.special.7">systemd.special(7)</a></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg146ac4b0e523_.E6.9B.B4.E6.94.B9.E6.8C.82.E8.B5.B7.E6.96.B9.E6.B3.95" id="更改挂起方法"><span id=".E6.9B.B4.E6.94.B9.E6.8C.82.E8.B5.B7.E6.96.B9.E6.B3.95"></span>更改挂起方法</h2></div>
+<p>在 S0ix 挂起不能提供与常规 S3 睡眠相同的节能的系统上，或者当节能优于快速的恢复时间时，可以更改默认挂起方法。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>S0ix 被认为可以提供与 S3 睡眠相同或更好的节能，请参阅以下英特尔博客文章 <a href="https://web.archive.org/web/20230614200816/https://01.org/blogs/qwang59/2018/how-achieve-s0ix-states-linux">如何在 Linux 中实现 S0ix 状态</a>，<a href="https://web.archive.org/web/20230614200306/https://01.org/blogs/qwang59/2020/linux-s0ix-troubleshooting">Linux S0ix 故障排除</a>和<a href="https://web.archive.org/web/20230503102522/https://01.org/blogs/thac0/2019/idling-efficiently-linux-case-study">在 Linux 上高效空闲：一个案例研究</a>，以检查你是否可以使其按预期工作。英特尔用户可以使用 <a href="https://github.com/intel/S0ixSelftestTool">S0ixSelftestTool</a>。AMD 用户可以使用 <a href="https://git.kernel.org/pub/scm/linux/kernel/git/superm1/amd-debug-tools.git/about/">amd-debug-tools</a>。</div>
+<p>运行以下命令以查看硬件公开支持的所有挂起方法（当前方法包裹在方括号中显示<a href="https://docs.kernel.org/admin-guide/pm/sleep-states.html#basic-sysfs-interfaces-for-system-suspend-and-hibernation">[1]</a>）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /sys/power/mem_sleep</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[s2idle] shallow deep
+</pre>
+<table class="wikitable sortable">
+<caption>mem_sleep 中支持的睡眠状态
+</caption>
+<tbody><tr>
+<th>mem_sleep 字符串</th>
+<th>睡眠状态
+</th></tr>
+<tr>
+<td>s2idle</td>
+<td><a href="https://docs.kernel.org/admin-guide/pm/sleep-states.html#suspend-to-idle">suspend-to-idle</a>
+</td></tr>
+<tr>
+<td>shallow</td>
+<td><a href="https://docs.kernel.org/admin-guide/pm/sleep-states.html#standby">standby</a>
+</td></tr>
+<tr>
+<td>deep</td>
+<td><a href="https://docs.kernel.org/admin-guide/pm/sleep-states.html#suspend-to-ram">suspend-to-RAM</a>
+</td></tr></tbody></table>
+<p>如果你的硬件没有公布 <code>deep</code> 睡眠状态，请首先检查 UEFI 是否公布了它的某些设置，通常是在“电源（<i>Power</i>）”或“睡眠状态（<i>Sleep state</i>）”或类似的用词下，并使用名为 <i>Windows 10</i>, <i>Windows and Linux</i> 或 <i>S3/Modern standby support</i> 关于 S0ix 的选项，以及 <i>Legacy</i>, <i>Linux</i>, <i>Linux S3</i> 或 <i>S3 enabled</i> 关于 S3 睡眠的选项。否则，你可以继续使用 <code>s2idle</code>，考虑使用休眠或尝试给 <a href="#pgb6adbac7a9ca">DSDT</a> 表打补丁（或在线查找补丁版本）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>最后一个解决方案很可能会引起问题。自从 Windows 系统默认使用 “现代待机 ”后，制造商已经停止修复 ACPI S3 状态的错误：如果它们主动地不公布它，它可能会在某种程度上出问题。</div>
+<p>通过在更改睡眠方法后测试几个睡眠周期，验证你的硬件没有 S3 睡眠问题：
+</p>
+<pre># echo deep &gt; /sys/power/mem_sleep
+</pre>
+<p>如果没有发现任何问题，可以通过 <span class="plainlinks archwiki-template-man" title="$ man 5 systemd-sleep.conf"><a href="https://man.archlinux.org/man/systemd-sleep.conf.5">systemd-sleep.conf(5)</a></span> 中的 <code>MemorySleepMode</code> 选项使更改永久化。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/sleep.conf.d/mem-deep.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Sleep]
+MemorySleepMode=deep</pre>
+<p>或者通过<code>mem_sleep_default=deep</code> <a href="#pgec0856954f1c">内核参数</a>。
+</p><p>在一些相反的情况下，有缺陷的固件公布支持 <code>deep</code> 睡眠，但只支持 <code>s2idle</code>。在这种情况下，通过选项中的 <code>SuspendState</code> 可以以另一种方法使用 <code>s2idle</code> ：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/sleep.conf.d/freeze.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Sleep]
+SuspendState=freeze</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg146ac4b0e523_.E4.BC.91.E7.9C.A0" id="休眠"><span id=".E4.BC.91.E7.9C.A0"></span>休眠</h2></div>
+<p>为了使用休眠功能，你必须创建一个 <a href="#pgad14227759fd">swap</a> 分区或文件、#配置 initramfs 以便在早期用户空间启动恢复过程，并指定交换空间的位置以便 initramfs 可以访问，例如：由 <a href="#pgac06dd8bfe95">systemd</a> 定义的 <code>HibernateLocation</code> EFI 变量或 <code>resume=</code> <a href="#pgec0856954f1c">内核参数</a>。下面详细描述了这三个步骤。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>使用 <a href="#pgc8709fcfef27">encryption</a> 时，请参阅 <a href="#pg766573d7bb8e">Dm-crypt/交换分区加密#需要休眠支持</a>。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 不支持休眠，请参阅 <a href="https://bugs.archlinux.org/task/63648">FS#63648</a>。</li>
+<li>即使 zram 配置了永久存储上的后端设备，也不支持休眠到 <a href="#pg61935487d964">zram 上的交换分区</a>。虽然 <i>logind</i> 会阻止尝试将休眠到 zram 上的交换空间，但作为替代，你可以创建多个交换空间。内存将存储到交换文件中，而另一个可用交换空间将保留给 zram。有关详细信息，请参阅 #Maintaining swap file for hibernation with zram。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_swap.E5.88.86.E5.8C.BA.2F.E6.96.87.E4.BB.B6.E7.9A.84.E5.A4.A7.E5.B0.8F" id="swap分区/文件的大小"><span id="swap.E5.88.86.E5.8C.BA.2F.E6.96.87.E4.BB.B6.E7.9A.84.E5.A4.A7.E5.B0.8F"></span>swap分区/文件的大小</h3></div>
+<p>即使交换分区比内存小，成功休眠的可能性仍然不小。参见<a href="https://docs.kernel.org/admin-guide/pm/sleep-states.html?highlight=image_size#basic-sysfs-interfaces-for-system-suspend-and-hibernation">内核文档</a>中的“image_size”部分以获取关于 <code>image_size</code> <span class="plainlinks archwiki-template-man" title="$ man 5 sysfs"><a href="https://man.archlinux.org/man/sysfs.5">sysfs(5)</a></span> 伪文件的更多信息。
+</p><p>你可以减小 <code>/sys/power/image_size</code> 的设定值以使休眠镜像尽可能小（对于小交换分区），或者增大它以加快休眠过程（也许）。对于 RAM 很大的系统，较小的值可能会显著提高系统从休眠中恢复的速度。<a href="#pgac06dd8bfe95">Systemd#systemd-tmpfiles_-_临时文件</a>可以用于固定你的修改。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tmpfiles.d/hibernation_image_size.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">	
+#    Path                   Mode UID  GID  Age Argument
+	
+w    /sys/power/image_size  -    -    -    -   0
+	
+</pre>
+<p>休眠镜像不能跨多个交换分区和/或交换文件。它必须完全适配<b>一个</b>交换分区或<b>一个</b>交换文件<a href="https://docs.kernel.org/power/swsusp.html">[2]</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E9.85.8D.E7.BD.AE_initramfs" id="配置_initramfs"><span id=".E9.85.8D.E7.BD.AE_initramfs"></span>配置 initramfs</h3></div>
+<ul><li>当使用一个 busybox-based 的 <a href="#pg7e866ec617d4">initramfs</a> 时（这是默认值），<code>/etc/mkinitcpio.conf</code> 中需要 <code>resume</code> 钩子。无论是通过卷标还是通过 UUID，交换分区都是通过 udev 设备节点来引用的，因此 <code>resume</code> 钩子必须在 <code>udev</code> 钩子之后。这是一个使用默认钩子配置的示例：</li></ul>
+<dl><dd><pre>HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems <b>resume</b> fsck)</pre></dd>
+<dd>编辑后记得<a href="#pgbd0f46fbac92">重新生成 initramfs</a>。</dd></dl>
+<dl><dd><div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果使用堆叠存储作为交换空间，例如 <a href="#pg8e3a9446707a">dm-crypt</a>、<a href="#pg1b71ce42139c">RAID</a> 或 <a href="#pg02cd87050dfd">LVM</a>，则最终映射的设备必须在早期用户空间中可用，并且在恢复过程启动之前。也就是说，在这样的设置中，<code>resume</code> 钩子必须放在诸如 <code>encrypt</code>、<code>lvm2</code> 等钩子之后。</div></dd></dl>
+<ul><li>当使用带有 <code>systemd</code> 钩子的 initramfs 时，已经提供了恢复机制，不需要额外添加钩子。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E4.BC.A0.E9.80.92.E4.BC.91.E7.9C.A0.E4.BD.8D.E7.BD.AE.E5.88.B0_initramfs" id="传递休眠位置到_initramfs"><span id=".E4.BC.A0.E9.80.92.E4.BC.91.E7.9C.A0.E4.BD.8D.E7.BD.AE.E5.88.B0_initramfs"></span>传递休眠位置到 initramfs</h3></div>
+<p>当系统休眠时，内存映像被转储到交换空间，其中也包括挂载文件系统的状态。因此，休眠位置必须提供给 initramfs，即在挂载根文件系统之前，以便从休眠状态恢复。
+</p><p>从 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd">systemd</a></span><sup><small>包</small></sup></span> v255 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio">mkinitcpio</a></span><sup><small>包</small></sup></span> v38 开始，当系统运行在 <a href="#pg46c3147defaf">UEFI</a> 上时，<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-sleep"><a href="https://man.archlinux.org/man/systemd-sleep.8">systemd-sleep(8)</a></span> 将自动选择合适的交换空间进行休眠，并且所用交换空间的信息存储在 <code>HibernateLocation</code> EFI 变量中。在下次启动时，<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-hibernate-resume"><a href="https://man.archlinux.org/man/systemd-hibernate-resume.8">systemd-hibernate-resume(8)</a></span> 从 EFI 变量读取位置，系统恢复。这意味着除非系统使用遗留 <a href="#pg7e866ec617d4">BIOS</a> 或你想选择与自动选择的不同的交换空间，否则以下步骤不是必需的。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg146ac4b0e523_.E6.89.8B.E5.8A.A8.E6.8C.87.E5.AE.9A.E4.BC.91.E7.9C.A0.E4.BD.8D.E7.BD.AE" id="手动指定休眠位置"><span id=".E6.89.8B.E5.8A.A8.E6.8C.87.E5.AE.9A.E4.BC.91.E7.9C.A0.E4.BD.8D.E7.BD.AE"></span>手动指定休眠位置</h4></div>
+<p>可以传递<a href="#pgec0856954f1c">内核参数</a> <code>resume=<i>swap_device</i></code>。其中 <i>swap_device</i> 遵循 <a href="#pg2636278c0df5">persistent block device naming</a>。例如：
+</p>
+<ul><li><code>resume=UUID=4209c845-f495-4c43-8a03-5363dd433153</code></li>
+<li><code>resume="PARTLABEL=swap分区卷标"</code></li>
+<li><code>resume=/dev/archVolumeGroup/archLogicalVolume</code>——如果swap在<a href="#pg02cd87050dfd">LVM</a>逻辑卷上（UUID 和 标签应该同样可以工作）</li></ul>
+<p>内核参数只有在重新启动后才会生效。要想不重启而马上休眠，请从<a href="#pg8fc701831ed9">lsblk</a>获取卷的主要和次要设备号，并 echo <code><i>major</i>:<i>minor</i></code>到<code>/sys/power/resume</code>。
+</p><p>例如，如果交换设备是<code>8:3</code>：
+</p>
+<pre># echo 8:3 &gt; /sys/power/resume
+
+</pre>
+<p>如果使用交换文件，请继续查看#获取交换文件偏移量。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg146ac4b0e523_.E8.8E.B7.E5.8F.96.E4.BA.A4.E6.8D.A2.E6.96.87.E4.BB.B6.E5.81.8F.E7.A7.BB.E9.87.8F" id="获取交换文件偏移量"><span id=".E8.8E.B7.E5.8F.96.E4.BA.A4.E6.8D.A2.E6.96.87.E4.BB.B6.E5.81.8F.E7.A7.BB.E9.87.8F"></span>获取交换文件偏移量</h5></div>
+<p>使用交换文件进行休眠时，文件系统所在的块设备应该在 <code>resume=</code> 中指定，并且还需要通过 <code>resume_offset=</code> <a href="#pgec0856954f1c">内核参数</a>指定交换文件的物理偏移量。 <a href="https://docs.kernel.org/power/swsusp-and-swap-files.html">[3]</a>
+</p><p>在除 <a href="#pg429e7ec45c9c">Btrfs</a> 之外的文件系统上，可以通过运行 <code>filefrag -v <i>交换文件</i></code> 来获取 <code>resume_offset=</code> 的值。输出为表格格式，所需的值位于第一行 <code>physical_offset</code> 列中。
+</p><p>例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># filefrag -v /swapfile</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Filesystem type is: ef53
+File size of /swapfile is 4294967296 (1048576 blocks of 4096 bytes)
+ ext:     logical_offset:        physical_offset: length:   expected: flags:
+   0:        0..       0:      <b>38912..</b>     38912:      1: 
+   1:        1..   22527:      38913..     61439:  22527:             unwritten
+   2:    22528..   53247:     899072..    929791:  30720:      61440: unwritten
+...
+</pre>
+<p>在本例中，<code>resume_offset=</code> 的值是首先出现的那个 <code>38912</code>。
+</p><p>或者，为了直接获取偏移量：
+</p>
+<pre># filefrag -v <i>swap_file</i> | awk '$1=="0:" {print substr($4, 1, length($4)-2)}'
+</pre>
+<p>对于 <a href="#pg429e7ec45c9c">Btrfs</a>，请不要尝试使用 <i>filefrag</i> 工具，因为 <i>filefrag</i> 获取到的“物理”偏移量并不是真正在硬盘上的偏移量；这是一个虚拟的硬盘地址空间，用于支持多设备<a href="https://bugzilla.kernel.org/show_bug.cgi?id=202803">[4]</a>。请使用 <span class="plainlinks archwiki-template-man" title="$ man 8 btrfs-inspect-internal"><a href="https://man.archlinux.org/man/btrfs-inspect-internal.8">btrfs-inspect-internal(8)</a></span> 命令作为代替，例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># btrfs inspect-internal map-swapfile -r <i>swap_file</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">198122980
+</pre>
+<p>在本例中，设置偏移量的内核参数是 <code>resume_offset=198122980</code>。
+</p><p>为使该更改立刻生效（无需重启），使用 <code>echo</code> 将偏移量改动至 <code>/sys/power/resume_offset</code>。例如，如果偏移量是<code>38912</code>：
+</p>
+<pre># echo 38912 &gt; /sys/power/resume_offset
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>这个命令也许可以用于查找交换文件所在设备：<code>findmnt -no UUID -T <i>swap_file</i></code></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>对于一个堆叠块设备，比如一个加密容器（LUKS），RAID 或者 LVM，<code>resume</code> 参数必须指向交换文件所在的已解锁或映射的设备。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E6.9B.B4.E6.94.B9.E4.BC.91.E7.9C.A0.E9.95.9C.E5.83.8F.E7.9A.84.E5.8E.8B.E7.BC.A9.E7.AE.97.E6.B3.95" id="更改休眠镜像的压缩算法"><span id=".E6.9B.B4.E6.94.B9.E4.BC.91.E7.9C.A0.E9.95.9C.E5.83.8F.E7.9A.84.E5.8E.8B.E7.BC.A9.E7.AE.97.E6.B3.95"></span>更改休眠镜像的压缩算法</h3></div>
+<p>从 Linux 6.9 开始<a href="https://web.git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=3fec6e5961b77af6a952b77f5c2ea26f7513b216">[5]</a>，可以更改休眠镜像的压缩算法。默认的压缩算法基于编译时选项 <code>CONFIG_HIBERNATION_DEF_COMP</code> 选择，但可以在启动时和运行时覆盖。
+</p><p>不同的压缩算法具有不同的特性，休眠可能会受益于使用其中任何一种算法，尤其是当次要算法（LZ4）在默认算法（LZO）上提供更好的解压缩速度时，这反过来会减少休眠镜像的恢复时间。
+</p><p>你可以通过两种方式覆盖默认算法：
+</p><p>1) 传递 <code>hibernate.compressor</code> 作为<a href="#pgec0856954f1c">内核参数</a>：
+</p>
+<pre>hibernate.compressor=lzo
+hibernate.compressor=lz4
+</pre>
+<p>2) 在运行时指定算法：
+</p>
+<pre># echo lzo &gt; /sys/module/hibernate/parameters/compressor
+# echo lz4 &gt; /sys/module/hibernate/parameters/compressor
+</pre>
+<p>目前 <code>lzo</code> 和 <code>lz4</code> 是支持的算法，LZO 是默认算法。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E4.BD.BF.E7.94.A8_zram_.E7.BB.B4.E6.8A.A4.E4.BC.91.E7.9C.A0.E7.9A.84.E4.BA.A4.E6.8D.A2.E6.96.87.E4.BB.B6" id="使用_zram_维护休眠的交换文件"><span id=".E4.BD.BF.E7.94.A8_zram_.E7.BB.B4.E6.8A.A4.E4.BC.91.E7.9C.A0.E7.9A.84.E4.BA.A4.E6.8D.A2.E6.96.87.E4.BB.B6"></span>使用 zram 维护休眠的交换文件</h3></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>与以下涉及多个交换空间的设置不同，可以使用 zswap 来建立类似的行为。</div>
+<p>通过同时维护两个或更多的交换空间，可以解决使用 zram 仅内存交换时的休眠问题。<a href="#pgac06dd8bfe95">systemd</a> 在触发休眠前会始终忽略 zram 块设备 <a href="https://github.com/systemd/systemd/issues/16708#issuecomment-1632592375">[6]</a>，因此保持两个交换空间启用应该可以在无需进一步干预的情况下正常工作。
+</p><p>在配置交换文件后，请按照 <a href="#pg61935487d964">zram</a> 页面的说明进行操作。确保 zram 具有<b>更高的交换优先级</b>（例如 <code>pri=100</code>）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li><b>不要</b>为休眠创建按需交换单元，因为这不被官方支持。请参阅 systemd 问题 <a href="https://github.com/systemd/systemd/issues/16708">#16708</a> 和 <a href="https://github.com/systemd/systemd/issues/30083">#30083</a>。</li>
+<li>内核单独负责回收页面的匿名内存并进行交换；不使用交换空间实际上可能导致内存使用不良。用户可以通过 <a href="#pg24308b964839">control groups</a> 中的 <code>memory.low</code> 来管理某些应用程序的内存回收优先级。总的来说，这比设置 <a href="#pge71220be39ad">swappiness</a> 参数更有效。</li>
+<li>阅读 <a href="https://www.kernel.org/doc/gorman/html/understand/understand014.html">内核文档中的交换管理</a> 和 <a href="https://chrisdown.name/2018/01/02/in-defence-of-swap.html">Chris Down 的文章 - 为交换辩护：常见误解</a> 以获取更多详细信息。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E4.BC.91.E7.9C.A0.E5.88.B0.E7.B2.BE.E7.AE.80.E9.85.8D.E7.BD.AE.E7.9A.84LVM.E5.8D.B7.E4.B8.AD" id="休眠到精简配置的LVM卷中"><span id=".E4.BC.91.E7.9C.A0.E5.88.B0.E7.B2.BE.E7.AE.80.E9.85.8D.E7.BD.AE.E7.9A.84LVM.E5.8D.B7.E4.B8.AD"></span>休眠到精简配置的LVM卷中</h3></div>
+<p>在精简配置的<a href="#pg02cd87050dfd">LVM</a>卷中休眠是可能的，但必须确保该卷已完全分配。否则系统将无法从中恢复，参见 <a href="https://bugs.archlinux.org/task/50703">FS#50703</a>。
+</p><p>可以通过简单地用零填充来完全分配LVM卷。例如：
+</p>
+<pre># dd if=/dev/zero of=/dev/vg0/swap bs=1M status=progress
+</pre>
+<p>想确认卷是否已完全被分配，使用：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># lvs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"> LV                   VG  Attr       LSize   Pool Origin    Data%  Meta%  Move Log Cpy%Sync Convert
+ swap                 vg0 Vwi-aot--- 10.00g  pool           100
+</pre>
+<p>完全分配的卷将显示为具有100%的Data%
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不要在用于休眠的精简配置的swap分区上使用<a href="#pgcb28ba980ed7">TRIM</a>，即：不要在<code>/etc/fstab</code>使用<code>discard</code>，也不要在<i>swapon</i>时加入<code>-d</code>或<code>--discard</code>参数。否则已被使用的空间会被重新去分配</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E7.A6.81.E7.94.A8_zswap_.E5.86.99.E5.9B.9E.E4.BB.A5.E4.BB.85.E5.B0.86.E4.BA.A4.E6.8D.A2.E7.A9.BA.E9.97.B4.E7.94.A8.E4.BA.8E.E4.BC.91.E7.9C.A0" id="禁用_zswap_写回以仅将交换空间用于休眠"><span id=".E7.A6.81.E7.94.A8_zswap_.E5.86.99.E5.9B.9E.E4.BB.A5.E4.BB.85.E5.B0.86.E4.BA.A4.E6.8D.A2.E7.A9.BA.E9.97.B4.E7.94.A8.E4.BA.8E.E4.BC.91.E7.9C.A0"></span>禁用 zswap 写回以仅将交换空间用于休眠</h3></div>
+<p>在 Linux 6.8 中，<a href="#pg952d5556d6d4">zswap</a> 增加了<a href="https://git.kernel.org/linus/501a06fe8e4c185bbda371b8cedbdf1b23a633d8">一个按 cgroup 禁用写回的选项</a>。通过在所有可能的单元类型中使用 systemd 单元设置 <code>MemoryZSwapWriteback</code>（参见 <span class="plainlinks archwiki-template-man" title="$ man 5 systemd.resource-control"><a href="https://man.archlinux.org/man/systemd.resource-control.5#Memory_Accounting_and_Control">systemd.resource-control(5) § Memory Accounting and Control</a></span>），可以有效地完全禁用 zswap 写回。这使得 zswap 可以像 zram 一样使用，同时还支持休眠。
+</p><p>为了避免手动创建十二个顶级按类型的 drop-in 文件（用于系统和用户的 <code>scope</code>、<code>service</code>、<code>slice</code>、<code>socket</code>、<code>mount</code>、<code>swap</code> 单元类型），请<a href="#pg54c3351b3e3b">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zswap-disable-writeback/">zswap-disable-writeback</a></span><sup><small>AUR</small></sup></span>。<a href="#pg952d5556d6d4">启用 zswap</a> 并重新启动以使设置生效。
+</p><p>尝试执行内存密集型任务并确认 zswap 没有将任何内容写入磁盘：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cat /sys/kernel/debug/zswap/written_back_pages</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">0
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg146ac4b0e523_.E7.9D.A1.E7.9C.A0.E9.92.A9.E5.AD.90" id="睡眠钩子"><span id=".E7.9D.A1.E7.9C.A0.E9.92.A9.E5.AD.90"></span>睡眠钩子</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E8.87.AA.E5.AE.9A.E4.B9.89_systemd_.E5.8D.95.E5.85.83" id="自定义_systemd_单元"><span id=".E8.87.AA.E5.AE.9A.E4.B9.89_systemd_.E5.8D.95.E5.85.83"></span>自定义 systemd 单元</h3></div>
+<p><a href="#pgac06dd8bfe95">systemd</a> 会分别为每个睡眠状态启动 <code>suspend.target</code>、<code>hibernate.target</code>、<code>hybrid-sleep.target</code> 或 <code>suspend-then-hibernate.target</code>。所有上述目标都会拉取 <code>sleep.target</code>。可以使用这些目标中的任何一个来在挂起/休眠之前或之后调用<a href="#pgac06dd8bfe95">自定义单元</a>。应为用户操作和 root/系统操作分别创建文件。示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/user-suspend@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=User suspend actions
+Before=sleep.target
+
+[Service]
+User=%I
+Type=forking
+Environment=DISPLAY=:0
+ExecStartPre= -/usr/bin/pkill -u %u unison ; /usr/local/bin/music.sh stop
+ExecStart=/usr/bin/sflock
+ExecStartPost=/usr/bin/sleep 1
+
+[Install]
+WantedBy=sleep.target</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/user-resume@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=User resume actions
+After=suspend.target hibernate.target
+
+[Service]
+User=%I
+Type=simple
+ExecStart=/usr/local/bin/ssh-connect.sh
+
+[Install]
+WantedBy=suspend.target hibernate.target</pre>
+<p>启用 <code>user-suspend@<i>user</i>.service</code> 和/或 <code>user-resume@<i>user</i>.service</code> 以使更改生效。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>由于屏幕锁定器可能会在屏幕“锁定”之前返回，因此在从挂起状态恢复时屏幕可能会闪烁。通过 <code>ExecStartPost=/usr/bin/sleep 1</code> 添加一个小延迟有助于防止这种情况。</div>
+<p>对于 root/系统操作：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/root-suspend.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Local system suspend actions
+Before=sleep.target
+
+[Service]
+Type=simple
+ExecStart=-/usr/bin/pkill sshfs
+
+[Install]
+WantedBy=sleep.target</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/root-resume.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Local system resume actions
+After=suspend.target hibernate.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/systemctl restart mnt-media.automount
+
+[Install]
+WantedBy=suspend.target hibernate.target</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg146ac4b0e523_.E7.BB.84.E5.90.88.E7.9D.A1.E7.9C.A0.2F.E6.81.A2.E5.A4.8D.E5.8D.95.E5.85.83" id="组合睡眠/恢复单元"><span id=".E7.BB.84.E5.90.88.E7.9D.A1.E7.9C.A0.2F.E6.81.A2.E5.A4.8D.E5.8D.95.E5.85.83"></span>组合睡眠/恢复单元</h4></div>
+<p>使用组合单元文件，单个钩子可以为不同的阶段（睡眠/恢复）和不同的目标完成所有工作。
+</p><p>示例和解释：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/wicd-sleep.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Wicd sleep hook
+Before=sleep.target
+StopWhenUnneeded=yes
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=-/usr/share/wicd/daemon/suspend.py
+ExecStop=-/usr/share/wicd/daemon/autoconnect.py
+
+[Install]
+WantedBy=sleep.target</pre>
+<ul><li><code>RemainAfterExit=yes</code>：启动后，服务被视为活动状态，直到显式停止。</li>
+<li><code>StopWhenUnneeded=yes</code>：当活动时，如果没有其他活动服务需要它，服务将被停止。在这个特定示例中，它将在 <code>sleep.target</code> 停止后被停止。</li>
+<li>因为 <code>sleep.target</code> 有 <code>StopWhenUnneeded=yes</code>，所以钩子保证会为不同的任务正确启动/停止。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E4.BD.8D.E4.BA.8E_.2Fusr.2Flib.2Fsystemd.2Fsystem-sleep_.E7.9A.84.E9.92.A9.E5.AD.90" id="位于_/usr/lib/systemd/system-sleep_的钩子"><span id=".E4.BD.8D.E4.BA.8E_.2Fusr.2Flib.2Fsystemd.2Fsystem-sleep_.E7.9A.84.E9.92.A9.E5.AD.90"></span>位于 /usr/lib/systemd/system-sleep 的钩子</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>根据 <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-sleep"><a href="https://man.archlinux.org/man/systemd-sleep.8">systemd-sleep(8)</a></span>，此方法被视为一种 hack。<i>systemd-sleep</i> 会并行运行这些钩子，而不是一个接一个地运行。有关支持排序的更明确接口，请参见#Custom systemd units。</div>
+<p><i>systemd-sleep</i> 会运行 <code>/usr/lib/systemd/system-sleep/</code> 中的所有可执行文件，并向每个文件传递两个参数：
+</p>
+<ol><li>要么是 <code>pre</code>，要么是 <code>post</code>，取决于机器是进入睡眠还是唤醒。</li>
+<li><code>suspend</code>、<code>hibernate</code>、<code>hybrid-sleep</code> 或 <code>suspend-then-hibernate</code>，取决于正在调用的是哪个。</li></ol>
+<p>任何自定义脚本的输出都将由 <i>systemd-suspend.service</i>、<i>systemd-hibernate.service</i> 或 <i>systemd-hybrid-sleep.service</i> 记录。你可以在 <i>systemd</i>'s <a href="#pg95a389d97781">journalctl</a> 中查看其输出：
+</p>
+<pre># journalctl -b -u systemd-suspend.service
+</pre>
+<p>自定义睡眠脚本的示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/systemd/system-sleep/example.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+case $1/$2 in
+  pre/*)
+    echo "Going to $2..."
+    ;;
+  post/*)
+    echo "Waking up from $2..."
+    ;;
+esac
+</pre>
+<p>不要忘记使你的脚本<a href="#pgf46977f5f342">可执行</a>。
+</p><p>一个名为 <code>SYSTEMD_SLEEP_ACTION</code> 的环境变量将被设置，并包含正在处理的睡眠操作。这对于 <i>suspend-then-hibernate</i> 特别有用，其中变量的值将是 <code>suspend</code>、<code>hibernate</code> 或 <code>suspend-after-failed-hibernate</code>（在休眠失败的情况下）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg146ac4b0e523_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E5.9C.A8.E5.8F.97.E4.BF.A1.E4.BB.BB.E7.9A.84.E4.BD.8D.E7.BD.AE.E8.87.AA.E5.8A.A8.E8.A7.A3.E9.94.81" id="在受信任的位置自动解锁"><span id=".E5.9C.A8.E5.8F.97.E4.BF.A1.E4.BB.BB.E7.9A.84.E4.BD.8D.E7.BD.AE.E8.87.AA.E5.8A.A8.E8.A7.A3.E9.94.81"></span>在受信任的位置自动解锁</h3></div>
+<p>在恢复时，如果系统连接到某些设备或受信任的 Wi-Fi 网络，你可以自动解锁系统。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/local-scripts/resume-unlock.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/bash
+# 如果在受信任的位置，则解锁会话
+
+function trusted() {
+    # 检查是否连接到受信任的 Wi-Fi 网络
+    [[ $(iwgetid -r) == <i>your_home_ssid</i> ]] \
+        &amp;&amp; return 0
+
+    # 检查是否连接了受信任的 USB 设备。
+    #lsusb -d <i>xxxx:xxxx</i> &amp;&amp; return 0
+
+    return 1 # 不受信任
+}
+
+for (( i=0; i &lt; 10; i++ )); do
+    if trusted; then
+        loginctl unlock-sessions
+        exit
+    fi
+    sleep 0.5
+done</pre>
+<p>配置你的桌面环境，使其在恢复时锁定，然后创建一个睡眠钩子，在恢复后运行上述脚本。你还需要<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wireless_tools">wireless_tools</a></span><sup><small>包</small></sup></span> 以读取连接的 Wi-Fi SSID。如果你还想测试连接的 USB 设备，请取消脚本中的 <code>lsusb -d ...</code> 行的注释，并填写你受信任设备的 ID。你可以通过运行 <code>lsusb</code> 获取设备的 ID。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E5.AE.8C.E5.85.A8.E7.A6.81.E7.94.A8.E7.9D.A1.E7.9C.A0" id="完全禁用睡眠"><span id=".E5.AE.8C.E5.85.A8.E7.A6.81.E7.94.A8.E7.9D.A1.E7.9C.A0"></span>完全禁用睡眠</h3></div>
+<p>当使用设备作为服务器时，可能不需要或甚至不希望挂起/休眠。可以通过 <span class="plainlinks archwiki-template-man" title="$ man 5 systemd-sleep.conf"><a href="https://man.archlinux.org/man/systemd-sleep.conf.5">systemd-sleep.conf(5)</a></span> 禁用每个睡眠状态：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/sleep.conf.d/disable-sleep.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Sleep]
+AllowSuspend=no
+AllowHibernation=no
+AllowHybridSleep=no
+AllowSuspendThenHibernate=no</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E8.8B.B1.E7.89.B9.E5.B0.94.E5.BF.AB.E9.80.9F.E5.90.AF.E5.8A.A8.E6.8A.80.E6.9C.AF.EF.BC.88Intel_Rapid_Start_Technology.2C_IRST.EF.BC.89" id="英特尔快速启动技术（Intel_Rapid_Start_Technology,_IRST）"><span id=".E8.8B.B1.E7.89.B9.E5.B0.94.E5.BF.AB.E9.80.9F.E5.90.AF.E5.8A.A8.E6.8A.80.E6.9C.AF.EF.BC.88Intel_Rapid_Start_Technology.2C_IRST.EF.BC.89"></span>英特尔快速启动技术（Intel Rapid Start Technology, IRST）</h3></div>
+<p>英特尔快速启动技术是一种基于固件的休眠方法，允许在预定义的时间间隔或根据电池状态从睡眠中休眠。这应该比常规休眠更快更可靠，因为它是由固件而不是在操作系统级别完成的。通常，它必须在固件中启用，固件还支持设置暂停/电池事件触发休眠后的持续时间。然而，尽管固件中支持 IRST，但某些设备仅允许通过英特尔的 Windows 驱动程序进行配置。在这种情况下，下面描述的 intel-rst 内核模块应该能够在 Linux 下配置事件。
+</p><p>启用英特尔快速启动技术（IRST）后，从深度睡眠中恢复需要“<a href="https://mjg59.dreamwidth.org/26022.html">比从 S3 恢复长几秒，但比从休眠中恢复快得多</a>”。
+</p><p>许多基于英特尔的系统都支持 IRST 固件，但需要在 SSD（而不是 HDD）上使用特殊分区。Windows 的 OEM 部署可能已经有一个预先存在的 IRST 分区，可以在 Arch Linux 安装过程中保留（而不是擦除和重新分区整个 SSD）。它应该显示为与系统 RAM 大小相等的未格式化分区。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>英特尔快速启动分区未加密；“如果你使用基于软件的磁盘加密，英特尔建议禁用英特尔快速启动技术”。<a href="https://www.intel.com/content/www/us/en/support/articles/000024080/technologies.html">[7]</a></div>
+<p>但是，如果你打算擦除并重新分区整个驱动器（或者已经这样做了），那么如果你也计划使用该技术，则必须重新创建IRST分区。这可以通过创建一个与系统 RAM 大小相等的空分区，并将其分区类型设置为 <a href="https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs">GUID</a> <code>D3BFE2DE-3DAF-11DF-BA40-E3A556D89593</code>（对于 <a href="#pg8edad8d1135b">GPT</a> 分区）或 <a href="https://en.wikipedia.org/wiki/Partition_type">ID</a> <code>0x84</code>（对于 <a href="#pg8edad8d1135b">MBR</a> 分区）来实现。你可能还需要在系统的固件设置中启用对IRST的支持。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可以在系统的固件设置中调整 IRST 启动前（挂起后）的持续时间。</div>
+<p>IRST 休眠过程的持续时间（即将RAM的全部内容复制到特殊分区）取决于系统的 RAM 大小和 SSD 速度，因此可能需要20–60秒。一些系统可以用 LED 指示灯指示过程的完成，例如停止闪烁。
+</p><p>在 Linux 内核中配置 IRST 休眠事件需要 <code>CONFIG_INTEL_RST</code> 内置或作为模块。一旦通过 <code>modprobe intel_rst</code> 加载，它应该在 <code>/sys/bus/acpi/drivers/intel_rapid_start/*/</code> 下创建 <code>wakeup_events</code> 和 <code>wakeup_time</code> 文件，这些文件可用于进一步配置。该模块的文档较少，请参阅源代码 <a href="https://github.com/torvalds/linux/blob/143a6252e1b8ab424b4b293512a97cca7295c182/drivers/platform/x86/intel/rst.c">drivers/platform/x86/intel/rst.c</a> 以获取更多详细信息。
+</p><p>另请参阅英特尔快速启动技术的<a href="https://www.intel.com/content/www/us/en/support/articles/000024078/technologies.html">一般问答</a>和<a href="https://www.intel.com/content/www/us/en/support/articles/000024273/technologies/intel-vpro-platform.html?wapkw=user%20guide%20Intel%20rapid%20start%20">用户手册</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E8.B7.9F.E8.B8.AA.E7.AC.94.E8.AE.B0.E6.9C.AC.E7.94.B5.E8.84.91.E7.94.B5.E6.B1.A0.E5.9C.A8.E7.9D.A1.E7.9C.A0.E7.8A.B6.E6.80.81.E4.B8.8B.E7.9A.84.E8.83.BD.E9.87.8F.E5.8F.98.E5.8C.96" id="跟踪笔记本电脑电池在睡眠状态下的能量变化"><span id=".E8.B7.9F.E8.B8.AA.E7.AC.94.E8.AE.B0.E6.9C.AC.E7.94.B5.E8.84.91.E7.94.B5.E6.B1.A0.E5.9C.A8.E7.9D.A1.E7.9C.A0.E7.8A.B6.E6.80.81.E4.B8.8B.E7.9A.84.E8.83.BD.E9.87.8F.E5.8F.98.E5.8C.96"></span>跟踪笔记本电脑电池在睡眠状态下的能量变化</h3></div>
+<p>要测量挂起状态下的功耗，请使用 <a href="https://github.com/equaeghe/batenergy">Batenergy</a> 脚本将电池变化记录到系统日志中。这允许比较 S3 / S0x 状态下的功耗，或在 BIOS 和内核更新后检查回归和修复。该脚本需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bc">bc</a></span><sup><small>包</small></sup></span> 进行计算。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg146ac4b0e523_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_ACPI_OS_NAME" id="ACPI_OS_NAME">ACPI_OS_NAME</h3></div>
+<p>你也许需要调整你的 <b>DSDT table</b> 来让它工作。参阅 <a href="#pgb6adbac7a9ca">DSDT</a> 词条。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E7.9D.A1.E7.9C.A0.2F.E4.BC.91.E7.9C.A0.E6.97.A0.E6.B3.95.E8.BF.9B.E8.A1.8C.EF.BC.8C.E6.88.96.E6.97.A0.E6.B3.95.E7.A8.B3.E5.AE.9A.E8.BF.9B.E8.A1.8C" id="睡眠/休眠无法进行，或无法稳定进行"><span id=".E7.9D.A1.E7.9C.A0.2F.E4.BC.91.E7.9C.A0.E6.97.A0.E6.B3.95.E8.BF.9B.E8.A1.8C.EF.BC.8C.E6.88.96.E6.97.A0.E6.B3.95.E7.A8.B3.E5.AE.9A.E8.BF.9B.E8.A1.8C"></span>睡眠/休眠无法进行，或无法稳定进行</h3></div>
+
+<p><br/>
+有相当多的错误报告指出，他们的屏幕在给出可读的错误信息前就关闭了，有时屏幕关闭了，却再也无法唤醒。这些故障在笔记本电脑和台式机上都曾发生。这不是个官方解决方案，但切换到旧的内核，尤其是LTS内核，或许可以修复这个问题。
+</p><p>使用硬件看门狗定时器（默认禁用，参见<code>RuntimeWatchdogSec=</code> in <span class="plainlinks archwiki-template-man" title="$ man 5 systemd-system.conf"><a href="https://man.archlinux.org/man/systemd-system.conf.5#OPTIONS">systemd-system.conf(5) § OPTIONS</a></span>）时可能会出现一个问题。一个有问题的看门狗定时器可能会在系统完成创建休眠映像之前重置计算机。
+</p><p>有时屏幕会变黑，这是由于从initramfs内部初始化设备引起的。移除<a href="#pgbd0f46fbac92">Mkinitcpio#MODULES</a>中可能包含的任何模块，移除<code>kms</code>钩子并重新生成initramfs可能会解决这个问题，特别是对于<a href="#pg1b16260aab54">早期KMS</a>的图形驱动程序。在恢复之前初始化这些设备可能会导致系统无法从休眠中恢复的不一致情况。这不影响从RAM中恢复。此外，请查看博客文章<a href="https://web.archive.org/web/20230502010825/https://01.org/blogs/rzhang/2015/best-practice-debug-linux-suspend/hibernate-issues">调试挂起问题的最佳实践</a>。
+</p><p>从<a href="#pgedfe18626036">ATI</a>视频驱动程序切换到较新的<a href="#pg4a4bc5e5df24">AMDGPU</a>驱动程序也可能有助于使休眠和唤醒过程成功。
+</p><p>对于<a href="#pge12579b7d4ac">NVIDIA</a>用户，<a href="#pg3a5d8bdf10b8">禁用</a>模块<code>nvidiafb</code>可能会有所帮助。<a href="https://bbs.archlinux.org/viewtopic.php?id=234646">[8]</a>
+</p><p>带有Intel CPU的笔记本电脑如果加载了<code>intel_lpss_pci</code>模块用于触摸板，可能会在恢复时遇到内核恐慌（大写锁定键闪烁）<a href="https://bbs.archlinux.org/viewtopic.php?id=231881">[9]</a>。需要将该模块添加到<a href="#pg5409190f7704">initramfs</a>中：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">MODULES=(... intel_lpss_pci ...)</pre>
+<p>然后<a href="#pgbd0f46fbac92">重新生成initramfs</a>。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg146ac4b0e523_USB_.E8.AE.BE.E5.A4.87.E9.94.99.E8.AF.AF" id="USB_设备错误"><span id="USB_.E8.AE.BE.E5.A4.87.E9.94.99.E8.AF.AF"></span>USB 设备错误</h4></div>
+<p>系统可能因为USB设备而无法挂起。你可能会看到以下错误：
+</p>
+<pre>PM: Some devices failed to suspend, or early wake event detected
+...
+xhci_hcd 0000:02:00.0: PM: failed to suspend async: error -16
+</pre>
+<p><i>lspci</i>可能会给你更多关于故障设备的信息：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lspci -s 02:00.0</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">02:00.0 USB controller: Advanced Micro Devices, Inc. [AMD] 500 Series Chipset USB 3.1 XHCI Controller</pre>
+<p>尝试断开该端口上的设备。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E7.BD.91.E7.BB.9C.E5.94.A4.E9.86.92.EF.BC.88WoL.2C_Wake-on-LAN.EF.BC.89" id="网络唤醒（WoL,_Wake-on-LAN）"><span id=".E7.BD.91.E7.BB.9C.E5.94.A4.E9.86.92.EF.BC.88WoL.2C_Wake-on-LAN.EF.BC.89"></span>网络唤醒（WoL, Wake-on-LAN）</h3></div>
+<p>如果<a href="#pg2693a40edfb6">网络唤醒</a>被启用，网卡可能会消耗电力，即使电脑处于休眠状态。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E6.8C.82.E8.B5.B7.E5.90.8E.E8.A2.AB.E7.AB.8B.E5.8D.B3.E5.94.A4.E9.86.92" id="挂起后被立即唤醒"><span id=".E6.8C.82.E8.B5.B7.E5.90.8E.E8.A2.AB.E7.AB.8B.E5.8D.B3.E5.94.A4.E9.86.92"></span>挂起后被立即唤醒</h3></div>
+<p>参见<a href="#pgb0e48b0a2dc6">电源管理/唤醒触发器#挂起后被立即唤醒</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E7.B3.BB.E7.BB.9F.E5.9C.A8.E4.BC.91.E7.9C.A0.E5.90.8E.E6.B2.A1.E6.9C.89.E6.96.AD.E7.94.B5" id="系统在休眠后没有断电"><span id=".E7.B3.BB.E7.BB.9F.E5.9C.A8.E4.BC.91.E7.9C.A0.E5.90.8E.E6.B2.A1.E6.9C.89.E6.96.AD.E7.94.B5"></span>系统在休眠后没有断电</h3></div>
+<p>当你休眠系统时，系统应该会断电（在将状态保存到磁盘后）。在某些固件上，S4 睡眠状态可能无法可靠工作。例如，系统可能会重启或保持开启但无响应，而不是断电。如果发生这种情况，可以在 <span class="plainlinks archwiki-template-man" title="$ man 5 sleep.conf.d"><a href="https://man.archlinux.org/man/sleep.conf.d.5">sleep.conf.d(5)</a></span> 中将 <code>HibernateMode</code> 设置为 <code>shutdown</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/sleep.conf.d/hibernatemode.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Sleep]
+HibernateMode=shutdown</pre>
+<p>使用上述配置，如果其他设置都正确，在调用 <code>systemctl hibernate</code> 时，机器将会关闭，并在关闭过程中将状态保存到磁盘。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_.E4.BC.91.E7.9C.A0.E5.90.8E.E5.90.AF.E5.8A.A8.E6.97.B6.E6.9C.AA.E6.89.BE.E5.88.B0.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.EF.BC.88.E6.88.96.E5.90.AF.E5.8A.A8.E9.94.99.E8.AF.AF.E7.9A.84.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.EF.BC.89" id="休眠后启动时未找到操作系统（或启动错误的操作系统）"><span id=".E4.BC.91.E7.9C.A0.E5.90.8E.E5.90.AF.E5.8A.A8.E6.97.B6.E6.9C.AA.E6.89.BE.E5.88.B0.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.EF.BC.88.E6.88.96.E5.90.AF.E5.8A.A8.E9.94.99.E8.AF.AF.E7.9A.84.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.EF.BC.89"></span>休眠后启动时未找到操作系统（或启动错误的操作系统）</h3></div>
+<p>当引导磁盘是外部磁盘时，可能会发生这种情况，这似乎是由 BIOS/固件限制引起的。BIOS/固件尝试从内部磁盘启动，而休眠是从外部（或其他）磁盘上的操作系统完成的。
+</p><p>类似于#系统在休眠后没有断电，设置 <code>HibernateMode=shutdown</code> 以永久解决问题。如果你已经将自己锁定在外，你可以尝试重新启动系统4次（每次等待错误出现），这在某些BIOS上强制执行正常的引导过程。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_Swap_file_in_.2Fhome" id="Swap_file_in_/home"><span id="Swap_file_in_.2Fhome"></span>Swap file in /home</h3></div>
+<p>如果交换文件位于 <code>/home/</code> 目录下，<i>systemd-logind</i> 将无法访问它，从而导致 <code>Call to Hibernate failed: No such file or directory</code> 警告信息，并且在执行 <code>systemctl hibernate</code> 时需要身份验证。应避免这种设置，因为它被认为是<a href="https://github.com/systemd/systemd/issues/31100">上游不支持的</a>。有关两种解决方法，请参阅 <a href="https://github.com/systemd/systemd/issues/15354#issuecomment-611077881">systemd issue 15354</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_PC_.E6.97.A0.E6.B3.95.E4.BB.8E_A520I_.E5.92.8C_B550I_.E4.B8.BB.E6.9D.BF.E7.9A.84.E7.9D.A1.E7.9C.A0.E4.B8.AD.E5.94.A4.E9.86.92" id="PC_无法从_A520I_和_B550I_主板的睡眠中唤醒"><span id="PC_.E6.97.A0.E6.B3.95.E4.BB.8E_A520I_.E5.92.8C_B550I_.E4.B8.BB.E6.9D.BF.E7.9A.84.E7.9D.A1.E7.9C.A0.E4.B8.AD.E5.94.A4.E9.86.92"></span>PC 无法从 A520I 和 B550I 主板的睡眠中唤醒</h3></div>
+<p>在某些使用 A520i 和 B550i 芯片组的主板上，系统无法完全进入睡眠状态或从睡眠状态中恢复。症状包括系统进入睡眠状态，显示器关闭，但主板上的内部 LED 或电源 LED 仍然亮着。随后，系统无法从该状态恢复，需要强制关机。如果你在使用 AMD 时遇到类似问题，请首先确保你的系统已完全更新，并检查是否安装了 AMD <a href="#pgdc6bceef5651">microcode</a> 软件包。
+</p><p>验证以 <code>GPP0</code> 开头的行是否处于启用状态：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /proc/acpi/wakeup</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Device	S-state	  Status   Sysfs node
+GP12	  S4	*enabled   pci:0000:00:07.1
+GP13	  S4	*enabled   pci:0000:00:08.1
+XHC0	  S4	*enabled   pci:0000:0b:00.3
+GP30	  S4	*disabled
+GP31	  S4	*disabled
+PS2K	  S3	*disabled
+<b>GPP0</b>	  S4	<b>*enabled</b>   pci:0000:00:01.1
+GPP8	  S4	*enabled   pci:0000:00:03.1
+PTXH	  S4	*enabled   pci:0000:05:00.0
+PT20	  S4	*disabled
+PT24	  S4	*disabled
+PT26	  S4	*disabled
+PT27	  S4	*disabled
+PT28	  S4	*enabled   pci:0000:06:08.0
+PT29	  S4	*enabled   pci:0000:06:09.0
+</pre>
+<p>如果该行已启用，你可以运行以下命令禁用它：
+</p>
+<pre># echo GPP0 &gt; /proc/acpi/wakeup
+</pre>
+<p>现在通过运行 <code>systemctl suspend</code> 进行测试，让系统进入睡眠状态。然后尝试在几秒钟后唤醒系统。如果有效，你可以使此解决方法永久生效。<a href="#pgeb027b34b7ae">创建</a>一个 systemd <a href="#pgac06dd8bfe95">单元文件</a>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/toggle-gpp0-to-fix-wakeup.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description="禁用 GPP0 以修复睡眠问题"
+
+[Service]
+ExecStart=/bin/sh -c "/bin/echo GPP0 &gt; /proc/acpi/wakeup"
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>执行 <a href="#pg16fc2566d30b">daemon-reload</a> 并 <a href="#pgf2f8af0a5db6">start/enable</a> 新创建的单元。
+</p><p>或者，你可以创建一个 <a href="#pge009209061ac">udev</a> 规则。假设 <code>GPP0</code> 的 sysfs 节点为 <code>pci:0000:00:01.1</code>，如示例所示，运行 <code>udevadm info -a -p /sys/bus/pci/devices/0000\:00\:01.1</code> 以获取相关信息，并创建如下 udev 规则：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/10-gpp0-acpi-fix.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">KERNEL=="0000:00:01.1", SUBSYSTEM=="pci", DRIVERS=="pcieport", ATTR{vendor}=="0x1022", ATTR{device}=="0x1483", ATTR{power/wakeup}="disabled"</pre>
+<p>默认情况下，udev 守护程序已经在监视系统中的更改。如果需要，你可以<a href="#pge009209061ac">手动重新加载规则</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_Suspend_from_corresponding_laptop_Fn_key" id="Suspend_from_corresponding_laptop_Fn_key_not_working">Suspend from corresponding laptop Fn key not working</h3></div>
+<p>如果无论 `logind.conf` 中的设置如何，睡眠按钮都不起作用（按下它甚至不会在 `syslog` 中产生消息），那么 `logind` 可能没有监视键盘设备。<a href="https://lists.freedesktop.org/archives/systemd-devel/2015-February/028325.html">[10]</a> 请执行以下操作：
+</p>
+<pre># journalctl --grep="Watching system buttons"
+</pre>
+<p>你可能会看到类似以下的内容：
+</p>
+<pre>May 25 21:28:19 vmarch.lan systemd-logind[210]: Watching system buttons on /dev/input/event2 (Power Button)
+May 25 21:28:19 vmarch.lan systemd-logind[210]: Watching system buttons on /dev/input/event3 (Sleep Button)
+May 25 21:28:19 vmarch.lan systemd-logind[210]: Watching system buttons on /dev/input/event4 (Video Bus)
+</pre>
+<p>注意没有键盘设备。按如下方式列出键盘设备：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ stat -c%N /dev/input/by-id/*-kbd</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+/dev/input/by-id/usb-SIGMACHIP_USB_Keyboard-event-kbd -&gt; <b>../event6</b>
+...</pre>
+<p>现在获取父键盘设备的 <code>ATTRS{name}</code> <a href="https://systemd-devel.freedesktop.narkive.com/Rbi3rjNN/patch-1-2-logind-add-support-for-tps65217-power-button">[11]</a>。例如，在上面的列表中，此键盘设备的设备输入事件为 <code><b>event6</b></code>，可以用于搜索其相应的属性名称：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># udevadm info -a /dev/input/<b>event6</b></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+KERNEL=="event6"
+...
+ATTRS{name}=="SIGMACHIP USB Keyboard"</pre>
+<p>现在编写一个自定义的 `udev` 规则来添加 "power-switch" 标签：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/70-power-switch-my.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="remove", GOTO="power_switch_my_end"
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="SIGMACHIP USB Keyboard", TAG+="power-switch"
+LABEL="power_switch_my_end"</pre>
+<p>在<a href="#pge009209061ac">重新加载 udev 规则</a>并<a href="#pgdf6211f8fea3">重启</a> <code>systemd-logind.service</code> 后，你应该会在 `logind` 的日志中看到 <code>Watching system buttons on /dev/input/event6</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg146ac4b0e523_System_freezes_for_60_seconds_and_then_w" id="System_freezes_for_60_seconds_and_then_wakes_back_up_or_hangs_after_waking_up">System freezes for 60 seconds and then wakes back up or hangs after waking up</h3></div>
+<p>自 systemd v256 起，systemd 在休眠前会冻结 <code>user.slice</code>。由于内核错误，特别是当使用 KVM 时，此过程可能会失败。<a href="https://github.com/systemd/systemd/issues/33083">[12]</a><a href="https://github.com/systemd/systemd/issues/33626">[13]</a>
+</p><p>日志中的消息会在休眠前包含 <code>Failed to freeze unit 'user.slice'</code>。当发生此类问题时，尝试登录（启动另一个会话）将失败，并显示：
+</p>
+<pre>pam_systemd(<i>process</i>:session): Failed to create session: Job 9876 for unit 'session-6.scope' failed with 'frozen'</pre>
+<p>要暂时恢复旧行为，请<a href="#pgfbacf3a1812d">edit</a> <code>systemd-suspend.service</code>、<code>systemd-hibernate.service</code>、<code>systemd-hybrid-sleep.service</code> 和 <code>systemd-suspend-then-hibernate.service</code>，并添加以下 drop-in：
+</p>
+<pre>[Service]
+Environment=SYSTEMD_SLEEP_FREEZE_USER_SESSIONS=false</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807031334
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.338 seconds
+Real time usage: 0.349 seconds
+Preprocessor visited node count: 2027/1000000
+Revision size: 38990/2097152 bytes
+Post‐expand include size: 29782/2097152 bytes
+Template argument size: 14997/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 39/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  113.216      1 -total
+ 14.34%   16.237    128 Template:Ic
+  9.74%   11.032     16 Template:Man
+  7.45%    8.437      7 Template:Note
+  5.02%    5.682     25 Template:Hc
+  4.38%    4.963      1 Template:Accuracy
+  3.42%    3.876      3 Template:Tip
+  2.99%    3.387      1 Template:翻译状态
+  2.61%    2.956      5 Template:Pkg
+  2.42%    2.738      2 Template:警告
+-->
+<!-- Render ID f94d0f0e-920d-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3698:|#|:idhash:canonical!zh-cn and timestamp 20260807031334 and revision id 34246. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

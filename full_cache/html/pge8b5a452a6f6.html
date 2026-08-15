@@ -1,0 +1,53 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pge8b5a452a6f6">身份管理</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg4e165f93ce98">LDAP 认证</a></li>
+<li><a href="#pgfefbd690c49d">安全</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Identity_management">Identity management</a>，最近一次同步于 2025-07-12，若英文版本有所<a href="https://wiki.archlinux.org/title/Identity_management?diff=0&amp;oldid=835139">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Identity_management_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p><a href="https://en.wikipedia.org/wiki/Identity_management">身份管理</a>（Identity Management，IDM），又称作身份与访问管理（Identity and Access Management，IAM），负责控制用户用户如何获得数字身份及其角色，并有时负责为身份授予权限。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge8b5a452a6f6_.E8.BD.AF.E4.BB.B6.E6.B8.85.E5.8D.95" id="软件清单"><span id=".E8.BD.AF.E4.BB.B6.E6.B8.85.E5.8D.95"></span>软件清单</h2></div>
+<p>有许多软件可以帮助进行身份管理，下列是其中一部分。
+</p>
+<ul><li><a href="#pgc6b79bacc2c5">Google 身份验证器</a>，使用一次性密码(OTP)进行两步验证</li>
+<li><a href="#pg2d64f6742b83">Initiative for Open Authentication</a>，对网页 API 调用获取访问令牌的方法进行了标准化。包含了密码方法，但未来会转用 WebAuthn</li>
+<li>kanidm，相关信息可参考<a href="https://fy.blackhats.net.au/blog/html/2019/09/18/announcing_kanidm_a_new_idm_project.html">此处</a>，是 LDAP 和 Kerberos 的后继者，实现了服务器端的 WebAuthn</li>
+<li><a href="#pg3ac39333c5e1">Kerberos</a>, with <a href="#pg253cad6d271e">Active Directory integration</a>, <a href="#pgf70b84d00ebd">FreeIPA</a></li>
+<li><a href="#pg4e165f93ce98">LDAP 认证</a>，可将密码存放在中心化服务器上</li>
+<li><a href="#pgdacf2e1d6f91">PAM</a> Linux 可插拔认证模块（Pluggable Authentication Module），可将 Kerberos，LDAP，kanidm 等接入到 Linux</li>
+<li><a href="#pge07ea6e47de8">通用第二因素</a>（U2F），被 WebAuthn 替代</li>
+<li><a href="#pg60160f86c6a5">用户和用户组</a>，可存放在系统上或中心化的 LDAP 和 kanidm 平台上</li>
+<li><a href="#pg529f6ef7c993">WebAuthn</a> 浏览器网页认证 API（Web Authentication API），用于替代密码认证，可向后兼容 U2F</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808041427
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.059 seconds
+Real time usage: 0.062 seconds
+Preprocessor visited node count: 53/1000000
+Revision size: 1562/2097152 bytes
+Post‐expand include size: 1082/2097152 bytes
+Template argument size: 121/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   10.181      1 -total
+ 31.14%    3.170      1 Template:翻译状态
+ 24.02%    2.446      1 Template:相关文章开始
+ 21.69%    2.208      2 Template:Related
+  9.02%    0.918      1 Template:META_Related_articles_start
+  7.64%    0.778      1 Template:相关文章结束
+-->
+<!-- Render ID a5125f8e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7720:|#|:idhash:canonical!zh-cn and timestamp 20260808041427 and revision id 33872. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

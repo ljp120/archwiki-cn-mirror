@@ -1,0 +1,252 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgf09eeac60a75">小米笔记本 Air 13.3 (2016)</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Xiaomi_Mi_Notebook_Air_13.3_(2016)">Xiaomi Mi Notebook Air 13.3 (2016)</a>，最近一次同步于 2020-03-03，若英文版本有所<a href="https://wiki.archlinux.org/title/Xiaomi_Mi_Notebook_Air_13.3_(2016)?diff=0&amp;oldid=590955">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Xiaomi_Mi_Notebook_Air_13.3_(2016)_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<table class="wikitable" style="float: right;">
+<tbody><tr>
+<td><b>设备</b></td>
+<td><b>状态</b></td>
+<td><b>内核模块</b>
+</td></tr>
+<tr>
+<td>视频</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">工作</td>
+<td>i915
+</td></tr>
+<tr>
+<td>无线网络</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">工作</td>
+<td>iwlwifi
+</td></tr>
+<tr>
+<td>蓝牙</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">工作</td>
+<td>btusb
+</td></tr>
+<tr>
+<td>音频</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">工作</td>
+<td>snd_hda_intel
+</td></tr>
+<tr>
+<td>触摸板</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">工作</td>
+<td>?
+</td></tr>
+<tr>
+<td>网络摄像头</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">工作</td>
+<td>uvcvideo
+</td></tr>
+<tr>
+<td>USB-C / Thunderbolt 3</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">工作</td>
+<td>?
+</td></tr>
+<tr>
+<td>功能/多媒体键</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">工作</td>
+<td>?
+</td></tr></tbody></table>
+<p>小米笔记本 Air 13.3 是一款铝合金的超极本，由小米公司生产。目前只能在中国或者通过跨境电商网站购买。第一代小米 Air 使用运行在 2.3 Ghz 的 Intel Core i5 6200U 和 NVIDIA GeForce 940MX 显卡，以较低的价格提供了不错的性能。
+</p><p>如果按照以下步骤安装，应该不会出现任何问题。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf09eeac60a75_.E5.AE.89.E8.A3.85.E5.89.8D.E7.9A.84.E7.B3.BB.E7.BB.9F.E8.AE.BE.E7.BD.AE" id="安装前的系统设置"><span id=".E5.AE.89.E8.A3.85.E5.89.8D.E7.9A.84.E7.B3.BB.E7.BB.9F.E8.AE.BE.E7.BD.AE"></span>安装前的系统设置</h2></div>
+<p>正确启动 Arch 安装媒介实际上很简单。启动 Arch 安装 ISO 之前，在引导过程中按 <code>F2</code>，进入 UEFI 设置。
+</p>
+<ul><li>安全 -&gt; 设置密码</li>
+<li>安全 -&gt; 关闭安全启动（Secure Boot）</li>
+<li>再次设置密码，但在"新密码"一栏留空，从而重置密码</li></ul>
+<p>Arch的安装就可以正常进行了。请参考<a href="#pgbdbcbed611fc">安装指南</a>获取更多信息。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>切记，你的固态硬盘名称为 <code>nvme0n1</code> 而非 <code>sda</code>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf09eeac60a75_.E6.98.BE.E5.8D.A1.E8.AE.BE.E7.BD.AE" id="显卡设置"><span id=".E6.98.BE.E5.8D.A1.E8.AE.BE.E7.BD.AE"></span>显卡设置</h2></div>
+<p>小米笔记本同时配有 Intel 的集成显卡和 Nvidia 的独立显卡。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf09eeac60a75_.E5.8F.AA.E4.BD.BF.E7.94.A8.E9.9B.86.E6.98.BE" id="只使用集显"><span id=".E5.8F.AA.E4.BD.BF.E7.94.A8.E9.9B.86.E6.98.BE"></span>只使用集显</h3></div>
+<p>如果你想完全禁用Nvidia GPU以提高续航，操作如下：
+</p>
+<ul><li>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span></li>
+<li>屏蔽内核模块 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia">nvidia</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-nouveau">xf86-video-nouveau</a></span><sup><small>包</small></sup></span>，参见 <a href="#pga016157dc9e9">Kernel module#黑名单</a></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/nouveau.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">blacklist nouveau
+blacklist nvidia</pre>
+<ul><li>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bbswitch">bbswitch</a></span><sup><small>包</small></sup></span>以<a href="#pg0f53b4421948">关闭独立显卡</a></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/bbswitch</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options bbswitch load_state=0 unload_state=0</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf09eeac60a75_Intel.2FNvidia_.E6.B7.B7.E5.90.88.E9.85.8D.E7.BD.AE" id="Intel/Nvidia_混合配置"><span id="Intel.2FNvidia_.E6.B7.B7.E5.90.88.E9.85.8D.E7.BD.AE"></span>Intel/Nvidia 混合配置</h3></div>
+<p>使用 <a href="#pg0f53b4421948">Bumblebee</a> 或 <a href="#pg9ff9e1bc1c96">NVIDIA Optimus</a> 都可以启用混合 GPU。Bumblebee 一般续航和兼容性更好，但没有 NVIDIA 的官方支持。
+</p><p>请参阅相应文章。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf09eeac60a75_.E8.BE.93.E5.85.A5" id="输入"><span id=".E8.BE.93.E5.85.A5"></span>输入</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf09eeac60a75_.E8.A7.A6.E6.91.B8.E6.9D.BF" id="触摸板"><span id=".E8.A7.A6.E6.91.B8.E6.9D.BF"></span>触摸板</h3></div>
+<p>想要正常使用触摸板，必须使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-libinput">xf86-input-libinput</a></span><sup><small>包</small></sup></span>。如果使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-evdev">xf86-input-evdev</a></span><sup><small>包</small></sup></span>，则触摸板会像触摸屏一样工作（也就是说，它直接把你在触摸板上的操作映射到屏幕上）。而如果使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-synaptics">xf86-input-synaptics</a></span><sup><small>包</small></sup></span>（尽管强烈不建议这样，因为它已经被废弃了（参见 <a href="#pg7e24b7b56bea">Synaptics</a>）），触摸板只会偶尔正常工作。通过XOrg配置文件对 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libinput">libinput</a></span><sup><small>包</small></sup></span> 作如下配置，即可启用双指手势、轻触点击、双指/三指点击（分别对应于按下鼠标右键和中键）。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-touchpad.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "InputClass"
+        Identifier "libinput touchpad"
+        Driver "libinput"
+        MatchIsTouchpad "on"
+        MatchDevicePath "/dev/input/event*"
+        Option "Tapping" "on"
+        Option "ClickMethod" "clickfinger"
+        Option "NaturalScrolling" "true"
+EndSection</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf09eeac60a75_Fn_.E9.94.AE" id="Fn_键"><span id="Fn_.E9.94.AE"></span>Fn 键</h3></div>
+<p>在该笔记本上默认Fn键是启用的（如按F1可以静音）。如果按这些Fn功能键没有反应，那么你很可能使用的是<a href="#pg3d6d7c1e6c7c">窗口管理器</a>而不是<a href="#pg712e4adaddad">桌面环境</a>。使用相应的配置文件将按键与功能绑定，比如利用 <a href="#pg63ab98ba33b7">Xbindkeys</a> 或 <a href="#pg04e8e3ac1488">i3</a> 的 <code>bindsym</code>。
+</p><p>大多数 Fn 键返回正确的键码。以下表格包含了这些信息：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>Fn-F-Key
+</th>
+<th>Keycode
+</th></tr>
+<tr>
+<td><code>F1</code>
+</td>
+<td><code>XF86AudioMute</code>
+</td></tr>
+<tr>
+<td><code>F2</code>
+</td>
+<td><code>XF86AudioLowerVolume</code>
+</td></tr>
+<tr>
+<td><code>F3</code>
+</td>
+<td><code>XF86AudioRaiseVolume</code>
+</td></tr>
+<tr>
+<td><code>F4</code>
+</td>
+<td><code>XF86MonBrightnessDown</code>
+</td></tr>
+<tr>
+<td><code>F5</code>
+</td>
+<td><code>XF86MonBrightnessUp</code>
+</td></tr>
+<tr>
+<td><code>F6</code>
+</td>
+<td><code>Super_L + P</code>
+</td></tr>
+<tr>
+<td><code>F7</code>
+</td>
+<td><code>无</code>
+</td></tr>
+<tr>
+<td><code>F8</code>
+</td>
+<td><code>Super_L + Tab</code>
+</td></tr>
+<tr>
+<td><code>F9</code>
+</td>
+<td><code>无</code>
+</td></tr>
+<tr>
+<td><code>F10</code>
+</td>
+<td><code>Turns Keyboard backlight on/off</code>
+</td></tr>
+<tr>
+<td><code>F11</code>
+</td>
+<td><code>Print</code>
+</td></tr>
+<tr>
+<td><code>F12</code>
+</td>
+<td><code>Insert</code>
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf09eeac60a75_.E6.98.BE.E7.A4.BA.E6.A0.A1.E5.87.86" id="显示校准"><span id=".E6.98.BE.E7.A4.BA.E6.A0.A1.E5.87.86"></span>显示校准</h2></div>
+<p>出厂显示校准很差。作为对校色仪的替代，试试这里的<a href="#pg62101412fe7d">ICC 配置文件</a>：<a href="https://github.com/tlvince/xiaomi-mi-notebook-air-13/tree/master/display-calibration">tlvince/xiaomi-mi-notebook-air-13</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf09eeac60a75_.E7.A1.AC.E4.BB.B6.E4.BF.A1.E6.81.AF" id="硬件信息"><span id=".E7.A1.AC.E4.BB.B6.E4.BF.A1.E6.81.AF"></span>硬件信息</h2></div>
+<p><i>lspci</i> 输出：
+</p>
+<pre>00:00.0 Host bridge: Intel Corporation Xeon E3-1200 v5/E3-1500 v5/6th Gen Core Processor Host Bridge/DRAM Registers (rev 08)
+00:02.0 VGA compatible controller: Intel Corporation HD Graphics 520 (rev 07)
+00:14.0 USB controller: Intel Corporation Sunrise Point-LP USB 3.0 xHCI Controller (rev 21)
+00:16.0 Communication controller: Intel Corporation Sunrise Point-LP CSME HECI #1 (rev 21)
+00:17.0 SATA controller: Intel Corporation Sunrise Point-LP SATA Controller [AHCI mode] (rev 21)
+00:1c.0 PCI bridge: Intel Corporation Sunrise Point-LP PCI Express Root Port #1 (rev f1)
+00:1c.4 PCI bridge: Intel Corporation Sunrise Point-LP PCI Express Root Port #5 (rev f1)
+00:1d.0 PCI bridge: Intel Corporation Sunrise Point-LP PCI Express Root Port #9 (rev f1)
+00:1f.0 ISA bridge: Intel Corporation Sunrise Point-LP LPC Controller (rev 21)
+00:1f.2 Memory controller: Intel Corporation Sunrise Point-LP PMC (rev 21)
+00:1f.3 Audio device: Intel Corporation Sunrise Point-LP HD Audio (rev 21)
+00:1f.4 SMBus: Intel Corporation Sunrise Point-LP SMBus (rev 21)
+01:00.0 3D controller: NVIDIA Corporation GM108M [GeForce 940MX] (rev ff)
+02:00.0 Network controller: Intel Corporation Wireless 8260 (rev 3a)
+03:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd NVMe SSD Controller SM951/PM951 (rev 01)
+</pre>
+<p><i>lsusb</i> 输出：
+</p>
+<pre>Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 001 Device 003: ID 8087:0a2b Intel Corp.
+Bus 001 Device 002: ID 05c8:03a2 Cheng Uei Precision Industry Co., Ltd (Foxlink)
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf09eeac60a75_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf09eeac60a75_.E8.83.8C.E5.85.89.E7.81.AF" id="背光灯"><span id=".E8.83.8C.E5.85.89.E7.81.AF"></span>背光灯</h3></div>
+<p>以默认配置使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xbacklight">xorg-xbacklight</a></span><sup><small>包</small></sup></span> 之类的工具是无效的，因为背光灯路径不符合标准。为了解决此问题，需要使用 X-Org 配置文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/10-backlight.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Device" 
+        Identifier "Card0" 
+        Driver     "intel" 
+        Option     "Backlight"  "intel_backlight" 
+        BusID      "PCI:0:2:0" 
+EndSection</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf09eeac60a75_WiFi" id="WiFi">WiFi</h3></div>
+<p>如果自动检测的 WiFi 驱动出现问题，可能是因为两个驱动存在冲突，如 <code>rfkill list</code> 的输出所示。屏蔽有问题的驱动以解决此问题：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/blacklist.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">blacklist acer-wmi</pre>
+<p>注：此问题在 Linux 内核 4.9 以上版本中已经解决。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf09eeac60a75_.E9.9F.B3.E9.A2.91.E6.8F.92.E5.AD.94" id="音频插孔"><span id=".E9.9F.B3.E9.A2.91.E6.8F.92.E5.AD.94"></span>音频插孔</h3></div>
+<p>如果想使用插入音频组合插孔中的耳机上的麦克风，请将这一行加入 alsa 配置文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/alsa-base.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options snd-hda-intel model=dell-headset-multi</pre>
+<p>然后重启机器。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807052507
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.132 seconds
+Real time usage: 0.139 seconds
+Preprocessor visited node count: 594/1000000
+Revision size: 7709/2097152 bytes
+Post‐expand include size: 7573/2097152 bytes
+Template argument size: 2457/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   42.426      1 -total
+ 24.08%   10.216      8 Template:G
+ 11.53%    4.893     29 Template:Ic
+ 10.83%    4.595      8 Template:META_Table_cell
+ 10.04%    4.259      9 Template:Pkg
+  9.88%    4.193      1 Template:翻译状态
+  5.26%    2.234      6 Template:Hc
+  4.42%    1.876      1 Template:注意
+-->
+<!-- Render ID 59e5478e-9220-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:4024:|#|:idhash:canonical!zh-cn and timestamp 20260807052507 and revision id 33759. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

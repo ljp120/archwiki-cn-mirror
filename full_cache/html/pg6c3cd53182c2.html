@@ -1,0 +1,311 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg6c3cd53182c2">AUR 助手</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/AUR_helpers">AUR_helpers</a>，最近一次同步于 2026-06-25，若英文版本有所<a href="https://wiki.archlinux.org/title/AUR_helpers?diff=0&amp;oldid=879324">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/AUR_helpers_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgbdb93f242c71">yay</a></li>
+<li><a href="#pg9ef105bf1e3c">pacman</a></li>
+</ul></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>AUR 助手不受 Arch Linux 官方支持。您应当熟悉<a href="#pgf9029631e281">手动构建过程</a>，以准备好解决可能遇到的问题。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>优先使用讨论页而非编辑此文：<a href="#pge029df9302c7">Talk:AUR 助手</a>。</div>
+<p>使用 <a href="#pgf9029631e281">Arch 用户仓库</a>时，AUR 助手可以自动完成以下任务：
+</p>
+<ul><li>查找 AUR 上发布的包；</li>
+<li>解析 AUR 包之间的依赖关系；</li>
+<li>获取并构建 AUR 软件包；</li>
+<li>获取在线内容，例如用户评论；</li>
+<li>提交 AUR 软件包。</li></ul>
+<p><a href="#pg9ef105bf1e3c">Pacman</a> 只处理其仓库内预构建的软件包的更新。AUR 软件包以 <a href="#pgf9d748a7b27b">PKGBUILD</a> 的形式分发，并需要 AUR 助手自动完成构建。然而切记：即使该包自身没有更新，但其依赖的共享库（shared library）有更新，您可能仍需重新构建该包。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6c3cd53182c2_.E8.AF.B4.E6.98.8E" id="说明"><span id=".E8.AF.B4.E6.98.8E"></span>说明</h2></div>
+<p>#对比表各表头释义：
+</p>
+<dl><dt>文件检查</dt>
+<dd><i>默认</i>不 <a href="#pg04471119f812">source</a> <a href="#pgf9d748a7b27b">PKGBUILD</a> 文件；或在 <a href="#pg04471119f812">source</a> 之前，提醒并允许用户手动检查 PKGBUILD。有些助手会在用户能够检查 PKGBUILD 之前就执行 <a href="#pg04471119f812">source</a>，<b>为潜在的恶意代码放行</b>。</dd>
+<dt>差异比较</dt>
+<dd>有能力检查包之间差异。不只是 <code>PKGBUILD</code> 文件，还要坚持对其他文件的改动，例如 <code>.install</code> 或 <code>.patch</code> 文件。</dd>
+<dt>Git clone</dt>
+<dd>默认使用 <span class="plainlinks archwiki-template-man" title="$ man 1 git-clone"><a href="https://man.archlinux.org/man/git-clone.1">git-clone(1)</a></span> 从 AUR 获取构建文件。</dd>
+<dt>可靠的解析器</dt>
+<dd>能运用提供的元数据 (<a href="https://wiki.archlinux.org/title/Aurweb_RPC_interface">RPC</a>/<code>.SRCINFO</code>) 而非<a href="https://en.wikipedia.org/wiki/Parsing#Parser">解析</a> <code>PKGBUILD</code> 文件来处理复杂软件包，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aws-cli-git/">aws-cli-git</a></span><sup><small>AUR</small></sup></span>。</dd>
+<dt>可靠的求解器</dt>
+<dd>有能力正确解决并构建复杂的依赖链，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/iri-git-meta/">iri-git-meta</a></span><sup><small>AUR</small></sup></span>。</dd>
+<dt>包拆分</dt>
+<dd>有能力正确地构建并安装：
+<ul><li>对于有相同包基础的多个软件包，不重复构建和安装其基础，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clion/">clion</a></span><sup><small>AUR</small></sup></span>。</li>
+<li>拆分依赖于同一基础的多个软件包，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/samsung-unified-driver/">samsung-unified-driver</a></span><sup><small>AUR</small></sup></span>。</li>
+<li>独立拆分软件包，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nxproxy/">nxproxy</a></span><sup><small>AUR</small></sup></span> 以及 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nxagent/">nxagent</a></span><sup><small>AUR</small></sup></span>。</li></ul></dd></dl>
+<dl><dt>Shell 补全</dt>
+<dd><a href="https://en.wikipedia.org/wiki/Command-line_completion">Tab 补全</a>在所列出的 <a href="#pgd53258e68888">shell</a> 中可用。</dd></dl>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li><i>可选</i> 意味着该功能可用，但是需要通过命令行参数或配置文件启用。</li>
+<li><i>部分</i> 意味着该功能尚未完全实现，或与给定标准有部分差异。</li></ul>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6c3cd53182c2_.E5.AF.B9.E6.AF.94.E8.A1.A8" id="对比表"><span id=".E5.AF.B9.E6.AF.94.E8.A1.A8"></span>对比表</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6c3cd53182c2_.E6.9F.A5.E6.89.BE.E5.B9.B6.E4.B8.8B.E8.BD.BD" id="查找并下载"><span id=".E6.9F.A5.E6.89.BE.E5.B9.B6.E4.B8.8B.E8.BD.BD"></span>查找并下载</h3></div>
+<table class="wikitable sortable" style="text-align: center;">
+<tbody><tr>
+<th>名称</th>
+<th>编写语言</th>
+<th>文件检查</th>
+<th>差异比较</th>
+<th>Git clone</th>
+<th>可靠的解析器</th>
+<th>可靠的求解器</th>
+<th>Shell 补全</th>
+<th>特性
+</th></tr>
+<tr>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/auracle-git/">auracle-git</a></span><sup><small>AUR</small></sup></span>
+</th>
+<td>C++</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/falconindy/auracle/commit/c73bbee">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>bash</td>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: left;">显示构建顺序
+</td></tr>
+<tr>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/repoctl/">repoctl</a></span><sup><small>AUR</small></sup></span>
+</th>
+<td>Go</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/goulash/pacman/blob/master/aur/aur.go">是</a></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td>bash, zsh, fish</td>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: left;"><a href="#pg41d69b780ee1">本地仓库</a>
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6c3cd53182c2_.E6.9F.A5.E6.89.BE.E5.B9.B6.E6.9E.84.E5.BB.BA" id="查找并构建"><span id=".E6.9F.A5.E6.89.BE.E5.B9.B6.E6.9E.84.E5.BB.BA"></span>查找并构建</h3></div>
+<table class="wikitable sortable" style="text-align: center;">
+<tbody><tr>
+<th>名称</th>
+<th>编写语言</th>
+<th>文件检查</th>
+<th>差异比较</th>
+<th>Git clone</th>
+<th>可靠的解析器</th>
+<th>可靠的求解器</th>
+<th>包拆分</th>
+<th>Shell 补全</th>
+<th>特性
+</th></tr>
+<tr>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aurutils/">aurutils</a></span><sup><small>AUR</small></sup></span>
+</th>
+<td>Bash</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>bash, zsh</td>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: left;"><a href="#pg41d69b780ee1">本地仓库</a>，应用本地补丁，<a href="#pge293c5f6dad1">包签名</a>，<a href="https://wiki.archlinux.org/title/clean_chroot">干净的 chroot</a>
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pat-aur-host-git/">pat-aur-host-git</a></span><sup><small>AUR</small></sup></span><br/><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pat-aur-client-git/">pat-aur-client-git</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td>Elvish</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>bash, zsh, elvish</td>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: left;"><a href="#pg41d69b780ee1">本地仓库</a>, 本地补丁应用程序，<a href="#pge293c5f6dad1">包签名</a>, <a href="https://wiki.archlinux.org/title/clean_chroot">干净的 chroot</a>（通过 <a href="#pg351d995f478c">bubblewrap</a>），<a href="https://en.wikipedia.org/wiki/Cross_compiler">交叉编译</a>
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6c3cd53182c2_Pacman_.E5.B0.81.E8.A3.85" id="Pacman_封装"><span id="Pacman_.E5.B0.81.E8.A3.85"></span>Pacman 封装</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><span class="plainlinks archwiki-template-man" title="$ man 8 pacman"><a href="https://man.archlinux.org/man/pacman.8">pacman(8)</a></span> 封装将包管理器的工作抽象化。这些封装可能（可选或默认地）引入 <a href="#pg9a1cc6af125e">不安全标志</a>，或其他导致系统缺陷的异常行为。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>下列 pacman 封装支持批量（而非按需）操作：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pikaur/">pikaur</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/yay/">yay</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aura/">aura</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/paru/">paru</a></span><sup><small>AUR</small></sup></span>
+</div>
+<table class="wikitable sortable" style="text-align: center;">
+<tbody><tr>
+<th>名称</th>
+<th>编写语言</th>
+<th>文件检查</th>
+<th>差异比较</th>
+<th>Git clone</th>
+<th>可靠的解析器</th>
+<th>可靠的求解器</th>
+<th>包拆分</th>
+<th>不安全标志</th>
+<th>Shell 补全</th>
+<th>特性
+</th></tr>
+<tr>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aura/">aura</a></span><sup><small>AUR</small></sup></span>
+</th>
+<td>Rust</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="https://github.com/aurapm/aura/blob/89bf702/aura/src/Aura/Pkgbuild/Records.hs">部分</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/fosskers/aura/commit/ca9c38d">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/aurapm/aura/commit/7848e98">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/fosskers/aura/pull/479">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/fosskers/aura/pull/479">是</a></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td>bash, fish, zsh</td>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: left;"><a href="https://wiki.archlinux.org/title/clean_chroot">干净的 chroot</a>
+</td></tr>
+<tr>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pakku/">pakku</a></span><sup><small>AUR</small></sup></span>
+</th>
+<td>Nim</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/kitsunyan/pakku/commit/396e9f4">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/kitsunyan/pakku/wiki/Native-Pacman-Explanation">-Sy</a></td>
+<td>bash, zsh</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/paru/">paru</a></span><sup><small>AUR</small></sup></span>
+</th>
+<td>Rust</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/Morganamilo/paru/blob/15394a7db80d045f038ea4d0ee94d00211070c96/man/paru.8#L543-L552">-Sy</a><br/><a href="https://github.com/Morganamilo/paru/blob/32b75ac1cb7e0fccd21a0f795f25fd9fb1a14d8a/man/paru.conf.5#L110-L116">--ask</a></td>
+<td>bash, fish, zsh</td>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: left;"><a href="#pg41d69b780ee1">本地仓库</a>，<a href="https://wiki.archlinux.org/title/clean_chroot">干净的 chroot</a>
+</td></tr>
+<tr>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pikaur/">pikaur</a></span><sup><small>AUR</small></sup></span>
+</th>
+<td>Python</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://github.com/actionless/pikaur#pikaur">-Sy</a></td>
+<td>bash, fish, zsh</td>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: left;"><a href="https://0pointer.net/blog/dynamic-users-with-systemd.html">动态用户</a>
+</td></tr>
+<tr>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/trizen/">trizen</a></span><sup><small>AUR</small></sup></span>
+</th>
+<td>Perl</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/trizen/trizen/commit/6fb0cc9">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/trizen/trizen/commit/7ab7ee5f">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="https://github.com/trizen/trizen/issues/46">部分</a></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td>bash, fish, zsh</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/yay/">yay</a></span><sup><small>AUR</small></sup></span>
+</th>
+<td>Go</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/Jguer/yay/pull/447">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/Jguer/yay/pull/297">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://github.com/Jguer/yay/pull/866">是</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="https://github.com/Jguer/yay/commit/ea5a94e">--ask</a></td>
+<td>bash, fish, zsh</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6c3cd53182c2_.E5.9B.BE.E5.BD.A2.E5.8C.96" id="图形化"><span id=".E5.9B.BE.E5.BD.A2.E5.8C.96"></span>图形化</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>使用图形化的 AUR 助手可能导致系统缺陷，例如执行无人值守的<a href="https://wiki.archlinux.org/title/partial_upgrade">部分更新</a>。</div>
+<ul><li><b>Argon</b> — 使用 Python 编写的 GTK 3 pacman 封装。</li></ul>
+<dl><dd><a href="https://github.com/14mRh4X0r/arch-argon">https://github.com/14mRh4X0r/arch-argon</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/argon/">argon</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Bauh</b> — 使用 Python 编写的 Qt 5 应用，支持 AppImage，Debian，Arch 软件包（含 AUR），Flatpak，Snap 以及 原生 Web 应用。</li></ul>
+<dl><dd><a href="https://github.com/vinifmor/bauh">https://github.com/vinifmor/bauh</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bauh/">bauh</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Cylon</b> — 使用 Bash 编写的 TUI（终端用户界面）pacman 封装。</li></ul>
+<dl><dd><a href="https://github.com/gavinlyonsrepo/cylon">https://github.com/gavinlyonsrepo/cylon</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cylon/">cylon</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Kalu</b> — 系统托盘通知图标，使用 libalpm 和 <a href="https://wiki.archlinux.org/title/PolicyKit">PolicyKit</a> 编写，有可选的更新器。</li></ul>
+<dl><dd><a href="https://github.com/Thulinma/kalu">https://github.com/Thulinma/kalu</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/kalu/">kalu</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Octopi</b> — 使用 C++ 编写的 Qt 5 pacman 封装。</li></ul>
+<dl><dd><a href="https://tintaescura.com/projects/octopi">https://tintaescura.com/projects/octopi</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/octopi/">octopi</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Pacsea</b> — 快速、键盘友好型 TUI，可用于浏览、安装 Arch 和 AUR 软件包，使用 Rust 编写。</li></ul>
+<dl><dd><a href="https://github.com/Firstp1ck/Pacsea">https://github.com/Firstp1ck/Pacsea</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pacsea-bin/">pacsea-bin</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Pacseek</b> — 一个终端用户界面封装，可以查找并安装 Arch Linux 软件包。</li></ul>
+<dl><dd><a href="https://github.com/moson-mo/pacseek">https://github.com/moson-mo/pacseek</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pacseek/">pacseek</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Pamac</b> — 使用 <span class="plainlinks archwiki-template-man" title="$ man 3 libalpm"><a href="https://man.archlinux.org/man/libalpm.3">libalpm(3)</a></span>、为 Manjaro 编写的、独立的 GTK 4（或终端界面）包管理器，有托盘集成。</li></ul>
+<dl><dd><a href="https://wiki.manjaro.org/index.php/Pamac">https://wiki.manjaro.org/index.php/Pamac</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pamac-aur/">pamac-aur</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Pakku GUI</b> — 使用 python 编写的 pakku 的 GTK 3 前端。</li></ul>
+<dl><dd><a href="https://gitlab.com/mrvik/pakku-gui">https://gitlab.com/mrvik/pakku-gui</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pakku-gui/">pakku-gui</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>PkgBrowser</b> — 使用 python 编写的 Qt 5 程序、查看官方仓库/AUR 软件包的只读浏览器。</li></ul>
+<dl><dd><a href="https://osdn.net/projects/pkgbrowser/">https://osdn.net/projects/pkgbrowser/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pkgbrowser/">pkgbrowser</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>SPM</b> — 一个 TUI pacman 和 yay 的封装，视觉化、交互化包管理。</li></ul>
+<dl><dd><a href="https://github.com/adelmonte/Simple_Package_Manager">https://github.com/adelmonte/Simple_Package_Manager</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/spm-arch/">spm-arch</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Yup</b> — 使用 Go 和 Ncurses 编写的 TUI pacman 封装。</li></ul>
+<dl><dd><a href="https://github.com/ericm/yup">https://github.com/ericm/yup</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/yup/">yup</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6c3cd53182c2_.E7.BB.B4.E6.8A.A4" id="维护"><span id=".E7.BB.B4.E6.8A.A4"></span>维护</h2></div>
+<ul><li><b>aur-out-of-date</b> — 借助主机服务提供者的 API，检查 AUR 软件包的上游更改。</li></ul>
+<dl><dd><a href="https://github.com/simon04/aur-out-of-date">https://github.com/simon04/aur-out-of-date</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aur-out-of-date/">aur-out-of-date</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>aurpublish</b> — AUR 助手脚本：借助 <span class="plainlinks archwiki-template-man" title="$ man 1 git-subtree"><a href="https://man.archlinux.org/man/git-subtree.1">git-subtree(1)</a></span> 管理和上传 AUR 软件包。会使用 <span class="plainlinks archwiki-template-man" title="$ man 5 githooks"><a href="https://man.archlinux.org/man/githooks.5">githooks(5)</a></span> 校验 <code>PKGBUILD</code> 文件，自动生成 <code>.SRCINFO</code> 文件，以及创建需提交信息的模板。</li></ul>
+<dl><dd><a href="https://github.com/eli-schwartz/aurpublish">https://github.com/eli-schwartz/aurpublish</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=aurpublish">aurpublish</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://wiki.archlinux.org/title/clean_chroot">devtools</a></b> — 在干净的环境（<a href="#pgf6282688d557">systemd-nspawn</a> 容器）中构建软件包，以确保正确性。被 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aura/">aura</a></span><sup><small>AUR</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aurutils/">aurutils</a></span><sup><small>AUR</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clean-chroot-manager/">clean-chroot-manager</a></span><sup><small>AUR</small></sup></span>，和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/paru/">paru</a></span><sup><small>AUR</small></sup></span> 封装。</li></ul>
+<dl><dd><a href="https://gitlab.archlinux.org/archlinux/devtools">https://gitlab.archlinux.org/archlinux/devtools</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=devtools">devtools</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>pkgoutofdate</b> — 解析 <code>PKGBUILD</code> 中的源 URL，并以发送递增版本号的方式，尝试寻找软件包的较新版本。</li></ul>
+<dl><dd><a href="https://github.com/anatol/pkgoutofdate">https://github.com/anatol/pkgoutofdate</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pkgoutofdate-git/">pkgoutofdate-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>repman</b> — 用于管理本地和远程仓库的命令行工具。</li></ul>
+<dl><dd><a href="https://gitlab.com/mipimipi/repman">https://gitlab.com/mipimipi/repman</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/repman-git/">repman-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6c3cd53182c2_.E5.85.B6.E4.BB.96" id="其他"><span id=".E5.85.B6.E4.BB.96"></span>其他</h2></div>
+<ul><li><b>aur-talk</b> — 提取并显示 AUR 评论。</li></ul>
+<dl><dd><a href="https://github.com/GermainZ/aur-talk">https://github.com/GermainZ/aur-talk</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aur-talk-git/">aur-talk-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>aurvote-utils</b> — 一系列管理 AUR 投票的实用工具。</li></ul>
+<dl><dd><a href="https://github.com/jadenPete/aurvote-utils">https://github.com/jadenPete/aurvote-utils</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aurvote-utils/">aurvote-utils</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>haskell-aur</b> — 用于访问 <a href="https://wiki.archlinux.org/title/Aurweb_RPC_interface">Aurweb RPC 界面</a>的 <a href="https://wiki.archlinux.org/title/Haskell">Haskell</a> 库。</li></ul>
+<dl><dd><a href="https://hackage.haskell.org/package/aur">https://hackage.haskell.org/package/aur</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/haskell-aur/">haskell-aur</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>package-query</b> — 用于查询 <span class="plainlinks archwiki-template-man" title="$ man 3 libalpm"><a href="https://man.archlinux.org/man/libalpm.3">libalpm(3)</a></span> 和 AUR 的工具。</li></ul>
+<dl><dd><a href="https://github.com/archlinuxfr/package-query">https://github.com/archlinuxfr/package-query</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/package-query/">package-query</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>python3-aur</b> — 用于访问 AUR 包信息、自动化 AUR 交互过程的 <a href="#pgf6d3de5ccfac">Python</a> 模块和 AUR 助手工具。</li></ul>
+<dl><dd><a href="https://xyne.dev/projects/python3-aur">https://xyne.dev/projects/python3-aur</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/python3-aur/">python3-aur</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>raur</b> — 用于访问 <a href="https://wiki.archlinux.org/title/Aurweb_RPC_interface">Aurweb RPC 界面</a>的 Rust 库。</li></ul>
+<dl><dd><a href="https://gitlab.com/davidbittner/raur">https://gitlab.com/davidbittner/raur</a> ||</dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6c3cd53182c2_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://www.debugpoint.com/arch-linux-gui-package-managers/">适用于 Arch Linux 的图形化包管理器</a> (DebugPoint, 2023) 提供#图形化中某些选项的截屏和简单信息。</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807022445
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.343 seconds
+Real time usage: 0.363 seconds
+Preprocessor visited node count: 1766/1000000
+Revision size: 10709/2097152 bytes
+Post‐expand include size: 39944/2097152 bytes
+Template argument size: 17280/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  199.449      1 -total
+ 39.56%   78.909      1 Template:翻译状态
+ 10.52%   20.972     23 Template:App
+  9.14%   18.234     51 Template:是
+  6.18%   12.330     28 Template:META_Table_cell
+  6.12%   12.200     13 Template:G
+  5.87%   11.708      7 Template:L
+  4.37%    8.707      3 Template:Y
+  3.89%    7.761     45 Template:AUR
+  2.39%    4.762      4 Template:R
+-->
+<!-- Render ID 277b208e-9207-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2705:|#|:idhash:canonical!zh-cn and timestamp 20260807022445 and revision id 35255. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

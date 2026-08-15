@@ -1,0 +1,241 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgbbc368f6292e">媒体传输协议</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgd0c0a274df06">Android#传输文件</a></li>
+<li><a href="#pgb42228802789">USB 存储设备</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/MTP">MTP</a>，最近一次同步于 2024-08-21，若英文版本有所<a href="https://wiki.archlinux.org/title/MTP?diff=0&amp;oldid=813110">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/MTP_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>媒体传输协议（<a href="https://en.wikipedia.org/wiki/Media_Transfer_Protocol">Media Transfer Protocol</a> MTP）可用于在移动设备（所有的 Windows Phone 7/8/10 设备，大部分新的 <a href="#pgd0c0a274df06">Android</a> 设备）以及媒体播放器（如 Creative Zen）之间传输媒体文件。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbbc368f6292e_.E8.BF.9E.E6.8E.A5" id="连接"><span id=".E8.BF.9E.E6.8E.A5"></span>连接</h2></div>
+<p>要通过 MTP 将计算机连接至一台设备：
+</p>
+<ul><li>该设备需要通过 USB 连接至计算机</li>
+<li>需要启用设备上的 MTP</li>
+<li>设备需要解锁屏幕（安全原因）</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbbc368f6292e_FUSE_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="FUSE_文件系统"><span id="FUSE_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>FUSE 文件系统</h2></div>
+<p>下列程序允许通过 <a href="#pg28f17f5cf109">FUSE</a> 文件系统访问 MTP 设备。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>MTP 功能杂乱且设备之间的实现各不相同。请尝试以下客户端，找出最合适的那一款。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>建议在安装 MTP 相关软件包后重启计算机。</div>
+<p>对基于 FUSE 的文件系统，可能需要先创建挂载点目录。以下示例中使用了 <code>~/mnt</code> 目录。
+</p><p>挂载的 FUSE 一般可用 <code>fusermount -u <i>mountpoint</i></code> 卸载。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbbc368f6292e_Android_File_Transfer" id="Android_File_Transfer">Android File Transfer</h3></div>
+<p><b>Android File Transfer</b> — 带有 CLI、Qt 界面 和 FUSE 封装器的 MTP 客户端，使用自定义 MTP 实现。
+</p>
+<dl><dd><a href="https://whoozle.github.io/android-file-transfer-linux/">https://whoozle.github.io/android-file-transfer-linux/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=android-file-transfer">android-file-transfer</a></span><sup><small>包</small></sup></span></dd></dl>
+<p>将设备挂载至 <code>~/mnt</code>：
+</p>
+<pre>$ aft-mtp-mount ~/mnt
+</pre>
+<p>若希望显示专辑封面，则必须将其命名为 <code>albumart.xxx</code> 并应先将其放入目标文件夹，然后再复制其他文件。同时请注意，fuse 可能比 ui 或 cli 的文件传输慢 7 至 8 倍。
+</p><p>若希望通过命令行接口与其交互，请运行命令：
+</p>
+<pre>$ aft-mtp-cli
+</pre>
+<p>输入 <i>help</i> 以列出所有可用命令，输入 <i>exit</i> 退出。
+</p><p>若希望通过图形用户界面与其交互，请启动 <i>android-file-transfer</i> 应用程序，选择一个目标文件夹并点击工具栏上的任意按钮。可用选项有：<i>Upload Album</i>（上传专辑）、<i>Upload Directory</i>（上传文件夹）和 <i>Upload Files</i>（上传文件）。后两项不必解释。<i>Upload album</i> 选项将在源目录内搜索并设置一个最佳的专辑封面。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbbc368f6292e_MTPfs" id="MTPfs">MTPfs</h3></div>
+<p><b>MTPfs</b> — 一个基于 <a href="#pgbbc368f6292e_libmtp">libmtp</a> 的 FUSE 文件系统，支持读写任意 MTP 设备。
+</p>
+<dl><dd><a href="https://www.adebenham.com/mtpfs/">https://www.adebenham.com/mtpfs/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mtpfs">mtpfs</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>以下操作可能无效，需要恢复至 <a href="#pgf26a2a89fd07">libgphoto2</a> 或使用支持 gvfs 的文件管理器，例如 <a href="#pg9519798d0f49">PCManFM</a>。</div>
+<p>首先编辑 <code>/etc/fuse.conf</code>，取消该行的注释：
+</p>
+<pre>user_allow_other
+</pre>
+<p>然后将设备挂载至 <code>~/mnt</code>：
+</p>
+<pre>$ mtpfs -o allow_other ~/mnt
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbbc368f6292e_jmtpfs" id="jmtpfs">jmtpfs</h3></div>
+<p><b>jmtpfs</b> — 基于 <a href="#pgbbc368f6292e_libmtp">libmtp</a>，用于访问 MTP（Media Transfer Protocol）设备。
+</p>
+<dl><dd><a href="https://github.com/JasonFerrara/jmtpfs">https://github.com/JasonFerrara/jmtpfs</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jmtpfs/">jmtpfs</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<p>将设备挂载至 <code>~/mnt</code>：
+</p>
+<pre>$ jmtpfs ~/mnt
+</pre>
+<p>通过以下两个步骤，使其与 Linux 的其他部分保持一致（使用通常的 mount 与 umount 命令）：
+</p>
+<pre>$# ln -s &lt;“实际的挂载命令路径”&gt;                 &lt;“与 Linux 挂载约定一致的名称“&gt;
+$  ln -s /sbin/jmtpfs                        /sbin/mount.jmtpfs
+</pre>
+<p>将此行（非 # 注释的那一行）添加至 <code>/etc/fstab</code>：
+</p>
+<pre> #jmtpfs &lt;“挂载路径”&gt;         fuse nodev,allow_other,&lt;“其他选项”&gt;                                 0    0
+  jmtpfs /home/sam/run/motog fuse nodev,allow_other,rw,user,noauto,noatime,uid=1000,gid=1000    0    0
+</pre>
+<p>然后挂载设备，观察选项是否生效：
+</p>
+<pre> $ mount /home/sam/run/motog
+ Device 0 (VID=22b8 and PID=2e82) is a Motorola Moto G (ID2).
+ Android device detected, assigning default bug flags
+ $ mount 
+  ...
+  jmtpfs on /home/sam/run/motog type fuse.jmtpfs (rw,nosuid,nodev,noexec,noatime,user_id=1000,group_id=1000,allow_other,user=sam)
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbbc368f6292e_SIMPLE_MTPFS" id="SIMPLE-MTPFS">SIMPLE-MTPFS</h3></div>
+<p><b>SIMPLE-MTPFS</b> — 简易媒体传输协议文件系统（Simple Media Transfer Protocol FileSystem），基于 <a href="#pgbbc368f6292e_libmtp">libmtp</a>，能够对通过 USB 连接至本地机器的 MTP 设备上的文件进行操作。
+</p>
+<dl><dd><a href="https://github.com/phatina/simple-mtpfs/">https://github.com/phatina/simple-mtpfs/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/simple-mtpfs/">simple-mtpfs</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<p>运行 <code>simple-mtpfs -l</code> 以列出探测到的设备。
+</p><p>要将列表中的第一个设备挂载至 <code>~/mnt</code>，请运行 <code>simple-mtpfs --device 1 ~/mnt</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbbc368f6292e_go_mtpfs" id="go-mtpfs">go-mtpfs</h3></div>
+<p><b>go-mtpfs</b> — 使用自定义 MTP 实现的 FUSE 文件系统，用 Go 语言编写。
+</p>
+<dl><dd><a href="https://github.com/hanwen/go-mtpfs">https://github.com/hanwen/go-mtpfs</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/go-mtpfs-git/">go-mtpfs-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=android-udev">android-udev</a></span><sup><small>包</small></sup></span>，之后可编辑 <code>/etc/udev/rules.d/51-android.rules</code> 并应用至 <code>idVendor</code> 和 <code>idProduct</code>，运行 <i>mtp-detect</i> 后可观察到上述行为。在行尾添加当前用户 <code>OWNER="<i>user</i>"</code>。
+</p><p>将设备挂载至 <code>~/mnt</code>：
+</p>
+<pre>$ go-mtpfs ~/mnt
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>有多个设备时，可使用 <code>-d</code> 标志指定某个设备（id 可通过运行 <code>mtp-detect</code> 获取）。</li>
+<li>使用 <code>go-mtpfs</code> 挂载时，若存在外置 SD 卡，挂载可能会失败。若在有 SD 卡的情况下尝试访问设备时遇 go-mtpfs 报错，请移除 SD 卡并重新挂载。</li>
+<li>该软件包自 2020 年以来未曾维护。</li></ul>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbbc368f6292e_libmtp" id="libmtp">libmtp</h2></div>
+<p><a href="https://libmtp.sourceforge.net/">libmtp</a> 是一个 MTP 实现库，还附带了一些命令行工具示例（可使用 <code>pacman -Ql libmtp</code> 列出）。
+</p><p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libmtp">libmtp</a></span><sup><small>包</small></sup></span> 软件包。
+</p><p>运行 <code>mtp-detect</code> 以探测设备。
+</p><p>若返回错误，请确认当前用户在 <code>adbusers</code> <a href="#pg033277e1d6d8">用户组</a>内。
+</p><p>可使用 <code>mtp-connect</code> 命令传输文件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbbc368f6292e_.E5.89.8D.E7.AB.AF" id="前端"><span id=".E5.89.8D.E7.AB.AF"></span>前端</h3></div>
+<p><b>gMTP</b> — libmtp 的一个图形前端。允许用户连接安卓设备，并使用与桌面无关的图形用户界面管理文件。
+</p>
+<dl><dd><a href="https://gmtp.sourceforge.io/">https://gmtp.sourceforge.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gmtp">gmtp</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbbc368f6292e_.E5.AA.92.E4.BD.93.E6.92.AD.E6.94.BE.E5.99.A8" id="媒体播放器"><span id=".E5.AA.92.E4.BD.93.E6.92.AD.E6.94.BE.E5.99.A8"></span>媒体播放器</h2></div>
+<p>要在音乐播放器（如 <a href="#pga919b2088931">Amarok</a>）中使用 MTP 设备，需编辑 <code>/etc/udev/rules.d/51-android.rules</code>（以下示例中的 MTP 设备是一部 Galaxy Nexus）。运行如下命令以搜索设备：
+</p>
+<pre>$ lsusb
+</pre>
+<p>搜索结果应类似于：
+</p>
+<pre>Bus 003 Device 011: ID 04e8:6860 Samsung Electronics Co., Ltd GT-I9100 Phone [Galaxy S II], GT-P7500 [Galaxy Tab 10.1]
+</pre>
+<p>将条目其添加至 <code>/etc/udev/rules.d/51-android.rules</code>，像这样：
+</p>
+<pre>SUBSYSTEM=="usb", ATTR{idVendor}=="04e8", ATTR{idProduct}=="6860", MODE="0666", OWNER="[username]"
+</pre>
+<p>同时，重新加载 udev 规则：
+</p>
+<pre># udevadm control --reload
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbbc368f6292e_.E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8.E9.9B.86.E6.88.90" id="文件管理器集成"><span id=".E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8.E9.9B.86.E6.88.90"></span>文件管理器集成</h2></div>
+<p>要在文件管理器内通过 MTP 查看安卓设备的存储内容，请安装对应的插件：
+</p>
+<ul><li>对于使用 <a href="#pgfd588d8d2005">GVFS</a> 的文件管理器（GNOME Files），安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs-mtp">gvfs-mtp</a></span><sup><small>包</small></sup></span> 以支持 MTP 或安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs-gphoto2">gvfs-gphoto2</a></span><sup><small>包</small></sup></span> 以支持 PTP。</li>
+<li>对于使用 KIO 的文件管理器（KDE 的 Dolphin），<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kio-extras">kio-extras</a></span><sup><small>包</small></sup></span>（dolphin 的依赖项）已包含 MTP 支持。</li></ul>
+<p>安装好所需的软件包后，设备应自动显示在文件管理器内，并且可通过 URL 访问，如 <code>mtp://[usb:002,013]/</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbbc368f6292e_gvfs_mtp" id="gvfs-mtp">gvfs-mtp</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs-mtp">gvfs-mtp</a></span><sup><small>包</small></sup></span> 软件包可从官方仓库获取。
+</p><p>可通过 <code>lsusb</code> 获得设备信息，包括 Bus 编号、设备编号（Device numbers）和设备 ID，前两项信息可用于 <code>gvfs-mtp</code>，设备 ID 可用于创建 <a href="#pge009209061ac">udev</a> 规则。
+</p>
+<pre>Bus <b>002</b> Device <b>018</b>: ID <b>04b7</b>:<b>88a9</b> Compal Electronics, Inc.
+</pre>
+<p>要查看已探测到启用了 MTP 的设备，使用 <i>gio mount</i>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">gio mount -li | grep -e ^Volume -e activation_root</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Volume(0): MT65xx Android Phone
+  activation_root=mtp://[usb:<b>002</b>,<b>018</b>]/</pre>
+<p>或使用 <i>lsusb</i>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">lsusb -v 2&gt; /dev/null | grep -e Bus -e iInterface -e bInterfaceProtocol</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+Bus 002 Device 018: ID 04b7:88a9 Compal Electronics, Inc. 
+      bInterfaceProtocol      0 
+      iInterface              5 MTP
+...</pre>
+<p>要挂载所有可用的已连接 MTP 设备，请使用内联脚本：
+</p>
+<pre>gio mount -li | awk -F= '{if(index($2,"mtp") == 1)system("gio mount "$2)}'
+</pre>
+<p>通过命令使用 gvfs-mtp 挂载或卸载设备，请指定 Bus 编号和设备编号（Device numbers），例如，使用 <code>gio mount mtp://[usb:001,007]/</code> 挂载，使用 <code>gio mount -u mtp://[usb:001,007]/</code> 卸载。已挂载设备可通过 <i>mtp:host=</i> 开头的目录访问，且位于 <i>/run/user/$UID/gvfs/</i> 目录下。
+</p><p>使用 gvfs 时，若希望禁用自动挂载 MTP 设备的功能，需更改 <i>AutoMount</i> 变量的值，将其从 <i>true</i> 更改为 <i>false</i>，该变量位于 <code>/usr/share/gvfs/mounts/mtp.mount</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>文件管理器自身可能有关于自动挂载的选项。它们在启动时将检查所有可挂载的设备。</div>
+<p>若设备没有出现在文件管理器中，则可能缺少 <a href="#pgbbc368f6292e_libmtp">#libmtp</a> 的本地支持，或是不在<a href="https://sourceforge.net/p/libmtp/code/ci/HEAD/tree/src/music-players.h">支持的设备</a>列表中。在尝试使用命令行挂载时，可能会遇到错误：
+</p>
+<pre>Device 0 (VID=<i>XXXX</i> and PID=<i>XXXX</i>) is UNKNOWN.
+Please report this VID/PID and the device model to the libmtp development team</pre>
+<p>使设备显示在文件管理器中的解决方法是，为设备写一个 <a href="#pge009209061ac">udev</a> 规则，但这并不保证能用 MTP 连接将其成功挂载。
+</p><p>创建一个 udev 规则配置文件并使用 <b>vendorId</b>:<b>productID</b> 模式的 ID 编号：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/51-android.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SUBSYSTEM=="usb", ATTR{idVendor}=="04b7", ATTR{idProduct}=="88a9", MODE="0660", GROUP="uucp", ENV{ID_MTP_DEVICE}="1", SYMLINK+="libmtp"
+</pre>
+<p>然后重新加载 udev 规则：
+</p>
+<pre># udevadm control --reload
+</pre>
+<p>若受 <a href="#pgbbc368f6292e_libmtp">#libmtp</a> 支持，支持 <span class="ilh-all" data-foreign-title="gvfs" data-lang-code="en" data-lang-name="英语" data-orig-title="gvfs"><span class="ilh-page"><a href="#pg95aa7192ad64">gvfs</a></span></span> 的文件管理器能够显示并挂载 MTP 设备。若不受支持且无法打开，请在手机上更改至 PTP 并安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs-gphoto2">gvfs-gphoto2</a></span><sup><small>包</small></sup></span> 以获取（至少）对照片的访问，通过命令行挂载 PTP 与挂载 MTP 设备类似：<code>gio mount gphoto2://[usb:002,019]/</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>若访问设备受限，且无法通过命令行使用标准命令，例如 <code>cp</code>、<code>ls</code>，请查找 <span class="ilh-all" data-foreign-title="gvfs" data-lang-code="en" data-lang-name="英语" data-orig-title="gvfs"><span class="ilh-page"><a href="#pg95aa7192ad64">gvfs</a></span></span> 的自身替代品：<code>ls -1 /usr/bin/gvfs-*</code>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbbc368f6292e_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbbc368f6292e_libmtp.EF.BC.88gvfs-mtp.EF.BC.89.EF.BC.9A.E4.BD.BF.E7.94.A8.E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8.EF.BC.88nautilus.E3.80.81pcmanfm.E3.80.81vifm_.E7.AD.89.EF.BC.89.E8.AE.BF.E9.97.AE.E5.AE.89.E5.8D.93.E8.AE.BE.E5.A4.87.E4.B8.8A.E7.9A.84.E7.9B.B8.E6.9C.BA.E7.9B.B8.E5.86.8C.E6.97.B6.E6.8C.82.E8.B5.B7" id="libmtp（gvfs-mtp）：使用文件管理器（nautilus、pcmanfm、vifm_等）访问安卓设备上的相机相册时挂起"><span id="libmtp.EF.BC.88gvfs-mtp.EF.BC.89.EF.BC.9A.E4.BD.BF.E7.94.A8.E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8.EF.BC.88nautilus.E3.80.81pcmanfm.E3.80.81vifm_.E7.AD.89.EF.BC.89.E8.AE.BF.E9.97.AE.E5.AE.89.E5.8D.93.E8.AE.BE.E5.A4.87.E4.B8.8A.E7.9A.84.E7.9B.B8.E6.9C.BA.E7.9B.B8.E5.86.8C.E6.97.B6.E6.8C.82.E8.B5.B7"></span>libmtp（gvfs-mtp）：使用文件管理器（nautilus、pcmanfm、vifm 等）访问安卓设备上的相机相册时挂起</h3></div>
+<p>症状：一切正常，直到进入相机相册目录。此时文件管理器冻结，甚至在命令行下也无法 <code>ls</code> 该目录。
+</p><p>这极有可能是 libmtp 的问题。
+</p><p>该症状可能由类似 <code>20180915_180351(0).jpg</code> 的文件名引起。例如，三星手机倾向于创建此类名称的文件。
+</p><p>参见相关问题报告（<a href="https://sourceforge.net/p/libmtp/bugs/1830/">[1]</a>、<a href="https://sourceforge.net/p/libmtp/bugs/1808/">[2]</a>）和问答（<a href="https://askubuntu.com/questions/995383/nautilus-hangs-on-accessing-dcim-camera-on-android">[3]</a>、<a href="https://askubuntu.com/questions/1030736/cant-open-photos-stored-on-android-system-from-ubuntu/1148034#1148034">[4]</a>）。
+</p><p>该问题可能的解决方法是使用与 #FUSE 文件系统不同的 mtp 选项（例如 go-mtpfs）或更改手机相机的文件命名策略（或切换至其他相机应用，如 <a href="https://opencamera.sourceforge.io/">Open Camera</a>）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbbc368f6292e_jmtpfs.EF.BC.9A.E9.A6.96.E6.AC.A1.E8.AE.BF.E9.97.AE.E8.AE.BE.E5.A4.87.E6.97.B6.E5.87.BA.E7.8E.B0.E8.BE.93.E5.85.A5.E8.BE.93.E5.87.BA.E9.94.99.E8.AF.AF" id="jmtpfs：首次访问设备时出现输入输出错误"><span id="jmtpfs.EF.BC.9A.E9.A6.96.E6.AC.A1.E8.AE.BF.E9.97.AE.E8.AE.BE.E5.A4.87.E6.97.B6.E5.87.BA.E7.8E.B0.E8.BE.93.E5.85.A5.E8.BE.93.E5.87.BA.E9.94.99.E8.AF.AF"></span>jmtpfs：首次访问设备时出现输入输出错误</h3></div>
+<p>症状：jmtpfs 成功挂载，但当尝试访问设备上的文件时（例如，通过 <code>ls</code> 访问），会产生以下报错：
+</p>
+<pre> cannot access &lt;mount-point&gt;: Input/output error
+</pre>
+<p>这可能是一个安全特性：手机屏幕锁定时，MTP 不能正常运作。解锁手机后，只要保持连接，MTP 应正常生效。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbbc368f6292e_kio-mtp:_.E6.97.A0.E6.B3.95.E4.BD.BF.E7.94.A8.E2.80.9C.E7.94.A8.E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8.E6.89.93.E5.BC.80.E2.80.9D.E6.93.8D.E4.BD.9C" id="kio-mtp:_无法使用“用文件管理器打开”操作"><span id="kio-mtp:_.E6.97.A0.E6.B3.95.E4.BD.BF.E7.94.A8.E2.80.9C.E7.94.A8.E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8.E6.89.93.E5.BC.80.E2.80.9D.E6.93.8D.E4.BD.9C"></span>kio-mtp: 无法使用“用文件管理器打开”操作</h3></div>
+<p>若无法使用“用文件管理器打开（Open with File Manager）”，可能需要编辑文件 <code>/usr/share/solid/actions/solid_mtp.desktop</code> 以解决此问题。
+</p><p>将 <code>Exec=kioclient exec mtp:udi=%i/</code> 这一行更改为 <code>Exec=dolphin "mtp:/"</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbbc368f6292e_kio-mtp_.E8.A2.AB.E4.B8.8D.E5.90.8C.E7.9A.84.E6.9C.8D.E5.8A.A1.E5.90.8C.E6.97.B6.E8.B0.83.E7.94.A8" id="kio-mtp_被不同的服务同时调用"><span id="kio-mtp_.E8.A2.AB.E4.B8.8D.E5.90.8C.E7.9A.84.E6.9C.8D.E5.8A.A1.E5.90.8C.E6.97.B6.E8.B0.83.E7.94.A8"></span>kio-mtp 被不同的服务同时调用</h3></div>
+<p>根据<a href="https://bbs.archlinux.org/viewtopic.php?pid=1657736#p1657736">此帖</a>内容，应避免同时使用 mtpfs 和 kio-mtp，或是使用与 kio-mtp 冲突的服务（包括音乐播放服务）。
+</p><p>例如，Amarok 的 MTP 服务插件，可能会阻止 Dolphin（plasma）访问不同型号手机的文件。对于至少一位用户，解决方案是将其关闭。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807055716
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.193 seconds
+Real time usage: 0.198 seconds
+Preprocessor visited node count: 674/1000000
+Revision size: 12326/2097152 bytes
+Post‐expand include size: 11229/2097152 bytes
+Template argument size: 4843/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 136/5000000 bytes
+Lua time usage: 0.011/7.000 seconds
+Lua memory usage: 628322/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   77.817      1 -total
+ 38.72%   30.131      2 Template:Link-en
+ 10.98%    8.544      6 Template:App
+  7.85%    6.107      5 Template:注意
+  7.18%    5.590     41 Template:Ic
+  4.83%    3.762     10 Template:Pkg
+  3.79%    2.952      1 Template:翻译状态
+  3.04%    2.363      1 Template:相关文章开始
+  2.72%    2.113      2 Template:Related
+  2.28%    1.771      3 Template:Hc
+-->
+<!-- Render ID d7ab520e-9224-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7003:|#|:idhash:canonical!zh-cn and timestamp 20260807055716 and revision id 33744. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

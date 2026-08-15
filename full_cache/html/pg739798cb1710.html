@@ -1,0 +1,1128 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg739798cb1710">dotfiles</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Dotfiles">Dotfiles</a>，最近一次同步于 2025-1-29，若英文版本有所<a href="https://wiki.archlinux.org/title/Dotfiles?diff=0&amp;oldid=825943">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Dotfiles_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg1b1ba6f94973">XDG 基本目录</a></li>
+<li><a href="#pgfdfac14ad1cb">X 资源</a></li>
+</ul></div>
+<p>用户对于程序的配置通常存储在所谓的<a href="https://en.wikipedia.org/wiki/dotfile">点文件</a>（以 <code>.</code> 开头的文件）中。通常的做法是用<a href="#pg2ffcf4fbeff7">版本控制系统</a>（如 <a href="#pg0d34da84b694">Git</a> ）来管理点文件，以跟踪其变化，并在不同的主机上同步。有许多管理点文件的方法。例如，直接跟踪主目录中的点文件；或者将其放在子文件夹中，用 <a href="#pgd53258e68888">shell</a> 脚本或专用工具进行管理。除了说明如何管理你的点文件之外，本文章还包含了一个来自 Arch Linux 用户的点文件配置库列表。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg739798cb1710_.E4.BD.BF.E7.94.A8_Git_.E8.B7.9F.E8.B8.AA.E7.82.B9.E6.96.87.E4.BB.B6" id="使用_Git_跟踪点文件"><span id=".E4.BD.BF.E7.94.A8_Git_.E8.B7.9F.E8.B8.AA.E7.82.B9.E6.96.87.E4.BB.B6"></span>使用 Git 跟踪点文件</h2></div>
+<p><span id="Tracking_dotfiles_directly_with_Git"></span>
+</p><p>直接使用 Git 跟踪点文件的好处是它只涉及<a href="#pg0d34da84b694">Git</a>而不涉及符号链接。坏处则是对于特定主机的配置通常需要多个<a href="#pg0d34da84b694">分支</a>来合并。
+</p><p>实现这一需求最简单的方式是直接在 home 目录初始化一个 <a href="#pg0d34da84b694">Git</a> 仓库，并在<span class="plainlinks archwiki-template-man" title="$ man 5 gitignore"><a href="https://man.archlinux.org/man/gitignore.5">gitignore(5)</a></span>文件中使用<code>*</code>匹配所有文件来忽视它们。
+但是两个弊端也随之而来：一是当你的 home 目录下有其他 Git 仓库时，就会难以应对（比如说你如果你忘记初始化而直接对点文件仓库进行操作的时候）。二是你很难确定当前目录下的那些文件是没有被跟踪的（因为他们已经被忽略了)。
+</p><p>为避免上述两个弊端，一个很受欢迎的替代方法是“裸仓库别名法”，它的原文链接在此：<a href="https://news.ycombinator.com/item?id=11071754">Ask Hacker News: What do you use to manage your dotfiles?</a>，它只要3个命令就可轻松完成设置：
+</p>
+<pre>$ git init --bare ~/.dotfiles
+$ alias dotfiles='/usr/bin/git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME"'
+$ dotfiles config status.showUntrackedFiles no
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>通常情况下， 点文件都是默认权限，但如果某些配置一定要配置特定权限，请另寻他法。（git 不支持存储权限信息）(<a href="#pg086983cf886b">Discussion</a>)</div>
+<p>你可以采用下面的命令在新系统中复制点文件：
+</p>
+<pre>$ git clone --bare &lt;git-repo-url&gt; $HOME/.dotfiles
+$ alias dotfiles='/usr/bin/git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME"'
+$ dotfiles checkout
+$ dotfiles config --local status.showUntrackedFiles no
+</pre>
+<ul><li>如果这时有一些点文件已经被覆盖了，你可能会遇到类似下面这样的错误：</li></ul>
+<dl><dd><pre>$ dotfiles checkout
+error: The following untracked working tree files would be overwritten by checkout:
+    .bashrc
+    .gitignore
+Please move or remove them before you can switch branches.
+Aborting
+</pre></dd></dl>
+<dl><dd>你应该使用 <code>$ dotfiles checkout -f</code>重写已经存在的文件，或是用下面更安全的脚本方法备份所有文件，记得使用<code>checkout</code>：<pre>mkdir -p .dotfiles-backup &amp;&amp; \
+dotfiles checkout 2&gt;&amp;1 | egrep "\s+\." | awk {'print $1'} | \
+xargs -I{} mv {} .dotfiles-backup/{}
+</pre></dd></dl>
+<p>在这之后你可以用 alias命令 去管理点文件。如果你使用的是 Bash，只需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bash-complete-alias/">bash-complete-alias</a></span><sup><small>AUR</small></sup></span> 后就可以使用补全功能，最后将别名和下面的一行命令放在你的<code>~/.bashrc</code>中。
+</p>
+<pre>$ complete -F _complete_alias dotfiles
+</pre>
+<p>另一种在bash中使用补全功能的方法，在你的<code>~/.bashrc</code>中加入下面的命令（擅自<a href="https://askubuntu.com/a/642778">[1]</a>）：
+</p>
+<pre>source /usr/share/bash-completion/completions/git
+__git_complete config __git_main
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>关于避免以外提交敏感信息的方式，请看 <a href="#pg0d34da84b694">Git#Filtering confidential information</a>.</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg739798cb1710_.E7.89.B9.E5.AE.9A.E8.AE.BE.E5.A4.87.E7.9B.B8.E5.85.B3.E7.9A.84.E9.85.8D.E7.BD.AE" id="特定设备相关的配置"><span id=".E7.89.B9.E5.AE.9A.E8.AE.BE.E5.A4.87.E7.9B.B8.E5.85.B3.E7.9A.84.E9.85.8D.E7.BD.AE"></span>特定设备相关的配置</h2></div>
+<p>你可能有很多台设备, 在这些设备之间同步点文件是一个很常见的问题，我们将其称之为特定设备相关的配置。
+</p><p>有了 <a href="#pg0d34da84b694">Git</a> 工具的帮助，我们可以通过以下方式解决这个问题：我们可以维护一个包含通用配置文件的主分支，同时为设备间不同的特定配置文件创建单独的分支。维护时将通用配置文件的变动提交到前者，而将与设备相关的配置文件提交到后者。也就是说，每个设备的专用分支都是在保持通用分支更新的基础上单独建立的。
+</p><p>某些配置文件中，比如在 <a href="#pg43b5ad694da4">shell configuration files</a> 中，可以使用条件逻辑判断不同的设备。比如，<a href="#pg1ca1e15827ff">Bash</a> 脚本 (即<code>.bashrc</code>) 中可以根据不同的主机名（或者其他特征如类型、自定义变量等等）应用不同的配置。
+</p>
+<pre>if [[ "$(hostname)" == "archlaptop" ]]; then
+    # laptop specific commands here
+else
+    # desktop or server machine commands
+fi
+</pre>
+<p>同样也可以用 <a href="#pg262b5623890b">.Xresources</a>.<a href="https://jnrowe.github.io/articles/tips/Sharing_Xresources_between_systems.html">[2]</a> 实现类似功能。
+</p><p>如果你觉得设置 Git 分支太麻烦，也可以使用支持文件分组的工具，或者使用处理工具使管理更加灵活。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg739798cb1710_.E5.B7.A5.E5.85.B7" id="工具"><span id=".E5.B7.A5.E5.85.B7"></span>工具</h2></div>
+<dl><dt>文件分组</dt>
+<dd>也就是将配置文件归纳成组的方法。</dd>
+<dt>处理</dt>
+<dd>一些工具对配置文件进行处理，使其能够根据主机情况进行定制。</dd></dl>
+<table class="wikitable sortable" style="text-align: center;">
+<tbody><tr>
+<th>名称</th>
+<th>包</th>
+<th>语言</th>
+<th>文件分组</th>
+<th>处理
+</th></tr>
+<tr>
+<th><a href="https://github.com/anishathalye/dotbot">dotbot</a>
+</th>
+<td><a href="https://aur.archlinux.org/packages/dotbot/">dotbot</a><sup><small>AUR</small></sup>
+</td>
+<td>Python
+</td>
+<td>配置文件
+</td>
+<td>无
+</td></tr>
+<tr>
+<th><a href="https://github.com/twpayne/chezmoi">chezmoi</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=chezmoi">chezmoi</a></span><sup><small>包</small></sup></span></td>
+<td>Go</td>
+<td>基于目录</td>
+<td>Go 模板
+</td></tr>
+<tr>
+<th><a href="https://github.com/kesslern/dot-templater">dot-templater</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dot-templater-git/">dot-templater-git</a></span><sup><small>AUR</small></sup></span></td>
+<td>Rust</td>
+<td>基于目录</td>
+<td>特定语法
+</td></tr>
+<tr>
+<th><a href="https://github.com/oknozor/toml-bombadil">toml-bombadil</a>
+</th>
+<td><a href="https://archlinux.org/packages/?name=toml-bombadil">toml-bombadil</a>
+</td>
+<td>Rust
+</td>
+<td>基于目录
+</td>
+<td>tera
+</td></tr>
+<tr>
+<th><a href="https://deadc0de.re/dotdrop/">dotdrop</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dotdrop/">dotdrop</a></span><sup><small>AUR</small></sup></span></td>
+<td>Python</td>
+<td>配置文件</td>
+<td>Jinja2
+</td></tr>
+<tr>
+<th><a href="https://github.com/jbernard/dotfiles">dotfiles</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dotfiles/">dotfiles</a></span><sup><small>AUR</small></sup></span></td>
+<td>Python</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;"><a href="https://github.com/jbernard/dotfiles/pull/24">无</a></td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">无
+</td></tr>
+<tr>
+<th><a href="https://github.com/SuperCuber/dotter">dotter</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dotter-rs/">dotter-rs</a></span><sup><small>AUR</small></sup></span></td>
+<td>Rust</td>
+<td>配置文件</td>
+<td>Handlebars
+</td></tr>
+<tr>
+<th><a href="https://dt.cli.rs">dt-cli</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dt-cli/">dt-cli</a></span><sup><small>AUR</small></sup></span></td>
+<td>Rust</td>
+<td>配置文件</td>
+<td>Handlebars
+</td></tr>
+<tr>
+<th><a href="https://www.gnu.org/software/stow/">GNU Stow</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=stow">stow</a></span><sup><small>包</small></sup></span></td>
+<td>Perl</td>
+<td>基于目录<a href="http://brandon.invergo.net/news/2012-05-26-using-gnu-stow-to-manage-your-dotfiles.html">[3]</a></td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">无
+</td></tr>
+<tr>
+<th><a href="https://github.com/lra/mackup">Mackup</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mackup/">mackup</a></span><sup><small>AUR</small></sup></span></td>
+<td>Python</td>
+<td>自动按应用</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">无
+</td></tr>
+<tr>
+<th><a href="https://github.com/darkfeline/mir.qualia">mir.qualia</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mir.qualia/">mir.qualia</a></span><sup><small>AUR</small></sup></span></td>
+<td>Python</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">无</td>
+<td>自定义块
+</td></tr>
+<tr>
+<th><a href="https://github.com/thoughtbot/rcm">rcm</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rcm/">rcm</a></span><sup><small>AUR</small></sup></span></td>
+<td>Shell</td>
+<td>基于目录（按主机或标签）</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">无
+</td></tr>
+<tr>
+<th><a href="https://github.com/sebastiancarlos/yas-bdsm">yas-bdsm</a>
+</th>
+<td>-
+</td>
+<td>Shell
+</td>
+<td>基于目录
+</td>
+<td>无
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg739798cb1710_Git_.E7.9A.84.E6.9B.BF.E4.BB.A3.E5.93.81" id="Git_的替代品"><span id="Git_.E7.9A.84.E6.9B.BF.E4.BB.A3.E5.93.81"></span>Git 的替代品</h3></div>
+<p>如果你不喜欢 <a href="#pg0d34da84b694">Git</a> ，可以尝试下列工具，它们或多或少可以看作是版本控制系统。
+</p>
+<table class="wikitable sortable" style="text-align:center;">
+<tbody><tr>
+<th>名称</th>
+<th>包</th>
+<th>语言</th>
+<th>文件分组</th>
+<th>处理
+</th></tr>
+<tr>
+<th><a href="https://github.com/kazhala/dotbare">dotbare</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dotbare/">dotbare</a></span><sup><small>AUR</small></sup></span></td>
+<td>Shell (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fzf">fzf</a></span><sup><small>包</small></sup></span>)</td>
+<td>repository-wise</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">无
+</td></tr>
+<tr>
+<th><a href="https://github.com/kobus-v-schoor/dotgit">dotgit</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dotgit/">dotgit</a></span><sup><small>AUR</small></sup></span></td>
+<td>Python</td>
+<td>基于文件名称</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">无
+</td></tr>
+<tr>
+<th><a href="https://github.com/andsens/homeshick">homeshick</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/homeshick-git/">homeshick-git</a></span><sup><small>AUR</small></sup></span></td>
+<td>Bash</td>
+<td>repository-wise</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">无
+</td></tr>
+<tr>
+<th><a href="https://github.com/technicalpickles/homesick">homesick</a>
+</th>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td>Ruby</td>
+<td>repository-wise</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">无
+</td></tr>
+<tr>
+<th><a href="https://github.com/pearl-core/pearl">Pearl</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pearl-git/">pearl-git</a></span><sup><small>AUR</small></sup></span></td>
+<td>Python</td>
+<td>repository-wise</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">无
+</td></tr>
+<tr>
+<th><a href="https://github.com/RichiH/vcsh">vcsh</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vcsh">vcsh</a></span><sup><small>包</small></sup></span></td>
+<td>Shell</td>
+<td>repository-wise</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">无
+</td></tr>
+<tr>
+<th><a href="https://yadm.io">yadm</a><sup>(1)</sup>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=yadm">yadm</a></span><sup><small>包</small></sup></span></td>
+<td>Python</td>
+<td>基于文件名称<br/>(按类/操作系统/发行版/主机名称/用户)<a href="https://yadm.io/docs/alternates">[4]</a></td>
+<td>内置模板/Jinja2/ESH<a href="https://yadm.io/docs/templates">[5]</a><br/>（可选）
+</td></tr>
+<tr>
+<th><a href="https://github.com/justone/dotfiles">dfm</a>
+</th>
+<td><a href="https://aur.archlinux.org/packages/dfm/">dfm</a><sup><small>AUR</small></sup>
+</td>
+<td>Perl
+</td>
+<td>repository-wise
+</td>
+<td>无
+</td></tr></tbody></table>
+<ol><li>支持以 <a href="#pg168817120ccc">GPG</a> 或 OpenSSL 对文件加密。 <a href="https://yadm.io/docs/encryption">[6]</a></li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg739798cb1710_.E7.94.A8.E6.88.B7.E4.BB.93.E5.BA.93" id="用户仓库"><span id=".E7.94.A8.E6.88.B7.E4.BB.93.E5.BA.93"></span>用户仓库</h2></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>中文社区有人整理了来自中文社区用户的 dotfiles 集锦：<a href="https://github.com/zjuyk/archlinuxcn-dotfiles-collection">archlinuxcn-dotfiles-collection</a>。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这个表格用于提供点文件的参考和例子，如果你想将自己的点文件提交到此，请确保它们整洁、注释完善且不过时。</div><div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>这些点文件未经Arch Linux维护团队验证，请自行承担使用风险。</div>
+<table class="wikitable sortable" style="text-align:center">
+<tbody><tr>
+<th>作者</th>
+<th>Shell</th>
+<th>WM / DE</th>
+<th>编辑器</th>
+<th>终端</th>
+<th>终端复用</th>
+<th>音频</th>
+<th>资源监视</th>
+<th>邮件</th>
+<th>IRC</th>
+<th>文件管理</th>
+<th>RSS 阅读
+</th></tr>
+<tr>
+<th><a href="https://github.com/adamperkowski/dwm">adamperkowski</a>
+</th>
+<td>Zsh
+</td>
+<td>dwm
+</td>
+<td>Neovim
+</td>
+<td>Kitty
+</td>
+<td>tmux
+</td>
+<td>mpv
+</td>
+<td>自定义
+</td>
+<td>
+</td>
+<td><a href="https://github.com/benmezger/dotfiles/blob/main/dot_weechat/">weechat</a>
+</td>
+<td>
+</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/alfunx/.dotfiles">alfunx</a>
+</th>
+<td>zsh</td>
+<td>awesome</td>
+<td>vim</td>
+<td>kitty</td>
+<td>tmux</td>
+<td>ncmpcpp/mpd</td>
+<td>htop/lain</td>
+<td>thunderbird</td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://gitlab.com/Ambrevar/dotfiles">Ambrevar</a>
+</th>
+<td>Eshell</td>
+<td>EXWM</td>
+<td>Emacs</td>
+<td>Emacs (Eshell)</td>
+<td>Emacs TRAMP + dtach</td>
+<td>EMMS</td>
+<td>conky/dzen</td>
+<td>mu4e</td>
+<td>Circe</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/ask1234560/dotfiles_bspwm">ananthu</a>
+</th>
+<td>zsh</td>
+<td>bspwm</td>
+<td>neovim</td>
+<td>alacritty</td>
+<td></td>
+<td>mpv</td>
+<td>htop, polybar</td>
+<td>neomutt</td>
+<td>weechat</td>
+<td>ranger</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/awalGarg/dotfiles">awal</a>
+</th>
+<td>fish</td>
+<td>i3</td>
+<td>vim</td>
+<td>st</td>
+<td>tmux</td>
+<td></td>
+<td>i3status</td>
+<td></td>
+<td>The Lounge</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/ayekat/localdir">ayekat</a>
+</th>
+<td>zsh</td>
+<td>karuiwm</td>
+<td>vim</td>
+<td>rxvt-unicode</td>
+<td>tmux</td>
+<td>ncmpcpp/mpd</td>
+<td>karuibar</td>
+<td>mutt</td>
+<td>irssi</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/BachoSeven/dotfiles">bachoseven</a>
+</th>
+<td>zsh</td>
+<td><a href="https://github.com/BachoSeven/dwm">dwm</a></td>
+<td>neovim</td>
+<td><a href="https://github.com/BachoSeven/st">st</a></td>
+<td></td>
+<td>ncmpcpp</td>
+<td>bottom</td>
+<td>neomutt</td>
+<td>weechat</td>
+<td>lf</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/bamos/dotfiles">bamos</a>
+</th>
+<td>zsh</td>
+<td>i3/xmonad</td>
+<td>vim/emacs</td>
+<td>rxvt-unicode</td>
+<td>tmux</td>
+<td>mpv/cmus</td>
+<td>conky/xmobar</td>
+<td>mutt</td>
+<td>ERC</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/pbrisbin/dotfiles">brisbin33</a>
+</th>
+<td><a href="https://github.com/pbrisbin/oh-my-zsh">zsh</a></td>
+<td><a href="https://github.com/pbrisbin/xmonad-config">xmonad</a></td>
+<td><a href="https://github.com/pbrisbin/vim-config">vim</a></td>
+<td>rxvt-unicode</td>
+<td>screen</td>
+<td></td>
+<td>dzen</td>
+<td><a href="https://github.com/pbrisbin/mutt-config">mutt</a></td>
+<td><a href="https://github.com/pbrisbin/irssi-config">irssi</a></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://gitlab.com/BVollmerhaus/dotfiles">BVollmerhaus</a>
+</th>
+<td><a href="https://gitlab.com/BVollmerhaus/dotfiles/-/tree/master/config/fish">fish</a></td>
+<td><a href="https://gitlab.com/BVollmerhaus/dotfiles/blob/master/config/i3/config">i3-gaps</a></td>
+<td><a href="https://gitlab.com/BVollmerhaus/dotfiles/blob/master/config/kak/kakrc">kakoune</a></td>
+<td><a href="https://gitlab.com/BVollmerhaus/dotfiles/-/blob/master/config/kitty/kitty.conf">kitty</a></td>
+<td></td>
+<td></td>
+<td><a href="https://gitlab.com/BVollmerhaus/dotfiles/blob/master/config/polybar/config">polybar</a></td>
+<td></td>
+<td></td>
+<td><a href="https://gitlab.com/BVollmerhaus/dotfiles/-/tree/master/config/ranger">ranger</a></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/christian-heusel/dotfiles">christian-heusel</a>
+</th>
+<td><a href="https://github.com/pbrisbin/oh-my-zsh">Zsh</a>
+</td>
+<td>i3
+</td>
+<td>Neovim
+</td>
+<td>st / terminator
+</td>
+<td>byobu / tmux
+</td>
+<td>
+</td>
+<td>htop
+</td>
+<td>neomutt/thunderbird
+</td>
+<td>weechat
+</td>
+<td>nemo / rangern
+</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/cinelli/dotfiles">cinelli</a>
+</th>
+<td>zsh</td>
+<td>dwm</td>
+<td>vim</td>
+<td>termite-git</td>
+<td></td>
+<td>pianobar</td>
+<td>htop</td>
+<td>mutt-kz</td>
+<td>weechat</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/dikiaap/dotfiles">dikiaap</a>
+</th>
+<td>zsh</td>
+<td>i3-gaps</td>
+<td>neovim</td>
+<td>alacritty</td>
+<td>tmux</td>
+<td></td>
+<td>i3blocks</td>
+<td></td>
+<td></td>
+<td>nnn</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/Earnestly/dotfiles">Earnestly</a>
+</th>
+<td>zsh</td>
+<td>i3/orbment</td>
+<td>vim/emacs</td>
+<td>termite</td>
+<td>tmux</td>
+<td>mpd</td>
+<td>conky</td>
+<td>mutt</td>
+<td>weechat</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/ErikBjare/dotfiles">ErikBjare</a>
+</th>
+<td>zsh</td>
+<td>xmonad/xfce4</td>
+<td>vim</td>
+<td>terminator</td>
+<td>tmux</td>
+<td></td>
+<td>xfce4-panel</td>
+<td></td>
+<td>weechat</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/falconindy/dotfiles">falconindy</a>
+</th>
+<td>bash</td>
+<td>i3</td>
+<td>vim</td>
+<td>rxvt-unicode</td>
+<td></td>
+<td>ncmpcpp</td>
+<td>conky</td>
+<td>mutt</td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/filiparag/dotfiles">filiparag</a>
+</th>
+<td>fish</td>
+<td>bspwm</td>
+<td>vim</td>
+<td>alacritty</td>
+<td>tmux</td>
+<td>mpv, <a href="https://github.com/altdesktop/playerctl">playerctl</a></td>
+<td>htop, polybar</td>
+<td><a href="https://www.nongnu.org/mailnotify/">mail-notification</a></td>
+<td></td>
+<td><a href="https://wiki.lxde.org/en/PCManFM">pcmanfm</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2022-09-17 ⓘ]</sup></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://git.sr.ht/~gardenapple/dotfiles">gardenapple</a>
+</th>
+<td>zsh</td>
+<td>sway</td>
+<td>neovim</td>
+<td>kitty</td>
+<td></td>
+<td></td>
+<td>htop</td>
+<td><a href="https://aerc-mail.org/">aerc</a></td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/graysky2/configs/tree/master/dotfiles">graysky</a>
+</th>
+<td>zsh</td>
+<td>xfce4</td>
+<td>vim</td>
+<td>terminal</td>
+<td></td>
+<td>ncmpcpp</td>
+<td>custom</td>
+<td>thunderbird</td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/hugdru/dotfiles">hugdru</a>
+</th>
+<td>zsh</td>
+<td>awesome</td>
+<td>neovim</td>
+<td>rxvt-unicode</td>
+<td>tmux</td>
+<td></td>
+<td></td>
+<td>thunderbird</td>
+<td>weechat</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/insanum/dotfiles">insanum</a>
+</th>
+<td>bash</td>
+<td>herbstluftwm</td>
+<td>vim</td>
+<td>evilvte</td>
+<td>tmux</td>
+<td></td>
+<td>dzen</td>
+<td>mutt-kz</td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/isti115/dotfiles">isti115</a>
+</th>
+<td><a href="https://github.com/Isti115/dotfiles/blob/master/.config/powershell/Microsoft.PowerShell_profile.ps1">pwsh</a>
+</td>
+<td><a href="https://github.com/Isti115/dotfiles/blob/master/.config/sway/config">sway</a>
+</td>
+<td><a href="https://github.com/Isti115/dotfiles/tree/master/.config/nvim">neovim</a>
+</td>
+<td><a href="https://github.com/Isti115/dotfiles/blob/master/.config/alacritty/alacritty.yml">alacritty</a>
+</td>
+<td>tmux
+</td>
+<td><a href="https://github.com/Isti115/dotfiles/tree/master/.config/mpv">mpv</a> / playerctl
+</td>
+<td><a href="https://github.com/Isti115/dotfiles/tree/master/.config/waybar">waybar</a> / htop / ytop
+</td>
+<td>
+</td>
+<td>
+</td>
+<td><a href="https://github.com/Isti115/dotfiles/tree/master/.config/ranger">ranger</a>
+</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://hg.sr.ht/~jasonwryan/shiv">jasonwryan</a>
+</th>
+<td>bash/zsh</td>
+<td>dwm</td>
+<td>vim</td>
+<td>rxvt-unicode</td>
+<td>tmux</td>
+<td>ncmpcpp</td>
+<td>custom</td>
+<td>mutt</td>
+<td>irssi</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/JDevlieghere/dotfiles/">jdevlieghere</a>
+</th>
+<td>zsh</td>
+<td>xmonad</td>
+<td>vim</td>
+<td>terminal</td>
+<td>tmux</td>
+<td></td>
+<td>htop</td>
+<td>mutt</td>
+<td>weechat</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/jelly/Dotfiles">jelly</a>
+</th>
+<td>zsh</td>
+<td>i3</td>
+<td>vim</td>
+<td>termite</td>
+<td>tmux</td>
+<td>ncmpcpp</td>
+<td></td>
+<td>mutt-kz-git</td>
+<td>weechat</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/JonasDe/dotfiles">JonasDe</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2022-09-17 ⓘ]</sup>
+</th>
+<td>zsh</td>
+<td>i3</td>
+<td>vim</td>
+<td>rxvt-unicode</td>
+<td>tmux</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/Jorengarenar/dotfiles">Jorengarenar</a>
+</th>
+<td><a href="https://github.com/Jorengarenar/dotfiles/tree/master/shell">sh</a>/<a href="https://github.com/Jorengarenar/dotfiles/blob/master/bashrc">Bash</a></td>
+<td><a href="https://github.com/Jorengarenar/dotfiles/tree/master/i3">i3</a></td>
+<td><a href="https://github.com/Jorengarenar/dotfiles/tree/master/vim">Vim</a></td>
+<td><a href="https://github.com/Jorengarenar/dotfiles/blob/master/X11/Xresources">xterm</a></td>
+<td><a href="https://github.com/Jorengarenar/dotfiles/blob/master/tmux.conf">tmux</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2022-09-17 ⓘ]</sup></td>
+<td><a href="https://github.com/Jorengarenar/dotfiles/tree/master/mpv">mpv</a></td>
+<td><a href="https://github.com/Jorengarenar/dotfiles/blob/master/htoprc">htop</a></td>
+<td><a href="https://github.com/Jorengarenar/dotfiles/tree/master/aerc">aerc</a></td>
+<td><a href="https://github.com/Jorengarenar/dotfiles/tree/master/weechat">WeeChat</a></td>
+<td><a href="https://github.com/Jorengarenar/dotfiles/blob/master/ranger.conf">ranger</a></td>
+<td>QuiteRSS
+</td></tr>
+<tr>
+<th><a href="https://github.com/markuszoppelt/dotfiles">MarkusZoppelt</a>
+</th>
+<td>zsh</td>
+<td>gnome</td>
+<td>vim</td>
+<td>terminal</td>
+<td>tmux</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/maximbaz/dotfiles">maximbaz</a>
+</th>
+<td>zsh</td>
+<td>sway</td>
+<td>kakoune</td>
+<td>kitty</td>
+<td></td>
+<td></td>
+<td>waybar</td>
+<td>neomutt</td>
+<td></td>
+<td>nnn</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://git.mehalter.com/mehalter/dotfiles">mehalter</a>
+</th>
+<td>zsh</td>
+<td>i3-gaps</td>
+<td>neovim</td>
+<td>termite</td>
+<td>tmux</td>
+<td>cmus</td>
+<td>gotop</td>
+<td>neomutt</td>
+<td>weechat</td>
+<td>ranger</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/meskarune/.dotfiles">meskarune</a>
+</th>
+<td>bash</td>
+<td>herbstluftwm</td>
+<td>vim</td>
+<td>rxvt-unicode</td>
+<td>screen</td>
+<td></td>
+<td>conky</td>
+<td></td>
+<td>weechat</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/neersighted/dotfiles">neersighted</a>
+</th>
+<td>fish</td>
+<td>i3</td>
+<td>neovim</td>
+<td>alacritty</td>
+<td>tmux</td>
+<td>ncmpcpp</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/nimaipatel/dotfiles">nimaipatel</a>
+</th>
+<td>fish</td>
+<td>awesome</td>
+<td>neovim</td>
+<td>alacritty</td>
+<td></td>
+<td>ncmpcpp</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/oibind/dotfiles">oibind</a>
+</th>
+<td>fish</td>
+<td>awesome</td>
+<td>neovim</td>
+<td>st</td>
+<td>tmux</td>
+<td></td>
+<td>htop-vim</td>
+<td></td>
+<td>weechat</td>
+<td>lf</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/ok100/configs">OK100</a>
+</th>
+<td>bash</td>
+<td>dwm</td>
+<td>vim</td>
+<td>rxvt-unicode</td>
+<td></td>
+<td>cmus</td>
+<td>conky, dzen</td>
+<td>mutt</td>
+<td>weechat</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/orhun/dotfiles">orhun</a>
+</th>
+<td>bash</td>
+<td>i3-gaps</td>
+<td>vsc</td>
+<td>alacritty</td>
+<td></td>
+<td></td>
+<td>i3status</td>
+<td></td>
+<td>weechat</td>
+<td>tere</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/pablox-cl/dotfiles">pablox-cl</a>
+</th>
+<td>zsh (zplug)</td>
+<td>gnome3</td>
+<td>neovim</td>
+<td>kitty</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://gitlab.com/peterzuger/dotfiles">peterzuger</a>
+</th>
+<td>zsh</td>
+<td>i3-gaps</td>
+<td>emacs</td>
+<td>rxvt-unicode</td>
+<td>screen</td>
+<td>moc</td>
+<td>htop</td>
+<td></td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/potamides/dotfiles">potamides</a>
+</th>
+<td>bash</td>
+<td>awesome</td>
+<td>neovim</td>
+<td>termite</td>
+<td>tmux</td>
+<td>ncmpcpp</td>
+<td>conky,htop</td>
+<td>mutt</td>
+<td>weechat</td>
+<td>ranger</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/reisub0/dot">reisub0</a>
+</th>
+<td>fish</td>
+<td>qtile</td>
+<td>neovim</td>
+<td>kitty</td>
+<td></td>
+<td>mpd</td>
+<td>conky</td>
+<td></td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://git.sr.ht/~scrumplex/dotfiles">Scrumplex</a>
+</th>
+<td>fish</td>
+<td>sway</td>
+<td>neovim</td>
+<td>kitty</td>
+<td></td>
+<td>ncmpcpp / pipewire</td>
+<td>waybar</td>
+<td>aerc</td>
+<td></td>
+<td>ranger</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/sistematico/majestic">sistematico</a>
+</th>
+<td>zsh/fish/bash</td>
+<td><a href="https://github.com/Airblader/i3">i3-gaps</a></td>
+<td>vim/nano</td>
+<td>termite</td>
+<td>tmux</td>
+<td>ncmpcpp</td>
+<td>polybar</td>
+<td>mutt</td>
+<td>weechat</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://git.sitilge.id.lv/sitilge/dotfiles">sitilge</a>
+</th>
+<td>zsh</td>
+<td>sway</td>
+<td>neovim</td>
+<td>alacritty</td>
+<td></td>
+<td></td>
+<td>htop</td>
+<td>thunderbird</td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://git.sr.ht/~thecashewtrader/dotfiles">thecashewtrader</a>
+</th>
+<td>Eshell</td>
+<td>EXWM</td>
+<td>Emacs</td>
+<td>Emacs (VTerm)</td>
+<td>Emacs</td>
+<td>Bongo</td>
+<td>htop</td>
+<td>mu4e</td>
+<td>ERC</td>
+<td>Dired</td>
+<td>Elfeed
+</td></tr>
+<tr>
+<th><a href="https://github.com/thiagowfx/.dotfiles">thiagowfx</a>
+</th>
+<td>bash/zsh</td>
+<td>i3</td>
+<td>vim</td>
+<td>alacritty</td>
+<td>tmux</td>
+<td>playerctl</td>
+<td>i3status</td>
+<td></td>
+<td></td>
+<td>ranger</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/tuurep/dotfiles">tuurep</a>
+</th>
+<td>bash</td>
+<td>openbox</td>
+<td>neovim</td>
+<td>alacritty</td>
+<td>tmux</td>
+<td></td>
+<td>polybar</td>
+<td></td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/vodik/dotfiles">vodik</a>
+</th>
+<td>zsh</td>
+<td>xmonad</td>
+<td>vim</td>
+<td>termite-git</td>
+<td>tmux</td>
+<td>ncmpcpp</td>
+<td>custom</td>
+<td>mutt</td>
+<td>weechat</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/w0ng/dotfiles">w0ng</a>
+</th>
+<td>zsh</td>
+<td>dwm</td>
+<td>vim</td>
+<td>rxvt-unicode</td>
+<td>tmux</td>
+<td>ncmpcpp</td>
+<td>custom</td>
+<td>mutt</td>
+<td>irssi</td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/whitelynx/dotfiles">whitelynx</a>
+</th>
+<td>fish</td>
+<td>i3</td>
+<td>neovim</td>
+<td>kitty</td>
+<td></td>
+<td></td>
+<td>i3pystatus</td>
+<td></td>
+<td></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://git.sr.ht/~whynothugo/dotfiles">whynothugo</a>
+</th>
+<td>zsh</td>
+<td>sway</td>
+<td>neovim</td>
+<td>alacritty</td>
+<td></td>
+<td>mpv</td>
+<td>waybar, top</td>
+<td>neomutt</td>
+<td></td>
+<td>nemo</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="https://github.com/wryonik/dotfiles">wryonik</a>
+</th>
+<td>zsh</td>
+<td>i3-gaps-rounded</td>
+<td>vim</td>
+<td>terminator</td>
+<td></td>
+<td>cmus</td>
+<td>htop, i3blocks, gotop</td>
+<td></td>
+<td></td>
+<td>ranger, nautilus</td>
+<td>
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg739798cb1710_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://mywiki.wooledge.org/DotFiles">gregswiki:DotFiles</a></li>
+<li><a href="https://wiki.haskell.org/Xmonad/Config_archive">XMonad Config Archive</a></li>
+<li><a href="http://dotshare.it">dotshare.it</a></li>
+<li><a href="https://dotfiles.github.io/">dotfiles.github.io</a></li>
+<li><a href="https://terminal.sexy/">terminal.sexy</a> - Terminal color scheme designer</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807032342
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.256 seconds
+Real time usage: 0.264 seconds
+Preprocessor visited node count: 763/1000000
+Revision size: 18954/2097152 bytes
+Post‐expand include size: 10170/2097152 bytes
+Template argument size: 2804/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 376/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   65.309      1 -total
+ 15.31%   10.001     12 Template:灰
+  8.64%    5.645     13 Template:META_Table_cell
+  6.06%    3.958      3 Template:Dead_link
+  5.36%    3.502      1 Template:小写标题
+  5.12%    3.342      1 Template:翻译状态
+  4.86%    3.175     13 Template:AUR
+  4.86%    3.171      1 Template:Anchor
+  4.44%    2.901      5 Template:Pkg
+  3.47%    2.268      1 Template:相关文章开始
+-->
+<!-- Render ID 63b27f0e-920f-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7237:|#|:idhash:canonical!zh-cn and timestamp 20260807032342 and revision id 31285. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,89 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg9d7e0c937471">字体打包指南</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Font_package_guidelines">Font package guidelines</a>，最近一次同步于 2022-05-27，若英文版本有所<a href="https://wiki.archlinux.org/title/Font_package_guidelines?diff=0&amp;oldid=719729">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Font_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – 字体
+</p>
+</div>
+<p>本文档提供为<a href="#pg7830c089a224">字体</a>撰写 <a href="#pgf9d748a7b27b">PKGBUILD</a> 的建议规范。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9d7e0c937471_.E9.80.9A.E7.94.A8.E6.8C.87.E5.BC.95" id="通用指引"><span id=".E9.80.9A.E7.94.A8.E6.8C.87.E5.BC.95"></span>通用指引</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9d7e0c937471_.E5.8C.85.E5.91.BD.E5.90.8D" id="包命名"><span id=".E5.8C.85.E5.91.BD.E5.90.8D"></span>包命名</h3></div>
+<ul><li><a href="https://zh.wikipedia.org/wiki/TrueType">TTF</a> 字体使用<code>ttf-</code>前缀。</li>
+<li><a href="https://zh.wikipedia.org/wiki/OpenType">OTF</a> 字体使用<code>otf-</code>前缀。</li></ul>
+<p>若为<a href="https://zh.wikipedia.org/wiki/%E5%8F%AF%E5%8F%98%E5%AD%97%E4%BD%93">可变字体</a>，使用<code>-variable</code>后缀。
+</p><p>包名应使用全小写。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9d7e0c937471_.E5.8C.85.E6.8F.8F.E8.BF.B0" id="包描述"><span id=".E5.8C.85.E6.8F.8F.E8.BF.B0"></span>包描述</h3></div>
+<p>至少要表明它是一个字体，并注明字体类别：衬线体、非衬线体、等宽等。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9d7e0c937471_.E6.9E.B6.E6.9E.84" id="架构"><span id=".E6.9E.B6.E6.9E.84"></span>架构</h3></div>
+<p>字体是与架构无关的。使用<code>arch=(any)</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9d7e0c937471_.E4.BE.9D.E8.B5.96" id="依赖"><span id=".E4.BE.9D.E8.B5.96"></span>依赖</h3></div>
+<p>字体没有依赖项。但是许多仓库里的包依赖于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fontconfig">fontconfig</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-mkfontscale">xorg-mkfontscale</a></span><sup><small>包</small></sup></span>，这些依赖是以前字体包还需要使用安装脚本更新字体缓存时的历史遗留。现在可以用 <a href="#pg9ef105bf1e3c">pacman 钩子</a>来完成这项工作。安装上述两个包时，<code>/usr/share/fonts/</code>下的所有字体都会被缓存，因此无需再强制使用 fontconfig 或 mkfontscale。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9d7e0c937471_.E6.8F.90.E4.BE.9B" id="提供"><span id=".E6.8F.90.E4.BE.9B"></span>提供</h3></div>
+<p>许多应用依赖于虚拟包<code>ttf-font</code>。若你的字体家族满足<a href="https://archlinux.org/todo/fix-ttf-font-default-font-setup">该页面</a>的要求，可添加<code>provides=('ttf-font')</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9d7e0c937471_.E6.9D.A5.E6.BA.90" id="来源"><span id=".E6.9D.A5.E6.BA.90"></span>来源</h3></div>
+<p>可按下列顺序查询：
+</p>
+<ul><li>官方网站，或某个如 GitHub 的托管平台</li>
+<li><a href="https://fonts.google.com">Google Fonts</a>: <code>https://fonts.google.com/download?family=<i>Name</i></code></li>
+<li><a href="https://www.fontsquirrel.com">Font Squirrel</a>、<a href="https://fontlibrary.org">Font Library</a>、<a href="https://www.ffonts.net">FFonts</a>、<a href="https://www.1001freefonts.com">1001 Fonts</a>、 <a href="https://www.dafont.com">DaFont</a></li></ul>
+<p>以下来源不推荐：
+</p>
+<ul><li><a href="https://www.fontspace.com">FontSpace</a>（校验码因不明原因变动）</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9d7e0c937471_.E6.89.93.E5.8C.85" id="打包"><span id=".E6.89.93.E5.8C.85"></span>打包</h2></div>
+<p>下列片段是以 OFL（SIL Open Font License）授权的 OTF 字体的示例片段：
+</p>
+<pre>license=('OFL')
+...
+package() {
+  install -Dm644 -t "$pkgdir/usr/share/fonts/OTF" "path/to/font/*.otf"
+  install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname" "path/to/license/OFL.txt"
+}
+</pre>
+<ul><li><a href="https://zh.wikipedia.org/wiki/SIL%E5%BC%80%E6%BA%90%E5%AD%97%E4%BD%93%E6%8E%88%E6%9D%83">OFL</a>理论上是个<a href="#pgf9d748a7b27b">自定义许可</a>，因此字体包的许可证文件需要安装在<code>/usr/share/licenses/[包名]</code>。</li>
+<li>若有许多个文件，目标目录名可考虑使用<code>包名</code>而非<code>OTF</code>。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9d7e0c937471_.E7.A4.BA.E4.BE.8B.E5.8C.85" id="示例包"><span id=".E7.A4.BA.E4.BE.8B.E5.8C.85"></span>示例包</h2></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-merriweather-sans/">ttf-merriweather-sans</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/otf-commissioner/">otf-commissioner</a></span><sup><small>AUR</small></sup></span> - OTF、TTF、可变三种包分离</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9d7e0c937471_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://bbs.archlinux.org/viewtopic.php?pid=1888912">论坛讨论</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807034631
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.106 seconds
+Real time usage: 0.112 seconds
+Preprocessor visited node count: 190/1000000
+Revision size: 2678/2097152 bytes
+Post‐expand include size: 3457/2097152 bytes
+Template argument size: 420/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 231/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   19.233      1 -total
+ 24.12%    4.639      1 Template:翻译状态
+ 13.23%    2.545      2 Template:Pkg
+ 11.74%    2.259     11 Template:Ic
+ 10.63%    2.045      1 Template:Package_guidelines
+  6.40%    1.230      2 Template:AUR
+  5.48%    1.054      1 Template:Bc
+-->
+<!-- Render ID 93af518e-9212-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3113:|#|:idhash:canonical!zh-cn and timestamp 20260807034631 and revision id 33746. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

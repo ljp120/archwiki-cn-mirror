@@ -1,0 +1,215 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg3738a76f9acc">GNOME/文件</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/GNOME/Files">GNOME/Files</a>，最近一次同步于 2022-04-19，若英文版本有所<a href="https://wiki.archlinux.org/title/GNOME/Files?diff=0&amp;oldid=726907">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/GNOME_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Files_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg1e095fe2c2a6">GNOME</a></li>
+<li><a href="#pg72058752b34a">File manager functionality</a></li>
+<li><a href="#pg4490cff5d21b">Nemo</a></li>
+<li><a href="#pgc3ce5bd2b24c">Thunar</a></li>
+<li><a href="#pg9519798d0f49">PCManFM</a></li>
+</ul></div>
+<p><b>文件</b>是<a href="https://wiki.gnome.org/">GNOME</a>的默认文件管理器。文件的目的是提供一种管理文件和应用的简化方法。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在3.6版本之前，文件叫做<a href="https://wiki.gnome.org/Apps/Nautilus">Nautilus</a>，后来则对每种语言做了新的描述性名称。<i>Nautilus</i>这个名字仍然用在许多地方，如可执行文件名、软件包名、桌面条目和GSettings Schema等。</div>
+<p><br/>
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3738a76f9acc_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nautilus">nautilus</a></span><sup><small>包</small></sup></span> 软件包，此软件包是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/gnome/">gnome</a></span><sup><small>包组</small></sup></span> 组的一部分。见<a href="#pgcbd134d3bc62">文件管理器功能#额外功能</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>“文件”不依赖 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-shell">gnome-shell</a></span><sup><small>包</small></sup></span>，只需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-desktop">gnome-desktop</a></span><sup><small>包</small></sup></span>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E6.89.A9.E5.B1.95" id="扩展"><span id=".E6.89.A9.E5.B1.95"></span>扩展</h3></div>
+<p>一些程序可以为文件增加额外的功能，例如下面这些来自官方软件仓库和 <a href="#pg89cb7b475cfb">AUR</a> 的软件包。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>用 <a href="#pgf6d3de5ccfac">Python</a> 编写的扩展需要 Nautilus 扩展 API 的 Python 绑定（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-nautilus">python-nautilus</a></span><sup><small>包</small></sup></span> 包）。</div>
+<ul><li><b>File Manager Actions</b> — Configures programs to be launched when files are selected in Nautilus (written in C)</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/GNOME/filemanager-actions">https://gitlab.gnome.org/GNOME/filemanager-actions</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=filemanager-actions">filemanager-actions</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Folder Color</b> — A file browser extension for choosing the color of a folder (written in Python)</li></ul>
+<dl><dd><a href="https://foldercolor.tuxfamily.org/">https://foldercolor.tuxfamily.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/folder-color-nautilus/">folder-color-nautilus</a></span><sup><small>AUR</small></sup></span></dd>
+<dd><div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>This extension works only with these icon-themes which contain additional colored icons, eg:<br/><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/numix-icon-theme-git/">numix-icon-theme-git</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vibrancy-colors/">vibrancy-colors</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/humanity-icon-theme/">humanity-icon-theme</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mint-x-icons/">mint-x-icons</a></span><sup><small>AUR</small></sup></span></div></dd></dl>
+<ul><li><b>Nautilus Admin</b> — Add to menu: "Open as administrator" or "Edit as administrator" (written in Python)</li></ul>
+<dl><dd><a href="https://github.com/brunonova/nautilus-admin">https://github.com/brunonova/nautilus-admin</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nautilus-admin/">nautilus-admin</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Nautilus Annotations</b> — Annotate files and directories (written in C)</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/madmurphy/nautilus-annotations/">https://gitlab.gnome.org/madmurphy/nautilus-annotations/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nautilus-annotations/">nautilus-annotations</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Nautilus Bluetooth</b> — Add to menu: "Send via Bluetooth" (written in C)</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/madmurphy/nautilus-bluetooth/">https://gitlab.gnome.org/madmurphy/nautilus-bluetooth/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nautilus-bluetooth/">nautilus-bluetooth</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Nautilus Git</b> — Nautilus/Nemo extension to add important information about the current git directory (written in Python)</li></ul>
+<dl><dd><a href="https://github.com/bilelmoussaoui/nautilus-git">https://github.com/bilelmoussaoui/nautilus-git</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nautilus-ext-git/">nautilus-ext-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Nautilus Hide</b> — Add to menu: "Hide"/"Unhide" (written in C)</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/madmurphy/nautilus-hide/">https://gitlab.gnome.org/madmurphy/nautilus-hide/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nautilus-hide/">nautilus-hide</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Nautilus Launch</b> — Nautilus extension to run executables and launchers via right-click menu (written in C)</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/madmurphy/nautilus-launch">https://gitlab.gnome.org/madmurphy/nautilus-launch</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nautilus-launch/">nautilus-launch</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Nautilus Metadata Editor</b> — Nautilus extension with simple Metadata Editor for the following mime types: <code>audio/x-mp3</code>, <code>audio/x-flac</code>, <code>audio/x-vorbis+ogg</code>, <code>audio/x-speex+ogg</code>, <code>audio/x-musepack</code>, <code>audio/x-wavpack</code>, <code>audio/x-tta</code>, <code>audio/x-aiff</code>, <code>audio/m4a</code>, <code>video/mp4</code>, <code>video/x-ms-asf</code> (written in C and Vala)</li></ul>
+<dl><dd><a href="https://gitlab.com/nvlgit/nautilus-metadata-editor-extension">https://gitlab.com/nvlgit/nautilus-metadata-editor-extension</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nautilus-metadata-editor/">nautilus-metadata-editor</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/nautilus-metadata-editor">nautilus-metadata-editor</a></span><sup><small><a href="#pgc6e2daf482c3">CNRepo</a></small></sup></span></dd></dl>
+<ul><li><b>Nautilus SendTo</b> — Files context menu for sending files (written in C)</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/Archive/nautilus-sendto">https://gitlab.gnome.org/Archive/nautilus-sendto</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nautilus-sendto">nautilus-sendto</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Nautilus Share</b> — Nautilus extension to share folder using Samba (written in C)</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/Archive/nautilus-share">https://gitlab.gnome.org/Archive/nautilus-share</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nautilus-share">nautilus-share</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Nautilus Wipe</b> — Nautilus extension to provide <a href="#pg8e3f3779e38c">wiping</a> integration (written in C)</li></ul>
+<dl><dd><a href="https://wipetools.tuxfamily.org/nautilus-wipe.html">https://wipetools.tuxfamily.org/nautilus-wipe.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nautilus-wipe/">nautilus-wipe</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Seahorse Nautilus</b> — PGP encryption and signing for Files (written in C)</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/GNOME/seahorse-nautilus">https://gitlab.gnome.org/GNOME/seahorse-nautilus</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=seahorse-nautilus">seahorse-nautilus</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若要编写新的扩展，辅助脚本 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nextgen/">nextgen</a></span><sup><small>AUR</small></sup></span> 可以让您轻松地设置 <b>GNOME</b>文件的新扩展项目（默认使用C语言）。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg3738a76f9acc_.E5.AE.89.E8.A3.85.E8.87.AA.E5.B7.B1_Nautilus_.E6.89.A9.E5.B1.95.E7.9A.84.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="安装自己_Nautilus_扩展的应用程序"><span id=".E5.AE.89.E8.A3.85.E8.87.AA.E5.B7.B1_Nautilus_.E6.89.A9.E5.B1.95.E7.9A.84.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>安装自己 Nautilus 扩展的应用程序</h4></div>
+<p>以下应用默认安装自己的扩展，从而将其功能集成于 Nautilus。
+</p>
+<ul><li><b>EasyTAG</b> — EasyTAG is a simple application for viewing and editing tags in audio files; it supports MP3, MP2, MP4/AAC, FLAC, Ogg Opus, Ogg Speex, Ogg Vorbis, MusePack, Monkey's Audio, and WavPack files and works under Linux or Windows — The application includes a "<b>Nautilus EasyTAG</b>" extension (written in C)</li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Apps/EasyTAG">https://wiki.gnome.org/Apps/EasyTAG</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=easytag">easytag</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Brasero</b> — CD/DVD mastering tool — The application includes a "<b>Nautilus Brasero</b>" extension (written in C)</li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Apps/Brasero">https://wiki.gnome.org/Apps/Brasero</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=brasero">brasero</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Eiciel</b> — GNOME file ACL editor — The application includes an "<b>Eiciel Nautilus</b>" extension that add graphical <a href="#pg5a0884778d38">ACL</a> editor into the file properties window (written in C++)</li></ul>
+<dl><dd><a href="https://rofi.roger-ferrer.org/eiciel/">https://rofi.roger-ferrer.org/eiciel/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/eiciel/">eiciel</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Evince</b> — Document viewer (PDF, PostScript, XPS, djvu, dvi, tiff, cbr, cbz, cb7, cbt) — The application includes an "<b>Evince Properties Page</b>" extension for Nautilus (written in C)</li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Apps/Evince">https://wiki.gnome.org/Apps/Evince</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=evince">evince</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>File Roller</b> — An application for browsing archives — The application includes a "<b>Nautilus FileRoller</b>" extension (written in C)</li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Apps/FileRoller">https://wiki.gnome.org/Apps/FileRoller</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=file-roller">file-roller</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>GNOME Terminal</b> — The GNOME Terminal Emulator — The application includes a "<b>Terminal Nautilus</b>" extension (written in C)</li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Apps/Terminal">https://wiki.gnome.org/Apps/Terminal</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-terminal">gnome-terminal</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Tilix</b> — A tiling terminal emulator for GNU/Linux using GTK+ 3 — The application includes an extension for Nautilus which adds an "Open in Tilix" option to the context menu (written in Python)</li></ul>
+<dl><dd><a href="https://github.com/gnunn1/tilix">https://github.com/gnunn1/tilix</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tilix">tilix</a></span><sup><small>包</small></sup></span></dd>
+<dd><div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>“Open in Tilix”扩展将 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-nautilus">python-nautilus</a></span><sup><small>包</small></sup></span> 软件包标记为可选依赖，但必须安装才能使用。</div></dd></dl>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg3738a76f9acc_.E4.BE.9D.E8.B5.96.E9.9D.9E.E8.87.AA.E7.94.B1.E8.BD.AF.E4.BB.B6.E7.9A.84.E6.89.A9.E5.B1.95" id="依赖非自由软件的扩展"><span id=".E4.BE.9D.E8.B5.96.E9.9D.9E.E8.87.AA.E7.94.B1.E8.BD.AF.E4.BB.B6.E7.9A.84.E6.89.A9.E5.B1.95"></span>依赖非自由软件的扩展</h4></div>
+<p>一些 <b>GNOME 文件</b>的扩展虽然免费/自由，但可能依赖于非自由软件，例如：
+</p>
+<ul><li><b>Code Nautilus</b> — 用来在 <a href="#pg761d4119d014">Visual Studio Code</a> 中打开文件和目录的Nautilus扩展（用 Python 编写）</li></ul>
+<dl><dd><a href="https://github.com/cra0zy/code-nautilus">https://github.com/cra0zy/code-nautilus</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/code-nautilus-git/">code-nautilus-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>JetBrains Nautilus</b> — Nautilus extension to open files and directories in JetBrains Toolbox installed products (written in Python)</li></ul>
+<dl><dd><a href="https://github.com/encounter/jetbrains-nautilus">https://github.com/encounter/jetbrains-nautilus</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jetbrains-nautilus-git/">jetbrains-nautilus-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3738a76f9acc_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<p>文件很容易进行图形化配置，但并非所有选项都能在首选项中找到。更多选项可以使用<i>dconf-editor</i>在<code>org.gnome.nautilus</code>中找到。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果在GNOME桌面环境之外使用文件，则必须确保<code>/usr/lib/gsd-xsettings</code>正在运行，否则dconf设置不会在文件中应用。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E6.A1.8C.E9.9D.A2.E5.9B.BE.E6.A0.87" id="桌面图标"><span id=".E6.A1.8C.E9.9D.A2.E5.9B.BE.E6.A0.87"></span>桌面图标</h3></div>
+<p>见<a href="#pg1e095fe2c2a6">GNOME#Icons on the desktop</a><sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E6.94.B9.E5.8F.98.E9.BB.98.E8.AE.A4.E9.A1.B9.E7.9B.AE.E8.A7.86.E5.9B.BE" id="改变默认项目视图"><span id=".E6.94.B9.E5.8F.98.E9.BB.98.E8.AE.A4.E9.A1.B9.E7.9B.AE.E8.A7.86.E5.9B.BE"></span>改变默认项目视图</h3></div>
+<p>设置<code>default-folder-viewer</code>变量可以改变项目的默认视图，如设为列表视图：
+</p>
+<pre>$ gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E6.8C.89.E7.B1.BB.E5.9E.8B.E6.8E.92.E5.BA.8F" id="按类型排序"><span id=".E6.8C.89.E7.B1.BB.E5.9E.8B.E6.8E.92.E5.BA.8F"></span>按类型排序</h3></div>
+<p>若要默认用类型排序所有文件夹中的文件：
+</p>
+<pre>$ gsettings set org.gnome.nautilus.preferences default-sort-order 'type'
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E4.BB.8E.E4.BE.A7.E8.BE.B9.E6.A0.8F.E7.A7.BB.E9.99.A4.E6.96.87.E4.BB.B6.E5.A4.B9" id="从侧边栏移除文件夹"><span id=".E4.BB.8E.E4.BE.A7.E8.BE.B9.E6.A0.8F.E7.A7.BB.E9.99.A4.E6.96.87.E4.BB.B6.E5.A4.B9"></span>从侧边栏移除文件夹</h3></div>
+<p><code>~/.config/user-dirs.dirs</code>中指定了侧边栏显示的文件夹，可以用文本编辑器修改。执行<code>xdg-user-dirs-update</code>会改变文件，因此最好将文件权限设为只读。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E5.A7.8B.E7.BB.88.E6.98.BE.E7.A4.BA.E6.96.87.E6.9C.AC.E6.96.87.E4.BB.B6.E8.B7.AF.E5.BE.84" id="始终显示文本文件路径"><span id=".E5.A7.8B.E7.BB.88.E6.98.BE.E7.A4.BA.E6.96.87.E6.9C.AC.E6.96.87.E4.BB.B6.E8.B7.AF.E5.BE.84"></span>始终显示文本文件路径</h3></div>
+<p>文件工具栏默认显示用于路径导航的按钮栏界面。若要用<b>键盘</b>输入路径，则需按<code>Ctrl+l</code>显示文本路径栏。
+</p><p>若要始终以文本路径栏显示，可以使用以下<i>gsettings</i>命令：
+</p>
+<pre>$ gsettings set org.gnome.nautilus.preferences always-use-location-entry true
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>改变此设置后将无法再显示按钮栏，只有把值设为<b>false</b>时才能同时使用两种路径栏。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3738a76f9acc_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E7.BC.A9.E7.95.A5.E5.9B.BE" id="缩略图"><span id=".E7.BC.A9.E7.95.A5.E5.9B.BE"></span>缩略图</h3></div>
+<p>见<a href="#pg72058752b34a">File manager functionality#缩略图预览</a><sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span>中，缩略图会生成失败（所有缩略图都在<code>~/.cache/thumbnails/fail/</code>目录中），这是由于非特权用户的命名空间因为安全原因在该内核上默认禁用。Nautilus使用<code>bwrap</code> (由<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bubblewrap">bubblewrap</a></span><sup><small>包</small></sup></span>提供)对缩略图进行沙盒处理。可以用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bubblewrap-suid">bubblewrap-suid</a></span><sup><small>包</small></sup></span>替换<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bubblewrap">bubblewrap</a></span><sup><small>包</small></sup></span>。详见<a href="#pg08a28f4ac689">Security#Sandboxing applications</a>。</div>
+<p>有时会无法显示视频缩略图。若要解决此问题（正如<a href="https://bbs.archlinux.org/viewtopic.php?id=168626">No video thumbnails on nautilus</a>），必须安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ffmpegthumbnailer">ffmpegthumbnailer</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gst-libav">gst-libav</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gst-plugins-ugly">gst-plugins-ugly</a></span><sup><small>包</small></sup></span>并移除<code>~/.cache/thumbnails/fail/</code>里的内容。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E7.94.A8.E5.8F.B3.E9.94.AE.E8.8F.9C.E5.8D.95.E5.88.9B.E5.BB.BA.E6.96.B0.E6.96.87.E6.A1.A3" id="用右键菜单创建新文档"><span id=".E7.94.A8.E5.8F.B3.E9.94.AE.E8.8F.9C.E5.8D.95.E5.88.9B.E5.BB.BA.E6.96.B0.E6.96.87.E6.A1.A3"></span>用右键菜单创建新文档</h3></div>
+<p>若要使用此选项，请在您的主文件夹中创建一个<code>~/Templates/</code>（模板）文件夹，并通过终端<code>touch ~/Templates/new</code>或任何文件管理器在该文件夹中放置一个空文件，然后重新启动文件。
+</p><p>在非英语系统中，模板目录的名称可能不同。可以用<code>xdg-user-dir TEMPLATES</code>找到实际目录。
+</p><p>可以在<code>~/.config/user-dirs.dirs</code>文件中配置模板目录。
+</p>
+<pre>XDG_TEMPLATES_DIR="$HOME<i>/some/path</i>"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E9.9A.90.E8.97.8F.E6.96.87.E4.BB.B6" id="隐藏文件"><span id=".E9.9A.90.E8.97.8F.E6.96.87.E4.BB.B6"></span>隐藏文件</h3></div>
+<p>GNOME文件和大部分文件管理器一样，默认隐藏名称以“.”开头的文件。
+</p><p>GNOME Files additionally hides files when their names are listed in a <code>.hidden</code> file in the same directory (one filename per line). See <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nautilus-hide/">nautilus-hide</a></span><sup><small>AUR</small></sup></span> for an extension that facilitates adding/removing entries from such <code>.hidden</code> files.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E5.9C.A8Tilix.E4.B8.AD.E6.89.93.E5.BC.80.E5.BD.93.E5.89.8D.E8.B7.AF.E5.BE.84" id="在Tilix中打开当前路径"><span id=".E5.9C.A8Tilix.E4.B8.AD.E6.89.93.E5.BC.80.E5.BD.93.E5.89.8D.E8.B7.AF.E5.BE.84"></span>在Tilix中打开当前路径</h3></div>
+<p>If you are using <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tilix">tilix</a></span><sup><small>包</small></sup></span> terminal you can easily add "Open in Tilix" option to the context menu of GNOME Files by installing its optional dependency <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-nautilus">python-nautilus</a></span><sup><small>包</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E5.B0.86.E6.96.87.E4.BB.B6.E5.A4.B9.E5.8A.A0.E5.85.A5.E4.B9.A6.E7.AD.BE" id="将文件夹加入书签"><span id=".E5.B0.86.E6.96.87.E4.BB.B6.E5.A4.B9.E5.8A.A0.E5.85.A5.E4.B9.A6.E7.AD.BE"></span>将文件夹加入书签</h3></div>
+<p>若要将文件夹添加到你的书签中，只需在Nautilus中打开该文件夹，并按<code>Ctrl+d</code>。请注意，书签列表与其它基于GNOME的图形化文件管理器（如Nemo）共享，因此在其中增减的文件夹也会影响到其它文件管理器中的书签。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E8.87.AA.E5.AE.9A.E4.B9.89.E8.84.9A.E6.9C.AC" id="自定义脚本"><span id=".E8.87.AA.E5.AE.9A.E4.B9.89.E8.84.9A.E6.9C.AC"></span>自定义脚本</h3></div>
+<p>位于<code>~/.local/share/nautilus/scripts</code>的脚本可以运行于文件的右键关联菜单。
+</p><p>The context menu can also be organized into subfolders, e.g. <code>~/.local/share/nautilus/scripts/images</code> and <code>~/.local/share/nautilus/scripts/music</code>.
+</p><p>Scripts have access to the following environment variables:
+</p>
+<pre>NAUTILUS_SCRIPT_SELECTED_FILE_PATHS
+NAUTILUS_SCRIPT_SELECTED_URIS
+NAUTILUS_SCRIPT_CURRENT_URI
+NAUTILUS_SCRIPT_WINDOW_GEOMETRY
+</pre>
+<p>一些脚本示例:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.local/share/nautilus/scripts/open-terminal-here</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+gnome-terminal
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.local/share/nautilus/scripts/remove-extension</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+echo "$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS" | while read -r filename; do
+    mv -n "$filename" "${filename%.*}"
+done
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Make sure the scripts are marked as <a href="#pgf46977f5f342">executable</a>. You may have to restart nautilus with <code>nautilus -q</code> for them to show up.</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg3738a76f9acc_Keybinds" id="Keybinds">Keybinds</h4></div>
+<p>Keybinds to execute scripts can be assigned in the <code>~/.config/nautilus/scripts-accels</code> file:
+</p>
+<pre>; Example Keybinds
+; Modifiers: &lt;Control&gt; &lt;Alt&gt; &lt;Shift&gt;
+F4 open-terminal-here
+&lt;Alt&gt;x remove-extension
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>You cannot overwrite any pre-existing nautilus keybinds.</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3738a76f9acc_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E6.96.87.E4.BB.B6.E5.B7.B2.E4.B8.8D.E5.86.8D.E6.98.AF.E9.BB.98.E8.AE.A4.E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8" id="文件已不再是默认文件管理器"><span id=".E6.96.87.E4.BB.B6.E5.B7.B2.E4.B8.8D.E5.86.8D.E6.98.AF.E9.BB.98.E8.AE.A4.E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8"></span>文件已不再是默认文件管理器</h3></div>
+<p>这可能是因为重置了路径的文件关联，安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/anjuta/">anjuta</a></span><sup><small>AUR</small></sup></span>往往会造成这种情况。
+</p><p>若要解决此问题，打开文件，右键点击一个文件夹，然后选择<i>使用其它程序打开 &gt; 文件 &gt; 选择</i>，就会把路径的关联设回文件。
+</p><p>若没有解决此问题，见<a href="#pg72058752b34a">File manager functionality#目录未在文件管理器中打开</a><sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E6.AF.8F.E6.AC.A1.E5.A4.8D.E5.88.B6.E6.93.8D.E4.BD.9C.E5.90.8E.E9.83.BD.E4.BC.9A.E5.8D.A1.E5.87.A0.E7.A7.92" id="每次复制操作后都会卡几秒"><span id=".E6.AF.8F.E6.AC.A1.E5.A4.8D.E5.88.B6.E6.93.8D.E4.BD.9C.E5.90.8E.E9.83.BD.E4.BC.9A.E5.8D.A1.E5.87.A0.E7.A7.92"></span>每次复制操作后都会卡几秒</h3></div>
+<p>如果系统中安装了<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kdeconnect">kdeconnect</a></span><sup><small>包</small></sup></span>，问题可能来自其文件共享模块，停用文件共享即可。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3738a76f9acc_.E6.89.93.E4.B8.8D.E5.BC.80Google_Drive" id="打不开Google_Drive"><span id=".E6.89.93.E4.B8.8D.E5.BC.80Google_Drive"></span>打不开Google Drive</h3></div>
+<p>可能是因为没有全部安装以下软件包：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-online-accounts">gnome-online-accounts</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs-goa">gvfs-goa</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs-google">gvfs-google</a></span><sup><small>包</small></sup></span></li></ul>
+<p>全部安装即可。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807071913
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.232 seconds
+Real time usage: 0.239 seconds
+Preprocessor visited node count: 1044/1000000
+Revision size: 12513/2097152 bytes
+Post‐expand include size: 27482/2097152 bytes
+Template argument size: 14621/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 6/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   77.415      1 -total
+ 28.23%   21.858     22 Template:App
+  8.85%    6.848     28 Template:Pkg
+  8.57%    6.631      9 Template:注意
+  5.87%    4.543     32 Template:Ic
+  5.14%    3.981     19 Template:AUR
+  4.62%    3.578      1 Template:Tip
+  4.41%    3.412      1 Template:翻译状态
+  4.18%    3.237      1 Template:需要翻译
+  3.53%    2.729      3 Template:Broken_section_link
+-->
+<!-- Render ID 4a6dfa8e-9230-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3137:|#|:idhash:canonical!zh-cn and timestamp 20260807071913 and revision id 35077. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

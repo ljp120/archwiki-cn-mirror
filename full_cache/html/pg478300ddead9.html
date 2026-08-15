@@ -1,0 +1,256 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg478300ddead9">多引导 USB 设备</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Multiboot_USB_drive">Multiboot USB drive</a>，最近一次同步于 2022-09-30，若英文版本有所<a href="https://wiki.archlinux.org/title/Multiboot_USB_drive?diff=0&amp;oldid=640905">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Multiboot_USB_drive_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgca9c4017f7ad">GRUB</a></li>
+<li><a href="#pg0ca06688075c">Syslinux</a></li>
+<li><a href="#pg2da385a25e75">Archiso</a></li>
+</ul></div>
+<p>多引导USB启动盘可以从单个设备引导多个ISO镜像文件。ISO镜像文件可以不需要解压复制到U盘上就可以启动。以下有多种可用的方案，但不一定兼容所有ISO镜像。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg478300ddead9_GRUB.E5.BC.95.E5.AF.BC.E5.99.A8.E5.8F.8Aloopback_devices.E5.AE.9E.E7.8E.B0" id="GRUB引导器及loopback_devices实现"><span id="GRUB.E5.BC.95.E5.AF.BC.E5.99.A8.E5.8F.8Aloopback_devices.E5.AE.9E.E7.8E.B0"></span>GRUB引导器及loopback devices实现</h2></div>
+
+<p>优点:
+</p>
+<ul><li>仅需要一个分区</li>
+<li>所有ISO文件镜像可在同一个文件夹下被检测到</li>
+<li>易于添加或移除ISO镜像文件</li></ul>
+<p>缺点:
+</p>
+<ul><li>并非所有镜像兼容</li>
+<li>ISO文件原本的启动菜单不会显示</li>
+<li>找到可用的启动项可能并不容易</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg478300ddead9_.E5.87.86.E5.A4.87" id="准备"><span id=".E5.87.86.E5.A4.87"></span>准备</h3></div>
+<p>在USB设备上创建至少一个<a href="#pg8edad8d1135b">分区</a>和一个<a href="#pgca9c4017f7ad">GRUB</a>支持的<a href="#pg6c70b7fdfa57">文件系统</a>。分区的大小取决与要存储在其中的ISO文件大小和引导程序所计划需要的空间。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg478300ddead9_.E5.AE.89.E8.A3.85_GRUB.E5.BC.95.E5.AF.BC.E5.99.A8" id="安装_GRUB引导器"><span id=".E5.AE.89.E8.A3.85_GRUB.E5.BC.95.E5.AF.BC.E5.99.A8"></span>安装 GRUB引导器</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg478300ddead9_.E7.AE.80.E5.8D.95.E5.AE.89.E8.A3.85" id="简单安装"><span id=".E7.AE.80.E5.8D.95.E5.AE.89.E8.A3.85"></span>简单安装</h4></div>
+<p>挂载U盘:
+</p>
+<pre># mount /dev/sdXY /mnt
+</pre>
+<p>U盘上创建 /boot文件夹:
+</p>
+<pre># mkdir /mnt/boot
+</pre>
+<p>安装GRUB到U盘:
+</p>
+<pre># grub-install --target=i386-pc --recheck --boot-directory=/mnt/boot /dev/sdX
+</pre>
+<p>如果以UEFI启动镜像, 您需要按UEFI方式安装GRUB:
+</p>
+<pre># grub-install --target=x86_64-efi --removable --boot-directory=/mnt/boot --efi-directory=/mnt
+</pre>
+<p>对于UEFI, 引导分区必须是FAT32格式, 且启动分区必须是MBR分区表中的第一个分区.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg478300ddead9_.E6.B7.B7.E5.90.88_UEFI_GPT_.2B_BIOS_GPT.2FMBR_.E5.90.AF.E5.8A.A8" id="混合_UEFI_GPT_+_BIOS_GPT/MBR_启动"><span id=".E6.B7.B7.E5.90.88_UEFI_GPT_.2B_BIOS_GPT.2FMBR_.E5.90.AF.E5.8A.A8"></span>混合 UEFI GPT + BIOS GPT/MBR 启动</h4></div>
+<p>以下有用的配置可以帮助您创建一份可以在任意地方启动的通用U盘。首先，您必须在您的设备上创建一份 <a href="#pg69f558531e59">GPT</a> 分区。您至少需要以下三个分区：
+</p>
+<ol><li>一个BIOS启动分区（gdisk代号编码 <code>EF02</code>），该分区至少需要1 MiB的大小。</li>
+<li>一个EFI系统分区（gdisk代号编码<code>EF00</code>且它使用<a href="#pg635d4bd93303">FAT32文件系统</a>），该分区至少需要50 MiB的大小。</li>
+<li>您自己的数据分区（使用<a href="#pgca9c4017f7ad">GRUB</a>支持的文件系统)，该分区的大小是由您硬盘的剩余空间容量来决定的。</li></ol>
+<p>接下来您必须创建一个<a href="https://www.rodsbooks.com/gdisk/hybrid.html">MBR混合</a>分区表。如果没有它，一个仅BIOS MBR引导启动的电脑将无法启动。因为它无法寻找到硬盘里的实例以启动。
+</p><p>以下是一个使用<a href="#pgba80dd5ffb4c">gdisk</a>创建MBR混合分区表的例子：
+</p>
+<pre># gdisk /dev/sdX
+
+Command (? for help): r
+Recovery/transformation command (? for help): h
+
+WARNING! Hybrid MBRs are flaky and dangerous! If you decide not to use one,
+just hit the Enter key at the below prompt and your MBR partition table will
+be untouched.
+
+Type from one to three GPT partition numbers, separated by spaces, to be added to the hybrid MBR, in sequence: 1 2 3
+Place EFI GPT (0xEE) partition first in MBR (good for GRUB)? (Y/N): N
+
+Creating entry for GPT partition #1 (MBR partition #1)
+Enter an MBR hex code (default EF): 
+Set the bootable flag? (Y/N): N
+
+Creating entry for GPT partition #2 (MBR partition #2)
+Enter an MBR hex code (default EF): 
+Set the bootable flag? (Y/N): N
+
+Creating entry for GPT partition #3 (MBR partition #3)
+Enter an MBR hex code (default 83): 
+Set the bootable flag? (Y/N): Y
+
+Recovery/transformation command (? for help): x
+Expert command (? for help): h
+Expert command (? for help): w
+
+Final checks complete. About to write GPT data. THIS WILL OVERWRITE EXISTING
+PARTITIONS!!
+
+Do you want to proceed? (Y/N): Y
+</pre>
+<p>注意 Hybird MBR 只可以输入三个分区。
+</p><p>不要忘了格式化这些分区：
+</p>
+<pre># mkfs.fat -F32 /dev/sdX2
+# mkfs.ext4 /dev/sdX3
+</pre>
+<p>您现在可以安装GRUB以同时支持EFI + GPT引导以及BIOS + GPT/MBR引导。GRUB配置(--boot-directory）将会被保持在同一个地方。
+</p><p>首先，您需要挂载您USB驱动器上的EFI系统分区和数据分区。
+</p><p>以下是如何挂载的例子：
+</p>
+<pre># mount /dev/sdX3 /mnt
+# mkdir -p /mnt/boot/EFI
+# mount /dev/sdX2 /mnt/boot/EFI
+</pre>
+<p>然后，您就可以在UEFI上安装GRUB：
+</p><p>在大多数案例中，<code>EFI_MOUNTPOINT</code>将会对应至您所挂载的U盘上的<code>/mnt/boot/EFI</code>这个子目录中。<code>DATA_MOUNTPOINT</code>是数据分区的挂载目录。在本例中就是 sdX3 的挂载目录，即<code>/mnt</code>。
+</p>
+<pre># grub-install --target=x86_64-efi --recheck --removable --efi-directory=/<i>EFI_MOUNTPOINT</i> --boot-directory=/<i>DATA_MOUNTPOINT</i>/boot
+</pre>
+<p>在BIOS上安装GRUB：
+</p>
+<pre># grub-install --target=i386-pc --recheck --boot-directory=/<i>DATA_MOUNTPOINT</i>/boot /dev/sd<i>X</i>
+</pre>
+<p>作为后备处理，您也可以把GRUB安装进您的MBR启动分区里面。
+</p>
+<pre># grub-install --target=i386-pc --recheck --boot-directory=/<i>DATA_MOUNTPOINT</i>/boot /dev/<i>sdX3</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg478300ddead9_.E9.85.8D.E7.BD.AE_GRUB" id="配置_GRUB"><span id=".E9.85.8D.E7.BD.AE_GRUB"></span>配置 GRUB</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg478300ddead9_.E5.8F.82.E8.80.83.E6.A8.A1.E6.9D.BF" id="参考模板"><span id=".E5.8F.82.E8.80.83.E6.A8.A1.E6.9D.BF"></span>参考模板</h4></div>
+<p>有些git项目中提供了一些预先存在的GRUB配置文件，一个优秀且通用的 grub.cfg 文件可以用来按需加载其他引导项，只有在指定的ISO文件（或包含它们的文件夹）存在于驱动器上时才会显示它们。
+</p><p>Multiboot USB: <a href="https://github.com/hackerncoder/multibootusb">https://github.com/hackerncoder/multibootusb</a>
+</p><p>GLIM (GRUB2 Live ISO Multiboot): <a href="https://github.com/thias/glim">https://github.com/thias/glim</a>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg478300ddead9_.E6.89.8B.E5.8A.A8.E9.85.8D.E7.BD.AE" id="手动配置"><span id=".E6.89.8B.E5.8A.A8.E9.85.8D.E7.BD.AE"></span>手动配置</h4></div>
+<p>通过手动编辑<code>grub.cfg</code>以代替自动生成它可以更容易的达到制作多启动USB驱动盘的目的。或者，在<code>/etc/grub.d/40_custom</code>或<code>/mnt/boot/grub/custom.cfg</code>中做出如下改动并通过<a href="#pgca9c4017f7ad">grub-mkconfig</a>生成<code>/mnt/boot/grub/grub.cfg</code>。
+</p><p>As it is recommend to use a <a href="#pg2636278c0df5">persistent name</a> instead of <code>/dev/sd<i>xY</i></code> to identify the partition on the USB drive where the image files are located, define a variable for convenience to hold the value. If the ISO images are on the same partition as GRUB, use the following to read the UUID at boot time:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/mnt/boot/grub/grub.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># path to the partition holding ISO images (using UUID)
+probe -u $root --set=rootuuid
+set imgdevpath="/dev/disk/by-uuid/$rootuuid"</pre>
+<p>Or specify the UUID explicitly:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/mnt/boot/grub/grub.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># path to the partition holding ISO images (using UUID)
+set imgdevpath="/dev/disk/by-uuid/<i>UUID_value</i>"</pre>
+<p>Alternatively, use the device label instead of UUID:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/mnt/boot/grub/grub.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># path to the partition holding ISO images (using labels)
+set imgdevpath="/dev/disk/by-label/<i>label_value</i>"</pre>
+<p>The necessary UUID or label can be found using <code>lsblk -f</code>. Do not use the same label as the Arch ISO for the USB device, otherwise the boot process will fail.
+</p><p>To complete the configuration, a boot entry for each ISO image has to be added below this header, see the next section for examples.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg478300ddead9_.E5.90.AF.E5.8A.A8.E9.A1.B9" id="启动项"><span id=".E5.90.AF.E5.8A.A8.E9.A1.B9"></span>启动项</h3></div>
+<p>It is assumed that the ISO images are stored in the <code>boot/iso/</code> directory on the same filesystem where GRUB is installed. Otherwise it would be necessary to prefix the path to ISO file with device identification when using the <code>loopback</code> command, for example <code>loopback loop <b>(hd1,2)</b>$isofile</code>. As this identification of devices is not <a href="#pg2636278c0df5">persistent</a>, it is not used in the examples in this section.
+</p><p>One can use persistent block device naming like so. Replace the UUID according to your ISO filesystem UUID.
+</p>
+<pre># define globally (i.e outside any menuentry)
+insmod search_fs_uuid
+search --no-floppy --set=<b>isopart</b> --fs-uuid <i>123-456</i>
+# later use inside each menuentry instead
+loopback loop <b>($isopart)</b>$isofile</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong> For a list of kernel parameters, see <a href="https://docs.kernel.org/admin-guide/kernel-parameters.html">the kernel's command-line parameter documentation</a>. For more examples of boot entries, see the <a href="https://www.gnu.org/software/grub/manual/grub.html#Multi_002dboot-manual-config">GRUB upstream documentation</a> or the documentation for the distribution you wish to boot.</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg478300ddead9_Arch_Linux_monthly_release" id="Arch_Linux_monthly_release">Arch Linux monthly release</h4></div>
+<p>Also see <a href="#pg2da385a25e75">archiso</a>.
+</p>
+<pre>menuentry '[loopback]archlinux-2020.10.01-x86_64.iso' {
+	set isofile='/boot/iso/archlinux-2020.10.01-x86_64.iso'
+	loopback loop $isofile
+	linux (loop)/arch/boot/x86_64/vmlinuz-linux img_dev=$imgdevpath img_loop=$isofile earlymodules=loop
+	initrd (loop)/arch/boot/intel-ucode.img (loop)/arch/boot/amd-ucode.img (loop)/arch/boot/x86_64/initramfs-linux.img
+}</pre>
+<p>See <a href="https://gitlab.archlinux.org/mkinitcpio/mkinitcpio-archiso/blob/master/docs/README.bootparams">README.bootparams</a> for archiso options supported in kernel command line.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg478300ddead9_Memtest86.2B" id="Memtest86+"><span id="Memtest86.2B"></span>Memtest86+</h4></div>
+<p><a href="#pg517d69f358a4">Memtest86+</a><sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>包含在每月构建的 ISO中。
+</p>
+<pre>menuentry '[loopback]archlinux-2020.10.01-x86_64.iso' {
+	set isofile='/boot/iso/archlinux-2020.10.01-x86_64.iso'
+	loopback loop $isofile
+	linux16 (loop)/arch/boot/memtest
+}</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg478300ddead9_archboot" id="archboot">archboot</h4></div>
+<p>参见 <a href="https://gitlab.archlinux.org/tpowa/archboot/-/wikis/Archboot-Homepage">Archboot Homepage</a>。
+</p>
+<pre>menuentry '[loopback]archlinux-2014.11-1-archboot' {
+	set isofile='/boot/iso/archlinux-2014.11-1-archboot.iso'
+	loopback loop $isofile
+	linux (loop)/boot/vmlinuz_<b>x86_64</b> iso_loop_dev=$imgdevpath iso_loop_path=$isofile
+	initrd (loop)/boot/initramfs_<b>x86_64</b>.img
+}</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg478300ddead9_Syslinux.E5.92.8Cmemdisk.E5.AE.9E.E7.8E.B0" id="Syslinux和memdisk实现"><span id="Syslinux.E5.92.8Cmemdisk.E5.AE.9E.E7.8E.B0"></span>Syslinux和memdisk实现</h2></div>
+<p>Using the <a href="https://wiki.syslinux.org/wiki/index.php/MEMDISK">memdisk</a> module, the ISO image is loaded into memory, and its bootloader is loaded. Make sure that the system that will boot this USB drive has sufficient amount of memory for the image file and running operating system.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg478300ddead9_.E5.87.86.E5.A4.87_2" id="准备_2"><span id=".E5.87.86.E5.A4.87_2"></span>准备</h3></div>
+<p>Make sure that the USB drive is properly <a href="#pg33ead49dca67">partitioned</a> and that there is a partition with <a href="#pg6790ffb56e98">file system</a> supported by Syslinux, for example fat32 or ext4. Then install Syslinux to this partition, see <a href="#pg0ca06688075c">Syslinux#Installation on BIOS</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg478300ddead9_.E5.AE.89.E8.A3.85_memdisk_.E6.A8.A1.E5.9D.97" id="安装_memdisk_模块"><span id=".E5.AE.89.E8.A3.85_memdisk_.E6.A8.A1.E5.9D.97"></span>安装 memdisk 模块</h3></div>
+<p>The memdisk module was not installed during Syslinux installation, it has to be installed manually. Mount the partition where Syslinux is installed to <code>/mnt/</code> and copy the memdisk module to the same directory where Syslinux is installed:
+</p>
+<pre># cp /usr/lib/syslinux/bios/memdisk /mnt/boot/syslinux/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg478300ddead9_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h3></div>
+<p>在将ISO文件复制至USB驱动盘之后，编辑<a href="#pg0ca06688075c">Syslinux配置文件</a>并为ISO镜像创立菜单条目，最基础的条目看起来像这样：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">boot/syslinux/syslinux.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">LABEL <i>some_label</i>
+    LINUX memdisk
+    INITRD <i>/path/to/image.iso</i>
+    APPEND iso
+</pre>
+<p>参见<a href="https://wiki.syslinux.org/wiki/index.php/MEMDISK">memdisk on Syslinux wiki</a> 以了解更多调试选项。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg478300ddead9_.E8.87.AA.E5.8A.A8.E5.88.B6.E4.BD.9C.E5.B7.A5.E5.85.B7.E5.AE.9E.E7.8E.B0.28.E5.BC.80.E6.BA.90.E8.BD.AF.E4.BB.B6.29" id="自动制作工具实现(开源软件)"><span id=".E8.87.AA.E5.8A.A8.E5.88.B6.E4.BD.9C.E5.B7.A5.E5.85.B7.E5.AE.9E.E7.8E.B0.28.E5.BC.80.E6.BA.90.E8.BD.AF.E4.BB.B6.29"></span>自动制作工具实现(开源软件)</h2></div>
+<ul><li><b>GRUB2 Live ISO Multiboot (GLIM)</b> — A set of GRUB configuration files to turn a VFAT formatted USB memory stick with GNU/Linux distribution ISO images into a multiboot USB drive.</li></ul>
+<dl><dd><a href="https://github.com/thias/glim">https://github.com/thias/glim</a> || <small>未被打包？<a href="https://aur.archlinux.org/packages/">在 AUR 里搜索</a></small></dd></dl>
+<ul><li><b>liveusb-builder</b> — 一个为GNU/Linux发行版创建多启动U盘的脚本套件</li></ul>
+<dl><dd><a href="https://github.com/mytbk/liveusb-builder">https://github.com/mytbk/liveusb-builder</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/liveusb-builder-git/">liveusb-builder-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>MultiBootUSB</b> — 一个具有CLI和GUI界面的跨平台Python软件，可添加或删除多个Linux LIVE映像环境到U盘。</li></ul>
+<dl><dd><a href="https://github.com/mbusb/multibootusb">https://github.com/mbusb/multibootusb</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/multibootusb/">multibootusb</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>MultiSystem</b> — 一个图形化工具，可添加或删除多个Linux LIVE映像环境到U盘。</li></ul>
+<dl><dd><a href="http://liveusb.info/dotclear/">http://liveusb.info/dotclear/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/multisystem/">multisystem</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg3f1c38595131">Ventoy</a></b> — 一个开源工具，为ISO/WIM/IMG/VHD(x)/EFI文件创建可引导的USB驱动器。不需要一遍又一遍格式化磁盘，只需要复制文件到U盘即可启动。</li></ul>
+<dl><dd><a href="https://www.ventoy.net/">https://www.ventoy.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ventoy-bin/">ventoy-bin</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg478300ddead9_.E6.9B.B4.E5.A4.9A.E5.8F.82.E8.80.83" id="更多参考"><span id=".E6.9B.B4.E5.A4.9A.E5.8F.82.E8.80.83"></span>更多参考</h2></div>
+<ul><li>GRUB:
+<ul><li><a href="https://help.ubuntu.com/community/Grub2/ISOBoot/Examples">https://help.ubuntu.com/community/Grub2/ISOBoot/Examples</a></li>
+<li><a href="https://help.ubuntu.com/community/Grub2/ISOBoot">https://help.ubuntu.com/community/Grub2/ISOBoot</a></li>
+<li><a href="https://github.com/thias/glim">GRUB Live ISO Multiboot</a> - GRUB configurations for booting ISO images</li></ul></li>
+<li>Syslinux:
+<ul><li><a href="https://wiki.syslinux.org/wiki/index.php?title=Boot_an_Iso_image">Boot an ISO image</a></li></ul></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807094852
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.174 seconds
+Real time usage: 0.179 seconds
+Preprocessor visited node count: 458/1000000
+Revision size: 11950/2097152 bytes
+Post‐expand include size: 9423/2097152 bytes
+Template argument size: 5333/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 5/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   42.176      1 -total
+ 16.56%    6.983      5 Template:App
+ 10.15%    4.283      1 Template:Style
+  8.61%    3.633      1 Template:翻译状态
+  6.61%    2.786     16 Template:Ic
+  5.39%    2.274      3 Template:Related
+  5.34%    2.252      1 Template:Broken_section_link
+  5.27%    2.221      1 Template:相关文章开始
+  4.73%    1.993      1 Template:Tip
+  4.11%    1.734      5 Template:Bc
+-->
+<!-- Render ID 3254a60e-9245-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3537:|#|:idhash:canonical!zh-cn and timestamp 20260807094852 and revision id 35010. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

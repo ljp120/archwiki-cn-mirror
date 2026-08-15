@@ -1,0 +1,143 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg5c7afd7e8ea9">笔记本电脑/三星</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Laptop/Samsung">Laptop/Samsung</a>，最近一次同步于 2020-05-02，若英文版本有所<a href="https://wiki.archlinux.org/title/Laptop/Samsung?diff=0&amp;oldid=609852">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Laptop_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Samsung_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box archwiki-template-box-navigation" style="text-align: center;"><a href="#pgd87c0e8f487f">宏碁</a> – <a href="#pg723f7ed62e98">苹果</a> – <a href="#pgc3714be81017">华硕</a> – <a href="#pga56ab09876a6">戴尔</a> – <a href="#pg78274c483daa">富士通</a> – <a href="#pg0ce6708e6b11">惠普</a> – <a href="#pgfe5aa3ca089d">IBM/联想</a> – <a href="#pg3a6d1c9c2b35">微星</a> – 三星 – <a href="#pg9e6cc7a70cfb">索尼</a> – <a href="#pg2aab1b5456aa">东芝</a> – <a href="#pge2b0642d65e4">其他</a></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5c7afd7e8ea9_.E5.9E.8B.E5.8F.B7.E5.88.97.E8.A1.A8" id="型号列表"><span id=".E5.9E.8B.E5.8F.B7.E5.88.97.E8.A1.A8"></span>型号列表</h2></div>
+<table class="wikitable sortable">
+<tbody><tr>
+<th>型号版本</th>
+<th>日期</th>
+<th>视频</th>
+<th>音频</th>
+<th>以太网</th>
+<th>无线</th>
+<th>蓝牙</th>
+<th>电源管理</th>
+<th>其他</th>
+<th>注释
+</th></tr>
+<tr>
+<td>R65-Pro T5500 Boteez</td>
+<td>2008.06 overlord</td>
+<td>GeForce 7600 Go</td>
+<td>hda-intel</td>
+<td>BCM4401B0 100BaseTX</td>
+<td>Intel 3945ABG</td>
+<td>不适用</td>
+<td>挂起到 RAM：不适用<br/>挂起到磁盘：不适用<br/>电池：否<br/>显示屏变暗：是<br/>CPU 频率缩放：是</td>
+<td>不适用</td>
+<td>不适用</td>
+<td>不适用
+</td></tr>
+<tr>
+<td>Q45 T5750</td>
+<td>2009.02</td>
+<td>Intel GMA X3100</td>
+<td>hda-intel</td>
+<td>Marvel 88E8039 （sky2）</td>
+<td>Intel 3945ABG （iwl-3945）</td>
+<td>不适用</td>
+<td>挂起到 RAM：是<br/>挂起到磁盘：是<br/>显示屏变暗：是（有一些技巧）<br/>CPU 频率缩放：是</td>
+<td>不适用</td>
+<td>3G+ 调制解调器选项 GTM378 （hso）<br/>网络摄像头（uvcvideo）</td>
+<td>不适用
+</td></tr>
+<tr>
+<td>NC110</td>
+<td>2011.08.19</td>
+<td>3D 使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> 2.19，1024x600 的本机分辨率，外部屏幕可以正常工作</td>
+<td>带有 <a href="#pgb16dfd48462f">ALSA</a> 的 Intel HD 音频</td>
+<td>是</td>
+<td>是；rfkill soft block 也可以工作</td>
+<td>被认可；未经测试</td>
+<td>挂起到 RAM：是<br/>挂起到磁盘：未测试<br/>显示屏变暗：是（带有 <code>acpi_backlight=vendor</code>）<br/>CPU 频率缩放：是</td>
+<td>不适用</td>
+<td>网络摄像头工作，读卡器工作，两指滚动工作，只有一半的功能按钮可以直接使用（剩余的功能按钮需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/samsung-tools/">samsung-tools</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>）</td>
+<td>不适用
+</td></tr>
+<tr>
+<td>QX411 W02UB</td>
+<td>2011.08.19</td>
+<td>Intel HD Graphics 3000 - i915 与上述型号相同的软件包（1366x768）</td>
+<td>Intel HD Audio with ALSA</td>
+<td>Realtek 千兆位以太网控制器（06版）</td>
+<td>Centrino Wireless-N + WiMAX 6150（67 版）</td>
+<td>不适用</td>
+<td>挂起到 RAM：是<br/>挂起到磁盘：是<br/>显示屏变暗：是 <br/>CPU 频率缩放：是</td>
+<td>不适用</td>
+<td>网络摄像头（uvcvideo）</td>
+<td>没有棘手的硬件。功能齐全。
+</td></tr>
+<tr>
+<td>NP730U3E （系列 7 Ultra）</td>
+<td>2013.06.01</td>
+<td>Intel HD Graphics 4000 @ 1920x1080_60 - 工作是（i915 w/KMS 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span>）；<br/>AMD Radeon 8570M （无混合） - 似乎可以与 PRIME（Linux 3.11）一起使用；<br/>外部屏幕未经测试。</td>
+<td>Intel HDA + ALSA</td>
+<td>Realtek 千兆以太网，r8169 驱动程序</td>
+<td>Intel Centrino Advanced-N 6235 （24 系列）, <i>iwlwifi</i> 驱动程序；<br/>rfkill 使用 <i>samsung-laptop</i> 模块工作</td>
+<td>未经测试</td>
+<td>挂起到 RAM： 是<br/>挂起到磁盘： 未经测试<br/>显示屏变暗：是 <br/>CPU 频率缩放：是</td>
+<td>不适用</td>
+<td>网络摄像头 - <i>uvcvideo</i>, 工作是；<br/>读卡器 Realtek RTS5139 - 临时驱动程序，从 Linux 3.11；<br/>Fn 键 - only brightness and sound out-of-the-box；<br/>Elan 触摸板完美工作 （Linux 3.11）；<br/>打开盖子无法唤醒；</td>
+<td>有点棘手，需要工作。
+</td></tr>
+<tr>
+<td>NP535U3C （系列 5）</td>
+<td>2016.03.01</td>
+<td>Radeon HD 7300G @ 1366x768_60 - 工作正常，使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-ati">xf86-video-ati</a></span><sup><small>包</small></sup></span> <br/>HDMI 可以正常工作。</td>
+<td>Generic AMD 音频； <br/>Works fine with <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pulseaudio">pulseaudio</a></span><sup><small>包</small></sup></span></td>
+<td>Realtek 千兆以太网，r8169 驱动程序</td>
+<td>Qualcomm Atheros AR9462 ath9k 驱动程序</td>
+<td>AR3012 Bluetooth 4.0, 工作 fine</td>
+<td>挂起到 RAM： 是<br/>挂起到磁盘： 未经测试<br/>显示屏变暗：是 <br/>CPU 频率缩放： 是</td>
+<td>不适用</td>
+<td>Web-Cam：是；<br/>读卡器：未经测试；<br/>Fn 键 - 全部开箱即用；<br/>Elan 触摸板完美工作</td>
+<td>不适用
+</td></tr>
+<tr>
+<td>Samsung notebook 7 Spin <a href="#pg1c1ba4ab3c8c">NP740U3L-L02US</a></td>
+<td>2016.07.01</td>
+<td>Intel HD Graphics 520</td>
+<td>工作</td>
+<td>不适用</td>
+<td><i>iwlwifi</i> 驱动程序</td>
+<td>未经测试</td>
+<td>?</td>
+<td>不适用</td>
+<td>需要对触摸板敏感度进行操作 <br/><br/>需要双重引导才能关闭安全引导</td>
+<td>最新（截至2016年7月4日）具有相当通用硬件的 2 合 1 笔记本电脑型号（此处提供规格信息：<a href="http://www.notebookocean.com/samsung-notebook-7-spin-np740u3l-l02us-specs/">[1]</a>）；到目前为止似乎非常有用
+</td></tr></tbody></table>
+<!-- 
+NewPP limit report
+Cached time: 20260807181212
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.085 seconds
+Real time usage: 0.090 seconds
+Preprocessor visited node count: 83/1000000
+Revision size: 3969/2097152 bytes
+Post‐expand include size: 2900/2097152 bytes
+Template argument size: 248/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 2/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   18.549      1 -total
+ 19.45%    3.608      1 Template:翻译状态
+ 18.88%    3.503      4 Template:Pkg
+ 16.56%    3.071      1 Template:Broken_package_link
+  6.26%    1.162      1 Template:笔记本电脑导航
+  5.81%    1.077      1 Template:AUR
+  5.53%    1.026      1 Template:Ic
+  5.48%    1.017      1 Template:笔记本电脑表格标题
+-->
+<!-- Render ID 82eef20e-928b-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3382:|#|:idhash:canonical!zh-cn and timestamp 20260807181212 and revision id 33820. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

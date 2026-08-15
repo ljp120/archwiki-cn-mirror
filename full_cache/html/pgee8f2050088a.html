@@ -1,0 +1,371 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgee8f2050088a">Arch 的启动流程</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Arch_boot_process">Arch boot process</a>，最近一次同步于 2025-12-27，若英文版本有所<a href="https://wiki.archlinux.org/title/Arch_boot_process?diff=0&amp;oldid=858944">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Arch_boot_process_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg8aa171ccea0e">主引导记录</a></li>
+<li><a href="#pgf5d6dc2b8800">GUID 分区表</a></li>
+<li><a href="#pg46c3147defaf">UEFI</a></li>
+<li><a href="#pgbd0f46fbac92">mkinitcpio</a></li>
+<li><a href="#pg614d0af1f125">init</a></li>
+<li><a href="#pgac06dd8bfe95">systemd</a></li>
+<li><a href="#pgced0cc449f44">fstab</a></li>
+<li><a href="#pg9604da0ac74d">自动启动</a></li>
+</ul></div>
+<p>为了启动 Arch Linux，必须配置一个与 Linux 兼容的引导加载程序。引导加载程序负责在初始化启动进程之前，加载好内核和 <a href="#pgee8f2050088a_initramfs">initramfs</a>，具体过程因 <a href="https://zh.wikipedia.org/wiki/BIOS">BIOS</a> 和 <a href="#pg46c3147defaf">UEFI</a> 系统而异。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgee8f2050088a_.E5.9B.BA.E4.BB.B6.E7.B1.BB.E5.9E.8B" id="固件类型"><span id=".E5.9B.BA.E4.BB.B6.E7.B1.BB.E5.9E.8B"></span>固件类型</h2></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E5%9B%BA%E4%BB%B6">固件</a>是开机时最先执行的程序。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>本文时常以 <i>BIOS</i> 和 <i>UEFI</i> 代称<i>固件</i>。</li>
+<li>勿与 <a href="#pg4fe4844c73f4">Linux 固件</a>混淆。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgee8f2050088a_UEFI" id="UEFI">UEFI</h3></div>
+<p><a href="#pg46c3147defaf">统一可扩展固件接口</a>（Unified Extensible Firmware Interface，UEFI）支持读取分区表和文件系统。UEFI 不从<a href="#pg8edad8d1135b">主引导记录（MBR）中启动任何引导代码</a>（无论其是否存在），相反，UEFI 的启动过程依赖<a href="https://en.wikipedia.org/wiki/Non-volatile_random-access_memory">非易失性随机访问存储器（NVRAM）</a>中的引导条目。
+</p><p>UEFI 规范要求支持 <a href="#pg30cebfcdd710">FAT12、FAT16 和 FAT32</a> 文件系统（参见 <a href="https://uefi.org/specs/UEFI/2.11/13_Protocols_Media_Access.html#file-system-format-1">UEFI 规范 2.11 版 13.3.1.1 小节</a>），但每个符合规范的厂商可以选择添加对其它文件系统的支持；比如，苹果的固件支持 <a href="https://zh.wikipedia.org/wiki/HFS%2B">HFS+</a> 或 <a href="https://zh.wikipedia.org/wiki/%E8%8B%B9%E6%9E%9C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">APFS</a> 文件系统。UEFI 的一些实现方案还支持光盘的 <a href="https://zh.wikipedia.org/wiki/ISO_9660">ISO 9660</a> 文件系统。
+</p><p>UEFI 会启动 EFI 应用程序，例如引导加载程序、引导管理器和 <a href="#pg46c3147defaf">UEFI Shell</a> 等等。这些应用程序通常以文件形式存储在 <a href="#pg635d4bd93303">EFI 系统分区</a>中。厂商可以将其特定文件存储在 EFI 系统分区中的 <code>/EFI/<i>vendor_name</i></code> 文件夹下。应用程序可以通过在 NVRAM 中添加引导项或从 UEFI shell 中启动。
+</p><p>UEFI 规范通过<a href="https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface#CSM_booting">兼容性支持模块</a>（Compatibility Support Module，CSM）来支持传统 <a href="#pgee8f2050088a_BIOS">BIOS</a> 引导。如果在 UEFI 中启用了 CSM，UEFI 会为所有驱动器生成 CSM 引导项。如果选择从某一个 CSM 引导项启动，UEFI 的 CSM 会尝试从这个磁盘的 MBR 引导代码启动。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>英特尔正逐渐取消对 CSM 的支持。以后也许不能再依赖此特性。<a href="https://www.intel.com/content/dam/support/us/en/documents/intel-nuc/Legacy-BIOS-Boot-Support-Removal-for-Intel-Platforms.pdf">[1]</a></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgee8f2050088a_BIOS" id="BIOS">BIOS</h3></div>
+<p><a href="https://zh.wikipedia.org/wiki/BIOS">BIOS</a>，又称基本输入输出系统（Basic Input-Output System），大多数情况下储存在主板自身的一块闪存内，独立于其它系统存储。其最早是为 <a href="https://zh.wikipedia.org/wiki/IBM_PC">IBM PC</a> 开发，用于处理硬件初始化和启动过程。从 2010 年起已逐渐被技术上没有类似限制的 UEFI 替换。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgee8f2050088a_.E7.B3.BB.E7.BB.9F.E5.88.9D.E5.A7.8B.E5.8C.96" id="系统初始化"><span id=".E7.B3.BB.E7.BB.9F.E5.88.9D.E5.A7.8B.E5.8C.96"></span>系统初始化</h2></div>
+<p>系统上电时，会执行<a href="https://zh.wikipedia.org/wiki/%E5%8A%A0%E7%94%B5%E8%87%AA%E6%A3%80">加电自检</a>（Power-on self-test，POST）。详细信息可参考 Hugo Landau 的 <a href="https://www.devever.net/~hl/backstage-cast">Modern CPUs have a backstage cast</a> 一文。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgee8f2050088a_.E5.9C.A8_UEFI_.E4.B8.8B.E7.9A.84.E6.83.85.E5.86.B5" id="在_UEFI_下的情况"><span id=".E5.9C.A8_UEFI_.E4.B8.8B.E7.9A.84.E6.83.85.E5.86.B5"></span>在 UEFI 下的情况</h3></div>
+<ol><li>加电自检后，UEFI 初始化引导所需的硬件（硬盘、键盘控制器等等）。</li>
+<li>固件读取 NVRAM 中的引导项，以决定要启动哪一个 EFI 应用程序，以及从哪启动（比如从哪一个硬盘和分区）。
+<ul><li>一个引导项可能对应的只是一块硬盘。在这种情况下，固件会寻找硬盘上的 <a href="#pg635d4bd93303">EFI 系统分区</a>，并尝试在后备引导路径 <code>\EFI\BOOT\BOOTx64.EFI</code> 处（在 <a href="#pg46c3147defaf">IA32（32 位）UEFI</a> 的系统上为 <code>BOOTIA32.EFI</code>）查找 EFI 应用程序。这就是UEFI 可引导可移除介质的工作原理。</li></ul></li>
+<li>固件启动 EFI 应用程序。
+<ul><li>这可以是一个#引导加载程序，或者是使用 <span class="ilh-all ilh-blue" data-foreign-title="EFISTUB" data-lang-code="en" data-lang-name="英语" data-orig-title="EFISTUB"><span class="ilh-page"><a href="#pgae292a1994d8">EFISTUB</a></span></span> 的 Arch <a href="#pg3473491e6a48">内核</a>本体。</li>
+<li>还可以是一些其他的 EFI 应用程序，比如 <a href="#pg46c3147defaf">UEFI shell</a> 或引导管理器（例如 <a href="#pg171755f7b428">systemd-boot</a> 或 <a href="#pg155cf311d887">rEFInd</a>）。</li></ul></li></ol>
+<p>如果启用了<a href="#pg0e14304dd697">安全启动</a>，启动过程将会通过签名验证 EFI 二进制文件的真实性。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>一些 UEFI 系统只能从后备引导路径启动。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgee8f2050088a_.E5.A4.9A.E9.87.8D.E5.BC.95.E5.AF.BC" id="多重引导"><span id=".E5.A4.9A.E9.87.8D.E5.BC.95.E5.AF.BC"></span>多重引导</h4></div>
+<p>由于每个操作系统或厂商都可以维护自己在 <a href="#pg635d4bd93303">EFI 系统分区</a>中的文件，同时不影响其他系统，所以 UEFI 的多重引导的原理就是启动不同的、与特定操作系统引导加载程序所对应的 EFI 应用程序。这避免了依赖一个#引导加载程序去加载另一个操作系统的<a href="https://en.wikipedia.org/wiki/Chain_loading">链式加载</a>机制。
+</p><p>另请参阅 <a href="#pg4d5a3358c464">Arch + Windows 双系统</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgee8f2050088a_.E5.9C.A8_BIOS_.E4.B8.8B.E7.9A.84.E6.83.85.E5.86.B5" id="在_BIOS_下的情况"><span id=".E5.9C.A8_BIOS_.E4.B8.8B.E7.9A.84.E6.83.85.E5.86.B5"></span>在 BIOS 下的情况</h3></div>
+<ol><li>上电自检后，BIOS 初始化引导所需的硬件（硬盘、键盘控制器等等）。</li>
+<li>BIOS 启动在“BIOS 硬盘顺序”中第一块硬盘上的前 440 字节代码（即<a href="#pg8aa171ccea0e">主引导记录引导代码区域</a>）。</li>
+<li>引导加载程序在 MBR 引导代码的第一阶段，之后会从下列任意一处启动第二阶段代码（如果有的话）：
+<ul><li>MBR 之后的下一个磁盘扇区，即所谓 MBR 后间隙（post-MBR gap，仅在 MBR 分区表上有）。</li>
+<li>分区或者无分区磁盘的<a href="https://en.wikipedia.org/wiki/Volume_boot_record">卷引导记录</a>（Volume Boot Record，VBR）。</li>
+<li>GRUB 特定 <a href="#pgca9c4017f7ad">BIOS 引导分区</a>（仅限 GPT 分区硬盘上的 <a href="#pgca9c4017f7ad">GRUB</a>，用于 GPT 上没有 MBR 后间隙的情况）</li></ul></li>
+<li>真正的#引导加载程序启动。</li>
+<li>随后，引导加载程序通过链式加载或直接加载操作系统内核的方式加载操作系统。</li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgee8f2050088a_.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F" id="引导加载程序"><span id=".E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F"></span>引导加载程序</h2></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E5%BC%95%E5%AF%BC%E7%A8%8B%E5%BA%8F">引导加载程序</a>（boot loader，又称引导加载器、启动加载器或启动引导器）是由计算机<a href="https://zh.wikipedia.org/wiki/%E5%9B%BA%E4%BB%B6">固件</a>（<a href="https://zh.wikipedia.org/wiki/BIOS">BIOS</a> 或 <a href="#pg46c3147defaf">UEFI</a>）启动的软件，负责用指定<a href="#pgec0856954f1c">内核参数</a>加载<a href="#pg3473491e6a48">内核</a>和其它外置 <a href="#pg5409190f7704">initramfs</a> 映像。
+</p><p><a href="https://www.rodsbooks.com/efi-bootloaders/principles.html">引导管理器</a>（boot manager，又称启动管理器）让用户使用启动选项菜单或其他方式控制启动过程——也就是说，仅用于运行其他 EFI 应用程序。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>一些程序，例如 <a href="#pgca9c4017f7ad">GRUB</a> 及 <a href="#pg9fa60bf874d4">GRUB Legacy</a> 兼具引导加载程序和引导管理器的功能。</div>
+<p>在 UEFI 的情况下，内核本身可以由 UEFI 使用 <span class="ilh-all" data-foreign-title="EFI boot stub" data-lang-code="en" data-lang-name="英语" data-orig-title="EFI boot stub"><span class="ilh-page"><a href="#pg20728dc42f15">EFI boot stub</a></span></span> 直接启动。要在引导前编辑内核参数，可以使用引导管理器或是单独的引导加载程序。
+</p><p>使用 <a href="#pg46c3147defaf">32 位 IA32 UEFI</a> 固件的系统需要使用支持混合启动模式的引导加载程序。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>引导加载程序必须能够访问通常位于 <code>/boot</code> 目录下的内核和 initramfs 映像才能成功引导 Arch 系统。也就是说，引导加载程序必须解决从块设备、堆叠块设备（LVM、RAID、dm-crypt、LUKS 等）开始，到内核和 initramfs 映像所在文件系统为止的访问。
+<p>因为几乎没有引导加载程序支持堆叠块设备，并且文件系统引入的一些新特性可能尚未有任何引导加载程序支持（例如 <a href="https://gitlab.archlinux.org/archlinux/packaging/packages/grub/-/issues/7">archlinux/packaging/packages/grub#7</a>、<a href="https://bugs.archlinux.org/task/79857">FS#79857</a>、<a href="https://bugs.archlinux.org/task/59047">FS#59047</a>、<a href="https://bugs.archlinux.org/task/58137">FS#58137</a>、<a href="https://bugs.archlinux.org/task/51879">FS#51879</a>、<a href="https://bugs.archlinux.org/task/46856">FS#46856</a>、<a href="https://bugs.archlinux.org/task/38750">FS#38750</a>、<a href="https://bugs.archlinux.org/task/21733">FS#21733</a> 和 <span class="ilh-all" data-foreign-title="fscrypt" data-lang-code="en" data-lang-name="英语" data-orig-title="fscrypt"><span class="ilh-page"><a href="#pgd16fe308a4b9">fscrypt</a></span></span> 加密目录），所以用广泛支持的文件系统（例如 <a href="#pgfeb479f7aff2">FAT32</a>）单独创建 <a href="#pg8edad8d1135b">/boot 分区</a>通常更可行。
+</p>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgee8f2050088a_.E5.8A.9F.E8.83.BD.E6.AF.94.E8.BE.83" id="功能比较"><span id=".E5.8A.9F.E8.83.BD.E6.AF.94.E8.BE.83"></span>功能比较</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>由于 GPT 是 UEFI 规范的一部分，因此所有的 UEFI 引导加载程序都支持 GPT 磁盘。在 BIOS 上使用 GPT 磁盘是可行的，可以使用 <a href="https://www.rodsbooks.com/gdisk/hybrid.html">Hybrid MBR</a> 的“混合引导（hybrid booting）”，或者使用新的<a href="https://repo.or.cz/syslinux.git/blob/HEAD:/doc/gpt.txt">纯 GPT</a> 协议。但是这个协议可能在某些 BIOS 实现上会出问题，详情请参考 <a href="https://www.rodsbooks.com/gdisk/bios.html#bios">Rodsbooks</a>。</li>
+<li>作为 UEFI 规范的一部分，所有 UEFI 引导加载程序都支持<a href="#pg0e14304dd697">安全启动</a>，但有可能会存在一些限制。</li></ul>
+</div>
+<table class="wikitable sortable">
+<tbody><tr>
+<th rowspan="2">名称
+</th>
+<th colspan="2">固件
+</th>
+<th colspan="2"><a href="#pg10de20c4b0fb">分区表</a>
+</th>
+<th rowspan="2">多重引导
+</th>
+<th rowspan="2"><a href="#pg6c70b7fdfa57">文件系统</a>
+</th>
+<th rowspan="2">注意
+</th></tr>
+<tr>
+<th>BIOS</th>
+<th><a href="#pg46c3147defaf">UEFI</a>
+</th>
+<th><a href="#pg3fb7df0ff769">MBR</a></th>
+<th><a href="#pg69f558531e59">GPT</a>
+</th></tr>
+<tr>
+<th><a href="#pg4fa16a81add8">Clover</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="#pg4fa16a81add8">可扩展</a><sup>2,5</sup>
+</td>
+<td>可以在过时 BIOS 系统上模拟 UEFI。
+</td></tr>
+<tr>
+<th><span class="ilh-all" data-foreign-title="EFI boot stub" data-lang-code="en" data-lang-name="英语" data-orig-title="EFI boot stub"><span class="ilh-page"><a href="#pg20728dc42f15">EFI boot stub</a></span></span>
+</th>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<sup>1</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">继承自固件<sup>2</sup>
+</td>
+<td>内核是有效的 EFI 可执行文件，可直接从 UEFI 或其它 UEFI 引导加载器启动。
+</td></tr>
+<tr>
+<th><a href="#pgca9c4017f7ad">GRUB</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<sup>3</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="#pgca9c4017f7ad">内置</a>
+</td>
+<td>支持 RAID，LUKS（Argon2 PBKDFs 除外）和 LVM（但是不支持精简配置卷）。平台相关限制请参考 <a href="#pgca9c4017f7ad">GRUB</a>。
+</td></tr>
+<tr>
+<th><a href="#pg7b799300dd78">Limine</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<sup>3</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="#pg7b799300dd78">有限</a>
+</td>
+<td>
+</td></tr>
+<tr>
+<th><a href="#pg155cf311d887">rEFInd</a>
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<sup>4</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="#pg155cf311d887">可扩展</a><sup>2,5</sup>
+</td>
+<td>支持自动检测内核和参数，无需明确配置，并支持快速启动<a href="https://bbs.archlinux.org/viewtopic.php?id=258805">[2]</a>。
+</td></tr>
+<tr>
+<th><a href="#pg0ca06688075c">Syslinux</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="#pg0ca06688075c">部分</a><sup>1</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="#pg0ca06688075c">部分</a>
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="#pg0ca06688075c">有限</a>
+</td>
+<td>不支持某些文件系统功能。<br/>只能访问<a href="#pg0ca06688075c">自身所处</a>的文件系统。
+</td></tr>
+<tr>
+<th><a href="#pg171755f7b428">systemd-boot</a>
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<sup>3</sup>
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="https://github.com/systemd/systemd/issues/1125">手动</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<sup>4</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="#pg171755f7b428">可扩展</a><sup>2,5</sup>
+</td>
+<td>无法从 <a href="#pgc551b9cd7a20">ESP</a> 或扩展引导加载程序分区（XBOOTLDR）以外的分区启动二进制文件。<br/>支持自动检测放入 <code><i>esp</i>/EFI/Linux/</code> 的<a href="#pgd819314d422c">统一内核映像</a>。
+</td></tr>
+<tr>
+<th><a href="#pgd819314d422c">统一内核映像</a>
+</th>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<sup>3</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">继承自固件<sup>2</sup>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 7 systemd-stub"><a href="https://man.archlinux.org/man/systemd-stub.7">systemd-stub(7)</a></span>、内核、initramfs、内核命令行打包而成的 EFI 可执行文件，可直接从 UEFI 固件或另一个引导加载程序加载。
+</td></tr>
+<tr>
+<th class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;"><a href="#pg9fa60bf874d4">GRUB Legacy</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="#pg9fa60bf874d4">有限</a>
+</td>
+<td><a href="https://www.gnu.org/software/grub/grub-legacy.html">停止开发</a>，转为 <a href="#pgca9c4017f7ad">GRUB</a>。
+</td></tr>
+<tr>
+<th class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;"><a href="#pg789c0f6ec01c">LILO</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="https://salsa.debian.org/joowie-guest/upstream_lilo/-/commit/29a64e6b92cac22d472f4b352de5b1535e4afc5f">部分</a>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;"><a href="#pg789c0f6ec01c">有限</a>
+</td>
+<td>因为局限性（如与 Btrfs、GPT 和 RAID 搭配使用时）已<a href="https://web.archive.org/web/20180323163248/http://lilo.alioth.debian.org/">停止开发</a>。
+</td></tr></tbody></table>
+<ol><li>虽然二进制文件可以被签名用于<a href="#pg0e14304dd697">安全启动</a>，但它不会进行后续验证，从而破坏了信任链。</li>
+<li>文件系统支持是从固件继承的。<a href="https://uefi.org/specs/UEFI/2.11/13_Protocols_Media_Access.html#file-system-format-1">UEFI 规范要求支持 FAT12，FAT16 和 FAT32 文件系统</a>，但厂商可选择添加对其他文件系统的支持。比如说，苹果 <a href="#pg858934ed7570">Mac</a> 中的固件支持 HFS+ 文件系统。如果固件提供在启动时加载 <a href="#pg46c3147defaf">UEFI 驱动程序</a>的接口，则可以通过加载文件系统驱动程序（需单独获取）的方式添加对其他文件系统的支持。</li>
+<li>支持混合模式启动，即可以在 <a href="#pg46c3147defaf">32 位 IA32 UEFI</a> 固件上启动 64 位 x86_64 Linux 内核</li>
+<li>一种<a href="https://www.rodsbooks.com/efi-bootloaders/principles.html">启动管理器</a>。它只能启动其他的 EFI 应用程序，例如，使用 <code>CONFIG_EFI_STUB=y</code> 参数编译的 Linux 内核映像和 <a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/bringup/boot-and-uefi#understanding-the-windows-boot-manager">Windows Boot Manager</a> <code>bootmgfw.efi</code>。</li>
+<li>支持加载 <a href="#pg46c3147defaf">UEFI 文件系统驱动</a>。</li></ol>
+<p>另请参见<a href="https://en.wikipedia.org/wiki/Comparison_of_boot_loaders">维基百科：引导加载程序比较</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgee8f2050088a_.E5.86.85.E6.A0.B8" id="内核"><span id=".E5.86.85.E6.A0.B8"></span>内核</h2></div>
+<p>引导加载器会启动包含<a href="#pg3473491e6a48">内核</a>的 <a href="https://zh.wikipedia.org/wiki/vmlinux">vmlinux 映像</a>。
+</p><p>内核是操作系统的核心。它运行于一个叫<i>内核空间</i>的底层上，负责机器硬件和应用程序之间的交流。在继续进入用户空间前，内核会首先执行硬件枚举和初始化。具体细节请参考<a href="https://zh.wikipedia.org/wiki/%E5%86%85%E6%A0%B8">zhwp:内核</a>和<a href="https://zh.wikipedia.org/wiki/Linux%E5%86%85%E6%A0%B8">zhwp:Linux内核</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgee8f2050088a_initramfs" id="initramfs">initramfs</h2></div>
+<p><i>initramfs</i>（初始内存文件系统，<i><b>init</b></i>ial <i><b>RAM</b></i> <i><b>f</b></i>ile <i><b>s</b></i>ystem）映像是一个 <a href="https://zh.wikipedia.org/wiki/cpio">cpio</a> 存档文件，为<i>早期用户空间</i>（见下文）启动晚期用户空间提供了必要的文件。这包括了所有用于定位，访问和挂载根文件系统的内核模块、用户空间工具、相关库文件、类似 udev 规则的支持文件等。得益于 initramfs 的概念，它可以处理更加复杂的配置场景，例如从外置硬盘启动，堆叠设备（例如逻辑卷，软 RAID，压缩和加密），或是在早期用户空间中运行一个微型 SSH 服务器，以供远程解锁或为根文件系统执行维护任务。
+</p><p>绝大部分内核模块都将在初始化流程的后期阶段，由 <a href="#pge009209061ac">udev</a> 在根切换到根文件系统后加载。
+</p><p>具体流程如下：
+</p>
+<ol><li><code>/</code> 下的根文件系统原本是一个空的 <a href="https://docs.kernel.org/filesystems/ramfs-rootfs-initramfs.html">rootfs</a>，它是一个特殊的 tmpfs 或 ramfs 实例。这里就是 initramfs 会解压到的临时根文件系统。</li>
+<li>内核会将其内置 initramfs 解压到临时根文件系统下。Arch Linux <a href="#pg3473491e6a48">官方支持的内核</a>使用空白存档作为内置 initramfs，即构建内核时的默认行为。</li>
+<li>然后，内核会按照引导加载器传递的命令行参数指定的顺序解压外置 initramfs 映像，覆盖掉之前内置 initramfs 或其它解压出来的文件。注意，可以将多个 initramfs 映像合并为一个文件，内核会按照文件内的顺序加载映像。
+<ul><li>如果首个 initramfs 映像未经压缩，那么内核会在解包该映像后在 <code>/kernel/x86/microcode/</code> 目录查找 CPU <a href="#pga6cf703397a3">微码</a>更新，在 <code>/kernel/firmware/acpi/</code> 目录查找 ACPI 表更新。</li>
+<li>在适用的情况下，在处理完 CPU 微码和 ACPI 表更新后，内核会继续解压剩余的 initramfs 映像。</li></ul></li></ol>
+<p>initramfs 映像是 Arch Linux 推荐的早期用户空间配置方法，并可通过 <a href="#pgbd0f46fbac92">mkinitcpio</a>，<a href="#pgb185d4cf00ac">dracut</a> 或 <a href="#pg375fc9bbcc64">booster</a> 来生成。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgee8f2050088a_.E4.B8.8D.E4.BD.BF.E7.94.A8_initramfs" id="不使用_initramfs"><span id=".E4.B8.8D.E4.BD.BF.E7.94.A8_initramfs"></span>不使用 initramfs</h3></div>
+<p>从 6.13.8 版本开始，<a href="#pg3473491e6a48">官方支持的内核</a>已内置 <a href="#pg429e7ec45c9c">Btrfs</a> 和 <a href="#pgb5dd09f37b3e">Ext4</a> 的驱动<a href="https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/commit/a7e2a17f9c0e55937ea3e18c4d5b905a8e4f8047">[3]</a>。
+</p><p>因此内核可以直接使用这些文件系统格式的根分区，然后再加载其它需要的外部模块。但有几点需要注意：
+</p>
+<ul><li>不能使用 <a href="#pgac06dd8bfe95">GPT 分区自动挂载</a>，必须使用 <code>root</code> <a href="#pgec0856954f1c">内核参数</a>。</li>
+<li>只能使用 <code>PARTUUID</code> 和 <code>PARTLABEL</code> 作为根分区（<code>root</code>）的<a href="#pgd2fddf50b50f">块设备持久化名称</a><a href="https://github.com/torvalds/linux/blob/v6.14/block/early-lookup.c#L216-L243">[4]</a>。</li>
+<li><code>rootflags</code> 的<a href="#pgaacf649200cb">挂载</a>选项比较有限，例如 <code>noatime</code> 就无法使用<a href="https://bugzilla.kernel.org/show_bug.cgi?id=61601">[5]</a>。要绕过该问题，可以先以只读进行挂载（<code>rootflags=ro</code>），然后使用 <a href="#pgced0cc449f44">fstab</a> 进行重新挂载来应用所需的挂载选项。</li>
+<li>由于 GPT 分区自动挂载不可用，无需启用 <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-gpt-auto-generator"><a href="https://man.archlinux.org/man/systemd-gpt-auto-generator.8">systemd-gpt-auto-generator(8)</a></span>，启用甚至还会导致问题出现<a href="https://github.com/systemd/systemd/issues/16953">[6]</a>，可以通过 <code>systemd.gpt_auto=no</code> 将其禁用。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>目前只内置了 SCSI/SATA/AHCI 的模块，其它存储设备（例如 <span class="ilh-all" data-foreign-title="NVMe" data-lang-code="en" data-lang-name="英语" data-orig-title="NVMe"><span class="ilh-page"><a href="#pgfabce5fffaa5">NVMe</a></span></span>，<a href="#pgb42228802789">USB</a>，<a href="https://en.wikipedia.org/wiki/Device_mapper">device mapper</a> 等）不适用于该节内容。另外，<a href="#pg02cd87050dfd">LVM</a> 和加密也必须搭配 initramfs 使用，这两者需要用户空间工具才能正常工作。</div>
+<p>另外，<a href="#pga6cf703397a3">早期微码加载</a>也必须搭配 initramfs 使用，但没必要为其构建完整映像，Arch 可以<a href="#pga6cf703397a3">将微码放置在单独的 initramfs 文件</a>中，以供单独使用。
+</p><p>即使没有提供 initramfs 映像，内核仍会包含一个空映像以供启动<a href="https://docs.kernel.org/filesystems/ramfs-rootfs-initramfs.html#populating-initramfs">[7]</a>，以防止根分区<a href="https://github.com/torvalds/linux/blob/1b907d0507354b74a4f2c286380cd6059af79248/fs/namespace.c#L4222">固定</a>出现问题。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgee8f2050088a_.E6.97.A9.E6.9C.9F.E7.94.A8.E6.88.B7.E7.A9.BA.E9.97.B4" id="早期用户空间"><span id=".E6.97.A9.E6.9C.9F.E7.94.A8.E6.88.B7.E7.A9.BA.E9.97.B4"></span>早期用户空间</h2></div>
+<p>早期用户空间阶段（亦称“initramfs 阶段”）在由 <a href="#pgee8f2050088a_initramfs">#initramfs</a> 映像提供文件的 rootfs 中进行，始于内核以 PID 1 执行 <code>/init</code>。
+</p><p>早期用户空间的功能<a href="#pgbd0f46fbac92">可以进行配置</a>，但主要是引导系统到能够访问真正根文件系统的状态，这主要包括：
+</p>
+<ul><li><span class="plainlinks archwiki-template-man" title="$ man 8 systemd-modules-load"><a href="https://man.archlinux.org/man/systemd-modules-load.8">systemd-modules-load(8)</a></span> 加载内核模块（基于 systemd 的 initramfs），例如挂载真正根文件系统所需的任何块设备模块。</li>
+<li>构建访问真正根文件系统所需的存储栈（例如通过 <a href="#pg8e3a9446707a">dm-crypt</a>、<span class="ilh-all" data-foreign-title="dm-verity" data-lang-code="en" data-lang-name="英语" data-orig-title="dm-verity"><span class="ilh-page"><a href="#pgb60d478fa906">dm-verity</a></span></span>、<a href="#pge514c9bd219e">mdadm</a>、<a href="#pg02cd87050dfd">LVM</a>、<span class="ilh-all" data-foreign-title="systemd-repart" data-lang-code="en" data-lang-name="英语" data-orig-title="systemd-repart"><span class="ilh-page"><a href="#pg06aaf5887bc3">systemd-repart</a></span></span> 等）。
+<ul><li>解密真正根文件系统（若适用）。</li></ul></li>
+<li><a href="#pge009209061ac">udev</a> 将<a href="#pgd2fddf50b50f">块设备持久化名称</a>解析为实际设备。</li>
+<li>加载 DRM 模块（因为默认启用的 <a href="#pg4955543b232e">KMS 早启动</a>）。</li></ul>
+<p>需要注意的是，早期用户空间不仅仅用于设置真正根文件系统。有些任务只能在挂载真正根文件系统之前执行，例如 <a href="#pg7545319bee41">fsck</a>和从<a href="#pg146ac4b0e523">休眠</a>中恢复。
+</p><p>在早期用户空间的最后阶段，真正根文件系统会被挂载到 <code>/sysroot/</code>（基于 <a href="#pgac06dd8bfe95">systemd</a> 的 initramfs）或 <code>/new_root/</code>（基于 BusyBox 的 initramfs），然后通过 <code>systemctl switch-root</code>（基于 systemd 的 initramfs）或 <span class="plainlinks archwiki-template-man" title="$ man 8 switch_root"><a href="https://man.archlinux.org/man/switch_root.8">switch_root(8)</a></span>（基于 BusyBox 的 initramfs）切换到真正根文件系统。最后通过执行真正根文件系统中的 <a href="#pg614d0af1f125">init</a> 程序启动晚期用户空间。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgee8f2050088a_.E6.99.9A.E6.9C.9F.E7.94.A8.E6.88.B7.E7.A9.BA.E9.97.B4" id="晚期用户空间"><span id=".E6.99.9A.E6.9C.9F.E7.94.A8.E6.88.B7.E7.A9.BA.E9.97.B4"></span>晚期用户空间</h2></div>
+<p>晚期用户空间从 <a href="#pg614d0af1f125">init</a> 进程开始。Arch 官方支持的 <a href="#pgac06dd8bfe95">systemd</a> 基于单元和服务的概念，但这里描述的功能在很大程度上与其它 init 系统重叠。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgee8f2050088a_getty" id="getty">getty</h3></div>
+<p><a href="#pg614d0af1f125">init</a> 会为每个<a href="https://en.wikipedia.org/wiki/Virtual_console">虚拟终端</a>（通常有六个）调用一次 <a href="#pg9683b73bd6d3">getty</a>，它会初始化终端并保护其免受未授权访问。在提供用户名和密码后，<i>getty</i> 会对照 <code>/etc/passwd</code> 和 <code>/etc/shadow</code> 检查是否正确。如果正确，就接着调用 <span class="plainlinks archwiki-template-man" title="$ man 1 login"><a href="https://man.archlinux.org/man/login.1">login(1)</a></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgee8f2050088a_login" id="login">login</h4></div>
+<p><i>login</i> 会根据 <code>/etc/passwd</code> 设置环境变量并启动用户 shell，从而为用户配置一个会话。在成功登录后，启动登录 shell 前，<i>login</i> 程序会显示 <a href="https://en.wikipedia.org/wiki/motd_(Unix)">/etc/motd</a>（<i><b>m</b></i>essage <i><b>o</b></i>f <i><b>t</b></i>he <i><b>d</b></i>ay）的内容，你可以用它来显示服务条款以提醒用户你的本地策略，也可以显示其它提示信息。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgee8f2050088a_shell" id="shell">shell</h4></div>
+<p>用户的 <a href="#pgd53258e68888">shell</a> 启动后，在显示命令行提示符前，通常会执行一个运行时配置文件（例如 <a href="#pgfad015008cee">bashrc</a>）。如果用户账户配置为在<a href="#pgb2b30451e491">登录时自动启动 X</a>，那么运行时配置文件会调用 <a href="#pgbe190b056b34">startx</a> 或 <a href="#pg9fc1e9437ae5">xinit</a>，具体内容请参考#图形会话（Xorg）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgee8f2050088a_.E6.98.BE.E7.A4.BA.E7.AE.A1.E7.90.86.E5.99.A8" id="显示管理器"><span id=".E6.98.BE.E7.A4.BA.E7.AE.A1.E7.90.86.E5.99.A8"></span>显示管理器</h3></div>
+
+<p>另外，在特定虚拟终端下，<a href="#pg614d0af1f125">init</a> 可配置为启动<a href="#pg30e2075251d0">显示管理器</a>，而不是 <i>getty</i>。要达成该效果，需要手动<a href="#pg3ef6532bc644">启用</a>其 <a href="#pgac06dd8bfe95">systemd 服务文件</a>，之后显示管理器就会启动一个图形会话。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgee8f2050088a_.E5.9B.BE.E5.BD.A2.E4.BC.9A.E8.AF.9D.EF.BC.88Xorg.EF.BC.89" id="图形会话（Xorg）"><span id=".E5.9B.BE.E5.BD.A2.E4.BC.9A.E8.AF.9D.EF.BC.88Xorg.EF.BC.89"></span>图形会话（Xorg）</h4></div>
+<p><a href="#pg9fc1e9437ae5">xinit</a> 会调用用户的 <a href="#pg05a4704b29d5">xinitrc</a> 运行时配置文件，后者一般会启动一个<a href="#pg3d6d7c1e6c7c">窗口管理器</a>或<a href="#pg712e4adaddad">桌面环境</a>。如果用户退出了窗口管理器，<i>xinit</i>、<i>startx</i>、shell、login 就会依次中断，返回到 <i>getty</i> 或显示管理器。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgee8f2050088a_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://en.wikipedia.org/wiki/Booting_process_of_Linux">Wikipedia:Booting process of Linux</a></li>
+<li><a href="https://web.archive.org/web/20230313210814/https://developer.ibm.com/articles/l-linuxboot/">Inside the Linux boot process</a></li>
+<li><a href="https://www.rodsbooks.com/efi-bootloaders/">Rod Smith - Managing EFI Boot Loaders for Linux</a></li>
+<li><a href="https://neosmart.net/wiki/mbr-boot-process/">NeoSmart: The BIOS/MBR Boot Process</a></li>
+<li><a href="https://0pointer.net/blog/linux-boot-partitions.html">Lennart Poettering - Linux Boot Partitions and How to Set Them Up</a></li>
+<li><a href="https://en.wikipedia.org/wiki/initramfs">Wikipedia:initramfs</a></li>
+<li><a href="https://web.archive.org/web/20150430223035/http://archlinux.me/brain0/2010/02/13/early-userspace-in-arch-linux/">Early Userspace in Arch Linux</a></li>
+<li><a href="https://www.linux.com/learn/kernel-newbie-corner-initrd-and-initramfs-whats">Kernel Newbie Corner: initrd and initramfs</a></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 7 bootup"><a href="https://man.archlinux.org/man/bootup.7">bootup(7)</a></span>（主要涉及 systemd 早期用户空间部分）</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807031418
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.357 seconds
+Real time usage: 0.369 seconds
+Preprocessor visited node count: 1409/1000000
+Revision size: 21833/2097152 bytes
+Post‐expand include size: 25696/2097152 bytes
+Template argument size: 7934/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 6/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.023/7.000 seconds
+Lua memory usage: 845664/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  150.417      1 -total
+ 33.88%   50.968      7 Template:Link-en
+  7.77%   11.695      1 Template:警告
+  5.85%    8.801     19 Template:META_Table_cell
+  5.43%    8.161      7 Template:G
+  4.57%    6.870      8 Template:Y
+  4.31%    6.482     36 Template:是
+  3.66%    5.501      6 Template:Man
+  3.42%    5.142      1 Template:Note
+  3.08%    4.636      2 Template:Grey
+-->
+<!-- Render ID 1386ed0f-920e-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2787:|#|:idhash:canonical!zh-cn and timestamp 20260807031418 and revision id 34665. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

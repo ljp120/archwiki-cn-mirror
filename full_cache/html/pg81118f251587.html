@@ -1,0 +1,437 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg81118f251587">罗技木星轨迹球</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN">
+<p><b>罗技木星轨迹球</b>具有四个按键，且是对称的，因而不论左右手都适合使用。<a href="https://secure.logitech.com/assets/21083/21083.png">Picture</a>缺点是不具滚轮功能，但可以设定来启用此功能。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg81118f251587_.E5.AE.89.E8.A3.9D" id="安裝"><span id=".E5.AE.89.E8.A3.9D"></span>安装</h2></div>
+<p>无缺额外驱动程式。在系统启动或在已开启系统中连接时，即可侦测到罗技木星。罗技木星虽然可以当作一般鼠标来使用，不进行设定，然而你可能想要启用滚轮功能或客制化按键。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg81118f251587_.E5.9F.BA.E6.9C.AC.E5.8A.9F.E8.83.BD" id="基本功能"><span id=".E5.9F.BA.E6.9C.AC.E5.8A.9F.E8.83.BD"></span>基本功能</h2></div>
+<p>无论何种硬件设定，木星的硬件ID固定的。
+</p><p>当没有额外设定时，按钮会为下列功能：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>ID</th>
+<th>硬件动作</th>
+<th>结果
+</th></tr>
+<tr>
+<td>1</td>
+<td>左大按键</td>
+<td>左键
+</td></tr>
+<tr>
+<td>2</td>
+<td>双击（大按键）</td>
+<td>中键  †
+</td></tr>
+<tr>
+<td>3</td>
+<td>右大按键</td>
+<td>右键
+</td></tr>
+<tr>
+<td>4</td>
+<td>“无”</td>
+<td>-
+</td></tr>
+<tr>
+<td>5</td>
+<td>“无”</td>
+<td>-
+</td></tr>
+<tr>
+<td>6</td>
+<td>“无”</td>
+<td>-
+</td></tr>
+<tr>
+<td>7</td>
+<td>“无”</td>
+<td>-
+</td></tr>
+<tr>
+<td>8</td>
+<td>左小按键</td>
+<td>上一页
+</td></tr>
+<tr>
+<td>9</td>
+<td>右小按键</td>
+<td>下一页
+</td></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>大按键双产生“中键”</li>
+<li>†  同时按压按键需要 <code>Emulate3buttons</code>.</li>
+<li>本文中“中键”、“滚轮键”同意义。</li>
+<li>“选择键”、“右键”同义，一般用于弹出选单。</li>
+<li>以上结果，不按压修正键（modifier key）</li>
+<li>若按压修正键结果可能不相同</li></ul></div>
+<table class="wikitable">
+<tbody><tr>
+<th>ID</th>
+<th>硬件动作</th>
+<th>结果
+</th></tr>
+<tr>
+<td>4</td>
+<td>球体向下</td>
+<td>鼠标向下
+</td></tr>
+<tr>
+<td>5</td>
+<td>球体向上</td>
+<td>鼠标向上
+</td></tr>
+<tr>
+<td>6</td>
+<td>球体向左</td>
+<td>鼠标向左
+</td></tr>
+<tr>
+<td>7</td>
+<td>球体向右</td>
+<td>鼠标向右
+</td></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>不使用修正键时，鼠标移动。</li>
+<li>使用修正键时，结果可能不尽相同。</li>
+<li>“修正键”可以是一个键盘按键（如：Ctrl）或是木星上的按键。</li></ul></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>当<b>scroll mod­ifier</b>按压同时滚动轨迹球，便可将轨迹球当滚轮使用。你必需到少配置<b><a href="#pg81118f251587_Minimal_configuration">minimal configuration</a></b>来启用这个功能。</div>
+<p>在“滚轮模式”使用轨迹球时，也可使用一些鼠标手势的功能，例如，在同时按压Ctrl键跟滚动滚轮可以缩放浏览器中的字体。使用轨迹球时，则需同时按压Ctrl与“滚轮模式按压键”来触发功能。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg81118f251587_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<p>你可以参考及尝试这个<a href="#pg81118f251587_Sample_configuration">简易配置</a>。
+</p><p>这个配置含有一些资讯，大部分的Arch使用者使用的现行X server的配置是需要udev热插拔。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>可参考May 2012五月的这篇<a href="https://who-t.blogspot.com.au/2011/04/gnome-30-middle-mouse-button-emulation.html">Gnome 3 and middle click emulation</a>. See #双击大按键</div>
+<p>可在Ubuntu 12.04 的Gnome 3环境下使用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg81118f251587_.E6.8C.89.E9.8D.B5.E8.88.87.E8.BB.8C.E8.B7.A1.E7.90.83" id="按鍵與軌跡球"><span id=".E6.8C.89.E9.8D.B5.E8.88.87.E8.BB.8C.E8.B7.A1.E7.90.83"></span>按键与轨迹球</h3></div>
+<pre><a href="#pg81118f251587_Configuration_file">簡單配置</a>依照你的喜好修改後，放置在正確位置即可使用。
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg81118f251587_.E6.8C.87.E5.AE.9A.E6.8C.89.E9.8D.B5" id="指定按鍵"><span id=".E6.8C.87.E5.AE.9A.E6.8C.89.E9.8D.B5"></span>指定按键</h4></div>
+<p>借由设定参数，你可以指定功能给不同按键。
+</p><p>按键的值可以修改为1、2、3、8、及9（2是双击两个大按键），但不要调整成4、5、6、或7。
+</p>
+<pre># 此行是不同的按鈕配置
+Option "ButtonMapping" "1 2 3 4 5 6 7 8 9"
+</pre>
+<p>左手使用需要使用不同的按钮动作。
+</p>
+<pre># 此行是左手使用都的按鈕配置（僅按鍵左右交換）
+Option "ButtonMapping" "3 2 1 4 5 6 7 8 9"
+</pre>
+<p>对小按钮，不喜欢“原始”配置可以修改按键的值
+</p><p>这一行修改按钮2成“上一页”。参数2（双击大按钮）的值修改9，改成“上一页”。此行也将参数8、9的值都改为2，使两个小按钮都各别修改成“中键”。
+</p>
+<pre># 這是給右手使用者的，修改了三個按鈕
+Option "ButtonMapping" "1 9 3 4 5 6 7 2 2"
+</pre>
+<p>参数按顺序排列，参数1、2、3、8、9可修改，但轨迹的移动的参数4、5、6、7 不要修改。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg81118f251587_.E9.9B.99.E6.93.8A.E5.A4.A7.E6.8C.89.E9.8D.B5" id="雙擊大按鍵"><span id=".E9.9B.99.E6.93.8A.E5.A4.A7.E6.8C.89.E9.8D.B5"></span>双击大按键</h4></div>
+<p>如前述，参数2是表示两个大按键同时按下。
+</p><p>经试验，在缺少设定的情形下，会产生不可确定的结果， 而非预期的“中键”。然而，若要双击能正确使用，你需要启用“相黏键”功能：
+</p>
+<pre># Emulate3Buttons 係指同時按下按鍵A與D
+# 同時按可以模擬「中鍵」或「滾輪鍵」
+Option "Emulate3Buttons" "true"
+</pre>
+<p>可以使用预设2（滚轮键），请参<a href="#pg81118f251587_Minimal_configuration">minimal configuration</a>。
+</p><p>在2012五月些文章<a href="https://who-t.blogspot.com.au/2011/04/gnome-30-middle-mouse-button-emulation.html">Gnome 3 and middle click emulation</a>显示，在ubuntu 12.04 Gnome 3的环境下，预设值会变成 “false”而成为“中键”，原因是Gnome在Xorg进行设定（即Gnome的设定覆盖了Xorg的设定），使的模拟被取消了。可由以下令命修正Gnome的行为：
+</p>
+<pre>gsettings set org.gnome.settings-daemon.peripherals.mouse middle-button-enabled true
+</pre>
+<p>每个使用者仅需下一次令命即可，Gnome会记得这个设定。如果你感兴趣可以参考 <a href="https://bugs.launchpad.net/ubuntu/+source/xserver-xorg-input-evdev/+bug/874237/comments/13">launchpad bug</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg81118f251587_.E6.BB.BE.E8.BC.AA.E4.BF.AE.E6.AD.A3.E9.8D.B5" id="滾輪修正鍵"><span id=".E6.BB.BE.E8.BC.AA.E4.BF.AE.E6.AD.A3.E9.8D.B5"></span>滚轮修正键</h4></div>
+<p>罗技木星轨迹球的一个严重缺点是没有滚轮或是滚轮环，但可以借由设定“滚轮修正键”来克服这个问题，即按下一个按钮，使得轨迹球的滚动变成滚轮。虽然，预设已有提供滚轮修正键的功能(参基本功能)，但滚动修正键并没有被启用。若要启用，必需设定给不同的按键。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>除了滚动功能外，滚轮键还有“点”的功能。滚轮修正键的“长压”与“点”的功能是分开的，较佳可将两个小按键之一设定成滚轮修正键。 原本小按键的预设功能也不甚方便，我建议你重新设定它们。</div>
+<p>小按键的原设定是滚动修正键，但同时该小按键的“点”的预设功能是“上一页”，根据多年的使用经验，建议设成“中键”。
+</p><p>撇开关于小按键的抱怨不谈，你可以如下设定“滚轮修正键”
+</p>
+<pre>Option "EmulateWheel" "true"
+Option "EmulateWheelButton" "8"
+
+# 按鍵8是左邊的小按鍵，適合右手使用者。
+# 按鍵9是右邊的小按鍵，適合左手使用者。
+# 按鍵2不可設定成「滾輪修正鍵」（又稱做"EmulateWheelButton"）
+</pre>
+<p><b>取消水平卷动</b>
+你可以取消下行的注解，来取消水平卷动。
+</p>
+<pre># 井字號是註解
+# Option "XAxisMapping" "6 7"
+</pre>
+<p>虽然我使用两个方向的卷动，但不少人认为单一方向的卷动比较好用。
+也许你想尝试取消垂直方向的卷动，但是类似设定是不能取消垂直方向卷动的。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg81118f251587_.E5.B7.A6.E6.92.87.E5.AD.90.E6.88.96.E5.8F.B3.E6.92.87.E5.AD.90" id="左撇子或右撇子"><span id=".E5.B7.A6.E6.92.87.E5.AD.90.E6.88.96.E5.8F.B3.E6.92.87.E5.AD.90"></span>左撇子或右撇子</h3></div>
+<p>前面章节已经说明如何设定给右手或左手使用的设置。
+</p>
+<ul><li>你可能经常的左右手交替使用</li>
+<li>我会在我感到不适前交替</li></ul>
+<p>为了左右手交替，我会手动修改配置（加注一些内容）后<a href="#pg81118f251587_Restarting_X">重启X server</a>。你也可以依你需要自已写一些Script自动化这些步骤。
+</p>
+<ul><li>在Arch Linux上，我建议使用轻量的<b><a href="#pg8bc45a0eb197">Openbox</a></b>做视窗管理。</li></ul>
+<p>在其他的桌面环境中，可能有一些简单（或复杂）的小工具做左右手交替的设定。例如，Ubuntu 10.10中，你可以点击一个鼠标控制的面版按钮即进行交替。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg81118f251587_System_wide_or_per_user" id="System-wide_or_per-user">System-wide or per-user</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong> Section undergoing revision. Please jump to the sample configuration </div>
+<p>If you want the configuration to be system wide, you can add this line to the InputDevice-Section.
+</p>
+<pre>Option "ButtonMapping" "1 8 3 2 9"
+</pre>
+<p>For a per-user-configuration you need to put this in your ~/.Xmodmap
+</p>
+<pre>pointer = 1 8 3 4 5 6 7 2 9 10 11 12 13
+</pre>
+<p>or this in your ~/.xinitrc.
+</p>
+<pre>xmodmap -e "pointer = 1 8 3 4 5 6 7 2 9 10 11 12 13"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg81118f251587_Xorg_input_hotplugging" id="Xorg_input_hotplugging">Xorg input hotplugging</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong> Section undergoing revision. Please jump to the sample configuration </div>
+<p>Two expositions help you configure a trackball with buttons for click, middle-click, right-click, and scrolling. The first exposition uses <a href="#pga36c0aff60be">Xorg Input Hotplugging</a>; the second does not. Edit them to suit your preferences.
+</p><p>Add this entry to your <code>/etc/X11/xorg.conf</code>:
+</p>
+<pre>Section "InputClass"
+    Identifier   "Logitech Trackball"
+    MatchProduct "Trackball"
+    Option       "ButtonMapping"      "1 8 3 4 5 6 7 2 9"
+    Option       "EmulateWheel"       "True"
+    Option       "EmulateWheelButton" "9"
+    Option       "XAxisMapping"       "6 7"
+EndSection
+</pre>
+<p>To learn more about the used parameters you should read the apropriate section in the evdev man page.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg81118f251587_Without_Xorg_hotplugging" id="Without_Xorg_hotplugging">Without Xorg hotplugging</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong> Section undergoing revision. Please jump to the sample configuration </div>
+<p>The mouse device entry in <code>/etc/X11/xorg.conf</code> should look like this:
+</p>
+<pre>Section "InputDevice"
+    Identifier "Mouse0"
+    Driver     "mouse"
+    Option     "CorePointer"
+    Option     "Device"             "/dev/input/mice"
+    Option     "Protocol"           "ExplorerPS/2"
+    Option     "Buttons"            "9"
+    Option     "ZAxisMapping"       "4 5"
+    Option     "XAxisMapping"       "6 7"
+    Option     "EmulateWheelButton" "9"
+    Option     "EmulateWheel"       "true"
+EndSection
+</pre>
+<p>The <code>"Auto"</code> option for <code>"Protocol"</code> works fine, too.
+Of course you can use the name you prefer as the <code>Identifier</code>, as long as it is the same you use as <code>InputDevice</code> in the <code>Section "ServerLayout"</code> .
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg81118f251587_Sample_configuration" id="Sample_configuration">Sample configuration</h2></div>
+<p>The sample configuration modifies and extends the basic function of the Marble Mouse.
+</p><p>In this example, either of the two small buttons may be clicked to send a <i><b>wheel-click</b></i>. Wheel-click means the same as "middle-click" here. In addition, one of the small buttons provides <i><b>scrolling</b></i> in conjunction with the trackball. Note that only <i>one</i> small button has the ability for scrolling, although both small buttons are able to <i>wheel-click.</i>
+</p><p>Finally, clicking both large buttons simultaneously sends the <i><b>browser back</b></i> event. There is no button to send <i>browser forward</i>.
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>ID</th>
+<th>Hardware Action</th>
+<th>Result (this configuration)</th>
+<th>New assignment
+</th></tr>
+<tr>
+<td>1</td>
+<td>Large button left</td>
+<td>normal click</td>
+<td>1
+</td></tr>
+<tr>
+<td>2</td>
+<td>Both large buttons</td>
+<td>browser back</td>
+<td>8
+</td></tr>
+<tr>
+<td>3</td>
+<td>Large button right</td>
+<td>right-click</td>
+<td>3
+</td></tr>
+<tr>
+<td>8</td>
+<td>Small button left  †</td>
+<td>wheel-click</td>
+<td>2
+</td></tr>
+<tr>
+<td>9</td>
+<td>Small button right  ‡</td>
+<td>wheel-click</td>
+<td>2
+</td></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>Both large buttons pressed simultaneously results in <i>browser back</i>.</li>
+<li>Either small button, when clicked, results in <i>middle-click</i>.</li>
+<li>†  This small button allows trackball scrolling when held down. It is the scroll modifier.</li>
+<li>‡  This button can be mapped for scrolling function instead. This button works better for left-side placement because it lies near the thumb of one's left-hand. Only one button can be assigned as the scroll modifier as far as I know.</li></ul></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg81118f251587_Configuration_file" id="Configuration_file">Configuration file</h3></div>
+<p>The following lines are appended to <b><code>/etc/X11/xorg.conf.d/10-evdev.conf</code></b>
+</p><p><b>Note:</b> <i>Users of other Linux distributions may find the configuration file in another location. Ubuntu uses /usr/share/X11/xorg.conf.d/10-evdev.conf</i>
+</p><p>This example is set up for right-hand placement with horizontal scrolling disabled.
+</p>
+<pre>#       - - - Logitech Marble Mouse Settings - - -
+#
+#       The Logitech Marble Mouse buttons are mapped [A-D] from left to right: 
+#       A (large); B (small) |  C (small); D (large). 
+#
+#       Preferred options for right-handed usage:
+#       A = normal click [1]  
+#       B = middle-click [2] 
+#       C = middle-click [2] 
+#       D = right-click [3]
+#       Hold button B while rolling trackball to emulate wheel-scrolling. 
+#
+#       Preferred options for left-handed usage:
+#       A = right-click [3]  
+#       B = middle-click [2] 
+#       C = middle-click [2]
+#       D = normal click [1]
+#       Hold button C while rolling trackball to emulate wheel-scrolling.
+#       Pressing both large buttons simultaneously (b) produces a "back" action.
+
+Section "InputClass"
+        Identifier  "Marble Mouse"
+        MatchProduct "Logitech USB Trackball"
+        MatchIsPointer "on"
+        MatchDevicePath "/dev/input/event*"
+        Driver "evdev"
+
+#       Physical button #s:     A b D - - - - B C    
+#       Option "ButtonMapping" "1 8 3 4 5 6 7 2 2"   right-hand placement
+#       Option "ButtonMapping" "3 8 1 4 5 6 7 2 2"   left-hand placement
+#       b = A &amp; D 
+        Option "ButtonMapping" "1 8 3 4 5 6 7 2 2"
+
+#       EmulateWheel: Use Marble Mouse trackball as mouse wheel 
+#       Factory Default: 8; Use 9 for right side small button
+        Option "EmulateWheel" "true"
+        Option "EmulateWheelButton" "8"
+
+#       EmulateWheelInertia: How far (in pixels) the pointer must move to
+#       generate button press/release events in wheel emulation mode.
+#       Factory Default: 50
+        Option "EmulateWheelInertia" "10"
+
+#       Axis Mapping: Enable vertical [ZAxis] and horizontal [XAxis] scrolling
+        Option "ZAxisMapping" "4 5"
+#       Option "XAxisMapping" "6 7"
+
+#       Emulate3Buttons: Required to interpret simultaneous press of two large
+#       buttons, A &amp; D, as a seperate command, b.
+#       Factory Default: true
+        Option "Emulate3Buttons" "true"
+EndSection
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg81118f251587_Restarting_X" id="Restarting_X">Restarting X</h3></div>
+<p>Changes made to xorg configuration files do not take effect until the X session is restarted. To restart the X session, simply log out from your window manager and log back in.
+</p><p>Or, depending on what display manager you use, you can use one of the following commands:
+</p><p>Default Ubuntu (with LightDM) : <code>sudo restart lightdm</code>
+</p><p>Gnome (with GDM) : <code>sudo restart gdm</code>
+</p><p>KDE (with KDM) : <code>sudo restart kdm</code>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg81118f251587_Minimal_configuration" id="Minimal_configuration">Minimal configuration</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg81118f251587_Using_evdev" id="Using_evdev">Using evdev</h3></div>
+<p>At times it can be useful to start with the absolute minimum and build from there. This is one facet of <a href="#pg506f4b58911b">The Arch Way</a>. In this spirit, I decided to see how few lines I might use to create a usable Marble Mouse configuration.
+</p><p>You can omit <i>all</i> configuration lines and the Marble Mouse is still usable for basic pointing and clicking. However, it will not be able to scroll. The "both-large-button" simultaneous click produces indeterminate results — experimentation shows this.
+</p><p>Given that you are satisfied with default button settings and you wish only to enable scrolling and the "both-large-button" click, you need these lines. The following lines are appended to <b><code>/etc/X11/xorg.conf.d/10-evdev.conf</code></b>.
+</p>
+<pre>Section "InputClass"
+        Identifier  "Marble Mouse"
+        MatchProduct "Logitech USB Trackball"
+        Option "EmulateWheel" "true"
+        Option "EmulateWheelButton" "8"
+        Option "XAxisMapping" "6 7"
+        Option "Emulate3Buttons" "true"
+EndSection
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg81118f251587_Using_libinput" id="Using_libinput">Using libinput</h3></div>
+<p>As of version 3.16 GDM/Gnome uses libinput. For the device to work as described in the above section (note that wheel click emulation is not yet supported by libinput) you need to install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-libinput">xf86-input-libinput</a></span><sup><small>包</small></sup></span> and instead append this to <code>/etc/X11/xorg.conf.d/10-libinput.conf</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/10-libinput.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "InputClass"
+        Identifier      "Marble Mouse"
+        MatchProduct    "Logitech USB Trackball"
+        Driver          "libinput"
+        Option          "ScrollMethod" "button"
+        Option          "ScrollButton" "8"
+EndSection
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg81118f251587_Additional_tweaks" id="Additional_tweaks">Additional tweaks</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg81118f251587_Console_.28gpm.29" id="Console_(gpm)"><span id="Console_.28gpm.29"></span>Console (gpm)</h3></div>
+<p>See <a href="#pg2471f3b99906">Console mouse support</a> for details. Within the console you can use <code>gpm</code> with type option set to <b>imps2</b>. Edit <b><code>/etc/conf.d/gpm</code></b> such that:
+</p>
+<pre>GPM_ARGS="-m /dev/input/mice -t imps2"
+</pre>
+<p>This lets you use the large left button for selecting text and the right button to extend the selection. The small left button acts as a middle-click; it pastes the selection.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg81118f251587_Chromium_browser" id="Chromium_browser">Chromium browser</h3></div>
+<p>By default, Chromium treats a middle-click as a <i>paste</i> command. This choice stems from "Linux tradition", not the capricious whim of one developer. Like myself, you may prefer a <i><b>Windows</b></i> approach. I want the middle button(s) to initiate <i>automatic scrolling,</i> not <i>pasting</i>:
+</p>
+<ul><li>A browser extension <b>AutoScroll</b> allows middle-click to initiate automatic scrolling.</li>
+<li>This extension is helpful for any Linux user with a wheel mouse, not just Marble Mouse users.</li>
+<li>A middle-click initiates automatic scrolling when clicked on a blank area of a web page.</li></ul>
+<ul><li>When you program both small buttons to emit middle-click, either button can initiate automatic scrolling. That is a click function.</li>
+<li>When you program one of the small buttons to act as scroll modifier (mouse setup), you can manually scroll web pages <b>without</b> fixing the browser. That is a press‑and‑hold function. (I recommend installing AutoScroll even though it is not absolutely necessary for scrolling.)</li>
+<li>After you assign the scroll modifier to one of the small buttons, the small buttons act a bit differently from one another. The difference is seen when you compare their "press‑and‑hold" behaviors.</li></ul>
+<p>Be sure to install <i><b>AutoScroll</b></i>;  the similarly-named <i>Auto Scroll</i> extension implements a different feature.
+</p><p>This information also applies to the browser called <b>Google Chrome</b>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg81118f251587_Firefox_browser" id="Firefox_browser">Firefox browser</h3></div>
+<p>Older versions of Firefox map horizontal-scrolling hardware to perform <i><b>browser back</b></i> and <i><b>browser forward</b></i> navigation.
+</p><p>This makes vertical scrolling using the trackball almost impossible.
+</p><p>The slightest horizontal motion triggers a URL redirection. To fix this:
+</p>
+<ul><li>Enter <code>about:config</code> in the location bar</li>
+<li>Find the internal variable named <code>mousewheel.horizscroll.withnokey.action</code>. Set its value to <b>0</b>.</li>
+<li>It may be useful to set <code>mousewheel.horizscroll.withnokey.numlines</code> to <b>1</b> as well.</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg81118f251587_See_also" id="See_also">See also</h2></div>
+<ul><li>Arch wiki documentation: <a href="#pg2b3d332f6a6c">All Mouse Buttons Working</a></li>
+<li>Arch wiki documentation: <a href="#pga36c0aff60be">Xorg#Configuration</a></li>
+<li>Marble mouse scroll wheel: <a href="https://web.archive.org/web/20120711134845/http://simans.net/marble/">Replacement for SetPoint driver</a></li>
+<li>Joe Shaw blog post: <a href="https://joeshaw.org/2010/10/01/681/">Linux input ecosystem</a></li>
+<li>Ubuntu community: <a href="https://help.ubuntu.com/community/Logitech_Marblemouse_USB">Logitech Marble Mouse</a></li>
+<li>Chrome web store: <a href="https://chrome.google.com/webstore/detail/occjjkgifpmdgodlplnacmkejpdionan">AutoScroll extension</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808041344
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.125 seconds
+Real time usage: 0.128 seconds
+Preprocessor visited node count: 316/1000000
+Revision size: 18421/2097152 bytes
+Post‐expand include size: 5067/2097152 bytes
+Template argument size: 2646/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 247/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   20.446      1 -total
+ 24.20%    4.948      1 Template:过时
+ 15.18%    3.104      1 Template:META_Message
+ 14.56%    2.977      9 Template:注意
+ 13.68%    2.797     19 Template:Ic
+  9.53%    1.948      1 Template:Pkg
+  6.15%    1.257      1 Template:Hc
+  4.86%    0.993      1 Template:META_Unexplained_Status_Template
+-->
+<!-- Render ID 8b71180e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7051:|#|:idhash:canonical!zh-cn and timestamp 20260808041344 and revision id 33842. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,127 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg550eb4ccbb57">深度桌面环境</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><a href="https://www.deepin.org/dde/">深度桌面环境</a> (Deepin Desktop Environment, DDE) 是 Linux 发行版 Deepin 的桌面环境。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg550eb4ccbb57_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>如果你想安装一个最小化的 DDE，<a href="#pg3296932e5bbe">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/deepin/">deepin</a></span><sup><small>包组</small></sup></span> 组即可。这将安装所有基础组件。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/deepin-extra/">deepin-extra</a></span><sup><small>包组</small></sup></span> 组包含了一些额外的应用程序来提供一个更完整的桌面环境。
+</p><p>要能够使用内置的网络管理，需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=networkmanager">networkmanager</a></span><sup><small>包</small></sup></span> 包，并且 <code>NetworkManager.service</code> 需要被<a href="#pgac06dd8bfe95">激活并设为开机自启</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg550eb4ccbb57_.E5.90.AF.E5.8A.A8" id="启动"><span id=".E5.90.AF.E5.8A.A8"></span>启动</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg550eb4ccbb57_.E9.80.9A.E8.BF.87.E6.98.BE.E7.A4.BA.E7.AE.A1.E7.90.86.E5.99.A8" id="通过显示管理器"><span id=".E9.80.9A.E8.BF.87.E6.98.BE.E7.A4.BA.E7.AE.A1.E7.90.86.E5.99.A8"></span>通过显示管理器</h3></div>
+<p><i><b>无需修改此配置文件，DDE会自己完成更改操作</b></i>，只需启用 <code>lightdm.service</code> 服务即可。 
+</p><p>要使用 DDE 默认的 lightdm greeter，你必须修改 <code>[Seat:*]</code> 部分下的配置文件以声明：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/lightdm/lightdm.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Seat:*]
+...
+greeter-session=lightdm-deepin-greeter</pre>
+<p>需要注意的是，非 root 用户需要存在有效的主目录才能使 greeter 工作。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg550eb4ccbb57_.E9.80.9A.E8.BF.87_xinit" id="通过_xinit"><span id=".E9.80.9A.E8.BF.87_xinit"></span>通过 xinit</h3></div>
+<p>要通过 <a href="#pg9fc1e9437ae5">xinit</a> 使用 DDE，你需要添加以下内容到你的 .xinitrc 文件。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xinitrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">exec startdde</pre>
+<p>Execute <code>startx</code> or <code>xinit</code> to start DDE.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果你想在开机时自动启动xorg，请参阅 <a href="#pgd6ac85c06c95">Start X at login</a> .</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg550eb4ccbb57_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg550eb4ccbb57_.E8.87.AA.E5.AE.9A.E4.B9.89.E8.A7.A6.E6.91.B8.E6.9D.BF.E6.89.8B.E5.8A.BF" id="自定义触摸板手势"><span id=".E8.87.AA.E5.AE.9A.E4.B9.89.E8.A7.A6.E6.91.B8.E6.9D.BF.E6.89.8B.E5.8A.BF"></span>自定义触摸板手势</h3></div>
+<p>deepin官方没有提供自定义触摸板手势，但我们可以通过修改配置文件的方式来自定义触摸板。
+</p><p>配置文件目录：
+</p>
+<pre>/usr/share/dde-daemon/gesture.json
+</pre>
+<p>如果想要禁止某项手势，把Action设置为none。例如：
+</p>
+<pre>{
+       "Name": "tap",
+       "Direction": "none",
+       "Fingers": 3,
+       "Action": {
+           "Type": "built-in",
+           "Action": "none"
+       }
+}
+</pre>
+<p>设置完后注销或重启使其生效。
+</p><p>也可以尝试第三方的编辑工具 <a href="https://github.com/debuggerx01/dde_gesture_manager">debuggerx01/dde_gesture_manager</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg550eb4ccbb57_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg550eb4ccbb57_.E4.BB.8E.E5.BE.85.E6.9C.BA.E7.8A.B6.E6.80.81.E6.81.A2.E5.A4.8D.E5.90.8E.E6.B2.A1.E6.9C.89.E8.83.8C.E6.99.AF" id="从待机状态恢复后没有背景"><span id=".E4.BB.8E.E5.BE.85.E6.9C.BA.E7.8A.B6.E6.80.81.E6.81.A2.E5.A4.8D.E5.90.8E.E6.B2.A1.E6.9C.89.E8.83.8C.E6.99.AF"></span>从待机状态恢复后没有背景</h3></div>
+<p>由于 NVIDIA 驱动存储其 FBO 的方式<a href="https://devtalk.nvidia.com/default/topic/787748/linux/-nvidia340xx-archlinux64-gnome3-14-the-background-of-desktop-and-lockscreen-mess-after-resume-from-/post/4367179/#4367179">[1]</a>，从待机状态下恢复后背景突然消失，仅留下一个可能带有一些颜色噪音的白色屏幕。这个 bug 似乎在 GNOME 上游被修复，但在 DDE 中仍然存在。
+</p><p>一个可能的解决方法是在每次计算机从待机中恢复时重启窗口管理器。完成这项任务的一个方式是创建下列的 systemd 服务
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/resume@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=User resume actions
+After=suspend.target
+
+[Service]
+User=%I
+Type=simple
+ExecStart=/usr/bin/deepin-wm-restart.sh
+
+[Install]
+WantedBy=suspend.target
+</pre>
+<p>来运行下列的脚本
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/bin/deepin-wm-restart.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+export DISPLAY=:0
+deepin-wm --replace
+</pre>
+<p>一旦在正确的目录中创建了这两个文件，要启用这个脚本，只需要运行这些命令：
+</p>
+<pre># chmod +x /usr/bin/deepin-wm-restart.sh
+# systemctl enable resume@<i>user</i>
+# systemctl start resume@<i>user</i> 
+</pre>
+<p>第一个命令使你创建的脚本可执行，第二个命令确保服务始终在开机时启动，最后一个命令使服务立即启动，因此你可以测试解决方法而无需重启。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg550eb4ccbb57_.E6.97.A0.E7.BA.BF.E7.BD.91.E7.BB.9C.E6.97.A0.E6.B3.95.E8.BF.9E.E6.8E.A5" id="无线网络无法连接"><span id=".E6.97.A0.E7.BA.BF.E7.BD.91.E7.BB.9C.E6.97.A0.E6.B3.95.E8.BF.9E.E6.8E.A5"></span>无线网络无法连接</h3></div>
+<p>网络管理器会随即生成并设置MAC地址。这是默认选项，如果要禁止它，将下面的几行加入到网络管理器的配置文件中。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/NetworkManager/NetworkManager.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[device]
+wifi.scan-rand-mac-address=no
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg550eb4ccbb57_.E6.8A.A5.E5.91.8A_Bug" id="报告_Bug"><span id=".E6.8A.A5.E5.91.8A_Bug"></span>报告 Bug</h2></div>
+
+<p>任何上游或 Arch 打包相关 bug 应在<a href="https://github.com/linuxdeepin/developer-center/issues">这里</a>报告。所有的深度开发人员将看见 bug 报告并且尽可能快地解决它们。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807220145
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.164 seconds
+Real time usage: 0.168 seconds
+Preprocessor visited node count: 194/1000000
+Revision size: 4124/2097152 bytes
+Post‐expand include size: 3158/2097152 bytes
+Template argument size: 989/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 258/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   19.529      1 -total
+ 21.63%    4.224      1 Template:Expansion
+ 14.23%    2.779      2 Template:Grp
+ 10.73%    2.095      5 Template:Hc
+  9.98%    1.950      1 Template:Pkg
+  8.69%    1.697      1 Template:META_Message
+  7.83%    1.529      5 Template:Ic
+  5.20%    1.016      1 Template:Bc
+  4.80%    0.938      1 Template:注意
+-->
+<!-- Render ID 9447f68e-92ab-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2991:|#|:idhash:canonical!zh-cn and timestamp 20260807220145 and revision id 35031. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

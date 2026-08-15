@@ -1,0 +1,406 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg52b00790fb44">dm-crypt/系统配置</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Dm-crypt/System_configuration">Dm-crypt/System_configuration</a>，最近一次同步于 2025-07-17，若英文版本有所<a href="https://wiki.archlinux.org/title/Dm-crypt/System_configuration?diff=0&amp;oldid=841168">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Dm-crypt_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/System_configuration_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>若需要在启动早期阶段远程解密分区（例如，解密没有显示输出的设备或远程服务器），参考<a href="#pg2d5af776f6fd">Dm-crypt/特殊应用#远程解锁分区</a>。</li>
+<li>使用支持直接将命令输出插入到所编辑的文本中的<a href="#pg581be9986cc0">文本编辑器</a>，可以便于在修改配置文件时输入UUID、PARTUUID等内容。例如，对于<a href="#pg431294adbe18">nano</a>，可使用<code>Ctrl+t</code>；对于<a href="#pg74a2a3e4814c">vim</a>或<a href="#pgb11b7c104bf6">Neovim</a>，可使用<code>:read</code>；对于<a href="#pg263748879d82">mcedit</a>，可使用<code>Alt+u</code>。接下来，可使用<a href="#pgd2fddf50b50f">lsblk、blkid命令及恰当的参数</a>，输出并插入所需内容。或者，也可以使用<a href="#pga96df2a9d88c">终端多路复用器</a>的复制、粘贴功能。</li></ul>
+</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg52b00790fb44_.E5.9C.A8.E6.97.A9.E6.9C.9F.E7.94.A8.E6.88.B7.E7.A9.BA.E9.97.B4.E8.A7.A3.E5.AF.86" id="在早期用户空间解密"><span id=".E5.9C.A8.E6.97.A9.E6.9C.9F.E7.94.A8.E6.88.B7.E7.A9.BA.E9.97.B4.E8.A7.A3.E5.AF.86"></span>在早期用户空间解密</h2></div>
+<p>若要从加密的根文件系统启动，<a href="#pg5409190f7704">initramfs</a>需要包含能在早期用户空间（即initramfs阶段）解密卷的工具。一般使用<a href="#pgec0856954f1c">内核参数</a>指定要解密的卷。
+</p><p>下列小节介绍了如何配置mkinitcpio以生成所需的initramfs，以及所需的内核参数。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg52b00790fb44_mkinitcpio" id="mkinitcpio">mkinitcpio</h3></div>
+<p>依据具体的配置，需要启用如下<a href="#pgbd0f46fbac92">mkinitcpio钩子</a>中的部分：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>busybox</th>
+<th>systemd</th>
+<th>Use case
+</th></tr>
+<tr>
+<td style="text-align: center;white-space:nowrap;"><code>encrypt</code>
+</td>
+<td style="text-align: center;white-space:nowrap;"><code>sd-encrypt</code>
+</td>
+<td>若根分区是加密的，或者需要在根分区挂载<b>之前</b>挂载其它加密分区，则需要此钩子。在其它情况下，初始化脚本（例如，<code>/etc/crypttab</code> ）将解锁非根分区，故无需此钩子。注意，此钩子必须放置在<code>udev</code> / <code>systemd</code>钩子<b>之后</b>。
+</td></tr>
+<tr>
+<td colspan="2" style="text-align: center;white-space:nowrap;"><code>keyboard</code>
+</td>
+<td>需要，用于使得在早期用户空间可以使用键盘。
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>对于外设连接经常改变（即，后续启动时连接的外设可能和生成initramfs镜像时不一致）的系统（例如，使用外置键盘的笔记本、<a href="https://en.wikipedia.org/wiki/Headless_computer">headless系统</a>），建议将本钩子放置在<code>autodetect</code>之前，以便始终包含所有键盘驱动。否则，若在生成镜像时未连接外置键盘，但在启动时连接，则外置键盘可能由于缺少驱动而无法正常工作。</div>
+</td></tr>
+<tr>
+<td style="text-align: center;white-space:nowrap;"><code>keymap</code>
+</td>
+<td rowspan="2" style="text-align: center;white-space:nowrap;"><code>sd-vconsole</code>
+</td>
+<td>在输入密码时，提供非标准键盘布局支持。必须放置在<code>encrypt</code>钩子<b>之前</b>。在 <code>/etc/vconsole.conf</code> 中设置键盘布局，详见<a href="#pg0c4d7f41106e">控制台键盘配置持久化</a>。
+</td></tr>
+<tr>
+<td style="text-align: center;white-space:nowrap;"><code>consolefont</code>
+</td>
+<td>在早期用户空间加载非默认字体。在 <code>/etc/vconsole.conf</code> 中设置字体，详见<a href="#pg0c4d7f41106e">控制台键盘配置持久化</a>。
+</td></tr></tbody></table>
+<p><a href="#pgbd0f46fbac92">其它可能需要的钩子</a>参考相应配置方案的指南。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在修改<code>/etc/mkinitcpio.conf</code>后，应当<a href="#pg82461695094b">重新生成 initramfs</a>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg52b00790fb44_.E7.A4.BA.E4.BE.8B" id="示例"><span id=".E7.A4.BA.E4.BE.8B"></span>示例</h4></div>
+<p>对于基于busybox的initramfs，使用<code>encrypt</code>钩子时，典型的配置如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+HOOKS=(base <b>udev</b> autodetect microcode modconf kms keyboard <b>keymap</b> <b>consolefont</b> block <b>encrypt</b> lvm2 filesystems fsck)
+...</pre>
+<p>对于基于systemd的initramfs，使用<code>sd-encrypt</code>钩子时，典型的配置如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+HOOKS=(base <b>systemd</b> autodetect microcode modconf kms keyboard <b>sd-vconsole</b> block <b>sd-encrypt</b> lvm2 filesystems fsck)
+...</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg52b00790fb44_.E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0" id="内核参数"><span id=".E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0"></span>内核参数</h3></div>
+<p><code>encrypt</code>钩子和<code>sd-encrypt</code>钩子需要设定的<a href="#pgec0856954f1c">内核参数</a>不同。但<code>root</code>、<code>resume</code>参数的设定方式相同。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg52b00790fb44_root" id="root">root</h4></div>
+<p><code>root=</code>参数指定了解密后的、实际的根文件系统：
+</p>
+<pre>root=<i>device</i>
+</pre>
+<ul><li>若直接在加密设备上创建根文件系统，则为<code>/dev/mapper/<i>dmname</i></code>。</li>
+<li>若在LVM上层使用<a href="#pg29ec7c5af952">加密的逻辑卷</a>，则设置同上。</li>
+<li>若<a href="#pg29ec7c5af952">在加密设备上使用LVM</a>，则为<code>root=/dev/&lt;卷组名称&gt;/&lt;逻辑卷名称&gt;</code>。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>若使用<code>sd-encrypt</code>钩子以及<a href="#pgac06dd8bfe95">GPT分区自动挂载</a>，则无需指定<code>root=</code>参数。详见<a href="#pg29ec7c5af952">在单一分区上配置LUKS</a>。</li>
+<li>若使用<a href="#pgca9c4017f7ad">GRUB</a>，并通过<i>grub-mkconfig</i>生成<code>grub.cfg</code>配置文件，则无需手动设置<code>root=</code>参数。<i>grub-mkconfig</i>将自动检测解密后的根文件系统的UUID，并将其添加到<code>grub.cfg</code>中。</li></ul>
+</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg52b00790fb44_resume" id="resume">resume</h4></div>
+<pre>resume=<i>device</i>
+</pre>
+<ul><li><code><i>device</i></code> 应当为用于<a href="#pg146ac4b0e523">休眠</a>的设备文件或加密后的swap文件系统。对于单独的swap分区，该参数的值形如<code>/dev/mapper/swap</code>。详见<a href="#pg766573d7bb8e">Dm-crypt/交换分区加密</a>。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg52b00790fb44_encrypt.E9.92.A9.E5.AD.90" id="encrypt钩子"><span id="encrypt.E9.92.A9.E5.AD.90"></span>encrypt钩子</h4></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>相比<a href="#pg778e3d3578b8">sd-encrypt</a>钩子，<code>encrypt</code>不支持如下功能：
+<ul><li>解密<a href="#pg2d5af776f6fd">多个加密设备</a> (<a href="https://gitlab.archlinux.org/archlinux/mkinitcpio/mkinitcpio/-/issues/231">archlinux/mkinitcpio/mkinitcpio#231</a>)。在initramfs中只能解密<b>一个</b>设备。</li>
+<li>使用<a href="#pg2d5af776f6fd">分离的LUKS头</a> (<a href="https://gitlab.archlinux.org/archlinux/mkinitcpio/mkinitcpio/-/issues/234">archlinux/mkinitcpio/mkinitcpio#234</a>)。</li>
+<li>设置某些<a href="#pg52b00790fb44_crypttab">crypttab</a>支持的加密选项。</li></ul>
+</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg52b00790fb44_cryptdevice" id="cryptdevice">cryptdevice</h5></div>
+<p>指定在冷启动时包含加密的根分区的设备（加密容器）。<code>encrypt</code>钩子通过该参数判断哪个设备包含了加密的系统。
+</p>
+<pre>cryptdevice=<i>device</i>:<i>dmname</i>:<i>options</i>
+</pre>
+<ul><li><code><i>device</i></code>：包含加密容器的设备。强烈建议使用<a href="#pgd2fddf50b50f">块设备持久化命名</a>指定。</li>
+<li><code><i>dmname</i></code>：解密后产生的设备映射器名称（<b>d</b>evice-<b>m</b>apper name），设备解密后，可通过<code>/dev/mapper/<i>dmname</i></code>访问解密后的数据。</li>
+<li><code><i>options</i></code>：（可选），按逗号分隔的选项（例如，启用TRIM支持）。若无需额外指定选项，省略该参数（即，使用<code>cryptdevice=<i>device</i>:<i>dmname</i></code>）。</li>
+<li>若<a href="#pg29ec7c5af952">加密的根分区在LVM上</a>，则应当首先激活LVM，并设置<code><i>device</i></code>为<code>/dev/&lt;卷组名称&gt;/&lt;逻辑卷名称&gt;</code>。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>对于固态硬盘，可能需要<a href="#pg2d5af776f6fd">启用Discard/TRIM 支持</a>。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg52b00790fb44_cryptkey" id="cryptkey">cryptkey</h5></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若使用密码解密设备，则无需指定<code>cryptkey=</code>参数。在启动时，将提示输入密码。</div>
+<p>该参数指定了<code>encrypt</code>钩子用于解锁<code><i>cryptdevice</i></code>的密钥文件。若密钥放置在默认位置（详见下），无需手动指定此参数。
+</p><p>取决于密钥文件的存储位置，该参数有三种指定方式。
+</p><p>若密钥文件存储在某设备上的文件系统中，作为该文件系统中的一个文件：
+</p>
+<pre>cryptkey=<i>device</i>:<i>fstype</i>:<i>path</i>
+</pre>
+<ul><li><code><i>device</i></code>：存储密钥文件的设备。强烈建议使用<a href="#pgd2fddf50b50f">块设备持久化命名</a>指定。</li>
+<li><code><i>fstype</i></code>：存储密钥文件的设备的文件系统。或者，指定<code>auto</code>表示自动探测文件系统类型。</li>
+<li><code><i>path</i></code>：在该文件系统中，密钥文件的绝对路径。</li></ul>
+<p>例如：<code>cryptkey=LABEL=usbstick:vfat:/secretkey</code>
+</p><p>若密钥文件直接对应某一设备上的一段比特流：
+</p>
+<pre>cryptkey=<i>device</i>:<i>offset</i>:<i>size</i> 
+</pre>
+<p>offset表示比特流起始位置相对于设备首部的偏移量，size表示比特流长度。offset、size的单位都是字节。
+</p><p>例如：<code>cryptkey=UUID=<i>ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ</i>:0:512</code>从指定设备开头处读取512字节，作为密钥文件内容。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若要使用的设备路径包含字符“<code>:</code>”，需要使用反斜杠“<code>\</code>”转义。例如，对于ID为<code>usb-123456-0:0</code>的USB设备，可设置<code>cryptkey=/dev/disk/by-id/usb-123456-0\:0:0:512</code>。</div>
+<p>若密钥文件已<a href="#pgbd0f46fbac92">包含在initramfs中</a><a href="https://gitlab.archlinux.org/archlinux/packaging/packages/cryptsetup/-/blob/main/hooks-encrypt#L14">[1]</a>：
+</p>
+<pre>cryptkey=rootfs:<i>path</i>
+</pre>
+<p>例如：<code>cryptkey=rootfs:/secretkey</code>。
+</p><p>注意，若没有指定<code>cryptkey</code>，将默认尝试从initramfs中读取<code>/crypto_keyfile.bin</code>。<a href="https://gitlab.archlinux.org/archlinux/packaging/packages/cryptsetup/-/blob/main/hooks-encrypt#L8">[2]</a>
+</p><p>另见<a href="#pg88d6e7a842ae">Dm-crypt/设备加密#密钥文件</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg52b00790fb44_crypto" id="crypto">crypto</h5></div>
+<p>该参数专门用于传递dm-crypt plain模式的加密选项。
+</p><p>参数格式如下：
+</p>
+<pre>crypto=<i>hash</i>:<i>cipher</i>:<i>keysize</i>:<i>offset</i>:<i>skip</i>
+</pre>
+<p>参数内容直接与cryptsetup选项有关。参见<a href="#pg88d6e7a842ae">Dm-crypt/设备加密#plain模式的加密选项</a>。
+</p><p>即使设备采用plain模式的默认选项加密，也必须指定<code>crypto</code>参数。但该参数的每个部分都可以留空：
+</p>
+<pre>crypto=::::
+</pre>
+<p>该参数的具体例子如下：
+</p>
+<pre>crypto=sha512:twofish-xts-plain64:512:0:
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg52b00790fb44_.E4.BD.BF.E7.94.A8systemd-cryptsetup-generator" id="使用systemd-cryptsetup-generator"><span id=".E4.BD.BF.E7.94.A8systemd-cryptsetup-generator"></span>使用systemd-cryptsetup-generator</h4></div>
+<p><code>systemd-cryptsetup-generator</code>是用于解锁加密设备的<a href="#pgac06dd8bfe95">systemd</a>单元生成器。其将读取部分<a href="#pgec0856954f1c">内核参数</a>、<code>/etc/crypttab</code>以进行生成。关于其的详细叙述和支持的选项，参见<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-cryptsetup-generator"><a href="https://man.archlinux.org/man/systemd-cryptsetup-generator.8">systemd-cryptsetup-generator(8)</a></span>。
+</p><p>若使用<code>sd-encrypt</code><a href="#pgbd0f46fbac92">mkinitcpio钩子</a>、<code>systemd</code> <a href="#pgb185d4cf00ac">dracut模块</a>，则<code>systemd-cryptsetup-generator</code>将在<a href="#pg7e866ec617d4">initramfs阶段</a>运行。
+</p><p>下面将介绍部分<code>systemd-cryptsetup-generator</code>读取的<a href="#pgec0856954f1c">内核参数</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>若系统中存在<code>/etc/crypttab.initramfs</code>文件，则其将被复制到initramfs中的<code>/etc/crypttab</code>，以便指定需要在initramfs阶段解密的设备。该文件的语法详见<a href="#pg52b00790fb44_crypttab">#crypttab</a>。若不存在<code>/etc/crypttab.initramfs</code>文件，则initramfs中将不包含<code>/etc/crypttab</code>。此时必须通过下面介绍的内核参数指定要解密的设备。</li>
+<li>与<code>rd.luks</code>参数不同，<code>/etc/crypttab.initramfs</code>不局限于使用UUID指定设备。可以使用任何<a href="#pgd2fddf50b50f">块设备持久化命名方法</a>。</li>
+<li>若所有前提条件满足，则可以使用<a href="#pgac06dd8bfe95">GPT分区自动挂载</a>，在<code>/etc/crypttab.initramfs</code>中可使用<code>/dev/gpt-auto-root-luks</code>代指加密的根分区，而无需手动指定UUID、PARTUUID等设备标识符。详见#systemd-gpt-auto-generator。</li>
+<li>在解密过程中，输入的密码将被<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-cryptsetup"><a href="https://man.archlinux.org/man/systemd-cryptsetup.8">systemd-cryptsetup(8)</a></span>缓存到内核钥匙环中，故若多个设备使用相同的密码，只需要输入一次密码。钥匙环中缓存的密码还可用于在后期用户空间中解锁<a href="#pg52b00790fb44_crypttab">crypttab</a>中指定的其它设备。</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>所有<code>rd.luks</code>相关参数都可多次指定，以解密多个设备。</li>
+<li><code>rd.luks</code>相关参数仅支持解密LUKS设备。若要解密dm-crypt plain模式加密的设备，必须在<code>/etc/crypttab.initramfs</code>中指定。语法详见<a href="#pg52b00790fb44_crypttab">#crypttab</a>。</li>
+<li>在修改<code>/etc/crypttab.initramfs</code>后，需要<a href="#pg82461695094b">重新生成 initramfs</a>。</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>若同时使用<code>/etc/crypttab</code>/<code>/etc/crypttab.initramfs</code>配置文件和<code>luks.*</code>/<code>rd.luks.*</code>内核参数，则只有在内核参数中指定了的设备会被解密。对于crypttab中指定，但内核参数未指定的设备，将不会解密，并显示<code>Not creating device 'devicename' because it was not specified on the kernel command line.</code>警告。若要解密<code>/etc/crypttab</code>中指定的所有设备，不要设置<code>luks.*</code>内核参数，但仍可使用<code>rd.luks.*</code>内核参数指定initramfs阶段要解密的设备。若要解密<code>/etc/crypttab.initramfs</code>中指定的所有设备，不要设置任何<code>luks.*</code>、<code>rd.luks.*</code>内核参数。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg52b00790fb44_rd_luks_uuid" id="rd.luks.uuid">rd.luks.uuid</h5></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若使用<code>rd.luks.name</code>，则无需指定<code>rd.luks.uuid</code>。</div>
+<pre>rd.luks.uuid=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>
+</pre>
+<p>使用此参数指定要在启动过程中解密的设备的<a href="#pg676782540a81">UUID</a>。
+</p><p>默认情况下，解密后的设备将被映射到<code>/dev/mapper/luks-<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i></code>，其中<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>是LUKS所在分区的UUID。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg52b00790fb44_rd_luks_name" id="rd.luks.name">rd.luks.name</h5></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>在使用本参数时，无需指定<code>rd.luks.uuid</code>。</div>
+<pre>rd.luks.name=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>=<i>name</i>
+</pre>
+<p>本参数用于指定要解密的设备，并设置解密后设备的映射名称，其中<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>是LUKS所在分区的UUID。<i>name</i>与<code>encrypt</code>的<code>cryptdevice</code>配置中<code><i>dmname</i></code>参数作用相同。
+</p><p>例如，若设置<code>rd.luks.name=12345678-9abc-def0-1234-56789abcdef0=root</code>，则将解密UUID为<code>12345678-9ABC-DEF0-1234-56789ABCDEF0</code>的分区，解密后的分区可在<code>/dev/mapper/root</code>访问。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg52b00790fb44_rd_luks_key" id="rd.luks.key">rd.luks.key</h5></div>
+<p>指定用于解密特定UUID的分区所需要的密钥文件。与<code>encrypt</code>钩子的<code>cryptkey</code>参数不同，密钥文件位置没有默认值。
+</p><p>若密钥文件已<a href="#pgbd0f46fbac92">包含在initramfs中</a>：
+</p>
+<pre>rd.luks.key=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>=<i>/path/to/keyfile</i>
+</pre>
+<p>或者：
+</p>
+<pre>rd.luks.key=<i>/path/to/keyfile</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若密钥文件已经存储到<code>/etc/cryptsetup-keys.d/<i>name</i>.key</code>，则无需指定<code>rd.luks.key</code>参数。</div>
+<p>若密钥文件在另一设备上：
+</p>
+<pre>rd.luks.key=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>=<i>/path/to/keyfile</i>:UUID=<i>ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ</i>
+</pre>
+<p>将<code>UUID=<i>ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ</i></code>替换为密钥文件所在设备的UUID。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>若存储密钥文件的设备使用的文件系统与根文件系统不同，则必须<a href="#pgbd0f46fbac92">在initramfs中包含所需内核模块</a>。</li>
+<li>默认情况下，若<code>rd.luks.key</code>指定了位于另一设备上的密钥文件，但该设备在启动过程中不可用，则不会回退到使用密码解密。若需要回退，在<code>rd.luks.options</code>参数中指定<code>keyfile-timeout=</code>选项。例如，若要等待该设备10秒，使用： <pre>rd.luks.options=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>=keyfile-timeout=10s</pre></li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>包含密钥文件的卷不会在启动过程结束后自动卸载。详见<a href="https://github.com/systemd/systemd/issues/28021">systemd issue 28021</a>。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg52b00790fb44_rd_luks_options" id="rd.luks.options">rd.luks.options</h5></div>
+<pre>rd.luks.options=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>=<i>options</i>
+</pre>
+<p>或者：
+</p>
+<pre>rd.luks.options=<i>options</i>
+</pre>
+<p>指定用于解密特定UUID的分区时的额外选项。若不指定UUID，则指定的选项将用于所有解密过程，除非在其它地方（例如，crypttab）单独为该解密过程指定了选项。
+</p><p>该参数作用与<a href="#pg52b00790fb44_crypttab">crypttab</a>的选项字段相同，和crypttab选项字段的格式也相同，都使用逗号分隔，使用<code><i>option</i>=<i>value</i></code>指定带有值的选项。该参数与<code>encrypt</code>钩子的<code>cryptdevice</code>参数类似。
+</p><p>例如：
+</p>
+<pre>rd.luks.options=timeout=10s,discard,password-echo=no,tries=1
+</pre>
+<div class="mw-heading mw-heading6"><h6 data-bm="pg52b00790fb44_.E8.B6.85.E6.97.B6.E6.97.B6.E9.97.B4" id="超时时间"><span id=".E8.B6.85.E6.97.B6.E6.97.B6.E9.97.B4"></span>超时时间</h6></div>
+<p>在启动时，能用于输入密码解密卷的时间受两个选项影响：
+</p>
+<ul><li><code>rd.luks.options=timeout=<i>mytimeout</i></code>：询问密码的超时时间</li>
+<li><code>rootflags=x-systemd.device-timeout=<i>mytimeout</i></code>：systemd等待根文件系统所在设备出现的时间（默认为90秒）</li></ul>
+<p>若要完全关闭超时，将两个超时时间都设为0：
+</p>
+<pre>rd.luks.options=timeout=0 rootflags=x-systemd.device-timeout=0
+</pre>
+<div class="mw-heading mw-heading6"><h6 data-bm="pg52b00790fb44_.E5.AF.86.E7.A0.81.E5.9B.9E.E6.98.BE" id="密码回显"><span id=".E5.AF.86.E7.A0.81.E5.9B.9E.E6.98.BE"></span>密码回显</h6></div>
+<p>当输入密码时，systemd-cryptsetup默认将对每个输入的字符回显星号（<code>*</code>）。而<code>encrypt</code>钩子在输入时将不回显。要禁用回显，设置<code>password-echo=no</code>选项：
+</p>
+<pre>rd.luks.options=password-echo=no
+</pre>
+<div class="mw-heading mw-heading6"><h6 data-bm="pg52b00790fb44_.E5.8F.AF.E4.BF.A1.E5.B9.B3.E5.8F.B0.E6.A8.A1.E5.9D.97.E4.B8.8EFIDO2.E5.AF.86.E9.92.A5" id="可信平台模块与FIDO2密钥"><span id=".E5.8F.AF.E4.BF.A1.E5.B9.B3.E5.8F.B0.E6.A8.A1.E5.9D.97.E4.B8.8EFIDO2.E5.AF.86.E9.92.A5"></span>可信平台模块与FIDO2密钥</h6></div>
+<p>若系统有<a href="#pg49e7cf2b1de2">TPM2</a>芯片，或者使用了FIDO2兼容的安全密钥。可以使用它们而非密码、密钥文件来解密卷。
+</p><p>除了<code>rd.luks.uuid</code>/<code>rd.luks.name</code>外，还需添加如下参数：
+</p>
+<ul><li>若使用TPM2芯片：<code>rd.luks.options=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>=tpm2-device=auto</code></li>
+<li>若使用FIDO2密钥：<code>rd.luks.options=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>=fido2-device=auto</code></li></ul>
+<p>此外，也可以在<code>/etc/crypttab.initramfs</code>中指定上述参数：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab.initramfs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">root  UUID=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>  none  tpm2-device=auto</pre>
+<p>上述配置中，使用UUID指定加密设备名称，解密后的设备使用<code>root</code>挂载名称（解密后的设备可通过<code>/dev/mapper/root</code>访问），不使用密码解密，而是从TPM2设备获取密钥。
+</p><p>注意，若要使用TPM2解密，在密码字段必须填写<code>none</code>或者<code>-</code>，而不能留空。否则，<code>tpm2-device=auto</code>将被识别为密码，在启动时，将尝试使用该“密码”解密，并在解密失败时要求手动输入密码，而不尝试使用TPM2解密。
+</p><p>若通过UUID指定设备，请确保其是在磁盘上实际存在的加密容器的UUID，而不是解密后的根文件系统的UUID。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg52b00790fb44_rd_luks_data" id="rd.luks.data">rd.luks.data</h5></div>
+<p>当使用分离的LUKS头时，使用该参数可指定存储加密数据的块设备。同时必须在<code>rd.luks.options</code>中指定LUKS头的位置。
+</p><p>详见<a href="#pg2d5af776f6fd">Dm-crypt/特殊应用#在加密系统时使用分离的LUKS头</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg52b00790fb44_systemd_gpt_auto_generator" id="systemd-gpt-auto-generator">systemd-gpt-auto-generator</h4></div>
+<p>若满足<a href="#pgac06dd8bfe95">Systemd#GPT分区自动挂载</a>中的所有要求，则可以不设置<code>rd.luks</code>相关内核参数。systemd-cryptsetup-generator将自动探测并尝试解密LUKS加密的根分区。
+</p><p>udev将创建<code>/dev/gpt-auto-root</code>、<code>/dev/gpt-auto-root-luks</code>符号链接，分别指向解密后的根分区、存储根分区加密容器的分区。可在相关配置文件中使用，作为<a href="#pg2636278c0df5">对相关分区的持久性引用</a>。
+</p><p>在指定crypttab选项时，可以在<code>/etc/crypttab.initramfs</code>中使用<code>/dev/gpt-auto-root-luks</code>作为设备名称。例如，一个不设置额外选项、使用自动解密的配置文件如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab.initramfs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">root  /dev/gpt-auto-root-luks  none  tpm2-device=auto,fido2-device=auto</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg52b00790fb44_.E5.9C.A8.E5.90.8E.E6.9C.9F.E7.94.A8.E6.88.B7.E7.A9.BA.E9.97.B4.E4.B8.AD.E8.A7.A3.E5.AF.86" id="在后期用户空间中解密"><span id=".E5.9C.A8.E5.90.8E.E6.9C.9F.E7.94.A8.E6.88.B7.E7.A9.BA.E9.97.B4.E4.B8.AD.E8.A7.A3.E5.AF.86"></span>在后期用户空间中解密</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg52b00790fb44_crypttab" id="crypttab">crypttab</h3></div>
+<p>与<a href="#pgced0cc449f44">fstab</a>相似，<code>/etc/crypttab</code>（encrypted device table，加密设备表）包含了一系列需要在启动过程中挂载的文件系统，不同之处在于<code>crypttab</code>中指定的是需要被解密的加密设备。可以使用该文件自动挂载加密的swap设备、非根文件系统。
+</p><p><code>crypttab</code>在<code>fstab</code><b>之前</b>处理，以便在尝试挂载加密容器中的文件系统之前，先解密加密容器。
+</p><p>注意，<code>crypttab</code>在系统启动后（后期用户空间，挂载根文件系统后）才被处理，因此在<a href="#pg29ec7c5af952">加密了根分区的情况下</a>，不能用于替代<a href="#pg52b00790fb44_mkinitcpio">mkinitcpio</a>钩子、内核参数配置。<code>crypttab</code>将由<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-cryptsetup-generator"><a href="https://man.archlinux.org/man/systemd-cryptsetup-generator.8">systemd-cryptsetup-generator(8)</a></span>处理。
+</p><p>该文件语法详见<span class="plainlinks archwiki-template-man" title="$ man 5 crypttab"><a href="https://man.archlinux.org/man/crypttab.5">crypttab(5)</a></span>。此外，下文还提供了一些例子。在#在启动时挂载节中还包含了使用UUID挂载加密设备的方法。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>若设置了<code>nofail</code>选项，则密码输入界面可能会在输入过程中消失。因此，只应在使用密钥文件时设置<code>nofail</code>选项。</li>
+<li>对于<a href="#pg88d6e7a842ae">dm-crypt plain模式</a>加密的设备，必须指定<code>plain</code>选项，以便<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-cryptsetup"><a href="https://man.archlinux.org/man/systemd-cryptsetup.8">systemd-cryptsetup(8)</a></span>正确识别。参见<a href="https://github.com/systemd/systemd/issues/442">systemd issue 442</a>。</li></ul>
+</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># 示例crypttab文件。字段：名称、底层设备、密码、cryptsetup选项
+
+# Mount /dev/lvm/swap re-encrypting it with a fresh key each reboot
+swap  /dev/lvm/swap  /dev/urandom  swap,cipher=aes-xts-plain64,size=256,sector-size=4096
+
+# Mount /dev/lvm/tmp as /dev/mapper/tmp using plain dm-crypt with a random passphrase, making its contents unrecoverable after it is dismounted.
+tmp  /dev/lvm/tmp  /dev/urandom  tmp,cipher=aes-xts-plain64,size=256 
+
+# Mount /dev/lvm/home as /dev/mapper/home using LUKS, and prompt for the passphrase at boot time.
+home  /dev/lvm/home
+
+# Mount /dev/disk/by-uuid/<i>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</i> as /dev/mapper/backup using LUKS, with a passphrase stored in a file.
+backup  UUID=<i>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</i>  /home/alice/backup.key
+
+# Unlock /dev/disk/by-partuuid/<i>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</i> using the only available TPM, naming it myvolume
+myvolume  PARTUUID=<i>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</i>  none  tpm2-device=auto</pre>
+<p>修改crypttab后，若要立即测试并应用更改，先使用<a href="#pg16fc2566d30b">daemon-reload</a>重新加载systemd配置，然后<a href="#pg6ec215b93a06">启动</a>新生成的<code>systemd-cryptsetup@<i>name</i>.service</code>单元。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup status <i>name</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/mapper/<i>name</i> is active.
+  type:    ...
+  cipher:  ...
+  keysize: ... bits
+  key location: ...
+  device:  /dev/sdxN
+  sector size:  ...
+  offset:  ... sectors
+  size:    ... sectors
+  mode:    ...
+  flags:   ...</pre>
+<p>有关<code>systemd-cryptsetup@<i>name</i>.service</code>单元的更多信息，详见#按需挂载。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若使用GUID分区表（GPT），并正确设置分区类型UUID，则在使用systemd时，对于特定挂载点，可以自动挂载，而无需编写crypttab、fstab条目。详见<a href="#pgac06dd8bfe95">Systemd#GPT分区自动挂载</a>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg52b00790fb44_.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E6.8C.82.E8.BD.BD" id="在启动时挂载"><span id=".E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E6.8C.82.E8.BD.BD"></span>在启动时挂载</h4></div>
+<p>若要在启动过程中挂载加密设备，将目标设备的UUID加入到<code>/etc/crypttab</code>。可使用<code>lsblk -f</code>查看目标设备的UUID。
+</p><p><code>crypttab</code>中的条目形如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">externaldrive  UUID=2f9a8428-ac69-478a-88a2-4aa458565431  none  timeout=180</pre>
+<p>若设备使用LUKS2加密，也可以通过LUKS2 label指定：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">externaldrive  LABEL=encrypted-ext-drive-1  none  timeout=180</pre>
+<p>注意，LUKS2头中设定的label和加密容器上层的文件系统的label是不同的概念。
+</p><p>上述条目中，第一项为设备解密后的设备映射名。<code>none</code>选项表示在启动时手动输入解密密码。<code>timeout</code>选项指定了输入密码的超时时间。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>在使用sd-encrypt钩子时，启动过程中手动输入的密码将由<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-cryptsetup"><a href="https://man.archlinux.org/man/systemd-cryptsetup.8">systemd-cryptsetup(8)</a></span>缓存到内核钥匙环中（包括initramfs阶段输入的密码）。若<code>crypttab</code>中的某一条目对应设备的密码与之前的条目相同，则可设置第三个选项为<code>none</code>，将自动使用缓存的密码进行解密。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>crypttab</code>中设置的<code>timeout</code>选项只决定<b>输入密码</b>的超时时间。此外，<a href="#pgac06dd8bfe95">systemd</a>还有<b>等待设备可用</b>的超时时间（默认为90秒）。这两个超时时间是独立的。因此，即使<code>crypttab</code>中的<code>timeout</code>选项设置值长于90秒（设置为0表示无限时），systemd仍然只会等待某个设备90秒。要修改systemd的等待时间，可在<a href="#pgced0cc449f44">fstab</a>中，为相应的设备设置<code>x-systemd.device-timeout</code>选项（详见<span class="plainlinks archwiki-template-man" title="$ man 5 systemd.mount"><a href="https://man.archlinux.org/man/systemd.mount.5">systemd.mount(5)</a></span>）。建议对于启动时要挂载的加密设备，将<code>crypttab</code>中的<code>timeout</code>与<a href="#pgced0cc449f44">fstab</a>中的<code>x-systemd.device-timeout</code>设置为相同的值。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg52b00790fb44_.E4.BD.BF.E7.94.A8.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E8.A7.A3.E5.AF.86" id="使用密钥文件解密"><span id=".E4.BD.BF.E7.94.A8.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E8.A7.A3.E5.AF.86"></span>使用密钥文件解密</h5></div>
+<p>若根文件系统是加密的，可在其中存储解密其它设备的<a href="#pg88d6e7a842ae">密钥文件</a>。由于根文件系统是加密的，因此在系统关机时，密钥文件是安全的。存储密钥文件的好处在于，在启动时，可通过设置<a href="#pg52b00790fb44_crypttab">crypttab</a>，自动通过密钥文件解密其它设备，而无需输入密码。
+</p><p>例如，解密指定<a href="#pg676782540a81">UUID</a>的设备：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">home-crypt  UUID=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>  /etc/cryptsetup-keys.d/home-crypt.key</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>若没有指定密钥文件，<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-cryptsetup"><a href="https://man.archlinux.org/man/systemd-cryptsetup.8">systemd-cryptsetup(8)</a></span>会自动尝试从<code>/etc/cryptsetup-keys.d/<i>name</i>.key</code>、<code>/run/cryptsetup-keys.d/<i>name</i>.key</code>读取密钥文件。<a href="https://github.com/systemd/systemd/pull/15637">[3]</a></li>
+<li>若使用dm-crypt plain模式，需要在<code>/etc/crypttab</code>中指定相关加密选项。参见<a href="#pg52b00790fb44_crypttab">#crypttab</a>节中提到的systemd相关注意事项。</li></ul>
+</div>
+<p>之后，使用<code>/etc/crypttab</code>中定义的设备映射名称，添加对应的<code>/etc/fstab</code>条目：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/mapper/home-crypt  /home  ext4  defaults  0 2
+</pre>
+<p><code>/dev/mapper/home-crypt</code>已经是持久性的、唯一的分区映射名，可直接使用，而无需通过UUID指定。若要使用UUID指定，应当注意加密容器中文件系统的UUID和包含加密容器的分区的UUID不同。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg52b00790fb44_.E6.8C.82.E8.BD.BD.E5.A4.9A.E5.B1.82.E6.98.A0.E5.B0.84.E7.9A.84.E5.9D.97.E8.AE.BE.E5.A4.87" id="挂载多层映射的块设备"><span id=".E6.8C.82.E8.BD.BD.E5.A4.9A.E5.B1.82.E6.98.A0.E5.B0.84.E7.9A.84.E5.9D.97.E8.AE.BE.E5.A4.87"></span>挂载多层映射的块设备</h5></div>
+<p>在启动时，systemd的生成器将自动处理多层映射的块设备。
+</p><p>例如，可以先建立<a href="#pg1b71ce42139c">RAID</a>，在此之上创建加密卷，再在加密卷上创建<a href="#pg02cd87050dfd">LVM</a>逻辑卷，形成多层映射：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk -f</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">─sdXX                  linux_raid_member    
+│ └─md0                 crypto_LUKS   
+│   └─cryptedbackup     LVM2_member 
+│     └─vgraid-lvraid   ext4              /mnt/backup
+└─sdYY                  linux_raid_member    
+  └─md0                 crypto_LUKS       
+    └─cryptedbackup     LVM2_member 
+      └─vgraid-lvraid   ext4              /mnt/backup
+</pre>
+<p>启动过程中，将询问密码，并自动挂载所有层级的设备。
+</p><p>对于非根分区，只要正确设置了相应crypttab、fstab条目，就无需额外添加mkinitcpio钩子或修改相关配置。注意<code>/etc/crypttab</code>只适合于处理非根分区的挂载。若在挂载在RAID上的根分区时使用了<code>mdadm_udev</code>钩子，则需要额外配置<code>/etc/madadm.conf</code>并更新initramfs，以正确加载RAID配置。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg52b00790fb44_.E6.8C.89.E9.9C.80.E6.8C.82.E8.BD.BD" id="按需挂载"><span id=".E6.8C.89.E9.9C.80.E6.8C.82.E8.BD.BD"></span>按需挂载</h4></div>
+<p>若在<code>/etc/crypttab</code>中有如下条目：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">externaldrive UUID=... none noauto</pre>
+<p>则若要打开<code>externaldrive</code>，除了直接使用cryptsetup外：
+</p>
+<pre># cryptsetup open UUID=... externaldrive
+</pre>
+<p>还可<a href="#pg6ec215b93a06">启动</a><code>systemd-cryptsetup@externaldrive.service</code>。这样，无需在打开加密卷时手动输入加密选项。若需要密码进行解锁，<a href="#pg6ec215b93a06">启动</a>单元时将提示输入。
+</p><p>有关单元文件由<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-cryptsetup-generator"><a href="https://man.archlinux.org/man/systemd-cryptsetup-generator.8">systemd-cryptsetup-generator(8)</a></span>生成。可通过如下命令查看所有生成的单元文件：
+</p>
+<pre>$ systemctl list-unit-files | grep systemd-cryptsetup
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg52b00790fb44_.E9.9D.9E.E9.98.BB.E5.A1.9E.E6.8C.82.E8.BD.BD" id="非阻塞挂载"><span id=".E9.9D.9E.E9.98.BB.E5.A1.9E.E6.8C.82.E8.BD.BD"></span>非阻塞挂载</h4></div>
+<p>若在crypttab中指定了某一设备，即使该设备并不需要在启动时就完成挂载，在默认情况下，cryptsetup服务仍会阻塞地等待该设备完成挂载，再继续启动进程。可以通过指定<code>nofail</code>选项避免阻塞等待。添加该选项后，将从指定设备的挂载服务（systemd mount service）中移除<code>Before=cryptsetup.target</code>，避免启动过程阻塞。若设备不被启动过程依赖，且使用密钥文件解锁，则可使用<code>nofail</code>选项加快启动过程。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">data UUID=d0d0d110-0a71-4ed6-936a-304969ea36af /etc/cryptsetup-keys.d/data.key nofail
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg52b00790fb44_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg52b00790fb44_.E7.B3.BB.E7.BB.9F.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E5.8D.A1.E4.BD.8F.2F.E4.B8.8D.E6.98.BE.E7.A4.BA.E8.BE.93.E5.85.A5.E5.AF.86.E7.A0.81.E6.8F.90.E7.A4.BA.E7.AC.A6" id="系统在启动时卡住/不显示输入密码提示符"><span id=".E7.B3.BB.E7.BB.9F.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E5.8D.A1.E4.BD.8F.2F.E4.B8.8D.E6.98.BE.E7.A4.BA.E8.BE.93.E5.85.A5.E5.AF.86.E7.A0.81.E6.8F.90.E7.A4.BA.E7.AC.A6"></span>系统在启动时卡住/不显示输入密码提示符</h3></div>
+<p>若使用了<a href="#pg23e524bc1b67">Plymouth</a>，需要确保使用了正确的模块（详见<a href="#pg23e524bc1b67">Plymouth#mkinitcpio</a>），否则Plymouth将覆盖密码输入提示符，导致无法解密设备，系统无法启动。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg52b00790fb44_.E6.97.A0.E6.B3.95.E4.BD.BF.E7.94.A8.E9.94.AE.E7.9B.98.E8.BE.93.E5.85.A5.E5.AF.86.E7.A0.81.2F.E6.97.A0.E6.B3.95.E4.BB.8E.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E4.B8.8A.E8.AF.BB.E5.8F.96.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6" id="无法使用键盘输入密码/无法从文件系统上读取密钥文件"><span id=".E6.97.A0.E6.B3.95.E4.BD.BF.E7.94.A8.E9.94.AE.E7.9B.98.E8.BE.93.E5.85.A5.E5.AF.86.E7.A0.81.2F.E6.97.A0.E6.B3.95.E4.BB.8E.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E4.B8.8A.E8.AF.BB.E5.8F.96.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6"></span>无法使用键盘输入密码/无法从文件系统上读取密钥文件</h3></div>
+<p>若需要使用键盘输入密码（特别是键盘通过USB拓展坞连接时），或要从特定文件系统上读取密钥文件（且该文件系统在生成initramfs时未挂载），可能需要手动向mkinitcpio的<code>MODULES</code>数组中添加需要的模块。详见<a href="#pgbd0f46fbac92">Mkinitcpio#模块（MODULES）</a>。键盘、文件系统需要的模块名称可参见<a href="#pgc58950f08e5c">Mkinitcpio/极简_initramfs#整理模块</a>。
+</p><p>对于外设连接经常改变（即，后续启动时连接的外设可能和生成initramfs镜像时不一致）的系统，需要将<code>keyboard</code>钩子放置到<code>autodetect</code>钩子<b>之前</b>，以包含所有键盘有关模块，而不是只包含在生成initramfs时连接到计算机的键盘的模块。详见<a href="#pgbd0f46fbac92">Mkinitcpio#常用钩子</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807030609
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.295 seconds
+Real time usage: 0.304 seconds
+Preprocessor visited node count: 1789/1000000
+Revision size: 29042/2097152 bytes
+Post‐expand include size: 25653/2097152 bytes
+Template argument size: 15669/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   97.865      1 -total
+ 20.47%   20.037    174 Template:Ic
+ 16.37%   16.016     13 Template:提示
+  9.11%    8.918      3 Template:警告
+  8.27%    8.094      4 Template:注意
+  6.22%    6.084      9 Template:Man
+  4.77%    4.670      1 Template:Lowercase_title
+  3.35%    3.278     13 Template:Hc
+  3.21%    3.145      1 Template:翻译状态
+  2.54%    2.484      1 Template:Note
+-->
+<!-- Render ID f00f728e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8359:|#|:idhash:canonical!zh-cn and timestamp 20260807030609 and revision id 33604. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

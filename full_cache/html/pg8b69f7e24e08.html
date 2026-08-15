@@ -1,0 +1,199 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg8b69f7e24e08">快捷键</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><br/>
+本文介绍默认快捷键，以及用户自定义快捷键的信息。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果你需要键盘为主的工作流，参见<a href="#pg69b9739c5814">平铺窗口管理器</a>。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8b69f7e24e08_.E9.BB.98.E8.AE.A4.E5.BF.AB.E6.8D.B7.E9.94.AE" id="默认快捷键"><span id=".E9.BB.98.E8.AE.A4.E5.BF.AB.E6.8D.B7.E9.94.AE"></span>默认快捷键</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8b69f7e24e08_.E5.86.85.E6.A0.B8.EF.BC.88SysRq.EF.BC.89" id="内核（SysRq）"><span id=".E5.86.85.E6.A0.B8.EF.BC.88SysRq.EF.BC.89"></span>内核（SysRq）</h3></div>
+<p>以下是系统底层的快捷键，通常被用于调试。遇到系统问题，请尽可能尝试这些快捷键，而不是按住电源开关强制关机。
+</p><p>详情参见 <a href="https://en.wikipedia.org/wiki/Magic_SysRq_key">Magic SysRq key - Wikipedia</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8b69f7e24e08_.E5.90.AF.E7.94.A8" id="启用"><span id=".E5.90.AF.E7.94.A8"></span>启用</h4></div>
+<p><a href="#pgac06dd8bfe95">systemd</a> 有一个<a href="https://github.com/systemd/systemd/blob/main/sysctl.d/50-default.conf#L14-L19">默认设置为 0x10</a> 的 SysRq 权限掩码。这使得 SysRq <a href="https://docs.kernel.org/admin-guide/sysrq.html">并不能允许进程做发出信号、重启等事项</a>。为使用 <code>SysRq</code> 的完整功能，在 <a href="#pg7b7cc2bbe79a">sysctl#配置 sysctl</a>中加入 <code>kernel.sysrq = 1</code>。高于 1 的值用于选择性地开启 SysRq 功能，详见 <a href="https://docs.kernel.org/admin-guide/sysrq.html">Linux 内核文档</a>。如果你想确保其在分区挂载前开启，在<a href="#pgec0856954f1c">内核参数</a>中加入 <code>sysrq_always_enabled=1</code>。
+</p><p>注意，改变上述设置将使这些快捷键在重启后保持开启。如果你只想在当前会话开启 SysRq，你可以执行 <code>sysctl kernel.sysrq=1</code> 或 <code>echo "1" &gt; /proc/sys/kernel/sysrq</code>。
+</p><p>完全启用 SysRq 有明显的安全风险。除了强制重启，它还可以被用来丢弃 CPU 寄存器的内容，理论上来说可以泄露敏感信息。由于使用它需要物理访问系统(除非您通过 <a href="https://github.com/jd/sysrqd">sysrqd</a> 对外开放)，大多数桌面用户可能认为风险水平是可以接受的。尽管如此，在开启 SysRq 之前，你仍需要确保充分理解开启它的风险。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8b69f7e24e08_.E9.87.8D.E5.90.AF" id="重启"><span id=".E9.87.8D.E5.90.AF"></span>重启</h4></div>
+<p>记住这个激活命令的通用口诀是 "<b>R</b>eboot <b>E</b>ven <b>I</b>f <b>S</b>ystem <b>U</b>tterly <b>B</b>roken" (或者"REISUB")。
+要是记不住，想象 "BUSIER" 吧。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>千万注意："REISUB" 只是个口诀，决非是一种取得某个死机的系统后门权限的方法。你不应该在不了解这些键的真正功能的情况下盲目按。</div>
+<table>
+<tbody><tr>
+<th>键盘快捷键
+</th>
+<th>描述
+</th></tr>
+<tr>
+<td><code>Alt</code>+<code>SysRq</code>+<code>r</code> <b>Unraw</b>
+</td>
+<td>从X收回对键盘的控制
+</td></tr>
+<tr>
+<td><code>Alt</code>+<code>SysRq</code>+<code>e</code> <b>Terminate</b>
+</td>
+<td>向所有进程发送SIGTERM信号，让它们正常终止
+</td></tr>
+<tr>
+<td><code>Alt</code>+<code>SysRq</code>+<code>i</code> <b>Kill</b>
+</td>
+<td>向所有进程发送SIGKILL信号，强制立即终止
+</td></tr>
+<tr>
+<td><code>Alt</code>+<code>SysRq</code>+<code>s</code> <b>Sync</b>
+</td>
+<td>将待写数据写入磁盘
+</td></tr>
+<tr>
+<td><code>Alt</code>+<code>SysRq</code>+<code>u</code> <b>Unmount</b>
+</td>
+<td>卸载所有硬盘然后重新按只读模式挂载
+</td></tr>
+<tr>
+<td><code>Alt</code>+<code>SysRq</code>+<code>b</code> <b>Reboot</b>
+</td>
+<td>重启
+</td></tr>
+</tbody></table>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8b69f7e24e08_.E6.9D.80.E6.AD.BB.E5.86.85.E5.AD.98.E5.8D.A0.E7.94.A8.E8.BF.87.E5.A4.9A.E7.9A.84.E8.BF.9B.E7.A8.8B" id="杀死内存占用过多的进程"><span id=".E6.9D.80.E6.AD.BB.E5.86.85.E5.AD.98.E5.8D.A0.E7.94.A8.E8.BF.87.E5.A4.9A.E7.9A.84.E8.BF.9B.E7.A8.8B"></span>杀死内存占用过多的进程</h4></div>
+<p><code>Alt+SysRq+f</code> 可用于唤醒 <a href="https://docs.kernel.org/admin-guide/mm/concepts.html?highlight=oom#oom-killer">OOM（内存耗尽） 杀手</a>。即使在没有可以杀死的进程下，这也不会造成内核恐慌。这个 OOM 杀手作出一系列尝试，来杀死相对不重要的进程并收回内存。当某个进程用太多内存，比如浏览器脚本运行失控，导致系统软锁的时候，这很有用，能缓解很多需要重启的情况。请注意，OOM 杀手能杀掉各种进程。尽管其本意是好的，但还是不可预测。因此，要小心使用,不要随意唤醒它。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8b69f7e24e08_.E8.BF.9C.E7.A8.8B.E4.BD.BF.E7.94.A8" id="远程使用"><span id=".E8.BF.9C.E7.A8.8B.E4.BD.BF.E7.94.A8"></span>远程使用</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sysrqd/">sysrqd</a></span><sup><small>AUR</small></sup></span> 是一个远程使用 <code>SysRq</code> 的守护进程。它看起来没人维护了。<a href="https://aur.archlinux.org/packages/sysrqd#comment-922563">[1]</a>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8b69f7e24e08_.E7.96.91.E9.9A.BE.E8.A7.A3.E6.83.91" id="疑难解惑"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E6.83.91"></span>疑难解惑</h4></div>
+<ul><li>SysQq 将其结果输出到内核缓存环，会被 <a href="#pgf2f20f211250">systemd 日志</a>收集。即使 <a href="#pg27b8d938ed9d">Linux 控制台</a>没有输出任何东西，结果仍然在内核缓存环中。没有控制台输出并不意味着它没执行成功。如果碰上了这种情况，运行 <code>journalctl -kf</code> 来监控其到达内核缓存环的输出。</li>
+<li>如果你在使用<a href="#pg30e2075251d0">显示管理器</a>，并且在按下 <code>Alt+SysRq+e</code> 后显示了登录界面（开启了自动登录的话，还可能是完全的桌面），这很有可能是由于与<a href="#pgac06dd8bfe95">服务文件</a>有关的 <code>Restart=always</code> 指令导致的。有必要的话，你可能需要<a href="#pgaadaff213991">编辑单元文件</a>，但这应该不影响 "REISUB" 序列工作。</li>
+<li>如果以上快捷键除了 <code>Alt+SysRq+b</code> 都成功了，尝试使用对测的 <code>Alt</code> 键。</li>
+<li>对于一些用 <code>Fn</code> 键从 <code>PrtScrn</code> 键中区别出 <code>SysRq</code> 键的笔记本，可能并不需要同时按下 <code>Fn</code> 键（例如：<code>Alt+PrtScrn+字母</code> 可能可以工作）。</li>
+<li>对于 Legion 系列以外的联想笔记本，经常将 <code>Fn+S</code> 设置为 <code>SysRq</code> 键。为了使用这个快捷键的功能，先持续按下 <code>Alt</code> 键，然后按 <code>Fn+S</code>，<b>松开</b> <code>Fn</code> 与 <code>s</code>，始终保持 <code>Alt</code> 键，按先前提到的顺序继续按。</li>
+<li>你可能需要和 <code>Alt</code> 一同按下 <code>Ctrl</code>。如果这样，完整的快捷键示例就像 <code>Ctrl+Alt+SysRq+b</code>。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8b69f7e24e08_.E7.BB.88.E7.AB.AF" id="终端"><span id=".E7.BB.88.E7.AB.AF"></span>终端</h3></div>
+<p>见 <a href="#pg27b8d938ed9d">Linux 控制台#快捷键</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8b69f7e24e08_Xorg_.E4.B8.8E_Wayland" id="Xorg_与_Wayland"><span id="Xorg_.E4.B8.8E_Wayland"></span>Xorg 与 Wayland</h3></div>
+<table class="wikitable">
+<tbody><tr>
+<th>快捷键
+</th>
+<th>解释
+</th>
+<th>注意
+</th></tr>
+<tr>
+<td><code>Ctrl+Alt+F1</code>, <code>F2</code>, <code>F3</code>, ...
+</td>
+<td>切换到第 n 个虚拟控制台。
+</td>
+<td>不能用的话，尝试 <code>Ctrl+Alt+Fn+F…</code>。
+</td></tr>
+<tr>
+<td><code>Shift+Insert</code> <br/> <code>鼠标按键 2</code>
+</td>
+<td>从<a href="#pg19a17393756d">主缓冲区</a>粘贴文本
+</td>
+<td>默认情况下，Qt 将 <code>Shift+Insert</code> 映射到剪贴版而非主缓冲区（见<a href="https://doc.qt.io/qt-5/qlineedit.html#details">[2]</a>），而 <code>Ctrl+Shift+Insert</code> 才映射到主缓冲区。
+</td></tr>
+</tbody></table>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>译注：鼠标按键 2 一般是中键。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8b69f7e24e08_.E8.87.AA.E5.AE.9A.E4.B9.89.E5.BF.AB.E6.8D.B7.E9.94.AE" id="自定义快捷键"><span id=".E8.87.AA.E5.AE.9A.E4.B9.89.E5.BF.AB.E6.8D.B7.E9.94.AE"></span>自定义快捷键</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8b69f7e24e08_Readline" id="Readline">Readline</h3></div>
+<p><a href="#pgf0f301172588">Readline</a> 是行编辑领域常用的库，用例见 <a href="#pg1ca1e15827ff">Bash</a>、FTP，以及很多的其他软件（详见 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=readline">readline</a></span><sup><small>包</small></sup></span> 包页面下“被依赖”节）。它提供 <a href="#pg9de7470c4ea9">Emacs</a> 与 <a href="#pg900bbdcd1fb5">vi</a> 风格的编缉模式，因而有很多可以自定义的空序列。默认快捷键在 <span class="plainlinks archwiki-template-man" title="$ man 3 readline"><a href="https://man.archlinux.org/man/readline.3">readline(3)</a></span> 和<a href="https://tiswww.cwru.edu/php/chet/readline/rluserman.html">文档页</a>（或 <code>info readline</code>）列出。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8b69f7e24e08_Zsh" id="Zsh">Zsh</h3></div>
+<p><a href="#pg187873cfd725">Zsh</a> 使用 <a href="#pg187873cfd725">ZLE</a> 将快捷键映射到小部件、脚本与指令。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8b69f7e24e08_Xorg" id="Xorg">Xorg</h3></div>
+<p><a href="#pg2ae705869f4b">Xorg/Keyboard configuration#Frequently used XKB options</a> 记载了一些常见的快捷键，但它们默认关闭。
+</p><p>在桌面环境下，我们可以通过几种办法来实现一个按键序列被按下的时候自动执行一个指令（例如：将一个指令绑定到 <i>keysym</i>）：
+</p>
+<ul><li>最可移植的办法是使用低级工具，例如 <a href="#pg2b172a4074ba">acpid</a>。不是所有的键位都受到支持，但是它也可能通用于键盘案件、电源键甚至耳机接口的插拔事件。但，仍然要注意：它可能很难在 X 会话上正确地运行程序。</li>
+<li>最普遍的方法是使用 <a href="#pga36c0aff60be">Xorg</a> 工具（如 <a href="#pg63ab98ba33b7">xbindkeys</a>）和桌面环境（窗口管理器）的工具。</li>
+<li>快速的办法是用第三方程序，把所有的东西都放到 GUI，例如 Gnome 控制中心。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8b69f7e24e08_sxhkd" id="sxhkd">sxhkd</h4></div>
+<p>简单的 X 热键守护进程，提供了又小又强的配置语法。详见 <a href="#pgb45106978707">sxhkd</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8b69f7e24e08_actkbd" id="actkbd">actkbd</h4></div>
+<p>根据 <a href="http://users.softlab.ece.ntua.gr/~thkala/projects/actkbd/">actkbd 的主页</a>：
+</p>
+<dl><dd><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/actkbd/">actkbd</a></span><sup><small>AUR</small></sup></span> 是一个简单的将事件绑定到键盘事件上的守护进程。它可以识别组合键、连击、按下与释放按键的事件。它只支持 linux-2.6 edev 界面。它使用富文本的配置档案来记录所有的绑定.</dd></dl>
+<p>配置示例和指南可以访问<a href="http://users.softlab.ece.ntua.gr/~thkala/projects/actkbd/latest/README">这个链接</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8b69f7e24e08_xbindkeys" id="xbindkeys">xbindkeys</h4></div>
+<p><a href="#pg63ab98ba33b7">xbindkeys</a> 支持独立于桌面环境的键-事件映射。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果你觉得 <code>xbindkeys</code> 很难用，有一个图形化的管理器 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xbindkeys_config-gtk2/">xbindkeys_config-gtk2</a></span><sup><small>AUR</small></sup></span> 可用。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8b69f7e24e08_.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83" id="桌面环境"><span id=".E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83"></span>桌面环境</h3></div>
+<ul><li><a href="#pg9ecdb3d7e45b">LXDE#键盘快捷键</a></li>
+<li><a href="#pg361394ab1daf">Xfce#键盘快捷键</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8b69f7e24e08_.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8" id="窗口管理器"><span id=".E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8"></span>窗口管理器</h3></div>
+<ul><li><a href="#pg335e0e02a34a">Fluxbox#键盘快捷键</a></li>
+<li><a href="#pg8bc45a0eb197">Openbox#键盘快捷键</a></li>
+<li><a href="#pg04e8e3ac1488">i3#键盘快捷键</a></li>
+<li><a href="#pg73ce307a54af">Xmonad#X-Selection-Paste</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8b69f7e24e08_X-selection-paste_.E7.9A.84.E9.94.AE.E4.BD.8D.E6.98.A0.E5.B0.84" id="X-selection-paste_的键位映射"><span id="X-selection-paste_.E7.9A.84.E9.94.AE.E4.BD.8D.E6.98.A0.E5.B0.84"></span>X-selection-paste 的键位映射</h3></div>
+
+
+<p>更喜欢使用键盘工作的用户可能希望用快捷键来替代用中键粘贴，特别是在键盘中心的环境中使用的时候。一个工作流示例如下：
+</p>
+<ol><li>在使用火狐的时候，用鼠标选择一个你想在网上搜索的字符串。</li>
+<li>按下 <code>Ctrl+k</code> 进入“搜索引擎”区。</li>
+<li>按 <code>F9</code> 来粘贴缓冲区中的内容，代替用鼠标移到搜索引擎区再按中键。</li></ol>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>Shift+Insert</code> 的功能很相似，但是略有不同，见<a href="#pg8b69f7e24e08_Xorg">#Xorg</a>：<code>Shift+Insert</code> 在 QT 环境下从剪贴版缓冲区而非 x-selection-paste 缓冲区粘贴。在一些程序中，此二者互相映射。</div>
+<p>如上示例使用以下三样包：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xsel">xsel</a></span><sup><small>包</small></sup></span> 来访问 x-selection 缓冲区内容。</li>
+<li><a href="#pg63ab98ba33b7">Xbindkeys</a> 来将快捷键绑定到行为。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xvkbd/">xvkbd</a></span><sup><small>AUR</small></sup></span> 用于通过模拟键盘输入来将缓冲区中的字符串输入到应用中。</li></ul>
+<p>这个示例将 x-selection 粘贴操作绑定到 <code>F9</code> 键：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">.xbindkeysrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">"xvkbd -no-jump-pointer -xsendevent -text "\D1`xsel`" 2&gt;/dev/null"
+    F9
+</pre>
+<p><code>"\D1"</code> 码前置 100 毫秒延迟来插入到选定的缓冲区（详见 <a href="http://t-sato.in.coocan.jp/xvkbd/">xvkbd 主页</a>）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>取决于你的 X 设置，你可能需要不在 xvkbd 使用 <code>--xsendevent</code> 参数。</div>
+<p>除了 <code>F9</code> 以外的键也可以用 <code>xbindkeys -k</code> 绑定。
+</p><p>引用：
+</p>
+<ul><li><a href="https://unix.stackexchange.com/questions/11889/pasting-x-selection-not-clipboard-contents-with-keyboard">用键盘粘贴 X-selection（而非剪贴板）的内容</a></li>
+<li><a href="http://t-sato.in.coocan.jp/xvkbd/">xvkbd 主页</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8b69f7e24e08_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="http://lnag.sourceforge.net/lnag_html/node5.html">Linux Newbie 管理员指南 - 快捷键与指令</a></li>
+<li><a href="https://tldp.org/HOWTO/Keyboard-and-Console-HOWTO.html">如何使用 Linux 下的键盘与控制台</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807024839
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.180 seconds
+Real time usage: 0.186 seconds
+Preprocessor visited node count: 728/1000000
+Revision size: 10102/2097152 bytes
+Post‐expand include size: 6459/2097152 bytes
+Template argument size: 2180/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   51.627      1 -total
+ 18.63%    9.616     65 Template:Ic
+  9.93%    5.125      1 Template:Accuracy
+  8.82%    4.555      2 Template:Tip
+  6.54%    3.375      4 Template:Note
+  6.51%    3.360      1 Template:Expansion
+  5.01%    2.589      2 Template:META_Message
+  4.49%    2.319      2 Template:Pkg
+  3.39%    1.749      1 Template:Man
+  3.08%    1.590      4 Template:AUR
+-->
+<!-- Render ID 7e36298e-920a-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3363:|#|:idhash:canonical!zh-cn and timestamp 20260807024839 and revision id 34810. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

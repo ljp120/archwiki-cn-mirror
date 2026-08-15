@@ -1,0 +1,325 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg49e6f9b9d832">块设备持久化命名</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Persistent_block_device_naming">Persistent block device naming</a>，最近一次同步于 2025-08-01，若英文版本有所<a href="https://wiki.archlinux.org/title/Persistent_block_device_naming?diff=0&amp;oldid=838910">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Persistent_block_device_naming_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgced0cc449f44">fstab</a></li>
+<li><a href="#pge009209061ac">udev</a></li>
+<li><a href="#pg02cd87050dfd">LVM</a></li>
+</ul></div>
+<p>本文讲述如何为你的<a href="#pgdb9e1fd9f950">块设备</a>提供持久化命名。<a href="#pge009209061ac">udev</a> 的导入使之成为可能，也使之优于基于总线的命名法。如果你的设备上有多个硬盘使用同一套命名方案，那么添加对应设备节点的顺序是完全随机的。这可能会使每次启动时块设备的名称（例如 <code>/dev/sd<b>a</b></code> 和 <code>/dev/sd<b>b</b></code>，<code>/dev/nvme<b>0</b>n1</code> 和 <code>/dev/nvme<b>1</b>n1</code>，<code>/dev/mmcblk<b>0</b></code> 和 <code>/dev/mmcblk<b>1</b></code>）都被随机调换，并导致系统无法启动，内核错误或是块设备消失等问题出现。持久化命名法可以解决这些问题。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>持久化命名存在一些超出本文范围的限制，比如虽然 <a href="#pgbd0f46fbac92">mkinitcpio</a> 支持某个方法，但 <a href="#pgac06dd8bfe95">systemd</a> 会对启动时支持的设备名添加额外的限制（例如 <a href="https://bugs.archlinux.org/task/42884">FS#42884</a>）。</li>
+<li>本文与 <a href="#pg02cd87050dfd">LVM</a> 逻辑卷无关，因为 <code>/dev/<i>VolumeGroupName</i>/<i>LogicalVolumeName</i></code> 设备路径是持久化的。</li></ul>
+</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg49e6f9b9d832_.E6.8C.81.E4.B9.85.E5.8C.96.E5.91.BD.E5.90.8D.E7.9A.84.E6.96.B9.E6.B3.95" id="持久化命名的方法"><span id=".E6.8C.81.E4.B9.85.E5.8C.96.E5.91.BD.E5.90.8D.E7.9A.84.E6.96.B9.E6.B3.95"></span>持久化命名的方法</h2></div>
+<p>有多种方案可以提供由 <a href="#pge009209061ac">udev</a> 管理的持久化命名：
+</p>
+<ul><li><code>60-persistent-storage.rules</code> 提供了四种默认方案：通过标签、通过 uuid、通过 id 和 通过路径。对于使用 <a href="#pgf5d6dc2b8800">GUID 分区表（GPT）</a>的硬盘还有额外两种方案：通过分区标签和通过分区 uuid。</li>
+<li><code>99-systemd.rules</code> 还为支持 <a href="#pgac06dd8bfe95">GPT 分区自动挂载</a>的环境提供了 gpt-auto 方案</li></ul>
+<p><code>/dev/disk/</code> 中的文件夹是动态创建和销毁的，这取决于其中是否有设备。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>请注意<a href="#pge245372182c5">硬盘克隆</a>会创建两个有着相同名字的不同磁盘。</div>
+<p>下面讲解各种命名方案及其用法。
+</p><p><a href="#pge173af99a32b">lsblk</a> 命令用于以图示方式查看第一种方案：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk -f</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME        FSTYPE LABEL      UUID                                 MOUNTPOINT
+sda
+├─sda1      vfat              CBB6-24F2                            /boot
+├─sda2      ext4   Arch Linux 0a3407de-014b-458b-b5c1-848e92a327a3 /
+├─sda3      ext4   Data       b411dc99-f0a0-4c87-9e05-184977be8539 /home
+└─sda4      swap              f9fe0b69-a280-415d-a03a-a32752370dee [SWAP]
+mmcblk0
+└─mmcblk0p1 vfat              F4CA-5D75
+</pre>
+<p>使用 <a href="#pg69f558531e59">GPT</a> 时应改用 <code>blkid</code> 命令，这个命令更方便脚本使用但可读性低：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># blkid</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/sda1: UUID="CBB6-24F2" TYPE="vfat" PARTLABEL="EFI system partition" PARTUUID="d0d0d110-0a71-4ed6-936a-304969ea36af"
+/dev/sda2: LABEL="Arch Linux" UUID="0a3407de-014b-458b-b5c1-848e92a327a3" TYPE="ext4" PARTLABEL="GNU/Linux" PARTUUID="98a81274-10f7-40db-872a-03df048df366"
+/dev/sda3: LABEL="Data" UUID="b411dc99-f0a0-4c87-9e05-184977be8539" TYPE="ext4" PARTLABEL="Home" PARTUUID="7280201c-fc5d-40f2-a9b2-466611d3d49e"
+/dev/sda4: UUID="f9fe0b69-a280-415d-a03a-a32752370dee" TYPE="swap" PARTLABEL="Swap" PARTUUID="039b6c1c-7553-4455-9537-1befbc9fbc5b"
+/dev/mmcblk0: PTUUID="0003e1e5" PTTYPE="dos"
+/dev/mmcblk0p1: UUID="F4CA-5D75" TYPE="vfat" PARTUUID="0003e1e5-01"</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49e6f9b9d832_.E9.80.9A.E8.BF.87.E6.A0.87.E7.AD.BE" id="通过标签"><span id=".E9.80.9A.E8.BF.87.E6.A0.87.E7.AD.BE"></span>通过标签</h3></div>
+<p>几乎每一种<a href="#pg6c70b7fdfa57">文件系统</a>都可以有一个标签。所有有标签的卷都在 <code>/dev/disk/by-label</code> 目录中列出。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /dev/disk/by-label/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">total 0
+lrwxrwxrwx 1 root root 10 May 27 23:31 Data -&gt; ../../sda3
+lrwxrwxrwx 1 root root 10 May 27 23:31 Arch\x20Linux -&gt; ../../sda2
+</pre>
+<p>大多数文件系统都支持在创建文件系统时设置标签，详见相关的 <code>mkfs.*</code> 工具的 <a href="#pg49a53c288b70">man 手册</a>。有些文件系统还能修改标签。下面列出了一些常见文件系统修改标签的方式:
+</p>
+<dl><dt>btrfs</dt>
+<dd><code>btrfs filesystem label /dev/<i>XXX</i> "<i>new label</i>"</code>（如已挂载，需使用挂载点）- 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=btrfs-progs">btrfs-progs</a></span><sup><small>包</small></sup></span></dd>
+<dt>crypto_LUKS（仅 LUKS2）</dt>
+<dd><code>cryptsetup config --label="<i>new label</i>" /dev/<i>XXX</i></code> - 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cryptsetup">cryptsetup</a></span><sup><small>包</small></sup></span></dd>
+<dt>exfat</dt>
+<dd><code>tune.exfat -L "<i>new label</i>" /dev/<i>XXX</i></code> - 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=exfatprogs">exfatprogs</a></span><sup><small>包</small></sup></span></dd>
+<dd><code>exfatlabel /dev/<i>XXX</i> "<i>new label</i>"</code> - 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=exfatprogs">exfatprogs</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=exfat-utils">exfat-utils</a></span><sup><small>包</small></sup></span></dd>
+<dt>ext2/3/4</dt>
+<dd><code>e2label /dev/<i>XXX</i> "<i>new label</i>"</code> - 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=e2fsprogs">e2fsprogs</a></span><sup><small>包</small></sup></span></dd>
+<dt>fat/vfat</dt>
+<dd><code>fatlabel /dev/<i>XXX</i> "<i>new label</i>"</code> - 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dosfstools">dosfstools</a></span><sup><small>包</small></sup></span></dd>
+<dd><code>mlabel -i /dev/<i>XXX</i> ::"<i>new label</i>"</code> - 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mtools">mtools</a></span><sup><small>包</small></sup></span></dd>
+<dt>jfs</dt>
+<dd><code>jfs_tune -L "<i>new label</i>" /dev/<i>XXX</i></code> - 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=jfsutils">jfsutils</a></span><sup><small>包</small></sup></span></dd>
+<dt>ntfs</dt>
+<dd><code>ntfslabel /dev/<i>XXX</i> "<i>new label</i>"</code> - 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ntfs-3g">ntfs-3g</a></span><sup><small>包</small></sup></span></dd>
+<dt>reiserfs</dt>
+<dd><code>reiserfstune -l "<i>new label</i>" /dev/<i>XXX</i></code> - 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/reiserfsprogs/">reiserfsprogs</a></span><sup><small>AUR</small></sup></span></dd>
+<dt>swap</dt>
+<dd><code>swaplabel -L "<i>new label</i>" /dev/<i>XXX</i></code> - 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=util-linux">util-linux</a></span><sup><small>包</small></sup></span></dd>
+<dt>udf</dt>
+<dd><code>udflabel /dev/<i>XXX</i> "<i>new label</i>"</code> - 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=udftools">udftools</a></span><sup><small>包</small></sup></span></dd>
+<dt>xfs</dt>
+<dd><code>xfs_admin -L "<i>new label</i>" /dev/<i>XXX</i></code>（如已挂载，需使用挂载点）- 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xfsprogs">xfsprogs</a></span><sup><small>包</small></sup></span></dd></dl>
+<p>可以通过 <i>lsblk</i> 获得设备的标签：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk -dno LABEL /dev/sda2</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Arch Linux
+</pre>
+<p>也可以使用 <i>blkid</i>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># blkid -s LABEL -o value /dev/sda2</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Arch Linux
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>标签必须是唯一的，以防止可能的冲突。</li>
+<li>标签最多可以有 16 个字符。</li>
+<li>标签是文件系统的一个属性，所以无法持久地表示单个硬盘阵列（RAID）设备。</li>
+<li>在使用 <a href="#pg8e3a9446707a">dm-crypt</a> 的加密容器时，容器内的文件系统的标签在容器被锁定/加密时是不可用的。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49e6f9b9d832_.E9.80.9A.E8.BF.87_uuid" id="通过_uuid"><span id=".E9.80.9A.E8.BF.87_uuid"></span>通过 uuid</h3></div>
+<p><a href="https://en.wikipedia.org/wiki/UUID">UUID</a> 是一种为每个<a href="#pg6c70b7fdfa57">文件系统</a>提供唯一标识符的机制。这些标识符是在设备被格式化时，通过文件系统工具生成的（例如 <code>mkfs.*</code>），并且在设计上不太可能发生冲突。所有 GNU/Linux 文件系统 (包括 swap 和全加密设备的 LUKS 头字段）都支持 UUID。FAT，exFAT 和 NTFS 文件系统不支持 UUID，但是依旧会有一个较短的 UID（唯一标识符）在 <code>/dev/disk/by-uuid/</code> 中列出：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /dev/disk/by-uuid/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">total 0
+lrwxrwxrwx 1 root root 10 May 27 23:31 0a3407de-014b-458b-b5c1-848e92a327a3 -&gt; ../../sda2
+lrwxrwxrwx 1 root root 10 May 27 23:31 b411dc99-f0a0-4c87-9e05-184977be8539 -&gt; ../../sda3
+lrwxrwxrwx 1 root root 10 May 27 23:31 CBB6-24F2 -&gt; ../../sda1
+lrwxrwxrwx 1 root root 10 May 27 23:31 f9fe0b69-a280-415d-a03a-a32752370dee -&gt; ../../sda4
+lrwxrwxrwx 1 root root 10 May 27 23:31 F4CA-5D75 -&gt; ../../mmcblk0p1
+</pre>
+<p>可以通过 <i>lsblk</i> 获取设备的 UUID：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk -dno UUID /dev/sda1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">CBB6-24F2
+</pre>
+<p>或使用 <i>blkid</i>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># blkid -s UUID -o value /dev/sda1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">CBB6-24F2
+</pre>
+<p>使用 UUID 方法的优势在于，与使用标签相比，发生名称冲突的可能性要小得多。此外，它是在创建文件系统时自动生成的。举个例子，即使设备插入另一个系统（那个系统上可能有一个具有相同标签的设备），它也会保持唯一。
+</p><p>这个方法的坏处是 UUID 使长代码行难以阅读，并会打乱许多配置文件中的格式（例如 <a href="#pgced0cc449f44">fstab</a> 或 <a href="#pg1340a4be8b92">crypttab</a>）。此外,每次重新格式化卷时都会生成一个新的 UUID，使得必须手动调整配置文件。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果您的交换卷没有分配 UUID，你将需要使用 <a href="#pgad14227759fd">mkswap</a> 工具来重置它。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49e6f9b9d832_.E9.80.9A.E8.BF.87_id_.E5.92.8C_.E9.80.9A.E8.BF.87.E8.B7.AF.E5.BE.84" id="通过_id_和_通过路径"><span id=".E9.80.9A.E8.BF.87_id_.E5.92.8C_.E9.80.9A.E8.BF.87.E8.B7.AF.E5.BE.84"></span>通过 id 和 通过路径</h3></div>
+<p><code>by-id</code> 会依据硬件序列号创建一个唯一的名字，<code>by-path</code> 则取决于最短的物理路径（根据 sysfs）。两者都包含字符串以指示它们属于哪个子系统（例如 <code>by-path</code> 中的 <code>-ide-</code> 和 <code>by-id</code> 中的 <code>-ata-</code>），使得它们与控制设备的硬件相关联。这意味着不同级别的持久性：<code>by-path</code> 会在设备插入控制器的不同端口时改变，<code>by-id</code> 会在设备插入受另一个子系统约束的硬件控制器的端口时改变。<a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/5/html/Online_Storage_Reconfiguration_Guide/persistent_naming.html">[1]</a>因此,两者都不适合实现针对硬件更改的持久化命名。
+</p><p>然而,两者都提供了在大型硬件基础设施中查找特定设备的重要信息。举个例子,如果你没有手动分配持久性的标签（<code>by-label</code> 或 <code>by-partlabel</code>），但保留有一个包含硬件端口使用情况的目录，那可以通过 <code>by-id</code> 和 <code>by-path</code> 来找到特定的设备。<a href="https://linuxshellaccount.blogspot.in/2008/09/how-to-easily-find-wwns-of-qlogic-hba.html">[2]</a> <a href="https://www.linuxquestions.org/questions/linux-server-73/how-to-find-wwn-for-dev-sdc-917269/">[3]</a>
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li><code>by-id</code> 和 <code>by-path</code> 链接只能被视为硬盘持久化,而不是分区。分区将通过其在分区表中的编号进行引用,并且如果对分区重新排序,该编号可能会发生变化。</li>
+<li>如果添加或移除了 PCIe 设备，或是系统固件<a href="https://github.com/systemd/systemd/issues/22692">无法对它们进行枚举</a>，那么 NVMe 设备的 <code>/dev/disk/by-path/pci-*</code> 路径可能会产生变化。</li>
+<li>不带命名空间标识符（NSID）的 NVMe 设备 <code>by-id</code> 链接已过时。请使用在设备序列号后带有命名空间的链接（例如为首个命名空间使用 <code>_1</code>，或是对首个命名空间的首个分区使用 <code><b>_1</b>-part1</code>。）</li></ul>
+</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /dev/disk/by-id/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">total 0
+lrwxrwxrwx 1 root root 10 May 27 23:31 ata-WDC_WD2500BEVT-22ZCT0_WD-WXE908VF0470 -&gt; ../../sda
+lrwxrwxrwx 1 root root 10 May 27 23:31 ata-WDC_WD2500BEVT-22ZCT0_WD-WXE908VF0470-part1 -&gt; ../../sda1
+lrwxrwxrwx 1 root root 10 May 27 23:31 ata-WDC_WD2500BEVT-22ZCT0_WD-WXE908VF0470-part2 -&gt; ../../sda2
+lrwxrwxrwx 1 root root 10 May 27 23:31 ata-WDC_WD2500BEVT-22ZCT0_WD-WXE908VF0470-part3 -&gt; ../../sda3
+lrwxrwxrwx 1 root root 10 May 27 23:31 ata-WDC_WD2500BEVT-22ZCT0_WD-WXE908VF0470-part4 -&gt; ../../sda4
+lrwxrwxrwx 1 root root 10 May 27 23:31 mmc-SD32G_0x0040006d -&gt; ../../mmcblk0
+lrwxrwxrwx 1 root root 10 May 27 23:31 mmc-SD32G_0x0040006d-part1 -&gt; ../../mmcblk0p1
+lrwxrwxrwx 1 root root 13 May 27 23:31 nvme-Samsung_SSD_970_EVO_Plus_2TB_S4J4NJ0N704064T -&gt; ../../nvme1n1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-Samsung_SSD_970_EVO_Plus_2TB_S4J4NJ0N704064T-part1 -&gt; ../../nvme1n1p1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-Samsung_SSD_970_EVO_Plus_2TB_S4J4NJ0N704064T-part2 -&gt; ../../nvme1n1p2
+lrwxrwxrwx 1 root root 13 May 27 23:31 nvme-Samsung_SSD_970_EVO_Plus_2TB_S4J4NJ0N704064T_1 -&gt; ../../nvme1n1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-Samsung_SSD_970_EVO_Plus_2TB_S4J4NJ0N704064T_1-part1 -&gt; ../../nvme1n1p1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-Samsung_SSD_970_EVO_Plus_2TB_S4J4NJ0N704064T_1-part2 -&gt; ../../nvme1n1p2
+lrwxrwxrwx 1 root root 13 May 27 23:31 nvme-WDS100T1X0E-00AFY0_21455A801268 -&gt; ../../nvme0n1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-WDS100T1X0E-00AFY0_21455A801268-part1 -&gt; ../../nvme0n1p1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-WDS100T1X0E-00AFY0_21455A801268-part2 -&gt; ../../nvme0n1p2
+lrwxrwxrwx 1 root root 13 May 27 23:31 nvme-WDS100T1X0E-00AFY0_21455A801268_1 -&gt; ../../nvme0n1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-WDS100T1X0E-00AFY0_21455A801268_1-part1 -&gt; ../../nvme0n1p1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-WDS100T1X0E-00AFY0_21455A801268_2-part2 -&gt; ../../nvme0n1p2
+lrwxrwxrwx 1 root root 13 May 27 23:31 nvme-eui.002538570142d716 -&gt; ../../nvme1n1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-eui.002538570142d716-part1 -&gt; ../../nvme1n1p1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-eui.002538570142d716-part2 -&gt; ../../nvme1n1p2
+lrwxrwxrwx 1 root root 13 May 27 23:31 nvme-eui.e8238fa6bf530001001b448b4566aa1a -&gt; ../../nvme0n1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-eui.e8238fa6bf530001001b448b4566aa1a-part1 -&gt; ../../nvme0n1p1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-eui.e8238fa6bf530001001b448b4566aa1a-part2 -&gt; ../../nvme0n1p2
+lrwxrwxrwx 1 root root 10 May 27 23:31 wwn-0x60015ee0000b237f -&gt; ../../sda
+lrwxrwxrwx 1 root root 10 May 27 23:31 wwn-0x60015ee0000b237f-part1 -&gt; ../../sda1
+lrwxrwxrwx 1 root root 10 May 27 23:31 wwn-0x60015ee0000b237f-part2 -&gt; ../../sda2
+lrwxrwxrwx 1 root root 10 May 27 23:31 wwn-0x60015ee0000b237f-part3 -&gt; ../../sda3
+lrwxrwxrwx 1 root root 10 May 27 23:31 wwn-0x60015ee0000b237f-part4 -&gt; ../../sda4
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /dev/disk/by-path/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">total 0
+lrwxrwxrwx 1 root root 10 May 27 23:31 pci-0000:00:1f.2-ata-1 -&gt; ../../sda
+lrwxrwxrwx 1 root root 10 May 27 23:31 pci-0000:00:1f.2-ata-1-part1 -&gt; ../../sda1
+lrwxrwxrwx 1 root root 10 May 27 23:31 pci-0000:00:1f.2-ata-1-part2 -&gt; ../../sda2
+lrwxrwxrwx 1 root root 10 May 27 23:31 pci-0000:00:1f.2-ata-1-part3 -&gt; ../../sda3
+lrwxrwxrwx 1 root root 10 May 27 23:31 pci-0000:00:1f.2-ata-1-part4 -&gt; ../../sda4
+lrwxrwxrwx 1 root root 13 May 27 23:31 pci-0000:01:00.0-nvme-1 -&gt; ../../nvme0n1
+lrwxrwxrwx 1 root root 15 May 27 23:31 pci-0000:01:00.0-nvme-1-part1 -&gt; ../../nvme0n1p1
+lrwxrwxrwx 1 root root 15 May 27 23:31 pci-0000:01:00.0-nvme-1-part2 -&gt; ../../nvme0n1p2
+lrwxrwxrwx 1 root root 13 May 27 23:31 pci-0000:04:00.0-nvme-1 -&gt; ../../nvme1n1
+lrwxrwxrwx 1 root root 15 May 27 23:31 pci-0000:04:00.0-nvme-1-part1 -&gt; ../../nvme1n1p1
+lrwxrwxrwx 1 root root 15 May 27 23:31 pci-0000:04:00.0-nvme-1-part2 -&gt; ../../nvme1n1p2
+lrwxrwxrwx 1 root root 10 May 27 23:31 pci-0000:07:00.0-platform-rtsx_pci_sdmmc.0 -&gt; ../../mmcblk0
+lrwxrwxrwx 1 root root 10 May 27 23:31 pci-0000:07:00.0-platform-rtsx_pci_sdmmc.0-part1 -&gt; ../../mmcblk0p1
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg49e6f9b9d832_.E5.85.A8.E5.B1.80.E5.90.8D.E7.A7.B0.EF.BC.88World_Wide_Name.EF.BC.89" id="全局名称（World_Wide_Name）"><span id=".E5.85.A8.E5.B1.80.E5.90.8D.E7.A7.B0.EF.BC.88World_Wide_Name.EF.BC.89"></span>全局名称（World Wide Name）</h4></div>
+<p><code>by-id</code> 还会为支持的存储设备创建<a href="https://en.wikipedia.org/wiki/World_Wide_Name">全局名称（World Wide Name，WWN）</a>链接。与其它 <code>by-id</code> 链接不同，WWN 是完全持久化的，不会随使用的子系统而变化。
+</p><p>SATA 和 SAS 设备带有 <code>wwn-</code> 前缀，而 NVMe 设备会使用<a href="https://en.wikipedia.org/wiki/World_Wide_Name#Formats">不同的 WWN 格式</a>，其前缀为 <code>nvme-eui.</code>。<a href="https://github.com/systemd/systemd/pull/3136">[4]</a>
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>存储设备的 WWN 通常会写在其标签（硬盘上面的贴纸）上。</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /dev/disk/by-id/{wwn-,nvme-eui.}*</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">lrwxrwxrwx 1 root root 13 May 27 23:31 nvme-eui.002538570142d716 -&gt; ../../nvme1n1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-eui.002538570142d716-part1 -&gt; ../../nvme1n1p1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-eui.002538570142d716-part2 -&gt; ../../nvme1n1p2
+lrwxrwxrwx 1 root root 13 May 27 23:31 nvme-eui.e8238fa6bf530001001b448b4566aa1a -&gt; ../../nvme0n1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-eui.e8238fa6bf530001001b448b4566aa1a-part1 -&gt; ../../nvme0n1p1
+lrwxrwxrwx 1 root root 15 May 27 23:31 nvme-eui.e8238fa6bf530001001b448b4566aa1a-part2 -&gt; ../../nvme0n1p2
+lrwxrwxrwx 1 root root 10 May 27 23:31 wwn-0x60015ee0000b237f -&gt; ../../sda
+lrwxrwxrwx 1 root root 10 May 27 23:31 wwn-0x60015ee0000b237f-part1 -&gt; ../../sda1
+lrwxrwxrwx 1 root root 10 May 27 23:31 wwn-0x60015ee0000b237f-part2 -&gt; ../../sda2
+lrwxrwxrwx 1 root root 10 May 27 23:31 wwn-0x60015ee0000b237f-part3 -&gt; ../../sda3
+lrwxrwxrwx 1 root root 10 May 27 23:31 wwn-0x60015ee0000b237f-part4 -&gt; ../../sda4
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49e6f9b9d832_.E9.80.9A.E8.BF.87.E5.88.86.E5.8C.BA.E6.A0.87.E7.AD.BE" id="通过分区标签"><span id=".E9.80.9A.E8.BF.87.E5.88.86.E5.8C.BA.E6.A0.87.E7.AD.BE"></span>通过分区标签</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此方法仅涉及具有 <a href="#pgf5d6dc2b8800">GUID 分区表（GPT）</a>的硬盘。</div>
+<p>在 GPT 硬盘上，GPT 分区标签可以在<a href="https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_entries_.28LBA_2.E2.80.9333.29">分区条目</a>的头字段中定义。
+</p><p>这个方法与文件系统标签很相似，但是分区标签不随分区文件系统的修改而变动。
+</p><p>所有分区的分区标签都于 <code>/dev/disk/by-partlabel</code> 目录中列出。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /dev/disk/by-partlabel/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">total 0
+lrwxrwxrwx 1 root root 10 May 27 23:31 EFI\x20system\x20partition -&gt; ../../sda1
+lrwxrwxrwx 1 root root 10 May 27 23:31 GNU\x2fLinux -&gt; ../../sda2
+lrwxrwxrwx 1 root root 10 May 27 23:31 Home -&gt; ../../sda3
+lrwxrwxrwx 1 root root 10 May 27 23:31 Swap -&gt; ../../sda4
+</pre>
+<p>设备的分区标签可以用 <i>lsblk</i> 获取：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk -dno PARTLABEL /dev/sda1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">EFI system partition
+</pre>
+<p>或使用 <i>blkid</i>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># blkid -s PARTLABEL -o value /dev/sda1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">EFI system partition
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>GPT 分区标签也需要各不相同来避免冲突。要想改变分区标签，你可以使用 <a href="#pgba80dd5ffb4c">gdisk</a> 或基于 ncurse 的 <a href="#pg415b7ac71981">cgdisk</a>。它们都可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gptfdisk">gptfdisk</a></span><sup><small>包</small></sup></span> 软件包获取。具体信息请参考<a href="#pg8edad8d1135b">分区#分区工具</a>。</li>
+<li>根据规范,GPT 分区标签最多可以有 72 字符长。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49e6f9b9d832_.E9.80.9A.E8.BF.87.E5.88.86.E5.8C.BA_uuid" id="通过分区_uuid"><span id=".E9.80.9A.E8.BF.87.E5.88.86.E5.8C.BA_uuid"></span>通过分区 uuid</h3></div>
+<p>与 GPT 分区标签类似，GPT 分区 UUID 也在 GPT 硬盘的<a href="https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_entries_.28LBA_2.E2.80.9333.29">分区条目</a>中定义。 
+</p><p>MBR 不支持分区 UUID，但是使用 libblkid<a href="https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git/commit/?id=d67cc2889a0527b26d7bb8c76f2acac46751d673">[5]</a> 的 Linux<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d33b98fc82b0908e91fb05ae081acaed7323f9d2">[6]</a> 和软件（例如 udev<a href="https://github.com/systemd/systemd/pull/3293">[7]</a>）能够为 MBR 分区生成伪分区 UUID。其格式为 <code><i>SSSSSSSS</i>-<i>PP</i></code>，其中 <code><i>SSSSSSSS</i></code> 是一个零填充的 32 位 <a href="https://en.wikipedia.org/wiki/Master_boot_record#Disk_identity">MBR 硬盘签名</a>，而 <code><i>PP</i></code> 则是一个十六进制形式的零填充分区号。和一般的 GPT 分区的分区 UUID 不同，MBR 的伪分区 UUID 会在分区改变时改变。
+</p><p>动态目录与其它方法相似，就像文件系统 UUID，比起标签更推荐使用 UUID。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /dev/disk/by-partuuid/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">total 0
+lrwxrwxrwx 1 root root 10 May 27 23:31 0003e1e5-01 -&gt; ../../mmcblk0p1
+lrwxrwxrwx 1 root root 10 May 27 23:31 039b6c1c-7553-4455-9537-1befbc9fbc5b -&gt; ../../sda4
+lrwxrwxrwx 1 root root 10 May 27 23:31 7280201c-fc5d-40f2-a9b2-466611d3d49e -&gt; ../../sda3
+lrwxrwxrwx 1 root root 10 May 27 23:31 98a81274-10f7-40db-872a-03df048df366 -&gt; ../../sda2
+lrwxrwxrwx 1 root root 10 May 27 23:31 d0d0d110-0a71-4ed6-936a-304969ea36af -&gt; ../../sda1
+</pre>
+<p>设备的分区 UUID 可以用 <i>lsblk</i> 获得：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk -dno PARTUUID /dev/sda1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">d0d0d110-0a71-4ed6-936a-304969ea36af
+</pre>
+<p>或使用 <i>blkid</i>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># blkid -s PARTUUID -o value /dev/sda1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">d0d0d110-0a71-4ed6-936a-304969ea36af
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49e6f9b9d832_gpt_auto" id="gpt-auto">gpt-auto</h3></div>
+<p>如果满足了 <a href="#pgac06dd8bfe95">systemd-gpt-auto-generator</a> 的所有需求，那么 udev 会自动创建指向根卷设备的 <code>/dev/gpt-auto-root</code> 符号链接。如果根分区使用了 LUKS 加密，那么 <code>/dev/gpt-auto-root</code> 会指向已解锁/映射的卷，而 <code>/dev/gpt-auto-root-luks</code> 会指向加密了的分区。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /dev/gpt-auto-*</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">lrwxrwxrwx 1 root root 10 May 27 23:31 /dev/gpt-auto-root -&gt; dm-0
+lrwxrwxrwx 1 root root 10 May 27 23:31 /dev/gpt-auto-root-luks -&gt; nvme1n1p2
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg49e6f9b9d832_.E4.BD.BF.E7.94.A8.E6.8C.81.E4.B9.85.E5.90.8D.E7.A7.B0" id="使用持久名称"><span id=".E4.BD.BF.E7.94.A8.E6.8C.81.E4.B9.85.E5.90.8D.E7.A7.B0"></span>使用持久名称</h2></div>
+<p>有多种应用可以配置为使用持久名称。下面列出了一些配置的例子：
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49e6f9b9d832_fstab" id="fstab">fstab</h3></div>
+<p>请见主文章：<a href="#pgced0cc449f44">fstab#文件系统标识</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49e6f9b9d832_.E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0" id="内核参数"><span id=".E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0"></span>内核参数</h3></div>
+<p>要在<a href="#pgec0856954f1c">内核参数</a>中使用持久化名称，需要满足下列先决条件。在遵循<a href="#pgbdbcbed611fc">安装指南</a>的标准安装中，需满足两个条件：
+</p>
+<ul><li>你在使用一个包含 <a href="#pge009209061ac">udev</a> 的 <a href="#pg5409190f7704">initramfs</a> 镜像。</li>
+<li>对于 <a href="#pgbd0f46fbac92">mkinitcpio</a>，需在 <code>/etc/mkinitcpio.conf</code> 中启用 <code>udev</code> 或 <code>systemd</code> <a href="#pgbd0f46fbac92">钩子</a>。</li></ul>
+<p>根文件系统的位置在内核命令行中是通过 <code>root</code> 参数传递的。内核命令行是通过<a href="#pgee8f2050088a">引导加载程序</a>配置的，详见<a href="#pgec0856954f1c">内核参数#启动管理器配置</a>。要想修改为持久化设备名，只需修改用于指定块设备的参数，例如 <code>root</code> 和 <code>resume</code>，而其它参数则保持不变。支持多种命名方案：
+</p><p>在这个以 <code>Arch Linux</code> 为根文件系统标签的例子中，展示了使用标签的持久化设备名和 <code>LABEL=</code> 格式：
+</p>
+<pre>root="LABEL=Arch Linux"
+</pre>
+<p>在这个以 <code>0a3407de-014b-458b-b5c1-848e92a327a3</code> 为根文件系统 UUID 的例子中，展示了使用 uuid 的持久化设备名和 <code>UUID=</code> 格式：
+</p>
+<pre>root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3
+</pre>
+<p>在这个以 <code>wwn-0x60015ee0000b237f-part2</code> 为根分区 id 的例子中，展示了使用磁盘 id 的持久化设备名和 <code>/dev</code> 路径格式。
+</p>
+<pre>root=/dev/disk/by-id/wwn-0x60015ee0000b237f-part2
+</pre>
+<p>在这个以 <code>98a81274-10f7-40db-872a-03df048df366</code> 为根分区的分区 UUID 的例子中，展示了使用 GPT 分区 UUID 的持久化设备名和 <code>PARTUUID=</code> 格式：
+</p>
+<pre>root=PARTUUID=98a81274-10f7-40db-872a-03df048df366
+</pre>
+<p>在这个以 <code>GNU/Linux</code> 为根分区的分区标签的例子中，展示了使用 GPT 分区标签的持久化设备名和 <code>PARTLABEL=</code> 格式。
+</p>
+<pre>root="PARTLABEL=GNU/Linux"
+</pre>
+<p>在使用 GPT 分区自动挂载时，可以直接省略 <code>root=</code> 参数。如果希望显式进行指定，可以使用：
+</p>
+<pre>root=gpt-auto
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807034025
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.295 seconds
+Real time usage: 0.305 seconds
+Preprocessor visited node count: 946/1000000
+Revision size: 21321/2097152 bytes
+Post‐expand include size: 20677/2097152 bytes
+Template argument size: 12199/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  160.946      1 -total
+ 56.32%   90.645      1 Template:翻译状态
+  6.96%   11.208     74 Template:Ic
+  3.31%    5.327     14 Template:Pkg
+  3.31%    5.320      1 Template:Note
+  3.12%    5.028     18 Template:Hc
+  2.43%    3.915      5 Template:注意
+  1.56%    2.504      1 Template:相关文章开始
+  1.52%    2.442      2 Template:Tip
+  1.45%    2.333      3 Template:Related
+-->
+<!-- Render ID b988268e-9211-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3676:|#|:idhash:canonical!zh-cn and timestamp 20260807034025 and revision id 33736. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

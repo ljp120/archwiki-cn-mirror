@@ -1,0 +1,401 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg367e96a59949">ZFS/虚拟磁盘</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgefb77a75bb9b">ZFS</a></li>
+<li><a href="#pga3067bb59a06">在 ZFS 上安装 Arch Linux</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/ZFS/Virtual_disks">ZFS/Virtual disks</a>，最近一次同步于 2023-10-28，若英文版本有所<a href="https://wiki.archlinux.org/title/ZFS/Virtual_disks?diff=0&amp;oldid=791253">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/ZFS_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Virtual_disks_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>该篇文章涵盖了关于 ZFS 的一些基本任务和用例。它与 <a href="#pgefb77a75bb9b">ZFS</a> 主文章有所不同，此处的案例使用了基于虚拟磁盘搭建的 zpool。因此，只要用户不在创建出的磁盘中存放任何关键数据，他们就无需担心任何的数据丢失问题。
+</p><p>在该文章的案例中使用了多个虚拟磁盘作为 ZFS 的 VDEV。用户可以用现有物理磁盘创建 VDEV，也可以在空闲内存足够时使用 tempfs（内存盘）创建 VDEV。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>使用文件作为 VDEV 是测试 ZFS 的好方法，但不建议用于存放实际数据。</div>
+<p>由于许可证的差异问题，ZFS 二进制文件和内核模块可以很容易地以源代码进行分发，但不容易以软件包和预编译集形式进行分发。详细信息可参考 <a href="#pgefb77a75bb9b">ZFS#安装</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg367e96a59949_.E5.88.9B.E5.BB.BA.E5.92.8C.E5.88.A0.E9.99.A4_Zpools" id="创建和删除_Zpools"><span id=".E5.88.9B.E5.BB.BA.E5.92.8C.E5.88.A0.E9.99.A4_Zpools"></span>创建和删除 Zpools</h2></div>
+<p>管理 ZFS 非常简单，只需要用到两个工具：
+</p>
+<ul><li><code>/usr/bin/zpool</code></li>
+<li><code>/usr/bin/zfs</code></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_.E9.95.9C.E5.83.8F" id="镜像"><span id=".E9.95.9C.E5.83.8F"></span>镜像</h3></div>
+<p>对于仅包含两个磁盘的带冗余 zpool，建议使用类似 RAID1 对数据镜像镜像的<i>镜像</i>模式。镜像同时可以作为 Raidz 配置的替代，以获得出人意料的结果。关于 vdev 镜像的详细信息可参考<a href="https://jrs-s.net/2015/02/06/zfs-you-should-use-mirror-vdevs-not-raidz/">这里</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_RAIDZ1" id="RAIDZ1">RAIDZ1</h3></div>
+<p>RAIDZ1 的最低硬盘数需求为 3。为了优化存储空间效率和达到性能最佳点，建议盘数遵顼“二次方加验证盘”的规则。对于 RAIDZ-1，建议使用 3（2+1），5（4+1），或者 9（8+1）块盘。下列示例将使用最简单的（2+1）。
+</p><p>创建 3 个 2G 的文件作为虚拟硬盘：
+</p>
+<pre>$ for i in {1..3}; do truncate -s 2G /scratch/$i.img; done
+</pre>
+<p>创建 RAIDZ1：
+</p>
+<pre># zpool create zpool raidz1 /scratch/1.img /scratch/2.img /scratch/3.img
+</pre>
+<p>注意已成功创建并挂载了一个 3.91G 的 zpool：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zfs list</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"> NAME   USED  AVAIL  REFER  MOUNTPOINT
+ test   139K  3.91G  38.6K  /zpool
+</pre>
+<p>可通过如下方式获取设备信息：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zpool status zpool</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">  pool: zpool
+ state: ONLINE
+  scan: none requested
+config:
+
+	NAME                STATE     READ WRITE CKSUM
+	   zpool            ONLINE       0     0     0
+	  raidz1-0          ONLINE       0     0     0
+	    /scratch/1.img  ONLINE       0     0     0
+	    /scratch/2.img  ONLINE       0     0     0
+	    /scratch/3.img  ONLINE       0     0     0
+
+errors: No known data errors
+</pre>
+<p>要删除 zpool：
+</p>
+<pre># zpool destroy zpool
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_RAIDZ2_.E5.92.8C_RAIDZ3" id="RAIDZ2_和_RAIDZ3"><span id="RAIDZ2_.E5.92.8C_RAIDZ3"></span>RAIDZ2 和 RAIDZ3</h3></div>
+<p>高阶 ZRAID 的操作与上述步骤类似，只需调整 for 循环参数来调整创建的文件数、在创建 zpool 时指定“raidz2”或“raidz3”，并补充上额外添加的镜像文件。
+</p><p>总结下 Toponce 的指南：
+</p>
+<ul><li>RAIDZ2 硬盘数应为 4（2+2），6（4+2），10（8+2）或 18（16+2）。</li>
+<li>RAIDZ3 硬盘数应为 5（2+3），7（4+3），11（8+3）或 19（16+3）。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_.E7.BA.BF.E6.80.A7.E6.89.A9.E5.B1.95" id="线性扩展"><span id=".E7.BA.BF.E6.80.A7.E6.89.A9.E5.B1.95"></span>线性扩展</h3></div>
+<p>This setup is for a JBOD, good for 3 or less drives normally, where space is still a concern and you are not ready to move to full features of ZFS yet because of it.  RaidZ will be your better bet once you achieve enough space to satisfy, since this setup is NOT taking advantage of the full features of ZFS, but has its roots safely set in a beginning array that will suffice for years until you build up your hard drive collection.  
+</p><p>Assemble the Linear Span:
+</p>
+<pre># zpool create zpool san /dev/sdd /dev/sde /dev/sdf
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zpool status zpool</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">  pool: zpool
+ state: ONLINE
+  scan: scrub repaired 0 in 4h22m with 0 errors on Fri Aug 28 23:52:55 2015
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        zpool       ONLINE       0     0     0
+          sde       ONLINE       0     0     0
+          sdd       ONLINE       0     0     0
+          sdf       ONLINE       0     0     0
+
+errors: No known data errors
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg367e96a59949_.E5.88.9B.E5.BB.BA.E4.B8.8E.E5.88.A0.E9.99.A4.E6.95.B0.E6.8D.AE.E9.9B.86" id="创建与删除数据集"><span id=".E5.88.9B.E5.BB.BA.E4.B8.8E.E5.88.A0.E9.99.A4.E6.95.B0.E6.8D.AE.E9.9B.86"></span>创建与删除数据集</h2></div>
+<p>以下演示了如何创建带压缩的子数据集：
+</p>
+<ul><li>创建数据集</li></ul>
+<pre># zfs create -p -o compression=on san/vault/falcon/snapshots
+# zfs create -o compression=on san/vault/falcon/version
+# zfs create -p -o compression=on san/vault/redtail/c/Users
+</pre>
+<ul><li>接下来列出数据集 (this was a linear span)</li></ul>
+<pre>$ zfs list
+</pre>
+<p>Note, there is a huge advantage(file deletion) for making a 3 level dataset. 如果你存放了大量的数据，通过使用数据集进行切分，可使得删除文件时只需删除对应的数据集，而无需等待删除递归操作完成。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg367e96a59949_.E6.98.BE.E7.A4.BA.E5.B9.B6.E8.AE.BE.E7.BD.AE.E5.B1.9E.E6.80.A7" id="显示并设置属性"><span id=".E6.98.BE.E7.A4.BA.E5.B9.B6.E8.AE.BE.E7.BD.AE.E5.B1.9E.E6.80.A7"></span>显示并设置属性</h2></div>
+<p>Without specifying them in the creation step, users can set properties of their zpools at any time after its creation using <code>/usr/bin/zfs</code>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_.E6.98.BE.E7.A4.BA.E5.B1.9E.E6.80.A7" id="显示属性"><span id=".E6.98.BE.E7.A4.BA.E5.B1.9E.E6.80.A7"></span>显示属性</h3></div>
+<p>To see the current properties of a given zpool:
+</p>
+<pre># zfs get all zpool
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_.E4.BF.AE.E6.94.B9.E5.B1.9E.E6.80.A7" id="修改属性"><span id=".E4.BF.AE.E6.94.B9.E5.B1.9E.E6.80.A7"></span>修改属性</h3></div>
+<p>Disable the recording of access time in the zpool:
+</p>
+<pre># zfs set atime=off zpool
+</pre>
+<p>Verify that the property has been set on the zpool:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zfs get atime</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME  PROPERTY     VALUE     SOURCE
+zpool  atime        off       local
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>This option like many others can be toggled off when creating the zpool as well by appending the following to the creation step: -O atime-off</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg367e96a59949_Add_content_to_the_Zpool_and_query_compr" id="Add_content_to_the_Zpool_and_query_compression_performance">Add content to the Zpool and query compression performance</h2></div>
+<p>Fill the zpool with files. For this example, first enable compression. ZFS uses many compression types, including, lzjb, gzip, gzip-N, zle, and lz4. Using a setting of simply 'on' will call the default algorithm (lzjb) but lz4 is a nice alternative. See <span class="plainlinks archwiki-template-man" title="$ man 7 zfsprops"><a href="https://openzfs.github.io/openzfs-docs/man/7/zfsprops.7.html#compression">zfsprops(7) § compression</a></span> for more.
+</p>
+<pre># zfs set compression=lz4 zpool
+</pre>
+<p>In this example, the linux source tarball is copied over and since lz4 compression has been enabled on the zpool, the corresponding compression ratio can be queried as well.
+</p>
+<pre>$ wget <a href="https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.11.tar.xz">https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.11.tar.xz</a>
+$ tar xJf linux-3.11.tar.xz -C /zpool 
+</pre>
+<p>To see the compression ratio achieved:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zfs get compressratio</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME      PROPERTY       VALUE  SOURCE
+zpool  compressratio  2.32x  -
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg367e96a59949_Simulate_a_disk_failure_and_rebuild_the_" id="Simulate_a_disk_failure_and_rebuild_the_Zpool">Simulate a disk failure and rebuild the Zpool</h2></div>
+<p>To simulate catastrophic disk failure (i.e. one of the HDDs in the zpool stops functioning), zero out one of the VDEVs.
+</p>
+<pre>$ dd if=/dev/zero of=/scratch/2.img bs=4M count=1 2&gt;/dev/null
+</pre>
+<p>Since we used a blocksize (bs) of 4M, the once 2G image file is now a mere 4M:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -lh /scratch </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">total 317M
+-rw-r--r-- 1 facade users 2.0G Oct 20 09:13 1.img
+-rw-r--r-- 1 facade users 4.0M Oct 20 09:09 2.img
+-rw-r--r-- 1 facade users 2.0G Oct 20 09:13 3.img
+</pre>
+<p>The zpool remains online despite the corruption.  Note that if a physical disc does fail, <a href="#pgcfe31b67199d">dmesg</a> and related logs would be full of errors.  To detect when damage occurs, users must execute a scrub operation.
+</p>
+<pre># zpool scrub zpool
+</pre>
+<p>Depending on the size and speed of the underlying media as well as the amount of data in the zpool, the scrub may take hours to complete.
+The status of the scrub can be queried:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zpool status zpool</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">  pool: zpool
+ state: DEGRADED
+status: One or more devices could not be used because the label is missing or
+	invalid.  Sufficient replicas exist for the pool to continue
+	functioning in a degraded state.
+action: Replace the device using 'zpool replace'.
+   see: http://zfsonlinux.org/msg/ZFS-8000-4J
+  scan: scrub repaired 0 in 0h0m with 0 errors on Sun Oct 20 09:13:39 2013
+config:
+
+	NAME                STATE     READ WRITE CKSUM
+	   zpool            DEGRADED     0     0     0
+	  raidz1-0          DEGRADED     0     0     0
+	    /scratch/1.img  ONLINE       0     0     0
+	    /scratch/2.img  UNAVAIL      0     0     0  corrupted data
+	    /scratch/3.img  ONLINE       0     0     0
+
+errors: No known data errors
+</pre>
+<p>Since we zeroed out one of our VDEVs, let us simulate adding a new 2G HDD by creating a new image file and adding it to the zpool:
+</p>
+<pre>$ truncate -s 2G /scratch/new.img
+# zpool replace zpool /scratch/2.img /scratch/new.img
+</pre>
+<p>Upon replacing the VDEV with a new one, zpool rebuilds the data from the data and parity info in the remaining two good VDEVs.  Check the status of this process:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zpool status zpool </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">  pool: zpool
+ state: ONLINE
+  scan: resilvered 117M in 0h0m with 0 errors on Sun Oct 20 09:21:22 2013
+config:
+
+	NAME                  STATE     READ WRITE CKSUM
+	   zpool              ONLINE       0     0     0
+	  raidz1-0            ONLINE       0     0     0
+	    /scratch/1.img    ONLINE       0     0     0
+	    /scratch/new.img  ONLINE       0     0     0
+	    /scratch/3.img    ONLINE       0     0     0
+
+errors: No known data errors
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg367e96a59949_.E5.BF.AB.E7.85.A7.E5.92.8C.E6.81.A2.E5.A4.8D.E5.B7.B2.E5.88.A0.E9.99.A4.E7.9A.84.E6.96.87.E4.BB.B6" id="快照和恢复已删除的文件"><span id=".E5.BF.AB.E7.85.A7.E5.92.8C.E6.81.A2.E5.A4.8D.E5.B7.B2.E5.88.A0.E9.99.A4.E7.9A.84.E6.96.87.E4.BB.B6"></span>快照和恢复已删除的文件</h2></div>
+<p>ZFS 是写时复制文件系统，所有文件在写入那一刻时就已存入。保存文件修改实际上创建了同一文件的拷贝及其修改记录。快照实际上利用了这一特性，使得用户可以访问快照创建时的旧版本文件。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>因 ZFS 使用快照方式较为特殊，当使用快照时，像 <b>df</b> 一类汇报文件系统空间的 Linux 应用会给出不准确的数据。<code>/usr/bin/zfs list</code> 会给出准确的 zpool 可用及剩余空间数据。</div>
+<p>为了简化示例，我们将在 zpool 中创建数据集并创建快照，快照可以对整个 zpool 或者池中的单个数据集进行创建，区别只有命名方式：
+</p>
+<table align="center" class="wikitable">
+<tbody><tr>
+<th>快照目标</th>
+<th>快照名
+</th></tr>
+<tr>
+<td>整个 zpool</td>
+<td>zpool@snapshot-name
+</td></tr>
+<tr>
+<td>数据集</td>
+<td>zpool/dataset@snapshot-name
+</td></tr>
+</tbody></table>
+<p>创建新数据集并获取所有权：
+</p>
+<pre># zfs create zpool/docs
+# chown facade:users /zpool/docs
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>创建命令中缺少 / 是有意为之的，并不是缺漏！</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_Time_0" id="Time_0">Time 0</h3></div>
+<p>添加一些文件到新数据集中（/zpool/docs）：
+</p>
+<pre>$ wget -O /zpool/docs/Moby_Dick.txt  <a href="https://www.gutenberg.org/ebooks/2701.txt.utf-8">https://www.gutenberg.org/ebooks/2701.txt.utf-8</a>
+$ wget -O /zpool/docs/War_and_Peace.txt <a href="https://www.gutenberg.org/ebooks/2600.txt.utf-8">https://www.gutenberg.org/ebooks/2600.txt.utf-8</a>
+$ wget -O /zpool/docs/Beowulf.txt <a href="https://www.gutenberg.org/ebooks/16328.txt.utf-8">https://www.gutenberg.org/ebooks/16328.txt.utf-8</a>
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zfs list</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME           USED  AVAIL  REFER  MOUNTPOINT
+zpool       5.06M  3.91G  40.0K  /zpool
+zpool/docs  4.92M  3.91G  4.92M  /zpool/docs
+</pre>
+<p>这意味着下载的书籍占用了 /zpool/docs 中 4.92M 的空间。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_Time_.2B1" id="Time_+1"><span id="Time_.2B1"></span>Time +1</h3></div>
+<p>接下来为数据集创建快照：
+</p>
+<pre># zfs snapshot zpool/docs@001
+</pre>
+<p>再运行一次 list 命令：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zfs list</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME           USED  AVAIL  REFER  MOUNTPOINT
+zpool       5.07M  3.91G  40.0K  /zpool
+zpool/docs  4.92M  3.91G  4.92M  /zpool/docs
+</pre>
+<p>注意，因为这三个文件没有被修改，因此 USED 一列没有变更，意味着快照不占用 zpool 空间。
+</p><p>我们可以通过如下方式列出快照，并确认快照不占用存储空间，而是<b>引用</b>了原始文件，这些文件共占用 4.92M：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zfs list -t snapshot</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME               USED  AVAIL  REFER  MOUNTPOINT
+zpool/docs@001      0      -  4.92M  -
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_Time_.2B2" id="Time_+2"><span id="Time_.2B2"></span>Time +2</h3></div>
+<p>接下来添加些新文件，并创建新快照：
+</p>
+<pre>$ wget -O /zpool/docs/Les_Mis.txt <a href="https://www.gutenberg.org/ebooks/135.txt.utf-8">https://www.gutenberg.org/ebooks/135.txt.utf-8</a>
+# zfs snapshot zpool/docs@002
+</pre>
+<p>再次使用 list 来查看空间变化：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zfs list -t snapshot</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME               USED  AVAIL  REFER  MOUNTPOINT
+zpool/docs@001  25.3K      -  4.92M  -
+zpool/docs@002      0      -  8.17M  -
+</pre>
+<p>可以看到 001 快照的元数据占用了 25.3K 大小，并依旧引用了之前的 4.92M 数据；新快照不占用任何空间，并引用了总共 8.17M 的数据。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_Time_.2B3" id="Time_+3"><span id="Time_.2B3"></span>Time +3</h3></div>
+<p>接下来我们模拟下意外覆盖文件导致的数据丢失：
+</p>
+<pre>$ echo "this book sucks" &gt; /zpool/docs/War_and_Peace.txt
+</pre>
+<p>与之前一样，再创建一个快照：
+</p>
+<pre># zfs snapshot zpool/docs@003
+</pre>
+<p>接下来列出快照，可见被引用的数据减少了 3.1M：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zfs list -t snapshot</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME               USED  AVAIL  REFER  MOUNTPOINT
+zpool/docs@001  25.3K      -  4.92M  -
+zpool/docs@002  25.5K      -  8.17M  -
+zpool/docs@003      0      -  5.04M  -
+</pre>
+<p>我们可以在一个或者多个旧快照中找到该文件的未损坏版本。ZFS 将快照存放在 zpool 中一个隐藏文件夹内：<code>/zpool/files/.zfs/snapshot</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /zpool/docs/.zfs/snapshot</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">total 0
+dr-xr-xr-x 1 root root 0 Oct 20 16:09 001
+dr-xr-xr-x 1 root root 0 Oct 20 16:09 002
+dr-xr-xr-x 1 root root 0 Oct 20 16:09 003
+</pre>
+<p>我们可以从任意一个快照中复制一份未损坏版本的书到 zpool 内或外部的任意地址：
+</p>
+<pre>% cp /zpool/docs/.zfs/snapshot/002/War_and_Peace.txt /zpool/docs
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>&lt;TAB&gt; 自动补全在默认情况下不可用，但可通过修改存储池或数据集的 <i>snapdir</i> 属性来启用。</div>
+<pre># zfs set snapdir=visible zpool/docs
+</pre>
+<p>接下来进入一个或各个快照文件夹：
+</p>
+<pre>$ cd /zpool/docs/.zfs/snapshot/001
+$ cd /zpool/docs/.zfs/snapshot/002
+</pre>
+<p>重复 df 命令：
+</p>
+<pre>$ df -h | grep zpool
+zpool           4.0G     0  4.0G   0% /zpool
+zpool/docs      4.0G  5.0M  4.0G   1% /zpool/docs
+zpool/docs@001  4.0G  4.9M  4.0G   1% /zpool/docs/.zfs/snapshot/001
+zpool/docs@002  4.0G  8.2M  4.0G   1% /zpool/docs/.zfs/snapshot/002
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>通过将 zpool 设为离线并重新挂载，或是重启服务器，可以撤销 .zfs 下所有文件夹可见。</div>
+<p>例如：
+</p>
+<pre># zpool export zpool
+# zpool import -d /scratch/ zpool
+$ df -h | grep zpool
+zpool         4.0G     0  4.0G   0% /zpool
+zpool/docs    4.0G  5.0M  4.0G   1% /zpool/docs
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_Time_.2B4" id="Time_+4"><span id="Time_.2B4"></span>Time +4</h3></div>
+<p>现在一切已恢复正常，我们可以为目前状态再次创建一个快照：
+</p>
+<pre># zfs snapshot zpool/docs@004
+</pre>
+<p>此时的 list 输出为：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zfs list -t snapshot</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME               USED  AVAIL  REFER  MOUNTPOINT
+zpool/docs@001  25.3K      -  4.92M  -
+zpool/docs@002  25.5K      -  8.17M  -
+zpool/docs@003   155K      -  5.04M  -
+zpool/docs@004      0      -  8.17M  -
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_.E5.88.97.E5.87.BA.E5.BF.AB.E7.85.A7" id="列出快照"><span id=".E5.88.97.E5.87.BA.E5.BF.AB.E7.85.A7"></span>列出快照</h3></div>
+<p>需要指出，这一简单但十分重要的命令在同类文章中经常被忽略，因此有必要特别提一下。
+</p><p>使用如下命令列出系统中的所有快照：
+</p>
+<pre>$ zfs list -t snapshot</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg367e96a59949_.E5.88.A0.E9.99.A4.E5.BF.AB.E7.85.A7" id="删除快照"><span id=".E5.88.A0.E9.99.A4.E5.BF.AB.E7.85.A7"></span>删除快照</h3></div>
+<p>可存放的快照数量最大为 2^64，用户可以通过如下命令删除快照：
+</p>
+<pre># zfs destroy zpool/docs@001
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># zfs list -t snapshot</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME               USED  AVAIL  REFER  MOUNTPOINT
+zpool/docs@002  3.28M      -  8.17M  -
+zpool/docs@003   155K      -  5.04M  -
+zpool/docs@004      0      -  8.17M  -
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg367e96a59949_Troubleshooting" id="Troubleshooting">Troubleshooting</h2></div>
+<p>If your system is not configured to load the zfs pool upon boot, or for whatever reason you want to manually remove and add back the pool, or if you have lost your pool completely, a convenient way is to use import/export. 
+</p><p>If your pool was named &lt;zpool&gt;
+</p>
+<pre># zpool import -d /scratch zpool
+</pre>
+<p>If you have any problems accessing your pool at any time, try export and reimport. 
+</p>
+<pre># zpool export zpool
+# zpool import -d /scratch zpool
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807221545
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.127 seconds
+Real time usage: 0.131 seconds
+Preprocessor visited node count: 418/1000000
+Revision size: 15184/2097152 bytes
+Post‐expand include size: 6669/2097152 bytes
+Template argument size: 2041/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 3476/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   33.381      1 -total
+ 13.99%    4.671      1 Template:Related_articles_start
+ 13.20%    4.405     16 Template:Hc
+  8.35%    2.787      5 Template:Note
+  6.50%    2.170      2 Template:Related
+  5.39%    1.798      1 Template:翻译状态
+  5.36%    1.788      1 Template:Tip
+  5.34%    1.782      1 Template:Related_articles_end
+  4.78%    1.595      1 Template:Man
+  4.17%    1.391      5 Template:Ic
+-->
+<!-- Render ID 88f5ca8e-92ad-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7646:|#|:idhash:canonical!zh-cn and timestamp 20260807221545 and revision id 33689. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

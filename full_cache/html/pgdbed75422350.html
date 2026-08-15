@@ -1,0 +1,155 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgdbed75422350">剪贴板</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Clipboard">Clipboard</a>，最近一次同步于 2024-11-16，若英文版本有所<a href="https://wiki.archlinux.org/title/Clipboard?diff=0&amp;oldid=820823">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Clipboard_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgc568502a4315">从终端复制文本</a></li>
+<li><a href="#pg9b5d7fec8088">Firefox#中键单击行为</a></li>
+<li><a href="#pg6438c4cbb62c">GTK#禁用鼠标中键粘贴</a></li>
+<li><a href="#pg74a2a3e4814c">Vim#剪贴板</a></li>
+</ul></div>
+
+<p>根据<a href="https://zh.wikipedia.org/wiki/%E5%89%AA%E8%B4%B4%E6%9D%BF">维基百科</a>：
+</p>
+<dl><dd>剪贴板（英语：clipboard），有时也称剪切板、剪贴簿、剪贴本。它是一种软件功能，通常由操作系统提供，作用是使用复制和粘贴操作短期存储数据和在文档或应用程序间转移数据。</dd></dl>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgdbed75422350_.E5.8E.86.E5.8F.B2" id="历史"><span id=".E5.8E.86.E5.8F.B2"></span>历史</h2></div>
+<p>在X10（<a href="https://en.wikipedia.org/wiki/X_Window_System#Release_history">1985</a>），引入了<a href="https://en.wikipedia.org/wiki/X_Window_selection#Cut_buffers">剪切缓冲区</a>。这些是有限的缓冲区，用于存储任意文本，并被大多数应用程序使用。然而，它们效率低下，且实现方式各异，因此引入了选择功能。剪切缓冲区现在已经被长期弃用，尽管一些应用程序（如<span class="ilh-all" data-foreign-title="xterm" data-lang-code="en" data-lang-name="英语" data-orig-title="xterm"><span class="ilh-page"><a href="#pg12c4c9eae03a">xterm</a></span></span>）可能仍然有对它们的遗留支持，但不建议使用它们。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgdbed75422350_.E9.80.89.E5.8C.BA" id="选区"><span id=".E9.80.89.E5.8C.BA"></span>选区</h2></div>
+<p><a href="#pgd0233de132d5">Freedesktop.org</a> 将两种主要<a href="https://en.wikipedia.org/wiki/X_Window_selection#Selections">选区</a>描述如下<a href="https://specifications.freedesktop.org/clipboard-spec/latest/">[4]</a>：
+</p>
+<dl><dt>PRIMARY</dt>
+<dd>用于当前选定的文本，即使该文本没有显式复制，并用于中键粘贴。在某些情况下，使用快捷键也可以粘贴。</dd>
+<dt>CLIPBOARD</dt>
+<dd>用于涉及键盘快捷键或菜单项的显式复制/粘贴命令。因此，它的行为类似于 Windows 上的单剪贴板系统。与 PRIMARY 不同，它还可以处理<a href="https://stackoverflow.com/questions/3571179/how-does-x11-clipboard-handle-multiple-data-formats">多种数据格式</a>。</dd></dl>
+<p>大多数 <a href="#pga36c0aff60be">Xorg</a> 程序，包括 <a href="#pg5016907af879">Qt</a> 和 <a href="#pg6438c4cbb62c">GTK</a> 应用程序，遵循此行为。尽管 <a href="https://tronche.com/gui/x/icccm/">ICCCM</a> 还定义了 SECONDARY 选区，但它没有一个广泛认同的用途。尽管名称上有三种选区，但它们基本上都是“剪贴板”。与旧的“剪切缓冲区”系统不同，只有一个应用程序可以控制或“拥有”一个选区。这避免了选区操作中的不一致性。
+</p><p>请参见<a href="#pg8b69f7e24e08">快捷键</a>页面，列出了许多程序的默认快捷键。
+</p><p>还需要注意的是，根据选择协议，直到粘贴之前，什么都不会被复制<a href="https://unix.stackexchange.com/questions/213840/how-to-toggle-or-turn-off-text-selection-being-sent-to-the-clipboard/213843#213843">[5]</a>。例如，如果你在终端窗口中选择了一些文字，关闭终端后想要粘贴到其他地方，它将无法工作，因为终端已经消失，文本并没有被复制到任何地方。如果你希望关闭终端窗口后保存文字，考虑安装<a href="#pgdbed75422350">剪贴板管理器</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><a href="#pgdbed75422350">剪贴板管理器</a>可以显著改变用户体验，例如，它们可能会同步 PRIMARY 和 CLIPBOARD 选择，以模拟单一剪贴板系统。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgdbed75422350_.E7.A6.81.E7.94.A8.E4.B8.AD.E9.94.AE.E7.B2.98.E8.B4.B4" id="禁用中键粘贴"><span id=".E7.A6.81.E7.94.A8.E4.B8.AD.E9.94.AE.E7.B2.98.E8.B4.B4"></span>禁用中键粘贴</h2></div>
+<p>以下方法通过自动清除 PRIMARY 来禁用中键粘贴行为，而不禁用中键按钮或更改其其他功能（如在新标签页中打开或滚动）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgdbed75422350_.E5.85.A8.E5.B1.80.E7.A6.81.E7.94.A8" id="全局禁用"><span id=".E5.85.A8.E5.B1.80.E7.A6.81.E7.94.A8"></span>全局禁用</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgdbed75422350_.E4.BD.BF.E7.94.A8_sxhkd" id="使用_sxhkd"><span id=".E4.BD.BF.E7.94.A8_sxhkd"></span>使用 sxhkd</h4></div>
+<p>使用 <a href="#pgb45106978707">sxhkd</a>，在<a href="#pgb45106978707">配置文件</a>中添加以下内容：
+</p>
+<pre>~button2
+    ;echo -n | xclip -in
+</pre>
+<p>该命令使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xclip">xclip</a></span><sup><small>包</small></sup></span>。请参见 <a href="#pgb45106978707">sxhkd#用法</a>配置 sxhkd 以实现自动启动。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgdbed75422350_.E4.BD.BF.E7.94.A8_xsel" id="使用_xsel"><span id=".E4.BD.BF.E7.94.A8_xsel"></span>使用 xsel</h4></div>
+<p>运行脚本：
+</p>
+<pre>#!/bin/sh
+while true; do
+    xsel --follow --input --nodetach &lt;/dev/null
+done
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgdbed75422350_.E7.89.B9.E5.AE.9A.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E7.A6.81.E7.94.A8" id="特定应用程序禁用"><span id=".E7.89.B9.E5.AE.9A.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E7.A6.81.E7.94.A8"></span>特定应用程序禁用</h3></div>
+<ul><li><a href="#pg6438c4cbb62c">GTK</a>——参见 <a href="#pg6438c4cbb62c">GTK#禁用鼠标中键粘贴</a></li>
+<li><a href="#pg9b5d7fec8088">Firefox</a>——参见<a href="#pg9b5d7fec8088">Firefox#中键单击行为</a></li>
+<li><a href="#pgaa27357d651e">LibreOffice</a>——可以在<b>工具 &gt; 选项 &gt; LibreOffice &gt; 查看 &gt; 鼠标</b>中禁用</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgdbed75422350_.E5.B7.A5.E5.85.B7" id="工具"><span id=".E5.B7.A5.E5.85.B7"></span>工具</h2></div>
+<p>本节列出了用于操作剪贴板的命令行工具。
+</p>
+<ul><li><b>sselp</b> — 简单的 X 选区输出工具。将 X 选区打印到标准输出。</li></ul>
+<dl><dd><a href="https://tools.suckless.org/x/sselp">https://tools.suckless.org/x/sselp</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sselp/">sselp</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>xclip</b> — 轻量级的命令行剪贴板接口。</li></ul>
+<dl><dd><a href="https://github.com/astrand/xclip">https://github.com/astrand/xclip</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xclip">xclip</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>xsel</b> — 命令行程序，用于获取和设置 X 选区的内容。</li></ul>
+<dl><dd><a href="http://www.vergenet.net/~conrad/software/xsel/">http://www.vergenet.net/~conrad/software/xsel/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xsel">xsel</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>wl-clipboard</b> — 用于 <a href="#pga21a6be8b605">Wayland</a> 合成器的简单复制/粘贴工具。</li></ul>
+<dl><dd><a href="https://github.com/bugaevc/wl-clipboard">https://github.com/bugaevc/wl-clipboard</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wl-clipboard">wl-clipboard</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>Wayland 上的剪贴板可以通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wl-clipboard">wl-clipboard</a></span><sup><small>包</small></sup></span> 使用 <code>wl-paste --primary --watch wl-copy</code> 同步。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgdbed75422350_.E7.AE.A1.E7.90.86.E5.99.A8" id="管理器"><span id=".E7.AE.A1.E7.90.86.E5.99.A8"></span>管理器</h2></div>
+<p>本节列出了提供额外功能（如剪贴板历史记录或同步）的剪贴板管理器。
+</p>
+<ul><li><b>Anamnesis</b> — 存储所有剪贴板历史记录的剪贴板管理器，提供一个接口进行全文搜索。提供命令行和 GUI 模式。</li></ul>
+<dl><dd><a href="https://anamnesis.sourceforge.net/">https://anamnesis.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/anamnesis/">anamnesis</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Autocutsel</b> — 命令行和守护进程接口，用于同步 PRIMARY，CLIPBOARD 和剪切缓冲区选区。</li></ul>
+<dl><dd><a href="https://www.nongnu.org/autocutsel/">https://www.nongnu.org/autocutsel/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/autocutsel/">autocutsel</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Clipboard</b> — 适用于终端的易用剪贴板管理器，支持多种剪贴板、持久剪贴板和正则选择。</li></ul>
+<dl><dd><a href="https://github.com/Slackadays/Clipboard">https://github.com/Slackadays/Clipboard</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clipboard/">clipboard</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Clipboard Indicator</b> — GNOME Shell的剪贴板管理器扩展。将剪贴板指示器添加到顶部面板，并缓存剪贴板历史记录。</li></ul>
+<dl><dd><a href="https://github.com/Tudmotu/gnome-shell-extension-clipboard-indicator">https://github.com/Tudmotu/gnome-shell-extension-clipboard-indicator</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gnome-shell-extension-clipboard-indicator-git/">gnome-shell-extension-clipboard-indicator-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Clipcat</b> — 用 Rust 编写的剪贴板管理器，允许用户通过应用启动器（如 <a href="#pge7090ebee131">dmenu</a>、<a href="#pg539120c87e1f">rofi</a>）选择剪贴板历史记录。</li></ul>
+<dl><dd><a href="https://github.com/xrelkd/clipcat">https://github.com/xrelkd/clipcat</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=clipcat">clipcat</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>cliphist</b> — 支持多媒体的 Wayland 剪贴板管理器。</li></ul>
+<dl><dd><a href="https://github.com/sentriz/cliphist">https://github.com/sentriz/cliphist</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cliphist">cliphist</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>ClipIt</b> — Parcellite 的分支，提供命令行和 GUI 模式。</li></ul>
+<dl><dd><a href="https://github.com/CristianHenzel/ClipIt">https://github.com/CristianHenzel/ClipIt</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clipit/">clipit</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Clipman</b> — 适用于 Xfce4 面板的剪贴板管理器插件。它保留剪贴板内容，防止在关闭应用程序时丢失。支持文本和图片，并具有根据正则表达式匹配特定文本选择执行操作的功能。</li></ul>
+<dl><dd><a href="https://goodies.xfce.org/projects/panel-plugins/xfce4-clipman-plugin">https://goodies.xfce.org/projects/panel-plugins/xfce4-clipman-plugin</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xfce4-clipman-plugin">xfce4-clipman-plugin</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Clipmenu</b> — 基于 Dmenu 的剪贴板管理器</li></ul>
+<dl><dd><a href="https://github.com/cdown/clipmenu/">https://github.com/cdown/clipmenu/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=clipmenu">clipmenu</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Clipmon</b> — 轻量级的 Wayland 剪贴板管理器。作为监控工具，当应用程序自己从剪贴板粘贴时，将发送通知（此功能正在开发中）。</li></ul>
+<dl><dd><a href="https://git.sr.ht/~whynothugo/clipmon">https://git.sr.ht/~whynothugo/clipmon</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clipmon-git/">clipmon-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>clipsim</b> — 用 C 语言编写的简单快速的 X 剪贴板管理器。</li></ul>
+<dl><dd><a href="https://github.com/lucas-mior/clipsim">https://github.com/lucas-mior/clipsim</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clipsim-git/">clipsim-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Clipster</b> — 轻量级的命令行驱动剪贴板管理器，用 Python 编写。</li></ul>
+<dl><dd><a href="https://github.com/mrichar1/clipster">https://github.com/mrichar1/clipster</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clipster/">clipster</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Clipton</b> — 带有 Rofi 前端的剪贴板管理器。</li></ul>
+<dl><dd><a href="https://github.com/madprops/clipton">https://github.com/madprops/clipton</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clipton-git/">clipton-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>CopyQ</b> — 聪明的 Qt 剪贴板管理器，具有可搜索和可编辑的历史记录、项目上的自定义操作和命令行支持。</li></ul>
+<dl><dd><a href="https://github.com/hluk/CopyQ">https://github.com/hluk/CopyQ</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=copyq">copyq</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Gnome Clipboard History</b> — GNOME 扩展的剪贴板管理器，可以保存你复制的内容，并以易于访问、可搜索的历史面板显示。</li></ul>
+<dl><dd><a href="https://github.com/SUPERCILEX/gnome-clipboard-history">https://github.com/SUPERCILEX/gnome-clipboard-history</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gnome-shell-extension-clipboard-history/">gnome-shell-extension-clipboard-history</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>GPaste</b> — 剪贴板管理系统，旨在成为新一代 Parcellite，具有模块化结构，分为多个库和守护进程以适应不同需求。提供 GNOME Shell 扩展和 CLI 界面。</li></ul>
+<dl><dd><a href="https://github.com/Keruspe/GPaste">https://github.com/Keruspe/GPaste</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gpaste">gpaste</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><span class="ilh-all" data-foreign-title="Greenclip" data-lang-code="en" data-lang-name="英语" data-orig-title="Greenclip"><span class="ilh-page"><a href="#pga959c6c18f37">Greenclip</a></span></span></b> — 简单的剪贴板管理器，可与 Rofi 集成。</li></ul>
+<dl><dd><a href="https://github.com/erebe/greenclip">https://github.com/erebe/greenclip</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rofi-greenclip/">rofi-greenclip</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Klipper">Klipper</a></b> — KDE 桌面环境的全功能剪贴板管理器。</li></ul>
+<dl><dd><a href="https://userbase.kde.org/Klipper">https://userbase.kde.org/Klipper</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=plasma-workspace">plasma-workspace</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Parcellite</b> — 轻量且功能丰富的剪贴板管理器，提供命令行和 GUI 模式。</li></ul>
+<dl><dd><a href="https://parcellite.sourceforge.net/">https://parcellite.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=parcellite">parcellite</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Qlipper</b> — 轻量级的跨平台剪贴板历史记录小程序，基于 Qt。</li></ul>
+<dl><dd><a href="https://github.com/pvanek/qlipper/">https://github.com/pvanek/qlipper/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qlipper/">qlipper</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>xclipboard</b> — 官方的 X 剪贴板命令行客户端。</li></ul>
+<dl><dd><a href="https://www.x.org/releases/X11R7.5/doc/man/man1/xclipboard.1.html">https://www.x.org/releases/X11R7.5/doc/man/man1/xclipboard.1.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xclipboard">xorg-xclipboard</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>xcmenu</b> — 为窗口管理器用户开发的剪贴板同步工具。</li></ul>
+<dl><dd><a href="https://github.com/dindon-sournois/xcmenu">https://github.com/dindon-sournois/xcmenu</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xcmenu-git/">xcmenu-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgdbed75422350_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://specifications.freedesktop.org/clipboard-spec/latest/">X 中的剪切和粘贴（剪贴板规范，英文）</a></li>
+<li><a href="https://www.jwz.org/doc/x-cut-and-paste.html">X 选区、剪切缓冲区和“Kill ring”（英文）</a></li>
+<li><a href="https://www.uninformativ.de/blog/postings/2017-04-02/0/POSTING-en.html">X11：“这个”剪贴板是如何工作的？（英文）</a></li>
+<li><a href="https://wayland.app/protocols/primary-selection-unstable-v1">Wayland 的 Primary 选区协议（英文）</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807114151
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.209 seconds
+Real time usage: 0.216 seconds
+Preprocessor visited node count: 674/1000000
+Revision size: 9194/2097152 bytes
+Post‐expand include size: 18746/2097152 bytes
+Template argument size: 10406/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 2/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.012/7.000 seconds
+Lua memory usage: 629021/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   85.155      1 -total
+ 38.07%   32.416      2 Template:Link-en
+ 25.72%   21.906     26 Template:App
+  5.83%    4.963      1 Template:Expansion
+  5.52%    4.699     14 Template:Pkg
+  4.40%    3.750      1 Template:Tip
+  4.03%    3.435      1 Template:翻译状态
+  3.82%    3.249     14 Template:AUR
+  3.80%    3.236      1 Template:Related_articles_start
+  2.80%    2.385      1 Template:META_Message
+-->
+<!-- Render ID faedf58e-9254-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7993:|#|:idhash:canonical!zh-cn and timestamp 20260807114151 and revision id 34286. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

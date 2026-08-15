@@ -1,0 +1,814 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgd94eb3177957">pacman/各软件包管理器命令对应关系</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Pacman/Rosetta">Pacman/Rosetta</a>，最近一次同步于 2025-04-15，若英文版本有所<a href="https://wiki.archlinux.org/title/Pacman/Rosetta?diff=0&amp;oldid=811193">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Pacman_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Rosetta_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>
+这个页面用表格展示一些流行的 Linux 发行版<a href="https://en.wikipedia.org/wiki/Package_manager">包管理器</a>命令的对应关系。这是受到 <a href="https://web.archive.org/web/20230215065301/https://old-en.opensuse.org/Software_Management_Command_Line_Comparison">openSUSE's Software Management Command Line Comparison</a> 的启发而成的。</p><div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>Arch 用户在临时处理其他发行版时可以用 <a href="https://github.com/icy/pacapt">pacapt</a>，它是对其它包管理器的简单包装。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd94eb3177957_.E5.9F.BA.E6.9C.AC.E6.93.8D.E4.BD.9C" id="基本操作"><span id=".E5.9F.BA.E6.9C.AC.E6.93.8D.E4.BD.9C"></span>基本操作</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>行为</th>
+<th>Arch</th>
+<th>Red Hat/Fedora</th>
+<th>Debian/Ubuntu</th>
+<th>SLES/openSUSE</th>
+<th>Gentoo
+</th></tr>
+<tr>
+<td>搜索软件包（们）。 默认情况下搜索的确切字段因每个工具而异。大多数选项都会带来同等水平的工具。</td>
+<td><code>pacman -Ss</code></td>
+<td><code>dnf search</code></td>
+<td><code>apt search</code></td>
+<td><code>zypper search</code> 或 <code>zypper se [-s]</code></td>
+<td><code>emerge --search</code> (<code>-s</code>)
+<p>或 <code>emerge --searchdesc</code> (<code>-S</code>)
+</p>
+</td></tr>
+<tr>
+<td>按照包名安装软件包（们）</td>
+<td><code>pacman -S</code></td>
+<td><code>dnf install</code></td>
+<td><code>apt install</code></td>
+<td><code>zypper install</code> 或 <code>zypper in</code></td>
+<td><code>emerge</code>
+</td></tr>
+<tr>
+<td>获取源码包（们）并构建依赖</td>
+<td><code>makepkg -s PKGBUILD</code></td>
+<td><code>dnf builddep</code></td>
+<td><code>apt build-dep</code></td>
+<td><code>zypper source-install</code> (<code>zypper si</code>) 或 <code>zypper install -d</code></td>
+<td><code>emerge</code>,或explicitly <code>emerge --with-bdeps</code>
+</td></tr>
+<tr>
+<td>不进行实际操作，只输出操作目标
+</td>
+<td><code>pacman --print</code> (或 <code>-p</code>)</td>
+<td><code>dnf --setopt=tsflags=test</code></td>
+<td><code>apt --simulate</code> (or <code>-s</code>, <code>--dry-run</code>, <code>--just-print</code>)</td>
+<td><code>zypper --dry-run</code></td>
+<td><code>emerge --pretend</code> (<code>-p</code>)
+</td></tr>
+<tr>
+<td>切换是否手动确认
+</td>
+<td><code>pacman --confirm</code> 或 <code>pacman --noconfirm</code></td>
+<td><code>dnf --assumeyes</code> (<code>-y</code>) 或 <code>dnf --assumeno</code></td>
+<td><code>apt --yes</code> (<code>-y</code>)</td>
+<td><code>zypper --non-interactive</code> (<code>-n</code>) 或 <code>zypper --no-confirm</code> (<code>-y</code>)</td>
+<td><code>emerge --ask</code> (<code>-a</code>)
+</td></tr>
+<tr>
+<td>刷新本地软件包数据库</td>
+<td><code>pacman -Sy</code> (见 <a href="#pg9a1cc6af125e">the warnings about partial updates</a>)</td>
+<td><code>dnf check-update</code>或<code>dnf makecache</code>或<code>dnf upgrade</code>（升级时自动刷新）</td>
+<td><code>apt update</code></td>
+<td><code>zypper refresh</code> 或 <code>zypper ref</code></td>
+<td><code>emerge --sync</code>
+</td></tr>
+<tr>
+<td>升级软件包 - 安装已经有旧版本安装的软件包</td>
+<td><code>pacman -Syu</code></td>
+<td><code>dnf upgrade</code></td>
+<td><code>apt upgrade</code></td>
+<td><code>zypper update</code> 或 <code>zypper up</code></td>
+<td><code>emerge -[a]uDN @world</code>
+</td></tr>
+<tr>
+<td>升级软件包 -另一种的升级命令, 可以完成更复杂的升级 -- 比如发行版升级. 当普通的更新命令会忽略软件包更新时,包括依赖关系的一些变化使用这个命令可以进行更新.</td>
+<td><code>pacman -Syu</code></td>
+<td><code>dnf distro-sync</code></td>
+<td><code>apt dist-upgrade</code></td>
+<td><code>zypper dup</code></td>
+<td><code>emerge -[a]uDN @world</code>
+</td></tr>
+<tr>
+<td>按照包名移除软件包（们）及其所有依赖</td>
+<td><code>pacman -Rs</code></td>
+<td><code>dnf remove</code></td>
+<td><code>apt autoremove</code></td>
+<td><code>zypper remove</code> 或 <code>zypper rm</code></td>
+<td><code>emerge --depclean</code> (<code>-c</code>)
+</td></tr>
+<tr>
+<td>按照包名移除软件包（们）及其配置文件
+</td>
+<td><code>pacman -Rn</code></td>
+<td>?</td>
+<td><code>apt purge</code></td>
+<td>?</td>
+<td>n/a
+</td></tr>
+<tr>
+<td>按照包名移除软件包（们）及其所有依赖和配置文件</td>
+<td><code>pacman -Rns</code></td>
+<td>?</td>
+<td><code>apt autoremove --purge</code></td>
+<td>?</td>
+<td>n/a
+</td></tr>
+<tr>
+<td>移除不再被需要的依赖(orphans), 例如 需要某个依赖的软件包已被移除</td>
+<td><code>pacman -Qdtq | pacman -Rs -</code> (<code>-Qdttq</code> to also remove optional deps)</td>
+<td><code>dnf autoremove</code></td>
+<td><code>apt autoremove</code></td>
+<td><code>zypper rm -u</code> (just for removing a package) 或 <code>zypper packages --unneeded</code> (listing only)</td>
+<td><code>emerge --depclean</code> (<code>-c</code>)
+</td></tr>
+<tr>
+<td>移除所有不再处于任何仓库的软件包</td>
+<td><code>pacman -Qmq | pacman -Rs -</code></td>
+<td><code>dnf repoquery --extras</code></td>
+<td><code>aptitude purge '~o'</code></td>
+<td></td>
+<td>?
+</td></tr>
+<tr>
+<td>将先前作为依赖被安装的软件包标记为明确的安装</td>
+<td><code>pacman -D --asexplicit</code></td>
+<td><code>dnf mark install</code></td>
+<td><code>apt-mark manual</code></td>
+<td><code>zypper install --force</code> (workaround which needs to reinstall the package)</td>
+<td><code>emerge --select</code> (<code>-w</code>)
+</td></tr>
+<tr>
+<td>将软件包作为依赖被安装 / 并不明确的标记为 required</td>
+<td><code>pacman -S --asdeps</code></td>
+<td><code>dnf install</code> and then <code>dnf mark remove</code></td>
+<td><code>apt-mark auto</code></td>
+<td>n/a (<a href="https://bugzilla.opensuse.org/show_bug.cgi?id=1175678">feature request + workaround</a>)</td>
+<td><code>emerge --oneshot</code> (<code>-1</code>)
+</td></tr>
+<tr>
+<td>仅下载指定的软件包而不解包或安装</td>
+<td><code>pacman -Sw</code></td>
+<td><code>dnf download</code></td>
+<td><code>apt install --download-only</code> (into the package cache) 或 <code>apt download</code> (bypass the package cache)</td>
+<td><code>zypper --download-only</code></td>
+<td><code>emerge --fetchonly</code> (<code>-f</code>)
+</td></tr>
+<tr>
+<td>清理本地所有缓存。可以使用选项显示实际清理的内容</td>
+<td><code>pacman -Sc</code>或<code>pacman -Scc</code></td>
+<td><code>dnf clean all</code></td>
+<td><code>apt autoclean</code> removes only unneeded, obsolete information或<code>apt clean</code></td>
+<td><code>zypper clean</code></td>
+<td><code>eclean distfiles</code>
+</td></tr>
+<tr>
+<td>打开一个Shell来在一个会话里输入多个命令
+</td>
+<td></td>
+<td><code>dnf shell</code></td>
+<td></td>
+<td><code>zypper shell</code></td>
+<td>
+</td></tr>
+<tr>
+<td>显示关于软件包管理行为的日志</td>
+<td>read <code>/var/log/pacman.log</code></td>
+<td><code>dnf history</code></td>
+<td>read <code> /var/log/dpkg.log</code></td>
+<td>read <code>/var/log/zypp/history</code>或<code>zypper-log</code> provided by an additional package</td>
+<td>read <code>/var/log/portage</code>
+</td></tr>
+<tr>
+<td>获取整个系统信息的转储-打印、保存或类似于包管理系统的当前状态。首选输出是文本或XML。（注意：为什么选择其中之一或此处？没有工具提供选择输出格式的选项。）</td>
+<td>见 <code>/var/lib/pacman/local</code></td>
+<td>见 <code>/var/lib/rpm/Packages</code></td>
+<td><code>apt-cache stats</code></td>
+<td></td>
+<td><code>emerge --info</code>
+</td></tr>
+<tr>
+<td>通过电子邮件发送软件包的变更
+</td>
+<td></td>
+<td></td>
+<td><code>apt install apt-listchanges</code></td>
+<td></td>
+<td><code>eselect news read</code>
+</td></tr>
+</tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd94eb3177957_.E6.9F.A5.E8.AF.A2.E7.89.B9.E5.AE.9A.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85" id="查询特定的软件包"><span id=".E6.9F.A5.E8.AF.A2.E7.89.B9.E5.AE.9A.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>查询特定的软件包</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>Action</th>
+<th>Arch</th>
+<th>Red Hat/Fedora</th>
+<th>Debian/Ubuntu</th>
+<th>SLES/openSUSE</th>
+<th>Gentoo
+</th></tr>
+<tr>
+<td>显示关于一个软件包的全部或者大多数信息。针对默认命令，每个根据的信息详细程度各不相同。但通过选项，各个工具可以达到大致相同的详细程度。</td>
+<td><code>pacman -Si</code>或<code>pacman -Qi</code></td>
+<td><code>dnf list</code> 或 <code>dnf info</code></td>
+<td><code>apt show</code> 或 <code>apt-cache policy</code></td>
+<td><code>zypper info</code>或<code>zypper if</code></td>
+<td><code>emerge -S</code>, <code>emerge -pv</code>或<code>eix</code>
+</td></tr>
+<tr>
+<td>显示本地软件包信息：名称、版本、描述等等</td>
+<td><code>pacman -Qi</code></td>
+<td><code>rpm -qi</code> / <code>dnf info installed</code></td>
+<td><code>dpkg -s</code> 或 <code>aptitude show</code></td>
+<td><code>zypper --no-remote info</code>或<code>rpm -qi</code></td>
+<td><code>emerge -pv</code>或<code>emerge -S</code>
+</td></tr>
+<tr>
+<td>显示远端软件包信息：名称、版本、描述等等</td>
+<td><code>pacman -Si</code></td>
+<td><code>dnf info</code></td>
+<td><code>apt-cache show</code> 或 <code>aptitude show</code></td>
+<td><code>zypper info</code></td>
+<td><code>emerge -pv</code> and <code>emerge -S</code>或<code>equery meta</code>
+</td></tr>
+<tr>
+<td>显示由本地软件包提供的文件</td>
+<td><code>pacman -Ql</code></td>
+<td><code>rpm -ql</code></td>
+<td><code>dpkg -L</code></td>
+<td><code>rpm -ql</code></td>
+<td><code>equery files</code>或<code>qlist</code>
+</td></tr>
+<tr>
+<td>显示由远端软件包提供的文件
+</td>
+<td><code>pacman -Fl</code></td>
+<td><code>dnf repoquery -l</code>或<code>repoquery -l</code> (from package yum-utils)</td>
+<td><code>apt-file list</code></td>
+<td></td>
+<td><code>pfl</code>
+</td></tr>
+<tr>
+<td>查询拥有某个文件的软件包</td>
+<td><code>pacman -Qo</code></td>
+<td><code>rpm -qf</code> (installed only)或<code>dnf provides</code> (everything)或<code>repoquery -f</code> (from package yum-utils)</td>
+<td><code>dpkg -S</code>或<code>dlocate</code></td>
+<td><code>rpm -qf</code> (installed only)或<code>zypper search -f</code> (everything)</td>
+<td><code>equery belongs</code> 或 <code>qfile</code>
+</td></tr>
+<tr>
+<td>列出软件包所提供的文件. 同样,这个功能可以被其他更复杂的命令实现</td>
+<td><code>pacman -Ql</code>或<code>pacman -Fl</code></td>
+<td><code>dnf repoquery -l</code></td>
+<td><code>dpkg-query -L</code></td>
+<td><code>rpm -ql</code></td>
+<td><code>equery files</code> 或 <code>qlist</code>
+</td></tr>
+<tr>
+<td>显示提供给定表达式的包，也称为反向提供。主要是搜索特定字段的快捷方式。其他工具可能通过搜索命令提供此功能。</td>
+<td><code>pacman -F</code></td>
+<td><code>dnf provides</code></td>
+<td><code>apt-file search</code></td>
+<td><code>zypper what-provides</code>或<code>zypper wp</code> (exact match)或<code>zypper se --provides</code> (fuzzy match)</td>
+<td><code>equery belongs</code> (only installed packages)或<code>pfl</code>
+</td></tr>
+<tr>
+<td>搜索所有软件包以找到持有某个特定文件的包</td>
+<td><code>pacman -F</code></td>
+<td><code>dnf provides</code></td>
+<td><code>apt-file search</code>或<code>auto-apt</code> is using this functionality.</td>
+<td><code>zypper search -f</code></td>
+<td><code>equery belongs</code> 或 <code>qfile</code>
+</td></tr>
+<tr>
+<td>显示软件包的变更日志</td>
+<td><code>pacman -Qc</code></td>
+<td><code>dnf changelog</code></td>
+<td><code>apt-get changelog</code></td>
+<td><code>rpm -q --changelog</code></td>
+<td><code>equery changes -f</code>
+</td></tr>
+</tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd94eb3177957_.E6.9F.A5.E8.AF.A2.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.88.97.E8.A1.A8" id="查询软件包列表"><span id=".E6.9F.A5.E8.AF.A2.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.88.97.E8.A1.A8"></span>查询软件包列表</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>Action</th>
+<th>Arch</th>
+<th>Red Hat/Fedora</th>
+<th>Debian/Ubuntu</th>
+<th>SLES/openSUSE</th>
+<th>Gentoo
+</th></tr>
+<tr>
+<td>通过软件包的名称、描述、简介来检索软件包。不同工具检索的字段可能有所不同，大多数选项可以使这些工具的功能趋于一致</td>
+<td><code>pacman -Ss</code></td>
+<td><code>dnf search</code></td>
+<td><code>apt search</code></td>
+<td><code>zypper search</code> 或 <code>zypper se -s</code></td>
+<td><code>emerge -S</code> 或 <code>eix</code>
+</td></tr>
+<tr>
+<td>列出有可用更新的软件包。注意：有些工具提供特殊命令来限制输出到某些安装源，而有些工具则使用选项来实现相同的功能。</td>
+<td><code>pacman -Qu</code></td>
+<td><code>dnf list updates</code> 或 <code>dnf check-update</code></td>
+<td><code>apt list --upgradable</code></td>
+<td><code>zypper list-updates</code>或<code>zypper patch-check</code> (just for patches)</td>
+<td><code>emerge -uDNp @world</code>
+</td></tr>
+<tr>
+<td>显示由软件包管理器处理的所有安装源中的软件包列表。一些工具提供选项或额外的命令来限制输出到特定的安装源。</td>
+<td><code>pacman -Sl</code></td>
+<td><code>dnf list available</code></td>
+<td><code>apt-cache dumpavail</code>或<code>apt-cache dump</code> (Cache only)或<code>apt-cache pkgnames</code></td>
+<td><code>zypper packages</code></td>
+<td><code>portageq all_best_visible /</code>
+</td></tr>
+<tr>
+<td>生成一个已安装软件包的列表</td>
+<td><code>pacman -Q</code></td>
+<td><code>dnf list installed</code></td>
+<td><code>dpkg --list | grep ^i</code></td>
+<td><code>zypper packages --installed-only</code></td>
+<td><code>qlist -IC</code>
+</td></tr>
+<tr>
+<td>列出已安装但不(再)属于任何软件源的软件包</td>
+<td><code>pacman -Qm</code></td>
+<td><code>dnf list extras</code></td>
+<td><code>apt --installed list | grep ,local</code></td>
+<td><code>zypper packages --installed-only --orphaned</code></td>
+<td><code>eix-test-obsolete</code>
+</td></tr>
+<tr>
+<td>列出最近添加到其中一个安装源的软件包，即其中一个安装源中新增的软件包。</td>
+<td></td>
+<td><code>dnf list recent</code></td>
+<td><code>aptitude search '~N'</code>或<code>aptitude forget-new</code></td>
+<td></td>
+<td><code>eix-diff</code>
+</td></tr>
+<tr>
+<td>列出本地已安装的软件包及版本
+</td>
+<td><code>pacman -Q</code></td>
+<td><code>rpm -qa</code></td>
+<td><code>dpkg -l</code>或<code>apt list --installed</code></td>
+<td><code>zypper search -si</code>或<code>rpm -qa</code></td>
+<td><code>qlist -ICv</code>
+</td></tr>
+<tr>
+<td>搜索本地已安装的软件包名或描述</td>
+<td><code>pacman -Qs</code></td>
+<td><code>rpm -qa '*&lt;str&gt;*'</code></td>
+<td><code>aptitude search '~i(~n $name|~d $description)'</code></td>
+<td><code>zypper search --installed-only --search-descriptions</code></td>
+<td><code>eix -S -I</code>
+</td></tr>
+<tr>
+<td>列出不再被任何软件包所需要的依赖
+</td>
+<td><code>pacman -Qtt</code></td>
+<td><code>dnf leaves</code>或<code>package-cleanup --leaves --all</code></td>
+<td><code>deborphan -anp1</code></td>
+<td><code>zypper packages --unneeded</code></td>
+<td><code>emerge -pc</code>
+</td></tr>
+<tr>
+<td>列出显式安装的软件包(不作为任何其他软件包的依赖而安装)</td>
+<td><code>pacman -Qe</code></td>
+<td><code>dnf history userinstalled</code></td>
+<td><code>apt-mark showmanual</code></td>
+<td><code>zypper search <i> | grep -E '^i\+'</i></code><i> (workaround)</i></td>
+<td><code>emerge -pvO @selected</code>或<code>eix --selected</code>
+</td></tr>
+<tr>
+<td>列出(作为依赖)自动安装的软件包</td>
+<td><code>pacman -Qd</code></td>
+<td><code>zypper search <i> | grep -E '^i[^+]'</i></code><i> (workaround)</i></td>
+<td><code>apt-mark showauto</code></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<td>
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd94eb3177957_.E6.9F.A5.E8.AF.A2.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.BE.9D.E8.B5.96" id="查询软件包依赖"><span id=".E6.9F.A5.E8.AF.A2.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.BE.9D.E8.B5.96"></span>查询软件包依赖</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>Action</th>
+<th>Arch</th>
+<th>Red Hat/Fedora</th>
+<th>Debian/Ubuntu</th>
+<th>SLES/openSUSE</th>
+<th>Gentoo
+</th></tr>
+<tr>
+<td>显示需要安装X的包，也称为显示反向依赖关系</td>
+<td><code>pacman -Sii</code>或<code>pacman -Qii</code></td>
+<td><code>dnf repoquery --alldeps --whatrequires</code>或<code>repoquery --whatrequires</code></td>
+<td><code>apt-cache rdepends</code>或<code>aptitude search ~D$pattern</code></td>
+<td><code>zypper search --requires</code></td>
+<td><code>equery depends</code>
+</td></tr>
+<tr>
+<td>显示与给定表达式（通常是软件包）冲突的软件包。也可以使用搜索功能来模仿此功能。</td>
+<td><code>pacman -Si</code>或<code>pacman -Qi</code></td>
+<td><code>dnf repoquery --conflicts</code></td>
+<td><code>aptitude search '~C$pattern'</code></td>
+<td><code>zypper search --conflicts</code></td>
+<td>
+</td></tr>
+<tr>
+<td>列出所有为给定软件包所需的软件包，也就是显示依赖项</td>
+<td><code>pacman -Si</code>或<code>pacman -Qi</code></td>
+<td><code>dnf repoquery --requires</code>或<code>repoquery -R</code></td>
+<td><code>apt-cache depends</code>或<code>apt-cache show</code></td>
+<td><code>zypper info --requires</code></td>
+<td><code>emerge -ep</code>
+</td></tr>
+<tr>
+<td>列出当前软件包提供的内容</td>
+<td><code>pacman -Sii</code>或<code>pacman -Qii</code></td>
+<td><code>dnf repoquery --provides</code></td>
+<td><code>dpkg -s</code>或<code>aptitude show</code></td>
+<td><code>zypper info --provides</code></td>
+<td><code>equery files</code>或<code>qlist</code>
+</td></tr>
+<tr>
+<td>列出所有需要特定软件包的软件包</td>
+<td><code>pacman -Sii</code></td>
+<td><code>dnf repoquery --installed --alldeps --whatrequires</code></td>
+<td><code>aptitude search ~D{depends,recommends,suggests}:$pattern</code>或<code>aptitude why</code>或<code>apt-cache rdepends</code></td>
+<td><code>zypper search --requires</code></td>
+<td><code>equery depends -a</code>
+</td></tr>
+<tr>
+<td>Display all packages that the specified packages obsoletes.</td>
+<td><code>pacman -Si</code>或<code>pacman -Qi</code></td>
+<td><code>dnf list obsoletes</code></td>
+<td><code>apt-cache show</code></td>
+<td><code>zypper info --obsoletes</code></td>
+<td>
+</td></tr>
+<tr>
+<td>Generates an output suitable for processing with dotty for the given package(s).</td>
+<td></td>
+<td></td>
+<td><code>apt-cache dotty</code></td>
+<td></td>
+<td>
+</td></tr>
+</tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd94eb3177957_.E8.BD.AF.E4.BB.B6.E6.BA.90.E7.AE.A1.E7.90.86" id="软件源管理"><span id=".E8.BD.AF.E4.BB.B6.E6.BA.90.E7.AE.A1.E7.90.86"></span>软件源管理</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>Action</th>
+<th>Arch</th>
+<th>Red Hat/Fedora</th>
+<th>Debian/Ubuntu</th>
+<th>SLES/openSUSE</th>
+<th>Gentoo
+</th></tr>
+<tr>
+<td>软件源管理</td>
+<td>编辑 <code>/etc/pacman.conf</code></td>
+<td>编辑 <code>/etc/yum.repos.d/${REPO}.repo</code></td>
+<td>编辑 <code>/etc/apt/sources.list</code>或者apt edit-source</td>
+<td>编辑 <code>/etc/zypp/repos.d/${REPO}.repo</code></td>
+<td><code>layman</code>或<code>eselect repository</code>
+</td></tr>
+<tr>
+<td>将安装源添加到系统中。一些工具为某些源提供了额外的命令，而另一些工具则允许添加命令使用所有类型的源URI。还有一些，比如apt强制编辑源列表。apt-cdrom是一个特殊的命令，为CD/DVD作为源提供了选项。</td>
+<td>edit <code>/etc/pacman.conf</code></td>
+<td><code>dnf config-manager</code></td>
+<td><code>apt-cdrom add</code></td>
+<td><code>zypper ar  &lt;URL or .repo file&gt;</code></td>
+<td><code>layman</code>或<code>overlays</code>
+</td></tr>
+<tr>
+<td>刷新所有或指定安装源的信息</td>
+<td><code>pacman -Sy</code> (<a href="#pgbb7568ec4406">always upgrade the whole system afterwards</a>)</td>
+<td><code>dnf clean expire-cache</code> and then <code>dnf check-update</code></td>
+<td><code>apt-get update</code></td>
+<td><code>zypper refresh</code>或<code>zypper ref</code> <code>[-s]</code></td>
+<td><code>emerge --sync</code>或<code>layman -S</code>
+</td></tr>
+<tr>
+<td>打印所有安装源的列表，包括URI、别名等重要信息。</td>
+<td><code>cat /etc/pacman.d/mirrorlist</code></td>
+<td><code>cat /etc/yum.repos.d/*</code></td>
+<td><code>apt-cache policy</code></td>
+<td><code>zypper repos</code>或<code>zypper lr</code> <code>--uri --alias</code></td>
+<td><code>layman -l</code>或<code>eselect repository list</code>
+</td></tr>
+<tr>
+<td>列出某一个仓库中的所有软件包</td>
+<td><code>paclist &lt;repo&gt;</code></td>
+<td></td>
+<td></td>
+<td><code>zypper packages -r &lt;repo&gt;</code> or <code>zypper pa -r &lt;repo&gt;</code></td>
+<td><code>eix --in-overlay</code>
+</td></tr>
+<tr>
+<td>Disable an installation source for an operation</td>
+<td></td>
+<td><code>dnf --disablerepo=</code></td>
+<td></td>
+<td></td>
+<td><code>emerge package::repo-to-use</code>
+</td></tr>
+<tr>
+<td>Download packages from a different version of the distribution than the one installed.</td>
+<td><code>pacman -S <i>repo_name</i>/<i>package</i></code></td>
+<td><code>dnf --releasever=</code></td>
+<td><code>apt-get install -t release package</code>或<code>apt-get install package/release</code> (dependencies not covered)</td>
+<td><code>zypper install -r &lt;repo&gt; package</code></td>
+<td><code>echo "category/package ~amd64" &gt;&gt; /etc/portage/package.keywords</code> and then <code>emerge package</code>
+</td></tr>
+</tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd94eb3177957_Overrides" id="Overrides">Overrides</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>Action</th>
+<th>Arch</th>
+<th>Red Hat/Fedora</th>
+<th>Debian/Ubuntu</th>
+<th>SLES/openSUSE</th>
+<th>Gentoo
+</th></tr>
+<tr>
+<td>Add a package lock rule to keep its current state from being changed</td>
+<td>edit <code>/etc/pacman.conf</code> modifying IgnorePkg array</td>
+<td>edit <code>dnf.conf</code> adding/amending the <code>exclude</code> option</td>
+<td><code>apt-mark hold pkg</code></td>
+<td><code>zypper al</code>或put package name in <code>/etc/zypp/locks</code></td>
+<td><code>/etc/portage/package.mask</code>
+</td></tr>
+<tr>
+<td>Delete a package lock rule</td>
+<td>edit <code>/etc/pacman.conf</code> removing package from IgnorePkg line</td>
+<td></td>
+<td><code>apt-mark unhold pkg</code></td>
+<td><code>zypper rl</code>或remove package name from <code>/etc/zypp/locks</code></td>
+<td><code>/etc/portage/package.mask</code> (or <code>package.unmask</code>)
+</td></tr>
+<tr>
+<td>Show a listing of all lock rules</td>
+<td><code>cat /etc/pacman.conf</code></td>
+<td></td>
+<td><code>/etc/apt/preferences</code></td>
+<td><code>zypper ll</code>或view <code>/etc/zypp/locks</code></td>
+<td><code>cat /etc/portage/package.mask</code>
+</td></tr>
+<tr>
+<td>Set the priority of the given package to avoid upgrade, force downgrade或to overwrite any default behavior. Can also be used to prefer a package version from a certain installation source.</td>
+<td>edit <code>/etc/pacman.conf</code> modifying HoldPkg and/or IgnorePkg arrays</td>
+<td></td>
+<td><code>/etc/apt/preferences</code>, <code>apt-cache policy</code></td>
+<td><code>zypper mr -p</code></td>
+<td>edit <code>/etc/portage/package.accept_keywords</code> adding a line with <code>=category/package-version</code>
+</td></tr>
+<tr>
+<td>Remove a previously set priority</td>
+<td></td>
+<td></td>
+<td><code>/etc/apt/preferences</code></td>
+<td><code>zypper mr -p</code></td>
+<td>edit <code>/etc/portage/package.accept_keywords</code> removing offending line
+</td></tr>
+<tr>
+<td>Show a list of set priorities</td>
+<td></td>
+<td></td>
+<td><code>apt-cache policy</code>或<code>/etc/apt/preferences</code></td>
+<td><code>zypper lr -p</code></td>
+<td><code>grep -r . /etc/portage/package.accept_keywords</code>
+</td></tr>
+</tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd94eb3177957_.E9.AA.8C.E8.AF.81.E5.92.8C.E4.BF.AE.E5.A4.8D" id="验证和修复"><span id=".E9.AA.8C.E8.AF.81.E5.92.8C.E4.BF.AE.E5.A4.8D"></span>验证和修复</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>Action</th>
+<th>Arch</th>
+<th>Red Hat/Fedora</th>
+<th>Debian/Ubuntu</th>
+<th>SLES/openSUSE</th>
+<th>Gentoo
+</th></tr>
+<tr>
+<td>验证单个软件包</td>
+<td><code>pacman -Qk</code> (can add another <code>k</code>)</td>
+<td><code>rpm -V</code></td>
+<td><code>debsums</code></td>
+<td><code>rpm -V</code></td>
+<td><code>equery check</code>
+</td></tr>
+<tr>
+<td>验证所有软件包</td>
+<td><code>pacman -Qk</code> (can add another <code>k</code>)</td>
+<td><code>rpm -Va</code></td>
+<td><code>debsums</code></td>
+<td><code>rpm -Va</code></td>
+<td><code>equery check</code>
+</td></tr>
+<tr>
+<td>重新安装给定的软件包。这将重新安装给定的包，而不会产生依赖性问题。</td>
+<td><code>pacman -S</code></td>
+<td><code>dnf reinstall</code></td>
+<td><code>apt install --reinstall</code></td>
+<td><code>zypper install --force</code></td>
+<td><code>emerge -1O</code>
+</td></tr>
+<tr>
+<td>验证整个系统的依赖关系; 安装过程被强制终止时使用</td>
+<td><code>pacman -Dk</code></td>
+<td><code>dnf repoquery --requires</code></td>
+<td><code>apt-get check</code></td>
+<td><code>zypper verify</code></td>
+<td><code>emerge -uDN @world</code>
+</td></tr>
+<tr>
+<td><s>使用一些魔法来修理损坏的依赖关系</s></td>
+<td>for <i>pacman</i> dependency level, use <code>pacman -Dk</code>; for shared library level, use <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/findbrokenpkgs/">findbrokenpkgs</a></span><sup><small>AUR</small></sup></span>或<code>lddd</code> (from <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=devtools">devtools</a></span><sup><small>包</small></sup></span>)</td>
+<td><code>dnf repoquery --unsatisfied</code></td>
+<td><code>apt-get --fix-broken</code> and then <code>aptitude install</code></td>
+<td><code>zypper verify</code></td>
+<td><code>revdep-rebuild</code>
+</td></tr>
+<tr>
+<td>为软件包系统添加一个检查点，以备后续回滚。</td>
+<td></td>
+<td>(unnecessary, it is done on every transaction)</td>
+<td></td>
+<td>n/a</td>
+<td>
+</td></tr>
+<tr>
+<td>从系统中移除一个检查点。</td>
+<td>n/a</td>
+<td>n/a</td>
+<td></td>
+<td>n/a</td>
+<td>
+</td></tr>
+<tr>
+<td>提供所有系统检查点的列表。</td>
+<td>n/a</td>
+<td><code>dnf history list</code></td>
+<td></td>
+<td>n/a</td>
+<td>
+</td></tr>
+<tr>
+<td>将整个软件包回滚到特定日期或检查点</td>
+<td>n/a</td>
+<td><code>dnf history rollback</code></td>
+<td></td>
+<td>n/a</td>
+<td>
+</td></tr>
+<tr>
+<td>撤销单个指定的事务</td>
+<td>n/a</td>
+<td><code>dnf history undo</code></td>
+<td></td>
+<td>n/a</td>
+<td>
+</td></tr>
+</tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd94eb3177957_Using_package_files_and_building_package" id="Using_package_files_and_building_packages">Using package files and building packages</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>Action</th>
+<th>Arch</th>
+<th>Red Hat/Fedora</th>
+<th>Debian/Ubuntu</th>
+<th>SLES/openSUSE</th>
+<th>Gentoo
+</th></tr>
+<tr>
+<td>查询命令行上提供的包，而不是包管理数据库中的条目</td>
+<td><code>pacman -Qp</code></td>
+<td><code>rpm -qp</code></td>
+<td><code>dpkg -I</code></td>
+<td></td>
+<td>
+</td></tr>
+<tr>
+<td>List the contents of a package file</td>
+<td><code>pacman -Qpl</code></td>
+<td><code>rpmls rpm -qpl</code></td>
+<td><code>dpkg -c</code></td>
+<td><code>rpm -qpl</code></td>
+<td>
+</td></tr>
+<tr>
+<td>Install local package file, e.g. app.rpm and uses the installation sources to resolve dependencies</td>
+<td><code>pacman -U</code></td>
+<td><code>dnf install</code></td>
+<td><code>dpkg -i</code></td>
+<td><code>zypper in</code></td>
+<td><code>emerge</code>
+</td></tr>
+<tr>
+<td>Updates package(s) with local packages and uses the installation sources to resolve dependencies</td>
+<td><code>pacman -U</code></td>
+<td><code>dnf upgrade</code></td>
+<td><code>debi</code></td>
+<td></td>
+<td><code>emerge</code>
+</td></tr>
+<tr>
+<td>Add a local package to the local package cache mostly for debugging purposes.</td>
+<td><code>cp <i>package-filename</i> /var/cache/pacman/pkg/</code></td>
+<td></td>
+<td><code>apt-cache add <i>package-filename</i></code></td>
+<td>n/a</td>
+<td><code>cp <i>package-filename</i> /usr/portage/distfiles</code>
+</td></tr>
+<tr>
+<td>解包一个软件包</td>
+<td><code>tar -xvf</code></td>
+<td><code>rpm2cpio | cpio -vid</code></td>
+<td><code>dpkg-deb -x</code></td>
+<td><code>rpm2cpio | cpio -vid</code></td>
+<td><code>tar -jxvf</code>
+</td></tr>
+<tr>
+<td>Install/Remove packages to satisfy build-dependencies. Uses information in the source package</td>
+<td>Use <a href="#pg649c5e3c750b">ABS</a> and <code>makepkg -seoc</code></td>
+<td><code>dnf builddep</code></td>
+<td><code>apt-get build-dep</code></td>
+<td><code>zypper si -d</code></td>
+<td><code>emerge -o</code>
+</td></tr>
+<tr>
+<td>Display the source package to the given package name(s)</td>
+<td></td>
+<td><code>dnf repoquery -s</code></td>
+<td><code>apt-cache showsrc</code></td>
+<td>n/a</td>
+<td>
+</td></tr>
+<tr>
+<td>Download the corresponding source package(s) to the given package name(s)</td>
+<td>Use <a href="#pg649c5e3c750b">ABS</a> and <code>makepkg -o</code></td>
+<td><code>dnf download --source</code></td>
+<td><code>apt-get source</code>或<code>debcheckout</code></td>
+<td><code>zypper source-install</code></td>
+<td><code>emerge --fetchonly</code>
+</td></tr>
+<tr>
+<td>构建一个软件包</td>
+<td><code>makepkg -s</code></td>
+<td><code>rpmbuild -ba</code> (normal)或<i>mock</i> (in chroot)</td>
+<td><code>debuild</code></td>
+<td><code>rpmbuild -ba</code>, then build, and then <code>osc build</code></td>
+<td><code>ebuild</code>或<code>quickpkg</code>
+</td></tr>
+<tr>
+<td>检查可能的打包问题</td>
+<td><i>namcap</i><br/>(requires <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=namcap">namcap</a></span><sup><small>包</small></sup></span>)</td>
+<td><i>rpmlint</i></td>
+<td><i>lintian</i></td>
+<td><i>rpmlint</i></td>
+<td><i>repoman</i>
+</td></tr>
+</tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd94eb3177957_Log_file_rotation" id="Log_file_rotation">Log file rotation</h2></div>
+<p>By default, Arch Linux does not rotate <code>pacman.log</code>. See, for example, <a href="https://bugs.archlinux.org/task/11272">FS#11272</a> and <a href="https://bugs.archlinux.org/task/20428#comment66480">FS#20428#comment66480</a>. This is in contrast to the default policy of most other Linux distributions. Some distributions, notably Gentoo, hardly write log files by default.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd94eb3177957_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://dnf.readthedocs.org/en/latest/cli_vs_yum.html">Changes in DNF CLI compared to Yum</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807051206
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.813 seconds
+Real time usage: 0.842 seconds
+Preprocessor visited node count: 3370/1000000
+Revision size: 21435/2097152 bytes
+Post‐expand include size: 18129/2097152 bytes
+Template argument size: 7801/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 221/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  167.959      1 -total
+ 30.42%   51.093    457 Template:Ic
+  1.90%    3.186      1 Template:需要翻译
+  1.86%    3.132      1 Template:翻译状态
+  1.40%    2.354      2 Template:Pkg
+  1.27%    2.133      1 Template:小写标题
+  1.09%    1.833      1 Template:Tip
+  1.00%    1.679      1 Template:META_Message
+  0.86%    1.447      1 Template:AUR
+  0.60%    1.003      2 Template:Bug
+-->
+<!-- Render ID 8862230e-921e-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3659:|#|:idhash:canonical!zh-cn and timestamp 20260807051206 and revision id 34641. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

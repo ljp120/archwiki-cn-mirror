@@ -1,0 +1,510 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgb8e819c27b39">字体</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg3ffaba980b7a">字体配置</a></li>
+<li><a href="#pg27b8d938ed9d">Linux 控制台#字体</a></li>
+<li><a href="#pga40410b06bef">Java 环境字体</a></li>
+<li><a href="#pg6a086b931dd9">Metric-compatible fonts</a></li>
+<li><a href="#pg1134d99f0a50">微软字体</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Fonts">Fonts</a>，最近一次同步于 2022-07-18，若英文版本有所<a href="https://wiki.archlinux.org/title/Fonts?diff=0&amp;oldid=738271">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Fonts_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>引自<a href="https://zh.wikipedia.org/wiki/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%AD%97%E4%BD%93">维基百科</a>：“计算机字体或电脑字体，简称字体，是包含有一套字形与字符的电子数据文件。”
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>部分字体许可协议可能会有一些法律限制。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8e819c27b39_.E5.AD.97.E4.BD.93.E6.A0.BC.E5.BC.8F" id="字体格式"><span id=".E5.AD.97.E4.BD.93.E6.A0.BC.E5.BC.8F"></span>字体格式</h2></div>
+<p>现在使用的计算机字体绝大多数都属于<b>点阵</b>或<b>轮廓</b>数据格式。
+</p>
+<dl><dt>点阵字体</dt>
+<dd>用点或者像素组成的矩阵代表每种字形的每种形式和尺寸的图像。</dd>
+<dt>轮廓字体，或称<i>矢量</i>字体</dt>
+<dd>使用贝塞尔曲线、绘图指令和数学公式描述每种字形，使得字符轮廓可以适应各种尺寸。</dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E7.82.B9.E9.98.B5.E6.A0.BC.E5.BC.8F" id="点阵格式"><span id=".E7.82.B9.E9.98.B5.E6.A0.BC.E5.BC.8F"></span>点阵格式</h3></div>
+<ul><li>Adobe 的<a href="https://zh.wikipedia.org/wiki/%E4%BD%8D%E5%9B%BE%E5%AD%97%E4%BD%93%E5%88%86%E5%B8%83%E6%A0%BC%E5%BC%8F">位图字体分布格式</a>（Glyph Bitmap Distribution Format，BDF）</li>
+<li>Xorg 的<a href="https://en.wikipedia.org/wiki/Portable_Compiled_Format">便携式编译格式</a>（Portable Compiled Format，PCF）</li>
+<li>Linux 内核的控制台使用的<a href="https://en.wikipedia.org/wiki/PC_Screen_Font">个人电脑屏幕字体</a>（PC Screen Font，PSF），不受 Xorg 支持（Unicode PSF 文件的扩展名是 <code>psfu</code>）</li></ul>
+<p>这些格式也可以被 gzip 压缩。可用的点阵字体请参见#点阵。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E8.BD.AE.E5.BB.93.E6.A0.BC.E5.BC.8F" id="轮廓格式"><span id=".E8.BD.AE.E5.BB.93.E6.A0.BC.E5.BC.8F"></span>轮廓格式</h3></div>
+<ul><li>Adobe 的 <a href="https://zh.wikipedia.org/wiki/PostScript%E5%AD%97%E4%BD%93">PostScript 字体</a>，有多种格式，如打印机 ASCII 字体（Printer Font ASCII，PFA）和打印机二进制字体（Printer Font Binary，PFB）</li>
+<li>Apple 和 Microsoft 的 <a href="https://zh.wikipedia.org/wiki/TrueType">TrueType</a>（扩展名为 <code>ttf</code>）</li>
+<li>Microsoft 的 <a href="https://zh.wikipedia.org/wiki/OpenType">OpenType</a>，基于 TrueType（扩展名为 <code>otf</code> 或 <code>ttf</code>）</li></ul>
+<p>在大多数情况下都可以忽略 TrueType 和 OpenType 之间的技术差异。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E5.85.B6.E5.AE.83.E6.A0.BC.E5.BC.8F" id="其它格式"><span id=".E5.85.B6.E5.AE.83.E6.A0.BC.E5.BC.8F"></span>其它格式</h3></div>
+<p>排版程序 <a href="#pg85046d840409">TeX</a> 和配套的字体软件 <i>Metafont</i> 使用它们自己的传统方法渲染字体。部分用于这两个程序的字体文件扩展名有 <code>*pk</code>、<code>*gf</code>、<code>mf</code> 与 <code>vf</code>。更新的版本也支持 TrueType 和 OpenType 字体。
+</p><p><a href="https://fontforge.github.io/en-US/">FontForge</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fontforge">fontforge</a></span><sup><small>包</small></sup></span>）是一个字体编辑程序，可以以自己基于文本的原生格式 <code>sfd</code>（<i>s</i>pline <i>f</i>ont <i>d</i>atabase）储存字体。
+</p><p><a href="https://www.w3.org/TR/SVG/fonts.html">SVG</a> 格式也有自己的字体描述方法。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8e819c27b39_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>可以使用多种方法安装字体。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_Pacman" id="Pacman">Pacman</h3></div>
+<p>可以使用 <a href="#pg9ef105bf1e3c">pacman</a> 安装已启用的软件源中的字体和字体集。
+</p><p>可用的字体可以通过<a href="#pg9ef105bf1e3c">查询包</a>查找（比如以 <code>font</code> 或 <code>ttf</code> 作为关键字查找）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E5.88.9B.E5.BB.BA.E5.AD.97.E4.BD.93.E5.8C.85" id="创建字体包"><span id=".E5.88.9B.E5.BB.BA.E5.AD.97.E4.BD.93.E5.8C.85"></span>创建字体包</h3></div>
+<p>字体应该由 pacman 管理，这可以通过<a href="#pgf054312e26a1">创建 Arch 包</a>完成。这些包也可以在 <a href="#pgb0e1a56d1c81">AUR</a> 中与社区分享。用于安装字体的包都非常相似；请参见<a href="#pg9d7e0c937471">字体打包指南</a>。
+</p><p>可以用 <code>fc-query</code> 查看字体的字体族，例如：<code>fc-query -f '%{family[0]}\n' /文件/路径</code>。<span class="plainlinks archwiki-template-man" title="$ man 3 FcPatternFormat"><a href="https://man.archlinux.org/man/FcPatternFormat.3">FcPatternFormat(3)</a></span> 中描述了输出的格式。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E6.89.8B.E5.8A.A8.E5.AE.89.E8.A3.85" id="手动安装"><span id=".E6.89.8B.E5.8A.A8.E5.AE.89.E8.A3.85"></span>手动安装</h3></div>
+<p>要安装不在源中的字体，推荐的方法是#创建字体包。这使得 pacman 在以后能够更新或者移除它们。
+</p><p>或者，也可以手动安装字体：
+</p>
+<ul><li>要为单个用户安装，则安装到 <code>~/.local/share/fonts/</code>。
+<ul><li>多数时候这就足够了，除非以其他用户的身份运行图形程序。</li>
+<li>之前曾使用过 <code>~/.fonts/</code>，但现在已被弃用。</li></ul></li>
+<li>要为系统（所有用户）安装，则安装到 <code>/usr/local/share/fonts/</code>。
+<ul><li>可能需要先创建该目录：<code>mkdir -p /usr/local/share/fonts</code>。</li>
+<li><code>/usr/share/fonts/</code> 由包管理器管理，请勿手动修改。</li></ul></li></ul>
+<p>是否要创建子目录由用户决定，各发行版也有不同。为清晰起见，可将每个字体族放在单独的目录里。Fontconfig 将递归搜索默认路径，确保可以发现子目录下的文件。
+</p><p>以下是一个目录结构示例：
+</p>
+<pre> /usr/local/share/fonts/
+ ├── otf
+ │   └── SourceCodeVariable
+ │       ├── SourceCodeVariable-Italic.otf
+ │       └── SourceCodeVariable-Roman.otf
+ └── ttf
+     ├── AnonymousPro
+     │   ├── Anonymous-Pro-B.ttf
+     │   ├── Anonymous-Pro-I.ttf
+     │   └── Anonymous-Pro.ttf
+     └── CascadiaCode
+         ├── CascadiaCode-Bold.ttf
+         ├── CascadiaCode-Light.ttf
+         └── CascadiaCode-Regular.ttf
+</pre>
+<p>请确保所有用户都有读取字体文件的权限，即至少将文件 <a href="#pgd868aa8d1162">chmod</a> 为 <code>444</code>，目录为 <code>555</code>。
+</p><p>要让 Xserver 直接载入字体（而不是使用某些<i>字体服务</i>），就需要将新增字体的目录加入到 FontPath 中。它位于 <a href="#pga36c0aff60be">Xorg 配置文件</a>（例如 <code>/etc/X11/xorg.conf</code> 或 <code>/etc/xorg.conf</code>) 中。更多详细内容请参见#较旧的应用程序。
+</p><p>最后，更新 Fontconfig 的缓存（通常不需要，因为使用 Fontconfig 库的软件会这样做）：
+</p>
+<pre>$ fc-cache
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E8.BE.83.E6.97.A7.E7.9A.84.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="较旧的应用程序"><span id=".E8.BE.83.E6.97.A7.E7.9A.84.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>较旧的应用程序</h3></div>
+<p>对于不支持 Fontconfig 的旧应用程序（例如 GTK 1.x 应用程序和 <code>xfontsel</code>），需要在字体目录中创建索引：
+</p>
+<pre>$ mkfontscale
+$ mkfontdir
+</pre>
+<p>或在一条命令中包含多个目录：
+</p>
+<pre>$ for dir in /字体/目录1/ /字体/目录2/; do xset +fp $dir; done &amp;&amp; xset fp rehash
+</pre>
+<p>或者，如果字体被安装在不同的子文件夹中，比如在 <code>/usr/share/fonts</code> 下：
+</p>
+<pre>$ for dir in * ; do if [  -d  "$dir"  ]; then cd "$dir";xset +fp "$PWD" ;mkfontscale; mkfontdir;cd .. ;fi; done &amp;&amp; xset fp rehash
+</pre>
+<p>有时 X 服务器可能无法加载字体目录，这时需要重新扫描所有 <code>fonts.dir</code> 文件：
+</p>
+<pre># xset +fp /usr/share/fonts/misc # 将新目录告诉 X 服务器
+# xset fp rehash                 # 强制重新扫描
+</pre>
+<p>要查询字体是否已经生效：
+</p>
+<pre>$ xlsfonts | grep fontname
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>许多软件包在安装时会自动配置 Xorg。这种情况下无需执行此步骤。</div>
+<p>这也可以在 <code>/etc/X11/xorg.conf</code> 或 <code>/etc/X11/xorg.conf.d</code> 中全局设置。
+</p><p>这个例子演示了必须加入到 <code>/etc/X11/xorg.conf</code> 中的一节内容。请根据实际需要添加或删除路径。
+</p>
+<pre> # 让 X.Org 知道自定义字体目录
+ Section "Files"
+     FontPath    "/usr/share/fonts/100dpi"
+     FontPath    "/usr/share/fonts/75dpi"
+     FontPath    "/usr/share/fonts/cantarell"
+     FontPath    "/usr/share/fonts/cyrillic"
+     FontPath    "/usr/share/fonts/encodings"
+     FontPath    "/usr/share/fonts/misc"
+     FontPath    "/usr/share/fonts/truetype"
+     FontPath    "/usr/share/fonts/TTF"
+     FontPath    "/usr/share/fonts/util"
+ EndSection
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_Pango_.E8.AD.A6.E5.91.8A" id="Pango_警告"><span id="Pango_.E8.AD.A6.E5.91.8A"></span>Pango 警告</h3></div>
+<p>如果系统使用 <a href="https://www.pango.org/">Pango</a>，那它就会从 <a href="https://www.freedesktop.org/wiki/Software/fontconfig">Fontconfig</a> 读取字体来源。
+</p>
+<pre>(process:5741): Pango-WARNING **: failed to choose a font, expect ugly output. engine-type='PangoRenderFc', script='common'
+(process:5741): Pango-WARNING **: failed to choose a font, expect ugly output. engine-type='PangoRenderFc', script='latin'
+</pre>
+<p>如果看到类似上面的错误，或在应用程序中看到方块而不是文字，就需要添加字体并更新字体缓存。以下示例以 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-liberation">ttf-liberation</a></span><sup><small>包</small></sup></span> 字体为例讲解（成功安装软件包后）如何解决这个问题，并以 root 权限运行使字体在系统范围内生效。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># fc-cache</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/usr/share/fonts: caching, new cache contents: 0 fonts, 3 dirs
+/usr/share/fonts/TTF: caching, new cache contents: 16 fonts, 0 dirs
+/usr/share/fonts/encodings: caching, new cache contents: 0 fonts, 1 dirs
+/usr/share/fonts/encodings/large: caching, new cache contents: 0 fonts, 0 dirs
+/usr/share/fonts/util: caching, new cache contents: 0 fonts, 0 dirs
+/var/cache/fontconfig: cleaning cache directory
+fc-cache: succeeded
+</pre>
+<p>可以这样测试设置的默认字体：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ fc-match</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">LiberationMono-Regular.ttf: "Liberation Mono" "Regular"
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8e819c27b39_.E5.AD.97.E4.BD.93.E5.8C.85" id="字体包"><span id=".E5.AD.97.E4.BD.93.E5.8C.85"></span>字体包</h2></div>
+<p>以下是一个有选择的列表，其中包括 <a href="#pgb0e1a56d1c81">AUR</a> 以及官方存储库中的许多字体包。标记为“Unicode”的字体具有广泛的 <a href="https://zh.wikipedia.org/wiki/Unicode">Unicode</a> 支持。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><a href="https://github.com/ternstor/distrofonts">Archfonts</a> 是一个可用于生成官方存储库和 AUR 中所有 TTF 字体的概述的 Python 脚本。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E7.82.B9.E9.98.B5" id="点阵"><span id=".E7.82.B9.E9.98.B5"></span>点阵</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pango">pango</a></span><sup><small>包</small></sup></span> 1.44 <a href="https://blogs.gnome.org/mclasen/2019/05/25/pango-future-directions/">放弃支持 FreeType，转而支持 HarfBuzz</a>，所以<a href="https://blogs.gnome.org/mclasen/2019/08/07/pango-1-44-wrap-up/">不再支持传统 BDF/PCF 点阵字体</a>，因此一些应用程序（例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-terminal">gnome-terminal</a></span><sup><small>包</small></sup></span>）将不再能够使用此类字体，结果显示方块而不是字形。参见 <a href="https://bugs.archlinux.org/task/63297">FS#63297</a>、<a href="https://gitlab.gnome.org/GNOME/pango/issues/386">Pango issue #386</a> 和 <a href="https://github.com/harfbuzz/harfbuzz/issues/1897">HarfBuzz issue #1897</a>。</div>
+<ul><li>默认的 8x16 大小
+<ul><li><a href="https://github.com/seraxis/pcf-spectrum-berry">Berry</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pcf-spectrum-berry/">pcf-spectrum-berry</a></span><sup><small>AUR</small></sup></span>）——8px</li>
+<li><a href="https://www.dcmembers.com/jibsen/download/61/">Dina</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dina-font">dina-font</a></span><sup><small>包</small></sup></span>）——6pt、8pt、9pt、10pt；等宽；基于 Proggy</li>
+<li><a href="http://openlab.jp/efont/unicode/">Efont</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/efont-unicode-bdf/">efont-unicode-bdf</a></span><sup><small>AUR</small></sup></span>——10px、12px、14px、16px、24px；普通体、粗体和斜体</li>
+<li><a href="https://font.gohu.org/">Gohu</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gohufont/">gohufont</a></span><sup><small>AUR</small></sup></span>）——11px、14px；普通体和粗体</li>
+<li><a href="http://artwizaleczapka.sourceforge.net/">Lime</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/artwiz-fonts/">artwiz-fonts</a></span><sup><small>AUR</small></sup></span>）</li>
+<li><a href="https://tobiasjung.name/profont/">ProFont</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-profont-iix/">ttf-profont-iix</a></span><sup><small>AUR</small></sup></span>）——10px、11px、12px、15px、17px、22px、29px；普通体</li>
+<li><a href="https://en.wikipedia.org/wiki/Proggy_programming_fonts">Proggy</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/proggyfonts/">proggyfonts</a></span><sup><small>AUR</small></sup></span>）——有不同的变体</li>
+<li><a href="http://www.fial.com/~scott/tamsyn-font/">Tamsyn</a> （<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tamsyn-font">tamsyn-font</a></span><sup><small>包</small></sup></span>）</li>
+<li><a href="https://terminus-font.sourceforge.net/">Terminus</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=terminus-font">terminus-font</a></span><sup><small>包</small></sup></span>）</li>
+<li><a href="https://github.com/lucy/tewi-font">Tewi</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bdf-tewi-git/">bdf-tewi-git</a></span><sup><small>AUR</small></sup></span>）</li>
+<li><a href="https://unifoundry.com/unifont.html">Unifont</a>（<a href="https://en.wikipedia.org/wiki/Unicode_font#Comparison_of_fonts">覆盖最广泛</a>，支持 Unicode 范围的所有字体）（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bdf-unifont/">bdf-unifont</a></span><sup><small>AUR</small></sup></span>）</li></ul></li></ul>
+<ul><li>适用于 Pango 1.44：
+<ul><li><a href="https://tobiasjung.name/profont/">ProFont</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/profont-otb/">profont-otb</a></span><sup><small>AUR</small></sup></span>）——ProFont的 OpenType 位图（OpenType Bitmap，OTB）变体</li>
+<li><a href="https://xorg.freedesktop.org/releases/individual/font/">Misc Fixed</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xorg-fonts-misc-otb/">xorg-fonts-misc-otb</a></span><sup><small>AUR</small></sup></span>）</li>
+<li><a href="https://font.gohu.org/">Gohufont</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gohufont-otb/">gohufont-otb</a></span><sup><small>AUR</small></sup></span>）</li>
+<li><a href="https://github.com/slavfox/Cozette/">Cozette</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cozette-otb/">cozette-otb</a></span><sup><small>AUR</small></sup></span>）</li>
+<li><a href="https://terminus-font.sourceforge.net/">Terminus</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=terminus-font">terminus-font</a></span><sup><small>包</small></sup></span>）</li>
+<li>AUR 中的其他 <a href="https://aur.archlinux.org/packages/?O=0&amp;SeB=n&amp;K=-otb&amp;outdated=&amp;SB=n&amp;SO=a&amp;PP=50&amp;do_Search=Go">OTB</a> 字体</li></ul></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E6.8B.89.E4.B8.81.E6.96.87.E5.AD.97" id="拉丁文字"><span id=".E6.8B.89.E4.B8.81.E6.96.87.E5.AD.97"></span>拉丁文字</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E5.AD.97.E4.BD.93.E6.97.8F" id="字体族"><span id=".E5.AD.97.E4.BD.93.E6.97.8F"></span>字体族</h4></div>
+<p>提供<a href="#pg9d7e0c937471">基本字体集</a>的包:
+</p>
+<ul><li><a href="https://zh.wikipedia.org/wiki/Bitstream_Vera">Bitstream Vera</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-bitstream-vera">ttf-bitstream-vera</a></span><sup><small>包</small></sup></span>）——包含无衬线、衬线和等宽字体。Bitstream Vera Sans 的公制与 <a href="https://zh.wikipedia.org/wiki/Verdana">Verdana</a> 兼容。</li>
+<li><a href="https://zh.wikipedia.org/wiki/Croscore%E5%AD%97%E4%BD%93">Croscore 字体</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-croscore">ttf-croscore</a></span><sup><small>包</small></sup></span>）——与 Helvetica、Times 和 Courier <a href="#pg3e5d1d3436ab">公制兼容</a>的字体，随 Chrome OS 提供。</li>
+<li><a href="https://zh.wikipedia.org/wiki/DejaVu%E5%AD%97%E4%BD%93">DejaVu 字体</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-dejavu">ttf-dejavu</a></span><sup><small>包</small></sup></span>）——Bitstream Vera modified for greater Unicode coverage</li>
+<li><a href="https://zh.wikipedia.org/wiki/Droid">Droid</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-droid">ttf-droid</a></span><sup><small>包</small></sup></span>）——Default font for older Android versions with wide Unicode coverage including CJK but not symbols and emojis</li>
+<li><a href="https://zh.wikipedia.org/wiki/GNU_FreeFont">GNU FreeFont</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnu-free-fonts">gnu-free-fonts</a></span><sup><small>包</small></sup></span>）——Includes three fonts that are open-source clones of Helvetica, Times, and Courier, but are <a href="https://askubuntu.com/questions/346552/closest-alternative-to-times-new-roman/1148247#1148247metrically">metrically slightly different</a>. Most Latin characters are from <a href="https://zh.wikipedia.org/wiki/URW_Type_Foundry">URW</a> fonts (e.g., <a href="https://zh.wikipedia.org/wiki/Nimbus_Roman_No._9_L">Nimbus Roman</a>, <a href="https://zh.wikipedia.org/wiki/Nimbus_Sans">Nimbus Sans</a>), good Unicode coverage but does not include CJK</li>
+<li><a href="https://zh.wikipedia.org/wiki/IBM_Plex">IBM Plex</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-ibm-plex">ttf-ibm-plex</a></span><sup><small>包</small></sup></span>）——Serif, sans-serif, condensed sans-serif and monospace with true italics</li>
+<li><a href="https://zh.wikipedia.org/wiki/Liberation%E5%AD%97%E4%BD%93">Liberation 字体</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-liberation">ttf-liberation</a></span><sup><small>包</small></sup></span>）——<a href="#pg6a086b931dd9">Metric-compatible fonts</a> for Helvetica, Times, and Courier, but are visually different</li>
+<li><a href="https://zh.wikipedia.org/wiki/Linux_Libertine">Linux Libertine</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-linux-libertine">ttf-linux-libertine</a></span><sup><small>包</small></sup></span>）——Serif (Libertine) and sans serif (Biolinum) fonts with large Unicode coverage</li>
+<li><a href="#pg40371f3dc11a">微软字体</a>——Windows 和 Office 中的字体。</li>
+<li><a href="https://zh.wikipedia.org/wiki/Noto">Noto</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=noto-fonts">noto-fonts</a></span><sup><small>包</small></sup></span>）——Google font family with full Unicode coverage if installed with its emoji and CJK optional dependencies</li></ul>
+<p>Packages not providing a base font set:
+</p>
+<ul><li><a href="https://b612-font.com/">B612</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-b612/">ttf-b612</a></span><sup><small>AUR</small></sup></span>)——由 Airbus 赞助的开源字体系列（无衬线和等宽），专为在飞机驾驶舱屏幕上阅读而设计</li>
+<li><a href="https://en.wikipedia.org/wiki/Luxi_fonts">Luxi fonts</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/font-bh-ttf/">font-bh-ttf</a></span><sup><small>AUR</small></sup></span>)——类似 Lucida 的 X.Org 字体族</li>
+<li><a href="https://en.wikipedia.org/wiki/Roboto">Roboto</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-roboto">ttf-roboto</a></span><sup><small>包</small></sup></span>) – Default font for newer Android versions where it is complemented by Noto fonts for languages not supported like CJK</li>
+<li><a href="http://www.gust.org.pl/projects/e-foundry/tex-gyre/index_html">TeX Gyre fonts</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tex-gyre-fonts">tex-gyre-fonts</a></span><sup><small>包</small></sup></span>) – <a href="#pg6a086b931dd9">Metric-compatible fonts</a> for Helvetica, Times, and Courier by the Polish GUST association of TeX users. They have their own math companion fonts, see #数学.</li>
+<li><a href="https://en.wikipedia.org/wiki/Ubuntu_Font_Family">Ubuntu 字体族</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-ubuntu-font-family">ttf-ubuntu-font-family</a></span><sup><small>包</small></sup></span>)</li></ul>
+<p>旧版 Microsoft 字体包：
+</p>
+<ul><li><a href="http://corefonts.sourceforge.net/">Microsoft 字体</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ms-fonts/">ttf-ms-fonts</a></span><sup><small>AUR</small></sup></span>) – Andalé Mono, Courier New, Arial, Arial Black, Comic Sans, Impact, Lucida Sans, Microsoft Sans Serif, Trebuchet, Verdana, Georgia, Times New Roman</li>
+<li>Vista 字体 (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-vista-fonts/">ttf-vista-fonts</a></span><sup><small>AUR</small></sup></span>) – Consolas, Calibri, Candara, Corbel, Cambria, Constantia</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E7.AD.89.E5.AE.BD" id="等宽"><span id=".E7.AD.89.E5.AE.BD"></span>等宽</h4></div>
+<p>支持<a href="https://en.wikipedia.org/wiki/Orthographic_ligature#Programming_languages">编程连字</a>的字体标有 ⟶ 符号。更多等宽字体参见#点阵和#字体族。
+</p>
+<ul><li><a href="https://www.marksimonson.com/fonts/view/anonymous-pro">Anonymous Pro</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-anonymous-pro">ttf-anonymous-pro</a></span><sup><small>包</small></sup></span>, included in <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-google-fonts-git/">ttf-google-fonts-git</a></span><sup><small>AUR</small></sup></span>)</li>
+<li><a href="https://github.com/microsoft/cascadia-code">Cascadia Code</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-cascadia-code">ttf-cascadia-code</a></span><sup><small>包</small></sup></span>) ⟶ – Designed to enhance the look of the Windows Terminal, with programming ligatures, released by Microsoft under the Open Font License.</li>
+<li><a href="https://quoteunquoteapps.com/courierprime/">Courier Prime</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-courier-prime/">ttf-courier-prime</a></span><sup><small>AUR</small></sup></span>) – Courier alternative which has been supplemented by a sans serif font and a version optimized for programming, released under the Open Font License.</li>
+<li><a href="https://damieng.com/envy-code-r">Envy Code R</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-envy-code-r/">ttf-envy-code-r</a></span><sup><small>AUR</small></sup></span>) – Font designed for programmers</li>
+<li>Fantasque Sans Mono (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-fantasque-sans-mono">ttf-fantasque-sans-mono</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=otf-fantasque-sans-mono">otf-fantasque-sans-mono</a></span><sup><small>包</small></sup></span>)</li>
+<li><a href="https://en.wikipedia.org/wiki/Fira_(typeface)">Fira Mono</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-fira-mono">ttf-fira-mono</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=otf-fira-mono">otf-fira-mono</a></span><sup><small>包</small></sup></span>) – Font optimized for small screens and adopted by Mozilla for the Firefox OS</li>
+<li><a href="https://en.wikipedia.org/wiki/Fira_(typeface)#Fira_Code">Fira Code</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-fira-code">ttf-fira-code</a></span><sup><small>包</small></sup></span>) ⟶ – Extension of Fira Mono with programming ligatures for common programming multi-character combinations</li>
+<li><a href="https://sourcefoundry.org/hack/">Hack</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-hack">ttf-hack</a></span><sup><small>包</small></sup></span>) - Open source monospaced font, used as the default in KDE Plasma</li>
+<li><a href="https://github.com/i-tu/Hasklig">Hasklig</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/otf-hasklig/">otf-hasklig</a></span><sup><small>AUR</small></sup></span>) - 具有等宽连字的代码字体</li>
+<li><a href="https://pcaro.es/p/hermit/">Hermit</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=otf-hermit">otf-hermit</a></span><sup><small>包</small></sup></span>) - 由程序员为程序员设计的字体</li>
+<li><a href="https://en.wikipedia.org/wiki/Inconsolata">Inconsolata</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-inconsolata">ttf-inconsolata</a></span><sup><small>包</small></sup></span>，包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-google-fonts-git/">ttf-google-fonts-git</a></span><sup><small>AUR</small></sup></span> 中）——为显示源代码设计，灵感来自 Consolas 和 Letter Gothic</li>
+<li><a href="https://leonardo-m.livejournal.com/77079.html">Inconsolata-g</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-inconsolata-g/">ttf-inconsolata-g</a></span><sup><small>AUR</small></sup></span>）——添加一些对程序员友好的修改</li>
+<li><a href="https://be5invis.github.io/Iosevka/">Iosevka</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttc-iosevka">ttc-iosevka</a></span><sup><small>包</small></sup></span>) ⟶ – Slender sans-serif and slab-serif typeface inspired by Pragmata Pro, M+ and PF DIN Mono, designed to be the ideal font for programming; it supports programming ligatures and over 2000 latin, greek, cyrillic, phonetic and PowerLine glyphs</li>
+<li><a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-jetbrains-mono">ttf-jetbrains-mono</a></span><sup><small>包</small></sup></span>) ⟶ – JetBrains 开发的免费开源字体</li>
+<li><a href="https://en.wikipedia.org/wiki/Lucida_Typewriter">Lucida Typewriter</a>（包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jre/">jre</a></span><sup><small>AUR</small></sup></span> 软件包中）</li>
+<li><a href="https://en.wikipedia.org/wiki/Menlo_(typeface)">Menlo</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-meslo/">ttf-meslo</a></span><sup><small>AUR</small></sup></span>) – Customized version of Apple's Menlo Regular font for OS X with larger vertical gap spacing</li>
+<li><a href="https://en.wikipedia.org/wiki/Monaco_(typeface)">Monaco</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-monaco/">ttf-monaco</a></span><sup><small>AUR</small></sup></span>) – Apple 为 OS X 设计的专有字体</li>
+<li>Monofur (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-monofur">ttf-monofur</a></span><sup><small>包</small></sup></span>)</li>
+<li><a href="https://madmalik.github.io/mononoki">Mononoki</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-mononoki/">ttf-mononoki</a></span><sup><small>AUR</small></sup></span>）——用于编程和 code review 的字体</li>
+<li><a href="https://en.wikipedia.org/wiki/Source_Code_Pro">Source Code Pro</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-code-pro-fonts">adobe-source-code-pro-fonts</a></span><sup><small>包</small></sup></span>，包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-google-fonts-git/">ttf-google-fonts-git</a></span><sup><small>AUR</small></sup></span> 中）</li></ul>
+<p>相关网站：
+</p>
+<ul><li><a href="http://www.lowing.org/fonts/">Trevor Lowing 的字体清单</a></li>
+<li><a href="https://www.slant.co/topics/67/~what-are-the-best-programming-fonts">Slant：最好的编程字体是什么？</a></li>
+<li><a href="https://stackoverflow.com/questions/4689/recommended-fonts-for-programming">Stack Overflow：推荐编程字体</a></li>
+<li><a href="https://www.programmingfonts.org">编程字体 - 试驾</a></li>
+<li><a href="http://s9w.io/font_compare">编程字体比较</a></li>
+<li><a href="https://www.codingfont.com/">Coding Font by Typogram</a></li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E6.97.A0.E8.A1.AC.E7.BA.BF" id="无衬线"><span id=".E6.97.A0.E8.A1.AC.E7.BA.BF"></span>无衬线</h4></div>
+<ul><li><a href="http://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&amp;id=andika">Andika</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-andika/">ttf-andika</a></span><sup><small>AUR</small></sup></span>)</li>
+<li><a href="https://en.wikipedia.org/wiki/Cantarell_(typeface)">Cantarell</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cantarell-fonts">cantarell-fonts</a></span><sup><small>包</small></sup></span>) – Default font supplied with GNOME, it is required by the GNOME and GTK 3 related packages</li>
+<li><a href="https://typedesigndead.coosucks.repl.co/">DMCA Sans Serif</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-dmcasansserif/">ttf-dmcasansserif</a></span><sup><small>AUR</small></sup></span>) – General purpose sans serif font metric-compatible with Microsoft Consolas</li>
+<li><a href="https://en.wikipedia.org/wiki/Fira_(typeface)">Fira Sans</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-fira-sans">ttf-fira-sans</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=otf-fira-sans">otf-fira-sans</a></span><sup><small>包</small></sup></span>) – Sans serif font designed by Erik Spiekermann for Mozilla and the Firefox OS. Fira Mono and Fira Code are monospaced companions of Fira Sans (see #等宽)</li>
+<li><a href="https://en.wikipedia.org/wiki/FreeSans">FreeSans</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnu-free-fonts">gnu-free-fonts</a></span><sup><small>包</small></sup></span>) – <a href="https://commons.wikimedia.org/wiki/File:FreeSansDemonstration.png">Visually similar</a> to Helvetica but metrically different, see #字体族</li>
+<li><a href="https://github.com/rsms/inter">Inter</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=inter-font">inter-font</a></span><sup><small>包</small></sup></span>) – A geometric neo-grotesque font designed for user interfaces</li>
+<li><a href="https://indestructibletype.com/Jost.html">Jost*</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/otf-jost/">otf-jost</a></span><sup><small>AUR</small></sup></span>) – An open-source typeface based on <a href="https://en.wikipedia.org/wiki/Futura_(typeface)">Futura</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Liberation_Sans">Liberation Sans</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-liberation">ttf-liberation</a></span><sup><small>包</small></sup></span>) – Metric-compatible with Helvetica but <a href="https://commons.wikimedia.org/wiki/File:Font_Sample_-_Liberation_Sans.svg">visually distinct</a>, see #字体族</li>
+<li><a href="https://fonts.google.com/specimen/Montserrat">Montserrat</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/montserrat-otf/">montserrat-otf</a></span><sup><small>AUR</small></sup></span>) – An open source font that shares similarities with <a href="https://en.wikipedia.org/wiki/Gotham_(typeface)">Gotham</a> and <a href="https://en.wikipedia.org/wiki/Proxima_Nova">Proxima Nova</a></li>
+<li><a href="https://fonts.google.com/specimen/Nunito">Nunito</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-nunito/">ttf-nunito</a></span><sup><small>AUR</small></sup></span>) – An open source font with rounded terminal, hence shares similarities with <a href="https://en.wikipedia.org/wiki/Gotham_(typeface)#Variations">Gotham Rounded</a> and <a href="https://fonts.adobe.com/fonts/proxima-soft">Proxima Soft</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Open_Sans">Open Sans</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-opensans">ttf-opensans</a></span><sup><small>包</small></sup></span>) – Sans serif font commissioned by Google, based on Droid sans but slightly wider.</li>
+<li><a href="https://en.wikipedia.org/wiki/PT_Sans">PT Sans</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-google-fonts-git/">ttf-google-fonts-git</a></span><sup><small>AUR</small></sup></span>) – 3 major variations: normal, narrow, and caption - Unicode: Latin, Cyrillic</li>
+<li><a href="https://en.wikipedia.org/wiki/Source_Sans">Source Sans</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-sans-fonts">adobe-source-sans-fonts</a></span><sup><small>包</small></sup></span>) – Open source sans serif font from Adobe with a design based on News Gothic and Franklin Gothic</li>
+<li><a href="https://www.winehq.org/announce/0.9.47">Tahoma (Wine Replacement)</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-tahoma/">ttf-tahoma</a></span><sup><small>AUR</small></sup></span>) – Open source substitute for <a href="https://en.wikipedia.org/wiki/Tahoma_(typeface)">Tahoma</a> developed by the <a href="#pg39e5cd9380ff">Wine</a> project. It was created because many Windows applications expected Tahoma to be available</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E8.A1.AC.E7.BA.BF" id="衬线"><span id=".E8.A1.AC.E7.BA.BF"></span>衬线</h4></div>
+<ul><li><a href="https://en.wikipedia.org/wiki/Bitstream_Charter">Bitstream Charter</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-bitstream-charter/">ttf-bitstream-charter</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/otf-bitstream-charter/">otf-bitstream-charter</a></span><sup><small>AUR</small></sup></span>) – Originally a commercial font designed by <a href="https://en.wikipedia.org/wiki/Matthew_Carter">Matthew Carter</a>. A version was released under a free license and later <a href="https://practicaltypography.com/charter.html">converted</a> to modern formats (provided as the aforementioned packages).</li>
+<li><a href="https://indestructibletype.com/Bodoni.html">Bodoni*</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/otf-bodoni/">otf-bodoni</a></span><sup><small>AUR</small></sup></span>) – An open-source <a href="https://en.wikipedia.org/wiki/Bodoni">Bodoni</a> revival</li>
+<li><a href="https://github.com/skosch/Crimson">Crimson</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=otf-crimson">otf-crimson</a></span><sup><small>包</small></sup></span>) – An open-source font that shares similarities with <a href="https://en.wikipedia.org/wiki/Minion_(typeface)">Minion</a></li>
+<li><a href="https://en.wikipedia.org/wiki/EB_Garamond">EB Garamond</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ebgaramond-otf/">ebgaramond-otf</a></span><sup><small>AUR</small></sup></span>) – An open-source <a href="https://en.wikipedia.org/wiki/Garamond">Garamond</a> revival, the aforementioned package is the version developed by <a href="https://github.com/octaviopardo/EBGaramond12">Octavio Pardo</a></li>
+<li><a href="https://en.wikipedia.org/wiki/FreeSerif">FreeSerif</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnu-free-fonts">gnu-free-fonts</a></span><sup><small>包</small></sup></span>) – <a href="https://commons.wikimedia.org/wiki/File:FreeSerifDemonstration.png">Visually similar</a> to Times New Roman but <a href="https://askubuntu.com/questions/346552/closest-alternative-to-times-new-roman/1148247#1148247">metrically different</a>, see #字体族</li>
+<li><a href="https://en.wikipedia.org/wiki/Gentium">Gentium</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gentium-plus-font">gentium-plus-font</a></span><sup><small>包</small></sup></span>) – Unicode: Latin, Greek, Cyrillic, Phonetic Alphabet</li>
+<li><a href="https://en.wikipedia.org/wiki/Utopia_(typeface)#Derived_typefaces">Heuristica</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-heuristica/">ttf-heuristica</a></span><sup><small>AUR</small></sup></span>) – Based on a version of <a href="https://en.wikipedia.org/wiki/Utopia_(typeface)">Utopia</a> that was released under a free license</li>
+<li><a href="https://en.wikipedia.org/wiki/Liberation_Serif">Liberation Serif</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-liberation">ttf-liberation</a></span><sup><small>包</small></sup></span>) – Metric-compatible with Times New Roman but <a href="https://en.wikipedia.org/wiki/File:Times_New_Roman_Liberation_Serif_comparison.png">visually distinct</a>, see #字体族</li>
+<li><a href="https://fonts.google.com/specimen/Libre+Baskerville">Libre Baskerville</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-librebaskerville/">ttf-librebaskerville</a></span><sup><small>AUR</small></sup></span>) – An open-source <a href="https://en.wikipedia.org/wiki/Baskerville">Baskerville</a> revival designed by Impallari Type</li>
+<li><a href="https://fonts.google.com/specimen/Libre+Caslon+Text">Libre Caslon</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/otf-libre-caslon/">otf-libre-caslon</a></span><sup><small>AUR</small></sup></span>) – An open-source <a href="https://en.wikipedia.org/wiki/Caslon">Caslon</a> revival designed by Impallari Type</li>
+<li><a href="https://en.wikipedia.org/wiki/Linux_Libertine">Linux Libertine</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-linux-libertine">ttf-linux-libertine</a></span><sup><small>包</small></sup></span>) – Developed as a substitute of Times New Roman, but different both visually and metrically (the metric differences are more notable for italic and bold fonts)</li>
+<li><a href="http://www.gust.org.pl/projects/e-foundry/tex-gyre/index_html">TeX Gyre Termes</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tex-gyre-fonts">tex-gyre-fonts</a></span><sup><small>包</small></sup></span>) – Visually similar to Times New Roman (but there are some minor metric differences), see #字体族</li>
+<li><a href="https://en.wikipedia.org/wiki/Croscore_fonts">Tinos</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-croscore">ttf-croscore</a></span><sup><small>包</small></sup></span>) – Metric-compatible with Times New Roman but visually distinct (and looks similar to Liberation Serif), see #字体族</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E9.9D.9E.E6.8B.89.E4.B8.81.E6.96.87.E5.AD.97" id="非拉丁文字"><span id=".E9.9D.9E.E6.8B.89.E4.B8.81.E6.96.87.E5.AD.97"></span>非拉丁文字</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E5.8F.A4.E4.BB.A3.E6.96.87.E5.AD.97" id="古代文字"><span id=".E5.8F.A4.E4.BB.A3.E6.96.87.E5.AD.97"></span>古代文字</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ancient-fonts/">ttf-ancient-fonts</a></span><sup><small>AUR</small></sup></span>——包含 Aegean、Egyptian、Cuneiform、Anatolian、Maya 和 Analecta 文字的 Unicode 符号的字体</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E9.98.BF.E6.8B.89.E4.BC.AF.E6.96.87" id="阿拉伯文"><span id=".E9.98.BF.E6.8B.89.E4.BC.AF.E6.96.87"></span>阿拉伯文</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-amiri/">ttf-amiri</a></span><sup><small>AUR</small></sup></span>——一个典型的阿拉伯文誊抄体 (Naskh) 字体，一开始由 Amiria Press 采用。其拉丁字符基于 Crimson (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=otf-crimson">otf-crimson</a></span><sup><small>包</small></sup></span>) <a href="https://fontsinuse.com/typefaces/82634/amiri">[1]</a> <a href="https://github.com/skosch/Crimson">[2]</a></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-arabeyes-fonts/">ttf-arabeyes-fonts</a></span><sup><small>AUR</small></sup></span>——自由的阿拉伯文字体集合</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-qurancomplex-fonts/">ttf-qurancomplex-fonts</a></span><sup><small>AUR</small></sup></span>——位于麦地那的 King Fahd Glorious Quran Printing Complex 制作的字体</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-sil-lateef/">ttf-sil-lateef</a></span><sup><small>AUR</small></sup></span>——来自 <a href="https://en.wikipedia.org/wiki/SIL_International">SIL</a> 的 Unicode 阿拉伯文字体</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-sil-scheherazade/">ttf-sil-scheherazade</a></span><sup><small>AUR</small></sup></span>——来自 SIL 的 Unicode 阿拉伯文字体（传统阿拉伯文字体的替代品）</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E5.AD.9F.E5.8A.A0.E6.8B.89.E6.96.87" id="孟加拉文"><span id=".E5.AD.9F.E5.8A.A0.E6.8B.89.E6.96.87"></span>孟加拉文</h4></div>
+<p>详见 <a href="#pg70797063b9af">Localization/Bengali#Fonts</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E7.9B.B2.E6.96.87" id="盲文"><span id=".E7.9B.B2.E6.96.87"></span>盲文</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ubraille/">ttf-ubraille</a></span><sup><small>AUR</small></sup></span>——包含 Unicode <i>盲文</i>符号的字体。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E4.B8.AD.E6.97.A5.E9.9F.A9.E8.B6.8A.E6.96.87.E5.AD.97" id="中日韩越文字"><span id=".E4.B8.AD.E6.97.A5.E9.9F.A9.E8.B6.8A.E6.96.87.E5.AD.97"></span>中日韩越文字</h4></div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgb8e819c27b39_.E6.B3.9B_CJK" id="泛_CJK"><span id=".E6.B3.9B_CJK"></span>泛 CJK</h5></div>
+<ul><li>思源字体——大量字体集合，全面支持简体中文、繁体中文、日文和韩文，具有一致的设计和外观。
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-han-sans-otc-fonts">adobe-source-han-sans-otc-fonts</a></span><sup><small>包</small></sup></span>——思源黑体，无衬线字体</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-han-serif-otc-fonts">adobe-source-han-serif-otc-fonts</a></span><sup><small>包</small></sup></span>——思源宋体，衬线字体</li></ul></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=noto-fonts-cjk">noto-fonts-cjk</a></span><sup><small>包</small></sup></span>——大量字体集合，全面支持简体中文、繁体中文、日文和韩文，具有一致的设计和外观。它目前是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-han-sans-otc-fonts">adobe-source-han-sans-otc-fonts</a></span><sup><small>包</small></sup></span> 重新贴标的版本。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>中文用户在安装思源cjk全集或者noto-cjk全集后，部分文字显示为日文异形字体，可参看<a href="#pg7ef5cbfa0038">Arch Linux Localization#修正简体中文显示为异体（日文）字形</a> 进行解决。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgb8e819c27b39_.E4.B8.AD.E6.96.87" id="中文"><span id=".E4.B8.AD.E6.96.87"></span>中文</h5></div>
+<p>参见 <a href="#pge9112754395a">Localization/Chinese#Fonts</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgb8e819c27b39_.E6.97.A5.E6.96.87" id="日文"><span id=".E6.97.A5.E6.96.87"></span>日文</h5></div>
+<p>参见 <a href="#pg295a5698c2d9">Localization/Japanese#Fonts</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgb8e819c27b39_.E9.9F.A9.E6.96.87" id="韩文"><span id=".E9.9F.A9.E6.96.87"></span>韩文</h5></div>
+<p>参见 <a href="#pge88c0e417e9b">Localization/Korean#Fonts</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgb8e819c27b39_.E8.B6.8A.E5.8D.97.E8.AF.AD" id="越南语"><span id=".E8.B6.8A.E5.8D.97.E8.AF.AD"></span>越南语</h5></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-hannom">ttf-hannom</a></span><sup><small>包</small></sup></span> – 用于喃字的越南语 TrueType 字体</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E8.A5.BF.E9.87.8C.E5.B0.94.E6.96.87.E5.AD.97" id="西里尔文字"><span id=".E8.A5.BF.E9.87.8C.E5.B0.94.E6.96.87.E5.AD.97"></span>西里尔文字</h4></div>
+<p>另请参阅#拉丁文字。
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-paratype/">ttf-paratype</a></span><sup><small>AUR</small></sup></span> – Font family by ParaType: sans, serif, mono, extended cyrillic and latin, OFL 许可证</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/otf-russkopis/">otf-russkopis</a></span><sup><small>AUR</small></sup></span> – A free OpenType cursive font for Cyrillic script</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E5.B8.8C.E8.85.8A.E6.96.87.E5.AD.97" id="希腊文字"><span id=".E5.B8.8C.E8.85.8A.E6.96.87.E5.AD.97"></span>希腊文字</h4></div>
+<p>几乎所有 Unicode 字体都包含希腊代码集 (也包含多调变音符号)。某些额外字体包虽然不包含完整的 Unicode 集，但拥有高质量的希腊字字形 (也包含拉丁字)：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/otf-gfs/">otf-gfs</a></span><sup><small>AUR</small></sup></span> - 由 Greek Font Society 选用的 OpenType 字体</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-mgopen/">ttf-mgopen</a></span><sup><small>AUR</small></sup></span> - 来自 Magenta 的专业 TrueType 字体</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E5.B8.8C.E4.BC.AF.E6.9D.A5.E6.96.87.E5.AD.97" id="希伯来文字"><span id=".E5.B8.8C.E4.BC.AF.E6.9D.A5.E6.96.87.E5.AD.97"></span>希伯来文字</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/opensiddur-hebrew-fonts/">opensiddur-hebrew-fonts</a></span><sup><small>AUR</small></sup></span> – Large collection of Open-source licensed Hebrew fonts. There are also few Latin, Greek, Cyrillic, Arabic, and Amharic.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/culmus/">culmus</a></span><sup><small>AUR</small></sup></span>——不错的自由的希伯来文字体集合。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/alefbet/">alefbet</a></span><sup><small>AUR</small></sup></span> – 2 Hebrew fonts (at the moment): the commonly used "David Libre", and the handwriting font "Gveret Levin".</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ms-fonts/">ttf-ms-fonts</a></span><sup><small>AUR</small></sup></span>——包含 Arial 和其他字体。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E5.8D.B0.E5.9C.B0.E6.96.87.E5.AD.97" id="印地文字"><span id=".E5.8D.B0.E5.9C.B0.E6.96.87.E5.AD.97"></span>印地文字</h4></div>
+<p>另请参阅 <a href="#pgca8121e26922">Localization/Indic#Fonts</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E9.AB.98.E6.A3.89.E6.96.87.E5.AD.97" id="高棉文字"><span id=".E9.AB.98.E6.A3.89.E6.96.87.E5.AD.97"></span>高棉文字</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-khmer">ttf-khmer</a></span><sup><small>包</small></sup></span> - 涵盖高棉语 (Khmer) 文字的字体</li>
+<li><a href="https://www.google.com/fonts/specimen/Hanuman">Hanuman</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-google-fonts-git/">ttf-google-fonts-git</a></span><sup><small>AUR</small></sup></span>)</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E8.92.99.E5.8F.A4.E8.AF.AD.E5.92.8C.E9.80.9A.E5.8F.A4.E6.96.AF.E8.AF.AD" id="蒙古语和通古斯语"><span id=".E8.92.99.E5.8F.A4.E8.AF.AD.E5.92.8C.E9.80.9A.E5.8F.A4.E6.96.AF.E8.AF.AD"></span>蒙古语和通古斯语</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-abkai/">ttf-abkai</a></span><sup><small>AUR</small></sup></span> – Fonts for Sibe, Manchu and Daur scripts (incomplete, currently in development)</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E6.B3.A2.E6.96.AF.E6.96.87.E5.AD.97" id="波斯文字"><span id=".E6.B3.A2.E6.96.AF.E6.96.87.E5.AD.97"></span>波斯文字</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/persian-fonts/">persian-fonts</a></span><sup><small>AUR</small></sup></span> – 用于安装 AUR 中所有波斯字体的元包。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/borna-fonts/">borna-fonts</a></span><sup><small>AUR</small></sup></span> – Borna Rayaneh Co. Persian B font series.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/iran-nastaliq-fonts/">iran-nastaliq-fonts</a></span><sup><small>AUR</small></sup></span> – 自由的 Unicode 书法波斯字体。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/iranian-fonts/">iranian-fonts</a></span><sup><small>AUR</small></sup></span> – Iranian-Sans and Iranian-Serif Persian font family.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ir-standard-fonts/">ir-standard-fonts</a></span><sup><small>AUR</small></sup></span> – 伊朗信息与通信技术高级理事会（SCICT）的标准波斯字体。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/persian-hm-ftx-fonts/">persian-hm-ftx-fonts</a></span><sup><small>AUR</small></sup></span> – A Persian font series derived from X Series 2, Metafont and FarsiTeX fonts with Kashida feature.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/persian-hm-xs2-fonts/">persian-hm-xs2-fonts</a></span><sup><small>AUR</small></sup></span> – A Persian font series derived from X Series 2 fonts with Kashida feature.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gandom-fonts/">gandom-fonts</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/parastoo-fonts/">parastoo-fonts</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sahel-fonts/">sahel-fonts</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/samim-fonts/">samim-fonts</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/shabnam-fonts/">shabnam-fonts</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tanha-fonts/">tanha-fonts</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vazirmatn-fonts/">vazirmatn-fonts</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vazir-code-fonts/">vazir-code-fonts</a></span><sup><small>AUR</small></sup></span> – Beautiful Persian fonts made by Saber RastiKerdar.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-yas/">ttf-yas</a></span><sup><small>AUR</small></sup></span> – The Yas Persian font series (with <b>hollow zero</b>).</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-x2/">ttf-x2</a></span><sup><small>AUR</small></sup></span> – Free fonts with support for Persian, Arabic, Urdu, Pashto, Dari, Uzbek, Kurdish, Uighur, old Turkish (Ottoman) and modern Turkish (Roman).</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E5.A3.AE.E4.BE.97.E8.AF.AD.E7.B3.BB" id="壮侗语系"><span id=".E5.A3.AE.E4.BE.97.E8.AF.AD.E7.B3.BB"></span>壮侗语系</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fonts-tlwg/">fonts-tlwg</a></span><sup><small>AUR</small></sup></span> – Collection of scalable Thai fonts</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-lao/">ttf-lao</a></span><sup><small>AUR</small></sup></span> – Lao TTF font (Phetsarath_OT)</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb8e819c27b39_.E8.97.8F.E7.BC.85.E8.AF.AD.E6.97.8F" id="藏缅语族"><span id=".E8.97.8F.E7.BC.85.E8.AF.AD.E6.97.8F"></span>藏缅语族</h4></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-tibetan-machine">ttf-tibetan-machine</a></span><sup><small>包</small></sup></span>——藏文 (Tibetan) Machine TTFont</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-sil-padauk/">ttf-sil-padauk</a></span><sup><small>AUR</small></sup></span>——支持多种使用缅文的语言的 Unicode 字体</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_Emoji_.E5.92.8C.E7.AC.A6.E5.8F.B7" id="Emoji_和符号"><span id="Emoji_.E5.92.8C.E7.AC.A6.E5.8F.B7"></span>Emoji 和符号</h3></div>
+<p>Unicode 标准的一部分用于称为“emoji”的象形字符。
+</p><p><a href="https://zh.wikipedia.org/wiki/%E8%A1%A8%E6%83%85%E7%AC%A6%E5%8F%B7">Emoji</a> 字体有不同的格式：CBDT/CBLC（Google）、SBIX（Apple）、COLR/CPAL（Microsoft）和 SVG（Mozilla/Adobe）。
+</p><p>只要安装了一种支持 Emoji 的字体，它就应当开箱即用。根据<a href="https://en.wikipedia.org/wiki/Emoji#Emoji_versus_text_presentation">标准</a>，Emoji 字体的回退需要<a href="https://github.com/google/emoji-segmenter">额外的代码</a>来处理。
+</p><p>有关 Emoji 的发现和输入，参见<a href="#pga96df2a9d88c">应用程序列表/工具#文字输入</a>。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>软件</th>
+<th>CBDT/CBLC</th>
+<th>SBIX</th>
+<th>COLR/CPAL</th>
+<th>SVG</th>
+<th>Emoji font fallback
+</th></tr>
+<tr>
+<th><a href="https://en.wikipedia.org/wiki/Freetype">Freetype</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://savannah.nongnu.org/bugs/?46141">否</a></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<th><a href="https://en.wikipedia.org/wiki/Pango">Pango</a>
+</th>
+<td colspan="4" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">Freetype</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://gitlab.gnome.org/GNOME/pango/-/issues/298">是</a>
+</td></tr>
+<tr>
+<th><a href="#pg138157ab9926">WebKitGTK</a>
+</th>
+<td colspan="4" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">Freetype</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://trac.webkit.org/changeset/239822/webkit">是</a>
+</td></tr>
+<tr>
+<th><a href="#pg5016907af879">Qt</a>
+</th>
+<td colspan="4" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">Freetype</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否 <a href="https://bugreports.qt.io/browse/QTBUG-71568">[3]</a> <a href="https://bugreports.qt.io/browse/QTBUG-85014">[4]</a> <a href="https://bugreports.qt.io/browse/QTBUG-85744">[5]</a>
+</td></tr>
+<tr>
+<th><a href="#pgad69d7c7a814">Chromium</a>
+</th>
+<td colspan="4" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">Freetype</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;"><a href="https://chromium.googlesource.com/chromium/src.git/+/671511b00e2d6c374a3079c1c379d2d0dfad32fe">是</a>
+</td></tr>
+<tr>
+<th><a href="#pg9b5d7fec8088">Firefox</a>
+</th>
+<td colspan="3" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">Freetype</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1509988">否</a>，参阅 <a href="#pg9b5d7fec8088">Firefox#字体故障排除</a>以获得解决方案。
+</td></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Qt 只能同时使用字体列表中的前 255 个<a href="https://bugreports.qt.io/browse/QTBUG-80434">[6]</a>。请确保你的<a href="#pg3ffaba980b7a">首选后备字体</a>中有 Emoji 字体。</div>
+<p>CBDT/CBLC：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=noto-fonts-emoji">noto-fonts-emoji</a></span><sup><small>包</small></sup></span>——Google 的开源 Emoji 14.0。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-joypixels/">ttf-joypixels</a></span><sup><small>AUR</small></sup></span>——EmojiOne 创作者的专有 Emoji。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-twemoji/">ttf-twemoji</a></span><sup><small>AUR</small></sup></span>——Twitter 的开源 Emoji 13.0。</li></ul>
+<p>SVG：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/otf-openmoji/">otf-openmoji</a></span><sup><small>AUR</small></sup></span>——施瓦本格明德德国设计大学的开源 Emoji 13.0。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-twemoji-color/">ttf-twemoji-color</a></span><sup><small>AUR</small></sup></span>——Twitter 的开源 Emoji 13.0。</li></ul>
+<p>仅轮廓字体:
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-symbola/">ttf-symbola</a></span><sup><small>AUR</small></sup></span>——提供许多 Unicode 符号，包括 Emoji。</li></ul>
+<p><a href="https://zh.wikipedia.org/wiki/%E9%A2%9C%E6%96%87%E5%AD%97">颜文字</a>，有时被称为“日式表情符号”，由来自各种字符集的字符组成，包括 CJK 和印度字符。下面的一组包涵盖了大部分现有颜文字中所使用的字符：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnu-free-fonts">gnu-free-fonts</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-arphic-uming">ttf-arphic-uming</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-indic-otf">ttf-indic-otf</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E6.95.B0.E5.AD.A6" id="数学"><span id=".E6.95.B0.E5.AD.A6"></span>数学</h3></div>
+<ul><li><a href="https://en.wikipedia.org/wiki/Computer_Modern">Computer Modern</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-cm-unicode/">ttf-cm-unicode</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/otf-cm-unicode/">otf-cm-unicode</a></span><sup><small>AUR</small></sup></span>)</li>
+<li>Computer Modern (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=otf-latin-modern">otf-latin-modern</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=otf-latinmodern-math">otf-latinmodern-math</a></span><sup><small>包</small></sup></span>) – LaTeX 中使用的改进版本</li>
+<li><a href="https://en.wikipedia.org/wiki/STIX_Fonts_project">STIX fonts</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/otf-stix/">otf-stix</a></span><sup><small>AUR</small></sup></span>) – Released under a royalty-free license and designed to be a math compansion of Times New Roman. The current version is called STIX Two Math.</li>
+<li><a href="http://www.gust.org.pl/projects/e-foundry/tg-math">TeX Gyre math fonts</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tex-gyre-math-fonts/">tex-gyre-math-fonts</a></span><sup><small>AUR</small></sup></span>) – Math compansions of TeX Gyre fonts (see #字体族). Notably, TeX Gyre Termes Math is a math compansion of Times New Roman.</li>
+<li><a href="https://en.wikipedia.org/wiki/XITS_font_project">XITS fonts</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/otf-xits/">otf-xits</a></span><sup><small>AUR</small></sup></span>) – A fork of STIX and is therefore a math compansion of Times New Roman. XITS and STIX Two Math have similar levels of completeness for mathematical symbols and alphabets <a href="http://www.gust.org.pl/bachotex/2019-pl/presentations/uvieth-1-2019.pdf">[7]</a>, but do have some visual differences.</li></ul>
+<p>此外，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=texlive-core">texlive-core</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=texlive-fontsextra">texlive-fontsextra</a></span><sup><small>包</small></sup></span> 中包含许多数学字体，例如 Latin Modern Math 和 STIX 字体。有关配置参见 <a href="#pg85046d840409">TeX Live#Making fonts available to Fontconfig</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E5.85.B6.E4.BB.96.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.E5.AD.97.E4.BD.93" id="其他操作系统字体"><span id=".E5.85.B6.E4.BB.96.E6.93.8D.E4.BD.9C.E7.B3.BB.E7.BB.9F.E5.AD.97.E4.BD.93"></span>其他操作系统字体</h3></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-mac-fonts/">ttf-mac-fonts</a></span><sup><small>AUR</small></sup></span> - Apple MacOS TrueType 字体</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8e819c27b39_.E5.90.8E.E5.A4.87.E5.AD.97.E4.BD.93.E9.A1.BA.E5.BA.8F" id="后备字体顺序"><span id=".E5.90.8E.E5.A4.87.E5.AD.97.E4.BD.93.E9.A1.BA.E5.BA.8F"></span>后备字体顺序</h2></div>
+<p>Fontconfig 会自动选择一个满足当前显示需求的字体。例如，如果浏览一个既有英文又有中文的窗口，而默认的字体不支持中文，它会自动用另外的字体显示中文。
+</p><p>Fontconfig 允许每个用户通过 <code>$XDG_CONFIG_HOME/fontconfig/fonts.conf</code> 调整字体的选择顺序。
+如果要优先使用衬线字体，遇到中文再使用某个特定的中文字体，配置文件会是这样：
+</p>
+<pre>&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE fontconfig SYSTEM "fonts.dtd"&gt;
+&lt;fontconfig&gt;
+&lt;alias&gt;
+   &lt;family&gt;serif&lt;/family&gt;
+   &lt;prefer&gt;
+     &lt;family&gt;喜欢的拉丁衬线字体名称&lt;/family&gt;
+     &lt;family&gt;中文字体名称&lt;/family&gt;
+   &lt;/prefer&gt;
+ &lt;/alias&gt;
+&lt;/fontconfig&gt;
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>如果系统的 locale 是中文，请将 <code>FC_LANG</code> 设置为 <code>und</code>或<code>en-US:zh-CN</code>，否则中英文都会使用中文字体渲染。</li>
+<li>修改配置后可以用 <code>fc-match -a monospace | head</code> 检查后备字体设置是否正确。</li></ul>
+</div>
+<p>无衬线和等宽字体也可以增加一样的设置，更多信息请参考 fontconfig 手册。
+</p><p>另请参阅<a href="#pg3ffaba980b7a">字体配置#设置默认和后备字体</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8e819c27b39_.E5.AD.97.E4.BD.93.E5.88.AB.E5.90.8D" id="字体别名"><span id=".E5.AD.97.E4.BD.93.E5.88.AB.E5.90.8D"></span>字体别名</h2></div>
+<p>有几种字体别名实际上代表着别的字体，以让应用程序可以使用类似的字体。最常见的别名是：<code>serif</code> 代表衬线字体（如 DejaVu Serif）；<code>sans-serif</code> 代表无衬线字体（如 DejaVu Sans）；以及 <code>monospace</code> 代表等宽字体（如 DejaVu Sans Mono）。然而，这些别名所代表的字体有可能会变化，但 <a href="#pg5b70e23b1711">KDE</a> 和其他<a href="#pg712e4adaddad">桌面环境</a>的字体管理工具通常不会显示对应关系。
+</p><p>如果想通过别名反向查找是展现了哪种字体，请运行：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ fc-match monospace</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">DejaVuSansMono.ttf: "DejaVu Sans Mono" "Book"
+</pre>
+<p>在这种情况下 monospace 别名展现的是 <code>DejaVuSansMono.ttf</code> 字体。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8e819c27b39_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E5.88.97.E5.87.BA.E6.89.80.E6.9C.89.E5.B7.B2.E5.AE.89.E8.A3.85.E7.9A.84.E5.AD.97.E4.BD.93" id="列出所有已安装的字体"><span id=".E5.88.97.E5.87.BA.E6.89.80.E6.9C.89.E5.B7.B2.E5.AE.89.E8.A3.85.E7.9A.84.E5.AD.97.E4.BD.93"></span>列出所有已安装的字体</h3></div>
+<p>可以使用以下命令列出系统上所有已安装且可用的 Fontconfig 字体。
+</p>
+<pre>$ fc-list
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E5.88.97.E5.87.BA.E7.89.B9.E5.AE.9A.E8.AF.AD.E8.A8.80.E7.9A.84.E5.B7.B2.E5.AE.89.E8.A3.85.E5.AD.97.E4.BD.93" id="列出特定语言的已安装字体"><span id=".E5.88.97.E5.87.BA.E7.89.B9.E5.AE.9A.E8.AF.AD.E8.A8.80.E7.9A.84.E5.B7.B2.E5.AE.89.E8.A3.85.E5.AD.97.E4.BD.93"></span>列出特定语言的已安装字体</h3></div>
+<p>应用程序和浏览器根据 fontconfig 首选项和 Unicode 文本的可用字体字形选择和显示字体。要列出特定语言的已安装字体，请使用命令 <code>fc-list :lang="<i>双字母语言代码</i>"</code>。例如，要列出已安装的阿拉伯字体或支持阿拉伯字形的字体：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ fc-list -f '%{file}\n' :lang=ar</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/usr/share/fonts/TTF/FreeMono.ttf
+/usr/share/fonts/TTF/DejaVuSansCondensed.ttf
+/usr/share/fonts/truetype/custom/DroidKufi-Bold.ttf
+/usr/share/fonts/TTF/DejaVuSansMono.ttf
+/usr/share/fonts/TTF/FreeSerif.ttf</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E5.88.97.E5.87.BA.E7.89.B9.E5.AE.9A_Unicode_.E5.AD.97.E7.AC.A6.E7.9A.84.E5.B7.B2.E5.AE.89.E8.A3.85.E5.AD.97.E4.BD.93" id="列出特定_Unicode_字符的已安装字体"><span id=".E5.88.97.E5.87.BA.E7.89.B9.E5.AE.9A_Unicode_.E5.AD.97.E7.AC.A6.E7.9A.84.E5.B7.B2.E5.AE.89.E8.A3.85.E5.AD.97.E4.BD.93"></span>列出特定 Unicode 字符的已安装字体</h3></div>
+<p>要搜索支持特定 Unicode 码点的等宽字体：
+</p>
+<pre>$ fc-match -s monospace:charset=1F4A9
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_Set_terminal_font_on_the_fly" id="Set_terminal_font_on-the-fly">Set terminal font on-the-fly</h3></div>
+<p>For terminal emulators that use <a href="#pg4c36b893db9d">X resources</a>, e.g. <a href="#pg12c4c9eae03a">xterm</a> or <a href="#pg779b777898ef">rxvt-unicode</a>, fonts can be set by using <a href="#pge07457b07cc4">escape sequences</a>. Specifically, <code>echo -e "\033]710;$font\007"</code> to change the normal font (<code>*font</code> in <code>~/.Xresources</code>), and replace <code>710</code> with <code>711</code>, <code>712</code>, and <code>713</code> to change the <code>*boldFont</code>, <code>*italicFont</code>, and <code>*boldItalicFont</code>, respectively.
+</p><p><code>$font</code> uses the same syntax as in <code>~/.Xresources</code> and can be anything the terminal emulator will support. (Example: <code>xft:dejavu sans mono:size=9</code>)
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.93.E7.94.A8.E7.9A.84.E5.AD.97.E4.BD.93.E7.BC.93.E5.AD.98" id="应用程序专用的字体缓存"><span id=".E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E4.B8.93.E7.94.A8.E7.9A.84.E5.AD.97.E4.BD.93.E7.BC.93.E5.AD.98"></span>应用程序专用的字体缓存</h3></div>
+<p>Matplotlib (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-matplotlib">python-matplotlib</a></span><sup><small>包</small></sup></span>) 使用自己的字体缓存，因此更新字体后记得删除 <code>$HOME/.matplotlib/fontList.cache</code>，<code>$HOME/.cache/matplotlib/fontList.cache</code>, <code>$HOME/.sage/matplotlib-1.2.1/fontList.cache</code> 等文件，这样它才会重新生成缓存并找到新字体 <a href="https://discourse.matplotlib.org/t/getting-matplotlib-to-recognize-a-new-font/17754">[8]</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb8e819c27b39_.E7.BB.88.E7.AB.AF.E4.B8.AD.E7.9A.84.E5.8F.8C.E5.90.91.E6.96.87.E6.9C.AC" id="终端中的双向文本"><span id=".E7.BB.88.E7.AB.AF.E4.B8.AD.E7.9A.84.E5.8F.8C.E5.90.91.E6.96.87.E6.9C.AC"></span>终端中的双向文本</h3></div>
+<p>要在终端中正确显示阿拉伯语和希伯来语，请运行 BiCon（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bicon-git/">bicon-git</a></span><sup><small>AUR</small></sup></span>）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb8e819c27b39_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="http://behdad.org/text/">State of Text Rendering</a></li>
+<li><a href="https://fontlibrary.org/en">Font Library</a> - Fonts under Free licenses</li>
+<li><a href="https://screenshots.debian.net/packages?search=fonts&amp;show=with">Fonts on screenshots.debian.net</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807024258
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.455 seconds
+Real time usage: 0.466 seconds
+Preprocessor visited node count: 2422/1000000
+Revision size: 36213/2097152 bytes
+Post‐expand include size: 43923/2097152 bytes
+Template argument size: 11017/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  138.879      1 -total
+ 10.82%   15.021     90 Template:AUR
+  9.27%   12.874     66 Template:Pkg
+  7.14%    9.921      7 Template:Yes
+  5.41%    7.515      3 Template:No
+  5.19%    7.207     54 Template:Ic
+  4.71%    6.539     13 Template:META_Table_cell
+  4.49%    6.242      4 Template:G
+  3.19%    4.431      5 Template:C
+  3.07%    4.269      3 Template:R
+-->
+<!-- Render ID b2f5b10e-9209-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3116:|#|:idhash:canonical!zh-cn and timestamp 20260807024258 and revision id 34472. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

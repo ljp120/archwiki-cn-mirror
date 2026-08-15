@@ -1,0 +1,108 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgd72b96aae6d5">可信平台模块/1.2</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Trusted_Platform_Module/1.2">Trusted Platform Module/1.2</a>，最近一次同步于 2026-05-03，若英文版本有所<a href="https://wiki.archlinux.org/title/Trusted_Platform_Module/1.2?diff=0&amp;oldid={{{3}}}">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Trusted_Platform_Module_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/1.2_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>TPM 1.2 使用 IBM 开发的 “TrouSerS” TSS (TCG软件栈) 。该软件栈包主要包含两个主要部分：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/trousers/">trousers</a></span><sup><small>AUR</small></sup></span> (提供<i>tcsd</i>守护进程) 和<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tpm-tools/">tpm-tools</a></span><sup><small>AUR</small></sup></span> (提供用户空间工具) 。所有软件都通过<i>tcsd</i>守护进程访问 TPM。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd72b96aae6d5_.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F" id="驱动程序"><span id=".E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F"></span>驱动程序</h2></div>
+<p>现代内核已原生支持 TPM 驱动程序，但可能需要手动加载：
+</p>
+<pre># modprobe tpm
+</pre>
+<p>根据芯片组的不同，你可能还需要加载以下驱动程序之一：
+</p>
+<pre># modprobe -a tpm_{atmel,infineon,nsc,tis,crb}
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd72b96aae6d5_.E4.BD.BF.E7.94.A8.E6.96.B9.E6.B3.95" id="使用方法"><span id=".E4.BD.BF.E7.94.A8.E6.96.B9.E6.B3.95"></span>使用方法</h2></div>
+<p>TPM 1.2 由<code>tcsd</code>管理，这是一个管理可信计算机资源的普通用户空间守护进程。根据 TSS 规范，它是访问 TPM 设备驱动程序的<b>唯一门户</b>。<code>tcsd</code>是<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/trousers/">trousers</a></span><sup><small>AUR</small></sup></span>软件包的一部分 (由 IBM 创建并发布) ，可以通过<code>/etc/tcsd.conf</code>进行配置。
+</p><p>若要启动<code>tcsd</code>并查看输出，请运行：
+</p>
+<pre># tcsd -f
+</pre>
+<p>或直接<a href="#pg6ec215b93a06">启动</a>并<a href="#pg3ef6532bc644">启用</a><code>tcsd.service</code>。
+</p><p>当<code>tcsd</code>运行后，你可能还想安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tpm-tools/">tpm-tools</a></span><sup><small>AUR</small></sup></span>，它提供了许多用于管理 TPM 的命令行工具。
+</p><p>其他值得关注的工具：
+</p>
+<ul><li><b>tpmmanager</b> — tpm-tools的 Qt 图形界面前端</li></ul>
+<dl><dd><a href="https://github.com/Rohde-Schwarz/TPMManager">https://github.com/Rohde-Schwarz/TPMManager</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tpmmanager/">tpmmanager</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>opencryptoki</b> — Linux下的 PKCS#11 实现。它包含启用 IBM 加密硬件的驱动程序和库，以及用于测试软件的令牌 (Token)。</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/opencryptoki">https://sourceforge.net/projects/opencryptoki</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/opencryptoki/">opencryptoki</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd72b96aae6d5_.E5.9F.BA.E7.A1.80.E6.93.8D.E4.BD.9C" id="基础操作"><span id=".E5.9F.BA.E7.A1.80.E6.93.8D.E4.BD.9C"></span>基础操作</h2></div>
+<p>首先，获取基础版本信息：
+</p>
+<pre>$ tpm_version
+</pre>
+<p>接着运行自检 (selftest)：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ tpm_selftest -l info</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">TPM Test Results: 00000000 ...
+tpm_selftest succeeded
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd72b96aae6d5_.E4.BF.9D.E6.8A.A4_SSH_.E5.AF.86.E9.92.A5" id="保护_SSH_密钥"><span id=".E4.BF.9D.E6.8A.A4_SSH_.E5.AF.86.E9.92.A5"></span>保护 SSH 密钥</h2></div>
+<p>利用 TPM 保护密钥的方法有很多种，这里介绍一种基于<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/simple-tpm-pk11-git/">simple-tpm-pk11-git</a></span><sup><small>AUR</small></sup></span>的简便方法。
+</p><p>首先，创建一个新目录并生成密钥：
+</p>
+<pre>$ mkdir ~/.simple-tpm-pk11
+$ stpm-keygen -o ~/.simple-tpm-pk11/<i>my.key</i>
+</pre>
+<p>在配置文件中指向该密钥：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.simple-tpm-pk11/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">key <i>my.key</i>
+</pre>
+<p>现在配置 SSH 以使用正确的 PKCS11提供程序 (Provider)：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.ssh/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Host *
+    PKCS11Provider /usr/lib/libsimple-tpm-pk11.so
+</pre>
+<p>之后便可以使用该 PKCS11 提供程序来生成密钥 (用于提取公钥)：
+</p>
+<pre>$ ssh-keygen -D /usr/lib/libsimple-tpm-pk11.so
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>该方法目前不支持生成和使用多个密钥。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd72b96aae6d5_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd72b96aae6d5_tcsd.service_.E5.90.AF.E5.8A.A8.E5.A4.B1.E8.B4.A5" id="tcsd.service_启动失败"><span id="tcsd.service_.E5.90.AF.E5.8A.A8.E5.A4.B1.E8.B4.A5"></span>tcsd.service 启动失败</h3></div>
+<p>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/trousers/">trousers</a></span><sup><small>AUR</small></sup></span>后，由于权限问题，<code>tcsd.service</code>服务可能无法正常启动。你可以通过重启系统或触发<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/trousers/">trousers</a></span><sup><small>AUR</small></sup></span>软件包中包含的<a href="#pge009209061ac">udev</a>规则来解决此问题：
+</p>
+<pre># udevadm control --reload-rules
+# udevadm trigger
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd72b96aae6d5_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://lwn.net/Articles/674751/">Protecting systems with the TPM</a></li>
+<li><a href="https://www.thinkwiki.org/wiki/Embedded_Security_Subsystem">Embedded Security Subsystem on Thinkwiki</a></li>
+<li><a href="https://www.cs.unh.edu/~it666/reading_list/Hardware/tpm_fundamentals.pdf">TPM Fundamentals (PDF)</a></li>
+<li><a href="https://www.lorier.net/docs/tpm">Using a TPM</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807144017
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.074 seconds
+Real time usage: 0.078 seconds
+Preprocessor visited node count: 223/1000000
+Revision size: 3199/2097152 bytes
+Post‐expand include size: 4319/2097152 bytes
+Template argument size: 1216/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   18.627      1 -total
+ 17.53%    3.265      1 Template:翻译状态
+ 16.47%    3.068      2 Template:App
+ 12.89%    2.401      9 Template:AUR
+  9.51%    1.771      1 Template:Note
+  8.73%    1.626      7 Template:Ic
+  8.14%    1.517      3 Template:Hc
+-->
+<!-- Render ID e833ea8e-926d-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8494:|#|:idhash:canonical!zh-cn and timestamp 20260807144017 and revision id 35111. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

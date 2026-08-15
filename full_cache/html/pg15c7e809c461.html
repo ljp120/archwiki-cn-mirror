@@ -1,0 +1,176 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg15c7e809c461">官方仓库</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Official_repositories">Official repositories</a>，最近一次同步于 2023-05-23，若英文版本有所<a href="https://wiki.archlinux.org/title/Official_repositories?diff=0&amp;oldid=779252">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Official_repositories_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="noteTA" id="noteTA-7f3f5856"><div class="noteTA-group"><div data-noteta-group="ArchWiki" data-noteta-group-source="module"></div></div></div>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg6a9e963f286f">Arch 用户软件仓库 (AUR)</a></li>
+<li><a href="#pg8d559a1b1a4f">Arch 构建系统</a></li>
+<li><a href="#pg7edcce763396">makepkg</a></li>
+<li><a href="#pg61db3d3fc575">Mirrors</a></li>
+<li><a href="#pgc80616905c12">官方仓库 web 接口</a></li>
+<li><a href="#pg9ef105bf1e3c">pacman</a></li>
+<li><a href="#pgf9d748a7b27b">PKGBUILD</a></li>
+<li><a href="#pgef9a589efc8b">非官方用户仓库</a></li>
+</ul></div>
+<p><a href="https://en.wikipedia.org/wiki/software_repository">软件仓库</a>是获取软件包的地方。
+</p><p>Arch Linux <b>官方软件仓库</b>包含着基础的和较为流行的软件。他们可通过<a href="#pg9ef105bf1e3c">Pacman</a>便捷的获取。软件包由<a href="#pgb50615929a83">软件包维护者</a>维护。
+</p><p>官方软件仓库中的软件包会持续更新，即老版本将被新版本所替代。Arch 没有主版本的概念：每个软件在上游有新版本时单独更新。每一个软件仓库都是互相联系的，即，软件仓库中的所有软件都是相互兼容的。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg15c7e809c461_.E7.A8.B3.E5.AE.9A.E4.BB.93.E5.BA.93" id="稳定仓库"><span id=".E7.A8.B3.E5.AE.9A.E4.BB.93.E5.BA.93"></span>稳定仓库</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15c7e809c461_core" id="core">core</h3></div>
+<p>core 仓库位于<a href="#pg61db3d3fc575">仓库镜像</a>的 <code>.../core/os/</code> 目录。
+</p><p><b>core</b>仓库包含着用于以下用途的软件包:
+</p>
+<ul><li>启动 Arch 系统。</li>
+<li><a href="#pgf42a74f3af9c">连接网络</a></li>
+<li><a href="#pgf054312e26a1">创建软件包</a></li>
+<li>检查、管理和修复所支持的<a href="#pg35e92562adc7">文件系统</a></li>
+<li>系统安装（例如<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openssh">openssh</a></span><sup><small>包</small></sup></span>）。</li></ul>
+<p>以及上述软件包的依赖（不包括<a href="#pgf9d748a7b27b">构建软件包所需的依赖</a>），以及 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base">base</a></span><sup><small>包</small></sup></span> <a href="#pge0f955900ee5">元软件包</a>。
+</p><p><i>core</i> 仓库对包有着相当严格的质量要求。软件包的更新需要经过开发者和用户的审察批准。对于低使用率的软件，适当的审核足矣：发布关于更新的通知，请求审核，根据更新的重要性在 core-testing 仓库暂留至多一周，并在确保无未解决bug报告后，由<a href="#pgb50615929a83">软件包维护者</a>审核通过。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如需在没有网络连接的情况下从 <i>core</i> （或其他软件仓库）创建本地软件仓库，见 <a href="#pg9dbef2bf5cad">Pacman/Tips and tricks#Installing packages from a CD/DVD or USB stick</a></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15c7e809c461_extra" id="extra">extra</h3></div>
+<p><i>extra</i> 仓库位于您最喜欢的仓库镜像的 <code>.../extra/os/</code> 目录。
+</p><p><i>extra</i>包含不适合在<i>core</i>仓库的所有软件包，由 <a href="#pg7ac163ed6ce0">Trusted Users</a> 和 Arch 开发者共同维护。 比如：<a href="#pga36c0aff60be">Xorg</a>，<a href="#pg3d6d7c1e6c7c">窗口管理器</a>，<a href="#pg138157ab9926">网络浏览器</a>，<a href="#pg58f89a7cd9f4">媒体播放器</a>，程序语言支持<a href="#pgf6d3de5ccfac">Python</a>和<a href="#pg3be4e2138bda">Ruby</a>等等。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15c7e809c461_multilib" id="multilib">multilib</h3></div>
+<p><i>multilib</i> 仓库位于您最喜欢的仓库镜像的 <code>.../multilib/os/</code> 目录。
+</p><p><i>multilib</i> 包含着32位的软件和链接库，可以用于在64位系统上运行和构建32位软件，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wine">wine</a></span><sup><small>包</small></sup></span> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=steam">steam</a></span><sup><small>包</small></sup></span> 等。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg15c7e809c461_.E5.90.AF.E7.94.A8multilib" id="启用multilib"><span id=".E5.90.AF.E7.94.A8multilib"></span>启用multilib</h4></div>
+<p>想使用 multilib 仓库，请在<code>/etc/pacman.conf</code>文件中取消 <code>[multilib]</code> 段落的注释：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[multilib]
+Include = /etc/pacman.d/mirrorlist</pre>
+<p>然后<a href="#pgbb7568ec4406">更新系统</a>
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>运行 <code>pacman -Sl multilib</code> 来列出在<i>multilib</i>仓库里的所有软件包，32位链接库的软件包以 <code>lib32-</code> 开头</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg15c7e809c461_.E7.A6.81.E7.94.A8multilib" id="禁用multilib"><span id=".E7.A6.81.E7.94.A8multilib"></span>禁用multilib</h4></div>
+<p>运行下面命令可以删除所有从 <i>multilib</i> 安装的软件:
+</p>
+<pre># pacman -R $(comm -12 &lt;(pacman -Qq | sort) &lt;(pacman -Slq multilib | sort))
+</pre>
+<p>如果有 gcc-libs 冲突，请重新安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gcc-libs">gcc-libs</a></span><sup><small>包</small></sup></span>和<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base-devel">base-devel</a></span><sup><small>包</small></sup></span>的依赖：
+</p><p>在  <code>/etc/pacman.conf</code> 中注释掉 <code>[multilib]</code> 段落：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#[multilib]
+#Include = /etc/pacman.d/mirrorlist</pre>
+<p>然后<a href="#pgbb7568ec4406">更新系统</a>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg15c7e809c461_testing_.E4.BB.93.E5.BA.93" id="testing_仓库"><span id="testing_.E4.BB.93.E5.BA.93"></span>testing 仓库</h2></div>
+<p><i>testing</i> 仓库的目的是提供一个即将被放入主软件仓库的软件包的集散地。软件包维护者（和普通用户）可以访问并测试这些软件包以确保软件包没有问题。当位于 <i>testing</i> 仓库的软件包被测试无问题后，即可被移入主仓库。
+</p><p>不是所有的包都需要经过如此的测试过程，满足如下条件的软件包会进测试仓库：
+</p>
+<ul><li>一切需要进入 <i>core</i> 仓库的软件包都需要先经过 <i>core-testing</i> 仓库</li>
+<li>更新该软件包可能损坏系统，需要进行测试。</li>
+<li>会影响到大量其它的软件包，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perl">perl</a></span><sup><small>包</small></sup></span> 或者 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python">python</a></span><sup><small>包</small></sup></span>。</li></ul>
+<p>大的软件集合，如<a href="#pg1e095fe2c2a6">GNOME</a> 或 <a href="#pg5b70e23b1711">KDE</a> 更新时会更新大批软件包，也需要进行测试。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>testing 库并不是“最新”软件包的仓库。它的目的是存放一些由于是[core]软件集合的一部分或者由于其它方面的问题，可能引起<b>系统崩溃</b>的软件包更新。我们<b>强烈建议</b>使用 testing 库的用户订阅<a href="https://lists.archlinux.org/mailman3/lists/arch-dev-public.lists.archlinux.org/">arch-dev-public</a>邮件列表，监视<a href="https://bbs.archlinux.org/viewforum.php?id=49">testing 仓库论坛</a>，并<a href="#pg7817680d64e1">报告bug</a>。你也应该考虑加入<a href="#pg3b379ce047d3">Arch测试团队</a></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>谨慎启用 <i>core-testing</i> 仓库，其中的软件包可能损坏系统。只有有足够的经验且知道如何应对问题的用户才可以启用。</li>
+<li>请同时启用 <i>core-testing</i> 仓库和 <i>extra-testing</i> 仓库。如果启用了下文的其他 <i>testing</i> 仓库，也需要启用 <i>core-testing</i> 和 <i>extra-testing</i> 仓库</li>
+<li>由于并不是所有的主仓库软件包都在测试仓库中有相应的版本，core 和 extra 主仓库应该保留，并保证相应的测试仓库在主仓库的前面</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15c7e809c461_core_testing" id="core-testing">core-testing</h3></div>
+<p>位于镜像的 <code>.../core-testing/os/</code> 目录。
+</p><p><i>core-testing</i> 包含要进入 <i>core</i> 仓库的候选软件包。
+</p><p>core-testing 库是唯一可以与其它官方软件仓库有名称冲突的仓库。如果要启用，应该在 <code>pacman.conf</code> 文件里把它设置为第一个仓库。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15c7e809c461_extra_testing" id="extra-testing">extra-testing</h3></div>
+<p><i>extra-testing</i>库的功能类似 <i>core-testing</i> ，不过是为 <i>extra</i> 库服务的测试仓库。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15c7e809c461_multilib_testing" id="multilib-testing">multilib-testing</h3></div>
+<p><i>multilib-testing</i> 库的功能类似 <i>core-testing</i> ,不过是为 <i>multilib-testing</i> 库服务的测试仓库。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15c7e809c461_gnome_unstable" id="gnome-unstable">gnome-unstable</h3></div>
+<p><a href="#pg1e095fe2c2a6">GNOME</a> 桌面环境的下一个稳定版本，在进入主 <i>extra-testing</i> 仓库前，会先放到 <i>gnome-unstable</i>.
+</p><p>要启用它，在 <code>/etc/pacman.conf</code> 中加入:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[gnome-unstable]
+Include = /etc/pacman.d/mirrorlist</pre>
+<p><i>gnome-unstable</i> 项需要在所有仓库的最上面（保证在 <i>core-testing</i> 上面），即：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[gnome-unstable]
+[core-testing]
+[core]
+[extra-testing]
+[extra]</pre>
+<p>如果有软件包相关的问题，请在 <a href="https://bugs.archlinux.org/">Arch bug tracker</a> 汇报，其它问题请<a href="https://gitlab.gnome.org">上游的 GNOME Gitlab</a>汇报。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15c7e809c461_kde_unstable" id="kde-unstable">kde-unstable</h3></div>
+<p>包含 <a href="#pg5b70e23b1711">KDE</a> Plasma 和应用程序的 <i>beta</i> 或<i>候选发行版本</i>.
+</p><p>要启用它，将下面内容加入 <code>/etc/pacman.conf</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[kde-unstable]
+Include = /etc/pacman.d/mirrorlist</pre>
+<p>同样地，<i>kde-unstable</i> 项需要在所有仓库的最上面（保证在 <i>core-testing</i> 上面）。
+</p><p>请<a href="#pg7817680d64e1">报告</a>遇到的问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15c7e809c461_.E7.A6.81.E7.94.A8.E6.B5.8B.E8.AF.95.E4.BB.93.E5.BA.93" id="禁用测试仓库"><span id=".E7.A6.81.E7.94.A8.E6.B5.8B.E8.AF.95.E4.BB.93.E5.BA.93"></span>禁用测试仓库</h3></div>
+<p>如果要禁用之前启用的测试仓库，应该：
+</p>
+<ol><li>从 <code>/etc/pacman.conf</code> 中删除(注释）掉配置</li>
+<li>执行 <code>pacman -Syuu</code> 将从这些仓库安装的软件还原到主仓库版本。</li></ol>
+<p>第二条为可选操作，如果在第一步后碰到任何问题，请先执行此操作。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg15c7e809c461_staging_repositories" id="staging_repositories">staging repositories</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不要因为任何原因启用 <i>staging</i> 仓库，因为你的系统一定会在更新后损坏。这个仓库仅为后端开发人员使用</div>
+<p>该存储库包含损坏的包，并且在一次重建多个包时仅供开发人员使用。 例如，为了重建依赖于新共享库的包，必须首先构建共享库本身并将其上传到临时存储库，以便其他开发人员可以使用。 一旦所有依赖包都被重建，这组包就会被转移到测试或主存储库，以更合适的方式.
+</p><p>详情请见 <a href="https://lists.archlinux.org/archives/list/arch-dev-public@lists.archlinux.org/thread/7RNII5TUKV3BJPGGBYKB7DNUK3WI26GZ/">staging 仓库发布通知</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg15c7e809c461_.E5.8E.86.E5.8F.B2.E8.83.8C.E6.99.AF" id="历史背景"><span id=".E5.8E.86.E5.8F.B2.E8.83.8C.E6.99.AF"></span>历史背景</h2></div>
+<p>大部分仓库是因为历史原因分开的。原本，当这个发行版只有一小部分用户时，是只有一个软件仓库的，它就是现在的 <b>core</b> ──那时候它叫做 <b>official</b> 。这个仓库主要存放了Judd Vinet选定的应用程序，当然现在已经不是这样了：它被设计为只包含“每种类型”程序中的一个 ── 一个桌面环境、一个主浏览器等等。
+</p><p>后来有用户不满Judd的选择，由于<a href="#pg03306a96a891">ABS系统</a>使用简单，所以他们就用ABS来创建自己的软件包。这些软件包被放入一个名为<b>unofficial</b>的软件仓库，而这个仓库由除Judd以外的开发人员维护。最终，新仓库获得开发人员同样的支持，所以就不再使用 official 和 unofficial 这两个名称了。大约在0.5版本的时候，两个仓库更名为 <b>current</b> 和 <b>extra</b> 。
+</p><p>在2007.8.1版本发布之后， current 更名为 core ，以免让人误解它包含的内容。如今，这两个仓库在开发人员和社区眼中都是相同分量的。不过 core 还是有些不同的，主要区别在于安装光盘和发布的快照中的软件包都只在 core 当中。这个仓库可以实现一个完整的Linux系统，但并不一定是你想要的Linux系统。
+</p><p>在0.5或者0.6版本的时候，仓库里有大量的软件包没有开发者愿意去维护。于是一位开发人员（Xentac）创建了“受信用户仓库”（Trusted User Repositories），作为存放被信任的用户（TU）自行创建的软件包的仓库。<b>staging</b>仓库里的软件包可以被Arch Linux的开发人员选拔入官方仓库，不过除此之外，开发人员和受信用户或多或少还是有所不同的。
+</p><p>就这样过了一段时间，逐渐的受信用户对他们的软件仓库感到厌倦，而非受信用户又期望可以将自己的软件包与大家分享。这导致了<a href="#pg89cb7b475cfb">AUR</a>的出现。慢慢的TU们形成更为严密的组织，如今他们共同维护<b>community</b>软件仓库。TU是一个独立于Arch Linux开发人员之外的组织，两者并没太多交流。不过，热门的软件包仍然会偶尔从 community 选拔入 <b>extra</b> 。<a href="https://aur.archlinux.org/">AUR</a>也允许非受信用户提交PKGBUILD给其他用户自愿使用。
+</p><p>在2006年，<b>core</b>仓库里未被正确编译的内核<a href="https://archlinux.org/news/please-avoid-kernel-261614-1/">导致许多用户系统崩溃</a>。之后，“core仓库审核机制”引入：所有[core]仓库软件包更新前，必须先在一个叫做 <b>core-testing</b> 的仓库进行测试，必须在其他开发者或 <a href="#pg3b379ce047d3">Arch Testing Team</a> 成员同意后，软件包才能正式移入 core 。后来， core 中出现一些低使用率的软件，审核机制对它们有所宽松。
+</p><p>2009年末至2010年初，出现了一些新的文件系统，人们希望在安装系统时就使用它们（即纳入 core ）。鉴于 core 从来没有给出明确的界定（只是重要的包，由开发者亲自挑选的）它有了一个更为明确的定义。
+</p><p>2023 年，经过几年的准备工作，Arch 将<a href="https://lists.archlinux.org/archives/list/arch-dev-public@lists.archlinux.org/thread/SHCCCKHLIWPXPOIR5ARNJKSVWL2SSUO7/">后端服务迁移到了 git</a>，并同时启用了新的仓库布局。在新的布局中，<i>extra</i> 包含了之前 <i>community</i> 仓库的软件包，testing 仓库分成了 <i>core-testing</i> 和  <i>extra-testing</i>, <i>community-testing</i> 被删除。 <a href="#pg7ac163ed6ce0">Trusted Users</a> 也有了推送软件包到 <i>extra</i> 的权限。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807023820
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc, prevent‐selective‐update]
+CPU time usage: 0.303 seconds
+Real time usage: 0.310 seconds
+Preprocessor visited node count: 420/1000000
+Revision size: 11996/2097152 bytes
+Post‐expand include size: 70715/2097152 bytes
+Template argument size: 2430/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.068/7.000 seconds
+Lua memory usage: 1221938/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  127.812      1 -total
+ 71.85%   91.830      1 Template:NoteTA
+  2.91%    3.723      8 Template:Pkg
+  2.85%    3.646      1 Template:翻译状态
+  2.38%    3.047      2 Template:Tip_(简体中文)
+  2.15%    2.745      8 Template:Related
+  2.13%    2.728     15 Template:Ic
+  1.82%    2.330      1 Template:相关文章开始
+  1.55%    1.980      5 Template:Hc
+  0.80%    1.025      2 Template:警告
+-->
+<!-- Render ID 0d42420e-9209-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3606:|#|:idhash:canonical!zh-cn and timestamp 20260807023820 and revision id 34372. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,468 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgf5d6dc2b8800">分区</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg6c70b7fdfa57">文件系统</a></li>
+<li><a href="#pgc1328f332dd1">fdisk</a></li>
+<li><a href="#pgba80dd5ffb4c">gdisk</a></li>
+<li><a href="#pgfba87229acd8">parted</a></li>
+<li><a href="#pgced0cc449f44">fstab</a></li>
+<li><a href="#pg02cd87050dfd">LVM</a></li>
+<li><a href="#pgad14227759fd">Swap</a></li>
+<li><a href="#pg7e866ec617d4">Arch 的启动流程</a></li>
+<li><a href="#pg46c3147defaf">UEFI</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Partitioning">Partitioning</a>，最近一次同步于 2024-07-06，若英文版本有所<a href="https://wiki.archlinux.org/title/Partitioning?diff=0&amp;oldid=809166">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Partitioning_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>根据<a href="https://en.wikipedia.org/wiki/Disk_partitioning">维基百科</a>:
+</p>
+<dl><dd>分区是在<a href="https://en.wikipedia.org/wiki/Secondary_storage#Secondary_storage">外存</a>上创建一个或多个区域的过程，分区的目的是单独管理各个部分。</dd></dl>
+<p>一个硬盘可以被划分为一个或者多个分区。一些场景需要使用多个分区，例如双重或多重启动、使用 <a href="#pgad14227759fd">Swap</a> 分区等。此外，分区也可以从逻辑上隔离数据，例如为音频和视频数据创建单独的分区。分区方案存储于#分区表中，例如主引导记录（MBR）或 GUID 分区表（GPT）。
+</p><p>可用<a href="https://zh.wikipedia.org/wiki/%E7%A1%AC%E7%A2%9F%E5%88%86%E5%89%B2%E8%BB%9F%E9%AB%94%E5%88%97%E8%A1%A8">分区工具</a>创建和修改分区表。#分区工具中列出了在 Arch Linux 中可用的分区工具。
+</p><p>分区通常直接包含一个<a href="#pg35e92562adc7">文件系统</a>，这是在分区上直接创建的（即<a href="#pg35e92562adc7">格式化</a>）。或者，分区可能包含<a href="#pg02cd87050dfd">LVM</a>（逻辑分卷管理器）、<a href="#pg181e0ec7c431">加密块设备</a>、<a href="#pg1b71ce42139c">RAID</a>（独立磁盘冗余阵列），它们最终提供可存放文件系统的设备文件。
+</p><p>直接包含可挂载文件系统的<a href="#pga4a069b5d648">块设备</a>（硬盘、分区、LUKS 设备、LVM 逻辑卷、RAID 阵列等）称为<a href="https://zh.wikipedia.org/wiki/%E5%8D%B7_(%E8%AE%A1%E7%AE%97)">卷</a>（也有卷标、宗卷等称谓）。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf5d6dc2b8800_.E5.88.86.E5.8C.BA.E8.A1.A8" id="分区表"><span id=".E5.88.86.E5.8C.BA.E8.A1.A8"></span>分区表</h2></div>
+<p>分区信息被存放在分区表中。目前有两种主流的模式：传统的#主引导记录（MBR）和新的#GUID 分区表（GPT）。后者功能更强大，解决了许多 MBR 的限制。第三个不常用的方式是使用无分区磁盘，后面也会介绍。
+</p><p>可使用#分区工具查看<a href="#pga4a069b5d648">块设备</a>的分区表。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可以用 <code>parted <i>/dev/sda</i> print</code> 或 <code>fdisk -l <i>/dev/sda</i></code> 查看当前分区信息。
+<p><code>/dev/sdX</code> 是块设备，依不同物理设备有不同的格式：
+</p>
+<ul><li><code>/dev/sda</code> 是 SATA 设备</li>
+<li><code>/dev/nvme0n1</code> 是 NVMe 设备</li>
+<li><code>/dev/mmcblk0</code> 是 eMMC 设备</li></ul>
+<p>更多信息请参看<a href="#pga4a069b5d648">块设备名称</a>
+</p>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_.E4.B8.BB.E5.BC.95.E5.AF.BC.E8.AE.B0.E5.BD.95" id="主引导记录"><span id=".E4.B8.BB.E5.BC.95.E5.AF.BC.E8.AE.B0.E5.BD.95"></span>主引导记录</h3></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E4%B8%BB%E5%BC%95%E5%AF%BC%E8%AE%B0%E5%BD%95">主引导记录</a>（Master boot record，MBR）是存储设备最开始的 512 字节。其包含操作系统启动加载器和分区表，在 <a href="https://zh.wikipedia.org/wiki/BIOS">BIOS</a> 系统的<a href="#pg2be54bdacb4c">启动流程</a>中扮演重要角色。可参阅上述维基页面了解 MBR 的结构。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>MBR 并不位于某个分区中。其位于分区前，设备的最开始的扇区（物理偏移 0）。
+无分区设备的启动扇区或分区中的启动扇区被称为 <a href="https://en.wikipedia.org/wiki/Volume_boot_record">Volume boot record</a>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf5d6dc2b8800_MBR.EF.BC.88.E5.BC.95.E5.AF.BC.E4.BB.A3.E7.A0.81.EF.BC.89" id="MBR（引导代码）"><span id="MBR.EF.BC.88.E5.BC.95.E5.AF.BC.E4.BB.A3.E7.A0.81.EF.BC.89"></span>MBR（引导代码）</h4></div>
+<p>MBR 的前 440 字节是引导（bootstrap）代码。在 BIOS 系统上，它通常包含引导程序的第一阶段。可以用 <a href="#pge09a1da9829f">dd</a> 备份、恢复、抹除引导代码。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf5d6dc2b8800_MBR.EF.BC.88.E5.88.86.E5.8C.BA.E8.A1.A8.EF.BC.89" id="MBR（分区表）"><span id="MBR.EF.BC.88.E5.88.86.E5.8C.BA.E8.A1.A8.EF.BC.89"></span>MBR（分区表）</h4></div>
+<p>MBR 分区表（或称为 DOS 分区表、MS-DOS 分区表）有三种分区类型：
+</p>
+<ul><li>主分区（Primary）</li>
+<li>扩展分区（Extended）
+<ul><li>逻辑分区（Logical）</li></ul></li></ul>
+<p><b>主分区</b>每个磁盘或者 RAID 卷上不能超过 4 个，可设置为可启动状态。如果分区方案要求使用多于 4 个的分区，就需将至少一个分区设置为<b>扩展分区</b>，并在上面建立<b>逻辑分区</b>。
+</p><p>扩展分区可以被看作是容纳逻辑分区的容器。硬盘上最多只能有1个扩展分区。如果磁盘上有 1 个扩展分区，它也被看作是 1 个主分区。因此只能另外再建立 3 个主分区（例如 3 个主分区加 1 个扩展分区）。扩展分区内所包含的逻辑分区数量没有限制。如果在双重启动中有 Windows，Windows 需要占据一个主分区。
+</p><p>通常习惯是创建主分区 sda1 到 sda3，然后建立一个扩展分区 sda4。sda4 中包含的逻辑分区编号为 sda5、sda6 等。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>在进行 MBR 分区时，请考虑在硬盘末尾留下至少 33 个 512 字节扇区（总共 16.5 KiB）的不分区空间。这样是为了方便以后 <a href="#pg382036d37a2d">转换到 GPT</a> 方案，会用于备份 GPT 头。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_GUID_.E5.88.86.E5.8C.BA.E8.A1.A8" id="GUID_分区表"><span id="GUID_.E5.88.86.E5.8C.BA.E8.A1.A8"></span>GUID 分区表</h3></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E5%85%A8%E5%B1%80%E5%94%AF%E4%B8%80%E6%A0%87%E8%AF%86%E5%88%86%E5%8C%BA%E8%A1%A8">全局唯一标识分区表</a>（GUID Partition Table，GPT）是 <a href="#pg759eb38b76cf">UEFI</a> 标准定义的分区规范。使用<a href="https://zh.wikipedia.org/wiki/%E9%80%9A%E7%94%A8%E5%94%AF%E4%B8%80%E8%AF%86%E5%88%AB%E7%A0%81">通用唯一识别码</a>（globally unique identifier，GUID；又称为 universally unique identifier，UUID）定义分区和<a href="https://zh.wikipedia.org/wiki/%E5%85%A8%E5%B1%80%E5%94%AF%E4%B8%80%E6%A0%87%E8%AF%86%E5%88%86%E5%8C%BA%E8%A1%A8#.E5.88.86.E5.8C.BA.E7.B1.BB.E5.9E.8BGUID">分区类型</a>。设计上是为了替换#主引导记录。
+</p><p>GUID 分区表的磁盘开始位置有一个<a href="https://zh.wikipedia.org/wiki/%E9%80%9A%E7%94%A8%E5%94%AF%E4%B8%80%E8%AF%86%E5%88%AB%E7%A0%81#.E4.BC.A0.E7.BB.9FMBR_.28LBA_0.29">保护 MBR</a>（protective Master Boot Record，PMBR），用以处理不支持 GPT 软件的访问。这段 MBR 和真正的 MBR 一样，具备一段#引导代码，后者可以用在支持的启动管理器中进行 BIOS/GPT 启动。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_.E9.80.89.E6.8B.A9_GPT_.E8.BF.98.E6.98.AF_MBR" id="选择_GPT_还是_MBR"><span id=".E9.80.89.E6.8B.A9_GPT_.E8.BF.98.E6.98.AF_MBR"></span>选择 GPT 还是 MBR</h3></div>
+<p>#GUID 分区表（GPT）是一种更灵活的分区方式。它正在逐步取代#主引导记录（MBR）系统。GPT 相对于诞生于 MS-DOS 时代的 MBR 而言，有许多优点。新版的分区工具可以让 GPT 和 MBR 都获得不错的可靠性和性能。
+</p><p>在做出选择前，需要考虑如下内容：
+</p>
+<ul><li>如果使用 GRUB legacy 作为引导程序，必须使用 MBR。</li>
+<li>如果使用传统的 BIOS，并且双启动中包含 Windows （无论是 32位版还是 64 位版），必须使用 MBR。</li>
+<li>如果使用 <a href="#pg46c3147defaf">UEFI</a> 而不是 BIOS，并且双启动中包含 Windows 64 位版，必须使用 GPT。</li>
+<li>非常老的机器需要使用 MBR，因为 BIOS 可能不支持 GPT。</li>
+<li>如果不属于上述任何一种情况，可以随意选择使用 GPT 还是 MBR。由于 GPT 更先进，建议选择 GPT。</li>
+<li>建议在使用 UEFI 的情况下选择 GPT，因为有些 UEFI 固件不支持从 MBR 启动。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>为了使 GRUB 从一台有 GPT 分区的基于 BIOS 的系统上启动，需要创建一个 <a href="#pgca9c4017f7ad">BIOS 启动分区</a>，这个分区和 /boot 没关系，仅仅是 GRUB 使用，不要建立文件系统和挂载。</div>
+<p>GPT 相对于 MBR 的一些优势：
+</p>
+<ul><li>为每个磁盘和每个分区提供相应的磁盘 UUID 和分区 UUID（<a href="#pg2636278c0df5">partuuid</a>），这样对分区和磁盘的命名就与其文件系统无关。UUID 同时是 systemd 的<a href="https://uapi-group.org/specifications/specs/discoverable_partitions_specification/">可发现分区规范</a>的前提，可以用于启用了 systemd 的 initramfs。</li>
+<li>提供与文件系统无关的分区名（<a href="#pg2636278c0df5">partlabel</a>）。</li>
+<li>任意多个分区（取决于为分区表本身分配的空间）使扩展分区和逻辑分区不再必要。GPT 表的默认空间可供 128 个分区使用，但若需要更多分区，也可为分区表分配更多空间。目前仅 gdisk 支持该功能。</li>
+<li>使用 64 位逻辑块地址（logical block address），可寻址的最大硬盘空间是 2 ZiB。MBR 只支持 2 TiB 的最大硬盘。</li>
+<li>在磁盘末尾储存头部和分区表，有助于<a href="#pg382036d37a2d">恢复分区表</a>。</li>
+<li>CRC32 校验码可用于侦测头部或分区表的错误。</li></ul>
+<p>#分区工具一节列出了用于创建和修改 GPT 或 MBR 表的工具。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>GPT 和 MBR 之间可以互相转换。请参阅<a href="#pg382036d37a2d">在 MBR 和 GPT 之间互相转换</a><sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_.E6.97.A0.E5.88.86.E5.8C.BA.E7.A3.81.E7.9B.98" id="无分区磁盘"><span id=".E6.97.A0.E5.88.86.E5.8C.BA.E7.A3.81.E7.9B.98"></span>无分区磁盘</h3></div>
+<p>无分区磁盘，即<a href="https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-and-gpt-faq#superfloppy">superfloppy</a> 是指无分区表的存储设备，一个文件系统占据整个存储空间。无分区设备上的启动扇区被称做 <a href="https://en.wikipedia.org/wiki/Volume_boot_record">volume boot record (VBR)</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_Btrfs_.E5.88.86.E5.8C.BA" id="Btrfs_分区"><span id="Btrfs_.E5.88.86.E5.8C.BA"></span>Btrfs 分区</h3></div>
+<p>Btrfs可以独占整个存储设备并替代 #MBR 和 #GPT 分区方案。请参考<a href="#pg429e7ec45c9c">创建 Btrfs 文件系统</a>以获取更多信息。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf5d6dc2b8800_.E5.88.86.E5.8C.BA.E6.96.B9.E6.A1.88" id="分区方案"><span id=".E5.88.86.E5.8C.BA.E6.96.B9.E6.A1.88"></span>分区方案</h2></div>
+<p>虽然有一些关于分区方案的通用建议，但没有严格的准则。有许多影响分区方案的因素，例如对灵活性的期望、访问速度、安全性以及可用磁盘空间的硬性限制。实际上就是个人取舍的问题。
+</p><p>如果你想双启动 Arch Linux 和 Windows，请参考 <a href="#pgeaa450c2a061">Dual boot with Windows</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>请别忘记为引导程序预留空间。这对于 MBR 和 GRUB-Legacy 来说不是问题，但是许多新方案可能要求占用一个特殊的小分区。</div>
+<ul><li><a href="#pg759eb38b76cf">UEFI</a> 系统通常需要有 <a href="#pg99a0c4106b90">EFI 系统分区</a>。</li>
+<li>在 BIOS 系统上使用 #GPT 进行分区后，安装 GRUB 时会需要一个额外的 <a href="#pgca9c4017f7ad">BIOS 启动分区</a>。</li>
+<li>如果使用的是 <a href="#pg429e7ec45c9c">Btrfs</a>，可以用子卷模拟分区，请参考 <a href="#pg429e7ec45c9c">Btrfs 子卷</a>。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_.E5.8D.95root.E5.88.86.E5.8C.BA" id="单root分区"><span id=".E5.8D.95root.E5.88.86.E5.8C.BA"></span>单root分区</h3></div>
+<p>这种是最简单，同时也能满足大部分应用场景的方案。如果需要的话，可以建立一个<a href="#pgad14227759fd">交换文件</a>。通常刚开始的时候建议一个单独的 <code>/</code> 分区，然后根据应用场景的需要，例如 RAID，加密，独立的多媒体分区等建立其他的分区。
+</p><p>单root分区的最小不建议低于23–32 GiB。用户文件或swap文件可能需要更多的空间。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>A separate physical (in the main partition table of the disk, not under LVM, software RAID or in a file system subvolume etc.) /boot partition is needed unless your <a href="#pg2590228fb4b9">boot loader</a> is capable of accessing the <code>/boot</code> directory that resides in <code>/</code>. That means the boot loader must have support for everything starting from the block devices, stacked block devices (LVM, RAID, dm-crypt, LUKS, etc.) and ending with the file system on which the kernel(s) and initramfs image(s) reside.</div>
+<p>A GPT partition should have the type GUID <code>4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709</code> ("Linux root (x86-64)", "Linux x86-64 root (/)"). An MBR partition should have the default "Linux" type ID <code>83</code>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_.E5.A4.9A.E5.88.86.E5.8C.BA" id="多分区"><span id=".E5.A4.9A.E5.88.86.E5.8C.BA"></span>多分区</h3></div>
+<p>将某个路径挂载为独立分区可以使其拥有不同的文件系统和挂载参数。某些情况下（例如多媒体文件分区），可以被多个操作系统共享。
+</p><p>下面这些路径可以作为独立分区的挂载点，你也可以根据实际需要做出其他决定。<span class="plainlinks archwiki-template-man" title="$ man 7 file-hierarchy"><a href="https://man.archlinux.org/man/file-hierarchy.7">file-hierarchy(7)</a></span> 介绍了各个目录的作用。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf5d6dc2b8800_.E6.A0.B9.E5.88.86.E5.8C.BA" id="根分区"><span id=".E6.A0.B9.E5.88.86.E5.8C.BA"></span>根分区</h4></div>
+<p>根目录是目录树的顶层，这里是主文件系统挂载和其他文件系统挂靠的地方。所有文件和目录都在根目录 <code>/</code> 显示，即使它们实际上存储在其他的物理设备上。根文件系统中的内容必须足以启动、恢复、修复系统。因此 <code>/</code> 目录下的特定目录是不能作为独立分区的。
+</p><p><code>/</code> 分区或叫根分区是最重要而且必需的，需要最先挂载，其他其他分区可以被它取代。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>与系统启动相关的特定目录（除了 <code>/boot</code>） <b>必须</b> 与 <code>/</code> 在同一个分区，或在系统刚进入用户态的时候通过 <a href="#pg2be54bdacb4c">initramfs</a> 挂载。这些特定的目录包括：<code>/etc</code> 和 <code>/usr</code> <a href="https://systemd.io/SEPARATE_USR_IS_BROKEN/">[1]</a> 。</div>
+<p>因为它通常包括 <code>/usr</code> 目录，根据安装的软件数量，会产生非常明显的增长。15-20 GiB 对于大多数用户来说是一个比较合适的取值。如果你打算在这里放一个交换文件或者不建立单独的 /var，需要适当调大取值(增加休眠空间和额外的 8–12 GiB 给 <code>/var</code>)。
+</p><p>使用GPT分区的话其类型GUID应当是<code>4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709</code> （“Linux root (x86-64)”，“Linux x86-64 root (/)”）。使用MBR分区表的话则其类型ID应当是 <code>83</code>（“Linux”）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf5d6dc2b8800_.2Fboot" id="/boot"><span id=".2Fboot"></span>/boot</h4></div>
+<p><code>/boot</code> 分区包含<a href="#pgc66c8898d8fa">vmlinuz</a>、 <a href="#pg5409190f7704">initramfs</a> 以及引导加载程序配置文件和引导加载程序阶段。它也可以存放内核在执行用户态程序之前所使用的其他数据。<code>/boot</code> 在日常系统运行中并不需要，只在启动和内核升级（重建 initial ramdisk 时）的时候用到。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>引导加载程序需要能够访问到 <code>/boot</code> 目录。所以引导加载程序需要视情况，支持块设备、堆叠块设备（如软 RAID、加密卷或 LVM 卷）以及存放内核、initramfs 的文件系统。</li>
+<li>有些文件系统能包含引导加载程序尚不支持的新特性，除非将不兼容特性禁用，否则不适于 <code>/boot</code> 分区。通常可以使用 <a href="#pgfeb479f7aff2">FAT32</a> 以避免此问题，因为 FAT32 包含所有需要的功能，而且不会再增加新的功能。</li></ul>
+</div>
+<p>有关启动加载器的需求和能力的更多信息，请参考 <a href="#pg2be54bdacb4c">Arch boot process#启动加载器</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在 UEFI 系统中，可以<a href="#pg99a0c4106b90">将 EFI 系统分区挂载</a>到<code>/boot</code>，这样就可以省去一个单独的 boot 分区。</div>
+<p>In other cases, it is recommended to set the partition type to <a href="https://uapi-group.org/specifications/specs/boot_loader_specification/#the-partitions">Extended Boot Loader (XBOOTLDR) Partition</a> which is GPT partition type GUID <code>BC13C2FF-59E6-4262-A352-B275FD6F7172</code> (<code>ea00</code> type for <a href="#pgba80dd5ffb4c">gdisk</a>) or MBR partition type ID <code>ea</code>.
+</p><p>在两种情况下，推荐的分区大小都是 1 GiB，这样就可以有足够的空间存放多个内核。如果怕不够，可以分配 4 GiB 空间。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf5d6dc2b8800_.2Fhome" id="/home"><span id=".2Fhome"></span>/home</h4></div>
+<p><code>/home</code>目录包含用户定义的配置文件、缓存、应用程序数据和媒体文件。
+</p><p>将<code>/home</code>目录独立使得<code>/</code>分区可以单独重新划分。但是请注意，在 <code>/home</code> 没有独立分区的情况下，仍然可以在不修改 <code>/home</code> 目录内容的情况下重装 Arch——删除其他顶级目录，然后执行 pacstrap。
+</p><p>不能与使用其他发行版的用户共享同一个 home 目录，因为不同的发行版可能使用不兼容的软件版本和补丁。可以共享媒体目录，或至少使用 <code>/home</code> 分区下的不同 home 目录。分区大小跟着存储的内容而定。
+</p><p>A GPT partition should have the type GUID <code>933AC7E1-2EB4-4F13-B844-0E14E2AEF915</code> ("Linux home", "Linux /home"). An MBR partition should have the default "Linux" type ID <code>83</code>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf5d6dc2b8800_Swap" id="Swap">Swap</h4></div>
+<p><a href="#pgad14227759fd">交换</a>文件或分区提供的硬盘空间作为交换空间使用。它们有同样的功能，没有明显的性能区别，但是前者更易于根据需要调整大小。如果没有使用休眠功能的话，交换分区可以被多个系统分时使用。
+</p><p>以前，在拥有不足512 MiB内存的机器上，通常为交换分区分配两倍内存大小的空间。如果有更大的内存（大于1024 MiB），可以分配较少的空间，甚至不需要交换空间。推荐的<a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/managing_storage_devices/getting-started-with-swap_managing-storage-devices#recommended-system-swap-space_getting-started-with-swap">默认大小</a>是4 GiB.
+</p><p>要使用休眠（挂起到硬盘）功能，最好分配与内存同样大的交换分区。虽然内核会尝试压缩休眠文件到交换分区的大小，但如果交换空间过于小则不一定成功。请参见<a href="#pgf74f0234a0f8">休眠</a>。
+</p><p>使用GPT分区的话其类型 GUID应当是<code>0657FD6D-A4AB-43C4-84E5-0933C84B4F4F</code> ("Linux swap")。使用MBR分区表的话则其类型ID应当是<code>82</code> ("Linux swap")。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf5d6dc2b8800_.2Fdata" id="/data"><span id=".2Fdata"></span>/data</h4></div>
+<p>可以为需要多用户共享的文件建立一个“data”分区。也可以使用 <code>/home</code> 分区用于这一目的。
+</p><p>A GPT partition should have the default "Linux filesystem" type GUID <code>0FC63DAF-8483-4772-8E79-3D69D8477DE4</code>. An MBR partition should have the default "Linux" type ID <code>83</code>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf5d6dc2b8800_.2Fvar" id="/var"><span id=".2Fvar"></span>/var</h4></div>
+<p><code>/var</code> 目录存储变量数据例如 spool 目录和文件，管理和登录数据，<a href="#pg9ef105bf1e3c">pacman</a> 的缓存，<a href="#pg03306a96a891">ABS</a> 树等等。它通常被用作缓存或者日志记录，因此读写频繁。将它独立出来可以避免由于大量日志写入造成的磁盘空间耗尽等问题。
+</p><p>它的存在是方便将 <code>/usr</code> 设置为只读挂载。所有在操作系统运行过程（而非安装或软件维护）中，从前要写入 <code>/usr</code> 的东西，放到 <code>/var</code> 下。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>/var</code> 包含许多小文件。如果将其作为独立分区，在文件系统的选择上需要考虑这一点。</div>
+<p>值得一提的是，<code>/var</code> 包含 <a href="#pg9ef105bf1e3c">pacman</a> 缓存。保留缓存的包提供了软件包<a href="#pg09c32999a0a8">降级</a>的能力，因此非常有用。也正因为这样，<code>/var</code> 的大小会随着时间推移而增长。尤其是 pacman 缓存将会随着新软件的安装、系统的升级而增长。在磁盘空间不足的时候，可以安全地<a href="#pg9ef105bf1e3c">清理</a>这个目录。
+</p><p><code>/var</code> 分配 8~12 GiB 对于桌面系统来说是比较合适的取值，具体取值取决于安装的软件数量。
+</p><p>A GPT partition should have the type GUID <code>4D21B016-B534-45C2-A9FB-5C16E091FD2D</code> ("Linux variable data", "Linux /var"). An MBR partition should have the default "Linux" type ID <code>83</code>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_.E5.B8.83.E5.B1.80.E7.A4.BA.E4.BE.8B" id="布局示例"><span id=".E5.B8.83.E5.B1.80.E7.A4.BA.E4.BE.8B"></span>布局示例</h3></div>
+<p>下面的例子使用 <code>/dev/sda</code> 作为示例磁盘，其中 <code>/dev/sda1</code> 是第一块分区。 The block device naming scheme will differ if you are partitioning a <a href="#pgfabce5fffaa5">NVMe</a> disk (e.g. <code>/dev/nvme0n1</code> with partitions starting from <code>/dev/nvme0n1p1</code>) or an SD card or eMMC disk (e.g. <code>/dev/mmcblk0</code> with partitions starting from <code>/dev/mmcblk0p1</code>). See <a href="#pga4a069b5d648">Device file#Block device names</a> for more information.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>UEFI/GPT 并没有真正的“boot”标志。启动仅依赖于设备上的相应记录。某些 GPT 分区工具标记的“boot”仅意味着它是一个 EFI 系统分区。</li>
+<li>不要求所有的分区都在同一个硬盘上。</li>
+<li>不要求所有的硬盘使用相同的分区表类型。</li></ul></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf5d6dc2b8800_UEFI.2FGPT_.E5.B8.83.E5.B1.80.E7.A4.BA.E4.BE.8B" id="UEFI/GPT_布局示例"><span id="UEFI.2FGPT_.E5.B8.83.E5.B1.80.E7.A4.BA.E4.BE.8B"></span>UEFI/GPT 布局示例</h4></div>
+<table class="wikitable">
+<tbody><tr>
+<th>挂载点
+</th>
+<th>分区
+</th>
+<th><a href="https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs">分区类型 GUID</a>
+</th>
+<th>推荐大小
+</th></tr>
+<tr>
+<td><code>/boot</code> or <code>/efi</code> <sup>1</sup>
+</td>
+<td><code>/dev/sda1</code>
+</td>
+<td><code>C12A7328-F81F-11D2-BA4B-00A0C93EC93B</code>: <a href="#pg99a0c4106b90">EFI system partition</a>
+</td>
+<td>1 GiB
+</td></tr>
+<tr>
+<td><code>[SWAP]</code>
+</td>
+<td><code>/dev/sda2</code>
+</td>
+<td><code>0657FD6D-A4AB-43C4-84E5-0933C84B4F4F</code>: Linux <a href="#pgad14227759fd">swap</a>
+</td>
+<td>至少 4 GiB，使用 <a href="#pgd15af3f6f9f7">休眠</a> 时等于内存大小
+</td></tr>
+<tr>
+<td><code>/</code>
+</td>
+<td><code>/dev/sda3</code>
+</td>
+<td><code>4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709</code>: Linux x86-64 root (/)
+</td>
+<td>剩余空间，至少 23 - 32 GiB
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf5d6dc2b8800_MBR.2FBIOS_.E7.A4.BA.E4.BE.8B" id="MBR/BIOS_示例"><span id="MBR.2FBIOS_.E7.A4.BA.E4.BE.8B"></span>MBR/BIOS 示例</h4></div>
+<table class="wikitable">
+<tbody><tr>
+<th>挂载点
+</th>
+<th>分区类型
+</th>
+<th><a href="https://en.wikipedia.org/wiki/Partition_type">分区类型 ID</a>
+</th>
+<th><a href="https://en.wikipedia.org/wiki/Boot_flag">Boot flag</a>
+</th>
+<th>Suggested size
+</th></tr>
+<tr>
+<td><code>[SWAP]</code>
+</td>
+<td><code>/dev/sda1</code>
+</td>
+<td><code>82</code>: Linux <a href="#pgad14227759fd">swap</a>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>至少 4 GiB，使用 <a href="#pgd15af3f6f9f7">休眠</a> 时等于内存大小
+</td></tr>
+<tr>
+<td><code>/</code>
+</td>
+<td><code>/dev/sda2</code>
+</td>
+<td><code>83</code>: Linux
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td>剩余空间，至少 23 - 32 GiB
+</td></tr>
+<tr>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">N/A
+</td>
+<td><i>Unallocated space</i><sup>2</sup>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">N/A
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">N/A
+</td>
+<td>At least 16.5 KiB at the end of the disk
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf5d6dc2b8800_BIOS.2FGPT_.E5.B8.83.E5.B1.80.E7.A4.BA.E4.BE.8B" id="BIOS/GPT_布局示例"><span id="BIOS.2FGPT_.E5.B8.83.E5.B1.80.E7.A4.BA.E4.BE.8B"></span>BIOS/GPT 布局示例</h4></div>
+<table class="wikitable">
+<tbody><tr>
+<th>挂载点
+</th>
+<th>分区
+</th>
+<th><a href="https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs">分区类型 GUID</a>
+</th>
+<th>推荐大小
+</th></tr>
+<tr>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">None
+</td>
+<td><code>/dev/sda1</code>
+</td>
+<td><code>21686148-6449-6E6F-744E-656564454649</code>: <a href="#pgfd308ebef1bf">BIOS boot partition</a> <sup>3</sup>
+</td>
+<td>1 MiB
+</td></tr>
+<tr>
+<td><code>[SWAP]</code>
+</td>
+<td><code>/dev/sda2</code>
+</td>
+<td><code>0657FD6D-A4AB-43C4-84E5-0933C84B4F4F</code>: Linux <a href="#pgad14227759fd">swap</a>
+</td>
+<td>至少 4 GiB，使用 <a href="#pgd15af3f6f9f7">休眠</a> 时等于内存大小
+</td></tr>
+<tr>
+<td><code>/</code>
+</td>
+<td><code>/dev/sda3</code>
+</td>
+<td><code>4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709</code>: Linux x86-64 root (/)
+</td>
+<td><code>2</code>: Legacy BIOS bootable
+</td>
+<td>23 - 32 GiB
+</td></tr></tbody></table>
+<ol><li>The ESP can be mounted to <code>/efi</code> if the used boot loader is capable of accessing the file system (and everything above it) on which the kernel and initramfs images are located. See <a href="#pg99a0c4106b90">EFI system partition#Typical mount points</a> and the warning in <a href="#pg2be54bdacb4c">Arch boot process#Boot loader</a> for details.</li></ol>
+<ol><li>An unpartitioned space of at least 33 512-byte sectors (16.5 KiB) at the end of the disk to allow <a href="#pg382036d37a2d">converting to GPT</a> in the future. The space will be required for the backup GPT header. The recommendation to preserve an unpartitioned space applies to all MBR partitioned disks.</li></ol>
+<ol><li>A BIOS boot partition is only required when using <a href="#pgca9c4017f7ad">GRUB</a> for BIOS booting from a GPT disk, it is not needed when using other boot loaders. The partition has nothing to do with <code>/boot</code>, and it must not be formatted with a file system or mounted.</li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf5d6dc2b8800_.E5.88.86.E5.8C.BA.E5.B7.A5.E5.85.B7" id="分区工具"><span id=".E5.88.86.E5.8C.BA.E5.B7.A5.E5.85.B7"></span>分区工具</h2></div>
+<p>下面表格可以帮助选择。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>请选择与分区表类型相兼容的工具。不兼容的工具可能损坏分区表，以至于损坏数据。</div>
+<table class="wikitable">
+<tbody><tr>
+<th>GPT
+</th>
+<th>CLI
+</th>
+<th>TUI
+</th>
+<th>Scripting utility
+</th></tr>
+<tr>
+<td><a href="#pgc1328f332dd1">fdisk</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=util-linux">util-linux</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 fdisk"><a href="https://man.archlinux.org/man/fdisk.8">fdisk(8)</a></span>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 cfdisk"><a href="https://man.archlinux.org/man/cfdisk.8">cfdisk(8)</a></span>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 sfdisk"><a href="https://man.archlinux.org/man/sfdisk.8">sfdisk(8)</a></span>
+</td></tr>
+<tr>
+<td><a href="#pg382036d37a2d">GPT fdisk</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gptfdisk">gptfdisk</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 gdisk"><a href="https://man.archlinux.org/man/gdisk.8">gdisk(8)</a></span>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 cgdisk"><a href="https://man.archlinux.org/man/cgdisk.8">cgdisk(8)</a></span>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 sgdisk"><a href="https://man.archlinux.org/man/sgdisk.8">sgdisk(8)</a></span>
+</td></tr>
+<tr>
+<td><a href="#pgfba87229acd8">Parted</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=parted">parted</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 parted"><a href="https://man.archlinux.org/man/parted.8">parted(8)</a></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 parted"><a href="https://man.archlinux.org/man/parted.8">parted(8)</a></span>
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_fdisk.2Fgdisk" id="fdisk/gdisk"><span id="fdisk.2Fgdisk"></span>fdisk/gdisk</h3></div>
+<p>请参考 <a href="#pgc1328f332dd1">fdisk</a>。
+</p>
+<ul><li><b><a href="#pgc1328f332dd1">fdisk</a></b> — Linux 自带的命令行分区工具。</li></ul>
+<dl><dd><a href="https://www.kernel.org/">https://www.kernel.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=util-linux">util-linux</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg41c41c0f3ffc">cfdisk</a></b> — 使用 ncurses 库编写的具有伪图形界面的命令行分区工具。</li></ul>
+<dl><dd><a href="https://www.kernel.org/">https://www.kernel.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=util-linux">util-linux</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg7a4bc6ee84aa">sfdisk</a></b> — 支持脚本的 fdisk.</li></ul>
+<dl><dd><a href="https://www.kernel.org/pub/linux/utils/util-linux/">https://www.kernel.org/pub/linux/utils/util-linux/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=util-linux">util-linux</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgba80dd5ffb4c">gdisk</a></b> — <a href="#pg69f558531e59">GPT</a> 版的 fdisk。</li></ul>
+<dl><dd><a href="https://www.rodsbooks.com/gdisk/">https://www.rodsbooks.com/gdisk/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gptfdisk">gptfdisk</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg415b7ac71981">cgdisk</a></b> — GPT 版的 cfdisk。</li></ul>
+<dl><dd><a href="https://www.rodsbooks.com/gdisk/">https://www.rodsbooks.com/gdisk/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gptfdisk">gptfdisk</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg2d05d0eca599">sgdisk</a></b> — Scriptable version of gdisk.</li></ul>
+<dl><dd><a href="https://www.rodsbooks.com/gdisk/sgdisk-walkthrough.html">https://www.rodsbooks.com/gdisk/sgdisk-walkthrough.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gptfdisk">gptfdisk</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_GNU_Parted" id="GNU_Parted">GNU Parted</h3></div>
+<p>下面工具在  <a href="#pge5d4d4fe4f1f">GNU Parted</a> 中有介绍。
+</p>
+<ul><li><b><a href="#pge5d4d4fe4f1f">GNU Parted</a></b> — 命令行分区工具。</li></ul>
+<dl><dd><a href="https://www.gnu.org/software/parted/parted.html">https://www.gnu.org/software/parted/parted.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=parted">parted</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgd81879c10179">GParted</a></b> — GTK 图形界面的分区工具。</li></ul>
+<dl><dd><a href="http://gparted.sourceforge.net/">http://gparted.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gparted">gparted</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>GNOME Disks</b> — GTK 写的图形分区工具.</li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Apps/Disks">https://wiki.gnome.org/Apps/Disks</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-disk-utility">gnome-disk-utility</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Partitionmanager</b> — QT 图形界面的分区工具。</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/partitionman/">https://sourceforge.net/projects/partitionman/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=partitionmanager">partitionmanager</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_.E5.A4.87.E4.BB.BD" id="备份"><span id=".E5.A4.87.E4.BB.BD"></span>备份</h3></div>
+<p>请参阅 <a href="#pgc1328f332dd1">fdisk#Backup and restore partition table</a> 或 <a href="#pgba80dd5ffb4c">gdisk#Backup and restore partition table</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_.E6.81.A2.E5.A4.8D" id="恢复"><span id=".E6.81.A2.E5.A4.8D"></span>恢复</h3></div>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/gpart">gpart</a></b> — 可猜测被破坏的 MBR 分区表内容。用法在<span class="plainlinks archwiki-template-man" title="$ man 8 gpart"><a href="https://man.archlinux.org/man/gpart.8">gpart(8)</a></span>。</li></ul>
+<dl><dd><a href="https://github.com/baruch/gpart">https://github.com/baruch/gpart</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gpart">gpart</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg382036d37a2d">GPT fdisk</a><sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup></b> — 该工具可从副 GPT 分区表（存储于磁盘末尾）恢复主 GPT 分区表（存储于磁盘开头），或是反过来。</li></ul>
+<dl><dd><a href="https://www.rodsbooks.com/gdisk/">https://www.rodsbooks.com/gdisk/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gptfdisk">gptfdisk</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg9c024ee102b3">TestDisk</a></b> — 该工具可恢复 MBR 或 GPT 丢失分区。</li></ul>
+<dl><dd><a href="https://www.cgsecurity.org/index.html?testdisk.html">https://www.cgsecurity.org/index.html?testdisk.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=testdisk">testdisk</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf5d6dc2b8800_.E5.88.86.E5.8C.BA.E5.AF.B9.E9.BD.90" id="分区对齐"><span id=".E5.88.86.E5.8C.BA.E5.AF.B9.E9.BD.90"></span>分区对齐</h2></div>
+<p>恰当的分区对齐有助于提升性能和使用寿命。这是由硬件层面和文件系统层面的每次<a href="https://en.wikipedia.org/wiki/Block_(data_storage)">块</a> I/O 操作特性决定的。对齐的关键是分区大小（至少）是<i>块大小</i>的倍数，<i>块大小</i>取决于选用的硬件设备。如果分区没有以<i>块大小</i>的整数倍对齐，对齐文件系统就失去意义了，因为从分区的起始偏移开始就是有偏差的。
+</p><p><a href="#pgc1328f332dd1">fdisk/gdisk</a> 和 <a href="#pgfba87229acd8">parted</a> 会自动处理分区对齐。<a href="#pge5d4d4fe4f1f">GNU Parted#Check alignment</a> 介绍了如何验证分区是否对齐。
+</p><p>有些硬盘使用<a href="#pgabf8f88823a3">高级格式</a>会提供更好的读写效率。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_GPT_.E5.86.85.E6.A0.B8.E6.94.AF.E6.8C.81" id="GPT_内核支持"><span id="GPT_.E5.86.85.E6.A0.B8.E6.94.AF.E6.8C.81"></span>GPT 内核支持</h3></div>
+<p>Linux 内核中 <code>CONFIG_EFI_PARTITION</code> 选项配置是否启用内核 GPT 支持（即使名称为 EFI PARTITION）。此选项必须内置于内核，不能作为可加载模块。即使 GPT 磁盘只用作数据存储而不作为启动盘，此选项也是必须的。在 Arch [core] 仓库中的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-lts">linux-lts</a></span><sup><small>包</small></sup></span> 内核默认启用此选项。如果自定内核，设置 <code>CONFIG_EFI_PARTITION=y</code> 启用此选项。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf5d6dc2b8800_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_Tricking_old_BIOS_into_booting_from_GPT" id="Tricking_old_BIOS_into_booting_from_GPT">Tricking old BIOS into booting from GPT</h3></div>
+<p>Some old BIOSes (from before year 2010) attempt to parse the boot sector and refuse to boot it if it does not contain a bootable MBR partition. This is a problem if one wants to use GPT on this disk, because, from the BIOS viewpoint, it contains only one, non-bootable, MBR partition of type <code>ee</code> (i.e., the protective MBR partition). One can mark the protective MBR entry as bootable using <code>fdisk -t mbr /dev/sda</code>, and it will work on some BIOSes. However, the UEFI specification prohibits the protective MBR partition entry from being bootable, and UEFI-based boards do care about this, even in the legacy boot mode. So, this matters if one wants to create a GPT-based USB flash drive that is supposed to boot both on modern UEFI-based boards and also on old BIOSes that insist on finding a bootable MBR partition. It is not possible to solve this problem using traditional tools such as <a href="#pgc1328f332dd1">fdisk</a> or <a href="#pgba80dd5ffb4c">gdisk</a>, but it is possible to create a fake MBR partition entry suitable for both kinds of BIOSes manually as a sequence of bytes.
+</p><p>The command below will overwrite the second MBR partition slot and add a bootable partition there of type 0 (i.e. unused), covering only the first sector of the device. It will not interfere with the GPT or with the first MBR partition entry which normally contains a protective MBR partition.
+</p>
+<pre># printf '\200\0\0\0\0\0\0\0\0\0\0\0\001\0\0\0' | dd of=/dev/sda bs=1 seek=462
+</pre>
+<p>最终结果看起来是这样的:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># fdisk -t mbr -l /dev/sda</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Disk /dev/sda: 232.9 GiB, 250059350016 bytes, 488397168 sectors
+Disk model: ST3250820AS     
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x00000000
+
+Device     Boot Start       End   Sectors   Size Id Type
+/dev/sda1           1 488397167 488397167 232.9G ee GPT
+/dev/sda2  *        0         0         1   512B  0 Empty
+
+Partition table entries are not in disk order.</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf5d6dc2b8800_.E5.90.AF.E7.94.A8.E5.9B.BA.E4.BB.B6_RAID_.E6.97.B6.E6.97.A0.E6.B3.95.E6.89.BE.E5.88.B0.E7.A1.AC.E7.9B.98" id="启用固件_RAID_时无法找到硬盘"><span id=".E5.90.AF.E7.94.A8.E5.9B.BA.E4.BB.B6_RAID_.E6.97.B6.E6.97.A0.E6.B3.95.E6.89.BE.E5.88.B0.E7.A1.AC.E7.9B.98"></span>启用固件 RAID 时无法找到硬盘</h3></div>
+<p>如果在固件配置界面可以看到 SATA 或 NVMe 硬盘，但在 Linux 中找不到（例如 <code>fdisk -l</code> 中没有），有可能控制器正处于固件 RAID 模式。
+</p><p>对于 NVMe，<a href="#pg47c5e1af4d24">journal</a> 会显示如下信息：
+</p>
+<pre>kernel: ahci 0000:00:17.0: Found 1 remapped NVMe devices.
+kernel: ahci 0000:00:17.0: Switch your BIOS from RAID to AHCI mode to use them.
+</pre>
+<p>解决方案是进入固件配置界面，禁用 NVMe RAID 模式并将 <a href="https://zh.wikipedia.org/wiki/AHCI#.E8.BF.90.E8.A1.8C.E6.A8.A1.E5.BC.8F">SATA 控制器运行模式</a>从 <i>RAID</i> 修改为 <i>AHCI</i>。注意，该设置的名称可能会有所不同（例如“Intel Rapid Storage Technology”，“Intel RST”，“Intel VMD controller”或“VMD”），且可能会是控制器或端口独立的。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>在使用 <a href="#pg4d5a3358c464">Arch + Windows 双系统</a>的情况下，在更改控制器模式前需要进行些准备，具体请参考<a href="https://www.tenforums.com/tutorials/22631-enable-ahci-windows-8-windows-10-after-installation.html">完成安装后如何在 Windows 8 和 Windows 10 中启用 AHCI</a>。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>有些固件没有单独的 NVMe RAID 模式配置项，并会将 SATA 控制器运行模式应用到 NVMe 控制器上。在这些固件上，将“SATA 运行模式”设为“AHCI”会将 NVMe 控制器设为“不使用固件 RAID，使用原生运行模式”。<a href="https://forums.anandtech.com/threads/nvme-drive-booting-in-ahci-mode.2500796/post-39852218">[2]</a><a href="https://lore.kernel.org/linux-pci/20190620061038.GA20564@lst.de/T/">[3]</a><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=aecec8b60422118b52e3347430ba9382e57d6d76">[4]</a></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf5d6dc2b8800_.E5.8F.82.E8.80.83.E8.B5.84.E6.96.99" id="参考资料"><span id=".E5.8F.82.E8.80.83.E8.B5.84.E6.96.99"></span>参考资料</h2></div>
+<ul><li><a href="https://en.wikipedia.org/wiki/Disk_partitioning">Wikipedia:Disk partitioning</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Binary_prefix">Wikipedia:Binary prefix</a></li>
+<li><a href="https://thestarman.pcministry.com/asm/mbr/DiskTerms.htm">Understanding Disk Drive Terminology</a></li>
+<li><a href="https://kb.iu.edu/data/aijw.html">What is a Master Boot Record (MBR)?</a></li>
+<li>Rod Smith's page on <a href="https://www.rodsbooks.com/gdisk/whatsgpt.html">What's a GPT?</a> and <a href="https://rodsbooks.com/gdisk/booting.html">Booting OSes from GPT</a></li>
+<li><a href="https://www.ibm.com/developerworks/linux/library/l-gpt/index.html?ca=dgr-lnxw07GPT-Storagedth-lx&amp;S_TACT=105AGY83&amp;S_CMP=grlnxw07">Make the most of large drives with GPT and Linux - IBM Developer Works</a></li>
+<li><a href="https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-and-gpt-faq">Microsoft's Windows and GPT FAQ</a></li>
+<li><a href="https://www.thomas-krenn.com/en/wiki/Partition_Alignment">Partition Alignment</a> (with examples)</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807030002
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.328 seconds
+Real time usage: 0.338 seconds
+Preprocessor visited node count: 1697/1000000
+Revision size: 29564/2097152 bytes
+Post‐expand include size: 22547/2097152 bytes
+Template argument size: 11207/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 4/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  104.950      1 -total
+ 10.48%   11.003     13 Template:App
+ 10.22%   10.726     91 Template:Ic
+  6.24%    6.547     10 Template:Man
+  6.19%    6.492      3 Template:No
+  4.91%    5.151     18 Template:Pkg
+  4.87%    5.109      6 Template:Yes
+  4.68%    4.915      1 Template:Tip_(简体中文)
+  4.27%    4.482      4 Template:Grey
+  3.71%    3.892      1 Template:R
+-->
+<!-- Render ID 154fb10e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3672:|#|:idhash:canonical!zh-cn and timestamp 20260807030002 and revision id 35029. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

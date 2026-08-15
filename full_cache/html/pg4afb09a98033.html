@@ -1,0 +1,91 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg4afb09a98033">分类:防火墙</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="noteTA" id="noteTA-7f3f5856"><div class="noteTA-group"><div data-noteta-group="ArchWiki" data-noteta-group-source="module"></div></div></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Category:Firewalls">Category:Firewalls</a>，最近一次同步于 2018-09-15，若英文版本有所<a href="https://wiki.archlinux.org/title/Category:Firewalls?diff=0&amp;oldid=495629">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Category:Firewalls_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>Arch Linux 提供了两种管理<a href="https://en.wikipedia.org/wiki/Firewall_(computing)">防火墙</a>的选项，两个方式默认都没有启用。Linux <a href="#pg79837a9c7434">内核</a>包含了 <a href="https://netfilter.org">netfilter</a> 包过滤框架，可以通过下面两个工具进行管理：
+</p>
+<ul><li><a href="#pg5d43226b0584">iptables</a> 是传统的防火墙管理用户空间工具。可以用命令行或图形工具进行配置。</li>
+<li><a href="#pg7bf4c060a5c1">nftables</a> 是为了替换 <i>iptables</i> 的新框架，语法更简洁，功能完善而且提供了性能优化。</li></ul>
+<table class="wikitable sortable">
+<tbody><tr>
+<th>名称
+</th>
+<th>用户空间软件包
+</th>
+<th>用户空间程序
+</th>
+<th>Systemd 服务
+</th>
+<th>配置文件
+</th></tr>
+<tr>
+<td><a href="#pg5d43226b0584">iptables</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iptables">iptables</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 iptables"><a href="https://man.archlinux.org/man/iptables.8">iptables(8)</a></span>
+</td>
+<td><code>iptables.service</code>
+</td>
+<td><code>/etc/iptables/iptables.rules</code>
+</td></tr>
+<tr>
+<td><a href="#pg7bf4c060a5c1">nftables</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nftables">nftables</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 nft"><a href="https://man.archlinux.org/man/nft.8">nft(8)</a></span>
+</td>
+<td><code>nftables.service</code>
+</td>
+<td><code>/etc/nftables.conf</code>
+</td></tr></tbody></table>
+<!-- 
+NewPP limit report
+Cached time: 20260807023557
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.228 seconds
+Real time usage: 0.235 seconds
+Preprocessor visited node count: 110/1000000
+Revision size: 1033/2097152 bytes
+Post‐expand include size: 66127/2097152 bytes
+Template argument size: 237/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.070/7.000 seconds
+Lua memory usage: 1221926/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  107.046      1 -total
+ 88.15%   94.356      1 Template:NoteTA
+  2.99%    3.205      1 Template:TranslationStatus_(简体中文)
+  2.34%    2.502      2 Template:Pkg
+  2.28%    2.445      2 Template:Man
+  1.34%    1.437      4 Template:Ic
+-->
+<!-- Render ID b806308e-9208-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:5668:|#|:idhash:canonical!zh-cn and timestamp 20260807023557 and revision id 34127. Rendering was triggered because: unknown
+ -->
+</div><div class="mw-category-generated" dir="ltr" lang="zh-Hans-CN"><div id="mw-pages">
+<h2 data-bm="pg4afb09a98033_分类_防火墙_中的页面">分类“防火墙”中的页面</h2>
+<p>本分类共含有11个页面，以下显示其中11个。
+</p><div class="mw-content-ltr" dir="ltr" lang="zh"><div class="mw-category mw-category-columns"><div class="mw-category-group"><h3 data-bm="pg4afb09a98033_F">F</h3>
+<ul><li><a href="#pgff31d434851a">Fail2ban</a></li>
+<li><a href="#pg24d00fd08c47">Firewalld</a></li></ul></div><div class="mw-category-group"><h3 data-bm="pg4afb09a98033_I">I</h3>
+<ul><li><a href="#pg69eed16796b6">Ipset</a></li>
+<li><a href="#pg5d43226b0584">Iptables</a></li></ul></div><div class="mw-category-group"><h3 data-bm="pg4afb09a98033_L">L</h3>
+<ul><li><a href="#pg7c61ad2c1173">路由器</a></li></ul></div><div class="mw-category-group"><h3 data-bm="pg4afb09a98033_N">N</h3>
+<ul><li><a href="#pg5e6298ca298f">NetworkManager</a></li>
+<li><a href="#pg7bf4c060a5c1">Nftables</a></li></ul></div><div class="mw-category-group"><h3 data-bm="pg4afb09a98033_S">S</h3>
+<ul><li><a href="#pg4ec999cb5b6b">Shorewall</a></li>
+<li><a href="#pg4b3eb4ac08ff">Simple stateful firewall</a></li>
+<li><a href="#pga4d595f5bda6">Sshguard</a></li></ul></div><div class="mw-category-group"><h3 data-bm="pg4afb09a98033_U">U</h3>
+<ul><li><a href="#pgf56c4de5366f">Uncomplicated Firewall</a></li></ul></div></div></div>
+</div></div>
+</div>

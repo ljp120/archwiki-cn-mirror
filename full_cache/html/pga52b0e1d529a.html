@@ -1,0 +1,98 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pga52b0e1d529a">额外的键盘按键</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Extra_keyboard_keys">Extra keyboard keys</a>，最近一次同步于 2025-02-02，若英文版本有所<a href="https://wiki.archlinux.org/title/Extra_keyboard_keys?diff=0&amp;oldid=826255">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Extra_keyboard_keys_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>在阅读本文前，确保预先阅读<a href="#pg8e1d604657a2">键盘输入</a>。
+</p><p>许多键盘配备若干“特殊按键”（有时也称作“热键”或“多媒体按键”），此类按键通常用于启动应用程序或输出标准国家键位布局未包含的特殊字符。<a href="#pge009209061ac">udev</a> 维护着针对各类键盘的庞大映射数据库，主流设备通常可即装即用。若使用新型号或非主流硬件，则可能需要手动调整映射配置。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga52b0e1d529a_.E7.AC.94.E8.AE.B0.E6.9C.AC.E7.94.B5.E8.84.91" id="笔记本电脑"><span id=".E7.AC.94.E8.AE.B0.E6.9C.AC.E7.94.B5.E8.84.91"></span>笔记本电脑</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga52b0e1d529a_Apple_MacBook_.E7.B3.BB.E5.88.97" id="Apple_MacBook_系列"><span id="Apple_MacBook_.E7.B3.BB.E5.88.97"></span>Apple MacBook 系列</h3></div>
+<p>相关完整配置信息参见专门文章 <span class="ilh-all" data-foreign-title="Apple Keyboard" data-lang-code="en" data-lang-name="英语" data-orig-title="Apple 键盘"><span class="ilh-page"><a href="#pg112960c22e37">Apple 键盘</a></span></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga52b0e1d529a_.E5.8D.8E.E7.A1.95_M_.E7.B3.BB.E5.88.97" id="华硕_M_系列"><span id=".E5.8D.8E.E7.A1.95_M_.E7.B3.BB.E5.88.97"></span>华硕 M 系列</h3></div>
+<p>若要控制华硕设备的光传感器及多媒体按键功能，应执行以下命令：
+</p>
+<pre># echo 1 &gt; /sys/devices/platform/asus_laptop/ls_switch
+</pre>
+<p>创建以下 <a href="#pgac06dd8bfe95">systemd tmpfile</a> 以实现开机自启：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tmpfiles.d/local.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">w /sys/devices/platform/asus_laptop/ls_switch - - - - 1
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此配置可能也适用于其他华硕笔记本型号。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga52b0e1d529a_.E5.8D.8E.E7.A1.95_N56VJ.EF.BC.88.E4.B9.9F.E5.8F.AF.E8.83.BD.E9.80.82.E7.94.A8.E4.BA.8E.E5.85.B6.E5.AE.83.E6.9C.BA.E5.9E.8B.EF.BC.89" id="华硕_N56VJ（也可能适用于其它机型）"><span id=".E5.8D.8E.E7.A1.95_N56VJ.EF.BC.88.E4.B9.9F.E5.8F.AF.E8.83.BD.E9.80.82.E7.94.A8.E4.BA.8E.E5.85.B6.E5.AE.83.E6.9C.BA.E5.9E.8B.EF.BC.89"></span>华硕 N56VJ（也可能适用于其它机型）</h3></div>
+<p>若大多数特殊按键无法使用，可尝试加载 asus-nb-wmi 内核模块：
+</p>
+<pre># modprobe asus-nb-wmi
+</pre>
+<p>随后再次检测 xev 输出。若结合使用 <code>acpi_osi="!Windows 2012"</code> 启动参数，可能导致 xev 检测结果异常，建议避免组合使用。若此方案有效，请通过<a href="#pg6dbfce2ea89d">内核模块#自动加载模块</a>所述方法实现开机自动加载模块。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga52b0e1d529a_.E8.81.94.E6.83.B3_T460p.EF.BC.88.E4.B9.9F.E5.8F.AF.E8.83.BD.E9.80.82.E7.94.A8.E4.BA.8E.E5.85.B6.E5.AE.83.E6.9C.BA.E5.9E.8B.EF.BC.89" id="联想_T460p（也可能适用于其它机型）"><span id=".E8.81.94.E6.83.B3_T460p.EF.BC.88.E4.B9.9F.E5.8F.AF.E8.83.BD.E9.80.82.E7.94.A8.E4.BA.8E.E5.85.B6.E5.AE.83.E6.9C.BA.E5.9E.8B.EF.BC.89"></span>联想 T460p（也可能适用于其它机型）</h3></div>
+<p>预装状态下，背光调节按键（位于<code>F5</code>、<code>F6</code>）可能无法响应，即便通过<code>/dev/input</code>接口亦无法检测。解决方案请参阅<a href="#pga0bdbde91ee9">背光#内核命令行选项</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga52b0e1d529a_.E6.B8.B8.E6.88.8F.E9.94.AE.E7.9B.98" id="游戏键盘"><span id=".E6.B8.B8.E6.88.8F.E9.94.AE.E7.9B.98"></span>游戏键盘</h2></div>
+<p>游戏键盘的某些特殊功能可能导致其在 Linux 中出现"异常行为"。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga52b0e1d529a_Cooler_Master_CM_Storm_QuickFire_TK" id="Cooler_Master_CM_Storm_QuickFire_TK">Cooler Master CM Storm QuickFire TK</h3></div>
+<p>该键盘存在两个可能导致 Linux 系统下异常操作的功能：全键无冲模式和 Win 锁定功能。
+</p><p>全键无冲模式可能<a href="https://bbs.archlinux.org/viewtopic.php?id=170877">导致功能键异常</a>。禁用方法为：长按 <code>Fn Lock</code> 键（位于右 <code>Ctrl</code> 键旁）直至指示灯亮起，随后按住 <code>Esc</code> 键并按下 <code>6</code> 键切换至 6 键无冲模式。再次长按 <code>Fn Lock</code> 键即可解除 Fn 锁定。
+</p><p>Win 锁定将完全禁用 <code>Super</code>（<code>Windows</code>）键。按下 <code>Fn+F12</code> 可切换开关状态。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga52b0e1d529a_.E6.B5.B7.E7.9B.97.E8.88.B9_K_.E7.B3.BB.E5.88.97.E9.94.AE.E7.9B.98" id="海盗船_K_系列键盘"><span id=".E6.B5.B7.E7.9B.97.E8.88.B9_K_.E7.B3.BB.E5.88.97.E9.94.AE.E7.9B.98"></span>海盗船 K 系列键盘</h3></div>
+<p>该系列键盘配备的 <code>winlock</code> 按钮可用于禁用 <code>Super</code>（<code>Windows</code>）键。该按钮位于键盘右上角，紧邻 <code>NumLock</code> 和 <code>CapsLock</code> 键。可通过 CKB 工具完全禁用此锁定功能以防止误触发。在默认状态下，只需按下该按钮即可重新启用 <code>Super</code> 键。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga52b0e1d529a_.E7.BD.97.E6.8A.80_G_.E7.B3.BB.E5.88.97_G710_.E4.B8.8E_710.2B" id="罗技_G_系列_G710_与_710+"><span id=".E7.BD.97.E6.8A.80_G_.E7.B3.BB.E5.88.97_G710_.E4.B8.8E_710.2B"></span>罗技 G 系列 G710 与 710+</h3></div>
+<p>该键盘配备 6 个可编程 G 键。需安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sidewinderd/">sidewinderd</a></span><sup><small>AUR</small></sup></span> 并<a href="#pg6ec215b93a06">启动</a> <code>sidewinderd.service</code> 方可实现罗技预设功能。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga52b0e1d529a_.E7.BD.97.E6.8A.80_G613" id="罗技_G613"><span id=".E7.BD.97.E6.8A.80_G613"></span>罗技 G613</h3></div>
+<p>该键盘配置 6 个可编程 G 键。需安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=solaar">solaar</a></span><sup><small>包</small></sup></span>，通过 solaar 界面进行 G 键功能重定向与重映射操作。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga52b0e1d529a_.E7.BD.97.E6.8A.80_MX_.E7.B3.BB.E5.88.97" id="罗技_MX_系列"><span id=".E7.BD.97.E6.8A.80_MX_.E7.B3.BB.E5.88.97"></span>罗技 MX 系列</h3></div>
+<p>该系列键盘的截屏工具键、麦克风静音键等特殊按键不会产生标准键码。安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=solaar">solaar</a></span><sup><small>包</small></sup></span> 后，可对这些按键进行功能重定向与重映射操作。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga52b0e1d529a_.E9.9D.9E.E6.A0.87.E5.87.86.E9.94.AE.E7.9B.98" id="非标准键盘"><span id=".E9.9D.9E.E6.A0.87.E5.87.86.E9.94.AE.E7.9B.98"></span>非标准键盘</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga52b0e1d529a_Royal_Kludge_RK61_.E5.8F.8A.E9.83.A8.E5.88.86.E5.85.B6.E5.AE.83_Apple_.E9.94.AE.E7.9B.98" id="Royal_Kludge_RK61_及部分其它_Apple_键盘"><span id="Royal_Kludge_RK61_.E5.8F.8A.E9.83.A8.E5.88.86.E5.85.B6.E5.AE.83_Apple_.E9.94.AE.E7.9B.98"></span>Royal Kludge RK61 及部分其它 Apple 键盘</h3></div>
+<p>部分 Apple 键盘（如 Royal Kludge RK61）的 <code>F1</code>–<code>F12</code> 功能键默认为 Mac 媒体键。若设备未提供 <code>Fn Lock</code> 键，则需修改默认 Apple 键盘行为方可改变此设定。要解决此问题，需确保系统通过以下命令将键盘识别为 Apple 设备：
+</p>
+<pre># lsusb | grep "Apple.*Keyboard"  
+</pre>
+<p>检测到 Apple 键盘后，继续根据 <span class="ilh-all" data-foreign-title="Apple Keyboard#Function keys do not work" data-lang-code="en" data-lang-name="英语" data-orig-title="Apple 键盘#功能键失效"><span class="ilh-page"><a href="#pg112960c22e37">Apple 键盘#功能键失效</a></span></span>进行配置。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga52b0e1d529a_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://wiki.linuxquestions.org/wiki/Configuring_keyboards#Enabling_Keyboard_Multimedia_Keys">LQWiki:Configuring keyboards#Enabling Keyboard Multimedia Keys</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808041454
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.122 seconds
+Real time usage: 0.126 seconds
+Preprocessor visited node count: 311/1000000
+Revision size: 4139/2097152 bytes
+Post‐expand include size: 4255/2097152 bytes
+Template argument size: 520/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.011/7.000 seconds
+Lua memory usage: 629722/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   57.761      1 -total
+ 59.44%   34.332      2 Template:Link-en
+  6.21%    3.585     22 Template:Ic
+  6.01%    3.471      1 Template:翻译状态
+  4.18%    2.413      2 Template:Pkg
+  3.66%    2.115      1 Template:Aur
+  3.49%    2.014      1 Template:Note
+  2.20%    1.273      1 Template:Hc
+-->
+<!-- Render ID b52a3f0e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6561:|#|:idhash:canonical!zh-cn and timestamp 20260808041454 and revision id 33897. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

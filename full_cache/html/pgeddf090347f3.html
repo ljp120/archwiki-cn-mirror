@@ -1,0 +1,399 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgeddf090347f3">NVIDIA/故障排除</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/NVIDIA/Troubleshooting">NVIDIA/Troubleshooting</a>，最近一次同步于 2022-12-10，若英文版本有所<a href="https://wiki.archlinux.org/title/NVIDIA/Troubleshooting?diff=0&amp;oldid=759560">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/NVIDIA_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Troubleshooting_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_.E6.98.BE.E7.A4.BA.E6.95.85.E9.9A.9C.EF.BC.88.E5.87.BA.E7.8E.B0.E5.85.AD.E4.B8.AA.E5.B0.8F.E5.B1.8F.E5.B9.95.E7.9A.84.E9.97.AE.E9.A2.98.EF.BC.89" id="显示故障（出现六个小屏幕的问题）"><span id=".E6.98.BE.E7.A4.BA.E6.95.85.E9.9A.9C.EF.BC.88.E5.87.BA.E7.8E.B0.E5.85.AD.E4.B8.AA.E5.B0.8F.E5.B1.8F.E5.B9.95.E7.9A.84.E9.97.AE.E9.A2.98.EF.BC.89"></span>显示故障（出现六个小屏幕的问题）</h2></div>
+<p>对于一些用户，使用 GeForce GT 100M 时，在 X 启动后屏幕显示会出现故障。显示了 6 个 分辨率限制在 640x480 的小屏幕。
+Quadro 2000 和高分辨率显示器最近也出现了同样的问题。
+</p><p>要解决此问题，请在 <code>Device</code> 节中启用验证模式 <code>NoTotalSizeCheck</code>：
+</p>
+<pre>Section "Device"
+ ...
+ Option "ModeValidation" "NoTotalSizeCheck"
+ ...
+EndSection
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_.27.2Fdev.2Fnvidia0.27_input.2Foutput_error" id="'/dev/nvidia0'_input/output_error"><span id=".27.2Fdev.2Fnvidia0.27_input.2Foutput_error"></span>'/dev/nvidia0' input/output error</h2></div>
+
+<p>出现此错误的原因可能多种多样，针对此错误给出的最常见解决方案是检查组 / 文件权限，但这在几乎所有情况下都<b>不是</b>问题所在。NVIDIA 文档没有详细说明如何纠正此问题，但有一些方法对某些人有效。问题可能出在与其他设备的 IRQ 冲突、内核或 BIOS 的错误路由等。
+</p><p>首先要尝试的是移除其他视频设备，比如采集卡，看看问题是否会消失。如果在同一个系统上有太多的视频处理器，它可能导致内核无法启动它们，因为视频控制器会有内存分配问题。特别是在显存较小的的系统上，即使只有一个视频处理器，也可能发生这种情况。在这种情况下，您应该找出系统的显存量（例如，通过使用<code>lspci -v</code> 命令），并将分配参数传递给内核。例如，对于 32 位内核，您可以设置：
+</p>
+<pre>vmalloc=384M
+</pre>
+<p>如果运行 64 位内核，驱动程序缺陷可能导致 NVIDIA 模块在 IOMMU 打开时无法初始化。在 BIOS 中关闭它已被确认对一些用户有效。 <a href="http://www.nvnews.net/vbulletin/showthread.php?s=68bb2fabadcb53b10b286aa42d13c5bc&amp;t=159335">[1]</a><a href="#pg874f8679f310">User:Clickthem#nvidia module</a>
+</p><p>另一件要尝试的事情是将 BIOS IRQ 路由从 <code>Operating system controlled</code> 更改为 <code>BIOS controlled</code> 或其他方式。前者可以通过使用内核参数来设置：
+</p>
+<pre>PCI=biosirq
+</pre>
+<p><code>noacpi</code> 内核参数也是解决方案之一，但是因为它会完全禁用 ACPI，所以应该谨慎使用。有些硬件很容易因过热而损坏。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>内核参数可以通过内核命令行或引导加载程序配置文件传递。有关详细信息，请参阅您使用的 bootloader 的 Wiki 页面。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_.E5.B8.B8.E8.A7.81.E5.B4.A9.E6.BA.83.E6.8E.92.E9.9A.9C" id="常见崩溃排障"><span id=".E5.B8.B8.E8.A7.81.E5.B4.A9.E6.BA.83.E6.8E.92.E9.9A.9C"></span>常见崩溃排障</h2></div>
+<ul><li>尝试在 xorg.conf 中禁用 <code>RenderAccel</code>。</li>
+<li>如果 Xorg 输出关于 <code>"conflicting memory type"</code> 或 <code>"failed to allocate primary buffer: out of memory"</code> 的错误，或者在使用 nvidia-96xx 驱动程序时出现“Signal 11”错误并崩溃，请将 <code>nopat</code> 添加到<a href="#pgec0856954f1c">内核参数</a>中。</li>
+<li>如果 NVIDIA 编译器提示当前 GCC 版本与编译内核时使用的版本不一致，请把以下内容添加到 <code>/etc/profile</code> 中：</li></ul>
+<pre>export IGNORE_CC_MISMATCH=1
+</pre>
+<ul><li>如果全屏应用程序冻结或崩溃，请尝试在桌面环境的设置中启用 <code>Display Compositing</code> 和 <code>Direct fullscreen rendering</code> 选项。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_.E9.A9.B1.E5.8A.A8.E5.8D.87.E7.BA.A7.E5.90.8E.E6.80.A7.E8.83.BD.E4.B8.8D.E4.BD.B3" id="驱动升级后性能不佳"><span id=".E9.A9.B1.E5.8A.A8.E5.8D.87.E7.BA.A7.E5.90.8E.E6.80.A7.E8.83.BD.E4.B8.8D.E4.BD.B3"></span>驱动升级后性能不佳</h2></div>
+<p>如果新驱动的 FPS 比旧驱动低，检查直接渲染是否已经启动。(<code>glxinfo</code> 程序包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa-utils">mesa-utils</a></span><sup><small>包</small></sup></span> 软件包中)：
+</p>
+<pre>$ glxinfo | grep direct
+</pre>
+<p>如果命令输出 :
+</p>
+<pre>direct rendering: No
+</pre>
+<p>您可能需要降级驱动并重启。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_.E9.81.BF.E5.85.8D.E5.B1.8F.E5.B9.95.E6.92.95.E8.A3.82" id="避免屏幕撕裂"><span id=".E9.81.BF.E5.85.8D.E5.B1.8F.E5.B9.95.E6.92.95.E8.A3.82"></span>避免屏幕撕裂</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>据报道，这会降低某些 OpenGL 应用程序的性能，并可能在 WebGL 中产生问题。它还大大增加了加载驱动的耗时 (<a href="https://forums.developer.nvidia.com/t/if-you-have-gpu-clock-boost-problems-please-try-gl-experimentalperfstrategy-1/71762">NVIDIA Support Thread</a>).</div>
+<p>无论您使用的是哪种合成器，都可以通过强制使用完整的合成管线来避免撕裂。要测试此选项是否有效，请运行：
+</p>
+<pre>$ nvidia-settings --assign CurrentMetaMode="nvidia-auto-select +0+0 { ForceFullCompositionPipeline = On }"
+</pre>
+<p>或者单击 <i>X Server Display Configuration</i> 菜单选项中的 <i>Advanced</i> 按钮。选择 <i>Force Composition Pipeline</i> 或 <i>Force Full Composition Pipeline</i>，然后单击 <i>Apply</i>。
+</p><p>为了使这一设置持久化，必须将其添加到 <a href="#pga36c0aff60be">Xorg</a> 配置文件的 <code>"Screen"</code> 部分。进行此更改时，应在驱动程序配置中启用 <code>TripleBuffering</code>，并禁用 <code>AllowIndirectGLXProtocol</code>。请参阅以下配置示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-nvidia.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Device"
+        Identifier "NVIDIA Card"
+        Driver     "nvidia"
+        VendorName "NVIDIA Corporation"
+        BoardName  "GeForce GTX 1050 Ti"
+EndSection
+
+Section "Screen"
+    Identifier     "Screen0"
+    Device         "Device0"
+    Monitor        "Monitor0"
+    Option         "ForceFullCompositionPipeline" "on"
+    Option         "AllowIndirectGLXProtocol" "off"
+    Option         "TripleBuffer" "on"
+EndSection</pre>
+<p>如果没有 Xorg 配置文件，可以使用 <code>nvidia-xconfig</code> ( 参见 <a href="#pge12579b7d4ac">NVIDIA#Automatic configuration</a>) 为当前硬件创建一个 Xorg 配置文件，并将其从 <code>/etc/X11/xorg.conf</code> 移动到首选位置 <code>/etc/X11/xorg.conf.d/20-nvidia.conf</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>使用 <code>nvidia-xconfig</code> 生成的 <code>20-nvidia.conf</code> 文件中的许多配置选项都是由驱动程序自动设置的，实际并不需要。我们只需要其中的 <code>"Screen"</code> 部分就可以启用合成管线，该部分包含 <code>Identifier</code> 和 <code>Option</code> 等设置，而其他部分可以从该文件中删除。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgeddf090347f3_.E5.A4.9A.E6.98.BE.E7.A4.BA.E5.99.A8" id="多显示器"><span id=".E5.A4.9A.E6.98.BE.E7.A4.BA.E5.99.A8"></span>多显示器</h3></div>
+<p>对于多显示器设置，您需要为每个显示器指定 <code>ForceCompositionPipeline=On</code>。例如 :
+</p>
+<pre>$ nvidia-settings --assign CurrentMetaMode="DP-2: nvidia-auto-select +0+0 {ForceCompositionPipeline=On}, DP-4: nvidia-auto-select +3840+0 {ForceCompositionPipeline=On}"
+</pre>
+<p>如果不执行此操作，<code>nvidia-settings</code> 命令将禁用其他显示器。
+</p><p>下面的命令可以用来获取当前的屏幕名称和偏移量：
+</p>
+<pre>$ nvidia-settings --query CurrentMetaMode
+</pre>
+<p>上面的命令适用于将两个 3840x2160 的显示器连接到 DP-2 和 DP-4 上。您需要通过导出 <code>xorg.conf</code> 来读取正确的 <code>CurrentMetaMode</code>，并将 <code>ForceCompositionPipeline</code> 附加到每个显示器上。设置 <code>ForceCompositionPipeline</code> 只会影响目标显示器。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果使用驱动程序启用了 vsync，则多显示器配置中使用的不同型号的显示器的刷新率可能略有不同。它将同步到其中一个刷新率，这可能导致不正确同步的显示器上出现屏幕撕裂的现象。选择同步主要使用的显示设备，因为其他显示设备不会同步正确。这可以在 <code>~/.nvidia-settings-rc</code> 中配置，例如<code>0/XVideoSyncToDisplayID=</code>，或者安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-settings">nvidia-settings</a></span><sup><small>包</small></sup></span> 并使用图形配置选项。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_Modprobe_Error:_.22Could_not_insert_.27nvidia.27:_No_such_device.22_on_linux_.3E.3D4.8" id="Modprobe_Error:_&quot;Could_not_insert_'nvidia':_No_such_device&quot;_on_linux_&gt;=4.8"><span id="Modprobe_Error:_.22Could_not_insert_.27nvidia.27:_No_such_device.22_on_linux_.3E.3D4.8"></span>Modprobe Error: "Could not insert 'nvidia': No such device" on linux &gt;=4.8</h2></div>
+<p>当试图使用独立显卡时，在 linux 4.8 系统中可能会遇到如下错误：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ modprobe nvidia -vv</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">modprobe: INFO: custom logging function 0x409c10 registered
+modprobe: INFO: Failed to insert module '/lib/modules/4.8.6-1-ARCH/extramodules/nvidia.ko.gz': No such device
+modprobe: ERROR: could not insert 'nvidia': No such device
+modprobe: INFO: context 0x24481e0 released
+insmod /lib/modules/4.8.6-1-ARCH/extramodules/nvidia.ko.gz 
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+NVRM: The NVIDIA GPU 0000:01:00.0 (PCI ID: 10de:139b)
+NVRM: installed in this system is not supported by the 370.28
+NVRM: NVIDIA Linux driver release.  Please see 'Appendix
+NVRM: A - Supported NVIDIA GPU Products' in this release's
+NVRM: README, available on the Linux driver download page
+NVRM: at www.nvidia.com.
+...
+</pre>
+<p>这个问题是由 Linux 内核中有关 PCIe 电源管理的错误提交导致的（如在 <a href="https://devtalk.nvidia.com/default/topic/971733/-370-28-with-kernel-4-8-on-gt-2015-machines-driver-claims-card-not-supported-if-nvidia-is-not-primary-card/">NVIDIA DevTalk 讨论串</a>中所述）。
+</p><p>解决方法是在<a href="#pgec0856954f1c">内核参数</a>中添加 <code>pcie_port_pm=off</code>。请注意，这会禁用所有设备的 PCIe 电源管理。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_.E6.8C.82.E8.B5.B7.E6.88.96.E4.BC.91.E7.9C.A0.E5.90.8E.E7.9A.84.E5.B1.8F.E5.B9.95.E6.8D.9F.E5.9D.8F" id="挂起或休眠后的屏幕损坏"><span id=".E6.8C.82.E8.B5.B7.E6.88.96.E4.BC.91.E7.9C.A0.E5.90.8E.E7.9A.84.E5.B1.8F.E5.B9.95.E6.8D.9F.E5.9D.8F"></span>挂起或休眠后的屏幕损坏</h2></div>
+<p>请参阅 <a href="#pgfdf764aa3343">NVIDIA/Tips and tricks#Preserve video memory after suspend</a>。
+</p><p>当使用 <a href="#pg89573e816846">GDM</a> 显示管理器时，驱动程序版本 515.43.04 以后的挂起后的损坏 bug 被修复了 <a href="https://forums.developer.nvidia.com/t/corrupted-graphics-upon-resume-gnome-41-x-org-495-44-driver/194565/18">[2]</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_.E4.BD.BF.E7.94.A8_400_.E7.B3.BB.E6.98.BE.E5.8D.A1.E6.97.B6_CPU_.E9.97.B4.E6.AD.87.E6.80.A7.E5.87.BA.E7.8E.B0.E5.B3.B0.E5.80.BC" id="使用_400_系显卡时_CPU_间歇性出现峰值"><span id=".E4.BD.BF.E7.94.A8_400_.E7.B3.BB.E6.98.BE.E5.8D.A1.E6.97.B6_CPU_.E9.97.B4.E6.AD.87.E6.80.A7.E5.87.BA.E7.8E.B0.E5.B3.B0.E5.80.BC"></span>使用 400 系显卡时 CPU 间歇性出现峰值</h2></div>
+<p>如果使用 400 系列显卡时出现间歇性 CPU 峰值，则可能是 PowerMizer 不断更改 GPU 的时钟频率导致的。您可以通过把以下内容添加到 Xorg 配置的 <code>Device</code> 部分来将 PowerMizer 的设置从自适应切换为性能：
+</p>
+<pre> Option "RegistryDwords" "PowerMizerEnable=0x1; PerfLevelSrc=0x3322; PowerMizerDefaultAC=0x1"
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_.E7.AC.94.E8.AE.B0.E6.9C.AC.E7.94.B5.E8.84.91.E7.9A.84_X_.E5.9C.A8.E7.99.BB.E5.85.A5.E5.92.8C.E6.B3.A8.E9.94.80.E6.97.B6.E6.8C.82.E8.B5.B7" id="笔记本电脑的_X_在登入和注销时挂起"><span id=".E7.AC.94.E8.AE.B0.E6.9C.AC.E7.94.B5.E8.84.91.E7.9A.84_X_.E5.9C.A8.E7.99.BB.E5.85.A5.E5.92.8C.E6.B3.A8.E9.94.80.E6.97.B6.E6.8C.82.E8.B5.B7"></span>笔记本电脑的 X 在登入和注销时挂起</h2></div>
+<p>如果在使用传统 NVIDIA 驱动程序时，Xorg 在登入和注销时候挂起（常表现为屏显被分成黑白 / 灰色两部分），但仍然可以通过 <code>Ctrl+Alt+Backspace</code>（或者绑定的其他“kill X”键）登录的话，请尝试在 <code>/etc/modprobe.d/modprobe.conf</code> 中添加：
+</p>
+<pre>options nvidia NVreg_Mobile=1
+</pre>
+<p>有的用户报告说以下配置也有效，但经过测试它也可能导致显著的性能下降：
+</p>
+<pre>options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=33 NVreg_DeviceFileMode=0660 NVreg_SoftEDIDs=0 NVreg_Mobile=1
+</pre>
+<p>请注意 <code>NVreg_Mobile</code> 参数的值因笔记本厂商差异而有所不同：
+</p>
+<ul><li>1 - Dell 笔记本电脑</li>
+<li>2 - 非 Compal 的 Toshiba 笔记本电脑</li>
+<li>3 - 其他笔记本电脑</li>
+<li>4 - Compal Toshiba 笔记本电脑.</li>
+<li>5 - Gateway 笔记本电脑.</li></ul>
+<p>请参考 NVIDIA Driver's README: Appendix K 了解更多信息。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_Screen.28s.29_found.2C_but_none_have_a_usable_configuration" id="Screen(s)_found,_but_none_have_a_usable_configuration"><span id="Screen.28s.29_found.2C_but_none_have_a_usable_configuration"></span>Screen(s) found, but none have a usable configuration</h2></div>
+<p>Sometimes NVIDIA and X have trouble finding the active screen. If your graphics card has multiple outputs try plugging your monitor into the other ones. On a laptop it may be because your graphics card has VGA/TV out. Xorg.0.log will provide more info.
+</p><p>Another thing to try is adding invalid <code>"ConnectedMonitor" Option</code> to <code>Section "Device"</code>
+to force Xorg throws error and shows you how correct it.
+Here
+more about ConnectedMonitor setting.
+</p><p>After re-run X see Xorg.0.log to get valid CRT-x,DFP-x,TV-x values.
+</p><p><code>nvidia-xconfig --query-gpu-info</code> could be helpful.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_Blackscreen_at_X_startup_.2F_Machine_poweroff_at_X_shutdown" id="Blackscreen_at_X_startup_/_Machine_poweroff_at_X_shutdown"><span id="Blackscreen_at_X_startup_.2F_Machine_poweroff_at_X_shutdown"></span>Blackscreen at X startup / Machine poweroff at X shutdown</h2></div>
+<p>If you have installed an update of NVIDIA and your screen stays black after launching Xorg, or if shutting down Xorg causes a machine poweroff, try the below workarounds:
+</p>
+<ul><li>Prepend "xrandr --auto" to your xinitrc</li></ul>
+<ul><li>Use the <code>rcutree.rcu_idle_gp_delay=1</code> <a href="#pga479202f6eed">kernel parameter</a>.</li></ul>
+<ul><li>You can also try to add the <code>nvidia</code> module directly to your <a href="#pg37f6992c45ff">mkinitcpio.conf</a>.</li></ul>
+<ul><li>If the screen still stays black with <b>both</b> the <code>rcutree.rcu_idle_gp_delay=1</code> <a href="#pga479202f6eed">kernel parameter</a> and the <code>nvidia</code> module directly in the <a href="#pg37f6992c45ff">mkinitcpio.conf</a>, try re-installing <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia">nvidia</a></span><sup><small>包</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span><sup><small>包</small></sup></span> in that order, and finally reload the driver:</li></ul>
+<pre># modprobe nvidia
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_Backlight_is_not_turning_off_in_some_occ" id="Backlight_is_not_turning_off_in_some_occasions">Backlight is not turning off in some occasions</h2></div>
+<p>By default, DPMS should turn off backlight with the timeouts set or by running xset. However, probably due to a bug in the proprietary NVIDIA drivers the result is a blank screen with no powersaving whatsoever. To workaround it, until the bug has been fixed you can use the <code>vbetool</code> as root.
+</p><p>Install the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vbetool">vbetool</a></span><sup><small>包</small></sup></span> package.
+</p><p>Turn off your screen on demand and then by pressing a random key backlight turns on again:
+</p>
+<pre>vbetool dpms off &amp;&amp; read -n1; vbetool dpms on
+</pre>
+<p>Alternatively, xrandr is able to disable and re-enable monitor outputs without requiring root.
+</p>
+<pre>xrandr --output DP-1 --off; read -n1; xrandr --output DP-1 --auto
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgeddf090347f3_Driver_415__HardDPMS" id="Driver_415:_HardDPMS">Driver 415: HardDPMS</h3></div>
+
+<p>Proprietary driver 415 includes a new feature called HardDPMS. This is reported by some users to solve the issues with suspending monitors connected over DisplayPort.
+It is reported to become the default in a future driver version, but for now, the <code>HardDPMS</code> option can be set in the <code>Device</code> or <code>Screen</code> sections. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-nvidia.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Device"
+    ...
+    Option         "HardDPMS" "true"    
+    ...
+EndSection
+
+Section "Screen"
+    ...
+    Option         "HardDPMS" "true"
+    ...
+EndSection
+</pre>
+<p><code>HardDPMS</code> will trigger on screensaver settings like <code>BlankTime</code>. The following <code>ServerFlags</code> will set your monitor(s) to suspend after 10 minutes of inactivity:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-nvidia.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "ServerFlags"
+    Option     "BlankTime" "10"
+EndSection
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_Xorg_fails_to_load_or_Red_Screen_of_Deat" id="Xorg_fails_to_load_or_Red_Screen_of_Death">Xorg fails to load or Red Screen of Death</h2></div>
+<p>If you get a red screen and use GRUB, disable the GRUB framebuffer by editing <code>/etc/default/grub</code> and uncomment <code>GRUB_TERMINAL_OUTPUT=console</code>. For more information see <a href="#pgc9828c7a368e">GRUB/Tips and tricks#Disable framebuffer</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_Black_screen_on_systems_with_integrated_" id="Black_screen_on_systems_with_integrated_GPU">Black screen on systems with integrated GPU</h2></div>
+<p>If you have a system with an integrated GPU (e.g. Intel HD 4000, VIA VX820 Chrome 9 or AMD Cezanne) and have installed the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia">nvidia</a></span><sup><small>包</small></sup></span> package, you may experience a black screen on boot, when changing virtual terminal, or when exiting an X session. This may be caused by a conflict between the graphics modules. This is solved by blacklisting the relevant GPU modules. Create the file <code>/etc/modprobe.d/blacklist.conf</code> and prevent the relevant modules from loading on boot:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/blacklist.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">install i915 /usr/bin/false
+install intel_agp /usr/bin/false
+install viafb /usr/bin/false
+install radeon /usr/bin/false
+install amdgpu /usr/bin/false
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_HDMI_.E6.97.A0.E5.A3.B0" id="HDMI_无声"><span id="HDMI_.E6.97.A0.E5.A3.B0"></span>HDMI 无声</h2></div>
+<p>有时，NVIDIA HDMI 音频设备在执行  <code>aplay -l</code> 时不会显示。在某些新机器上，NVIDIA GPU 上的音频芯片在启动时可能被禁用。你需要重新加载启用音频的 NVIDIA 设备。确保 GPU 处于开启状态（如在笔记本电脑/Bumblebee 中），并且没有在其上运行 X，因为这会导致重置：
+</p>
+<pre><code># setpci -s 01:00.0 0x488.l=0x2000000:0x2000000
+# rmmod nvidia-drm nvidia-modeset nvidia
+# echo 1 &gt; /sys/bus/pci/devices/0000:01:00.0/remove
+# echo 1 &gt; /sys/bus/pci/devices/0000:00:01.0/rescan
+# modprobe nvidia-drm
+# xinit -- -retro</code>
+</pre>
+<p>如果你在 NVIDIA 上运行 TTY，可以将这些命令放入脚本中，以免屏幕消失。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_X_fails_with_.22no_screens_found.22_when_using_Multiple_GPUs" id='X_fails_with_"no_screens_found"_when_using_Multiple_GPUs'><span id="X_fails_with_.22no_screens_found.22_when_using_Multiple_GPUs"></span>X fails with "no screens found" when using Multiple GPUs</h2></div>
+<p>In situations where you might have multiple GPUs on a system and X fails to start with:
+</p>
+<pre>[ 76.633] (EE) No devices detected.
+[ 76.633] Fatal server error:
+[ 76.633] no screens found
+</pre>
+<p>then you need to add your discrete card's BusID to your X configuration. This can happen on systems with an Intel CPU and an integrated GPU or if you have more than one NVIDIA card connected. Find your BusID:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># lspci | grep -E "VGA|3D controller"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">00:02.0 VGA compatible controller: Intel Corporation Xeon E3-1200 v2/3rd Gen Core processor Graphics Controller (rev 09)
+01:00.0 VGA compatible controller: NVIDIA Corporation GK107 [GeForce GTX 650] (rev a1)
+08:00.0 3D controller: NVIDIA Corporation GM108GLM [Quadro K620M / Quadro M500M] (rev a2)
+</pre>
+<p>Then you fix it by adding it to the card's Device section in your X configuration. In my case:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/10-nvidia.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Device"
+    Identifier     "Device0"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+    BusID          "PCI:1:0:0"
+EndSection
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>BusID formatting is important!</div>
+<p>In the example above <code>01:00.0</code> is stripped to be written as <code>1:0:0</code>, however some conversions can be more complicated. <code>lspci</code> output is in hex format, but in configuration files the BusID's are in decimal format! This means that in cases where the BusID is greater than 9 you will need to convert it to decimal! 
+</p><p>ie: <code>5e:00.0</code> from lspci becomes <code>PCI:94:0:0</code>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_Xorg_fails_during_boot.2C_but_otherwise_starts_fine" id="Xorg_fails_during_boot,_but_otherwise_starts_fine"><span id="Xorg_fails_during_boot.2C_but_otherwise_starts_fine"></span>Xorg fails during boot, but otherwise starts fine</h2></div>
+<p>On very fast booting systems, systemd may attempt to start the display manager before the NVIDIA driver has fully initialized. You will see a message like the following in your logs only when Xorg runs during boot.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/var/log/Xorg.0.log</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[     1.807] (EE) NVIDIA(0): Failed to initialize the NVIDIA kernel module. Please see the
+[     1.807] (EE) NVIDIA(0):     system's kernel log for additional error messages and
+[     1.808] (EE) NVIDIA(0):     consult the NVIDIA README for details.
+[     1.808] (EE) NVIDIA(0):  *** Aborting ***</pre>
+<p>In this case you will need to establish an ordering dependency from the display manager to the DRI device. First create device units for DRI devices by creating a new udev rules file.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-systemd-dri-devices.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", KERNEL=="card*", SUBSYSTEM=="drm", TAG+="systemd"</pre>
+<p>Then create dependencies from the display manager to the device(s).
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/display-manager.service.d/10-wait-for-dri-devices.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Wants=dev-dri-card0.device
+After=dev-dri-card0.device</pre>
+<p>If you have additional cards needed for the desktop then list them in Wants and After seperated by spaces.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_xrandr_BadMatch" id="xrandr_BadMatch">xrandr BadMatch</h2></div>
+<p>If you are trying to configure a WQHD monitor such as DELL U2515H using <a href="#pgaa98d1ed067b">xrandr</a> and <code>xrandr --addmode</code> gives you the error <code>X Error of failed request: BadMatch</code>, it might be because the proprietary NVIDIA driver clips the pixel clock maximum frequency of HDMI output to 225 MHz or lower. To set the monitor to maximum resolution you have to install <a href="#pg172970a5f8dd">nouveau</a> drivers. You can force nouveau to use a specific pixel clock frequency by setting <code>nouveau.hdmimhz=297</code> (or <code>330</code>) in your <a href="#pgc7833704a8db">Kernel parameters</a>.
+</p><p>Alternatively, it may be that your monitor's EDID is incorrect. See <a href="#pgeddf090347f3_Override_EDID">#Override EDID</a>.
+</p><p>Another reason could be that by default current NVIDIA drivers will only allow modes explicitly reported by EDID, but sometimes refresh rates and/or resolutions are desired which are not reported by the monitor (although the EDID information is correct; it is just that current NVIDIA drivers are too restrictive).
+</p><p>If this happens, you may want to add an option to <code>xorg.conf</code> to allow non-EDID modes:
+</p>
+<pre>Section "Device"
+    Identifier     "Device0"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+...
+    Option         "ModeValidation" "AllowNonEdidModes"
+...
+EndSection
+</pre>
+<p>This can be set per-output. See NVidia driver readme (Appendix B. X Config Options) for more information.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_Override_EDID" id="Override_EDID">Override EDID</h2></div>
+<p>See <a href="#pg1b16260aab54">Kernel mode setting#Forcing modes and EDID</a>, <a href="#pgaa98d1ed067b">Xrandr#Troubleshooting</a> and  <a href="#pg2d1262580bd2">Qnix QX2710#Fixing X11 with Nvidia</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_Overclocking_with_nvidia_settings_GUI_no" id="Overclocking_with_nvidia-settings_GUI_not_working">Overclocking with nvidia-settings GUI not working</h2></div>
+
+<p>Workaround is to use nvidia-settings CLI to query and set certain variables after enabling overclocking (as explained in <a href="#pgfdf764aa3343">NVIDIA/Tips and tricks#Enabling overclocking</a>, see <span class="plainlinks archwiki-template-man" title="$ man 1 nvidia-settings"><a href="https://man.archlinux.org/man/nvidia-settings.1">nvidia-settings(1)</a></span> for more information).
+</p><p>Example to query all variables:
+</p>
+<pre> nvidia-settings -q all
+</pre>
+<p>Example to set PowerMizerMode to prefer performance mode:
+</p>
+<pre> nvidia-settings -a [gpu:0]/GPUPowerMizerMode=1
+</pre>
+<p>Example to set fan speed to fixed 21%:
+</p>
+<pre>nvidia-settings -a [gpu:0]/GPUFanControlState=1 -a [fan:0]/GPUTargetFanSpeed=21
+</pre>
+<p>Example to set multiple variables at once (overclock GPU by 50MHz, overclock video memory by 50MHz, increase GPU voltage by 100mV):
+</p>
+<pre> nvidia-settings -a GPUGraphicsClockOffsetAllPerformanceLevels=50 -a GPUMemoryTransferRateOffsetGPUGraphicsClockOffsetAllPerformanceLevels=50 -a GPUOverVoltageOffset=100
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_Overclocking_not_working_with_Unknown_Er" id="Overclocking_not_working_with_Unknown_Error">Overclocking not working with Unknown Error</h2></div>
+<p>If you are running Xorg as a non-root user and trying to overclock your NVIDIA GPU, you will get an error similar to this one:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nvidia-settings -a "[gpu:0]/GPUGraphicsClockOffset[3]=10"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ERROR: Error assigning value 10 to attribute 'GPUGraphicsClockOffset' (trinity-zero:1[gpu:0]) as specified in assignment
+        '[gpu:0]/GPUGraphicsClockOffset[3]=10' (Unknown Error).</pre>
+<p>To avoid this issue, Xorg has to be run as the root user. See <a href="#pga36c0aff60be">Xorg#Rootless Xorg</a> for details.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_System_will_not_boot_after_driver_was_in" id="System_will_not_boot_after_driver_was_installed">System will not boot after driver was installed</h2></div>
+<p>If after installing the <a href="#pge12579b7d4ac">NVIDIA</a> driver your system becomes stuck before reaching the display manager, try to <a href="#pg1b16260aab54">disable kernel mode setting</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_X_fails_with_.22Failing_initialization_of_X_screen.22" id='X_fails_with_"Failing_initialization_of_X_screen"'><span id="X_fails_with_.22Failing_initialization_of_X_screen.22"></span>X fails with "Failing initialization of X screen"</h2></div>
+<p>If <code>/var/log/Xorg.0.log</code> says X server fails to initialize screen
+</p>
+<pre>(EE) NVIDIA(G0): GPU screens are not yet supported by the NVIDIA driver
+(EE) NVIDIA(G0): Failing initialization of X screen
+</pre>
+<p>and nvidia-smi says <code>No running processes found</code>
+</p><p>The solution is at first reinstall latest <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span><sup><small>包</small></sup></span>, and then copy <code>/usr/share/X11/xorg.conf.d/10-nvidia-drm-outputclass.conf</code> to <code>/etc/X11/xorg.conf.d/10-nvidia-drm-outputclass.conf</code>, and then edit <code>/etc/X11/xorg.conf.d/10-nvidia-drm-outputclass.conf</code> and add the line <code>Option "PrimaryGPU" "yes"</code>. Restart the computer. The problem will be fixed.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_System_does_not_return_from_suspend" id="System_does_not_return_from_suspend">System does not return from suspend</h2></div>
+<p>What you see in the log:
+</p>
+<pre>kernel: nvidia-modeset: ERROR: GPU:0: Failed detecting connected display devices
+kernel: nvidia-modeset: ERROR: GPU:0: Failed detecting connected display devices
+kernel: nvidia-modeset: WARNING: GPU:0: Failure processing EDID for display device DELL U2412M (DP-0).
+kernel: nvidia-modeset: WARNING: GPU:0: Unable to read EDID for display device DELL U2412M (DP-0)
+kernel: nvidia-modeset: ERROR: GPU:0: Failure reading maximum pixel clock value for display device DELL U2412M (DP-0).
+</pre>
+<p>A possible solution based on <a href="https://forums.developer.nvidia.com/t/solution-for-nvidia-sleep-wake-issue-in-linux/110911">[3]</a>:
+</p><p>Run this command to get the <code><i>version</i></code> string:
+</p>
+<pre># strings /sys/firmware/acpi/tables/DSDT | grep -i 'windows ' | sort | tail -1
+</pre>
+<p>Add the <code>acpi_osi=! "acpi_osi=<i>version</i>"</code> <a href="#pga479202f6eed">kernel parameter</a> to your <a href="#pg2590228fb4b9">boot loader</a> configuration.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_Vulkan_error_on_applications_start" id="Vulkan_error_on_applications_start">Vulkan error on applications start</h2></div>
+
+<p><br/>
+On executing an application that require Vulkan acceleration, if you get this error
+</p>
+<pre>Vulkan call failed: -4
+</pre>
+<p>try to delete the <code>~/.nv</code> or <code>~/.cache/nvidia</code> directory.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgeddf090347f3_Extreme_lag_on_Xorg" id="Extreme_lag_on_Xorg">Extreme lag on Xorg</h2></div>
+
+<p><br/>
+A common issue with Mutter is that <a href="https://gitlab.gnome.org/GNOME/mutter/-/issues/2233">animations, video playback and gaming cause extreme desktop lag on Xorg</a>.
+</p><p>See <a href="#pgfdf764aa3343">NVIDIA/Tips and tricks#Preserve video memory after suspend</a>.
+</p><p>This should resolve this issue, however if it did not, you are most likely out of luck. One way you can remedy this issue is by adding these options: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/environment</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">CLUTTER_DEFAULT_FPS=<i>YOUR_MAIN_DISPLAY_REFRESHRATE</i>
+__GL_SYNC_DISPLAY_DEVICE=<i>YOUR_MAIN_DISPLAY_OUTPUT_NAME</i></pre>
+<p>turning <code>Sync to VBlank</code> and <code>Allow flipping</code> off within NVIDIA Settings, and configuring NVIDIA Settings to launch on startup using the flag <code>--load-config-only</code>.
+This will still result in a laggy desktop behavior, in particular on an eventual second (or third) monitor, but it should be much better.
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807023013
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.231 seconds
+Real time usage: 0.241 seconds
+Preprocessor visited node count: 1086/1000000
+Revision size: 23920/2097152 bytes
+Post‐expand include size: 18546/2097152 bytes
+Template argument size: 8526/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   68.754      1 -total
+ 14.61%   10.044     78 Template:Ic
+ 11.11%    7.639      3 Template:Accuracy
+  5.36%    3.683      5 Template:META_Message
+  5.15%    3.538      7 Template:Pkg
+  5.09%    3.497     13 Template:Hc
+  4.87%    3.347      1 Template:翻译状态
+  4.70%    3.235      1 Template:Tip
+  4.18%    2.876      1 Template:Style
+  4.08%    2.805      4 Template:注意
+-->
+<!-- Render ID eafbf48e-9207-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7139:|#|:idhash:canonical!zh-cn and timestamp 20260807023013 and revision id 33651. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

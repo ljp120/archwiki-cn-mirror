@@ -1,0 +1,900 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg937d8e90f2bd">游戏</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgb01ad010631a">游戏列表</a></li>
+<li><a href="#pge02a63a3f46e">游戏机模拟器</a></li>
+<li><a href="#pga36c0aff60be">Xorg</a></li>
+<li><a href="#pg85cb2c411b99">Gamepad</a></li>
+<li><a href="#pg39e5cd9380ff">Wine</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Gaming">Gaming</a>，最近一次同步于 2025-3-8，若英文版本有所<a href="https://wiki.archlinux.org/title/Gaming?diff=0&amp;oldid=828329">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Gaming_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<p>Linux 曾被认为是“非官方”的游戏平台; 向其提供的支持和目标受众并不是大多数游戏组织的首要任务。 从 2021 年开始，这种情况的变化开始加速，这是因为像 <a href="https://en.wikipedia.org/wiki/Valve_Corporation">Valve</a>、<a href="https://en.wikipedia.org/wiki/CodeWeavers">CodeWeavers</a> 组和 <a href="https://en.wikipedia.org/wiki/Open-source_software_development">community</a> 这样的大公司/组织的参与，他们给 Linux 的游戏生态带来了巨大的变化，让 Linux 真正成为一个可行的游戏平台。 此外，越来越多的独立开发团队努力使用跨平台渲染引擎，以使他们的游戏能够在 Linux 上编译和运行。
+</p><p>当谈到游戏时，大多数用户的想法往往指向流行的 <a href="https://en.wikipedia.org/wiki/AAA_games">AAA games</a>，这些游戏通常是专门为 <a href="https://en.wikipedia.org/wiki/Microsoft_Windows">Microsoft Windows</a> 平台编写的。 这是可以理解的，但这不是唯一的可能性。 请参阅页面下方的 #游戏环境和 #获取游戏，您可以在其中找到从其他平台运行游戏的软件。
+</p><p>然而，如果您执着于让为 <a href="https://en.wikipedia.org/wiki/Microsoft_Windows">Microsoft Windows</a> 编写的游戏在 Linux 上运行，那么需要不同的思维方式、工具和方法； 了解内部结构并提供功能替代。 请阅读下面的 #游戏技术性。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg937d8e90f2bd_.E6.B8.B8.E6.88.8F.E6.8A.80.E6.9C.AF.E6.80.A7" id="游戏技术性"><span id=".E6.B8.B8.E6.88.8F.E6.8A.80.E6.9C.AF.E6.80.A7"></span>游戏技术性</h2></div>
+<p>试图在 Linux 上玩 <a href="https://en.wikipedia.org/wiki/AAA_games">AAA games</a>一般会出现<i>三个难题</i>。他们是：
+</p>
+<dl><dt>图形软件开发工具包（SDK）</dt>
+<dd></dd>
+<dd>在 Linux 上无法运行使用 Linux 无法识别的应用程序编程接口（API）（例如<a href="https://en.wikipedia.org/wiki/DirectX">DirectX</a>）开发的游戏。</dd>
+<dt>通用库依赖</dt>
+<dd></dd>
+<dd>在游戏过程中进行通用操作所需的库，例如保存游戏、加载配置。（例如 Microsoft Visual C++、MFC、.NET）。</dd>
+<dt>不兼容的接口</dt>
+<dd></dd>
+<dd>除了上面提到的框架之外，还有一个问题就是 Linux 系统无法直接识别以 Windows 系统为目标而生成的二进制格式和编译的代码。</dd></dl>
+<p>图形SDK将图形调用转发到底层图形驱动程序，然后驱动程序继续与GPU硬件交互。
+</p><p>上面的 API 将它们的图形调用转发给底层驱动程序，然后驱动程序再继续与GPU硬件沟通。 幸运的是，AMD用户拥有AMD自己发布的开源驱动程序，这就已经解决了一个巨大的问题了。而Nvidia用户必须依赖其他替代品，这些替代品通常打包为二进制大型对象(blobs)。 （作为 Nvidia 驱动程序逆向工程的结果，才能以这样的方式使用微代码和固件）
+</p><p>大量的游戏使用了 <a href="https://en.wikipedia.org/wiki/DirectX">DirectX</a> 作为他们主要的驱动SDK. Linux仅能原生支持<a href="https://en.wikipedia.org/wiki/OpenGL">OpenGL</a> 和 <a href="https://en.wikipedia.org/wiki/Vulkan_(API)">Vulkan</a>。Linux自己本身无法支持<a href="https://en.wikipedia.org/wiki/DirectX">DirectX</a>或任何上述技术（Microsoft Visual C++、MFC、.NET）。
+</p><p>相反，有多个开源替代项目被开发出来提供<i>相同</i>的功能，最终从图形的角度实现相同的结果。这些项目有它们<i>自己的</i>成型替代品，它们试图从<a href="https://en.wikipedia.org/wiki/black_box">黑盒子</a>的角度<i>重新发明</i>原始SDK调用可能实现的内容。受欢迎的包括：
+</p>
+<ul><li><a href="#pg39e5cd9380ff">Wine</a> (Wine Is Not an Emulator) [提供“加载器虚拟机”、自写依赖项、互操作性等]</li>
+<li><a href="#pgbc5acf5673c9">Proton</a> (Wine项目的分支，是Valve 针对 Steam 进行了优化的版本)</li>
+<li><a href="https://en.wikipedia.org/wiki/Mono_(software)">Mono</a> (.NET框架的等效替代)</li>
+<li><a href="https://en.wikipedia.org/wiki/Media_Foundation">MF-Media</a> (多媒体基础依赖)</li></ul>
+<p>例如，在 <a href="https://en.wikipedia.org/wiki/DirectX">DirectX</a> 上加载、转换和着色顶点的调用可能会在 Wine 拥有的新 <i>.dll/.so</i> 中从头开始重写，提供他们自己关于功能可能在下面做什么的<i>假设</i>想法，并将其转发给 <a href="https://en.wikipedia.org/wiki/OpenGL">OpenGL</a> 替代方案，有效地尝试实现类似的结果。 由于这些调用是直接等效的，并且可以看作<i>好像</i>正在运行DirectX，因此性能不会受到影响。（与这些互操作的起始开销除外）
+</p><p>这些工具往往同时被带入系统的发行版中。创建并配置了<b>prefix</b>（Wine 的术语，用于模拟 Windows 沙箱的目录）。依赖项被安装在<b>prefix</b>内（"沙盒"仍然需要游戏的<a href="https://en.wikipedia.org/wiki/Library_(computing)">可再发行程序库</a>），通常和 <a href="https://gitlab.winehq.org/wine/wine/-/wikis/Winetricks">winetricks </a> 一起出现，以这样的方式去运行游戏，"就好像"它是在Windows上运行一样。
+</p><p>幸运的是，这套方案如今适用于大多数游戏（<a href="https://www.keengamer.com/articles/features/opinion-pieces/kernel-level-anti-cheat-and-7-games-or-programs-that-use-it/">带有防作弊保护</a>的游戏除外，这需要一个 Wine/Proton 还没有的内核驱动程序）。 如果游戏无法运行，通常是由于包不兼容、缺少依赖项或 Wine/Proton 未实现的功能。
+</p><p>Lutris 是一款提供运行器和沙箱的软件，使用Lutris可以帮您在安装游戏时处理相关依赖关系，以避免上述复杂和难以处理的枯燥过程。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg937d8e90f2bd_.E5.B8.B8.E8.A7.81.E7.9A.84.E6.B8.B8.E6.88.8F.E4.BE.9D.E8.B5.96" id="常见的游戏依赖"><span id=".E5.B8.B8.E8.A7.81.E7.9A.84.E6.B8.B8.E6.88.8F.E4.BE.9D.E8.B5.96"></span>常见的游戏依赖</h2></div>
+<p>如果您决定走 Wine/Proton 路线，为了更深入地了解您打算做什么，有必要关注运行游戏所需的常见依赖项。还需要考虑指令集架构，无论是x86还是x64，最好是两者。
+</p><p><b>prefix</b>需要填充以下内容才能运行"大多数"Windows 游戏。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E5.BF.85.E4.B8.8D.E5.8F.AF.E5.B0.91.E7.9A.84.EF.BC.88.E5.9B.A0.E4.B8.BA.E8.A2.AB.E5.B9.BF.E6.B3.9B.E4.BD.BF.E7.94.A8.EF.BC.89" id="必不可少的（因为被广泛使用）"><span id=".E5.BF.85.E4.B8.8D.E5.8F.AF.E5.B0.91.E7.9A.84.EF.BC.88.E5.9B.A0.E4.B8.BA.E8.A2.AB.E5.B9.BF.E6.B3.9B.E4.BD.BF.E7.94.A8.EF.BC.89"></span>必不可少的（因为被广泛使用）</h3></div>
+
+<ul><li><a href="#pg40371f3dc11a">Microsoft Core Fonts</a></li>
+<li>Microsoft Visual C++ 2015 (2017 版本使用率最高, 推荐安装) [2005, 2008, 2010, 2012, 2013, 2015, 2017-2018, 2019]</li>
+<li>DirectX 9.0 (11.0 版本使用率最高，推荐安装) [June SDK update 2010] {举几个其中包括的例子：}
+<ul><li>Direct3D</li>
+<li>Direct2D</li>
+<li>DirectShow</li>
+<li>DirectInput</li>
+<li>DirectPlay</li>
+<li>DirectSound</li>
+<li>DXGI</li>
+<li>XAudio2</li></ul></li>
+<li>.NET Framework (3.5 版本使用率最高)</li>
+<li><a href="#pgb19d18f87176">OpenGL</a>
+<ul><li>OpenAL</li>
+<li>OpenAI</li>
+<li>OpenCL</li></ul></li>
+<li><a href="#pg813471eccd07">Vulkan</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E5.8F.AF.E9.80.89.E7.9A.84.EF.BC.88.E4.BD.86.E4.BB.8D.E7.84.B6.E5.BE.88.E5.B8.B8.E8.A7.81.EF.BC.89" id="可选的（但仍然很常见）"><span id=".E5.8F.AF.E9.80.89.E7.9A.84.EF.BC.88.E4.BD.86.E4.BB.8D.E7.84.B6.E5.BE.88.E5.B8.B8.E8.A7.81.EF.BC.89"></span>可选的（但仍然很常见）</h3></div>
+<ul><li>XNA</li>
+<li>PhysX</li>
+<li>Media Foundation</li>
+<li>Quicktime</li>
+<li>Adobe Reader 11</li>
+<li><a href="#pgf5cd65505569">Java</a> SRE (为运行 <a href="#pg17859bfc4f4c">Minecraft</a>)</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E5.B0.91.E8.A7.81.E7.9A.84.EF.BC.88.E4.B8.8D.E5.A4.AA.E5.B8.B8.E8.A7.81.EF.BC.89" id="少见的（不太常见）"><span id=".E5.B0.91.E8.A7.81.E7.9A.84.EF.BC.88.E4.B8.8D.E5.A4.AA.E5.B8.B8.E8.A7.81.EF.BC.89"></span>少见的（不太常见）</h3></div>
+<ul><li>Gamespy</li>
+<li>MIDI driver</li>
+<li>ACDSee</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg937d8e90f2bd_.E5.AF.B9.E7.B3.BB.E7.BB.9F.E7.9A.84.E8.A6.81.E6.B1.82" id="对系统的要求"><span id=".E5.AF.B9.E7.B3.BB.E7.BB.9F.E7.9A.84.E8.A6.81.E6.B1.82"></span>对系统的要求</h2></div>
+<p>仅仅用游戏需要的依赖项填充<b>prefix</b>是不够的。Linux内核本身必须具有它将提供运行游戏所需的调用之替代。如前所述，驱动程序和相关替代库必须要是有效的。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E6.98.BE.E5.8D.A1.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F" id="显卡驱动程序"><span id=".E6.98.BE.E5.8D.A1.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F"></span>显卡驱动程序</h3></div>
+<ul><li>AMD 显卡驱动: 参考 <a href="#pg4a4bc5e5df24">AMDGPU</a>.</li>
+<li>Intel 显卡驱动: 参考 <a href="#pgcf92ea97092d">Intel graphics</a>.</li>
+<li>NVIDIA 显卡驱动: 参考 <a href="#pge12579b7d4ac">NVIDIA</a>.</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E5.AF.B9.E7.B3.BB.E7.BB.9F.E5.92.8C.E6.9B.BF.E4.BB.A3.E5.93.81.E7.9A.84.E4.BE.9D.E8.B5.96" id="对系统和替代品的依赖"><span id=".E5.AF.B9.E7.B3.BB.E7.BB.9F.E5.92.8C.E6.9B.BF.E4.BB.A3.E5.93.81.E7.9A.84.E4.BE.9D.E8.B5.96"></span>对系统和替代品的依赖</h3></div>
+<ul><li><a href="#pg39e5cd9380ff">Wine</a></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wine-gecko">wine-gecko</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wine-mono">wine-mono</a></span><sup><small>包</small></sup></span></li>
+<li><a href="#pg813471eccd07">Vulkan</a></li>
+<li><a href="#pgb19d18f87176">OpenGL</a></li>
+<li><a href="#pgbc5acf5673c9">Proton</a> 可再发行程序库（可选，但可能有帮助）</li></ul>
+<p><b>这主要是提供信息。 一旦你安装了主要的包，其中一些包就会自行安装。</b>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg937d8e90f2bd_.E6.B8.B8.E6.88.8F.E7.8E.AF.E5.A2.83" id="游戏环境"><span id=".E6.B8.B8.E6.88.8F.E7.8E.AF.E5.A2.83"></span>游戏环境</h2></div>
+<p>Wine/Proton 并不是玩游戏的唯一途径。在Linux中玩游戏存在不同的环境，并且与Windows上的游戏一样多（或更多）：
+</p>
+<ul><li>原生游戏——构建目标为 Linux 平台的游戏，附带 OpenGL 和/或 Vulkan 图形 API 支持。</li>
+<li><a href="https://en.wikipedia.org/wiki/Emulator">游戏模拟器</a>——运行为其他架构和系统设计的软件所必需的。 一旦 ROM 被输入模拟器，大多数游戏都会开箱即用，而且很少遇到问题。 有关选项，请参阅<a href="#pge02a63a3f46e">游戏机模拟器</a>。</li>
+<li><a href="#pgf5cd65505569">Java</a>——一次编写，随处运行平台。 在 Linux 上运行的流行游戏示例有 <a href="#pg17859bfc4f4c">Minecraft</a>、<a href="#pg4e5da7731dbc">Runescape</a>、<a href="https://en.wikipedia.org/wiki/Wurm_Online">Wurm Online</a>、<a href="https://en.wikipedia.org/wiki/Puzzle_Pirates">Puzzle Pirates</a>。</li>
+<li>网络——在网络浏览器中运行的游戏。
+<ul><li>HTML5 游戏使用canvas画布和WebGL技术，可在所有现代浏览器中运行。</li>
+<li><a href="#pg24f269df429a">Flash</a>-based——您需要安装插件才能播放。</li></ul></li>
+<li><a href="#pg39e5cd9380ff">Wine</a>——Windows 兼容层，允许在类Unix操作系统上运行Windows应用程序（和许多游戏）。通过添加 <a href="#pg39e5cd9380ff">Wine#DXVK</a>，在运行时支持DirectX到 Vulkan的转换，还能提高仅支持DirectX的游戏的性能。</li>
+<li><a href="#pga50fc3ad83f4">虚拟机</a>——可用于安装兼容的操作系统（如 Windows）。 <a href="#pgbedf72352aa7">VirtualBox</a> 具有良好的 3D 支持。作为对此的扩展，如果您有兼容的硬件，您可以考虑将 VGA直通到Windows KVM客户机，关键字是<a href="https://docs.kernel.org/driver-api/vfio.html">“虚拟功能I/O”（VFIO)</a>，或<a href="#pgb2549c283c5e">通过OVMF进行PCI直通</a>。</li>
+<li><a href="https://steamcommunity.com/games/221410/announcements/detail/1696055855739350561">Proton/DXVK</a>——用于专有<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=steam">steam</a></span><sup><small>包</small></sup></span>平台的Wine项目分支，比 Wine 更好地支持游戏。有关详细信息，请参考 <a href="#pg95e65bdea0f3">Steam#Proton Steam-Play</a>。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg937d8e90f2bd_.E6.B8.B8.E6.88.8F.E5.85.BC.E5.AE.B9.E6.80.A7" id="游戏兼容性"><span id=".E6.B8.B8.E6.88.8F.E5.85.BC.E5.AE.B9.E6.80.A7"></span>游戏兼容性</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E5.A2.9E.E5.A4.A7_vm.max_map_count" id="增大_vm.max_map_count"><span id=".E5.A2.9E.E5.A4.A7_vm.max_map_count"></span>增大 vm.max_map_count</h3></div>
+<p>把 <code>vm.max_map_count</code> 的数值设定得太低会影响一些游戏的稳定性和性能。因此，建议通过创建如下的 <a href="#pg7b7cc2bbe79a">sysctl</a> 配置文件来永久改变它的大小。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/80-gamecompatibility.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">vm.max_map_count = 2147483642</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>默认的数值由 <code>/usr/lib/sysctl.d/10-arch.conf</code> 设定。如果要使用别的文件覆盖设定，请确保它有更高的优先级。参见 <span class="plainlinks archwiki-template-man" title="$ man 8 sysctl"><a href="https://man.archlinux.org/man/sysctl.8#SYSTEM_FILE_PRECEDENCE">sysctl(8) § SYSTEM FILE PRECEDENCE</a></span>。</div>
+<p>Arch Linux 默认使用的是 <b>1048576</b> 这个数值 <a href="https://archlinux.org/news/increasing-the-default-vmmax_map_count-value/">[1]</a>，这个值被 Fedora 认为是安全的 <a href="https://www.phoronix.com/news/Fedora-39-Max-Map-Count-Approve">[2]</a>。考虑到 Arch 曾使用的是内核默认值 65530，改变这个值会有比较大的影响，这个默认值对于当前的游戏来说应该是足够了的，无须再增加。<a href="https://www.phoronix.com/news/Fedora-39-VM-Max-Map-Count">[3]</a>。在 SteamOS 中，默认的数值是 <b>2147483642</b> (MAX_INT - 5)。
+</p><p>运行以下命令以应用更改（无需重启）：
+</p>
+<pre># sysctl --system
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这可能导致与尝试读取核心转储文件的旧程序不兼容 <a href="https://github.com/torvalds/linux/blob/v5.18/include/linux/mm.h#L178">[4]</a>.</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg937d8e90f2bd_.E8.8E.B7.E5.8F.96.E6.B8.B8.E6.88.8F" id="获取游戏"><span id=".E8.8E.B7.E5.8F.96.E6.B8.B8.E6.88.8F"></span>获取游戏</h2></div>
+<p>不能仅仅通过游戏是否能在Linux上运行来判断它们是否是原生游戏；它们可能是用 <a href="#pg39e5cd9380ff">Wine</a> 或 <a href="#pg70e711219755">DOSBox</a> 预打包的。
+</p><p><a href="#pg15c7e809c461">官方仓库</a>或 <a href="#pg89cb7b475cfb">AUR</a> 中为 Arch 打包的游戏列表请参见<a href="#pgb01ad010631a">游戏列表</a>。
+</p>
+<ul><li><b>Athenaeum</b> — Steam 的自由软件替代品。</li></ul>
+<dl><dd><a href="https://gitlab.com/librebob/athenaeum">https://gitlab.com/librebob/athenaeum</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/athenaeum-git/">athenaeum-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Bottles</b> — 使用 wine 和 proton 轻松地在 Linux 上运行 Windows 软件。</li></ul>
+<dl><dd><a href="https://usebottles.com/">https://usebottles.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bottles/">bottles</a></span><sup><small>AUR</small></sup></span>,<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bottles-git/">bottles-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Flathub</b> — 中心化的<a href="#pge822df3d71e0">Flatpak</a>软件仓库, 有比较少但仍在不断增长的游戏份额。</li></ul>
+<dl><dd><a href="https://flathub.org/apps/category/Game">https://flathub.org/apps/category/Game</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=flatpak">flatpak</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=discover">discover</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-software">gnome-software</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/GOG.com">GOG.com</a></b> — 无DRM游戏的游戏商店。游戏可以通过离线安装脚本（带有基于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gtk2">gtk2</a></span><sup><small>包</small></sup></span> 的 UI 的和直接从终端运行的皆可），Galaxy 客户端（需要 Wine），或者非官方客户端安装。</li></ul>
+<dl><dd><a href="https://www.gog.com">https://www.gog.com</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lgogdownloader/">lgogdownloader</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wyvern/">wyvern</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/minigalaxy/">minigalaxy</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Heroic Games Launcher</b> — GOG 和 Epic 的GUI，Epic Games Launcher 的开源替代品。</li></ul>
+<dl><dd><a href="https://heroicgameslauncher.com/">https://heroicgameslauncher.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/heroic-games-launcher/">heroic-games-launcher</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/itch.io">itch.io</a></b> — 独立游戏商店。</li></ul>
+<dl><dd><a href="https://itch.io">https://itch.io</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/itch-setup-bin/">itch-setup-bin</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Legendary</b> — Epic Games Launcher 的免费开源替代品。</li></ul>
+<dl><dd><a href="https://github.com/derrod/legendary">https://github.com/derrod/legendary</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/legendary/">legendary</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Lutris">Lutris</a></b> — Linux 的开放游戏平台。从 GOG、Steam、Battle.net、Origin、Uplay 和许多其他来源获取游戏。Lutris 利用各种<a href="https://lutris.net/games">游戏运行器</a>启动具有完全可自定义的配置选项的游戏。</li></ul>
+<dl><dd><a href="https://lutris.net">https://lutris.net</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lutris">lutris</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Modrinth App</b> — 一个独一无二的开源启动器；简单一个小软件包，你就可以畅玩喜欢的 mod 并让它们保持更新。</li></ul>
+<dl><dd><a href="https://modrinth.com/app">https://modrinth.com/app</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/modrinth-app-appimage/">modrinth-app-appimage</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Play.it</b> — 自动构建原生软件包，还支持 <a href="#pg39e5cd9380ff">Wine</a>、<a href="#pg70e711219755">DOSBox</a> 和 ScummVM 游戏。</li></ul>
+<dl><dd><a href="https://www.dotslashplay.it/">https://www.dotslashplay.it/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/play.it/">play.it</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>portproton</b> — 一个用于运行 Windows 游戏和启动器的软件。</li></ul>
+<dl><dd><a href="https://linux-gaming.ru/">https://linux-gaming.ru/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/portproton/">portproton</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Proton</b> — 为 Steam Play 设计的兼容性工具，基于 Wine 和其他附加组分。</li></ul>
+<dl><dd><a href="https://github.com/ValveSoftware/Proton">https://github.com/ValveSoftware/Proton</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/proton/">proton</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/proton-experimental/">proton-experimental</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup></dd></dl>
+<ul><li><b>proton-ge-custom</b> — GloriousEggroll 修改过的 Proton 编译版本。</li></ul>
+<dl><dd><a href="https://github.com/GloriousEggroll/proton-ge-custom">https://github.com/GloriousEggroll/proton-ge-custom</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/proton-ge-custom/">proton-ge-custom</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup></dd></dl>
+<ul><li><b>Rare</b> — 基于PyQt5的另一个Epic GUI</li></ul>
+<dl><dd><a href="https://github.com/Dummerle/Rare">https://github.com/Dummerle/Rare</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rare/">rare</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg95e65bdea0f3">Steam</a></b> — Valve开发的数字发行和社区平台。</li></ul>
+<dl><dd><a href="https://store.steampowered.com">https://store.steampowered.com</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=steam">steam</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>umu-launcher</b> — 这是 Linux 上 Windows 游戏的统一启动器，用以在 Steam 外运行 Proton。</li></ul>
+<dl><dd><a href="https://github.com/Open-Wine-Components/umu-launcher">https://github.com/Open-Wine-Components/umu-launcher</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=umu-launcher">umu-launcher</a></span><sup><small>包</small></sup></span></dd></dl>
+<p>对于第三方 <a href="#pg39e5cd9380ff">Wine</a> 程序，请参见 <a href="#pg39e5cd9380ff">Wine#第三方程序</a>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg937d8e90f2bd_.E6.B8.B8.E6.88.8F.E5.90.AF.E5.8A.A8.E5.99.A8" id="游戏启动器"><span id=".E6.B8.B8.E6.88.8F.E5.90.AF.E5.8A.A8.E5.99.A8"></span>游戏启动器</h2></div>
+<p>游戏启动器是在各平台上管理、运行游戏的重要工具。以下是 Linux 上可用的各游戏启动器的一个比较，主要聚焦于它们的特性和兼容性。
+</p>
+<div style="overflow-x: scroll">
+<table class="wikitable sortable" style="text-align:center">
+<tbody><tr>
+<th>名称</th>
+<th>包名</th>
+<th>是否开源</th>
+<th>是否支持 Wine</th>
+<th>是否支持 DLC 管理</th>
+<th>是否跨平台</th>
+<th><a href="#pg1fffc3c1d9c2">ProtonDB</a> 支持情况</th>
+<th>依赖</th>
+<th>是否推荐
+</th></tr>
+<tr>
+<th><a href="#pgfa2b96497136">Athenaeum</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/athenaeum-git/">athenaeum-git</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>无</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th><a href="#pgde50b4a36e71">Flathub</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=flatpak">flatpak</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>Flatpak 运行时</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="#pg0f97d03bcfca">GOG.com</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lgogdownloader/">lgogdownloader</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Python 3</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th><a href="#pgc8fe8ced82c6">Heroic Games Launcher</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/heroic-games-launcher/">heroic-games-launcher</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Qt 5</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th><a href="#pg060cd2eb4206">itch.io</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/itch-setup-bin/">itch-setup-bin</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>无</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th><a href="#pg27bb991bd30f">Legendary</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/legendary/">legendary</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>无</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th><a href="#pg3b27b035dd9a">Lutris</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lutris">lutris</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Python 3, Wine</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th><a href="#pg8a68cc62d9cf">Modrinth App</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/modrinth-app-appimage/">modrinth-app-appimage</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>无</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="#pgcd8edbc60074">Play.it</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/play.it/">play.it</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>无</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th><a href="#pg0ead97ecfe91">portproton</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/portproton/">portproton</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>无</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="#pg8c813b2a0b35">proton-ge-custom</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/proton-ge-custom/">proton-ge-custom</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>无</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th><a href="#pgdc1fe2222eda">Rare</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rare/">rare</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>无</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th><a href="#pg95e65bdea0f3">Steam</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=steam">steam</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>无</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th><a href="#pgb89f0960ff2d">umu-launcher</a>
+</th>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=umu-launcher">umu-launcher</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>无</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr></tbody></table>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg937d8e90f2bd_.E9.85.8D.E7.BD.AE.E6.B8.B8.E6.88.8F" id="配置游戏"><span id=".E9.85.8D.E7.BD.AE.E6.B8.B8.E6.88.8F"></span>配置游戏</h2></div>
+<p>某些游戏或游戏类型可能需要特殊配置才能运行或按预期运行。在大多数情况下，由于编译时优化，游戏将在Arch Linux中开箱即用，性能可能优于其他发行版。但是，某些特殊设置可能需要一些配置或脚本才能使游戏按预期顺利运行。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E5.A4.9A.E6.98.BE.E7.A4.BA.E5.99.A8.E8.AE.BE.E7.BD.AE" id="多显示器设置"><span id=".E5.A4.9A.E6.98.BE.E7.A4.BA.E5.99.A8.E8.AE.BE.E7.BD.AE"></span>多显示器设置</h3></div>
+<p>运行多屏设置可能会导致全屏游戏出现问题。在这种情况下，运行另一个X显示服务器是一种可能的解决方案。对于 NVIDIA 用户，一个可能的解决方案可以在 <a href="#pge12579b7d4ac">NVIDIA#用_TwinView_玩游戏</a>中找到。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E9.94.AE.E7.9B.98.E6.8A.93.E5.8F.96" id="键盘抓取"><span id=".E9.94.AE.E7.9B.98.E6.8A.93.E5.8F.96"></span>键盘抓取</h3></div>
+<p>许多游戏会占用键盘，明显会阻止您切换窗口（也称为 alt-tabbing）。
+</p><p>一些 SDL 游戏（例如 Guacamelee）允许您通过按 <code>Ctrl-g</code> 来禁用抓取。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>众所周知，SDL 有时无法抓取输入系统。在这种情况下，等待几秒钟可能会恢复。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E5.9C.A8.E5.8D.95.E7.8B.AC.E7.9A.84X.E6.98.BE.E7.A4.BA.E6.9C.8D.E5.8A.A1.E5.99.A8.E4.B8.AD.E5.90.AF.E5.8A.A8.E6.B8.B8.E6.88.8F" id="在单独的X显示服务器中启动游戏"><span id=".E5.9C.A8.E5.8D.95.E7.8B.AC.E7.9A.84X.E6.98.BE.E7.A4.BA.E6.9C.8D.E5.8A.A1.E5.99.A8.E4.B8.AD.E5.90.AF.E5.8A.A8.E6.B8.B8.E6.88.8F"></span>在单独的X显示服务器中启动游戏</h3></div>
+<p>在某些情况下，如上面提到的那些，可能需要或希望运行第二个X显示服务器。 运行第二个X显示服务器有很多优势，例如更好的性能，使用 <code>Ctrl+Alt+F7</code>/<code>Ctrl+Alt+F8</code> 来“跳出”游戏的能力，在游戏与图形驱动程序冲突的情况下也不会导致您的主X会话（可能有未完成的工作）崩溃。 新的X显示服务器将类似于ALSA的远程访问登录，因此您的用户需要成为 <code>audio</code> 组的一部分才能听到声音。
+</p><p>要启动第二个 X 服务器（以免费的第一人称射击游戏 <a href="https://www.xonotic.org/">Xonotic</a> 为例），您可以简单地执行以下操作：
+</p>
+<pre>$ xinit /usr/bin/xonotic-glx -- :1 vt$XDG_VTNR
+</pre>
+<p>这可以通过使用单独的X配置文件来做一些自定义设置：
+</p>
+<pre>$ xinit /usr/bin/xonotic-glx -- :1 -xf86config xorg-game.conf vt$XDG_VTNR
+</pre>
+<p>在这里提供替代“xorg.conf”的一个很好的理由可能是您的主要配置使用了 NVIDIA 的 Twinview，它将在您的多屏幕设置中间呈现您的 3D 游戏，如 Xonotic，跨越所有屏幕。这是不可取的，因此建议使用禁用第二个屏幕的替代配置启动第二个 X。要注意的是X配置文件位置是相对于 <code>/etc/X11</code> 目录的。
+</p><p>使用 Openbox 作为您的主目录或 <code>/usr/local/bin</code> 的游戏启动脚本可能如下所示：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/game.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">if [ $# -ge 1 ]; then
+        game="$(which $1)"
+        openbox="$(which openbox)"
+        tmpgame="/tmp/tmpgame.sh"
+        DISPLAY=:1.0
+        echo -e "${openbox} &amp;\n${game}" &gt; ${tmpgame}
+        echo "starting ${game}"
+        xinit ${tmpgame} -- :1 -xf86config xorg-game.conf || exit 1
+else
+        echo "not a valid argument"
+fi
+</pre>
+<p><a href="#pg7258f38183d6">添加可执行权限</a>后，您可以执行以下操作：
+</p>
+<pre>$ ~/game.sh xonotic-glx
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果你想避免从<code>/etc/X11/xorg.conf.d</code>加载配置，你还应该使用<code>-configdir</code>选项，指定一个空目录。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E8.B0.83.E6.95.B4.E9.BC.A0.E6.A0.87.E6.A3.80.E6.B5.8B" id="调整鼠标检测"><span id=".E8.B0.83.E6.95.B4.E9.BC.A0.E6.A0.87.E6.A3.80.E6.B5.8B"></span>调整鼠标检测</h3></div>
+<p>对于需要大量鼠标技能的游戏，调整<a href="#pga878f5660687">鼠标轮询率</a>可以帮助提高准确性。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E4.BD.BF.E7.94.A8_OpenAL_.E7.9A.84.E5.8F.8C.E8.80.B3.E9.9F.B3.E9.A2.91" id="使用_OpenAL_的双耳音频"><span id=".E4.BD.BF.E7.94.A8_OpenAL_.E7.9A.84.E5.8F.8C.E8.80.B3.E9.9F.B3.E9.A2.91"></span>使用 OpenAL 的双耳音频</h3></div>
+<p>对于使用了<a href="https://en.wikipedia.org/wiki/OpenAL">OpenAL</a>的游戏, 如果您使用耳机，您可能会使用 OpenAL 的 <a href="https://en.wikipedia.org/wiki/Head-related_transfer_function">HRTF</a> 过滤器获得更好的定位音频。 要启用，请<a href="#pgeb027b34b7ae">创建</a>如下文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.alsoftrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">hrtf = true</pre>
+<p>或者，从AUR安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/openal-hrtf/">openal-hrtf</a></span><sup><small>AUR</small></sup></span>，并编辑<code>/etc/openal/alsoftrc.conf</code>中的选项
+</p><p>对于 Source 游戏，必须将游戏内设置“dsp_slow_cpu”设置为“1”以启用 HRTF，否则游戏将启用自己的处理。您还需要将 Steam 设置为使用原生运行时，或者将其 openal.so副本链接到您自己的本地副本。为了完整起见，还使用以下选项：
+</p>
+<pre>dsp_slow_cpu 1 # 禁用游戏内空间化
+snd_spatialize_roundrobin 1 # 禁用空间化 1.0*100% 的声音
+dsp_enhance_stereo 0 # 禁用 DSP 音效。 如果你发现它不会干扰您对音效的感知，也可以将其保持打开状态。
+snd_pitchquality 1 # 使用高质量的声音
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E8.B0.83.E6.95.B4PulseAudio" id="调整PulseAudio"><span id=".E8.B0.83.E6.95.B4PulseAudio"></span>调整PulseAudio</h3></div>
+<p>如果你使用<a href="#pga942ba974b3d">PulseAudio</a>, 您可能希望调整一些默认设置以确保它以最佳方式运行。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_.E5.90.AF.E7.94.A8.E5.AE.9E.E6.97.B6.E4.BC.98.E5.85.88.E7.BA.A7.E5.92.8C.E8.B4.9Fnice.E7.BA.A7.E5.88.AB" id="启用实时优先级和负nice级别"><span id=".E5.90.AF.E7.94.A8.E5.AE.9E.E6.97.B6.E4.BC.98.E5.85.88.E7.BA.A7.E5.92.8C.E8.B4.9Fnice.E7.BA.A7.E5.88.AB"></span>启用实时优先级和负nice级别</h4></div>
+<p>Pulseaudio被构建为以实时优先级运行，是一个音频守护进程。但是，由于它锁定系统的安全风险，默认情况下它被安排为常规线程。 要对此进行调整，首先确保您在 <code>audio</code>组中。然后，取消注释并编辑 <code>/etc/pulse/daemon.conf</code> 中的以下行：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pulse/daemon.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">high-priority = yes
+nice-level = -11
+
+realtime-scheduling = yes
+realtime-priority = 5</pre>
+<p>再重新启动 pulseaudio。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_.E4.BD.BF.E7.94.A8.E6.9B.B4.E9.AB.98.E8.B4.A8.E9.87.8F.E7.9A.84.E6.B7.B7.E9.9F.B3.E4.BB.A5.E8.8E.B7.E5.BE.97.E6.9B.B4.E5.A5.BD.E7.9A.84.E5.A3.B0.E9.9F.B3" id="使用更高质量的混音以获得更好的声音"><span id=".E4.BD.BF.E7.94.A8.E6.9B.B4.E9.AB.98.E8.B4.A8.E9.87.8F.E7.9A.84.E6.B7.B7.E9.9F.B3.E4.BB.A5.E8.8E.B7.E5.BE.97.E6.9B.B4.E5.A5.BD.E7.9A.84.E5.A3.B0.E9.9F.B3"></span>使用更高质量的混音以获得更好的声音</h4></div>
+<p>Arch上的PulseAudio默认使用speex-float-1来重新混合频道，这被认为是“中低”质量的混音。如果您的系统可以处理额外的负载，将其设置为以下之一可以提升声音效果：
+</p>
+<pre>resample-method = speex-float-10
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_.E5.B0.86.E7.A1.AC.E4.BB.B6.E7.BC.93.E5.86.B2.E5.8C.BA.E4.B8.8EPulse.E7.9A.84.E7.BC.93.E5.86.B2.E7.9B.B8.E5.8C.B9.E9.85.8D" id="将硬件缓冲区与Pulse的缓冲相匹配"><span id=".E5.B0.86.E7.A1.AC.E4.BB.B6.E7.BC.93.E5.86.B2.E5.8C.BA.E4.B8.8EPulse.E7.9A.84.E7.BC.93.E5.86.B2.E7.9B.B8.E5.8C.B9.E9.85.8D"></span>将硬件缓冲区与Pulse的缓冲相匹配</h4></div>
+<p>匹配缓冲区可以减少卡顿并略微提高性能。 有关详细信息，请参考<a href="https://forums.linuxmint.com/viewtopic.php?f=42&amp;t=44862">这里</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg937d8e90f2bd_.E8.BF.9C.E7.A8.8B.E6.B8.B8.E7.8E.A9" id="远程游玩"><span id=".E8.BF.9C.E7.A8.8B.E6.B8.B8.E7.8E.A9"></span>远程游玩</h2></div>
+<p><a href="https://en.wikipedia.org/wiki/Cloud_gaming">云游戏</a>由于对客户端硬件的要求低，在过去几年中获得了广泛的欢迎。唯一重要的是稳定的互联网连接（推荐使用以太网电缆或 5GHz Wi-Fi），最低速度为 5-10 Mbit/s（取决于视频质量和帧率）。
+</p><p>参考<a href="#pg13f5c5ea60c5">游戏手柄#通过网络使用游戏手柄</a>用于通过网络使用游戏手柄以及通常不支持此功能的服务。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>大多数在浏览器中运行的服务通常意味着只与 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/google-chrome/">google-chrome</a></span><sup><small>AUR</small></sup></span> 兼容。</div>
+<table class="wikitable sortable" style="text-align: center;">
+<tbody><tr>
+<th>Service
+</th>
+<th class="unsortable">Installer
+</th>
+<th>In browser client
+</th>
+<th>Use your own host
+</th>
+<th>Offers host renting
+</th>
+<th>Full desktop support
+</th>
+<th>Controller support
+</th>
+<th class="unsortable">Remarks
+</th></tr>
+<tr>
+<td><a href="https://dixper.gg/">Dixper</a></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">Windows-only</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://reemo.io/">Reemo</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/reemod-bin/">reemod-bin</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">Chromium based only</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">Windows-only</td>
+<td>您还可以通过他们的网站在下载部分使用官方安装脚本安装软件。
+</td></tr>
+<tr>
+<td><a href="https://xbox.com/play">Xbox Cloud</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xbox-cloud-gaming/">xbox-cloud-gaming</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>您需要Game Pass Ultimate才能使用XCloud。
+</td></tr>
+<tr>
+<td><a href="#pgba5e1d314343">GeForce Now</a></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>您必须在Steam、Epic Client或GOG上有游戏才能使用此服务。并非所有游戏都可用。
+</td></tr>
+<tr>
+<td><a href="https://moonlight-stream.org/">Moonlight</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/moonlight-qt/">moonlight-qt</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>This is only a client. Host machine must use either GeForce Experience (windows only) or <a href="https://github.com/SunshineStream/Sunshine">Sunshine</a> (multiplatform).
+</td></tr>
+<tr>
+<td><a href="https://parsec.app/">Parsec</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/parsec-bin/">parsec-bin</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是 (experimental)</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">Windows-only</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://github.com/mbroemme/vdi-stream-client">VDI Stream Client</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vdi-stream-client/">vdi-stream-client</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">Windows-only</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>VDI client with 3D GPU acceleration and built-in USB redirection
+</td></tr>
+<tr>
+<td><a href="https://playkey.net/">Playkey</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/playkey-linux/">playkey-linux</a></span><sup><small>AUR</small></sup></span></td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td style="white-space:nowrap"><a href="https://www.playstation.com/en-gb/ps-now/ps-now-on-pc/">PlayStation Now</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2024-07-30 ⓘ]</sup></td>
+<td>Runs under <a href="#pg39e5cd9380ff">Wine</a> or <a href="#pg95e65bdea0f3">Steam</a>'s proton</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Play PS4, PS3 and PS2 games on PC. Alternatively, you can use <a href="#pg579af49f256f">emulators</a>.
+</td></tr>
+<tr>
+<td style="white-space:nowrap"><a href="https://www.playstation.com/en-us/remote-play/">PlayStation Remote Play</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/chiaki/">chiaki</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Play games from your PS4 and/or PS5 on PC.
+</td></tr>
+<tr>
+<td><a href="https://www.rainway.cloud/">Rainway</a></td>
+<td>基于浏览器</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">Windows-only</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>?</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://shadow.tech/">Shadow</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/shadow-tech/">shadow-tech</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>控制器支持依赖于IP上的USB，目前仅支持AVC，不支持HEVC
+</td></tr>
+<tr>
+<td><a href="#pg95e65bdea0f3">Steam Remote Play</a></td>
+<td>Part of <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=steam">steam</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="https://vortex.gg/">Vortex</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2024-01-29 ⓘ]</sup></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>?</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="#pgf4b1c230f49d">VNC</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tigervnc">tigervnc</a></span><sup><small>包</small></sup></span> or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=x11vnc">x11vnc</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>General purpose remote desktop protocol, but the latency should be low enough to use it for gaming over a LAN. See <a href="#pg85cb2c411b99">Gamepad#Gamepad over network</a> for gamepad support.
+</td></tr>
+<tr>
+<td><a href="#pg0791f7b65f3f">xrdp</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xrdp/">xrdp</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>Another general purpose remote desktop protocol, has both OpenGL and Vulkan support after configuring <a href="#pg0791f7b65f3f">graphical accleration</a>. Recommended for gaming over a LAN. See <a href="#pg85cb2c411b99">Gamepad#Gamepad over network</a> for gamepad support.
+</td></tr>
+<tr>
+<td><a href="#pg739caff8b23f">X11 forwarding</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openssh">openssh</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>X forwarding over SSH with <a href="#pg9b78e31687dd">VirtualGL</a> supports OpenGL and works for some but not all games. See <a href="#pg85cb2c411b99">Gamepad#Gamepad over network</a> for gamepad support.
+</td></tr>
+<tr>
+<td><a href="https://boosteroid.com/">Boosteroid</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/boosteroid/">boosteroid</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>您必须在数字发行平台（Steam、EGS、Origin等）上拥有游戏才能使用此服务。并非所有游戏都可用。您需要注册（免费）才能查看完整的游戏列表。您需要购买订阅，才能在数字发行平台上推出您拥有的游戏。
+</td></tr>
+<tr>
+<td><a href="https://www.blacknut.com/">Blacknut</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/blacknut-appimage/">blacknut-appimage</a></span><sup><small>AUR</small></sup></span> or <a href="https://www.blacknut.com/en/download/linux">Blacknut AppImage</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>您需要订阅才能使用此服务。并非所有游戏都可用。
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg937d8e90f2bd_.E6.80.A7.E8.83.BD.E4.BC.98.E5.8C.96" id="性能优化"><span id=".E6.80.A7.E8.83.BD.E4.BC.98.E5.8C.96"></span>性能优化</h2></div>
+<p>参考主要文章：<a href="#pg5f7223c277dc">性能优化</a>。 对于 Wine 程序，请参阅 <a href="#pg39e5cd9380ff">Wine#性能</a>。 要获得良好的低延迟游戏体验，需要一致的响应时间（无抖动）和足够的吞吐量（每秒帧数）。
+如果您有多个信号源并带有一点点抖动，它们有时可能会重叠并产生明显的卡顿。 因此，大多数时候最好稍微降低吞吐量以获得更多的响应时间一致性。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E6.8F.90.E9.AB.98_clock_gettime_.E5.90.9E.E5.90.90.E9.87.8F" id="提高_clock_gettime_吞吐量"><span id=".E6.8F.90.E9.AB.98_clock_gettime_.E5.90.9E.E5.90.90.E9.87.8F"></span>提高 clock_gettime 吞吐量</h3></div>
+<p>用户空间程序，尤其是游戏会多次调用 <span class="plainlinks archwiki-template-man" title="$ man 2 clock_gettime"><a href="https://man.archlinux.org/man/clock_gettime.2">clock_gettime(2)</a></span> 来获取计算游戏物理、fps 等的当前时间。 运行下面的命令可以查看使用率
+</p>
+<pre># perf top
+</pre>
+<p>并查看 read_hpet（或 acpi_pm_read）的开销。
+</p><p>如果您不依赖于非常精确的计时器，您可以从 hpet（高精度事件计时器）或 acpi_pm（ACPI电源管理计时器）切换到更快的TSC（时间戳计数器）计时器。添加<a href="#pgec0856954f1c">内核参数</a>
+</p>
+<pre>tsc=reliable clocksource=tsc
+</pre>
+<p>使TSC可用并启用它。重启后通过运行确认时钟源
+</p>
+<pre># cat /sys/devices/system/clocksource/clocksource*/current_clocksource
+</pre>
+<p>您可以通过运行下面命令查看所有当前可用的计时器
+</p>
+<pre># cat /sys/devices/system/clocksource/clocksource*/available_clocksource
+</pre>
+<p>往current_clocksource写入其中之一来进行更改。 在使用 <a href="https://gist.github.com/weirddan455/eb807fa48915652abeca3b6421970ab4">[5]</a> 的 Zen 3 系统基准测试中，与 <code>hpet</code> 或 <code>acpi_pm</code> 相比，<code>tsc</code> 的吞吐量高约 50 倍。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>在 <code>tsc</code> 尚不可靠时强行启用之会导致 Firefox 无征兆地崩溃，因为这破坏了为 Firefox 所依赖的 <code>clock_gettime(CLOCK_MONOTONIC)</code> 的单一性<a href="https://mastodon.yuuta.moe/@coelacanthus/110996261222325004">[6]</a>。使用风险自负！</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E8.B0.83.E6.95.B4.E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0.E4.BB.A5.E5.AE.9E.E7.8E.B0.E5.93.8D.E5.BA.94.E6.97.B6.E9.97.B4.E4.B8.80.E8.87.B4.E6.80.A7" id="调整内核参数以实现响应时间一致性"><span id=".E8.B0.83.E6.95.B4.E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0.E4.BB.A5.E5.AE.9E.E7.8E.B0.E5.93.8D.E5.BA.94.E6.97.B6.E9.97.B4.E4.B8.80.E8.87.B4.E6.80.A7"></span>调整内核参数以实现响应时间一致性</h3></div>
+<p>您可以安装实时内核以获得一些默认情况下的优势（参见<a href="#pga3a0aaf4b772">实时内核</a>），代价是损失 CPU 吞吐量且可能延迟中断处理。此外，实时内核与 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-open-dkms">nvidia-open-dkms</a></span><sup><small>包</small></sup></span>不兼容，并且不会更改 SCHED_NORMAL（也称为 SCHED_OTHER）进程的调度程序，这是默认进程调度类型。以下内核参数更改进一步提高了实时内核以及其他内核（例如默认 linux 内核）的响应时间一致性：
+</p><p>透明巨面（THP）分配的主动压缩会减少平均分配停滞，但不一定减少最大分配停滞。根据<a href="https://docs.kernel.org/admin-guide/sysctl/vm.html">内核文档</a>，禁用主动压缩，因为它会引入抖动：
+</p>
+<pre># echo 0 &gt; /proc/sys/vm/compaction_proactiveness
+</pre>
+<p>在内存碎片化的情况下，降低水印加速因数以对一个单独的页面块（64位x86上为2MB）进行碎片整理。这会更好地在内存碎片事件之后将应用程序数据保留在最后一级处理器缓存中。
+</p>
+<pre># echo 1 &gt; /proc/sys/vm/watermark_boost_factor
+</pre>
+<p>如果您有足够的可用 RAM，请增加最小可用千字节数以避免内存分配卡顿：<a href="https://highscalability.com/blog/2015/4/8/the-black-magic-of-systematically-reducing-linux">-os-jitter.html</a><a href="https://docs.kernel.org/admin-guide/sysctl/vm.html">[7]</a>。 不要将其设置为低于 1024 KB 或高于系统内存的 5%。 设置为预留1GB的命令如下：
+</p>
+<pre># echo 1048576 &gt; /proc/sys/vm/min_free_kbytes
+</pre>
+<p>如果您有足够的可用 RAM，请增加水印比例因数以进一步降低分配停滞的可能性<a href="https://blogs.oracle.com/linux/post/anticipating-your-memory-needs">[8]</a><a href="https://blogs.oracle.com/linux/post/anticipating-your-memory-needs-2">[9]</a>。将水印距离设置为 RAM 的5%：
+</p>
+<pre># echo 500 &gt; /proc/sys/vm/watermark_scale_factor
+</pre>
+<p>除非系统没有更多可用内存，否则避免交换（锁定页面会引入延迟并使用磁盘 IO）：
+</p>
+<pre># echo 10 &gt; /proc/sys/vm/swappiness
+</pre>
+
+<p><br/>
+启用 <a href="#pg952d5556d6d4">zswap</a>。如果出现对交换页面的需求, 那么 zswap 会帮助减少交换引起的卡顿。如果没有交换分区，可以使用 <a href="#pg61935487d964">zram#Usage as swap</a> 代替 zswap。要启用 zswap：
+</p>
+<pre># echo 1 &gt; /sys/module/zswap/parameters/enabled
+</pre>
+<p>启用多代最近最少使用（MGLRU），同时以较小的性能成本降低锁定争用的可能性<a href="https://docs.kernel.org/admin-guide/mm/multigen_lru.html">[11]</a>：
+</p>
+<pre># echo 5 &gt; /sys/kernel/mm/lru_gen/enabled
+</pre>
+<p>禁用区域回收（锁定和移动引入延迟峰值的内存页面）：
+</p>
+<pre># echo 0 &gt; /proc/sys/vm/zone_reclaim_mode
+</pre>
+<p>当性能开销很大时，禁用透明巨面 (THP)。 即使禁用碎片整理，THP 也可能会引入延迟峰值<a href="https://docs.kernel.org/admin-guide/mm/transhuge.html">[12]</a><a href="https://rigtorp.se/virtual-memory/">[13]</a><a href="https://alexandrnikitin.github.io/blog/transparent-hugepages-measuring-the-performance-impact/">[14]</a>。仅当应用程序使用 madvise 或 advise 特别请求时才启用：
+</p>
+<pre># echo madvise &gt; /sys/kernel/mm/transparent_hugepage/enabled
+# echo advise &gt; /sys/kernel/mm/transparent_hugepage/shmem_enabled
+# echo never &gt; /sys/kernel/mm/transparent_hugepage/khugepaged/defrag
+</pre>
+<p>请注意，如果您的游戏使用 TCMalloc（例如 Dota 2 和 CS:GO），则不建议禁用 THP，因为它会带来很大的性能成本<a href="https://github.com/google/tcmalloc/blob/master/docs/tuning.md#system-level-optimizations">[15]</a>。
+</p><p>减少最大页面锁定获取延迟，同时保持足够的吞吐量 <a href="https://www.phoronix.com/review/linux-59-unfairness">[16]</a><a href="https://openbenchmarking.org/result/2009154-FI-LINUX58CO57&amp;sro">[17]</a><a href="https://www.phoronix.com/review/linux-59-fairness">[18]</a>：
+</p>
+<pre># echo 1 &gt; /proc/sys/vm/page_lock_unfairness
+</pre>
+<p>调整调度程序设置。以下调度程序设置与 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cfs-zen-tweaks/">cfs-zen-tweaks</a></span><sup><small>AUR</small></sup></span> 冲突，因此对于每个设置只选择一个提供程序。默认情况下，linux 内核调度程序针对吞吐量而非延迟进行了优化。以下手工设置改变了这一点，并在不同的游戏中进行了测试，得到了显着的改进。 它们可能不是您的用例的最佳选择； 考虑根据需要来修改它们 <a href="https://access.redhat.com/solutions/177953">[19]</a><a href="https://doc.opensuse.org/documentation/leap/tuning/html/book-tuning/cha-tuning-taskscheduler.html">[20]</a><a href="https://www.amd.com/system/files/documents/58016-epyc-9004-tg-java.pdf#page=29">[21]</a>：
+</p>
+<pre># echo 0 &gt; /proc/sys/kernel/sched_child_runs_first
+# echo 1 &gt; /proc/sys/kernel/sched_autogroup_enabled
+# echo 3000 &gt; /proc/sys/kernel/sched_cfs_bandwidth_slice_us
+# echo 3000000 &gt; /sys/kernel/debug/sched/latency_ns
+# echo 500000 &gt; /sys/kernel/debug/sched/migration_cost_ns
+# echo 8 &gt; /sys/kernel/debug/sched/nr_migrate
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_.E5.9B.BA.E5.8C.96.E6.9B.B4.E6.94.B9" id="固化更改"><span id=".E5.9B.BA.E5.8C.96.E6.9B.B4.E6.94.B9"></span>固化更改</h4></div>
+<p>通常，永久设置<a href="#pgec0856954f1c">内核参数</a>的建议是创建并修改<a href="#pg7b7cc2bbe79a">sysctl</a>配置文件或更改<a href="#pg7e866ec617d4">引导加载程序</a>选项。然而，由于我们的更改跨越 procfs（<code>/proc</code>，包含 sysctl）和 sysfs（<code>/sys</code>），最方便的方法是使用 <a href="#pg98adf86d356b">systemd-tmpfiles</a>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tmpfiles.d/consistent-response-time-for-gaming.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#    Path                  Mode UID  GID  Age Argument
+w /proc/sys/vm/compaction_proactiveness - - - - 0
+w /proc/sys/vm/watermark_boost_factor - - - - 1
+w /proc/sys/vm/min_free_kbytes - - - - 1048576
+w /proc/sys/vm/watermark_scale_factor - - - - 500
+w /proc/sys/vm/swappiness - - - - 10
+w /sys/module/zswap/parameters/enabled - - - - 1
+w /sys/kernel/mm/lru_gen/enabled - - - - 5
+w /proc/sys/vm/zone_reclaim_mode - - - - 0
+w /sys/kernel/mm/transparent_hugepage/enabled - - - - madvise
+w /sys/kernel/mm/transparent_hugepage/shmem_enabled - - - - advise
+w /sys/kernel/mm/transparent_hugepage/defrag - - - - never
+w /proc/sys/vm/page_lock_unfairness - - - - 1
+w /proc/sys/kernel/sched_child_runs_first - - - - 0
+w /proc/sys/kernel/sched_autogroup_enabled - - - - 1
+w /proc/sys/kernel/sched_cfs_bandwidth_slice_us - - - - 3000
+w /sys/kernel/debug/sched/base_slice_ns  - - - - 3000000
+w /sys/kernel/debug/sched/migration_cost_ns - - - - 500000
+w /sys/kernel/debug/sched/nr_migrate - - - - 8
+</pre>
+<p>重启后查看值是否生效。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E5.87.8F.E5.B0.91.E7.BC.93.E5.AD.98.E8.86.A8.E8.83.80_.28Buffet_Bloat.29" id="减少缓存膨胀_(Buffet_Bloat)"><span id=".E5.87.8F.E5.B0.91.E7.BC.93.E5.AD.98.E8.86.A8.E8.83.80_.28Buffet_Bloat.29"></span>减少缓存膨胀 (Buffet Bloat)</h3></div>
+<p>设备会在大型缓存排队请求时经受缓存膨胀，导致新请求被长时间阻止。这会在发送和接收数据的时候发生。
+</p><p>缓存膨胀问题可以通过采用智能排队算法来解决，该算法为设备提供公平及时的共享。智能排队算法可以产生更快、更一致的响应时间，但会增加 CPU 开销。对于交互式工作负载，这样减少缓存膨胀是很值得的。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_.E5.9C.A8.E5.AD.98.E5.82.A8.E8.AE.BE.E5.A4.87.E4.B8.8A.E5.87.8F.E5.B0.91.E7.BC.93.E5.AD.98.E8.86.A8.E8.83.80" id="在存储设备上减少缓存膨胀"><span id=".E5.9C.A8.E5.AD.98.E5.82.A8.E8.AE.BE.E5.A4.87.E4.B8.8A.E5.87.8F.E5.B0.91.E7.BC.93.E5.AD.98.E8.86.A8.E8.83.80"></span>在存储设备上减少缓存膨胀</h4></div>
+<p>对于存储设备，BFQ 调度器在最小化缓存膨胀和提高交互性方面最为有效<a href="#pg5f7223c277dc">性能优化#调度算法</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_.E5.9C.A8.E7.BD.91.E7.BB.9C.E4.B8.8A.E5.87.8F.E5.B0.91.E7.BC.93.E5.AD.98.E8.86.A8.E8.83.80" id="在网络上减少缓存膨胀"><span id=".E5.9C.A8.E7.BD.91.E7.BB.9C.E4.B8.8A.E5.87.8F.E5.B0.91.E7.BC.93.E5.AD.98.E8.86.A8.E8.83.80"></span>在网络上减少缓存膨胀</h4></div>
+<p>你可以使用默认的 <a href="https://www.bufferbloat.net/projects/codel/wiki/">fq_codel</a> 或者优化过的 <a href="https://www.bufferbloat.net/projects/codel/wiki/Cake/">cake</a> 智能队列管理算法。它们可以通过 <a href="#pg7b7cc2bbe79a">sysctl</a> 设置。
+</p><p>你的家庭路由器可能会导致缓存膨胀，这可以通过重新配置、安装新的路由器操作系统或更换路由器来缓解 (<a href="https://www.bufferbloat.net/projects/bloat/wiki/What_can_I_do_about_Bufferbloat/">more info</a>)。
+</p><p><a href="https://www.bufferbloat.net/projects/bloat/wiki/Tests_for_Bufferbloat/">[22]</a> 这是检测网络缓存膨胀的一些简易方法。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E9.99.8D.E4.BD.8E_PCI-E_.E5.BB.B6.E8.BF.9F_.28PCI_Express_Latencies.29" id="降低_PCI-E_延迟_(PCI_Express_Latencies)"><span id=".E9.99.8D.E4.BD.8E_PCI-E_.E5.BB.B6.E8.BF.9F_.28PCI_Express_Latencies.29"></span>降低 PCI-E 延迟 (PCI Express Latencies)</h3></div>
+<p>可以把 PCI-E 延迟修改至与 CachyOS <a href="https://github.com/CachyOS/CachyOS-Settings/blob/master/usr/bin/pci-latency">[23]</a> 相似。也可以试着减少一个 PCI-E 客户端（除了声卡）在总线中最多可占用的线路 <a href="https://maximum-tech.net/what-is-pci-latency-timer/">[24]</a>。注意这些设置与<a href="#pgb3b4b5c595bd">专业音频#系统配置</a>相矛盾。
+</p>
+<pre># setpci -v -s '*:*' latency_timer=20
+# setpci -v -s '0:0' latency_timer=0
+# setpci -v -d "*:*:04xx" latency_timer=80
+</pre>
+<p>要使这些设置持续生效，请在<a href="#pg9604da0ac74d">自动启动#开关机时</a>时以超级用户身份运行它们。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E7.A6.81.E7.94.A8.E5.90.8C.E6.AD.A5.E5.A4.9A.E7.BA.BF.E7.A8.8B_.28SMT.29" id="禁用同步多线程_(SMT)"><span id=".E7.A6.81.E7.94.A8.E5.90.8C.E6.AD.A5.E5.A4.9A.E7.BA.BF.E7.A8.8B_.28SMT.29"></span>禁用同步多线程 (SMT)</h3></div>
+<p>禁用 SMT 能否提升你的游戏体验取决于你的硬件和游戏程序是什么。
+</p><p>启用 SMT 的好处：
+</p>
+<ol><li>提升吞吐量，如果你的程序能够利用这些额外的线程</li>
+<li>给调度器更多的运行队列，从而缩短一个进程被安排到核心上的平均等待时间</li></ol>
+<p>禁用 SMT 的好处：
+</p>
+<ol><li>更高的单核性能。由于不再需要共享核心内部资源以及内核和固件禁用SMT相关安全缓解措施的能力，单核性能表现通常会更好。</li>
+<li>更稳定的单核性能。根据你的处理器微架构，SMT 会共享许多处理器内部资源，如指令解码单元、微操作缓存、注册重命名功能、L1 与 L2 缓存和转换旁视缓冲器（TLB）片段。主线程的吞吐量会随着姐妹线程的行为而改变。SMT 也会降低进程调度器的公平性，即使它知晓 SMT 的存在。</li></ol>
+<p>如果你要禁用 SMT，请在 BIOS/UEFI 调整，以获得更好的单核性能。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E7.AB.8B.E5.8D.B3.E5.8A.A0.E8.BD.BD.E5.85.B1.E4.BA.AB.E5.AF.B9.E8.B1.A1.E4.BB.A5.E8.8E.B7.E5.BE.97.E6.9B.B4.E5.A5.BD.E7.9A.84.E9.A6.96.E6.AC.A1.E5.BB.B6.E8.BF.9F" id="立即加载共享对象以获得更好的首次延迟"><span id=".E7.AB.8B.E5.8D.B3.E5.8A.A0.E8.BD.BD.E5.85.B1.E4.BA.AB.E5.AF.B9.E8.B1.A1.E4.BB.A5.E8.8E.B7.E5.BE.97.E6.9B.B4.E5.A5.BD.E7.9A.84.E9.A6.96.E6.AC.A1.E5.BB.B6.E8.BF.9F"></span>立即加载共享对象以获得更好的首次延迟</h3></div>
+<p>给你要运行的游戏设置<a href="#pg4989d4f46056">环境变量</a>
+</p>
+<pre>LD_BIND_NOW=1
+</pre>
+<p>避免需要在运行时加载程序代码（参见 <span class="plainlinks archwiki-template-man" title="$ man 8 ld.so"><a href="https://man.archlinux.org/man/ld.so.8">ld.so(8)</a></span>），从而导致第一次调用函数时出现延迟。但是不要为 <i>startplasma-x11</i> 或链接到库中的其他程序设置此项，这些库实际上不再存在于系统中并且永远不会被程序调用。如果是这种情况，程序将在启动时尝试链接一个不存在的共享对象而失败，从而使这个问题很容易识别。启用此设置后，大多数游戏应该都能正常启动。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E5.B7.A5.E5.85.B7" id="工具"><span id=".E5.B7.A5.E5.85.B7"></span>工具</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_GameMode" id="GameMode">GameMode</h4></div>
+<p><a href="#pg02b1676a3742">GameMode</a> 是 Linux 的守护进程和库组合，它允许游戏请求将一组优化临时应用于host操作系统。 这可以提高游戏性能。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_Gamescope" id="Gamescope">Gamescope</h4></div>
+<p><a href="#pg873bd3c6e9b8">Gamescope</a>是 Valve 开发的一个微合成器，用于 Steam Deck 。其目标是提供一种针对游戏量身定制的独立合成器，并且支持许多以游戏为中心的功能。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_ACO.E7.BC.96.E8.AF.91.E5.99.A8" id="ACO编译器"><span id="ACO.E7.BC.96.E8.AF.91.E5.99.A8"></span>ACO编译器</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>下面显示的方法<b>仅</b>适用于运行<i><a href="#pg4a4bc5e5df24">AMDGPU</a> </i>驱动程序的 AMD GPU。</div>
+<p>参考 <a href="#pg4a4bc5e5df24">AMDGPU#ACO编译器</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E5.87.8F.E5.B0.91DRI.E5.BB.B6.E8.BF.9F" id="减少DRI延迟"><span id=".E5.87.8F.E5.B0.91DRI.E5.BB.B6.E8.BF.9F"></span>减少DRI延迟</h3></div>
+<p>直接渲染基础结构 (DRI) 配置文件适用于所有DRI驱动程序，包括Mesa和Nouveau。您可以在 <code>/etc/drirc</code> 或每个用户在 <code>$HOME/.drirc</code> 中更改系统范围内的 DRI 配置。如果文件不存在，可以创建它们。两个文件使用相同的语法； 这些选项的文档可以在 <a href="https://dri.freedesktop.org/wiki/ConfigurationOptions/">[25]</a> 找到。如果要禁用垂直同步来减少输入延迟，添加以下内容：
+</p>
+<pre>&lt;driconf&gt;
+   &lt;device&gt;
+       &lt;application name="Default"&gt;
+           &lt;option name="vblank_mode" value="0" /&gt;
+       &lt;/application&gt;
+   &lt;/device&gt;
+&lt;/driconf&gt;
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_.E4.BD.BF.E7.94.A8.E8.B0.83.E5.BA.A6.E7.AD.96.E7.95.A5.E6.8F.90.E9.AB.98.E5.B8.A7.E9.80.9F.E7.8E.87.E5.92.8C.E5.93.8D.E5.BA.94.E8.83.BD.E5.8A.9B" id="使用调度策略提高帧速率和响应能力"><span id=".E4.BD.BF.E7.94.A8.E8.B0.83.E5.BA.A6.E7.AD.96.E7.95.A5.E6.8F.90.E9.AB.98.E5.B8.A7.E9.80.9F.E7.8E.87.E5.92.8C.E5.93.8D.E5.BA.94.E8.83.BD.E5.8A.9B"></span>使用调度策略提高帧速率和响应能力</h3></div>
+<p>Most games can benefit if given the correct scheduling policies for the kernel to prioritize the task. These policies should ideally be set per-thread by the application itself.
+</p><p>For programs which do not implement scheduling policies on their own, application known as <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=schedtool">schedtool</a></span><sup><small>包</small></sup></span>, and its associated daemon <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/schedtoold/">schedtoold</a></span><sup><small>AUR</small></sup></span> can handle many of these tasks automatically.
+</p><p>To edit what programs relieve what policies, simply edit <code>/etc/schedtoold.conf</code> and add the program followed by the <i>schedtool</i> arguments desired.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_Policies" id="Policies">Policies</h4></div>
+<p><code>SCHED_ISO</code> (only implemented in BFS/MuQSSPDS schedulers found in -pf and -ck <a href="#pg79837a9c7434">kernel</a>s) – will not only allow the process to use a maximum of 80 percent of the CPU, but will attempt to reduce latency and stuttering wherever possible. Most if not all games will benefit from this:
+</p>
+<pre>bit.trip.runner -I
+</pre>
+<p><code>SCHED_FIFO</code> provides an alternative, that can even work better. You should test to see if your applications run more smoothly with <code>SCHED_FIFO</code>, in which case by all means use it instead. Be warned though, as <code>SCHED_FIFO</code> runs the risk of starving the system! Use this in cases where -I is used below:
+</p>
+<pre>bit.trip.runner -F -p 15
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_Nice_levels" id="Nice_levels">Nice levels</h4></div>
+<p>Secondly, the nice level sets which tasks are processed first, in ascending order. A nice level of -4 is recommended for most multimedia tasks, including games:
+</p>
+<pre>bit.trip.runner -n -4
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_Core_affinity" id="Core_affinity">Core affinity</h4></div>
+<p>There is some confusion in development as to whether the driver should be multithreading, or the program. Allowing both the driver and program to simultaneously multithread can result in significant performance reductions, such as framerate loss and increased risk of crashes. Examples of this include a number of modern games, and any Wine program which is running with <a href="https://en.wikipedia.org/wiki/OpenGL_Shading_Language">GLSL</a> enabled. To select a single core and allow only the driver to handle this process, simply use the <code>-a 0x<i>#</i></code> flag, where <i>#</i> is the core number, e.g.:
+</p>
+<pre>bit.trip.runner -a 0x1
+</pre>
+<p>uses first core.
+</p><p>Some CPUs are hyperthreaded and have only 2 or 4 cores but show up as 4 or 8, and are best accounted for:
+</p>
+<pre>bit.trip.runner -a 0x5
+</pre>
+<p>which use virtual cores 0101, or 1 and 3.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_General_case" id="General_case">General case</h4></div>
+<p>For most games which require high framerates and low latency, usage of all of these flags seems to work best. Affinity should be checked per-program, however, as most native games can understand the correct usage.
+For a general case:
+</p>
+<pre>bit.trip.runner -I -n -4
+Amnesia.bin64 -I -n -4
+hl2.exe -I -n -4 -a 0x1 #Wine with GLSL enabled
+</pre>
+<p>etc.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg937d8e90f2bd_Optimus.2C_and_other_helping_programs" id="Optimus,_and_other_helping_programs"><span id="Optimus.2C_and_other_helping_programs"></span>Optimus, and other helping programs</h4></div>
+<p>As a general rule, any other process which the game requires to operate should be reniced to a level above that of the game itself. Strangely, Wine has a problem known as <i>reverse scheduling</i>, it can often have benefits when the more important processes are set to a higher nice level. Wineserver also seems unconditionally to benefit from <code>SCHED_FIFO</code>, since it rarely consumes the whole CPU and needs higher prioritization when possible.
+</p>
+<pre>optirun -I -n -5
+wineserver -F -p 20 -n 19
+steam.exe -I -n -5
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg937d8e90f2bd_Peripherals" id="Peripherals">Peripherals</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_Mouse" id="Mouse">Mouse</h3></div>
+<p>You might want to set your <a href="#pg98b1e1734178">mouse acceleration</a> to control your mouse more accurately.
+</p><p>If your mouse has more than 3 buttons, you might want to see <a href="#pga88285cf648b">Mouse buttons</a>.
+</p><p>If you are using a gaming mouse (especially Logitech and Steelseries) you may want to configure your mouse <a href="#pgb663f7fada94">polling rate</a>, DPI, LEDs etc. Using <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=piper">piper</a></span><sup><small>包</small></sup></span>. See <a href="https://github.com/libratbag/libratbag/tree/master/data/devices">this page</a> for a full list of supported devices by piper. Alternatively <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=solaar">solaar</a></span><sup><small>包</small></sup></span> for logitech devices only.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg937d8e90f2bd_LEDs" id="LEDs">LEDs</h3></div>
+<p>You can change and manipulate various RGBs with <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openrgb">openrgb</a></span><sup><small>包</small></sup></span>, for a list of currently supported devices see <a href="https://openrgb.org/devices_0.9.html">[26]</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg937d8e90f2bd_See_also" id="See_also">See also</h2></div>
+<ul><li><a href="https://www.reddit.com/r/linux_gaming/linux_gaming">[27]</a> - Forum on reddit.com with gaming on linux as its topic, subpages: <a href="https://www.reddit.com/r/linux_gaming/wiki/index">Wiki</a>, <a href="https://www.reddit.com/r/linux_gaming/wiki/faq">FAQ</a>.</li>
+<li><a href="https://github.com/AdelKS/LinuxGamingGuide">Linux Gaming Guide</a> - Compilation of different techniques for optimizing the Linux gaming experience.</li>
+<li><a href="https://areweanticheatyet.com/">are we anti cheat yet</a> A comprehensive and crowd-sourced list of games using anti-cheats and their compatibility with GNU/Linux or Wine/Proton.</li>
+<li><a href="https://www.protondb.com/">proton db</a> crowdsourced Linux compatibility reports</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807035730
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.482 seconds
+Real time usage: 0.497 seconds
+Preprocessor visited node count: 2304/1000000
+Revision size: 43315/2097152 bytes
+Post‐expand include size: 54025/2097152 bytes
+Template argument size: 14370/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 374/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  162.723      1 -total
+ 11.61%   18.893     16 Template:App
+  6.31%   10.262     89 Template:Yes
+  4.90%    7.966     71 Template:No
+  4.66%    7.576     41 Template:AUR
+  4.02%    6.548     23 Template:Pkg
+  3.26%    5.303      6 Template:注意
+  3.18%    5.180      6 Template:Y
+  2.76%    4.499      9 Template:META_Table_cell
+  2.59%    4.214     29 Template:Ic
+-->
+<!-- Render ID 1c7abd0e-9214-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:5923:|#|:idhash:canonical!zh-cn and timestamp 20260807035730 and revision id 34243. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

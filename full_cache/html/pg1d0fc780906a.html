@@ -1,0 +1,441 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg1d0fc780906a">VMware/安装 Arch Linux 为虚拟机</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/VMware/Installing_Arch_as_a_guest">VMware/Installing Arch as a guest</a>，最近一次同步于 2025-01-10，若英文版本有所<a href="https://wiki.archlinux.org/title/VMware/Installing_Arch_as_a_guest?diff=0&amp;oldid=824810">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/VMware_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Installing_Arch_as_a_guest_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg01acf2ac5c98">VMware</a></li>
+<li><a href="#pg8072bd7d3fc1">VMWare vCLI</a></li>
+</ul></div>
+<p>这篇文章是关于如何在 <a href="#pg01acf2ac5c98">VMware</a> 产品，比如 <a href="https://www.vmware.com/products/workstation-player.html">Workstation Player</a>，<a href="https://www.vmware.com/products/fusion.html">Fusion</a> 或 <a href="https://www.vmware.com/products/workstation-pro.html">Workstation Pro</a> 中安装Arch Linux。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1d0fc780906a_.E7.BC.96.E8.AF.91.E8.BF.9B.E5.86.85.E6.A0.B8.E7.9A.84.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F.EF.BC.88.E6.A8.A1.E5.9D.97.EF.BC.89" id="编译进内核的驱动程序（模块）"><span id=".E7.BC.96.E8.AF.91.E8.BF.9B.E5.86.85.E6.A0.B8.E7.9A.84.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F.EF.BC.88.E6.A8.A1.E5.9D.97.EF.BC.89"></span>编译进内核的驱动程序（模块）</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>下列模块只有部分会被 Arch 的 <a href="#pge009209061ac">Udev</a> 自动检测并启用。如果某些需要的模块没有被自动检测到（可通过 <code>lsmod | grep <i>modulename</i></code> 进行确认），可以将其添加到 <a href="#pgbd0f46fbac92">mkinitcpio</a> 的 <code>MODULES</code> 列表。例如：
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+	
+MODULES=(... vmw_balloon vmw_pvscsi vsock vmw_vsock_vmci_transport ...)</pre>
+<p><br/>	
+确保 <a href="#pg82461695094b">重新生成 initramfs</a>。
+</p>
+</div>
+<ul><li><code>vmw_balloon</code> - 物理内存管理驱动。它可以像一个气球一样被“吹大”，在客户机上申请内存，并通过监视器释放掉这部分内存，使得这部分物理内存可以被分配给其它客户机使用；也可以"放气"，以允许虚拟机使用更多物理内存。还支持将反分配状态（deallocated）的虚拟机原本所占的内存释放回主机，而无需彻底停用虚拟机。</li>
+<li><code>vmw_pvscsi</code> - VMware 平行虚拟化 SCSI（PVSCSI）的主机总线适配器（HBA）。</li>
+<li><code>vmw_vmci</code> - 虚拟机通信接口（VMCI）。VMCI 虚拟设备的作用是实现虚拟环境中的主机-客机间高速通信。</li>
+<li><code>vmwgfx</code> - 这是 VMware SVGA2 虚拟显卡的 DRM 驱动，作用是 3D 加速。支持 <a href="#pg82edce9c2d36">KMS</a>。</li>
+<li><code>vmxnet3</code> - VMware 的 vmxnet3 虚拟网卡所需模块。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=open-vm-tools">open-vm-tools</a></span><sup><small>包</small></sup></span> 10.0 以上版本包含了一个基于 <a href="#pg28f17f5cf109">FUSE</a> 实现的 HGFS 文件系统，支持 Linux 4.0 及以上版本内核，用于主机-客机间共享目录。</li></ul>
+<p>如果你在某种监视器（比如 <a href="https://www.vmware.com/products/vsphere-hypervisor">VMware vSphere Hypervisor</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2024-07-30 ⓘ]</sup>）上运行 Arch Linux，那么同时需要安装下面这些模块。当虚拟机间通信时，客户机-服务器类型的应用可以通过 VMCI 虚拟设备向 VMCI 套接字（vsock）接口进行写入：
+</p>
+<ul><li><code>vsock</code> - 虚拟套接字协议。其作用是允许虚拟机，主机或监视器间像 TCP/IP 协议一样通信。</li>
+<li><code>vmw_vsock_vmci_transport</code> - 基于 VMCI 实现的虚拟套接字。</li></ul>
+<p>某些模块，例如旧的 <code>vmhgfs</code> 目录共享模块，还需要额外地手工编译，并手工从 systemd 启用服务，才能正常运转。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1d0fc780906a_VMware_Tools_.E4.B8.8E_Open-VM-Tools_.E6.96.B9.E6.A1.88.E5.AF.B9.E6.AF.94" id="VMware_Tools_与_Open-VM-Tools_方案对比"><span id="VMware_Tools_.E4.B8.8E_Open-VM-Tools_.E6.96.B9.E6.A1.88.E5.AF.B9.E6.AF.94"></span>VMware Tools 与 Open-VM-Tools 方案对比</h2></div>
+<p>2007 年，VMware 将 <a href="https://kb.vmware.com/kb/340">VMware Tools</a> 中的大部分代码以 LGPL 协议发布，这就是 <a href="https://sourceforge.net/projects/open-vm-tools/">Open-VM-Tools</a>。官方的 VMware Tools 不再<a href="https://packages.vmware.com/tools/esx/latest/repos/index.html">单独</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2024-07-30 ⓘ]</sup>向 Arch Linux 提供。
+</p><p>以往，VMware Tools 方案所提供的网络与储存驱动是最好的，而且还带有时间同步等功能。然而网络与 SCSI 驱动这部分代码现已合并入 Linux 内核了。
+</p><p>VMware Tools 曾经有使用 Unity mode 功能的优势，但由于使用的人不多且维护困难，于是从 VMWare Workstation 12 开始移除了 Linux 客户机的 Unity mode 支持。详情请阅<a href="https://communities.vmware.com/thread/518735">此跟帖</a>的答案。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1d0fc780906a_Open_VM_Tools" id="Open-VM-Tools">Open-VM-Tools</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E5.AE.9E.E7.94.A8.E5.B7.A5.E5.85.B7" id="实用工具"><span id=".E5.AE.9E.E7.94.A8.E5.B7.A5.E5.85.B7"></span>实用工具</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=open-vm-tools">open-vm-tools</a></span><sup><small>包</small></sup></span> 软件包里包括如下工具：
+</p>
+<ul><li><code>vmtoolsd</code> - 负责汇报虚拟机状态的服务。</li>
+<li><code>vmware-checkvm</code> - 用于检测虚拟机中是否在运行着某程序的工具。</li>
+<li><code>vmware-toolbox-cmd</code> - 用于收集宿主系统信息的工具。</li>
+<li><code>vmware-user</code> - 用来在宿主机和虚拟机之间共享剪切板（复制/粘贴）的工具。</li>
+<li><code>vmware-vmblock-fuse</code> - 文件系统工具。基于 <a href="https://en.wikipedia.org/wiki/Filesystem_in_Userspace">FUSE</a>（Filesystem in Userspace）实现了宿主/客机之间拖拽文件的功能。</li>
+<li><code>vmware-xferlogs</code> - 向虚拟机的日志文件输出日志与调试信息。</li>
+<li><code>vmhgfs-fuse</code> - 挂载 HGFS 共享目录的工具。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h3></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=open-vm-tools">open-vm-tools</a></span><sup><small>包</small></sup></span>。然后<a href="#pg6ec215b93a06">启动</a>并<a href="#pg3ef6532bc644">启用</a> <code>vmtoolsd.service</code> 和 <code>vmware-vmblock-fuse.service</code>。
+</p><p>如果主机和客户机间复制粘贴功能无法正常工作，请尝试手动安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gtkmm3">gtkmm3</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1d0fc780906a_.E5.AE.98.E6.96.B9.E7.9A.84_VMware_Tools" id="官方的_VMware_Tools"><span id=".E5.AE.98.E6.96.B9.E7.9A.84_VMware_Tools"></span>官方的 VMware Tools</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E6.A8.A1.E5.9D.97" id="模块"><span id=".E6.A8.A1.E5.9D.97"></span>模块</h3></div>
+<ul><li><code>vmblock</code> - 文件系统驱动。支持在主机-客机间拖拽文件。已被 <code>vmware-vmblock-fuse</code> <a href="https://www.mail-archive.com/open-vm-tools-devel@lists.sourceforge.net/msg00213.html">取代</a>。</li>
+<li><code>vmci</code> - 主机-客户机间的高性能通信接口。</li>
+<li><code>vmmon</code> - 虚拟机监视器。</li>
+<li><code>vmnet</code> - 网络驱动。</li>
+<li><code>vsock</code> - VMCI 套接字。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>vmware-vmblock-fuse</code> 这一组件不是以 内核 模块的形式实现的；且除非你禁用了 <code>fuse</code>，<code>vmblock</code> 已被从内核中移除。如果需要启用这些功能，需要手动启用 systemd 服务，具体操作见下文。
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E5.9C.A8.E5.AE.A2.E6.88.B7.E6.9C.BA.E5.AE.89.E8.A3.85" id="在客户机安装"><span id=".E5.9C.A8.E5.AE.A2.E6.88.B7.E6.9C.BA.E5.AE.89.E8.A3.85"></span>在客户机安装</h3></div>
+<p>安装依赖项：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/base-devel/">base-devel</a></span><sup><small>包组</small></sup></span>（用于编译模块），<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=net-tools">net-tools</a></span><sup><small>包</small></sup></span>（提供 <code>ifconfig</code> 供安装程序调用）和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-headers">linux-headers</a></span><sup><small>包</small></sup></span> (提供内核头文件)。另外需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=devtools">devtools</a></span><sup><small>包</small></sup></span> 包中的 <code>pkgctl</code> 来签出 <code>open-vm-tools</code>。
+</p><p>然后为安装程序创建假 init 目录：
+</p>
+<pre># for x in {0..6}; do mkdir -p /etc/init.d/rc${x}.d; done
+</pre>
+<p>挂载安装程序：
+</p>
+<pre># mount /dev/cdrom /mnt
+</pre>
+<p>解压（以解压到 <code>/root</code> 为例）：
+</p>
+<pre># tar xf /mnt/VMwareTools*.tar.gz -C /root
+</pre>
+<p>开始安装：
+</p>
+<pre># perl /root/vmware-tools-distrib/vmware-install.pl
+</pre>
+<p>若安装时出现如下的错误，都可以安全忽略：
+</p>
+<ul><li>VMXNET 3 虚拟网卡</li>
+<li>"Warning: This script could not find mkinitrd or update-initramfs and cannot remake the initrd file!"</li>
+<li>在系统中找不到 Fuse 组件</li></ul>
+<p>启用 <code>vmware-vmblock-fuse</code> systemd 服务（请确保你手动安装了依赖或使用了 <code>-s</code> 参数）。<code>open-vm-tools</code> 源代码应当被 <a href="#pg8d559a1b1a4f">Arch 构建系统</a>签出。
+</p>
+<pre> $ pkgctl repo clone open-vm-tools
+ $ cd open-vm-tools
+ $ makepkg -s --asdeps
+ # cp vm* /usr/lib/systemd/system
+</pre>
+<p><a href="#pg3ef6532bc644">启用</a> <code>vmware-vmblock-fuse.service</code> 和 <code>vmtoolsd.service</code>。
+</p><p>接下来重新启动虚拟机。
+</p><p>登录并启动 VMware Tools:
+</p>
+<pre># /etc/init.d/rc6.d/K99vmware-tools start
+</pre>
+<p>另外，可以通过创建 <code>/etc/systemd/system/vmwaretools.service</code> 文件来在启动时自动启动 <code>vmware-tools</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/vmwaretools.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=VMWare Tools daemon
+
+[Service]
+ExecStart=/etc/init.d/vmware-tools start
+ExecStop=/etc/init.d/vmware-tools stop
+PIDFile=/var/lock/subsys/vmware
+TimeoutSec=0
+RemainAfterExit=yes
+ 
+[Install]
+WantedBy=multi-user.target</pre>
+<p>然后<a href="#pg3ef6532bc644">启用</a> <code>vmwaretools.service</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>在 GitHub 上有个项目 <a href="https://github.com/rasa/vmware-tools-patches">[1]</a> 尝试将这些步骤全自动处理。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1d0fc780906a_Xorg_.E9.85.8D.E7.BD.AE" id="Xorg_配置"><span id="Xorg_.E9.85.8D.E7.BD.AE"></span>Xorg 配置</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>要在虚拟机中使用 Xorg，至少需要为其分配 32MB 的显存。</div>
+<p>需要安装以下依赖：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-vmmouse">xf86-input-vmmouse</a></span><sup><small>包</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-vmware">xf86-video-vmware</a></span><sup><small>包</small></sup></span>，以及 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span>。
+</p><p>应该只需要这几个包就可以启动至 <code>graphical target</code> 了。接下来 <code>/etc/xdg/autostart/vmware-user.desktop</code> 会自动启动，并负责完成在虚拟机里运行的相关必要配置。
+</p><p>然而如果你先启动至了 <code>multi-user.target</code>，或者你的环境不太常规（比如用了多个显示器），那么你需要手动<a href="#pg3ef6532bc644">启用</a> <code>vmtoolsd.service</code> 服务，并且还需要让 <a href="#pga36c0aff60be">Xorg 以根权限运行</a>以加载相关驱动。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1d0fc780906a_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E9.80.9A.E8.BF.87_-.7B.7D-vmhgfs-fuse_.E5.85.B1.E4.BA.AB.E7.9B.AE.E5.BD.95" id="通过_-{}-vmhgfs-fuse_共享目录"><span id=".E9.80.9A.E8.BF.87_-.7B.7D-vmhgfs-fuse_.E5.85.B1.E4.BA.AB.E7.9B.AE.E5.BD.95"></span>通过 <code>vmhgfs-fuse</code> 共享目录</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这一功能需要的最低软件版本是 <code>open-vm-tools</code> v.10.x 与 Linux 内核 4.x,同时需要 VMware Workstation / Fusion。</div>
+<p>在菜单中选择 <i>Edit virtual machine settings &gt; Options &gt; Shared Folders &gt; Always enabled</i>，即可建立共享目录。
+</p><p>在客机里运行如下命令可以列出共享目录：
+</p>
+<pre>$ vmware-hgfsclient
+</pre>
+<p>然后以如下方式挂载：
+</p>
+<pre># mkdir &lt;shared folders root directory&gt;
+# vmhgfs-fuse -o allow_other -o auto_unmount .host:/<i>&lt;shared_folder&gt;</i> <i>&lt;shared folders root directory&gt;</i>
+</pre>
+<p>如果碰到了如下报错：<code>fusermount: option allow_other only allowed if 'user_allow_other' is set in /etc/fuse.conf</code>，需将 <code>/etc/fuse.conf</code> 中的这一行取消注释：
+</p>
+<pre>user_allow_other
+</pre>
+<p>欲了解 <code>vmhgfs-fuse</code> 的其他挂载参数，可以用 <code>-h</code> 参数调用：
+</p>
+<pre># vmhgfs-fuse -h
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>In case I/O operations (such as <code>cp</code>, <code>mv</code> or <code>cat</code>) result in an "Input/output error" when accessing the shared folder then setting the mount option <code>max_write</code> can serve as a workaround (observed with <code>open-vm-tools</code> version 11.1.0 and higher; see this bug report: <a href="https://github.com/vmware/open-vm-tools/issues/437">https://github.com/vmware/open-vm-tools/issues/437</a>)).</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_fstab" id="fstab">fstab</h4></div>
+<p>每个共享目录的挂载都需要写如下的一行配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">.host:/<i>&lt;shared_folder&gt;</i> <i>&lt;shared folders root directory&gt;</i> fuse.vmhgfs-fuse nofail,allow_other 0 0
+</pre>
+<p>然后创建并挂载目录：
+</p>
+<pre># mkdir <i>&lt;shared folders root directory&gt;</i>
+# mount <i>&lt;shared folders root directory&gt;</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_Systemd" id="Systemd">Systemd</h4></div>
+<p>创建如下 <code>.service</code> 文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/<i>&lt;shared folders root directory&gt;</i>-<i>&lt;shared_folder&gt;</i>.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Load VMware shared folders
+Requires=vmware-vmblock-fuse.service
+After=vmware-vmblock-fuse.service
+ConditionPathExists=.host:/<i>&lt;shared_folder&gt;</i>
+ConditionVirtualization=vmware
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/vmhgfs-fuse -o allow_other -o auto_unmount .host:/<i>&lt;shared_folder&gt;</i> <i>&lt;shared folders root directory&gt;</i>
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>如果客机里的 <code><i>&lt;shared folders root directory&gt;</i></code> 目录还不存在，你需要手动提前创建：
+</p>
+<pre># mkdir -p <i>&lt;shared folders root directory&gt;</i>
+</pre>
+<p>然后<a href="#pg3ef6532bc644">启用</a> <code>&lt;shared folders root directory&gt;-&lt;shared_folder&gt;.service</code> 挂载目标。
+</p><p>删掉 <i>&lt;shared_folder&gt;</i> 的部分可以一次性挂载所有共享目录。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E4.BD.BF.E7.94.A8_vmhgfs_.E6.A8.A1.E5.9D.97.E7.9A.84.E6.97.A7.E5.BC.8F.E7.9B.AE.E5.BD.95.E5.85.B1.E4.BA.AB" id="使用_vmhgfs_模块的旧式目录共享"><span id=".E4.BD.BF.E7.94.A8_vmhgfs_.E6.A8.A1.E5.9D.97.E7.9A.84.E6.97.A7.E5.BC.8F.E7.9B.AE.E5.BD.95.E5.85.B1.E4.BA.AB"></span>使用 vmhgfs 模块的旧式目录共享</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>该功能只在 VMware Workstation 和 Fusion 中可用</div>
+<p>在菜单中选择 <i>Edit virtual machine settings &gt; Options &gt; Shared Folders &gt; Always enabled</i>，即可建立共享目录。
+</p><p>确保已加载 <code>vmhgfs</code> 驱动：
+</p>
+<pre># modprobe vmhgfs
+</pre>
+<p>可以通过以下命令查看共享目录清单：
+</p>
+<pre>$ vmware-hgfsclient
+</pre>
+<p>然后可以通过如下命令挂载目录：
+</p>
+<pre># mkdir /home/user1/shares
+# mount -n -t vmhgfs .host:/<i>&lt;shared_folder&gt;</i> /home/user1/shares
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E5.90.AF.E7.94.A8" id="在启动时启用"><span id=".E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E5.90.AF.E7.94.A8"></span>在启动时启用</h4></div>
+<p>按照如下编辑 <code>mkinitcpio.conf</code> 文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+MODULES=(... vmhgfs)
+...</pre>
+<p>然后<a href="#pg82461695094b">重新生成 initramfs</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg1d0fc780906a_fstab" id="fstab_2">fstab</h5></div>
+<p>每个共享目录的挂载都需要写如下的一行配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">.host:/<i>&lt;shared_folder&gt;</i> <i>/home/user1/shares</i> vmhgfs defaults 0 0
+</pre>
+<p>然后创建并挂载目录：
+</p>
+<pre># mkdir /home/user1/shares
+# mount /home/user1/shares
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg1d0fc780906a_Systemd" id="Systemd_2">Systemd</h5></div>
+<p>共享目录需用到 <code>vmhgfs</code> 驱动。参考如下案例创建 <code>.service</code> 文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/<i>&lt;shared folders root directory&gt;</i>-<i>&lt;shared_folder&gt;</i>.mount</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Load VMware shared folders
+ConditionPathExists=.host:/<i>&lt;shared_folder&gt;</i>
+ConditionVirtualization=vmware
+
+[Mount]
+What=.host:/<i>&lt;shared_folder&gt;</i>
+Where=<i>&lt;shared folders root directory&gt;</i>/<i>&lt;shared_folder&gt;</i>
+Type=vmhgfs
+Options=defaults,noatime
+
+[Install]
+WantedBy=multi-user.target</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/<i>&lt;shared folders root directory&gt;</i>-<i>&lt;shared_folder&gt;</i>.automount</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Load VMware shared folders
+ConditionPathExists=.host:/<i>&lt;shared_folder&gt;</i>
+ConditionVirtualization=vmware
+
+[Automount]
+Where=<i>&lt;shared folders root directory&gt;</i>/<i>&lt;shared_folder&gt;</i>
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>如果客户机内还没有 <code><i>&lt;shared folders root directory&gt;</i></code> 目录，你需要手动提前创建：
+</p>
+<pre># mkdir -p <i>&lt;shared folders root directory&gt;</i>
+</pre>
+<p>然后<a href="#pg3ef6532bc644">启用</a> <code>mnt-hgfs.automount</code> 挂载目标。
+</p><p>删掉 <i>&lt;shared_folder&gt;</i> 的部分可以一次性挂载所有共享目录。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E6.B8.85.E7.90.86_locate_DB" id="清理_locate_DB"><span id=".E6.B8.85.E7.90.86_locate_DB"></span>清理 locate DB</h4></div>
+<p>在使用 <a href="#pge74e7aaf6571">locate</a> 时，不需要在 <code>locate DB</code> 中为共享目录进行索引。因此，可以将共享目录添加到 <code>/etc/updatedb.conf</code> 中的 <code>PRUNEPATHS</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_3D_.E5.8A.A0.E9.80.9F" id="3D_加速"><span id="3D_.E5.8A.A0.E9.80.9F"></span>3D 加速</h3></div>
+<p>如果在创建客户机时没有选择 3D 加速功能，可以勾选: <i>编辑虚拟机设置 &gt; 硬件 &gt; 显示器 &gt; 加速 3D 图形</i>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>启用 3D 加速之后，Xorg 的性能可能会很差。有些时候通过 llvmpipe 来实现软件渲染的性能可能更好。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_OpenGL_.E4.B8.8E_GLSL_.E6.94.AF.E6.8C.81" id="OpenGL_与_GLSL_支持"><span id="OpenGL_.E4.B8.8E_GLSL_.E6.94.AF.E6.8C.81"></span>OpenGL 与 GLSL 支持</h4></div>
+<p>用户可以自行更新实现 OpenGL 的 GLSL 内核模块，覆盖 Arch 自带的版本。
+</p><p>本文成文时，OpenGL 3.3 和 GLSL 3.30 都得到了支持。参阅 <a href="https://bbs.archlinux.org/viewtopic.php?id=202713">https://bbs.archlinux.org/viewtopic.php?id=202713</a> 可以了解更多细节。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E6.97.B6.E9.97.B4.E5.90.8C.E6.AD.A5" id="时间同步"><span id=".E6.97.B6.E9.97.B4.E5.90.8C.E6.AD.A5"></span>时间同步</h3></div>
+<p>为虚拟机配置时间同步很重要，因为虚拟机比物理机更容易出现时间波动现象。主要原因就在于 CPU 是被共用的。
+</p><p>有两种方案可以实现同步：与宿主机同步，或是通过外部服务器同步。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E4.B8.8E.E5.AE.BF.E4.B8.BB.E6.9C.BA.E5.90.8C.E6.AD.A5.E6.97.B6.E9.97.B4" id="与宿主机同步时间"><span id=".E4.B8.8E.E5.AE.BF.E4.B8.BB.E6.9C.BA.E5.90.8C.E6.AD.A5.E6.97.B6.E9.97.B4"></span>与宿主机同步时间</h4></div>
+<p>先确保 <code>vmtoolsd.service</code> 服务已<a href="#pg6ec215b93a06">启动</a>，然后用如下命令启用时间同步功能：
+</p>
+<pre># vmware-toolbox-cmd timesync enable
+</pre>
+<p>宿主系统休眠后，用如下的命令来使客机间同步时间：
+</p>
+<pre># hwclock --hctosys --localtime
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E4.B8.8E.E5.A4.96.E9.83.A8.E6.9C.8D.E5.8A.A1.E5.99.A8.E5.90.8C.E6.AD.A5.E6.97.B6.E9.97.B4" id="与外部服务器同步时间"><span id=".E4.B8.8E.E5.A4.96.E9.83.A8.E6.9C.8D.E5.8A.A1.E5.99.A8.E5.90.8C.E6.AD.A5.E6.97.B6.E9.97.B4"></span>与外部服务器同步时间</h4></div>
+<p>参阅 <a href="#pg46720d5dbde6">NTP</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1d0fc780906a_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E5.AE.A2.E6.88.B7.E6.9C.BA.E7.BD.91.E7.BB.9C.E9.80.9F.E5.BA.A6.E5.87.8F.E6.85.A2" id="客户机网络速度减慢"><span id=".E5.AE.A2.E6.88.B7.E6.9C.BA.E7.BD.91.E7.BB.9C.E9.80.9F.E5.BA.A6.E5.87.8F.E6.85.A2"></span>客户机网络速度减慢</h3></div>
+<p>Arch Linux 和其它 Linux 客户机一样，当使用 NAT 模式的时候也许会碰到网络速度减慢的问题。为了解决这个问题，请在宿主机下把对应的客户机的网络模式切换为<b>桥接模式</b>，在必要时修改客户机网络的配置文件。有关配置的详细信息请参阅<a href="#pgf42a74f3af9c">网络配置</a>。如果在 Windows 宿主机下，使用正确的客户机网络配置仍然无法正确连接网络, 可使用<b>管理员</b>运行<b>虚拟网络编辑器</b>并点击左下方的<b>还原默认设置</b>按钮。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E5.A3.B0.E9.9F.B3.E9.97.AE.E9.A2.98" id="声音问题"><span id=".E5.A3.B0.E9.9F.B3.E9.97.AE.E9.A2.98"></span>声音问题</h3></div>
+<p>如果虚拟机发出了恼人的巨响，那有可能是 <a href="#pg562e8d103236">PC 扬声器</a>的原因。在客户机系统里<a href="#pg562e8d103236">禁用 PC 扬声器</a>即可解决。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E9.9F.B3.2F.E8.A7.86.E9.A2.91.E5.8D.A1.E9.A1.BF" id="音/视频卡顿"><span id=".E9.9F.B3.2F.E8.A7.86.E9.A2.91.E5.8D.A1.E9.A1.BF"></span>音/视频卡顿</h3></div>
+<p>在虚拟机环境下，在软件（如火狐和系统通知等）中回放音/视频时可能会出现卡顿、噪声和延迟。这些问题通常和 PipeWire 音频后端及模拟驱动有关，调整 ALSA 的 ringbuffer 设置或 PipeWire 的配置有助于解决这些问题。
+</p><p>具体的排障和修复步骤请参考论坛帖子：<a href="https://bbs.archlinux.org/viewtopic.php?id=280654">Audio and Video stuttering/crackling</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E9.BC.A0.E6.A0.87.E9.97.AE.E9.A2.98" id="鼠标问题"><span id=".E9.BC.A0.E6.A0.87.E9.97.AE.E9.A2.98"></span>鼠标问题</h3></div>
+<p>虚拟机可能会出现下列鼠标问题：
+</p>
+<ul><li>自动获取/失去焦点的功能可能会在鼠标箭头移入窗口时失效</li>
+<li>按键无响应</li>
+<li>卡顿、延迟</li>
+<li>在个别软件中点击无响应</li>
+<li>箭头在移入/移出虚拟机时跳跃</li>
+<li>箭头会跳跃到从虚拟机移出的位置</li></ul>
+<p>可以先尝试<a href="#pg8b741e1a21da">卸载</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-vmmouse">xf86-input-vmmouse</a></span><sup><small>包</small></sup></span> 包，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-vmmouse">xf86-input-vmmouse</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-libinput">xf86-input-libinput</a></span><sup><small>包</small></sup></span> 应足以处理鼠标和键盘输入。
+</p><p>为解决<a href="https://forums.mageia.org/en/viewtopic.php?f=7&amp;t=7977">鼠标箭头跳跃到从虚拟机移出的位置</a>的问题，可以试试在 <code>.vmx</code> 配置文件里添加如下配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/vmware/<i>&lt;Virtual Machine name&gt;</i>/<i>&lt;Virtual Machine name&gt;</i>.vmx</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">mouse.vusb.enable = "TRUE"
+mouse.vusb.useBasicMouse = "FALSE"</pre>
+<p>VMware 还会为游戏做自动的鼠标优化。如果这一优化产生了问题，可以在这里将其禁用：<i>Edit &gt; Preferences &gt; Input &gt; Optimize mouse for games: Never</i>
+</p><p>再者，尝试在 <code>60-libinput.conf</code> 里<a href="https://www.spinics.net/lists/xorg/msg53932.html">禁用</a> <code>catchall</code> 事件也可能有用：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/share/X11/xorg.conf.d/60-libinput.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#Section "InputClass"
+#        Identifier "libinput pointer catchall"
+#        MatchIsPointer "on"
+#        MatchDevicePath "/dev/input/event*"
+#        Driver "libinput"
+#EndSection
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E5.90.AF.E5.8A.A8.E6.95.85.E9.9A.9C" id="启动故障"><span id=".E5.90.AF.E5.8A.A8.E6.95.85.E9.9A.9C"></span>启动故障</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E5.90.AF.E5.8A.A8.E9.80.9F.E5.BA.A6.E6.85.A2" id="启动速度慢"><span id=".E5.90.AF.E5.8A.A8.E9.80.9F.E5.BA.A6.E6.85.A2"></span>启动速度慢</h4></div>
+<p>如果 VMware 开启了内存热扩容功能，那么有可能会出现如下错误：
+</p>
+<ul><li>add_memory failed</li>
+<li>acpi_memory_enable_device() error</li></ul>
+<p>可以在 <code>.vmx</code> 配置文件里写入 <code>mem.hotadd = "FALSE"</code> 来禁用内存热扩容功能。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/vmware/<i>&lt;Virtual Machine name&gt;</i>/<i>&lt;Virtual Machine name&gt;</i>.vmx</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">mem.hotadd = "FALSE"</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E5.85.B3.E6.9C.BA.2F.E9.87.8D.E5.90.AF.E6.97.B6.E5.8D.A1.E4.BD.8F.E4.B8.8D.E5.8A.A8" id="关机/重启时卡住不动"><span id=".E5.85.B3.E6.9C.BA.2F.E9.87.8D.E5.90.AF.E6.97.B6.E5.8D.A1.E4.BD.8F.E4.B8.8D.E5.8A.A8"></span>关机/重启时卡住不动</h4></div>
+<p>试着降低 vmtoolsd 服务的超时阈值（默认是 90 秒）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/vmtoolsd.service.d/timeout.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+TimeoutStopSec=1</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E7.AA.97.E5.8F.A3.E5.88.86.E8.BE.A8.E7.8E.87.E8.87.AA.E5.8A.A8.E9.80.82.E9.85.8D" id="窗口分辨率自动适配"><span id=".E7.AA.97.E5.8F.A3.E5.88.86.E8.BE.A8.E7.8E.87.E8.87.AA.E5.8A.A8.E9.80.82.E9.85.8D"></span>窗口分辨率自动适配</h3></div>
+<p>自动适配的意思是，当你在宿主机里缩放 VMware 窗口之后，Arch 作为客户机系统，应该自动根据主系统窗口的新尺寸来调整分辨率。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E6.96.B9.E6.A1.88_1" id="方案_1"><span id=".E6.96.B9.E6.A1.88_1"></span>方案 1</h4></div>
+<p>确保在设置里开启了自动适配。
+</p><p>VMware Worksation 的这一设置位于：<i>View -&gt; Autosize -&gt; Autofit Guest</i>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E6.96.B9.E6.A1.88_2" id="方案_2"><span id=".E6.96.B9.E6.A1.88_2"></span>方案 2</h4></div>
+<p>出于某些原因，分辨率自动适配的功能依赖于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gtkmm">gtkmm</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gtk2">gtk2</a></span><sup><small>包</small></sup></span> 软件包，所以需确保客户机上已安装这两个包。如果客户机没有安装 X windows 或使用的桌面环境不依赖于 GTK（例如 KDE），那么你需要手动安装这两个包。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E6.96.B9.E6.A1.88_3" id="方案_3"><span id=".E6.96.B9.E6.A1.88_3"></span>方案 3</h4></div>
+<p>可能需要向 mkinitcpio.conf 添加相关模块：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">MODULES=(vsock vmw_vsock_vmci_transport vmw_balloon vmw_vmci vmwgfx)</pre>
+<p>不要忘了<a href="#pg82461695094b">重新生成 initramfs</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E6.96.B9.E6.A1.88_4" id="方案_4"><span id=".E6.96.B9.E6.A1.88_4"></span>方案 4</h4></div>
+<p><a href="#pg3ef6532bc644">启用</a> <code>vmtoolsd.service</code>。
+</p><p>如果不起效，需确保 <code>vmtoolsd.service</code> 已正常<a href="#pgaa5af66d88c3">重启</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E6.96.B9.E6.A1.88_5" id="方案_5"><span id=".E6.96.B9.E6.A1.88_5"></span>方案 5</h4></div>
+<p>If <a href="#pg1e095fe2c2a6">GNOME</a> is running on <a href="#pga21a6be8b605">Wayland</a>, <a href="#pg54c3351b3e3b">install</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-vmware">xf86-video-vmware</a></span><sup><small>包</small></sup></span> (<a href="https://bugs.archlinux.org/task/57473">FS#57473</a>).
+</p><p>See <a href="https://github.com/vmware/open-vm-tools/issues/22#issuecomment-362705505">[2]</a>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E6.96.B9.E6.A1.88_6" id="方案_6"><span id=".E6.96.B9.E6.A1.88_6"></span>方案 6</h4></div>
+<p>Make sure that Stretch Mode is disabled. Follow <i>VM &gt; Settings &gt; Display &gt; Display Scaling</i> and untick the option <i>Stretch mode</i>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1d0fc780906a_.E6.BD.9C.E5.9C.A8.E7.9A.84.E6.96.B9.E6.A1.88_7" id="潜在的方案_7"><span id=".E6.BD.9C.E5.9C.A8.E7.9A.84.E6.96.B9.E6.A1.88_7"></span>潜在的方案 7</h4></div>
+<p>通过<a href="#pgec0856954f1c">内核命令行参数</a>的 <code>video=</code> 选项<a href="#pg4955543b232e">手动设置分辨率</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E6.8B.96.E6.8B.BD.E4.B8.8E.E5.A4.8D.E5.88.B6.E7.B2.98.E8.B4.B4" id="拖拽与复制粘贴"><span id=".E6.8B.96.E6.8B.BD.E4.B8.8E.E5.A4.8D.E5.88.B6.E7.B2.98.E8.B4.B4"></span>拖拽与复制粘贴</h3></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>这些功能与 <i>gtkmm3</i> 有着未指明的依赖关系，并会导致这些功能静默失败。此问题在 <a href="https://bugs.archlinux.org/task/43159">FS#43159</a>有详述。</div>
+<p>为了确保拖拽与复制粘贴功能正常工作，需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=open-vm-tools">open-vm-tools</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gtkmm3">gtkmm3</a></span><sup><small>包</small></sup></span> 这两个包。
+</p><p>使 <code>vmware-user</code> 在 <a href="#pg9d8a8632d257">X11</a> 之后运行：
+</p>
+<ul><li>确保 <code>/etc/xdg/autostart/vmware-user.desktop</code> 存在，如果文件不存在，请运行：</li></ul>
+<pre># cp /etc/vmware-tools/vmware-user.desktop /etc/xdg/autostart/vmware-user.desktop
+</pre>
+<p>或
+</p>
+<ul><li>添加 <code>vmware-user</code> 到 <a href="#pg05a4704b29d5">Xinitrc</a></li></ul>
+<p><a href="https://github.com/vmware/open-vm-tools/issues/443">Wayland 暂不支持</a>复制粘贴功能，但使用 <a href="#pg3bfae67062a7">Xwayland</a> 的应用可以正常使用该功能。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_.E5.9C.A8_VMware_Workstation_11_.E7.89.88.E4.B8.8A.E8.BF.90.E8.A1.8C.E5.85.B1.E4.BA.AB_VM" id="在_VMware_Workstation_11_版上运行共享_VM"><span id=".E5.9C.A8_VMware_Workstation_11_.E7.89.88.E4.B8.8A.E8.BF.90.E8.A1.8C.E5.85.B1.E4.BA.AB_VM"></span>在 VMware Workstation 11 版上运行共享 VM</h3></div>
+<p>Workstation 11 有个 bug：当 Arch 客户机以共享 VM 模式运行，且启动了 vmtoolsd 服务时，vmware-hostd 会崩溃。open-vm-tools 有个补丁来<a href="https://github.com/vmware/open-vm-tools/issues/31">绕过</a>这一问题。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1d0fc780906a_Virtual_Network_Editor_Wayland" id="Virtual_Network_Editor_Wayland">Virtual Network Editor Wayland</h2></div>
+<p><a href="#pgb2da89dbc461">Running GUI applications as root</a> -- some of the following is copied from
+</p>
+<ul><li>When running VMWare workstation on a wayland host the Virtual Network Editor will not launch under Wayland this because</li></ul>
+<p>Trying to run a graphical application as root via <a href="#pg8b873c561d21">su</a>, <a href="#pg023562413be7">sudo</a> or <a href="#pg74611dd9d3c8">pkexec</a> in a Wayland session (e.g. <a href="#pgd81879c10179">GParted</a> or <a href="#pg59c3fd392541">Gedit</a>), will fail with an error similar to this:
+</p>
+<pre>$ sudo vmware-netcfg
+No protocol specified
+Unable to init server: Could not connect: Connection refused
+
+(gedit:2349): Gtk-WARNING **: cannot open display: :0
+</pre>
+<p>This is a security feature of Wayland they reason GUI applications should not be run as root. This can be achieved using the following in the terminal
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_Using_xhost" id="Using_xhost">Using xhost</h3></div>
+<p>A more versatile —though much less secure— workaround is to use <a href="#pg06d389fad461">xhost</a> to temporarily allow the root user to access the local user's X session<a href="https://bugzilla.redhat.com/show_bug.cgi?id=1274451#c64">[3]</a>. To do so, execute the following command as the current (unprivileged) user:
+</p>
+<pre>$ xhost si:localuser:root
+</pre>
+<p>To remove this access after the application has been closed:
+</p>
+<pre>$ xhost -si:localuser:root
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1d0fc780906a_Using_sudo__E" id="Using_sudo_-E">Using sudo -E</h3></div>
+<p>Launch vmware-netcfg with:
+</p>
+<pre>$ sudo -E vmware-netcfg
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807040901
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.255 seconds
+Real time usage: 0.264 seconds
+Preprocessor visited node count: 1168/1000000
+Revision size: 21202/2097152 bytes
+Post‐expand include size: 15595/2097152 bytes
+Template argument size: 6356/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 4/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   73.989      1 -total
+ 14.00%   10.361     79 Template:Ic
+ 12.59%    9.316      4 Template:Note
+  6.93%    5.131     18 Template:Pkg
+  4.50%    3.330      1 Template:翻译状态
+  4.37%    3.232      2 Template:Dead_link
+  3.94%    2.916     13 Template:Hc
+  3.59%    2.657      1 Template:Tip_(简体中文)
+  3.07%    2.273      2 Template:Related
+  2.93%    2.169      1 Template:相关文章开始
+-->
+<!-- Render ID b858f88e-9215-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3946:|#|:idhash:canonical!zh-cn and timestamp 20260807040901 and revision id 33681. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

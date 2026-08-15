@@ -1,0 +1,898 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg88d6e7a842ae">dm-crypt/设备加密</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Dm-crypt/Device_encryption">Dm-crypt/Device encryption</a>，最近一次同步于 2026-08-09，若英文版本有所<a href="https://wiki.archlinux.org/title/Dm-crypt/Device_encryption?diff=0&amp;oldid=846907">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Dm-crypt_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Device_encryption_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本节介绍如何从命令行手动使用 <b>dm-crypt</b> 来加密系统。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg88d6e7a842ae_.E5.87.86.E5.A4.87" id="准备"><span id=".E5.87.86.E5.A4.87"></span>准备</h2></div>
+<p>在使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cryptsetup">cryptsetup</a></span><sup><small>包</small></sup></span> 之前，请始终确保已加载<code>dm_crypt</code>内核模块（<a href="#pga016157dc9e9">kernel module</a>）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg88d6e7a842ae_Cryptsetup_.E7.94.A8.E6.B3.95" id="Cryptsetup_用法"><span id="Cryptsetup_.E7.94.A8.E6.B3.95"></span>Cryptsetup 用法</h2></div>
+<p><span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup"><a href="https://man.archlinux.org/man/cryptsetup.8">cryptsetup(8)</a></span> 是与 <b>dm-crypt</b> 交互的命令行工具，用于创建、访问和管理加密设备。该工具后来被扩展为支持依赖 Linux 内核设备映射器和加密模块（Linux kernel <b>d</b>evice-<b>m</b>apper and the <b>crypt</b>ographic modules）的不同加密类型。最显著的扩展是 Linux 统一密钥设置 (LUKS) 扩展，它将 dm-crypt 所需的所有设置信息存储在磁盘本身上，并抽象分区和密钥管理以提高易用性。通过设备映射器访问的设备称为块设备。有关详细信息，请参阅静态数据加密#块设备加密（<a href="#pg181e0ec7c431">Data-at-rest encryption#Block device encryption</a>）。
+</p><p>该工具的使用如下： 
+</p>
+<pre># cryptsetup <i>action</i> <i>options</i> <i>device</i> <i>name</i>
+</pre>
+<p>它具有选项和加密模式的编译默认值，如果在命令行上未指定其他值，则将使用这些默认值。看看
+</p>
+<pre>$ cryptsetup --help 
+</pre>
+<p>它按顺序列出了加密模式的选项、操作和默认参数。可以在手册页上找到完整的选项列表。由于需要或可选不同的参数，根据加密模式和操作，以下部分将进一步指出差异。块设备加密速度很快，但速度也很重要。由于在设置后更改块设备的加密密码很困难，因此提前检查各个参数的 dm-crypt 性能很重要：
+</p>
+<pre>$ cryptsetup benchmark 
+</pre>
+<p>可以指导在安装之前决定算法和密钥大小。如果某些 AES 密码以相当高的吞吐量表现出色，那么这些密码可能是 CPU中具有硬件支持的密码。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>您可能想在学习时练习在虚拟机（<a href="#pg22ee61625b9d">virtual machine</a>）中加密虚拟硬盘。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_Cryptsetup_.E5.AF.86.E7.A0.81.E5.92.8C.E5.AF.86.E9.92.A5" id="Cryptsetup_密码和密钥"><span id="Cryptsetup_.E5.AF.86.E7.A0.81.E5.92.8C.E5.AF.86.E9.92.A5"></span>Cryptsetup 密码和密钥</h3></div>
+<p>加密的块设备受密钥保护。密钥可能是以下两者之一：
+</p>
+<ul><li>密码: 参见 <a href="#pg08a28f4ac689">Security#Passwords</a>。</li>
+<li>密钥文件, 参见 #密钥文件。</li></ul>
+<p>两种密钥类型都有默认的最大大小：密码最多可包含 512 个字符，密钥文件最多可包含 8192KiB。
+</p><p>LUKS 在这一点上需要注意的一个重要区别是，该密钥用于解锁 LUKS 加密设备的主密钥，并且可以通过 root 访问权限进行更改。其他加密模式不支持在设置后更改密钥，因为它们不使用主密钥进行加密。有关详细信息，请参阅静态数据加密#块设备加密（<a href="#pg181e0ec7c431">Data-at-rest encryption#Block device encryption</a>）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg88d6e7a842ae_.E5.8A.A0.E5.AF.86.E9.80.89.E9.A1.B9" id="加密选项"><span id=".E5.8A.A0.E5.AF.86.E9.80.89.E9.A1.B9"></span>加密选项</h2></div>
+<p><b>Cryptsetup</b> 支持与 dm-crypt 一起使用的不同加密操作模式：
+</p>
+<ul><li><code>--type luks</code> 使用默认的 LUKS 格式版本（cryptsetup&lt;2.1.0为LUKS1，cryptsetup≥2.1.0为LUKS2）；</li>
+<li><code>--type luks1</code> 用于使用 LUKS1，LUKS 的过往版本；</li>
+<li><code>--type luks2</code> 用于使用 LUKS2，LUKS 的当前版本，引入了附加扩展；
+<ul><li><code>--hw-opal-only</code> 用于驱动盘实现了 TCG OPAL 标准的硬件加密。见<span class="ilh-all" data-foreign-title="Self-encrypting drives#Using cryptsetup" data-lang-code="en" data-lang-name="英语" data-orig-title="自加密驱动#使用 cryptsetup"><span class="ilh-page"><a href="#pg7965366e4e6a">自加密驱动#使用 cryptsetup</a></span></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup"><a href="https://man.archlinux.org/man/cryptsetup.8#SED_(SELF_ENCRYPTING_DRIVE)_OPAL_EXTENSION">cryptsetup(8) § SED (SELF ENCRYPTING DRIVE) OPAL EXTENSION</a></span>。</li>
+<li><code>--hw-opal</code> 用于 OPAL 硬件加密与 dm-crypt 软件加密叠叠乐。</li></ul></li></ul>
+<ul><li><code>--type plain</code> 使用 dm-crypt plain模式；</li>
+<li><code>--type loopaes</code> 用于 loopaes传统模式；</li>
+<li><code>--type tcrypt</code> 用于TrueCrypt 兼容模式。</li>
+<li><code>--type bitlk</code> 用于 <a href="https://en.wikipedia.org/wiki/BitLocker">BitLocker</a> 兼容模式。请参阅<span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup"><a href="https://man.archlinux.org/man/cryptsetup.8#BITLK_(WINDOWS_BITLOCKER_COMPATIBLE)_EXTENSION">cryptsetup(8) § BITLK (WINDOWS BITLOCKER COMPATIBLE) EXTENSION</a></span>。</li></ul>
+<p>可用的加密密码和散列的基本加密选项可用于所有模式，并依赖于内核加密后端功能。所有已加载并可在运行时用作选项的内容都可以通过以下方式查看：
+</p>
+<pre>$ less /proc/crypto 
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果列表很短，请执行<code>$ cryptsetup benchmark</code>触发加载可用模块。</div>
+<p>下面介绍 <code>luks</code>、 <code>luks1</code>、 <code>luks2</code> 和 <code>plain</code> 模式的加密选项。请注意，表格列出了本文各个示例中使用的选项，而不是所有可用的选项。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_LUKS_.E6.A8.A1.E5.BC.8F.E7.9A.84.E5.8A.A0.E5.AF.86.E9.80.89.E9.A1.B9" id="LUKS_模式的加密选项"><span id="LUKS_.E6.A8.A1.E5.BC.8F.E7.9A.84.E5.8A.A0.E5.AF.86.E9.80.89.E9.A1.B9"></span>LUKS 模式的加密选项</h3></div>
+<p>在 LUKS 加密模式下设置新的 dm-crypt 设备的 <b>cryptsetup</b> 操作是<code>luksFormat</code>。与名称所暗示的不同，它不会格式化设备，而是设置 LUKS设备标头并使用所需的加密选项加密主密钥。
+</p><p>为了使用<code>cryptsetup --help</code>列出的编译默认值创建一个新的 LUKS 容器，只需执行：
+</p>
+<pre># cryptsetup luksFormat <i>device</i>
+</pre>
+<p>从 cryptsetup 2.4.0 开始，这相当于：  
+</p>
+<pre># cryptsetup luksFormat --type luks2 --cipher aes-xts-plain64 --hash sha256 --iter-time 2000 --key-size 256 --pbkdf argon2id --use-urandom --verify-passphrase <i>device</i>
+</pre>
+<p>默认值与下表中更高规格的加密示例进行了比较，并附有注释：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>选项</th>
+<th>Cryptsetup 2.1.0默认值</th>
+<th>示例</th>
+<th>注释
+</th></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--cipher
+<p>-c
+</p>
+</th>
+<td><code>aes-xts-plain64</code>
+</td>
+<td><code>aes-xts-plain64</code>
+</td>
+<td><a href="https://www.kernel.org/pub/linux/utils/cryptsetup/v1.6/v1.6.0-ReleaseNotes">1.6.0 版</a> 改为<a href="https://en.wikipedia.org/wiki/Disk_encryption_theory#XEX-based_tweaked-codebook_mode_with_ciphertext_stealing_.28XTS.29">XTS</a> 模式下的 AES <a href="#pg181e0ec7c431">密码</a> （参阅 <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#5-security-aspects">FAQ的</a>第 5.16 项）。建议不要使用以前的默认值 <code>--cipher aes-cbc-essiv</code>，因为它的已知<a href="https://en.wikipedia.org/wiki/Disk_encryption_theory#Cipher-block_chaining_.28CBC.29">问题</a>和针对它们的实际<a href="https://www.jakoblell.com/blog/2013/12/22/practical-malleability-attack-against-cbc-encrypted-luks-partitions/">攻击</a>。
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--key-size
+<p>-s
+</p>
+</th>
+<td><code>256</code> (XTS为<code>512</code>)
+</td>
+<td><code>512</code>
+</td>
+<td>默认情况下，XTS密码使用512 位密钥大小。但是请注意，<a href="https://en.wikipedia.org/wiki/Disk_encryption_theory#XEX-based_tweaked-codebook_mode_with_ciphertext_stealing_.28XTS.29">XTS将提供的密钥分成两半</a>，因此这会导致使用 AES-256。
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--hash
+<p>-h
+</p>
+</th>
+<td><code>sha256</code>
+</td>
+<td><code>sha512</code>
+</td>
+<td>用于<a href="#pg181e0ec7c431">密钥派生</a>的哈希算法。版本 1.7.0 将默认值从 <code>sha1</code> 更改为 <code>sha256</code> “不是出于安全原因【而】主要是为了确保它可以在SHA1不可用的系统上运行”<a href="https://www.kernel.org/pub/linux/utils/cryptsetup/v1.7/v1.7.0-ReleaseNotes">[1]</a>。  以前默认的<code>sha1</code>仍然可以用于与旧版本的 cryptsetup 兼容，因为它<a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#5-security-aspects">被认为是安全的</a>(参阅第5.20 条)。
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--iter-time
+<p>-i
+</p>
+</th>
+<td><code>2000</code>
+</td>
+<td><code>5000</code>
+</td>
+<td>用于 PBKDF 密码处理的毫秒数。版本 1.7.0 将默认值从 <code>1000</code> 更改为<code>2000</code>，以“尽量保持 PBKDF2 迭代计数仍然足够高，并且用户仍然可以接受。”<a href="https://www.kernel.org/pub/linux/utils/cryptsetup/v1.7/v1.7.0-ReleaseNotes">[2]</a>。此选项仅与设置或更改密码的 LUKS 操作相关，例如 <code>luksFormat</code> 或 <code>luksAddKey</code> 。指定 0作为参数选择编译的默认值。
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--use-urandom
+</th>
+<td><code>--use-urandom</code>
+</td>
+<td><code>--use-random</code>
+</td>
+<td>选择要使用的随机数生成器（<a href="#pg5307fe842182">随机数生成</a>）。请注意，<a href="https://lwn.net/Articles/808575/">/dev/random 阻塞池已被删除</a>。因此，<code>--use-random</code>标志现在等同于<code>--use-urandom</code>。
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--verify-passphrase
+<p>-y
+</p>
+</th>
+<td>Yes
+</td>
+<td>-
+</td>
+<td>在 Arch Linux 中默认为 <code>luksFormat</code> 和 <code>luksAddKey</code> 启用。
+</td></tr>
+<tr>
+<th>--sector-size
+</th>
+<td><code>512</code> 或 <code>4096</code> （设备相关）
+</td>
+<td><code>4096</code>
+</td>
+<td>设置用于磁盘加密的扇区大小（以字节为单位）。对于报告为 4Kn 或 512e 的块设备，默认值为 <code>4096</code>；对于报告为 512n 的块设备，默认值为 <code>512</code>。将扇区大小从 512 字节增加到 4096 字节可以在大多数现代存储设备上提供更好的性能。请参阅 <a href="#pg1e179f17182c">先进格式化#dm-crypt</a>
+</td></tr></tbody></table>
+<p>LUKS 功能和选项的属性在 <a href="https://gitlab.com/cryptsetup/cryptsetup/-/raw/master/docs/on-disk-format.pdf">LUKS1</a>(pdf) 和 <a href="https://gitlab.com/cryptsetup/cryptsetup/-/raw/master/docs/on-disk-format-luks2.pdf">LUKS2</a>(pdf) 规范中进行了描述。 
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>项目开发者的 <a href="https://mbroz.fedorapeople.org/talks/devconf2016/devconf2016-luks2.pdf">devconfcz2016</a>(pdf) 演示文稿总结了 LUKS2 主要规范更新的动机。另请参阅 cryptsetup 的<a href="https://mirrors.edge.kernel.org/pub/linux/utils/cryptsetup/v2.0/v2.0.0-ReleaseNotes">v2 release notes</a></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E8.BF.AD.E4.BB.A3.E6.97.B6.E9.97.B4" id="迭代时间"><span id=".E8.BF.AD.E4.BB.A3.E6.97.B6.E9.97.B4"></span>迭代时间</h4></div>
+<p>来自 <a href="https://gitlab.com/cryptsetup/cryptsetup/-/wikis/FrequentlyAskedQuestions#2-setup">cryptsetup FAQ§2.1</a> 和 <a href="https://gitlab.com/cryptsetup/cryptsetup/-/wikis/FrequentlyAskedQuestions#3-common-problems">§3.4</a>：
+</p>
+<dl><dd>设置密码时计算密钥槽 [……] 的解锁时间。默认为 1 秒（LUKS2 为 2 秒）。 [……]</dd>
+<dd>密码迭代计数基于时间，因此安全级别取决于创建 LUKS 容器的系统的 CPU 能力。 [……]</dd>
+<dd>如果在快速机器上设置密码，然后在慢速机器上解锁，解锁时间可能会更长。</dd></dl>
+<p>因此，最好始终在最常访问它的机器上创建一个容器。
+</p><p>阅读其余部分，了解如何在需要时正确调整迭代次数。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E6.89.87.E5.8C.BA.E5.A4.A7.E5.B0.8F" id="扇区大小"><span id=".E6.89.87.E5.8C.BA.E5.A4.A7.E5.B0.8F"></span>扇区大小</h4></div>
+<p>请参阅<a href="#pgabf8f88823a3">Advanced Format#dm-crypt</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_plain.E6.A8.A1.E5.BC.8F.E7.9A.84.E5.8A.A0.E5.AF.86.E9.80.89.E9.A1.B9" id="plain模式的加密选项"><span id="plain.E6.A8.A1.E5.BC.8F.E7.9A.84.E5.8A.A0.E5.AF.86.E9.80.89.E9.A1.B9"></span>plain模式的加密选项</h3></div>
+<p>在dm-crypt <b>plain</b>模式下，设备上没有主密钥，因此，不需要设置它。相反，要使用的加密选项被直接用来创建加密硬盘和命名设备之间的映射。映射可以针对一个分区或一个完整的设备创建。在后一种情况下，甚至不需要一个分区表。  
+</p><p>使用cryptsetup 的默认参数创建<b>plain</b>模式映射：
+</p>
+<pre># cryptsetup open --type plain <i>options</i> <i>device</i> <i>name</i>
+</pre>
+<p><br/>	
+Executing it will prompt for a password, which should have very high entropy, and the <code>--verify-passphrase</code> option can be used but is not a default. In general it is advisable to make exact note of the encryption options used for the creation, because they can not be derived from the encrypted device, or an optional key-file, and upstream defaults may change.
+执行它将提示输入密码，该密码应该具有非常高的熵。也可以添加 <code>--verify-passphrase</code> 选项（并非默认值）。一般来说，建议准确记录用于创建加密驱动器的选项，因为它们不能从加密设备或可选密钥文件中获得，而上游（简写的）默认值可能会更改。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>选项</th>
+<th>Cryptsetup 2.7.0默认值</th>
+<th>示例</th>
+<th>注释
+</th></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--hash
+<p>-h
+</p>
+</th>
+<td><code>sha256</code>
+</td>
+<td>-
+</td>
+<td>哈希（hash）用于从密码创建密钥；它不用于密钥文件。
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--cipher
+<p>-c
+</p>
+</th>
+<td><code>aes-xts-plain64</code>
+</td>
+<td><code>aes-xts-plain64</code>
+</td>
+<td>密码由三部分组成：cipher-chainmode-IV generator。请参阅 <a href="#pg181e0ec7c431">Data-at-rest encryption#Ciphers and modes of operation</a> 了解这些设置的说明，以及<a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt">DMCrypt 文档</a>了解一些可用选项。
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--key-size
+<p>-s
+</p>
+</th>
+<td><code>256</code>
+</td>
+<td><code>512</code>
+</td>
+<td>密钥大小（以位（bit）为单位）。其大小将取决于使用的密码以及使用的链模式。 <a href="https://en.wikipedia.org/wiki/Disk_encryption_theory#XEX-based_tweaked-codebook_mode_with_ciphertext_stealing_.28XTS.29">XTS 需要两倍于</a> CBC 的密钥大小.
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--size
+<p>-b
+</p>
+</th>
+<td>目标硬盘的实际大小
+</td>
+<td>- （默认即可）
+</td>
+<td>限制设备的最大大小（以 512字节扇区为单位）。
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--offset
+<p>-o
+</p>
+</th>
+<td><code>0</code>
+</td>
+<td><code>0</code>
+</td>
+<td>从目标硬盘起始位置（the beginning of the target disk）的偏移量（以512 字节扇区为单位）开始映射。
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--skip
+<p>-p
+</p>
+</th>
+<td><code>0</code>
+</td>
+<td><code>2048</code> (512B×2048=1MiB将被跳过)
+</td>
+<td>要跳过的 512 字节加密数据扇区的数量，用于计算初始向量（IV）。
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--key-file
+<p>-d
+</p>
+</th>
+<td>默认使用密码
+</td>
+<td><code>/dev/sd<i>Z</i></code> (或例如 <code>/boot/keyfile.enc</code>)
+</td>
+<td>用作密钥的设备或文件。有关详细信息，请参阅#Keyfiles<sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>。
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--keyfile-offset
+</th>
+<td><code>0</code>
+</td>
+<td><code>0</code>
+</td>
+<td>从密钥开始的文件开头（the beginning of the file）的偏移量（以字节为单位）。从cryptsetup 1.6.7 开始支持此选项。
+</td></tr>
+<tr>
+<th style="text-align:right;white-space:nowrap;">--keyfile-size
+<p>-l
+</p>
+</th>
+<td><code>8192kB</code>
+</td>
+<td>- (默认应用)
+</td>
+<td>限制从密钥文件中读取的字节数。从 cryptsetup 1.6.7 开始支持此选项。
+</td></tr>
+<tr>
+<th>--sector-size
+</th>
+<td><code>512</code>
+</td>
+<td><code>4096</code>
+</td>
+<td>用于磁盘加密的扇区大小（以字节为单位）。除了 4Kn 块设备，默认值为 <code>512</code>。将扇区大小从 512 字节增加到 4096 字节可以在大多数现代存储设备上提供更好的性能。请参阅<a href="#pgabf8f88823a3">Advanced Format#dm-crypt</a>。
+</td></tr></tbody></table>
+<p>使用设备<code>/dev/sd<i>X</i></code>, 上述右栏示例的结果是：
+</p>
+<pre># cryptsetup open --type plain --cipher=aes-xts-plain64 --offset=0 --skip=2048 --key-file=/dev/sd<i>Z</i> --key-size=512 --sector-size 4096 /dev/sdX enc
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>与使用 LUKS 加密不同，上述命令在需要重新建立映射时必须<b>完整</b>执行，因此记住密码、哈希和密钥文件的详细信息很重要。不要依赖 cryptsetup 的默认值，它们可能会随着版本迭代而改变。</div>
+<p>现在可以检查是否已映射：
+</p>
+<pre># fdisk -l
+</pre>
+<p>此时一个条目应当存在于<code>/dev/mapper/enc</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg88d6e7a842ae_.E4.BD.BF.E7.94.A8_cryptsetup_.E5.8A.A0.E5.AF.86.E8.AE.BE.E5.A4.87" id="使用_cryptsetup_加密设备"><span id=".E4.BD.BF.E7.94.A8_cryptsetup_.E5.8A.A0.E5.AF.86.E8.AE.BE.E5.A4.87"></span>使用 cryptsetup 加密设备</h2></div>
+<p>本节介绍如何使用选项来创建新的加密块设备并手动访问它们。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>GRUB 对 LUKS2 的支持有限；有关详细信息，请参阅<a href="#pgca9c4017f7ad">GRUB#Encrypted /boot</a>。对 GRUB 需要解锁的分区请使用 基于 PBKDF2 的 LUKS2 （<code>cryptsetup luksFormat --pbkdf pbkdf2</code>）。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E4.BD.BF.E7.94.A8_LUKS_.E6.A8.A1.E5.BC.8F.E5.8A.A0.E5.AF.86.E8.AE.BE.E5.A4.87" id="使用_LUKS_模式加密设备"><span id=".E4.BD.BF.E7.94.A8_LUKS_.E6.A8.A1.E5.BC.8F.E5.8A.A0.E5.AF.86.E8.AE.BE.E5.A4.87"></span>使用 LUKS 模式加密设备</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E6.A0.BC.E5.BC.8F.E5.8C.96_LUKS_.E5.88.86.E5.8C.BA" id="格式化_LUKS_分区"><span id=".E6.A0.BC.E5.BC.8F.E5.8C.96_LUKS_.E5.88.86.E5.8C.BA"></span>格式化 LUKS 分区</h4></div>
+<p>要将分区设置为加密的 LUKS分区，请执行：
+</p>
+<pre># cryptsetup luksFormat <i>device</i>
+</pre>
+<p>然后将提示您输入密码并进行验证。
+</p><p>有关命令行选项，请参阅#Encryption options for LUKS mode<sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>。
+</p><p>您可以通过以下方式检查结果：
+</p>
+<pre># cryptsetup luksDump <i>device</i>
+</pre>
+<p>您会注意到，dump 不仅显示密码头信息，还显示用于 LUKS 分区的密钥槽。
+</p><p>以下示例将使用 XTS 模式下的默认 AES 密码和有效的 256 位加密在 <code>/dev/sda1</code>上创建一个加密的根分区 
+</p>
+<pre># cryptsetup luksFormat -s 512 /dev/sda1
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg88d6e7a842ae_.E4.BD.BF.E7.94.A8LUKS.E6.9D.A5.E6.A0.BC.E5.BC.8F.E5.8C.96.E5.B8.A6.E6.9C.89.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E7.9A.84.E5.88.86.E5.8C.BA" id="使用LUKS来格式化带有密钥文件的分区"><span id=".E4.BD.BF.E7.94.A8LUKS.E6.9D.A5.E6.A0.BC.E5.BC.8F.E5.8C.96.E5.B8.A6.E6.9C.89.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E7.9A.84.E5.88.86.E5.8C.BA"></span>使用LUKS来格式化带有密钥文件的分区</h5></div>
+<p>在创建新的 LUKS 加密分区时，密钥文件可能会在创建时与分区相关联，使用：
+</p>
+<pre># cryptsetup luksFormat <i>device</i> <i>/path/to/mykeyfile</i>
+</pre>
+<p>有关如何生成和管理密钥文件的说明，请参阅#密钥文件。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E4.BD.BF.E7.94.A8.E8.AE.BE.E5.A4.87.E6.98.A0.E5.B0.84.E5.99.A8.E8.A7.A3.E9.94.81.2F.E6.98.A0.E5.B0.84_LUKS.E5.88.86.E5.8C.BA" id="使用设备映射器解锁/映射_LUKS分区"><span id=".E4.BD.BF.E7.94.A8.E8.AE.BE.E5.A4.87.E6.98.A0.E5.B0.84.E5.99.A8.E8.A7.A3.E9.94.81.2F.E6.98.A0.E5.B0.84_LUKS.E5.88.86.E5.8C.BA"></span>使用设备映射器解锁/映射 LUKS分区</h4></div>
+<p>一旦创建了 LUKS 分区，就可以解锁它们。
+</p><p>解锁过程将使用设备映射器将分区映射到新的设备名称。这提醒内核，<code><i>device</i></code>实际上是一个加密设备，应该通过 LUKS 使用 <code>/dev/mapper/<i>dm_name</i></code> 寻址，以免覆盖加密数据。为防止意外覆盖，为了防止意外覆盖，请阅读在完成设置后<a href="#pg8ad7aef74953">备份cryptheader</a>的可能性。
+</p><p>为了打开一个加密的LUKS分区，执行：
+</p>
+<pre># cryptsetup open <i>device</i> <i>dm_name</i>
+</pre>
+<p>然后将提示您输入密码以解锁该分区。通常，设备映射名称描述了被映射的分区的功能。例如，以下内容解锁了根 luks 分区<code>/dev/sda1</code>并将其映射到名为<code>root</code>的设备映射器：
+</p>
+<pre># cryptsetup open /dev/sda1 root 
+</pre>
+<p>打开后，根分区设备地址将是<code>/dev/mapper/root</code> 而不是分区（例如 <code>/dev/sda1</code>）。
+</p><p>为了在加密层上设置 LVM，解密卷组的设备文件将类似于<code>/dev/mapper/root</code>而不是<code>/dev/sda1</code>。然后LVM 将为创建的所有逻辑卷提供附加名称如<code>/dev/lvmpool/root</code> 与<code>/dev/lvmpool/swap</code>。
+</p><p>为了将加密数据写入分区，必须通过设备映射名称对其进行访问。访问的第一步通常是<a href="#pg60f777895eca">创建文件系统</a>。例如：
+</p>
+<pre># mkfs.ext4 /dev/mapper/root
+</pre>
+<p>然后，设备<code>/dev/mapper/root</code>可以像其他分区一样被挂载(<a href="#pg33fa78c05486">mount</a>)。
+</p><p>要关闭 LUKS 容器，请卸载分区并执行以下操作：
+</p>
+<pre># cryptsetup close root
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E4.BD.BF.E7.94.A8_TPM_.E5.AD.98.E5.82.A8.E5.AF.86.E9.92.A5" id="使用_TPM_存储密钥"><span id=".E4.BD.BF.E7.94.A8_TPM_.E5.AD.98.E5.82.A8.E5.AF.86.E9.92.A5"></span>使用 TPM 存储密钥</h4></div>
+<p>请参阅<a href="#pg3760f6882d85">可信平台模块#LUKS 数据加密</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E4.BD.BF.E7.94.A8plain.E6.A8.A1.E5.BC.8F.E5.8A.A0.E5.AF.86.E8.AE.BE.E5.A4.87" id="使用plain模式加密设备"><span id=".E4.BD.BF.E7.94.A8plain.E6.A8.A1.E5.BC.8F.E5.8A.A0.E5.AF.86.E8.AE.BE.E5.A4.87"></span>使用plain模式加密设备</h3></div>
+<p>创建和后续访问<b>dm-crypt</b> plain模式加密只需要使用<b>cryptsetup</b> <code>open</code>操作，并使用正确的<a href="#pg8ad7aef74953">参数</a>。下面的例子展示了两个非根设备的例子，但通过将两个设备堆叠起来增加了一个quirk(即，第二个是在第一个设备内部创建的)。显然，叠加加密会使开销加倍。这里的用例只是为了演示使用cipher选项的另一个示例。
+</p><p>第一个映射器是使用 <b>cryptsetup 的</b>plain模式默认值创建的，如上文的表中左列所述
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup --type plain -v open /dev/sd<i>xY</i> plain1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">WARNING: Using default options for cipher (aes-xts-plain64, key size 256 bits) that could be incompatible with older versions.
+WARNING: Using default options for hash (sha256) that could be incompatible with older versions.
+For plain mode, always use options --cipher, --key-size and if no keyfile is used, then also --hash.
+
+Enter passphrase for /dev/sd<i>xY</i>:
+Command successful.
+</pre>
+<p>现在我们在其中添加第二个块设备，使用不同的加密参数和（可选的）偏移量，创建一个文件系统并挂载它 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup --type plain --cipher=serpent-xts-plain64 --hash=sha256 --key-size=256 --offset=10  open /dev/mapper/plain1 plain2</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Enter passphrase for /dev/mapper/plain1:</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># lsblk -p</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"> NAME                                                     
+ /dev/sda                                     
+ ├─/dev/sd<i>xY</i>          
+ │ └─/dev/mapper/plain1     
+ │   └─/dev/mapper/plain2              
+ ...
+</pre>
+<pre># mkfs -t ext2 /dev/mapper/plain2
+# mount -t ext2 /dev/mapper/plain2 /mnt
+# echo "This is stacked. one passphrase per foot to shoot." &gt; /mnt/stacked.txt
+</pre>
+<p>我们关闭堆栈（stack），以检查访问是否有效
+</p>
+<pre># cryptsetup close plain2
+# cryptsetup close plain1
+</pre>
+<p>首先，让我们尝试直接打开文件系统：
+</p>
+<pre># cryptsetup --type plain --cipher=serpent-xts-plain64 --hash=sha256 --key-size=256 --offset=10 open /dev/sd<i>xY</i> plain2
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># mount -t ext2 /dev/mapper/plain2 /mnt</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">mount: /mnt: wrong fs type, bad option, bad superblock on /dev/mapper/plain2, missing codepage or helper program, or other error.
+       dmesg(1) may have more information after failed mount system call.
+</pre>
+<p>为什么那行不通？因为“plain2”起始块（<code>10</code>）仍然使用“plain1”中的密码加密。它只能通过堆叠映射器访问。不过这个错误是任意的，尝试错误的口令或错误的选项也会产生同样的结果。对于 <b>dm-crypt</b> plain 模式，<code>open</code>操作本身不会出错。
+</p><p>以正确的顺序重试：
+</p>
+<pre># cryptsetup close plain2    # 上一次尝试的功能失调的映射器
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup --type plain open /dev/sd<i>xY</i> plain1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">WARNING: Using default options for cipher (aes-xts-plain64, key size 256 bits) that could be incompatible with older versions.
+WARNING: Using default options for hash (sha256) that could be incompatible with older versions.
+For plain mode, always use options --cipher, --key-size and if no keyfile is used, then also --hash.
+
+Enter passphrase for /dev/sd<i>xY</i>:
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup --type plain --cipher=serpent-xts-plain64 --hash=sha256 --key-size=256 --offset=10 open /dev/mapper/plain1 plain2</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Enter passphrase for /dev/mapper/plain1:</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># mount /dev/mapper/plain2 /mnt &amp;&amp; cat /mnt/stacked.txt</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">This is stacked. one passphrase per foot to shoot.
+</pre>
+<p><b>dm-crypt</b>也会处理一些混合模式的叠加加密。例如，LUKS模式可以在 “plain1”映射器上叠加。当它被关闭时，它的头会在 “plain1”中被加密。
+</p><p>仅可用于plain模式的是选项<code>--shared</code>。有了它，可以将单个设备分割成不同的非重叠映射器。我们在下一个示例中就是这样做的，这次为“plain2”使用与 loopaes兼容的密码模式：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup --type plain --offset 0 --size 1000 open /dev/sd<i>xY</i> plain1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">WARNING: Using default options for cipher (aes-xts-plain64, key size 256 bits) that could be incompatible with older versions.
+WARNING: Using default options for hash (sha256) that could be incompatible with older versions.
+For plain mode, always use options --cipher, --key-size and if no keyfile is used, then also --hash.
+	
+Enter passphrase for /dev/sd<i>xY</i>:</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup --type plain --offset 1000 --size 1000 --shared --cipher=aes-cbc-lmk --hash=sha256 open /dev/sd<i>xY</i> plain2</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">WARNING: Using default options for cipher (aes-cbc-lmk, key size 256 bits) that could be incompatible with older versions.
+	
+For plain mode, always use options --cipher, --key-size and if no keyfile is used, then also --hash.
+	
+Enter passphrase for /dev/sd<i>xY</i>:</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># lsblk -p</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME                    
+dev/sd<i>xY</i>                    
+├─/dev/sd<i>xY</i>               
+│ ├─/dev/mapper/plain1     
+│ └─/dev/mapper/plain2     
+...
+</pre>
+<p>正如设备树所示，两者都位于同一级别，即没有堆叠，“plain2”可以单独打开。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg88d6e7a842ae_.E4.B8.93.E9.97.A8.E9.92.88.E5.AF.B9LUKS.E7.9A.84Cryptsetup.E6.93.8D.E4.BD.9C" id="专门针对LUKS的Cryptsetup操作"><span id=".E4.B8.93.E9.97.A8.E9.92.88.E5.AF.B9LUKS.E7.9A.84Cryptsetup.E6.93.8D.E4.BD.9C"></span>专门针对LUKS的Cryptsetup操作</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E5.AF.86.E9.92.A5.E7.AE.A1.E7.90.86" id="密钥管理"><span id=".E5.AF.86.E9.92.A5.E7.AE.A1.E7.90.86"></span>密钥管理</h3></div>
+<p>可以为 LUKS 分区添加额外的密钥。这使用户能够创建访问密钥以进行安全的备份存储。在所谓的密钥托管中，一个密钥用于日常使用，另一个保存在托管中以获取对分区的访问权限，以防忘记日常密码或密钥文件丢失/损坏。 也可以使用不同的密钥槽向用户授予对分区的访问权限，方法是发出第二个密钥，然后再将其撤销。
+</p><p>一旦创建了加密分区，就会创建初始密钥槽0。（如果没有手动指定其他密钥槽）。额外的密钥槽从1到7进行编号。可以通过发出以下命令查看哪些密钥槽被使用 
+</p>
+<pre># cryptsetup luksDump /dev/<i>device</i>
+</pre>
+<p>其中<code><i>device</i></code>是包含LUKS头的块设备。此命令和以下本节中的所有命令也适用于头备份文件。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E6.B7.BB.E5.8A.A0_LUKS_.E5.AF.86.E9.92.A5" id="添加_LUKS_密钥"><span id=".E6.B7.BB.E5.8A.A0_LUKS_.E5.AF.86.E9.92.A5"></span>添加 LUKS 密钥</h4></div>
+<p>添加新的密钥槽是动作<code>luksAddKey</code>完成的。为了安全起见，在输入新密钥之前，它总是会要求输入一个有效的现有密钥（任意已有密码槽的密码），对于已经解锁的设备也是如此。 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup luksAddKey /dev/<i>device</i> (<i>/path/to/</i>additionalkeyfile<i>)</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Enter any existing passphrase:
+Enter new passphrase for key slot:
+Verify passphrase: 
+</pre>
+<p>如果给出了<code><i>/path/to/additionalkeyfile</i></code>，cryptsetup 将为 <code><i>additionalkeyfile</i></code> 添加一个新的密钥槽。否则提示输入新密码。若要使用现有的<b>密钥文件</b>来授权操作，<code>--key-file</code>或 <code>-d</code> 选项后跟“旧的” <code><i>keyfile</i></code>，这样将尝试解锁所有可用的密钥文件密钥槽：
+</p>
+<pre># cryptsetup luksAddKey /dev/<i>device</i> [<i>/path/to/additionalkeyfile</i>] -d <i>/path/to/keyfile</i>
+</pre>
+<p>如果打算使用多个密钥并更改或撤销它们，则可以使用 <code>--key-slot</code>或 <code>-S</code> 选项来指定密钥槽：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup luksAddKey /dev/<i>device</i> -S 6</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">WARNING: The --key-slot parameter is used for new keyslot number.
+Enter any existing passphrase:  
+Enter new passphrase for key slot: 
+Verify passphrase:
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup luksDump /dev/<i>device</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+Keyslots:
+...
+<b>6</b>: luks2
+      Key:      512 bits
+      Priority: normal
+...
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>LUKS2 可以为各个密码槽设置优先级，请参阅 <span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup-config"><a href="https://man.archlinux.org/man/cryptsetup-config.8">cryptsetup-config(8)</a></span>。
+例如，如果上述密码槽 <code>6</code> 旨在在启动时解锁设备，请用 root 执行 <code>cryptsetup config --priority Preferred --key-slot 6 /dev/<i>device</i></code> 。</div>
+<p>为了在此示例中显示关联的操作，我们决定在继续删除之前立即更改密钥：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup luksChangeKey /dev/<i>device</i> -S 6</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Enter passphrase to be changed:  
+Enter new passphrase:
+Verify passphrase:
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E7.A7.BB.E9.99.A4_LUKS_.E5.AF.86.E9.92.A5" id="移除_LUKS_密钥"><span id=".E7.A7.BB.E9.99.A4_LUKS_.E5.AF.86.E9.92.A5"></span>移除 LUKS 密钥</h4></div>
+<p>从加密头部中删除密钥有三种不同的操作：
+</p>
+<ul><li><code>luksRemoveKey</code> 通过指定其密码/密钥文件来删除密钥。请参阅 <span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup-luksRemoveKey"><a href="https://man.archlinux.org/man/cryptsetup-luksRemoveKey.8">cryptsetup-luksRemoveKey(8)</a></span> 。</li>
+<li><code>luksKillSlot</code> 可用于从特定密钥槽中删除密钥（使用另一个有效密钥）。显然，如果您忘记了密码、丢失了密钥文件或无法访问它，这将非常有用。请参阅 <span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup-luksKillSlot"><a href="https://man.archlinux.org/man/cryptsetup-luksKillSlot.8">cryptsetup-luksKillSlot(8)</a></span>。</li>
+<li><code>erase</code> 用于快速删除<b>所有</b>激活的密钥。请参阅 <span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup-erase"><a href="https://man.archlinux.org/man/cryptsetup-erase.8">cryptsetup-erase(8)</a></span>。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>* 以上所有操作都可用于不可撤销地删除加密设备的最后一个活动密钥！
+<ul><li>在1.6.4版本中添加了<code>erase</code>命令，此操作<b>不会</b>提示输入有效密码！它不会<a href="#pg696584835e01">擦除 LUKS 头</a>，而是一次擦除所有密钥槽，因此，除非您拥有 LUKS 头的有效备份，否则您将无法重新获得访问权限。</li>
+<li>对 <a href="#pge2b7bc261d33">OPAL</a> 硬件加密的分区使用 <code>erase</code> 命令时，LUKS 头会被清空，同时 OPAL 锁定区域会被移除。与软件加密不同，这个操作不可恢复，即使存在有效的 LUKS 头备份也不行。</li></ul>
+</div>
+<p><br/>
+对于上述警告，最好知道我们要<b>保留</b>的密钥是有效的。一个简单的检查是使用 <code>-v</code> 选项解锁设备，该选项将指出它占用的密钥槽：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup --test-passphrase -v open /dev/<i>device</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">No usable token is available.
+Enter passphrase for /dev/<i>device</i>: 
+Key slot 1 unlocked.
+Command successful.
+</pre>
+<p>现在我们可以使用其密码删除在上一小节中添加的密钥：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup luksRemoveKey /dev/<i>device</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Enter passphrase to be deleted:
+</pre>
+<p>如果我们对两个密钥槽使用相同的密码，那么现在将擦除第一个槽。只有再次执行它才会删除第二个。
+</p><p>或者，我们可以指定密钥槽：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup luksKillSlot /dev/<i>device</i> 6</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Enter any remaining passphrase:
+</pre>
+<p>请注意，在这两种情况下，都不需要确认。
+</p><p>重申上面的警告：如果密钥槽 1 和 6 使用了相同的密码，那么现在两者都将消失。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E5.A4.87.E4.BB.BD.E4.B8.8E.E6.81.A2.E5.A4.8D" id="备份与恢复"><span id=".E5.A4.87.E4.BB.BD.E4.B8.8E.E6.81.A2.E5.A4.8D"></span>备份与恢复</h3></div>
+<p>如果 LUKS 加密分区的头被破坏，您将无法解密您的数据。这就像忘记密码或损坏用于解锁分区的密钥文件一样，都是一种困境。损坏可能是由于您在稍后重新分区硬盘时自己的错误或第三方程序误解了分区表而造成的。因此，备份（LUKS 加密分区的）头并将其存储在另一个硬盘上可能是个好主意。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果其中一个LUKS加密分区的密码被泄露，你必须在每一个加密头（cryptheader）的副本上撤销它，即使是那些你已经备份的副本。否则，使用被泄露的密码短语的备份加密头的副本可被用来确定主密钥，该主密钥可以用来解密关联的分区（甚至是实际的分区，而不仅仅是备份的版本）。另一方面，如果主密钥被泄露，您必须重新加密整个分区。有关详细信息，请参阅 <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#6-backup-and-data-recovery">LUKS FAQ</a>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E4.BD.BF.E7.94.A8_cryptsetup_.E8.BF.9B.E8.A1.8C.E5.A4.87.E4.BB.BD" id="使用_cryptsetup_进行备份"><span id=".E4.BD.BF.E7.94.A8_cryptsetup_.E8.BF.9B.E8.A1.8C.E5.A4.87.E4.BB.BD"></span>使用 cryptsetup 进行备份</h4></div>
+<p>Cryptsetup 的<code>luksHeaderBackup</code> 操作存储LUKS 头和密钥槽区域的二进制备份：
+</p>
+<pre># cryptsetup luksHeaderBackup /dev/<i>device</i> --header-backup-file <i>/mnt/backup/file.img</i>
+</pre>
+<p>其中<code><i>device</i></code>是包含LUKS 卷的分区。
+</p><p>你也可以将纯文本头备份到<a href="#pg96f7efa88158">tmpfs</a>中，并在将其写入持久性存储之前用例如<a href="#pg168817120ccc">GPG</a>进行加密：
+</p>
+<pre># mount --mkdir -t tmpfs -o noswap tmpfs /root/<i>tmp</i>
+# cryptsetup luksHeaderBackup /dev/<i>device</i> --header-backup-file /root/<i>tmp</i>/<i>file</i>.img
+# gpg --recipient <i>User_ID</i> --encrypt /root/<i>tmp</i>/<i>file</i>.img 
+# cp /root/<i>tmp</i>/<i>file</i>.img.gpg /mnt/<i>backup</i>/
+# umount /root/<i>tmp</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>选项<code>noswap</code>确保了该文件系统不会交换到硬盘中去。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E4.BD.BF.E7.94.A8_cryptsetup_.E6.81.A2.E5.A4.8D" id="使用_cryptsetup_恢复"><span id=".E4.BD.BF.E7.94.A8_cryptsetup_.E6.81.A2.E5.A4.8D"></span>使用 cryptsetup 恢复</h4></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>恢复不正确的头或恢复到未加密的分区将导致数据丢失!该操作无法检查头是否实际上是该特定设备的<b>正确</b>头。</div>
+<p>为了避免恢复错误的头，你可以先使用<code>--header</code> 远程连接它，来确保它真的没错。 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup -v --header /mnt/<i>backup</i>/<i>file</i>.img open /dev/<i>device</i> test</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">No usable token is available.
+Enter passphrase for /dev/<i>device</i>:
+Key slot 0 unlocked.
+Command successful.
+</pre>
+<pre># mount /dev/mapper/test /mnt/test &amp;&amp; ls /mnt/test 
+# umount /mnt/test 
+# cryptsetup close test 
+</pre>
+<p>现在检查成功，可以执行恢复：
+</p>
+<pre># cryptsetup luksHeaderRestore /dev/<i>device</i> --header-backup-file ./mnt/<i>backup</i>/<i>file</i>.img
+</pre>
+<p>现在所有的密钥槽区域都被重写了；发出命令后，只有备份文件中活跃的密钥槽可用。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E6.89.8B.E5.8A.A8.E5.A4.87.E4.BB.BD.E5.92.8C.E6.81.A2.E5.A4.8D" id="手动备份和恢复"><span id=".E6.89.8B.E5.8A.A8.E5.A4.87.E4.BB.BD.E5.92.8C.E6.81.A2.E5.A4.8D"></span>手动备份和恢复</h4></div>
+<p>头（header）始终位于设备的开头，并且无需访问 <b>cryptsetup</b> 也可以执行备份。首先，您必须找出加密分区的有效负载偏移量：
+</p>
+
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup luksDump /dev/<i>device</i> | grep "Payload offset"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Payload offset:	4040
+</pre>
+<p>其次检查驱动器的扇区大小
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># fdisk -l /dev/<i>device</i> | grep "Sector size"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Sector size (logical/physical): 512 bytes / 512 bytes
+</pre>
+<p>现在您知道了这些值，您可以使用简单的 <a href="#pge09a1da9829f">dd</a> 命令备份头：
+</p>
+<pre># dd if=/dev/<i>device</i> of=/path/to/<i>file</i>.img bs=512 count=4040
+</pre>
+<p>并安全存储。
+</p><p>然后可以使用与备份时相同的值执行还原：
+</p>
+<pre># dd if=./<i>file</i>.img of=/dev/<i>device</i> bs=512 count=4040
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E9.87.8D.E6.96.B0.E5.8A.A0.E5.AF.86.E8.AE.BE.E5.A4.87" id="重新加密设备"><span id=".E9.87.8D.E6.96.B0.E5.8A.A0.E5.AF.86.E8.AE.BE.E5.A4.87"></span>重新加密设备</h3></div>
+
+<p>cryptsetup <code>reencrypt</code> 操作能够重新加密 LUKS 设备。在 LUKS2 设备上，此操作可在线进行、多重并行且抗系统故障（弹性）。在 LUKS1 设备上，此操作只能离线进行（卸载后），单进程操作且更少弹性。
+</p><p>请参阅 <span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup-reencrypt"><a href="https://man.archlinux.org/man/cryptsetup-reencrypt.8">cryptsetup-reencrypt(8)</a></span>了解操作模式和选项。
+</p><p>可以借此改变#LUKS 模式的加密选项，也可用于将现有的未加密文件系统转换为 LUKS 加密文件系统或从设备中永久删除 LUKS 加密（使用<code>--decrypt</code>，请参阅<span class="ilh-all" data-foreign-title="Removing system encryption" data-lang-code="en" data-lang-name="英语" data-orig-title="去除系统加密"><span class="ilh-page"><a href="#pga03dbebe5779">去除系统加密</a></span></span>）。对于分离的 LUKS 标头，重新加密也是可行的，但请注意 <code>--header</code> 选项的警告。不支持 LUKS 以外的模式（例如 plain 模式）的重新加密。
+</p><p>重新加密的一种应用可能是在密码或#密钥文件被泄露<b>并且</b>不能确定（对方）没有获得 LUKS 头的副本后再次保护数据。例如，如果只有一个口令被窃取，但没有发生对设备的物理/逻辑访问，那么只需改变相应的口令/密钥即可（#密钥管理）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>始终确保有<b>可靠的备份</b>可用，并在使用该工具之前仔细检查您指定的选项！</div>
+<p>下面展示了一个对未加密的文件系统分区进行加密以及对现有LUKS设备进行重新加密的例子。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E5.8A.A0.E5.AF.86.E7.8E.B0.E6.9C.89.E7.9A.84.E6.9C.AA.E5.8A.A0.E5.AF.86.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="加密现有的未加密文件系统"><span id=".E5.8A.A0.E5.AF.86.E7.8E.B0.E6.9C.89.E7.9A.84.E6.9C.AA.E5.8A.A0.E5.AF.86.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>加密现有的未加密文件系统</h4></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果您尝试加密现有的根分区，您可能需要创建一个将被挂载到<code>/boot</code>的单独的且未加密的引导分区（请参阅<a href="#pg29ec7c5af952">dm-crypt/加密整个系统#准备boot分区</a>）。这不是绝对必要的，但有许多优点：
+<ul><li>如果<code>/boot</code> 位于加密的根分区内，系统将在机器开机时要求输入两次密码。第一次发生在引导加载程序尝试读取位于加密<code>/boot</code>中的文件时，第二次发生在内核尝试挂载加密分区 <a href="https://opencraft.com/blog/tutorial-encrypting-an-existing-root-partition-in-ubuntu-with-dm-crypt-and-luks/">[4]</a>。这可能不是所需的行为，可以通过使用单独且未加密的引导分区来防止。</li>
+<li>如果<code>/boot</code>位于加密分区，某些系统还原应用程序（例如，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=timeshift">timeshift</a></span><sup><small>包</small></sup></span>）将无法运行<a href="https://github.com/teejee2008/timeshift/issues/280">[5]</a>。</li></ul>
+简而言之，如果需要，创建一个大小至少为 260 MiB 的分区。请参阅<a href="#pg33ead49dca67">Partitioning#/boot</a>。</div>
+<p>LUKS 加密头始终存储在设备的起始（the beginning of the device）。由于现有文件系统通常会分配所有分区扇区，因此第一步是缩小它以给 LUKS头腾出空间。
+</p>
+
+<p><a href="#pg8ad7aef74953">默认</a>的LUKS2头需要16兆字节。如果当前的文件系统占据了所有的可用空间，那么我们至少要缩减这么多。要将<code>ext4</code>上现有的<code>/dev/sd<i>xY</i></code>文件系统缩小到目前可能的最小值:
+</p>
+<pre># umount /mnt
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># e2fsck -f /dev/sd<i>xY</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">e2fsck 1.46.5 (30-Dec-2021)
+Pass 1: Checking inodes, blocks, and sizes
+...
+/dev/sda6: 12/166320 files (0.0% non-contiguous), 28783/665062 blocks
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># resize2fs -p -M /dev/sd<i>xY</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">e2fsck 1.46.5 (30-Dec-2021)
+Resizing the filesystem on /dev/sd<i>xY</i> to 26347 (4k) blocks.
+The filesystem on /dev/sd<i>xY</i> is now 26347 (4k) blocks long.
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>使用<code>-M</code> 缩小到最小尺寸可能需要较长时间。您可能想要计算比当前大小仅小32 MiB 的大小，而不是使用 <code>-M</code> 。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>文件系统应被缩小，而底层设备（比如说一个分区）应保持其原始大小。一些图形工具（例如<a href="#pgd81879c10179">GParted</a>）可能会同时调整文件系统和分区的大小，加密后可能会发生数据丢失。</div>
+<p>现在我们使用默认密码对其进行加密，我们不必明确指定它：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup reencrypt --encrypt --reduce-device-size 32M /dev/sd<i>xY</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+WARNING!
+
+========
+
+This will overwrite data on LUKS2-temp-12345678-9012-3456-7890-123456789012.new irrevocably.
+
+Are you sure? (Type 'yes' in capital letters): YES
+Enter passphrase for LUKS2-temp-12345678-9012-3456-7890-123456789012.new: 
+Verify passphrase: 
+</pre>
+<p>完成后，整个<code>/dev/sd<i>xY</i></code> 分区都被加密，而不仅仅是文件系统被压缩的空间。作为最后一步，我们将原来的<code>ext4</code>文件系统扩展到现在加密的分区上，再次占用所有可用的空间：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup open /dev/sd<i>xY</i> recrypt</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Enter passphrase for /dev/sd<i>xY</i>: 
+...
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># resize2fs /dev/mapper/recrypt</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">resize2fs 1.43-WIP (18-May-2015)
+Resizing the filesystem on /dev/mapper/recrypt to 664807 (4k) blocks.
+The filesystem on /dev/mapper/recrypt is now 664807 (4k) blocks long.
+</pre>
+<pre># mount /dev/mapper/recrypt /mnt
+</pre>
+<p>文件系统现在可以使用了。您可能希望将其添加到您的<a href="#pg1340a4be8b92">crypttab</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果刚刚加密了根分区，可能需要做许多加密后的调整。
+<ol><li>配置 mkinitcpio 和内核参数。参阅<a href="#pg52b00790fb44">Dm-crypt/系统配置#在早期用户空间解密</a></li>
+<li>更新 <a href="#pgced0cc449f44">fstab</a> 中的 <code>/</code> 条目，使用解锁卷的标识 (如使用 <a href="#pg676782540a81">UUID</a>).</li></ol>
+</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E9.87.8D.E6.96.B0.E5.8A.A0.E5.AF.86.E7.8E.B0.E6.9C.89.E7.9A.84_LUKS_.E5.88.86.E5.8C.BA" id="重新加密现有的_LUKS_分区"><span id=".E9.87.8D.E6.96.B0.E5.8A.A0.E5.AF.86.E7.8E.B0.E6.9C.89.E7.9A.84_LUKS_.E5.88.86.E5.8C.BA"></span>重新加密现有的 LUKS 分区</h4></div>
+<p>在此示例中，现有的 LUKS 设备被重新加密。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>在没有<b>可靠备份</b>的情况下永远不要直接进行重新加密！若因密码泄露而考虑重新加密，则应当在创建备份、执行重新加密操作<b>之前</b>使用 <code>luksChangeKey</code>。 </div>
+<p>若要使用目标设备当前的加密选项重新加密，只需执行：
+</p>
+<pre> # cryptsetup reencrypt /dev/sd<i>xY</i>
+</pre>
+<p>使用不同的密码和/或散列重新加密设备时，会保留现有密钥。
+</p><p>若需要在重新加密的过程中，采用新的加密选项，则需要手动指定欲采用的选项。注意 LUKS2 头支持为每个密钥槽设置不同的加密选项，故重新加密过程只会在 LUKS2 卷的数据段上进行。
+</p><p>注意，LUKS 头的大小可能限制可用的修改操作。例如，如果设备最初使用 CBC 模式密码和 128 位密钥大小加密，则 LUKS 头将是上述<code>4096</code>个扇区大小的一半： 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup luksDump /dev/sd<i>xY</i> | grep -e "mode" -e "Payload" -e "MK bits"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Cipher mode:   	cbc-essiv:sha256
+Payload offset:	<b>2048</b>
+MK bits:       	128
+</pre>
+<p>若要在类似情况下更新加密选项，则应当在重新加密前将卷转换为 LUKS2 格式。若在转换过程中即出现头部空间不足，则需要先使用 <code>--reduce-device-size</code> 选项进行重新加密，以为头部留出更多的空间，之后再使用新的加密选项进行重新加密。将卷转换为 LUKS2 格式会操作 LUKS 头，为头部留出更多空间需要操作文件系统数据，故需要注意上述两步操作都存在一定风险。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E4.BB.8ELUKS1.E5.88.B0LUKS2.E7.9A.84.E8.BD.AC.E6.8D.A2.E5.92.8C.E5.9B.9E.E9.80.80" id="从LUKS1到LUKS2的转换和回退"><span id=".E4.BB.8ELUKS1.E5.88.B0LUKS2.E7.9A.84.E8.BD.AC.E6.8D.A2.E5.92.8C.E5.9B.9E.E9.80.80"></span>从LUKS1到LUKS2的转换和回退</h3></div>
+<p><i>cryptsetup</i> 提供 <code>convert</code> 选项，用于在 LUKS1 和 LUKS2 容器类型之间进行转换。参数 <code>--type</code> 是<b>必需的</b>。建议在执行转换前先对 LUKS 头进行备份。
+</p><p>从 LUKS1 迁移到 LUKS2：
+</p>
+<pre># cryptsetup convert --type luks2 /dev/sd<i>xY</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>LUKS 头大小将为 16 MiB 而不是 2MiB。</div>
+<p>回滚到 LUKS1（例如，从<a href="#pgca9c4017f7ad">带有加密 /boot 的GRUB</a> 启动）：
+</p>
+<pre># cryptsetup convert --type luks1 /dev/sd<i>xY</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>从 LUKS2 到 LUKS1 的转换并非总是可行的。您可能会收到以下错误：
+<pre>Cannot convert to LUKS1 format - keyslot 0 is not LUKS1 compatible.
+</pre>
+<p>If the container is using Argon2, it needs to be converted to PBKDF2 to be LUKS1-compatible.
+</p>
+<pre># cryptsetup luksConvertKey --pbkdf pbkdf2 /dev/sd<i>xY</i>
+</pre>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg88d6e7a842ae_.E8.B0.83.E6.95.B4.E5.8A.A0.E5.AF.86.E8.AE.BE.E5.A4.87.E7.9A.84.E5.A4.A7.E5.B0.8F" id="调整加密设备的大小"><span id=".E8.B0.83.E6.95.B4.E5.8A.A0.E5.AF.86.E8.AE.BE.E5.A4.87.E7.9A.84.E5.A4.A7.E5.B0.8F"></span>调整加密设备的大小</h2></div>
+
+<p>如果将使用 dm-crypt 加密的存储设备（使用dd 之类的工具）克隆到另一个更大的设备，或调整了 LUKS 容器所在磁盘分区的大小，则需要相应调整 LUKS 容器中的文件系统的大小。注意，对于 LUKS 容器本身，若没有指定 <code>--size</code> 参数，则容器并不记录底层磁盘分区的大小，而是默认使用整个分区，故不需要手动“调整”LUKS容器的大小，而是只需要遵循<a href="#pgfba87229acd8">调整普通分区的大小</a>的步骤即可。
+</p><p>扩大包含 <i>ext4</i> 文件系统的 LUKS 设备（<code>/dev/sdX2</code>）的步骤如下：
+</p><p>首先，使用 <a href="#pgfba87229acd8">Parted</a> 或 <a href="#pgc1328f332dd1">fdisk</a> 调整底层分区的大小（注意，若进行的是缩容，则应当先调整文件系统大小，再调整底层分区大小）。
+</p><p>然后，打开加密设备，并调整文件系统的大小：
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>在调整大小前，应当备份设备中的数据，并且应当卸载要调整的文件系统。</div>
+<p>在此示例中，目标设备是 /dev/sdX2，将使用与分区相邻的整个可用空间：
+</p>
+<pre># cryptsetup luksOpen /dev/sdX2 sdX2
+# e2fsck /dev/mapper/sdX2
+# resize2fs /dev/mapper/sdX2  # 使用扩大后的底层 LUKS 分区中的所有空间
+</pre>
+<p>之后重新挂载对应的文件系统即可。
+</p>
+<pre># mount /dev/mapper/sdX2 /mnt/enlarged_sdX2
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>cryptsetup-resize 命令用于调整当前处于活跃状态的 dm-crypt 映射的大小。若调整的是<i>ext2/3/4</i>文件系统，一般不需要该命令。</div>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E5.9C.A8LUKS.E4.B8.8A.E9.85.8D.E7.BD.AELVM" id="在LUKS上配置LVM"><span id=".E5.9C.A8LUKS.E4.B8.8A.E9.85.8D.E7.BD.AELVM"></span>在LUKS上配置LVM</h3></div>
+<p>详见<a href="#pg9ae8c9e942c7">调整“在LUKS上配置LVM”方案的大小</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E5.9B.9E.E9.80.81.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="回送文件系统"><span id=".E5.9B.9E.E9.80.81.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>回送文件系统</h3></div>
+<p>假设一个加密的回送文件系统存储在文件<code>/bigsecret</code>中，循环到<code>/dev/loop0</code>，映射到<code>secret</code>并挂载在<code>/mnt/secret</code>上，如 <a href="#pgb01e3fe42629">dm-crypt/Encrypting a non-root file system#File container</a>中的例子。
+</p><p>如果容器文件当前已映射和/或挂载，请卸载 并且/或着 关闭它：
+</p>
+<pre># umount /mnt/secret
+# cryptsetup close secret
+# losetup -d /dev/loop0
+</pre>
+<p>接下来，使用要添加的数据大小扩展容器文件。在本例中，文件将扩展 1M * 1024，即1G。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>一定确保使用 <code>oflag=append conv=notrunc</code> 选项，否则会覆盖文件，而不是追加到它。强烈建议在这一步骤之前做一个备份。</div>
+<pre># dd if=/dev/urandom of=/bigsecret bs=1M count=1024 iflag=fullblock oflag=append conv=notrunc status=progress
+</pre>
+<p>现在将容器映射到回送设备：
+</p>
+<pre># losetup /dev/loop0 /bigsecret
+# cryptsetup open /dev/loop0 secret
+</pre>
+<p>在此之后，将容器的加密部分的大小调整为容器文件的新的最大尺寸：
+</p>
+<pre># cryptsetup resize secret
+</pre>
+<p>最后，执行文件系统检查，如果没问题，调整它的大小（例如ext2/3/4）：
+</p>
+<pre># e2fsck -f /dev/mapper/secret
+# resize2fs /dev/mapper/secret
+</pre>
+<p>您现在可以再次挂载容器：
+</p>
+<pre># mount /dev/mapper/secret /mnt/secret
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E5.AE.8C.E6.95.B4.E6.80.A7.E4.BF.9D.E6.8A.A4.E8.AE.BE.E5.A4.87" id="完整性保护设备"><span id=".E5.AE.8C.E6.95.B4.E6.80.A7.E4.BF.9D.E6.8A.A4.E8.AE.BE.E5.A4.87"></span>完整性保护设备</h3></div>
+<p>如果设备是在支持完整性的情况下格式化的 (例如 <code>--integrity hmac-sha256</code>) 并且支持块设备缩小，则无法打开它，并出现以下错误： <code>device-mapper: reload ioctl on   failed: Invalid argument</code>.
+</p><p>为了解决这个问题而不再次擦除设备，可以用以前的主密钥进行格式化（保持每个扇区的标签有效）。
+</p>
+<pre># cryptsetup luksDump /dev/sdX2 --dump-master-key --master-key-file=/tmp/masterkey-in-tmpfs.key
+# cryptsetup luksFormat /dev/sdX2 --type luks2 --integrity hmac-sha256 --master-key-file=/tmp/masterkey-in-tmpfs.key --integrity-no-wipe
+# rm /tmp/masterkey-in-tmpfs.key
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg88d6e7a842ae_.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6" id="密钥文件"><span id=".E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6"></span>密钥文件</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>本节描述使用明文密钥文件。如果你想加密你的密钥文件给你双重身份验证，请参阅<a href="#pg2d5af776f6fd">dm-crypt/特殊应用#使用GPG、LUKS、OpenSSL加密的密钥文件</a>了解详细信息，但仍请阅读本节。</div>
+<p><b>什么是密钥文件？</b>
+</p><p>密钥文件是将其数据用作解锁加密卷的密码的文件。
+这意味着如果此类文件丢失或更改，则可能无法再解密该卷。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>在密钥文件之外定义一个密码，以便在定义的密钥文件丢失或改变的情况下对加密卷进行备份访问。</div>
+<p><b>为什么要使用密钥文件？</b>
+</p><p>密钥文件有很多种。所使用的每种类型的密钥文件都有以下总结的优点和缺点:
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E7.9A.84.E7.B1.BB.E5.9E.8B" id="密钥文件的类型"><span id=".E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E7.9A.84.E7.B1.BB.E5.9E.8B"></span>密钥文件的类型</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E5.AF.86.E7.A0.81" id="密码"><span id=".E5.AF.86.E7.A0.81"></span>密码</h4></div>
+<p>这是一个包含简单密码的密钥文件。这种类型的密钥文件的好处是，如果文件丢失，它包含的数据是已知的，并且很容易被加密卷的所有者记住。然而，缺点是这不会增加在初始系统启动期间输入密码的任何安全性。
+</p><p>示例： <code>correct horse battery staple</code>
+</p><p>{{注意|包含密码短语的密钥文件中不得有换行符。一种选择是使用以下方法来创建它： 
+</p>
+<pre># printf '%s' '<i>your_passphrase</i>' | install -m 0600 /dev/stdin /etc/cryptsetup-keys.d/<i>keyfile</i>.key
+</pre>
+<p>如果文件包含特殊字符，例如引号、反斜杠，而不是转义这些字符，建议直接编辑密钥文件，直接输入或粘贴密码，然后用方便的perl命令一行删除结尾换行：
+</p>
+<pre> # perl -pi -e 'chomp if eof' /etc/cryptsetup-keys.d/<i>keyfile</i>.key
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E9.9A.8F.E6.9C.BA.E6.96.87.E6.9C.AC" id="随机文本"><span id=".E9.9A.8F.E6.9C.BA.E6.96.87.E6.9C.AC"></span>随机文本</h4></div>
+<p>这是一个包含随机字符块的密钥文件。这种类型的密钥文件的好处是它比简单的密码更能抵抗字典攻击。在这种情况下，可以利用密钥文件的另一个优势，即所用数据的长度。由于这不是要由人记住以供输入的字符串，因此创建包含数千个随机字符作为密钥的文件是微不足道的。缺点是如果此文件丢失或更改，则很可能在没有备份密码的情况下无法访问加密卷。
+</p><p>理论上，随机文本可以使用任意字符集。但考虑到部分情况下键盘布局和 Unicode 支持可能不完善（例如，系统启动时的 LUKS 密码输入框、部分不支持 Unicode 的 POSIX 工具），建议使用 ASCII 中的字母和数字。可以按如下方式生成：
+</p>
+<pre>$ tr -dc '[:alnum:]' &lt;/dev/urandom | head -c64
+</pre>
+<p>示例：<code>rTCBW6j1dI2aYC5KcD6Ar38rBGN2DkWyang3RT7pdMGpdf1kRuMXi8EBHKu0BJ8X</code>
+</p><p>而随机生成 UTF-8 编码的密钥文件，结果可能是这样的：
+</p><p>示例：<code>W[�5ODó?Oéµ»9���¬hjT}­�DÐ§íŽ�uLÝæ�Ýœ�§aþ�óx±)Ñ)l­éeð��ú=èe</code>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E4.BA.8C.E8.BF.9B.E5.88.B6" id="二进制"><span id=".E4.BA.8C.E8.BF.9B.E5.88.B6"></span>二进制</h4></div>
+<p>这是一个已被定义为密钥文件的二进制文件。在将文件识别为密钥文件的候选文件时，建议选择相对静态的文件，例如照片、音乐、视频剪辑。这些文件的好处是它们具有双重功能，使它们更难被识别为密钥文件。与具有大量随机文本的文本文件不同，这种密钥文件对于旁观者来说看起来就像一个普通的图像文件或音乐剪辑。缺点是如果此文件丢失或更改，则很可能在没有备份密码的情况下无法访问加密卷。此外，与随机生成的文本文件相比，理论上存在随机性损失。这是因为图像、视频和音乐在相邻数据位之间具有某种内在关系，而随机文本文件不存在这种关系。然而，这是有争议的，从未被公开利用。
+</p><p>示例： 图片、文本、视频……
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E4.BD.BF.E7.94.A8.E9.9A.8F.E6.9C.BA.E5.AD.97.E7.AC.A6.E5.88.9B.E5.BB.BA.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6" id="使用随机字符创建密钥文件"><span id=".E4.BD.BF.E7.94.A8.E9.9A.8F.E6.9C.BA.E5.AD.97.E7.AC.A6.E5.88.9B.E5.BB.BA.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6"></span>使用随机字符创建密钥文件</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E5.B0.86.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E5.AD.98.E5.82.A8.E5.9C.A8.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E4.B8.8A" id="将密钥文件存储在文件系统上"><span id=".E5.B0.86.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E5.AD.98.E5.82.A8.E5.9C.A8.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E4.B8.8A"></span>将密钥文件存储在文件系统上</h4></div>
+<p>密钥文件可以是任意内容和大小。
+</p><p>这里 <a href="#pge09a1da9829f">dd</a> 用于生成 2048 个随机字节的密钥文件，将其存储在文件<code>/etc/cryptsetup-keys.d/mykeyfile.key</code> 中：
+</p>
+<pre> # dd bs=512 count=4 if=/dev/random iflag=fullblock | install -m 0600 /dev/stdin /etc/cryptsetup-keys.d/mykeyfile.key
+</pre>
+<p>如果你计划将密钥文件存储在一个外部设备上，也可以轻松将输出文件更改为对应的目录：
+</p>
+<pre> # dd bs=512 count=4 if=/dev/random of=/run/media/<i>user</i>/<i>usbstick</i>/mykeyfile.key iflag=fullblock
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg88d6e7a842ae_.E5.AE.89.E5.85.A8.E5.9C.B0.E8.A6.86.E7.9B.96.E5.AD.98.E5.82.A8.E7.9A.84.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6" id="安全地覆盖存储的密钥文件"><span id=".E5.AE.89.E5.85.A8.E5.9C.B0.E8.A6.86.E7.9B.96.E5.AD.98.E5.82.A8.E7.9A.84.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6"></span>安全地覆盖存储的密钥文件</h5></div>
+<p>如果你把你的临时密钥文件存储在一个物理存储设备上，并想删除它，记住以后不要只是删除密钥文件，而是使用类似于
+</p>
+<pre># shred --remove --zero mykeyfile
+</pre>
+<p>来安全地覆盖它。对于 FAT 或 ext2等过时的文件系统，这已经足够了，而在日志文件系统、闪存硬件和其他情况下，强烈建议<span class="ilh-all" data-foreign-title="Securely_wipe_disk" data-lang-code="en" data-lang-name="英语" data-orig-title="安全擦除硬盘"><span class="ilh-page"><a href="#pgc007b26be2b5">擦除整个设备</a></span></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E5.B0.86.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E5.AD.98.E5.82.A8.E5.9C.A8_tmpfs_.E4.B8.AD.EF.BC.88.E5.85.B3.E9.97.AD_swap.EF.BC.89" id="将密钥文件存储在_tmpfs_中（关闭_swap）"><span id=".E5.B0.86.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E5.AD.98.E5.82.A8.E5.9C.A8_tmpfs_.E4.B8.AD.EF.BC.88.E5.85.B3.E9.97.AD_swap.EF.BC.89"></span>将密钥文件存储在 tmpfs 中（关闭 swap）</h4></div>
+<p>另外，您可以挂载一个 tmpfs（关闭 swap） 来临时存储密钥文件：
+</p>
+<pre> # mount --mkdir -t tmpfs -o noswap tmpfs /root/mytmpfs
+ # cd /root/mytmpfs
+</pre>
+<p>优点是它驻留在 RAM 中而不是物理磁盘上，因此卸载 tmpfs 后无法恢复。将密钥文件复制到另一个安全且持久的文件系统后，再次卸载 tmpfs：
+</p>
+<pre># umount /root/mytmpfs
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E9.85.8D.E7.BD.AE_LUKS_.E4.BB.A5.E4.BD.BF.E7.94.A8.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6" id="配置_LUKS_以使用密钥文件"><span id=".E9.85.8D.E7.BD.AE_LUKS_.E4.BB.A5.E4.BD.BF.E7.94.A8.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6"></span>配置 LUKS 以使用密钥文件</h3></div>
+<p>将密钥文件的密钥槽添加到 LUKS 头：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup luksAddKey /dev/sda2 /etc/cryptsetup-keys.d/mykeyfile.key</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Enter any existing passphrase:
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E4.BD.BF.E7.94.A8.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E6.89.8B.E5.8A.A8.E8.A7.A3.E9.94.81.E5.88.86.E5.8C.BA" id="使用密钥文件手动解锁分区"><span id=".E4.BD.BF.E7.94.A8.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E6.89.8B.E5.8A.A8.E8.A7.A3.E9.94.81.E5.88.86.E5.8C.BA"></span>使用密钥文件手动解锁分区</h3></div>
+<p>打开 LUKS设备时使用<code>--key-file</code> 选项：
+</p>
+<pre> # cryptsetup open /dev/sda2 <i>dm_name</i> --key-file /etc/cryptsetup-keys.d/mykeyfile.key
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg88d6e7a842ae_.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E8.A7.A3.E9.94.81.E6.A0.B9.E5.88.86.E5.8C.BA" id="在启动时解锁根分区"><span id=".E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E8.A7.A3.E9.94.81.E6.A0.B9.E5.88.86.E5.8C.BA"></span>在启动时解锁根分区</h3></div>
+<p>这只是配置<a href="#pgbd0f46fbac92">mkinitcpio</a>以包括必要的模块或文件，并配置<a href="#pg52b00790fb44">cryptkey</a>以及<a href="#pgec0856954f1c">内核参数</a>以知道在哪里找到密钥文件。
+</p><p>下面介绍两种情况：
+</p>
+<ol><li>使用存储在外部介质（例如 U盘）上的密钥文件</li>
+<li>使用嵌入在initramfs 中的密钥文件</li></ol>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E4.BD.BF.E7.94.A8.E5.AD.98.E5.82.A8.E5.9C.A8.E5.A4.96.E9.83.A8.E4.BB.8B.E8.B4.A8.E4.B8.8A.E7.9A.84.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6" id="使用存储在外部介质上的密钥文件"><span id=".E4.BD.BF.E7.94.A8.E5.AD.98.E5.82.A8.E5.9C.A8.E5.A4.96.E9.83.A8.E4.BB.8B.E8.B4.A8.E4.B8.8A.E7.9A.84.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6"></span>使用存储在外部介质上的密钥文件</h4></div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg88d6e7a842ae_.E9.85.8D.E7.BD.AEmkinitcpio" id="配置mkinitcpio"><span id=".E9.85.8D.E7.BD.AEmkinitcpio"></span>配置mkinitcpio</h5></div>
+<p>您必须将驱动器<a href="#pg6790ffb56e98">文件系统</a>的内核模块添加到 <code>/etc/mkinitcpio.conf</code>中的 <a href="#pgbd0f46fbac92">MODULES array</a>中。例如，如果文件系统是Ext4，则添加<code>ext4</code>；如果是FAT，则添加<code>vfat</code>：
+</p>
+<pre>MODULES=(vfat)
+</pre>
+<p>如果在启动时有关于坏的超级块和坏的码表的信息，那么你需要加载一个额外的码表模块。例如，你可能需要<code>nls_iso8859-1</code>模块来加载<code>iso8859-1</code>编码页。
+</p><p><a href="#pgea04d1b8515f">重新生成 initramfs</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg88d6e7a842ae_.E9.85.8D.E7.BD.AE.E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0" id="配置内核参数"><span id=".E9.85.8D.E7.BD.AE.E5.86.85.E6.A0.B8.E5.8F.82.E6.95.B0"></span>配置内核参数</h5></div>
+<ul><li>对于使用<a href="#pg52b00790fb44">encrypt</a>钩子的基于busybox的initramfs，参阅<a href="#pg52b00790fb44">Dm-crypt/系统配置#cryptkey</a>。</li>
+<li>对于使用<a href="#pg778e3d3578b8">sd-encrypt</a>钩子的基于systemd的initramfs，参阅<a href="#pg52b00790fb44">Dm-crypt/系统配置#rd.luks.key</a>。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg88d6e7a842ae_.E5.9C.A8_initramfs_.E4.B8.AD.E5.B5.8C.E5.85.A5.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6" id="在_initramfs_中嵌入密钥文件"><span id=".E5.9C.A8_initramfs_.E4.B8.AD.E5.B5.8C.E5.85.A5.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6"></span>在 initramfs 中嵌入密钥文件</h4></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><b>只有</b>你通过以下方式充分保护密钥文件时，才使用嵌入式密钥文件：
+<ul><li>在启动过程的早期使用某种形式的身份验证。否则会发生自动解密，完全违背块设备加密的目的。</li>
+<li><code>/boot</code>已加密。否则，不同安装（包括实时环境（<a href="#pg0d85b8367b38">live environment</a>））上的 root 可以从 initramfs 中提取您的密钥，并在没有任何其他身份验证的情况下解锁设备。</li></ul></div>
+<p>此方法允许使用一个特殊命名的密钥文件，该密钥文件将嵌入到 <a href="#pg5409190f7704">initramfs</a> 中并由 <code>encrypt</code><a href="#pgbd0f46fbac92">钩子</a>拾取以自动解锁根文件系统（ <code>cryptdevice</code> ）。在使用 <a href="#pgca9c4017f7ad">GRUB 早期加密硬盘</a>功能时应用它可能很有用，以避免在引导期间输入两个密码。
+</p><p><a href="#pg8ad7aef74953">生成密钥文件</a>，为其赋予适当的权限并<a href="#pg8ad7aef74953">将其添加为 LUKS 密钥</a>：
+</p>
+<pre> # dd bs=512 count=4 if=/dev/random iflag=fullblock | install -m 0600 /dev/stdin /etc/cryptsetup-keys.d/root.key
+ # cryptsetup luksAddKey /dev/sd<i>X#</i> /etc/cryptsetup-keys.d/root.key
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>注意：initramfs 由 mkinitcpio 生成，默认<a href="#pgb27c176d600d">权限</a>为<code>600</code>，因此普通用户无法通过生成的 initramfs 读取密钥文件。</div>
+<p>在 <a href="#pgbd0f46fbac92">mkinitcpio 的 FILES array</a>中括入密钥：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">FILES=(/etc/cryptsetup-keys.d/root.key)</pre><p><a href="#pgea04d1b8515f">重新生成initramfs</a>
+</p><p>对于 <code>encrypt</code> 钩子，密钥文件由 <code>cryptkey=</code> 内核参数指定：在 initramfs，语法为 <code>rootfs:<i>/path/to/keyfile</i></code>。默认值为 <code>/crypto_keyfile.bin</code>，如果 initramfs 包含此路径的有效密钥，则可以省略 <code>cryptkey</code>。请参阅<a href="#pg52b00790fb44">Dm-crypt/系统配置#cryptkey</a>。
+</p><p>对于上述示例，当在 busybox-based initramfs 中使用 <code>encrypt</code> 钩子时，设置内核参数：
+</p>
+<pre>cryptkey=rootfs:/etc/cryptsetup-keys.d/root.key
+</pre>
+<p>若以 <code>sd-encrypt</code> 钩子替代，密钥文件通过 <code>rd.luks.key=</code> 内核参数指定。默认值是 <code>/etc/cryptsetup-keys.d/<i>name</i>.key</code>（其中 <code><i>name</i></code> 是用于 #使用 cryptsetup 加密设备 中解密的 <i>dm_name</i>）。且当 initramfs 包含此路径的有效密钥时， <code>rd.luks.key</code> 可省略。参阅 <a href="#pg52b00790fb44">Dm-crypt/系统配置#rd.luks.key</a>。
+</p><p>在下一次重新启动时，您应该只需要输入一次容器解密密码。
+</p><p>(<a href="https://www.pavelkogan.com/2014/05/23/luks-full-disk-encryption/#bonus-login-once">资料来源</a>)
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260809144958
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.420 seconds
+Real time usage: 0.429 seconds
+Preprocessor visited node count: 2149/1000000
+Revision size: 52107/2097152 bytes
+Post‐expand include size: 35423/2097152 bytes
+Template argument size: 16629/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 3/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 534/5000000 bytes
+Lua time usage: 0.015/7.000 seconds
+Lua memory usage: 660456/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  152.133      1 -total
+ 23.81%   36.218      3 Template:Link-en
+ 12.90%   19.626    159 Template:Ic
+  4.73%    7.201      9 Template:提示
+  4.57%    6.948      8 Template:Man
+  4.02%    6.116     28 Template:Hc
+  3.47%    5.280      3 Template:Expansion
+  2.60%    3.956      4 Template:META_Message
+  2.60%    3.954     10 Template:警告
+  2.23%    3.389      1 Template:过时
+-->
+<!-- Render ID 9754fb0e-9401-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3028:|#|:idhash:canonical!zh-cn and timestamp 20260809144957 and revision id 35539. Rendering was triggered because: page-edit
+ -->
+</div>
+</div>

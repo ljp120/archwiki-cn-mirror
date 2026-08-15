@@ -1,0 +1,304 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgc568502a4315">从终端复制文本</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Copying_text_from_a_terminal">Copying text from a terminal</a>，最近一次同步于 2024-11-16，若英文版本有所<a href="https://wiki.archlinux.org/title/Copying_text_from_a_terminal?diff=0&amp;oldid=820822">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Copying_text_from_a_terminal_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>大多数成熟的终端模拟器允许用户复制或保存其内容。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc568502a4315_.E4.B8.80.E8.88.AC.E6.96.B9.E6.B3.95" id="一般方法"><span id=".E4.B8.80.E8.88.AC.E6.96.B9.E6.B3.95"></span>一般方法</h2></div>
+<p>在图形化终端模拟器中，内容通常可以通过鼠标选择，然后通过右键菜单、编辑菜单或快捷键组合（例如 <code>Ctrl+Shift+c</code>）进行复制。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc568502a4315_.E4.B8.8D.E5.8E.9F.E7.94.9F.E6.94.AF.E6.8C.81_CLIPBOARD_.E9.80.89.E5.8C.BA.E7.9A.84.E7.BB.88.E7.AB.AF" id="不原生支持_CLIPBOARD_选区的终端"><span id=".E4.B8.8D.E5.8E.9F.E7.94.9F.E6.94.AF.E6.8C.81_CLIPBOARD_.E9.80.89.E5.8C.BA.E7.9A.84.E7.BB.88.E7.AB.AF"></span>不原生支持 CLIPBOARD 选区的终端</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc568502a4315_Xorg" id="Xorg">Xorg</h4></div>
+<p>有些终端仿真器不原生支持 <a href="#pg19a17393756d">CLIPBOARD 选区</a>，而是将数据复制到 PRIMARY 选取。对于这些终端，可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xclip">xclip</a></span><sup><small>包</small></sup></span>：
+</p>
+<pre>$ xclip -o | xclip -selection clipboard -i
+</pre>
+<p>上述命令将从 PRIMARY 选区读取数据并写入 CLIPBOARD 选择。
+</p><p>其他<a href="#pgdbed75422350">剪贴板管理器</a>（如<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/autocutsel/">autocutsel</a></span><sup><small>AUR</small></sup></span>）提供选择缓冲区之间的自动同步。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc568502a4315_Wayland" id="Wayland">Wayland</h4></div>
+<p>像 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wl-clipboard">wl-clipboard</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clipboard/">clipboard</a></span><sup><small>AUR</small></sup></span> 这样的工具可以将数据复制到Wayland剪贴板：
+</p>
+<pre>$ command 2&gt;&amp;1 | wl-copy
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc568502a4315_.E6.88.AA.E5.8F.96.E5.91.BD.E4.BB.A4.E8.BE.93.E5.87.BA" id="截取命令输出"><span id=".E6.88.AA.E5.8F.96.E5.91.BD.E4.BB.A4.E8.BE.93.E5.87.BA"></span>截取命令输出</h3></div>
+<p>使用 <span class="ilh-all" data-foreign-title="tee" data-lang-code="en" data-lang-name="英语" data-orig-title="tee"><span class="ilh-page"><a href="#pg8617dc2cb7e3">tee</a></span></span> 截取命令的输出。
+</p>
+<pre>$ command 2&gt;&amp;1 | tee output-file
+</pre>
+<p>在执行 <code>command</code> 之后，<code>output-file</code> 将包含其输出，同时显示输出。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc568502a4315_.E8.AE.BF.E9.97.AE_Linux_.E7.BB.88.E7.AB.AF.E5.8E.86.E5.8F.B2" id="访问_Linux_终端历史"><span id=".E8.AE.BF.E9.97.AE_Linux_.E7.BB.88.E7.AB.AF.E5.8E.86.E5.8F.B2"></span>访问 Linux 终端历史</h3></div>
+<p>可以通过 <code>/dev/vcs<i>N</i></code> 访问名为 <code>/dev/tty<i>N</i></code> 的本地终端的历史。因此，如果在 <code>/dev/tty1</code> 中工作，以下代码段将把历史存储到文件<code>output-file</code>中：
+</p>
+<pre># cat /dev/vcs1 &gt; output-file
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc568502a4315_.E5.B8.B8.E8.A7.81.E7.BB.88.E7.AB.AF.E4.BB.BF.E7.9C.9F.E5.99.A8.E6.AF.94.E8.BE.83" id="常见终端仿真器比较"><span id=".E5.B8.B8.E8.A7.81.E7.BB.88.E7.AB.AF.E4.BB.BF.E7.9C.9F.E5.99.A8.E6.AF.94.E8.BE.83"></span>常见终端仿真器比较</h2></div>
+
+<p><br/>
+除非“快捷键组合”列另有说明，否则快捷键组合为<code>Ctrl+Shift+c</code>。
+</p>
+<table class="wikitable sortable">
+<tbody><tr>
+<th rowspan="2">仿真器</th>
+<th rowspan="2">选择到 PRIMARY
+</th>
+<th colspan="5">CLIPBOARD
+</th></tr>
+<tr>
+<th>快捷键组合</th>
+<th>上下文菜单</th>
+<th>窗口菜单</th>
+<th>选择
+</th></tr>
+<tr>
+<td><a href="#pgfb0bd7cba1fa">Alacritty</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aterm/">aterm</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/eterm/">eterm</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><a href="#pg9075167ca2c1">foot</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">可选
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/germinal/">germinal</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="ilh-all" data-foreign-title="Guake" data-lang-code="en" data-lang-name="英语" data-orig-title="Guake"><span class="ilh-page"><a href="#pg2c1ce8022b07">Guake</a></span></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><a href="#pg45c1abc2d907">Konsole</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">可选
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lilyterm-git/">lilyterm-git</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是 <code>Ctrl+Delete</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lxterminal">lxterminal</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mate-terminal">mate-terminal</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><a href="#pga07d49a1594a">mlterm</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pantheon-terminal">pantheon-terminal</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="ilh-all" data-foreign-title="PuTTY" data-lang-code="en" data-lang-name="英语" data-orig-title="PuTTY"><span class="ilh-page"><a href="#pg537345df4a45">PuTTY</a></span></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=qterminal">qterminal</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/roxterm/">roxterm</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><a href="#pg779b777898ef">rxvt-unicode</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是 <code>Ctrl+Alt+c</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">可选
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sakura">sakura</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><a href="#pg30c80f48aedd">st</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="ilh-all" data-foreign-title="Terminator" data-lang-code="en" data-lang-name="英语" data-orig-title="Terminator"><span class="ilh-page"><a href="#pge679ca405a36">Terminator</a></span></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=terminology">terminology</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="ilh-all" data-foreign-title="Termite" data-lang-code="en" data-lang-name="英语" data-orig-title="Termite"><span class="ilh-page"><a href="#pgfbf414548eba">Termite</a></span></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="ilh-all" data-foreign-title="Tilda" data-lang-code="en" data-lang-name="英语" data-orig-title="Tilda"><span class="ilh-page"><a href="#pg37a15d562328">Tilda</a></span></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xfce4-terminal">xfce4-terminal</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="ilh-all" data-foreign-title="xterm" data-lang-code="en" data-lang-name="英语" data-orig-title="xterm"><span class="ilh-page"><a href="#pg12c4c9eae03a">xterm</a></span></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">可选<a href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=588785">[1]</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td><a href="#pgcc4325770cd6">Yakuake</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">可选
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc568502a4315_.E7.89.B9.E6.AE.8A.E6.83.85.E5.86.B5" id="特殊情况"><span id=".E7.89.B9.E6.AE.8A.E6.83.85.E5.86.B5"></span>特殊情况</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc568502a4315_putty" id="putty">putty</h3></div>
+<p>xclip 方法适用于 <i>putty</i>: 只需记住，<i>xclip</i> 命令应该在本地计算机上（在另一个终端中）执行，而不是在与 <i>putty</i> 连接的远程计算机上执行。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc568502a4315_urxvt" id="urxvt">urxvt</h3></div>
+<p>将文本选择到 CLIPBOARD 选区需要 <code>selection-to-clipboard</code> Perl 扩展。有关详细信息，请参见 <a href="#pg779b777898ef">rxvt-unicode#复制和粘贴</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc568502a4315_xterm" id="xterm">xterm</h3></div>
+<p>访问 <i>xterm</i> 中的 CLIPBOARD 选区需要<span class="ilh-all" data-foreign-title="xterm#PRIMARY or CLIPBOARD" data-lang-code="en" data-lang-name="英语" data-orig-title="xterm#PRIMARY 或 CLIPBOARD"><span class="ilh-page"><a href="#pg12c4c9eae03a">额外的步骤</a></span></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc568502a4315_mlterm" id="mlterm">mlterm</h3></div>
+<p>除了 <code>Ctrl+Shift+c</code>，如果不想意外杀死进程，还可以使用 <code>Ctrl+Insert</code>，同时，一些版本的 Mlterm 会在选择时自动实时复制选取。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808041002
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.273 seconds
+Real time usage: 0.283 seconds
+Preprocessor visited node count: 1012/1000000
+Revision size: 4742/2097152 bytes
+Post‐expand include size: 27792/2097152 bytes
+Template argument size: 1948/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 7/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.030/7.000 seconds
+Lua memory usage: 886829/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  148.303      1 -total
+ 40.21%   59.635      8 Template:Link-en
+  7.30%   10.821     70 Template:Yes
+  5.94%    8.806     50 Template:No
+  3.60%    5.345      5 Template:Y
+  3.46%    5.127      1 Template:Accuracy
+  3.25%    4.813      7 Template:META_Table_cell
+  2.85%    4.220      1 Template:G
+  2.75%    4.082      9 Template:Pkg
+  2.30%    3.418      1 Template:翻译状态
+-->
+<!-- Render ID 071e950e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7990:|#|:idhash:canonical!zh-cn and timestamp 20260808041002 and revision id 33699. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,208 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgcbd134d3bc62">文件管理器功能</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pga96df2a9d88c">应用程序列表/工具#文件管理器</a></li>
+<li><a href="#pg3d6d7c1e6c7c">窗口管理器</a></li>
+<li><a href="#pg712e4adaddad">桌面环境</a></li>
+<li><a href="#pgfb208edb391c">Udisks</a></li>
+<li><a href="#pgc44173b5554d">Extended attributes</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/File_manager_functionality">File_manager_functionality</a>，最近一次同步于 2024-11-07，若英文版本有所<a href="https://wiki.archlinux.org/title/File_manager_functionality?diff=0&amp;oldid=819884">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/File_manager_functionality_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文概述了扩展文件管理器特性和功能所需的附加软件包，特别是在使用 <a href="#pg8bc45a0eb197">Openbox</a> 等<a href="#pg3d6d7c1e6c7c">窗口管理器</a>的情况下。此外，还提供了在没有密码的情况下（若受影响）访问分区和可移动媒体的功能。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgcbd134d3bc62_.E6.A6.82.E8.A6.81" id="概要"><span id=".E6.A6.82.E8.A6.81"></span>概要</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>下列软件包在安装后，可以在所有桌面环境或窗口管理器下，被已安装且可用的文件管理器自动检测到。</div>
+<p>仅靠文件管理器无法提供使用完整桌面环境（如 <a href="#pg361394ab1daf">Xfce</a>、<a href="#pg5b70e23b1711">KDE</a>）的用户所习惯的特性和功能。因为文件管理器需要额外的软件包以：
+</p>
+<ul><li>显示并访问其他分区</li>
+<li>显示、挂载并访问可移动媒体（例如 USB 存储设备、光盘和数码相机）</li>
+<li>启用或与其他操作系统共享网络</li>
+<li>启用缩略图</li>
+<li>归档和提取压缩文件</li>
+<li>自动挂载可移动媒体</li></ul>
+<p>当一个文件管理器以完整桌面环境的一部分安装时，大多数这类的软件包都已被自动安装。因此，当为独立的窗口管理器安装了文件管理器时（就像独立的窗口管理器那样），文件管理器仅能提供基础功能。用户必须自行确定之后需要添加的额外扩展特性和功能。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgcbd134d3bc62_.E9.A2.9D.E5.A4.96.E5.8A.9F.E8.83.BD" id="额外功能"><span id=".E9.A2.9D.E5.A4.96.E5.8A.9F.E8.83.BD"></span>额外功能</h2></div>
+<p>使用轻量化环境时，文件管理器的特性越多，所需要使用的内存就越多。参见 <a href="#pgfb208edb391c">udisks</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcbd134d3bc62_.E6.8C.82.E8.BD.BD" id="挂载"><span id=".E6.8C.82.E8.BD.BD"></span>挂载</h3></div>
+<ul><li>Gnome 虚拟文件系统（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs">gvfs</a></span><sup><small>包</small></sup></span>）提供了挂载和垃圾桶功能。GVFS 使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=udisks2">udisks2</a></span><sup><small>包</small></sup></span> 提供挂载功能，该软件包也是大多数文件管理器所建议使用的解决方案。</li></ul>
+<p>GVFS 的文件夹有：
+</p>
+<ul><li><code>/usr/lib/</code> 包含了 <code>gvfsd-*</code> 文件，此处的 <code>*</code> 指代各种支持的文件系统类型。</li>
+<li><code>/usr/share/gvfs/mounts/</code> 包含了 GVFS 的挂载规则。若要使用用户自己的规则，请创建 <code>~/.gvfs/mounts</code>。</li></ul>
+<p>安装所需的附加软件包通常符合 <a href="https://archlinux.org/packages/?q=gvfs-">gvfs-* 模式</a>，例如：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs-mtp">gvfs-mtp</a></span><sup><small>包</small></sup></span>：用于支持使用 <a href="#pg1c00c229c29d">MTP</a> 的媒体播放器和移动设备</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs-gphoto2">gvfs-gphoto2</a></span><sup><small>包</small></sup></span>：用于支持使用 <a href="https://en.wikipedia.org/wiki/Picture_Transfer_Protocol">PTP</a> 的数码相机和移动设备</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs-afc">gvfs-afc</a></span><sup><small>包</small></sup></span>：用于支持苹果（Apple）移动设备</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcbd134d3bc62_.E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8.E5.AE.88.E6.8A.A4.E8.BF.9B.E7.A8.8B" id="文件管理器守护进程"><span id=".E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8.E5.AE.88.E6.8A.A4.E8.BF.9B.E7.A8.8B"></span>文件管理器守护进程</h4></div>
+<p>大多数图形化文件管理器都能够在程序运行时自动挂载插入的设备。若受支持，可以将文件管理器以<a href="#pg78f61917585b">守护进程</a>的模式（例如作为后台进程）运行，这可用作系统范围内的解决方案。例如，在 <a href="#pg8bc45a0eb197">Openbox</a> 中使用 <a href="#pg9519798d0f49">PCManFM</a> 时，应将下列命令添加至文件 <code>~/.config/openbox/autostart</code>：
+</p>
+<pre>pcmanfm -d &amp;
+</pre>
+<p>同时，有必要设置文件管理器自身的卷管理功能（例如，当探测到并挂载特定文件类型时应当执行什么，或应当启动什么应用程序）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>大多数桌面环境默认以守护进程模式启动文件管理器，因此在这些情况下不需要手动介入。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcbd134d3bc62_.E5.8D.95.E7.8B.AC.E5.AE.89.E8.A3.85" id="单独安装"><span id=".E5.8D.95.E7.8B.AC.E5.AE.89.E8.A3.85"></span>单独安装</h4></div>
+<p>另一个选项是安装一个独立的<a href="#pga96df2a9d88c">挂载程序</a>。这样做的优点是：
+</p>
+<ul><li>相比文件管理器，作为后台或<a href="#pg78f61917585b">守护进程</a>运行时使用的内存更少</li>
+<li>与文件管理器无关，可以自由添加、移除或切换</li>
+<li>无需安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs">gvfs</a></span><sup><small>包</small></sup></span> 即可挂载，内存占用更少。安装后，可以<a href="#pg05349798cdb5">覆盖</a>（mask）其守护进程，仅在需要时启动。在某些实现不起作用时，可以作为如 <a href="#pg1c00c229c29d">MTP</a> 的后备方案，十分有效。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcbd134d3bc62_.E7.BD.91.E7.BB.9C" id="网络"><span id=".E7.BD.91.E7.BB.9C"></span>网络</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>需要启用<a href="#pg20f71a8eddbf">蓝牙</a>和<a href="#pg3a2ac70f3f85">Windows</a>的网络共享以依次启用相关的文件管理器功能。</div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/obexftp/">obexftp</a></span><sup><small>AUR</small></sup></span>：挂载蓝牙设备并进行文件传输（参见<a href="#pg20f71a8eddbf">蓝牙</a>）</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs-smb">gvfs-smb</a></span><sup><small>包</small></sup></span>：为<b>非 KDE</b> 桌面提供 Windows 文件和打印机共享的支持（参见<a href="#pg3a2ac70f3f85">Samba</a>）</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kdenetwork-filesharing">kdenetwork-filesharing</a></span><sup><small>包</small></sup></span>：为 <a href="#pg5b70e23b1711">KDE</a> 提供 Windows 文件和打印机共享的支持（参见<a href="#pg3a2ac70f3f85">Samba#KDE</a>）</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sshfs">sshfs</a></span><sup><small>包</small></sup></span>：基于 <a href="#pg81569eb76dc7">SSH</a> 文件传输协议的 FUSE 客户端</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcbd134d3bc62_.E8.AE.BF.E9.97.AE_Windows" id="访问_Windows"><span id=".E8.AE.BF.E9.97.AE_Windows"></span>访问 Windows</h4></div>
+<p>若使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs-smb">gvfs-smb</a></span><sup><small>包</small></sup></span>，要访问 Windows、<a href="#pgaf4c3a6005ed">Cifs</a> 或 Samba 的共享文件，打开文件管理器，输入如下路径（请将 <code><i>server_name</i></code> 和 <code><i>share_name</i></code> 更改为正确的路径）：
+</p>
+<pre>smb://<i>server_name</i>/<i>share_name</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcbd134d3bc62_.E8.AE.BF.E9.97.AE.E8.8B.B9.E6.9E.9C.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="访问苹果文件系统"><span id=".E8.AE.BF.E9.97.AE.E8.8B.B9.E6.9E.9C.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>访问苹果文件系统</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs">gvfs</a></span><sup><small>包</small></sup></span> 已支持 AFP。若要访问 AFP 文件，打开文件管理器，输入如下路径（请将 <code><i>server_name</i></code> 和 <code><i>share_name</i></code> 更改为正确的路径）：
+</p>
+<pre>afp://<i>server_name</i>/<i>share_name</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcbd134d3bc62_.E9.80.9A.E8.BF.87_sftp_.E8.AE.BF.E9.97.AE" id="通过_sftp_访问"><span id=".E9.80.9A.E8.BF.87_sftp_.E8.AE.BF.E9.97.AE"></span>通过 sftp 访问</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs">gvfs</a></span><sup><small>包</small></sup></span> 已支持 SFTP。若要通过 sftp 访问文件夹，打开文件管理器，输入如下路径（请将 <code><i>user@server_name</i></code> 和 <code><i>folder_name</i></code> 更改为正确的路径）：
+</p>
+<pre>sftp://<i>user@server_name</i>/<i>folder_name</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcbd134d3bc62_WebDAV" id="WebDAV">WebDAV</h4></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gvfs-dnssd">gvfs-dnssd</a></span><sup><small>包</small></sup></span> 以支持 WebDAV。
+</p>
+<pre>davs://<i>user@server_name</i>/<i>folder_name</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcbd134d3bc62_.E7.BC.A9.E7.95.A5.E5.9B.BE.E9.A2.84.E8.A7.88" id="缩略图预览"><span id=".E7.BC.A9.E7.95.A5.E5.9B.BE.E9.A2.84.E8.A7.88"></span>缩略图预览</h3></div>
+<p>虽然安装了上述列举的软件包，一些文件管理器可能仍然不支持缩略图显示。请查阅相关文件管理器的文档说明。
+</p><p>远程存储（包括 <a href="#pg1c00c229c29d">MTP</a>）上的缩略图可能不会显示。请检查所用的文件管理器的设置，例如，对于 <a href="#pgc3ce5bd2b24c">Thunar</a>，应将“显示缩略图”选项设置为“总是”（"Show thumbnails: always"）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcbd134d3bc62_Dolphin_.E5.92.8C_Konqueror_.E4.BB.A5.E5.A4.96.E7.9A.84.E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8" id="Dolphin_和_Konqueror_以外的文件管理器"><span id="Dolphin_.E5.92.8C_Konqueror_.E4.BB.A5.E5.A4.96.E7.9A.84.E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8"></span>Dolphin 和 Konqueror 以外的文件管理器</h4></div>
+<p>下列软件包适用于大多数文件管理器，例如 <a href="#pg9519798d0f49">PCManFM</a>、<a href="#pg8e678f62b697">SpaceFM</a>、<a href="#pgc3ce5bd2b24c">Thunar</a> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xfe/">xfe</a></span><sup><small>AUR</small></sup></span>。但不适用于 <a href="#pg5b70e23b1711">KDE</a> 桌面环境下的 Dolphin 和 Konqueror：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tumbler">tumbler</a></span><sup><small>包</small></sup></span>：图片文件的缩略图预览。某些情况下<b><u>必须</u></b>安装才能将缩略图显示功能扩展至其他文件类型。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=webp-pixbuf-loader">webp-pixbuf-loader</a></span><sup><small>包</small></sup></span>：<code>.webp</code> 图片的缩略图预览</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=poppler-glib">poppler-glib</a></span><sup><small>包</small></sup></span>：Adobe <code>.pdf</code> 文件的缩略图预览</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ffmpegthumbnailer">ffmpegthumbnailer</a></span><sup><small>包</small></sup></span>：视频文件的缩略图预览</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=freetype2">freetype2</a></span><sup><small>包</small></sup></span>：字体文件的缩略图预览</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libgsf">libgsf</a></span><sup><small>包</small></sup></span>：<code>.odf</code> 文件的缩略图预览</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/raw-thumbnailer/">raw-thumbnailer</a></span><sup><small>AUR</small></sup></span>：<code>.raw</code> 文件的缩略图预览</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=totem">totem</a></span><sup><small>包</small></sup></span>：视频文件和含标签的音频文件（<a href="#pg3738a76f9acc">Gnome 文件</a>，仅适用于 Caja）的缩略图预览</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=evince">evince</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=atril">atril</a></span><sup><small>包</small></sup></span>：<code>.pdf</code> 文件的缩略图预览</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-epub-thumbnailer">gnome-epub-thumbnailer</a></span><sup><small>包</small></sup></span>：<code>.epub</code> 和 <code>.mobi</code> 电子书文件的缩略图预览</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mcomix/">mcomix</a></span><sup><small>AUR</small></sup></span>：<code>.cbr</code> 漫画书归档的缩略图预览</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/folderpreview/">folderpreview</a></span><sup><small>AUR</small></sup></span>：文件夹缩略图预览</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=f3d">f3d</a></span><sup><small>包</small></sup></span>：3D 文件的缩略图预览，包括 glTF、stl、step、ply、obj 和 fbx。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcbd134d3bc62_Dolphin_.E5.92.8C_Konqueror.EF.BC.88KDE.EF.BC.89" id="Dolphin_和_Konqueror（KDE）"><span id="Dolphin_.E5.92.8C_Konqueror.EF.BC.88KDE.EF.BC.89"></span>Dolphin 和 Konqueror（KDE）</h4></div>
+<p>参见 <a href="#pgf86b19d3a75a">Dolphin#文件预览</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcbd134d3bc62_Use_PCManFM_to_get_thumbnails_for_other_" id="Use_PCManFM_to_get_thumbnails_for_other_file_types">Use PCManFM to get thumbnails for other file types</h4></div>
+
+<p><a href="#pg9519798d0f49">PCManFM</a> supports image thumbnails out of the box. However, in order to view thumbnails of other file types, PCManFM uses the information provided in the files located at <code>/usr/share/thumbnailers</code>. The packages which provide a thumbnailer usually add the corresponding <i>.thumbnail</i> file at <code>/usr/share/thumbnailers</code>. For example, in order to get thumbnails for OpenDocument files, you may install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libgsf">libgsf</a></span><sup><small>包</small></sup></span> from the official repositories. For video files' thumbnails, the package <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ffmpegthumbnailer">ffmpegthumbnailer</a></span><sup><small>包</small></sup></span> is required. For PDF files, you may install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=evince">evince</a></span><sup><small>包</small></sup></span> from the official repositories, which provides <code>evince-thumbnailer</code> and the corresponding file at <code>/usr/share/thumbnailers</code>. However, if you prefer not to install <code>evince</code>, you can also replicate the functionality of <code>evince-thumbnailer</code> using <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=imagemagick">imagemagick</a></span><sup><small>包</small></sup></span>'s <code>convert</code> command. This is accomplished by creating a new file with the <i>.thumbnailer</i> extension (e.g.: <code>imagemagick-pdf.thumbnailer</code>) at <code>/usr/share/thumbnailers</code> with the following content:
+</p>
+<pre>  [Thumbnailer Entry]
+  TryExec=convert
+  Exec=convert %i[0] -background "#FFFFFF" -flatten -thumbnail %s %o
+  MimeType=application/pdf;application/x-pdf;image/pdf;
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>The <i>[0]</i> next to the input file is specified so that <code>convert</code> only generates a thumbnail of the first page. This is a <code>convert</code>-specific syntax and has nothing to do with the syntax of the thumbnailers' files.</div>
+<p>Following this example, you can specify custom thumbnailers by creating your own <i>.thumbnail</i> files. Keep in mind that <code>%i</code> refers to the input file (the file which will have its thumbnail made), <code>%o</code> to the output file (the thumbnail image) and <code>%s</code> to the size of the thumbnail. These parameters will be automatically substituted with the corresponding data and passed to the thumbnailer program by PCManFM.
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>If you only get thumbnails of certain files and not of all the files of the same type try increasing the maximum file size of the files that get a thumbnail at <i>Edit &gt; Preferences &gt; Display</i>.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcbd134d3bc62_.E5.BD.92.E6.A1.A3.E6.96.87.E4.BB.B6" id="归档文件"><span id=".E5.BD.92.E6.A1.A3.E6.96.87.E4.BB.B6"></span>归档文件</h3></div>
+<p>若要在文件管理器内提取归档文件（如 <code>.tar</code> 和 <code>.tar.gz</code>），首先需要安装一个图形化界面的归档压缩工具（如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=file-roller">file-roller</a></span><sup><small>包</small></sup></span>）。更多信息请参见<a href="#pga96df2a9d88c">归档与压缩工具</a>。额外的软件包，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=unzip">unzip</a></span><sup><small>包</small></sup></span>，也需要安装以支持 <code>.zip</code> 文件。归档压缩工具安装后，文件管理器内的文件应该可以通过右键菜单进行归档或提取。
+</p><p>归档文件会被挂载至 <code>/run/user/$(id -u)/gvfs/</code> 目录下、包含完整文件路径名的、自动创建的挂载点，其中，路径中的 <code>/</code> 和 <code>:</code> 会被分别替换为 <code>%252F</code> 和 <code>%253A</code> <a href="https://www.owasp.org/index.php/Double_Encoding">十六进制码</a>。
+</p><p>以下是已挂载的归档文件 <code>/full/path/to/file/name.zip</code> 的路径示例：
+</p>
+<pre>/run/user/$(id -u)/gvfs/archive:host=file%253A%252F%252F%252F<b>full%252Fpath%252Fto%252Ffile%252Fname.zip</b>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcbd134d3bc62_NTFS_.E8.AF.BB.E5.86.99.E6.94.AF.E6.8C.81" id="NTFS_读写支持"><span id="NTFS_.E8.AF.BB.E5.86.99.E6.94.AF.E6.8C.81"></span>NTFS 读写支持</h3></div>
+<p>参见 <a href="#pg172996877d67">NTFS</a> 文章的内容。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcbd134d3bc62_.E6.A1.8C.E9.9D.A2.E9.80.9A.E7.9F.A5" id="桌面通知"><span id=".E6.A1.8C.E9.9D.A2.E9.80.9A.E7.9F.A5"></span>桌面通知</h3></div>
+<p>一些文件管理器使用<a href="#pg5150d083aea5">桌面通知程序</a>来确认多种事件和状态，例如挂载、卸载和可移动媒体的弹出。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcbd134d3bc62_Enable_Trash_functionality_on_different_filesystems_.28external_drives.29" id="Enable_Trash_functionality_on_different_filesystems_(external_drives)"><span id="Enable_Trash_functionality_on_different_filesystems_.28external_drives.29"></span>Enable Trash functionality on different filesystems (external drives)</h3></div>
+
+<p><br/>
+Make <a href="https://specifications.freedesktop.org/trash-spec/latest/">trash directories</a> <code>.Trash-<i>&lt;uid&gt;</i></code> for each users on the top level of filesystems:
+</p><p>For example (mount point: /media/sdc1, uid: 1000, gid: 1000):
+</p>
+<pre># mkdir /media/sdc1/.Trash-1000
+</pre>
+<p>and <code>chown</code> them:
+</p>
+<pre># chown 1000:1000 /media/sdc1/.Trash-1000
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgcbd134d3bc62_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcbd134d3bc62_.E5.B0.9D.E8.AF.95.E6.8C.82.E8.BD.BD.E8.AE.BE.E5.A4.87.E6.97.B6.E6.8F.90.E7.A4.BA.E2.80.9C.E6.9C.AA.E6.8E.88.E6.9D.83.E2.80.9D" id="尝试挂载设备时提示“未授权”"><span id=".E5.B0.9D.E8.AF.95.E6.8C.82.E8.BD.BD.E8.AE.BE.E5.A4.87.E6.97.B6.E6.8F.90.E7.A4.BA.E2.80.9C.E6.9C.AA.E6.8E.88.E6.9D.83.E2.80.9D"></span>尝试挂载设备时提示“未授权”</h3></div>
+<p>使用 <a href="#pgfb208edb391c">udisks</a> 的文件管理器需要一个 <a href="#pg74611dd9d3c8">polkit</a> 身份认证组件。参见 <a href="#pg74611dd9d3c8">polkit 身份认证组件</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcbd134d3bc62_.E8.AE.BF.E9.97.AE.E5.88.86.E5.8C.BA.E6.97.B6.E9.9C.80.E8.A6.81.E5.AF.86.E7.A0.81" id="访问分区时需要密码"><span id=".E8.AE.BF.E9.97.AE.E5.88.86.E5.8C.BA.E6.97.B6.E9.9C.80.E8.A6.81.E5.AF.86.E7.A0.81"></span>访问分区时需要密码</h3></div>
+<p>若访问其他分区或已挂载的可移动媒体时需要输入密码，很有可能是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=udisks2">udisks2</a></span><sup><small>包</small></sup></span> 的默认权限设置引起的。更具体一些，权限可能设置为仅允许 root 用户，而非当前用户。详情请参见<a href="#pgfb208edb391c">配置 udisks</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcbd134d3bc62_.E6.9C.AA.E5.9C.A8.E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8.E4.B8.AD.E6.89.93.E5.BC.80.E7.9B.AE.E5.BD.95" id="未在文件管理器中打开目录"><span id=".E6.9C.AA.E5.9C.A8.E6.96.87.E4.BB.B6.E7.AE.A1.E7.90.86.E5.99.A8.E4.B8.AD.E6.89.93.E5.BC.80.E7.9B.AE.E5.BD.95"></span>未在文件管理器中打开目录</h3></div>
+<p><a href="#pgd8c02dcae438">Audacious</a> 和 <a href="#pg761d4119d014">Visual Studio Code</a> 等并非文件管理器的应用程序，可能是打开目录的默认应用程序（能够处理 <code>inode/directory</code> MIME 类型的桌面项可指定为打开目录的默认程序）。可使用如下命令查询打开目录的默认应用程序：
+</p>
+<pre>$ xdg-mime query default inode/directory
+</pre>
+<p>若要确保在文件管理器中打开目录，运行如下命令：
+</p>
+<pre>$ xdg-mime default <i>my_file_manager</i>.desktop inode/directory
+</pre>
+<p>其中 <code><i>my_file_manager</i>.desktop</code> 是要使用的文件管理器的桌面项，例如 <code>org.gnome.Nautilus.desktop</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若要在系统范围内更改此选项，以 root 用户运行上述命令或创建并编辑如下文件：
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/share/applications/mimeapps.list</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Default Applications]
+inode/directory=<i>my_file_manager</i>.desktop</pre></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcbd134d3bc62_D_Bus" id="D-Bus">D-Bus</h4></div>
+<p>其他一些应用程序使用 <code>org.freedesktop.FileManager1</code> D-Bus 协议（例如<a href="#pg11a76da100e0">火狐浏览器</a>）。以下的命令将列出系统上已安装且支持此协议的服务：
+</p>
+<pre>$ grep -R FileManager1 /usr/share/dbus-1/services
+</pre>
+<p>若要更改所使用的文件管理器，请将此文件软链接到 <code>$XDG_DATA_HOME/dbus-1/services/</code>，如果XDG_DATA_HOME环境变量为空，则软链接到<code>$HOME/.local/share/dbus-1/services/</code>。此外，在应用更改前，请终止实现 D-Bus 服务的程序。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcbd134d3bc62_.E7.9C.8B.E4.B8.8D.E5.88.B0.E5.9C.A8_.2Fetc.2Ffstab_.E4.B8.AD.E6.89.8B.E5.8A.A8.E5.88.9B.E5.BB.BA.E7.9A.84.E6.8C.82.E8.BD.BD.E7.82.B9" id="看不到在_/etc/fstab_中手动创建的挂载点"><span id=".E7.9C.8B.E4.B8.8D.E5.88.B0.E5.9C.A8_.2Fetc.2Ffstab_.E4.B8.AD.E6.89.8B.E5.8A.A8.E5.88.9B.E5.BB.BA.E7.9A.84.E6.8C.82.E8.BD.BD.E7.82.B9"></span>看不到在 /etc/fstab 中手动创建的挂载点</h3></div>
+<p>由于<a href="https://gitlab.gnome.org/GNOME/gvfs/-/commit/ee1b0ddf123c5e64352f1738445c1e62b67dd228">这个提交</a>的缘故，请在 <code>/media/your-user-name/</code> 目录下创建挂载点。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807114657
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.215 seconds
+Real time usage: 0.224 seconds
+Preprocessor visited node count: 933/1000000
+Revision size: 13327/2097152 bytes
+Post‐expand include size: 13920/2097152 bytes
+Template argument size: 3697/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   64.316      1 -total
+ 11.27%    7.247     31 Template:Pkg
+ 10.74%    6.905     52 Template:Ic
+  6.23%    4.008      1 Template:Style
+  5.37%    3.452      1 Template:Accuracy
+  4.68%    3.007      1 Template:翻译状态
+  4.23%    2.719      2 Template:提示
+  4.10%    2.639      1 Template:相关文章开始
+  3.73%    2.402      5 Template:Related
+  3.39%    2.179      2 Template:META_Message
+-->
+<!-- Render ID b151da8e-9255-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6889:|#|:idhash:canonical!zh-cn and timestamp 20260807114657 and revision id 34476. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

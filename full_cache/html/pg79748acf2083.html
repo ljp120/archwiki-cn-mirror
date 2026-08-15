@@ -1,0 +1,149 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg79748acf2083">R 软件打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/R_package_guidelines">R package guidelines</a>，最近一次同步于 2024-5-11，若英文版本有所<a href="https://wiki.archlinux.org/title/R_package_guidelines?diff=0&amp;oldid=808148">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/R_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – R – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<p>本文档涵盖了为 <a href="#pg19b931a98fc1">R</a> 软件包编写 <a href="#pgf9d748a7b27b">PKGBUILD</a> 的标准和指南。大多数信息可以通过查看软件包的 <code>DESCRIPTION</code> 文件获得。在 R 中运行 <code>tools::CRAN_package_db()</code> 可以获得大部分信息。您还可以访问 <a href="https://cran.r-project.org/src/contrib/PACKAGES">CRAN</a>、<a href="https://bioconductor.org/packages/release/bioc/src/contrib/PACKAGES">Bioconductor link1</a>与<a href="https://bioconductor.org/packages/release/data/annotation/src/contrib/PACKAGES">Bioconductor link2</a>，了解所有 R 软件包的信息。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg79748acf2083_.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.91.BD.E5.90.8D" id="软件包命名"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E5.91.BD.E5.90.8D"></span>软件包命名</h2></div>
+<p>软件包应命名为 <code>r-pkgname</code>，其中 pkgname 取自 <code>DESCRIPTION</code> 文件中的<code>Package</code>字段。软件包名称应小写。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg79748acf2083_.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.89.88.E6.9C.AC.E5.8F.B7" id="软件包版本号"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E7.89.88.E6.9C.AC.E5.8F.B7"></span>软件包版本号</h2></div>
+<p>从<code>Version</code>字段中获取。R 允许软件包在版本号中使用冒号和连字符，但在 PKGBUILD 中不允许。将其转换为句号或下划线。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg79748acf2083_Arch" id="Arch">Arch</h2></div>
+<p>请参见 <a href="#pgf9d748a7b27b">PKGBUILD#arch</a>。如果软件包的 CRAN 网页上有 <code>NeedsCompilation: yes</code>，那么它很可能是特定架构的。否则，很可能不是，参见 <a href="#pgf9d748a7b27b">PKGBUILD#arch</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg79748acf2083_.E4.BE.9D.E8.B5.96" id="依赖"><span id=".E4.BE.9D.E8.B5.96"></span>依赖</h2></div>
+<p>在软件包 <code>DESCRIPTION</code> 文件的<code>Depends</code>、<code>Imports</code>或 <code>LinkingTo</code> 字段中列出的 R 软件包应列在<a href="#pgf9d748a7b27b">依赖项</a>下。
+</p><p><code>Suggests</code> 中列出的 R 软件包应列为 <a href="#pg758b67730c11">optdepends</a>。
+</p><p>有些软件包需要外部工具，这些工具列在 <code>SystemRequirements</code> 下。
+</p><p>某些软件包需要<a href="#pgf9d748a7b27b">依赖</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gcc-fortran">gcc-fortran</a></span><sup><small>包</small></sup></span>，但它并不总是列在 <code>DESCRIPTION</code> 文件中。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg79748acf2083_.E6.9D.A5.E6.BA.90" id="来源"><span id=".E6.9D.A5.E6.BA.90"></span>来源</h2></div>
+<p>CRAN 上的所有 R 软件包都可以在网站 <code>https://cran.r-project.org/src/contrib/<i>cranname</i>_<i>cranversion</i>.tar.gz</code> 上找到，其中 <code><i>cranname</i></code> 是 CRAN 上软件包的名称，<code><i>cranversion</i></code> 是 cran 的版本。
+</p><p>Bioconductor 上可用的 R 软件包可从网站 <code>https://bioconductor.org/packages/release/bioc/src/contrib/<i>bcname</i>_<i>bcname</i>.tar.gz</code>  或 <code>https://bioconductor.org/packages/release/data/annotation/src/contrib/<i>bcname</i>_<i>bcname</i>.tar.gz</code>  上获取，其中 <code><i>bcname</i></code> 是 Bioconductor 上软件包的名称，<code><i>bcver</i></code> 是版本。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg79748acf2083_.E6.9E.84.E5.BB.BA.E4.B8.8E.E6.89.93.E5.8C.85" id="构建与打包"><span id=".E6.9E.84.E5.BB.BA.E4.B8.8E.E6.89.93.E5.8C.85"></span>构建与打包</h2></div>
+<p>R 内置支持构建软件包。下面是三个软件源的 <code>PKGBUILD</code> 模板： MRAN、CRAN 和 Bioconductor。MRAN 是 CRAN 的快照镜像，使用该模板即使软件包过期也能构建。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg79748acf2083_MRAN" id="MRAN">MRAN</h3></div>
+<pre>_cranname=
+_cranver=
+_updatedate=YYYY-MM-DD
+pkgname=r-${_cranname,,}
+pkgver=${_cranver//[:-]/.}
+pkgrel=1
+pkgdesc=""
+arch=()
+url="https://cran.r-project.org/package=${_cranname}"
+license=()
+depends=(r)
+makedepends=()
+optdepends=()
+source=("https://cran.microsoft.com/snapshot/${_updatedate}/src/contrib/${_cranname}_${_cranver}.tar.gz")
+sha256sums=(<i>)</i>
+
+build() {
+  R CMD INSTALL ${_cranname}_${_cranver}.tar.gz -l "${srcdir}"
+}
+
+package() {
+  install -dm0755 "${pkgdir}/usr/lib/R/library"
+
+  cp -a --no-preserve=ownership "${_cranname}" "${pkgdir}/usr/lib/R/library"
+}
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg79748acf2083_CRAN" id="CRAN">CRAN</h3></div>
+<pre>_cranname=
+_cranver=
+pkgname=r-${_cranname,,}
+pkgver=${_cranver//[:-]/.}
+pkgrel=1
+pkgdesc=""
+arch=()
+url="https://cran.r-project.org/package=${_cranname}"
+license=()
+depends=(r)
+makedepends=()
+optdepends=()
+source=("https://cran.r-project.org/src/contrib/${_cranname}_${_cranver}.tar.gz")
+sha256sums=(<i>)</i>
+
+build() {
+  R CMD INSTALL ${_cranname}_${_cranver}.tar.gz -l "${srcdir}"
+}
+
+package() {
+  install -dm0755 "${pkgdir}/usr/lib/R/library"
+
+  cp -a --no-preserve=ownership "${_cranname}" "${pkgdir}/usr/lib/R/library"
+}
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg79748acf2083_Bioconductor" id="Bioconductor">Bioconductor</h3></div>
+<pre>_bcname=
+_bcver=
+pkgname=r-${_bcname,,}
+pkgver=${_bcver//[:-]/.}
+pkgrel=1
+pkgdesc=""
+arch=()
+url="https://bioconductor.org/packages/${_bcname}"
+license=()
+depends=(r)
+makedepends=()
+optdepends=()
+source=("https://bioconductor.org/packages/release/bioc/src/contrib/${_bcname}_${_bcver}.tar.gz")
+# or
+# source=("https://bioconductor.org/packages/release/data/annotation/src/contrib/${_bcname}_${_bcver}.tar.gz")
+sha256sums=(<i>)</i>
+
+build() {
+  R CMD INSTALL ${_bcname}_${_bcver}.tar.gz -l "${srcdir}"
+}
+
+package() {
+  install -dm0755 "${pkgdir}/usr/lib/R/library"
+  
+  cp -a --no-preserve=ownership "${_bcname}" "${pkgdir}/usr/lib/R/library"
+}
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg79748acf2083_.E6.8A.80.E5.B7.A7.E4.B8.8E.E7.AA.8D.E9.97.A8" id="技巧与窍门"><span id=".E6.8A.80.E5.B7.A7.E4.B8.8E.E7.AA.8D.E9.97.A8"></span>技巧与窍门</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg79748acf2083_Bioconductor_.E5.AD.98.E5.82.A8.E5.BA.93" id="Bioconductor_存储库"><span id="Bioconductor_.E5.AD.98.E5.82.A8.E5.BA.93"></span>Bioconductor 存储库</h3></div>
+<p>欲轻松访问bioconductor软件包，可以添加 <a href="#pg09ba3fa9b29b">bioarchlinux</a> 软件源。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808040435
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.098 seconds
+Real time usage: 0.105 seconds
+Preprocessor visited node count: 274/1000000
+Revision size: 4811/2097152 bytes
+Post‐expand include size: 3219/2097152 bytes
+Template argument size: 525/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 653/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   18.436      1 -total
+ 20.54%    3.787     22 Template:Ic
+ 18.77%    3.461      1 Template:翻译状态
+ 14.71%    2.712      1 Template:Pkg
+  6.25%    1.152      1 Template:打包准则
+-->
+<!-- Render ID 4436578e-92de-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7741:|#|:idhash:canonical!zh-cn and timestamp 20260808040435 and revision id 33665. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

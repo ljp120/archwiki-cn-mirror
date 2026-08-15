@@ -1,0 +1,365 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg5f7223c277dc">性能优化</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Improving_performance">Improving performance</a>，最近一次同步于 2024-01-27，若英文版本有所<a href="https://wiki.archlinux.org/title/Improving_performance?diff=0&amp;oldid=796215">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Improving_performance_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg10926fdca149">性能优化/启动过程</a></li>
+<li><a href="#pg2749aa4d6728">Pacman/提示和技巧#性能</a></li>
+<li><a href="#pg4df2d7b1a305">OpenSSH#Speeding up SSH</a></li>
+<li><a href="#pg041f920ba806">Apache_OpenOffice#Speed up OpenOffice</a></li>
+<li><a href="#pge7666ea64560">笔记本电脑</a></li>
+<li><a href="#pg472d1cbaaad4">Preload</a></li>
+</ul></div>
+<p>本文将介绍与性能有关的系统诊断知识和具体步骤，通过减少资源消耗等方式优化系统性能。游戏相关的特别优化请参阅<a href="#pg94f32a2e73db">游戏#性能优化</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5f7223c277dc_.E5.9F.BA.E7.A1.80" id="基础"><span id=".E5.9F.BA.E7.A1.80"></span>基础</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E4.BA.86.E8.A7.A3.E4.BD.A0.E7.9A.84.E7.B3.BB.E7.BB.9F" id="了解你的系统"><span id=".E4.BA.86.E8.A7.A3.E4.BD.A0.E7.9A.84.E7.B3.BB.E7.BB.9F"></span>了解你的系统</h3></div>
+<p>性能优化的最佳方法是找到瓶颈或拖慢整体速度的子系统。查看系统细节可以帮助确定问题。
+</p>
+<ul><li>如果在同时运行多个大型程序时卡顿（如 LibreOffice、Firefox 等），请检查内存容量是否充足。使用以下命令，并检查“available”一列的数值：<pre>$ free -h</pre></li></ul>
+<ul><li>如果电脑开机很慢，并且（仅在）第一次打开应用时加载很慢，可能是因为硬盘速度过慢。可以用<code>hdparm</code>命令测试硬盘速度：<pre># hdparm -t /dev/sd<i>X</i></pre></li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hdparm">hdparm</a></span><sup><small>包</small></sup></span> 只代表了硬盘的读取速度，并没有进行有效的评分。空闲时读取速度只要高于 40MB/s 就可以满足大多数系统。</div>
+<ul><li>如果内存足够而 CPU 占用率居高不下，可以尝试停止进程或禁用<a href="#pgac4c4119fb1f">守护服务</a>。有多种方法可以监测 CPU 负荷，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=htop">htop</a></span><sup><small>包</small></sup></span>、<code>pstree</code> 或其他<a href="#pge780319168a8">系统监视器</a>：<pre>$ htop</pre></li></ul>
+<ul><li>如果使用直接渲染（GPU 渲染）的应用运行卡顿（比如使用 GPU 的视频播放器、游戏甚至<a href="#pg3d6d7c1e6c7c">窗口管理器</a>），改善 GPU 的性能应当有所帮助。首先需要检查直接渲染是否已经开启。可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa-utils">mesa-utils</a></span><sup><small>包</small></sup></span> 中的 <code>glxinfo</code> 命令：<pre>$ glxinfo | grep "direct rendering"</pre>，如果开启了，则会返回<code>direct rendering: Yes</code>。</li></ul>
+<ul><li>使用<a href="#pg712e4adaddad">桌面环境</a>时，禁用桌面特效或许可以减少 GPU 使用。如果当前的桌面环境不符合硬件或个人需求，可以使用一个更轻量的桌面环境或<a href="#pg712e4adaddad">自己打造桌面环境</a>。</li></ul>
+<ul><li>使用专门优化过的<a href="#pg79837a9c7434">内核</a>可以提高性能，比如可以选择 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-zen">linux-zen</a></span><sup><small>包</small></sup></span>，本文中的一些配置也可以优化默认内核的性能。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E5.9F.BA.E5.87.86.E6.B5.8B.E8.AF.95" id="基准测试"><span id=".E5.9F.BA.E5.87.86.E6.B5.8B.E8.AF.95"></span>基准测试</h3></div>
+<p>为定量评估优化成果，可使用<a href="#pgb7e3faeb840c">基准测试</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5f7223c277dc_.E5.AD.98.E5.82.A8.E8.AE.BE.E5.A4.87" id="存储设备"><span id=".E5.AD.98.E5.82.A8.E8.AE.BE.E5.A4.87"></span>存储设备</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E5.A4.9A.E7.A1.AC.E4.BB.B6.E8.B7.AF.E5.BE.84" id="多硬件路径"><span id=".E5.A4.9A.E7.A1.AC.E4.BB.B6.E8.B7.AF.E5.BE.84"></span>多硬件路径</h3></div>
+<p>内部硬件路径意指储存设备是如何连接到主板的。例如 TCP/IP 经由 NIC、即插即用设备可以使用 PCIe/PCI、火线、RAID 卡 、USB 等。通过将储存设备均分到这些接口可以最大化主板的性能，比如将六个硬盘接连到 USB 要比三个连接到 USB、三个连接到火线要慢。原因是主板上的接口点类似管道，而管道同一时间的最大流量是有上限的。幸运的是主板通常会有多个管道。
+</p><p>此外，假设电脑前面有两个 USB 插口，后面有四个 USB 插口，那么前面插两个、后面插两个应当要比前面插一个、后面插三个更快。这是因为前面的插口可能是多个根 Hub 设备，也就是说它可以在同一时间发送更多的数据。
+</p><p>使用下面的命令查看机器上是否有多个路径：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">USB设备树</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">$ lsusb -tv</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PCI设备树</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">$ lspci -tv</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E5.88.86.E5.8C.BA" id="分区"><span id=".E5.88.86.E5.8C.BA"></span>分区</h3></div>
+<p>确保您已经<a href="#pg33ead49dca67">对齐分区</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E5.A4.9A.E7.A1.AC.E7.9B.98" id="多硬盘"><span id=".E5.A4.9A.E7.A1.AC.E7.9B.98"></span>多硬盘</h4></div>
+<p>如果有多个硬盘，将其设置为软件 <a href="#pg1b71ce42139c">RAID</a> 可以提升速度。
+</p><p>在分离的硬盘上创建<a href="#pgad14227759fd">交换空间</a>也有所帮助，尤其是使用交换空间十分频繁时。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E9.80.89.E6.8B.A9.E5.B9.B6.E8.B0.83.E6.95.B4.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="选择并调整文件系统"><span id=".E9.80.89.E6.8B.A9.E5.B9.B6.E8.B0.83.E6.95.B4.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>选择并调整文件系统</h3></div>
+<p>为系统选择合适的文件系统十分重要，因为不同文件系统有各自的优势。<a href="#pg35e92562adc7">文件系统</a>文中对主流文件系统作了简短的总结，也可以在<a href="#pg5c155be3e83e">分类:文件系统</a>中阅读其他相关文章。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E6.8C.82.E8.BD.BD.E9.80.89.E9.A1.B9" id="挂载选项"><span id=".E6.8C.82.E8.BD.BD.E9.80.89.E9.A1.B9"></span>挂载选项</h4></div>
+<p>一些<a href="#pgced0cc449f44">*atime</a> 选项可以降低<code>strictatime</code>造成的性能损失。其他选项和文件系统相关，请参考所使用文件系统的相关段落。
+</p>
+<ul><li><a href="#pg226ab64889d4">Ext3</a></li>
+<li><a href="#pgb5dd09f37b3e">Ext4#提升性能</a></li>
+<li><a href="#pg55a5ea624780">JFS#Optimizations</a></li>
+<li><a href="#pg97815ebb0436">XFS#性能</a></li>
+<li><a href="#pg429e7ec45c9c">Btrfs#碎片整理</a>, <a href="#pg429e7ec45c9c">Btrfs#压缩</a>, 和 <span class="plainlinks archwiki-template-man" title="$ man 5 btrfs"><a href="https://man.archlinux.org/man/btrfs.5">btrfs(5)</a></span></li>
+<li><a href="#pgefb77a75bb9b">ZFS#调校</a></li>
+<li><a href="#pg172996877d67">NTFS#提高性能</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E6.9B.B4.E6.94.B9.E5.86.85.E6.A0.B8.E9.80.89.E9.A1.B9" id="更改内核选项"><span id=".E6.9B.B4.E6.94.B9.E5.86.85.E6.A0.B8.E9.80.89.E9.A1.B9"></span>更改内核选项</h3></div>
+<p>有些选项会影响块设备的性能，更多信息请参考 <a href="#pg7b7cc2bbe79a">sysctl#虚拟内存</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_I.2FO_.E8.B0.83.E5.BA.A6" id="I/O_调度"><span id="I.2FO_.E8.B0.83.E5.BA.A6"></span>I/O 调度</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E8.83.8C.E6.99.AF.E4.BF.A1.E6.81.AF" id="背景信息"><span id=".E8.83.8C.E6.99.AF.E4.BF.A1.E6.81.AF"></span>背景信息</h4></div>
+<p>I/O调度器是用于决定块I/O操作提交到存储设备顺序的一个内核组件，这里有必要简单的说一下两种主要驱动器的规格，因为I/O调度器的目标是优化这些不同驱动器的处理请求的方式：
+</p>
+<ul><li>机械硬盘（HDD）的工作原理是旋转磁盘以物理方式将扇区靠近磁头，基于这个原因，机械硬盘的随机读取延迟相当的高，一般在3到12毫秒。而顺序访问则可提供更高的吞吐量，典型的机械硬盘的I/O操作吞吐量约为每秒200次即200IOPS</li></ul>
+<ul><li>固态硬盘(SSD)没有机械硬盘那样的移动部件，因此它的随机访问速度和顺序访问速度是一样快的，通常不到0.1毫秒，并且可以处理多个并发的请求。典型的固态硬盘的I/O吞吐量超过了10,000IOPS,远超出了常见工作负载下所需的吞吐量</li></ul>
+<p>当多个进程向不同的存储部件发出了I/O请求，每秒就会产生数千的I/O请求，而一般的机械硬盘每秒只能处理大约200个I/O请求，这就是I/O调度发挥其作用的时候。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E8.B0.83.E5.BA.A6.E7.AE.97.E6.B3.95" id="调度算法"><span id=".E8.B0.83.E5.BA.A6.E7.AE.97.E6.B3.95"></span>调度算法</h4></div>
+<p>提高吞读量的一种方法是将访问队列进行物理上的线性化，即通过对等待请求按照逻辑地址进行排序，并且将地址上最近的一些请求组合在一起，举个例子，当三个程序发出请求，分别为1,2,3,其中1号要操作的位置在磁盘中间，而2号操作的位置在磁盘头部，3号操作的位置位于磁盘尾部，出于提高吞读的需求，我们会希望磁头能够转完一圈的时候将这三个I/O操作全部完成，也就是按照2,1,3的顺序来执行I/O操作，这很像现实生活中的电梯，因此，这个调度算法也被称为电梯调度算法（<a href="https://en.wikipedia.org/wiki/Elevator_algorithm">elevator</a>）。
+</p><p>但是电梯调度算法存在着一个问题，它并不适用于一个正在进行顺序读写的进程，常见的情况是：一个进程读取了一块数据并且就要读取下一块，上一个操作完成到下一个操作发起的时间相对于已经转到物理位置时进行读写所需时间来讲是很长的（进行操作仅需几微秒，而上一个操作完成到下一个往往需要几十微秒，这个调度算法推出的时候5400转的机械硬盘依旧是主流，而5400转的硬盘转一圈需要11.11毫秒）。 这个例子暴露出了电梯调度算法并不知道进程即将读取下一块数据. 预测调度算法（<a href="https://en.wikipedia.org/wiki/Anticipatory_scheduling">anticipatory</a> I/O scheduler）解决了这个问题：它在处理另一个请求之前，先暂停几毫秒（并不是停下磁盘），等待另一个与上个操作在物理位置上相近的操作。
+</p><p>以上两个调度算法都是试图提高总吞吐量的算法, 但他们忽视了I/O调度中的另一个问题，就是请求的延迟问题. 举个例子：当大多数进程在磁盘头发起请求，而少量的进程在磁盘另外一端，需要转一圈才可以访问（反转是不现实的，将一片正在高速旋转的磁盘突然停下然后反转这对磁盘的强度提出了极高的需求），这时，预测算法就会在一系列对于磁盘头的操作的请求中，等待数多个“几毫秒”，而这时磁盘尾端操作的请求早已等候许久，甚至可能已经因为I/O操作无法完成而无法进行下一步操作。我们将这样的情况称之为饥饿. 为了增加I/O操作的公平性 ，截止日期算法（ <a href="https://en.wikipedia.org/wiki/Deadline_scheduler">deadline</a> algorithm）应运而生 。它也有一个按照地址排序的队列，与电梯算法类似， 当一个进程在队列中等待了太久它们就会被移入到一个名为 "expired"（意指到期） 的队列中按照谁到期时间更久谁越靠前进行排序。调度器会检查这个队列，并从中处理请求，处理完成后，才会回到电梯队列中。这种调度方式牺牲了整体吞吐量以此交换了操作延迟，这也是I/O调度算法所需解决的问题，即吞吐量与延迟的平衡。
+</p><p>完全公平队列算法（ <a href="https://en.wikipedia.org/wiki/CFQ">Completely Fair Queuing (CFQ)</a> ）试图从不同的角度来平衡吞吐量与延迟，它将时间划分成时间片，然后根据进程优先级来划分配这个时间片与允许的请求数。 它支持 <a href="#pgb3f3c5c80dbd">cgroup</a> 以此允许为特定的进程保留一些时间片和请求数。 这在云存储中特别适用: 一些云存储服务的付费用户总是期望可以得到更多的IOPS。 此外它也会在同步I/O结束的时候闲置下来，等待其他附近位置的操作, 以此，它取代了预测调度算法（<i>anticipatory</i> scheduler）并且带来了一些增强的功能.  预测调度算法（<i>anticipatory</i> scheduler）和电梯调度算法（<i>elevator</i>  schedulers）都在现在的 Linux 内核中被下面更为先进的算法所替代。
+</p><p>预算公平算法（ <a href="https://algo.ing.unimo.it/people/paolo/disk_sched/">Budget Fair Queuing (BFQ)</a> ）是一种基于 CFQ 代码增加一些功能改进而来。它并不为磁盘分配固定的时间片，而是根据使用启发式的算法为进程分配“预算”（Budget）. 它相对与其他算法来说比较复杂, 这种算法也许更适合本来吞吐量就偏低的机械硬盘和低速SSD，它每次操作的开销都更高，特别是当CPU速度较慢时，这个调度算法甚至可能降低设备的响应速度. 它在个人系统上的目标是优化交互式任务的体验, 此时的存储设备与空闲的时候响应性能相当。它默认的配置被用来提供最低延迟，而不是最大吞吐量
+</p><p><a href="https://lwn.net/Articles/720675/">Kyber</a> 是一种新推出的调度器。受到网络路由器的主动队列管理结束启发，使用“token”用作限制请求的一种调度机制。这个机制有两个“令牌”（token）一个称为队列令牌（queuing token），用来防止请求进入“饥饿”状态，另一个称为“调度令牌”（dispatch token），被用作限制在指定设备上操作的优先级。 最后再定义一个目标读取延迟，并调整调度器来达到这个目标。 这个算法的实现相对简单，并且被认为是用于高速的设备（例如固态硬盘）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E5.86.85.E6.A0.B8.E7.9A.84_I.2FO_.E8.B0.83.E5.BA.A6.E5.99.A8" id="内核的_I/O_调度器"><span id=".E5.86.85.E6.A0.B8.E7.9A.84_I.2FO_.E8.B0.83.E5.BA.A6.E5.99.A8"></span>内核的 I/O 调度器</h4></div>
+<p>除去一些早期调度算法已经被移除, 官方的Linux kernel支持多种调度器，主要分为一下两类:
+</p>
+<ul><li>内核默认支持<b>多队列调度器（</b>multi-queue schedulers<b>）</b>. 多队列块I/O排队机制（ <a href="https://www.thomas-krenn.com/en/wiki/Linux_Multi-Queue_Block_IO_Queueing_Mechanism_(blk-mq)">Multi-Queue Block I/O Queuing Mechanism (blk-mq)</a> ）将I/O查询映射到多个队列, 任务分布于多个线程之间，同样也分布在多个CPU核心之间。 以下几种调度器在这个框架中可用:
+<ul><li><i>None</i>, 不应用任何调度算法.</li>
+<li><i>mq-deadline</i>, deadline（截止日期调度算法）的多线程版本。</li>
+<li><i>Kyber</i></li>
+<li><i>BFQ</i></li></ul></li></ul>
+<ul><li><b>单队列调度器</b>（single-queue schedulers） 是旧版本所拥有的调度器:
+<ul><li><a href="https://en.wikipedia.org/wiki/Noop_scheduler">NOOP</a> 是最简单的调度器，它将所有的I/O请求放入一个先进先出队列（FIFO）并以此实现请求合并。 在这个算法中，请求的位置的扇区号不会被用于排序。 因此，如果在另一层（例如设备级）, 或者无论怎样的调度算法都不会带来性能问题( 例如SSD),那么就可以使用这个算法。</li>
+<li><a href="https://en.wikipedia.org/wiki/Deadline_scheduler">Deadline</a></li>
+<li><a href="https://en.wikipedia.org/wiki/CFQ">CFQ</a></li></ul></li></ul>
+<dl><dd><div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>单队列调度器（single-queue schedulers）<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=f382fb0bcef4c37dc049e9f6963e3baf204d815c">自从Linux 5.0起被移除</a>.</div></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E6.9B.B4.E6.94.B9_I.2FO_.E8.B0.83.E5.BA.A6.E5.99.A8" id="更改_I/O_调度器"><span id=".E6.9B.B4.E6.94.B9_I.2FO_.E8.B0.83.E5.BA.A6.E5.99.A8"></span>更改 I/O 调度器</h4></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>调度器需要根据设备及负载的具体状况进行选择。另外，不应只根据以 MB/s 计量的吞吐量作为性能判断的唯一标准：到期时间或公平度会影响总体的吞吐性能，但同时会提高响应性能。<a href="#pgb7e3faeb840c">基准测试</a> 章节有助帮你判断各个 I/O 调度器的性能。</div>
+<p>列出单一设备所有可用的调度器及激活中的调度器（方括号内）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /sys/block/<i><b>sda</b></i>/queue/scheduler</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">mq-deadline kyber [bfq] none
+</pre>
+<p>列出所有设备可用的所有调度器：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ grep "" /sys/block/<b>*</b>/queue/scheduler</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/sys/block/pktcdvd0/queue/scheduler:none
+/sys/block/sda/queue/scheduler:mq-deadline kyber [bfq] none
+/sys/block/sr0/queue/scheduler:[mq-deadline] kyber bfq none
+</pre>
+<p>将 <i>sda</i> 使用的调度器更改为 <i>bfq</i>：
+</p>
+<pre># echo <i><b>bfq</b></i> &gt; /sys/block/<i><b>sda</b></i>/queue/scheduler
+</pre>
+<p>不论硬盘为何种类型，更改 I/O 调度器的操作都可以被自动化并持久化。例如，下列展示的 <a href="#pge009209061ac">udev</a> 规则将 <a href="#pgfabce5fffaa5">NVMe</a> 硬盘的调度器设为 none，<a href="#pg87ef25631e76">SSD</a>/eMMC 硬盘设为 <i>bfq</i>，机械硬盘设为 <i>bfq</i>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/60-ioschedulers.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># HDD
+ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
+
+# SSD
+ACTION=="add|change", KERNEL=="sd[a-z]*|mmcblk[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="bfq"
+
+# NVMe SSD
+ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="none"
+</pre>
+<p>完成后重启或是强制 <a href="#pge009209061ac">udev 加载新规则</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E5.BE.AE.E8.B0.83_I.2FO_.E8.B0.83.E5.BA.A6.E5.99.A8" id="微调_I/O_调度器"><span id=".E5.BE.AE.E8.B0.83_I.2FO_.E8.B0.83.E5.BA.A6.E5.99.A8"></span>微调 I/O 调度器</h4></div>
+<p>每一个内核的I/O调度器都有自己的tunables，如延迟时间、过期时间和FIFO参数。tunables有助于根据特定的设备和工作负载来调整算法。通常情况下，这是为了实现更高的吞吐量或更低的延迟。tunables及相关描述可以在<a href="https://docs.kernel.org/block/index.html">内核文档</a>中找到。
+</p><p>要查看设备（例如sdb）可用的tunables，执行：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls /sys/block/<i><b>sdb</b></i>/queue/iosched</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">fifo_batch  front_merges  read_expire  write_expire  writes_starved</pre>
+<p>上例中sdb使用<i>deadline</i>调度算法。
+</p><p>要牺牲延迟而改善<i>deadline</i>算法的吞吐量，可用以下命令提高<code>fifo_batch</code>的值：
+</p>
+<pre># echo <i>32</i> &gt; /sys/block/<i><b>sdb</b></i>/queue/iosched/<b>fifo_batch</b></pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86.E9.85.8D.E7.BD.AE.E4.B8.8E.E5.86.99.E5.85.A5.E7.BC.93.E5.AD.98" id="电源管理配置与写入缓存"><span id=".E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86.E9.85.8D.E7.BD.AE.E4.B8.8E.E5.86.99.E5.85.A5.E7.BC.93.E5.AD.98"></span>电源管理配置与写入缓存</h3></div>
+<p>使用机械硬盘（HDD）时你可能会想要降低或是完全关闭省电功能，并确认写入缓存是否已经启用。
+</p><p>可以参考<a href="#pg62a34c92338a">电源管理配置</a>和 <a href="#pg62a34c92338a">Hdparm#写入缓存</a>。
+</p><p>完成后，你可以配置 <a href="#pg62a34c92338a">udev 规则</a>以使更改在启动时应用。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><a href="#pg1e095fe2c2a6">GNOME</a> 允许你在磁盘应用中配置部分这些参数，不需要编辑 udev 规则。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>你的硬盘可能不支持部分功能。这种情况下，Hdparm 会向你发出提醒。你可以直接忽视掉这些不支持的配置选项。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E5.87.8F.E5.B0.91.E7.A3.81.E7.9B.98.E8.AF.BB.E5.86.99" id="减少磁盘读写"><span id=".E5.87.8F.E5.B0.91.E7.A3.81.E7.9B.98.E8.AF.BB.E5.86.99"></span>减少磁盘读写</h3></div>
+<p>避免对慢速存储设备的不必要访问不仅可以提升性能，还能延长设备寿命（不过，在现代硬件上往往可以忽略这些操作对设备寿命的影响）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>一个 32GB 的，写入放大系数为 10 倍，标准写入/擦除周期为 10000 次的固态硬盘，每天写入 10GB 的数据，预期寿命为 8 年。如果使用<a href="https://kcall.co.uk/ssd/">更大的固态硬盘</a>和写入放大系数更小的现代控制器，寿命会更长。在考虑是否真的需要任何限制磁盘写入的特定策略时，请参阅<a href="https://web.archive.org/web/20161124030749/http://techreport.com/review/27909/the-ssd-endurance-experiment-theyre-all-dead">本耐用性实验</a>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E6.98.BE.E7.A4.BA.E7.A3.81.E7.9B.98.E5.86.99.E4.BF.A1.E6.81.AF" id="显示磁盘写信息"><span id=".E6.98.BE.E7.A4.BA.E7.A3.81.E7.9B.98.E5.86.99.E4.BF.A1.E6.81.AF"></span>显示磁盘写信息</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iotop">iotop</a></span><sup><small>包</small></sup></span>可以显示程序写入磁盘的频率，并可将进程按写入量排序。详见<span class="plainlinks archwiki-template-man" title="$ man 8 iotop"><a href="https://man.archlinux.org/man/iotop.8">iotop(8)</a></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E9.87.8D.E5.AE.9A.E4.BD.8D.E6.96.87.E4.BB.B6.E5.88.B0_tmpfs" id="重定位文件到_tmpfs"><span id=".E9.87.8D.E5.AE.9A.E4.BD.8D.E6.96.87.E4.BB.B6.E5.88.B0_tmpfs"></span>重定位文件到 tmpfs</h4></div>
+<p>可将某些文件（如浏览器 profile）重定位到一个 <a href="#pg96f7efa88158">tmpfs</a> 上。这将让文件存储在内存中，在降低磁盘写入量的同时提升应用响应速度。
+</p>
+<ul><li>在tmpfs与磁盘间同步浏览器 profile，参见 <a href="#pga0bc35debb7f">Profile-sync-daemon</a>。</li></ul>
+<p>有些浏览器可能需要额外操作，如 <a href="#pgfdbcc5602284">Firefox</a>。
+</p>
+<ul><li>同步任何指定的文件夹，见 <a href="#pg494980c7859a">Anything-sync-daemon</a>。</li></ul>
+<ul><li>在tmpfs中编译程序以减少编译用时，见 <a href="#pg7edcce763396">Makepkg#减少编译时间</a>。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="文件系统"><span id=".E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>文件系统</h4></div>
+<p>可参阅特定<a href="#pg6790ffb56e98">文件系统</a>的维基页面，检查是否有适用的性能优化指南。如：<a href="#pgb5dd09f37b3e">Ext4#提升性能</a>、<a href="#pg97815ebb0436">XFS#性能</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E4.BA.A4.E6.8D.A2.E7.A9.BA.E9.97.B4" id="交换空间"><span id=".E4.BA.A4.E6.8D.A2.E7.A9.BA.E9.97.B4"></span>交换空间</h4></div>
+<p>详见 <a href="#pgad14227759fd">Swap#性能优化</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E5.9B.9E.E5.86.99.E9.97.B4.E9.9A.94.E5.92.8C.E7.BC.93.E5.86.B2.E5.8C.BA.E5.A4.A7.E5.B0.8F" id="回写间隔和缓冲区大小"><span id=".E5.9B.9E.E5.86.99.E9.97.B4.E9.9A.94.E5.92.8C.E7.BC.93.E5.86.B2.E5.8C.BA.E5.A4.A7.E5.B0.8F"></span>回写间隔和缓冲区大小</h4></div>
+<p>详见 <a href="#pg7b7cc2bbe79a">Sysctl#虚拟内存</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_.E7.A6.81.E7.94.A8.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8" id="禁用核心转储"><span id=".E7.A6.81.E7.94.A8.E6.A0.B8.E5.BF.83.E8.BD.AC.E5.82.A8"></span>禁用核心转储</h4></div>
+<p>详见<a href="#pgd8951e6ec7b8">核心转储#Disabling automatic core dumps</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E4.BD.BF.E7.94.A8_ionice_.E8.B0.83.E5.BA.A6.E5.82.A8.E5.AD.98_I.2FO" id="使用_ionice_调度储存_I/O"><span id=".E4.BD.BF.E7.94.A8_ionice_.E8.B0.83.E5.BA.A6.E5.82.A8.E5.AD.98_I.2FO"></span>使用 ionice 调度储存 I/O</h3></div>
+<p>许多后台任务（如备份），并不需要低I/O延迟或高I/O带宽。而对于桌面系统，要获得流畅的UI响应，前台进程的I/O就必须足够快。因此，若在其它任务需要时减少后台任务的存储带宽资源，将对提升性能大有裨益。Linux的CFQ I/O调度器支持为不同的进程设定不同的优先级，可以使用CFQ调度器达成这一点。
+</p><p>后台进程的I/O优先级可被降低到"Idle"：
+</p>
+<pre># ionice -c 3 command
+</pre>
+<p>详见：<a href="https://www.cyberciti.biz/tips/linux-set-io-scheduling-class-priority.html">一个ionice的简短介绍</a>、<span class="plainlinks archwiki-template-man" title="$ man 1 ionice"><a href="https://man.archlinux.org/man/ionice.1">ionice(1)</a></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5f7223c277dc_CPU" id="CPU">CPU</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E8.B6.85.E9.A2.91" id="超频"><span id=".E8.B6.85.E9.A2.91"></span>超频</h3></div>
+<p><a href="https://en.wikipedia.org/wiki/Overclocking">超频</a>通过提升 CPU 的时钟频率提升电脑性能，超频能力取决于 CPU 和主板的型号。通常使用 BIOS 进行超频。超频也会带来风险和不便，这里既不推荐超频也不反对超频。
+</p><p>很多 Intel 芯片不会在 acpi_cpufreq 或其他软件中报告真正的时钟频率，这会导致过多的 <a href="#pgcfe31b67199d">dmesg</a> 消息。通过卸载并将 <code>acpi_cpufreq</code> 模块加入黑名单可以避免此问题。使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=i7z">i7z</a></span><sup><small>包</small></sup></span> 中的 <i>i7z</i> 可以读取真实的时钟速度。对于正确的 CPU 超频方式而言，推荐使用<a href="#pg517d69f358a4">压力测试</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E8.87.AA.E5.8A.A8.E8.B0.83.E6.95.B4.E9.A2.91.E7.8E.87" id="自动调整频率"><span id=".E8.87.AA.E5.8A.A8.E8.B0.83.E6.95.B4.E9.A2.91.E7.8E.87"></span>自动调整频率</h3></div>
+<p>见 <a href="#pg863f270f94d0">CPU 调频</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E8.B0.83.E6.95.B4.E9.BB.98.E8.AE.A4CPU.E8.B0.83.E5.BA.A6.E5.99.A8.EF.BC.88CFS.EF.BC.89" id="调整默认CPU调度器（CFS）"><span id=".E8.B0.83.E6.95.B4.E9.BB.98.E8.AE.A4CPU.E8.B0.83.E5.BA.A6.E5.99.A8.EF.BC.88CFS.EF.BC.89"></span>调整默认CPU调度器（CFS）</h3></div>
+<p>mainline Linux内核中的默认CPU调度器是<a href="https://lwn.net/Articles/925371/">EEVDF</a>。
+</p>
+
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E5.85.B6.E4.BB.96CPU.E8.B0.83.E5.BA.A6.E5.99.A8" id="其他CPU调度器"><span id=".E5.85.B6.E4.BB.96CPU.E8.B0.83.E5.BA.A6.E5.99.A8"></span>其他CPU调度器</h3></div>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Brain_Fuck_Scheduler#MuQSS">MuQSS</a></b> — Multiple Queue Skiplist Scheduler. Available with the <code>-ck</code> patch set developed by <a href="https://en.wikipedia.org/wiki/Con_Kolivas">Con Kolivas</a>.</li></ul>
+<dl><dd><a href="#pg1b1006930586">Unofficial user repositories/Repo-ck</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-ck/">linux-ck</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://cchalpha.blogspot.com/search/label/PDS">PDS</a></b> — Priority and Deadline based Skiplist multiple queue scheduler focused on desktop responsiveness.</li></ul>
+<dl><dd><a href="https://cchalpha.blogspot.com/">https://cchalpha.blogspot.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-pds/">linux-pds</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://cchalpha.blogspot.com/search/label/BMQ">BMQ</a></b> — The BMQ "BitMap Queue" scheduler was created based on existing PDS development experience and inspired by the scheduler found in Zircon by Google, the kernel on which their Fuchsia OS initiative runs. Available with a set of patches from CachyOS.</li></ul>
+<dl><dd><a href="https://cchalpha.blogspot.com/">https://cchalpha.blogspot.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-cachyos-bmq/">linux-cachyos-bmq</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://cchalpha.blogspot.com/2020/05/project-c-announcement.html">Project C</a></b> — Cross-project for refactoring BMQ into Project C, with re-creation of PDS based on the Project C code base. So it is a merge of the two projects, with a subsequent update of the PDS as Project C. Recommended as a more recent development.</li></ul>
+<dl><dd><a href="https://cchalpha.blogspot.com/">https://cchalpha.blogspot.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-prjc/">linux-prjc</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://github.com/hamadmarri/TT-CPU-Scheduler">TT</a></b> — The goal of the Task Type (TT) scheduler is to detect tasks types based on their behaviours and control the schedulling based on their types.</li></ul>
+<dl><dd><a href="https://github.com/hamadmarri/TT-CPU-Scheduler">https://github.com/hamadmarri/TT-CPU-Scheduler</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-tt/">linux-tt</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://github.com/firelzrd/bore-scheduler">BORE</a></b> — The BORE scheduler focuses on sacrificing some fairness for lower latency in scheduling interactive tasks, it is built on top of CFS and is only adjusted for vruntime code updates, so the overall changes are quite small compared to other unofficial CPU schedulers.</li></ul>
+<dl><dd><a href="https://github.com/firelzrd/bore-scheduler">https://github.com/firelzrd/bore-scheduler</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-cachyos-bore/">linux-cachyos-bore</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>SCX</b> — Allows dynamic injection of various CPU schedulers without requiring a system reset.</li></ul>
+<dl><dd><a href="https://github.com/sched-ext/scx">https://github.com/sched-ext/scx</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=scx-scheds">scx-scheds</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E5.AE.9E.E6.97.B6.E5.86.85.E6.A0.B8" id="实时内核"><span id=".E5.AE.9E.E6.97.B6.E5.86.85.E6.A0.B8"></span>实时内核</h3></div>
+<p>有些应用（如在全高清(1080p)分辨率下运行电视卡）可能在<a href="#pg9743197ff846">实时内核</a>下表现更好。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E8.B0.83.E6.95.B4.E8.BF.9B.E7.A8.8B.E4.BC.98.E5.85.88.E7.BA.A7" id="调整进程优先级"><span id=".E8.B0.83.E6.95.B4.E8.BF.9B.E7.A8.8B.E4.BC.98.E5.85.88.E7.BA.A7"></span>调整进程优先级</h3></div>
+<p>见<span class="plainlinks archwiki-template-man" title="$ man 1 nice"><a href="https://man.archlinux.org/man/nice.1">nice(1)</a></span>和<span class="plainlinks archwiki-template-man" title="$ man 1 renice"><a href="https://man.archlinux.org/man/renice.1">renice(1)</a></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_Ananicy" id="Ananicy">Ananicy</h4></div>
+<p><a href="https://github.com/Nefelim4ag/Ananicy">Ananicy</a>是一个用于自动调节可执行程序nice值的守护进程。nice值表示了在为特定可执行程序分配CPU资源时的优先级。Ananicy在AUR中可用：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ananicy-cpp-git/">ananicy-cpp-git</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_cgroups" id="cgroups">cgroups</h4></div>
+<p>见<a href="#pgaf57e242338f">cgroups</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5f7223c277dc_Cpulimit" id="Cpulimit">Cpulimit</h4></div>
+<p><a href="https://github.com/opsengine/cpulimit">Cpulimit</a>是一个用于限制特定进程使用CPU资源多少的程序。安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cpulimit/">cpulimit</a></span><sup><small>AUR</small></sup></span>后，可以通过一个进程的PID来限制其CPU利用“百分比”。CPU利用“百分比”可取0到(总CPU核心数*100)间的任意值。例如，一个8核CPU的CPU利用“百分比”可取0到800间的值。
+</p><p>例如，要限制PID为5081的进程的CPU利用“百分比”为50，执行：
+</p>
+<pre>$ cpulimit -l 50 -p 5081
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_irqbalance" id="irqbalance">irqbalance</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=irqbalance">irqbalance</a></span><sup><small>包</small></sup></span>通过在多处理器系统上将硬件中断分散到每个处理器上以提升性能。可通过<code>irqbalance.service</code>服务<a href="#pgac06dd8bfe95">控制</a>irqbalance的运行。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E5.85.B3.E9.97.ADCPU.E6.BC.8F.E6.B4.9E.E7.BC.93.E8.A7.A3.E6.8E.AA.E6.96.BD" id="关闭CPU漏洞缓解措施"><span id=".E5.85.B3.E9.97.ADCPU.E6.BC.8F.E6.B4.9E.E7.BC.93.E8.A7.A3.E6.8E.AA.E6.96.BD"></span>关闭CPU漏洞缓解措施</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不要在充分考虑导致的漏洞前应用这些设置。更多信息见：<a href="https://phoronix.com/scan.php?page=news_item&amp;px=Linux-Improve-CPU-Spec-Switches">[2]</a>和<a href="https://linuxreviews.org/HOWTO_make_Linux_run_blazing_fast_(again)_on_Intel_CPUs">[3]</a>。</div>
+<p>关闭CPU漏洞缓解措施可能提升性能。 要完全关闭CPU漏洞缓解措施，使用如下<a href="#pgec0856954f1c">内核参数</a>:
+</p>
+<pre>mitigations=off
+</pre>
+<p>该内核参数改变的所有设置的详细解释可在<a href="https://docs.kernel.org/admin-guide/kernel-parameters.html">kernel.org|这里</a>找到。 可以使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/spectre-meltdown-checker/">spectre-meltdown-checker</a></span><sup><small>AUR</small></sup></span> 或者 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=util-linux">util-linux</a></span><sup><small>包</small></sup></span> 提供的 <span class="plainlinks archwiki-template-man" title="$ man 1 lscpu"><a href="https://man.archlinux.org/man/lscpu.1">lscpu(1)</a></span> 进行漏洞检测
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>当使用10代之后的Intel CPU或Ryzen 1000系列之后的AMD CPU时, 关闭CPU漏洞缓解措施带来的性能提升小于5%（而不是之前产品的多达25%）。详见<a href="https://www.phoronix.com/scan.php?page=article&amp;item=3-years-specmelt">the general review from early 2021</a>、<a href="https://www.phoronix.com/scan.php?page=article&amp;item=spectre-rocket-lake">the test on Rocket Lake</a>和<a href="https://www.phoronix.com/scan.php?page=article&amp;item=alder-lake-mitigations">the test on Alder Lake</a></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5f7223c277dc_.E6.98.BE.E5.8D.A1" id="显卡"><span id=".E6.98.BE.E5.8D.A1"></span>显卡</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_Xorg_.E9.85.8D.E7.BD.AE" id="Xorg_配置"><span id="Xorg_.E9.85.8D.E7.BD.AE"></span>Xorg 配置</h3></div>
+<p>显卡性能由<code>/etc/X11/xorg.conf</code>的配置决定，见 <a href="#pge12579b7d4ac">NVIDIA</a>、<a href="#pg4a4bc5e5df24">AMDGPU</a> 和 <a href="#pg7b57f700d367">Intel</a> 文章。配置不当可能导致 Xorg 停止工作，请慎重操作。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_Mesa_.E9.85.8D.E7.BD.AE" id="Mesa_配置"><span id="Mesa_.E9.85.8D.E7.BD.AE"></span>Mesa 配置</h3></div>
+<p>Mesa驱动的性能可通过<a href="https://dri.freedesktop.org/wiki/ConfigurationInfrastructure/">drirc</a>配置。此外，也可通过GUI工具进行配置：
+</p>
+<ul><li><b>adriconf (Advanced DRI Configurator)</b> — 通过GUI进行配置并向标准drirc文件写入配置项的工具。</li></ul>
+<dl><dd><a href="https://gitlab.freedesktop.org/mesa/adriconf/">https://gitlab.freedesktop.org/mesa/adriconf/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adriconf">adriconf</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>DRIconf</b> — 用于Direct Rendering Infrastructure的配置小程序。支持在应用/屏幕/设备层面上调整OpenGL的性能和视觉效果设置。</li></ul>
+<dl><dd><a href="https://dri.freedesktop.org/wiki/DriConf/">https://dri.freedesktop.org/wiki/DriConf/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/driconf/">driconf</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E7.A1.AC.E4.BB.B6.E8.A7.86.E9.A2.91.E5.8A.A0.E9.80.9F" id="硬件视频加速"><span id=".E7.A1.AC.E4.BB.B6.E8.A7.86.E9.A2.91.E5.8A.A0.E9.80.9F"></span>硬件视频加速</h3></div>
+<p><a href="#pge1e061b4fab9">硬件视频加速</a>可利用显卡解码/编码视频。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E8.B6.85.E9.A2.91_2" id="超频_2"><span id=".E8.B6.85.E9.A2.91_2"></span>超频</h3></div>
+<p>与 CPU 一样，超频可以直接提高性能，但通常不建议使用。<a href="#pg89cb7b475cfb">AUR</a>中的超频工具有<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rovclock/">rovclock</a></span><sup><small>AUR</small></sup></span> （ATI 显卡）、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rocm-smi-lib">rocm-smi-lib</a></span><sup><small>包</small></sup></span> (较新的 AMD 显卡) 、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvclock/">nvclock</a></span><sup><small>AUR</small></sup></span> (到 Geforce 9系的旧 NVIDIA 显卡)，以及适用于新 NVIDIA 显卡的<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span><sup><small>包</small></sup></span>。
+</p><p>见 <a href="#pg4a4bc5e5df24">AMDGPU#Overclocking</a> 或 <a href="#pg02e111bbe6ef">NVIDIA/提示和技巧#超频与散热</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E5.90.AF.E7.94.A8_PCI_Resizable_BAR" id="启用_PCI_Resizable_BAR"><span id=".E5.90.AF.E7.94.A8_PCI_Resizable_BAR"></span>启用 PCI Resizable BAR</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>在某些系统上启用 PCI Resizable BAR 会造成性能严重下降。配置完成后务必对系统进行测试以确保性能获得了提升。</li>
+<li>启用前 <a href="https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface#CSM_booting">Compatibility Support Module (CSM)</a> 必须关闭。</li></ul>
+</div>
+<p>PCI 标准允许使用更大的<a href="https://en.wikipedia.org/wiki/PCI_configuration_space#Standardized_registers">基地址寄存器（BAR）</a>以向 PCI 控制器暴露 PCI 设备的内存。这一操作可以提高显卡的性能。允许访问显卡的所有显存可以提高性能，同时也允许显卡驱动对其进行针对性的优化。AMD将 resizable BAR、above 4G decoding 和显示驱动一系列针对性的优化统称为 <a href="https://www.amd.com/zh-hans/technologies/smart-access-memory">AMD 显存智取技术</a>，最初出现在搭载 AMD 500 系列芯片组的主板上，并随后通过 UEFI 更新扩展至 AMD 400 系列及 Intel 300 系列主板。并非所有主板都有该设置，在某些主板上还会造成启动问题。
+</p><p>如果 BAR 大小为 256M，说明该特性尚未启用或不受支持：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg | grep BAR=</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[drm] Detected VRAM RAM=8176M, BAR=256M</pre>
+<p>如要启用，需要在主板的设置中启用 "Above 4G Decode" 或 "&gt;4GB MMIO"。完成后检查 BAR 是否变大：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg | grep BAR=</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[drm] Detected VRAM RAM=8176M, BAR=8192M</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5f7223c277dc_.E5.86.85.E5.AD.98.E3.80.81swap_.E4.B8.8E.E5.86.85.E5.AD.98.E8.80.97.E5.B0.BD.E7.9A.84.E5.A4.84.E7.90.86" id="内存、swap_与内存耗尽的处理"><span id=".E5.86.85.E5.AD.98.E3.80.81swap_.E4.B8.8E.E5.86.85.E5.AD.98.E8.80.97.E5.B0.BD.E7.9A.84.E5.A4.84.E7.90.86"></span>内存、swap 与内存耗尽的处理</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E9.A2.91.E7.8E.87.E5.92.8C.E6.97.B6.E5.BA.8F" id="频率和时序"><span id=".E9.A2.91.E7.8E.87.E5.92.8C.E6.97.B6.E5.BA.8F"></span>频率和时序</h3></div>
+<p>内存可在不同的频率和时序上运行，可通过BIOS进行设置。两者都会影响内存性能。选择BIOS中系列预设值中最高的一个通常会带来相比默认值的性能提升。将内存频率提高到不被主板和内存厂商支持的数值被称作超频，由此带来的风险与不便和#超频中的相似。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E5.9C.A8RAM_overlay.E4.B8.8A.E9.85.8D.E7.BD.AE.E6.A0.B9.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="在RAM_overlay上配置根文件系统"><span id=".E5.9C.A8RAM_overlay.E4.B8.8A.E9.85.8D.E7.BD.AE.E6.A0.B9.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>在RAM overlay上配置根文件系统</h3></div>
+<p>如果系统在写入速率较慢的设备（如USB、机械硬盘）上运行且对根文件系统的写入量较小，可在真实的根文件系统上挂载一层RAM overlay。这将保持
+真实的根文件系统为只读状态，所有的写入操作都在RAM中进行。由此可带来显著的性能提升，但根文件系统的写入量将受到限制。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_zram_.E6.88.96_zswap" id="zram_或_zswap"><span id="zram_.E6.88.96_zswap"></span>zram 或 zswap</h3></div>
+<p>与#在RAM overlay上配置根文件系统相似的好处（当然也有相似的不便）也可通过<a href="#pg952d5556d6d4">zswap</a>或<a href="#pg61935487d964">zram</a>达成。两者的目的相同但实现方法不同：zswap依靠一块压缩的内存缓存来工作，不需要（也不允许）过多的用户空间配置；而<a href="#pg61935487d964">zram</a>内核模块可用于在内存中创建一个压缩的块设备。<a href="#pg952d5556d6d4">zswap</a>需与swap设备配合工作，而<a href="#pg61935487d964">zram</a>则不需要。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E4.BD.BF.E7.94.A8.E6.98.BE.E5.AD.98" id="使用显存"><span id=".E4.BD.BF.E7.94.A8.E6.98.BE.E5.AD.98"></span>使用显存</h3></div>
+<p>在很少见的情况下，内存很小而显存过剩，那么可以将显存设为交换文件。见 <a href="#pga673aeb1090c">Swap on video RAM</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5f7223c277dc_.E5.9C.A8.E4.BD.8E.E5.86.85.E5.AD.98.E6.83.85.E5.86.B5.E4.B8.8B.E6.94.B9.E5.96.84.E7.B3.BB.E7.BB.9F.E5.8F.8D.E5.BA.94.E9.80.9F.E5.BA.A6" id="在低内存情况下改善系统反应速度"><span id=".E5.9C.A8.E4.BD.8E.E5.86.85.E5.AD.98.E6.83.85.E5.86.B5.E4.B8.8B.E6.94.B9.E5.96.84.E7.B3.BB.E7.BB.9F.E5.8F.8D.E5.BA.94.E9.80.9F.E5.BA.A6"></span>在低内存情况下改善系统反应速度</h3></div>
+<p>在传统的GNU/Linux系统，尤其是图形工作站上，当内存被过量分配（overcommitted）时，系统反应速度可能会在触发内核的OOM-killer前迅速降低到无法使用的程度，除非足量的内存得到释放。具体的过程会因特定的设置和系统所处的情况不同，导致系统回到正常状态的时间从数秒到超过半个小时不等。
+</p><p>在低内存状态下，内核的表现及用户空间程序的情况可能在未来得到改善（详见<a href="https://lore.kernel.org/lkml/d9802b6a-949b-b327-c4a6-3dbca485ec20@gmx.com/T/">内核</a>和<a href="https://lists.fedoraproject.org/archives/list/devel@lists.fedoraproject.org/thread/XUZLHJ5O32OX24LG44R7UZ2TMN6NY47N/">Fedora</a>的邮件列表）。此外，相比硬重启和调整<code>vm.overcommit_*</code> <a href="#pg7b7cc2bbe79a">sysctl</a>参数，用户还可以使用更可行和有效的选择：
+</p>
+<ul><li>使用<a href="https://docs.kernel.org/admin-guide/sysrq.html">Magic SysRq key</a>（<code>Alt+SysRq+f</code>）手动触发内核OOM-killer。</li>
+<li>使用用户空间的OOM守护进程来自动或交互性地处理低内存问题。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>触发OOM killer将强行停止某些正在运行的应用，可能导致未保存的工作丢失。是耐心等待并希望应用程序最终会释放掉占用的内存，还是迅速使系统脱离未响应状态取决于用户自身。</div>
+<p>相比SysRq，OOM守护进程可能更受到欢迎，因为不能手动设定内核的OOM-killer结束相关进程的优先级。
+</p><p>以下是一些OOM守护进程：
+</p>
+<ul><li><b>systemd-oomd</b> — <code>systemd-oomd.service</code>由<a href="#pgac06dd8bfe95">systemd</a>提供，可使用cgroups-v2及PSI（pressure stall information）监控进程并在内核OOM发生前采取行动。</li></ul>
+<dl><dd><a href="https://github.com/systemd/systemd">https://github.com/systemd/systemd</a>, <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-oomd"><a href="https://man.archlinux.org/man/systemd-oomd.8">systemd-oomd(8)</a></span> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd">systemd</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>earlyoom</b> — 用C语言实现的简单的用户空间OOM-killer。</li></ul>
+<dl><dd><a href="https://github.com/rfjakob/earlyoom">https://github.com/rfjakob/earlyoom</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=earlyoom">earlyoom</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>oomd</b> — 基于<a href="https://lwn.net/Articles/759781/">PSI</a>的OOM-killer实现，需要4.20+版本的内核。配置文件为JSON格式且较复杂。已被确认应用于Facebook的生产环境。</li></ul>
+<dl><dd><a href="https://github.com/facebookincubator/oomd">https://github.com/facebookincubator/oomd</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/oomd/">oomd</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>nohang</b> — 用Python实现的复杂OOM handler，具有可选的PSI支持，比earlyoom的可配置性强。</li></ul>
+<dl><dd><a href="https://github.com/hakavlad/nohang">https://github.com/hakavlad/nohang</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nohang-git/">nohang-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>low-memory-monitor</b> — 由GNOME开发，力图为用户空间应用程序提供更多的指示低内存状态的交流方式。基于PSI，需要5.2+版本的内核。</li></ul>
+<dl><dd><a href="https://gitlab.freedesktop.org/hadess/low-memory-monitor/">https://gitlab.freedesktop.org/hadess/low-memory-monitor/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/low-memory-monitor-git/">low-memory-monitor-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>uresourced</b> — 一个为图形界面用户会话提供基于cgroup的资源保护的微型守护进程。</li></ul>
+<dl><dd><a href="https://gitlab.freedesktop.org/benzea/uresourced">https://gitlab.freedesktop.org/benzea/uresourced</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/uresourced/">uresourced</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5f7223c277dc_.E7.BD.91.E7.BB.9C" id="网络"><span id=".E7.BD.91.E7.BB.9C"></span>网络</h2></div>
+<ul><li>内核网络设置: 详见<a href="#pg7b7cc2bbe79a">Sysctl#性能优化</a></li>
+<li>NIC: 详见<a href="#pgd9535840e0ba">网络配置#设定设备的 MTU 和队列长度</a></li>
+<li>DNS: 考虑使用有缓存的DNS解析器，详见<a href="#pg5e90005cb568">域名解析#DNS 服务器</a>。</li>
+<li>Samba: 详见<a href="#pg3a2ac70f3f85">Samba#Improve throughput</a>。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5f7223c277dc_.E7.9C.8B.E9.97.A8.E7.8B.97" id="看门狗"><span id=".E7.9C.8B.E9.97.A8.E7.8B.97"></span>看门狗</h2></div>
+<p>根据<a href="https://en.wikipedia.org/wiki/Watchdog_timer">Wikipedia:Watchdog timer</a>:
+</p>
+<dl><dd>看门狗计时器是一种检测并从计算机故障中恢复的电子计时器。在正常情况下，计算机定期重置看门狗计时器。如果计算机未能重置计时器，计时便会一直持续直到产生超时信号。产生超时信号后将执行修正操作，一般包括使系统回到安全状态并恢复正常的系统运作。</dd></dl>
+<p>或由于系统的关键角色（如服务器）或由于断电重置（如在嵌入式设备上常发生的），许多用户需要看门狗以在某些情况下保持系统的良好运作。然而，普通用户（如使用普通台式机或笔记本）并不需要看门狗。
+</p><p>要关闭看门狗计时器（包含硬件及软件实现），在启动参数中加入<code>nowatchdog</code>。
+</p><p><br/>
+<code>nowatchdog</code> 启动参数可能不适用于 Intel TCO 硬件看门狗 <a href="https://bbs.archlinux.org/viewtopic.php?id=221239">[4]</a>。在这种情况下，可以使用 <code>modprobe.blacklist=iTCO_wdt</code> <a href="#pgec0856954f1c">内核参数</a>禁用 TCO 的内核模块。
+</p><p>如果使用的是AMD Ryzen CPU，检查<a href="#pg47c5e1af4d24">日志</a>中的<code>sp5100-tco</code>相关输出。<code>sp5100-tco</code>是<a href="https://en.wikipedia.org/wiki/AMD_700_chipset_series">AMD 700芯片组系列</a>中的硬件看门狗。要关闭它，编辑：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/disable-sp5100-watchdog.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">blacklist sp5100_tco
+</pre>
+<p>或者使用<code>modprobe.blacklist=sp5100_tco</code> 内核参数。
+</p><p><br/>
+要检查新配置是否成功应用，执行 <code>cat /proc/sys/kernel/watchdog</code> 或 <code>wdctl</code> 。
+</p><p>因为加载的模块更少，上述两种关闭看门狗的方式都能提升系统的启动和关机速度。此外，关闭看门狗计时器还能提升性能并<a href="#pg3bfeacfb89ba">降低电量消耗</a>。
+</p><p>另见<a href="https://bbs.archlinux.org/viewtopic.php?id=163768">[5]</a>，<a href="https://bbs.archlinux.org/viewtopic.php?id=165834">[6]</a>，<a href="https://0pointer.de/blog/projects/watchdog.html">[7]</a>，和<a href="https://docs.kernel.org/watchdog/watchdog-parameters.html">[8]</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5f7223c277dc_.E4.BD.BF.E7.94.A8ALHP.E4.BB.93.E5.BA.93" id="使用ALHP仓库"><span id=".E4.BD.BF.E7.94.A8ALHP.E4.BB.93.E5.BA.93"></span>使用ALHP仓库</h2></div>
+<p>请参阅 <a href="#pg8fb973af9439">ALHP</a> 页面。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5f7223c277dc_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Performance_Tuning_Guide/index.html">Red Hat Performance Tuning Guide</a></li>
+<li><a href="https://www.thomas-krenn.com/en/wiki/Linux_Performance_Measurements_using_vmstat">Linux Performance Measurements using vmstat</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807031423
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.299 seconds
+Real time usage: 0.308 seconds
+Preprocessor visited node count: 1215/1000000
+Revision size: 32983/2097152 bytes
+Post‐expand include size: 21538/2097152 bytes
+Template argument size: 11149/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 339/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   70.034      1 -total
+ 18.25%   12.784     15 Template:App
+  7.37%    5.158      7 Template:Man
+  6.50%    4.551     14 Template:Pkg
+  5.35%    3.746      6 Template:注意
+  5.02%    3.513     16 Template:AUR
+  4.92%    3.447      1 Template:Expansion
+  4.78%    3.345      1 Template:翻译状态
+  3.79%    2.651     16 Template:Ic
+  3.78%    2.650      9 Template:Hc
+-->
+<!-- Render ID 1681dd8e-920e-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3268:|#|:idhash:canonical!zh-cn and timestamp 20260807031423 and revision id 34496. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

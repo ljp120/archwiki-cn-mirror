@@ -1,0 +1,264 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg9dcc5acb2bd6">系统时间</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgacfb0b28272f">网络时间协议</a></li>
+<li><a href="#pg4d30bfb86c19">OpenNTPD</a></li>
+<li><a href="#pg3ad0a5639384">Chrony</a></li>
+<li><a href="#pgcadc7fbbdd6c">systemd-timesyncd</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/System_time">System time</a>，最近一次同步于 2025-07-26，若英文版本有所<a href="https://wiki.archlinux.org/title/System_time?diff=0&amp;oldid=841727">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/System_time_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<p>在操作系统中，时间（时钟）取决于三个部分：时间值（本地时间或 UTC 等）、时区及夏令时（<i>DST</i>，需要时应用，在中国已废止）。本文将分别介绍各个部分的定义及如何设置和读取它们。系统中也存在两种时钟：硬件时钟和系统时钟，下文也将进行详细描述。
+</p><p>大部分操作系统的时间管理包括如下方面：
+</p>
+<ul><li>启动时根据硬件时钟设置系统时间</li>
+<li>保持系统时钟准确，细节请参考#时钟同步</li>
+<li>关机时根据系统时钟设置硬件时钟</li></ul>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9dcc5acb2bd6_.E6.97.B6.E9.97.B4.E6.A0.87.E5.87.86" id="时间标准"><span id=".E6.97.B6.E9.97.B4.E6.A0.87.E5.87.86"></span>时间标准</h2></div>
+<p>时间表示有两个标准：<b>localtime</b> 和 <b>UTC</b>（<a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time">Coordinated Universal Time</a>）。localtime 标准依赖于当前<b>时区</b>，而 UTC 是与时区无关的<b>全球</b>时间标准。尽管概念上有差别，UTC 和 GMT（格林威治时间）是一样的。
+</p><p>硬件（CMOS 时钟，即 BIOS 时钟）所使用的时间标准由操作系统设定，Windows 默认使用 localtime，macOS 默认使用 UTC ,而其他的 UNIX 和类 UNIX 操作系统各不相同。使用 UTC 标准的操作系统通常会认为硬件时钟也是 UTC，并在启动时根据时区调整到对应时间。
+</p><p>在 tzdata 中，时区的名字由该地区的最大城市代表。目前中国大陆全境官方使用 Asia/Shanghai 时区，它在2000年之后等于 UTC+8，而在历史上则根据当时的时区政策可能有夏令时等变化。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9dcc5acb2bd6_.E7.A1.AC.E4.BB.B6.E6.97.B6.E9.92.9F" id="硬件时钟"><span id=".E7.A1.AC.E4.BB.B6.E6.97.B6.E9.92.9F"></span>硬件时钟</h2></div>
+<p><b>硬件时钟</b>（即实时时钟 RTC 或 CMOS 时钟）仅能保存：年、月、日、时、分、秒这些时间数值。<a href="#pg46c3147defaf">UEFI</a> 固件可以额外存储时区以及是否使用夏令时的信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_.E8.AF.BB.E5.8F.96.E7.A1.AC.E4.BB.B6.E6.97.B6.E9.92.9F" id="读取硬件时钟"><span id=".E8.AF.BB.E5.8F.96.E7.A1.AC.E4.BB.B6.E6.97.B6.E9.92.9F"></span>读取硬件时钟</h3></div>
+<pre># hwclock --show
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_.E6.A0.B9.E6.8D.AE.E7.B3.BB.E7.BB.9F.E6.97.B6.E9.92.9F.E8.AE.BE.E7.BD.AE.E7.A1.AC.E4.BB.B6.E6.97.B6.E9.92.9F" id="根据系统时钟设置硬件时钟"><span id=".E6.A0.B9.E6.8D.AE.E7.B3.BB.E7.BB.9F.E6.97.B6.E9.92.9F.E8.AE.BE.E7.BD.AE.E7.A1.AC.E4.BB.B6.E6.97.B6.E9.92.9F"></span>根据系统时钟设置硬件时钟</h3></div>
+<p>下面命令将系统时钟设置到硬件时钟，同时会创建或更新 <code>/etc/adjtime</code>。详情请参考 <span class="plainlinks archwiki-template-man" title="$ man 8 hwclock"><a href="https://man.archlinux.org/man/hwclock.8#The_Adjtime_File">hwclock(8) § The Adjtime File</a></span> 和后面的 #时钟偏移段落。
+</p>
+<pre># hwclock --systohc
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_.E8.87.AA.E5.8A.A8.E5.90.8C.E6.AD.A5" id="自动同步"><span id=".E8.87.AA.E5.8A.A8.E5.90.8C.E6.AD.A5"></span>自动同步</h3></div>
+<p>默认配置下，Arch Linux 内核会每 11 分钟同步一次硬件时钟和系统时钟。你可以使用以下命令查看你的内核中是否已启用该功能：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ zgrep CMOS /proc/config.gz</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">CONFIG_GENERIC_CMOS_UPDATE=y
+CONFIG_RTC_DRV_CMOS=y</pre>
+<p>首次同步发生在启动阶段，也就是说如果硬件时钟误差较大（例如 CMOS 电池失效导致时钟被重置到 2000 年），那任何需要准确时间的操作都将报错（包括 SSL 和<a href="https://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol">在线证书状态协议（OCSP）</a>）。浏览器通常会将硬件时钟附在发往网站的请求中，因此如果时钟误差过大，就会因 OCSP 错误导致浏览器拒绝进行连接。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9dcc5acb2bd6_.E7.B3.BB.E7.BB.9F.E6.97.B6.E9.92.9F" id="系统时钟"><span id=".E7.B3.BB.E7.BB.9F.E6.97.B6.E9.92.9F"></span>系统时钟</h2></div>
+<p><b>系统时钟</b>（即软件时间）保存了：时间、时区和夏令时设置。Linux 内核将其计算为自 UTC 时间 1970 年 1 月 1 日经过的秒数。初始系统时钟是从硬件时间计算得来，计算时会考虑 <code>/etc/adjtime</code> 的设置。系统启动之后，系统时钟与硬件时钟独立运行，Linux 内核通过时钟中断计数维护系统时钟。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_.E8.AF.BB.E5.8F.96.E7.B3.BB.E7.BB.9F.E6.97.B6.E9.97.B4" id="读取系统时间"><span id=".E8.AF.BB.E5.8F.96.E7.B3.BB.E7.BB.9F.E6.97.B6.E9.97.B4"></span>读取系统时间</h3></div>
+<p>下面命令可以获得系统时间（同时以 localtime 和 UTC 显示）和 RTC 时间（硬件时钟）：
+</p>
+<pre>$ timedatectl
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_.E8.AE.BE.E7.BD.AE.E7.B3.BB.E7.BB.9F.E6.97.B6.E9.92.9F" id="设置系统时钟"><span id=".E8.AE.BE.E7.BD.AE.E7.B3.BB.E7.BB.9F.E6.97.B6.E9.92.9F"></span>设置系统时钟</h3></div>
+<p>设置系统时间的本地时间：
+</p>
+<pre># timedatectl set-time "yyyy-MM-dd hh:mm:ss"
+</pre>
+<p>例如：
+</p>
+<pre># timedatectl set-time "2014-05-26 11:13:54"
+</pre>
+<p>将时间设置为 2014 年 5 月 26 日 11 时 13 分 54 秒。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9dcc5acb2bd6_.E5.A4.9A.E7.B3.BB.E7.BB.9F" id="多系统"><span id=".E5.A4.9A.E7.B3.BB.E7.BB.9F"></span>多系统</h2></div>
+<p>如果设备上安装了多个操作系统，它们会从同一个硬件时钟生成自己的当前时间；在这种情况下，建议将硬件时钟设为 UTC，以避免各操作系统之间的冲突。如果硬件时钟使用的是本地时间，那可能会有多个操作系统同时修改硬件时钟（如进行<a href="https://en.wikipedia.org/wiki/Daylight_saving_time">夏令时调整</a>），导致修正过度；另外，在跨多个时区出行的场景下，使用其中一个操作系统重置系统/硬件时钟也可能会产生问题。
+</p><p>通过 <code>timedatectl</code> 命令可以查看并设置硬件时间。通过下面命令查看 Arch 系统当前硬件时钟的时间标准：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ timedatectl | grep local</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">RTC in local TZ: no
+</pre>
+<p>将硬件时间设置为 localtime：
+</p>
+<pre># timedatectl set-local-rtc <b>1</b>
+</pre>
+<p>硬件时间设置成 UTC：
+</p>
+<pre># timedatectl set-local-rtc <b>0</b>
+</pre>
+<p>上述命令会自动生成 <code>/etc/adjtime</code> 并配置 RTC，无需单独进行设置。
+</p><p>系统启动载入 RTC 驱动时可能会根据硬件时钟设置系统时钟。是否设置取决于硬件平台、内核版本和内核编译选项。如果进行了该设置，此时会假定硬件时钟为 UTC 标准，<code>/sys/class/rtc/rtcN/hctosys</code>(N=0,1,2,..) 会设置成 1。
+</p><p>后面 systemd 会根据 <code>/etc/adjtime</code> 重新由硬件时钟生成系统时间。所以在硬件时钟使用当地时间时，可能导致启动阶段出现预期外的行为，如系统时间回倒（<a href="https://www.cl.cam.ac.uk/~mgk25/mswish/ut-rtc.html">更多信息</a>）。所以从 systemd 216 版本开始，如果 RTC 设置为本地时间而不是 UTC，systemd 不会将时间回写到硬件时钟，因为这样会引起 Windows 时间错乱。systemd 也不会将当前时区信息传递给内核，这意味着 FAT 时间戳将统一按 UTC 时间处理 <a href="https://github.com/systemd/systemd/blob/main/NEWS">[1]</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>使用 <code>timedatectl</code> 需要一个启动的 <a href="#pg05349798cdb5">D-Bus</a>。因此，在 <a href="#pg5d8a2c5e3ac5">chroot</a>（比如在安装系统时）下可能无法运行 timedatectl。在这些情况下, 你可以使用 hwclock 命令或使用 <a href="#pgf6282688d557">systemd-nspawn</a> 代替 chroot。</li>
+<li>如果 <code>/etc/adjtime</code> 不存在，<a href="#pgac06dd8bfe95">systemd</a> 会假设硬件时钟设为 UTC。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_Windows_.E7.B3.BB.E7.BB.9F.E4.BD.BF.E7.94.A8_UTC" id="Windows_系统使用_UTC"><span id="Windows_.E7.B3.BB.E7.BB.9F.E4.BD.BF.E7.94.A8_UTC"></span>Windows 系统使用 UTC</h3></div>
+<p>在 <a href="#pg4d5a3358c464">Arch + Windows 双系统</a>时，建议配置 Windows 使用 UTC 时间，而不是让 Linux 使用 localtime。（Windows 默认使用 localtime <a href="https://devblogs.microsoft.com/oldnewthing/20040902-00/?p=37983">[2]</a>）
+</p><p>这一步可以通过修改注册表值达成：打开 <code>regedit</code>，然后新建一个 <code>DWORD</code> 类型的值，位置为 <code>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation\RealTimeIsUniversal</code>，值为十六进制的 <code>1</code>。
+</p><p>也可以用管理员权限启动命令行，然后执行以下命令来完成：
+</p>
+<pre>C:\&gt;reg add "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\TimeZoneInformation" /v RealTimeIsUniversal /d 1 /t REG_DWORD /f
+</pre>
+<p>或者，在桌面上创建一个 <code>*.reg</code> 文件，写入以下内容,并双击运行它以将内容导入到注册表:
+</p>
+<pre>Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation]
+"RealTimeIsUniversal"=dword:00000001
+</pre>
+<p>如果 Windows 要求根据夏令时更新时钟，可以允许。时钟仍然是 UTC，仅是显示时间会改变。
+</p><p>在设置该值后，可以会需要更新#硬件时钟和#系统时钟值。
+</p><p>如果你有时间偏移问题，重新安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tzdata">tzdata</a></span><sup><small>包</small></sup></span> 并再次设置你的时区：
+</p>
+<pre># timedatectl set-timezone Asia/Shanghai
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_UTC_.E5.9C.A8_Ubuntu.2FFedora_.E4.B8.8B.E7.9A.84.E8.AE.BE.E7.BD.AE" id="UTC_在_Ubuntu/Fedora_下的设置"><span id="UTC_.E5.9C.A8_Ubuntu.2FFedora_.E4.B8.8B.E7.9A.84.E8.AE.BE.E7.BD.AE"></span>UTC 在 Ubuntu/Fedora 下的设置</h3></div>
+<p>很多 Linux 发行版会在安装时检测计算机上是否存在 Windows，若存在则会默认使用localtime。这一操作似乎是为了让新用户在不修改注册表的前提下，在 Windows 设备上试用 Linux。
+</p><p>要修改该行为，请参考上文。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_.E5.A4.9A_NTP_.E4.BA.A4.E4.BA.92" id="多_NTP_交互"><span id=".E5.A4.9A_NTP_.E4.BA.A4.E4.BA.92"></span>多 NTP 交互</h3></div>
+<p>如果你在任意系统上使用的 NTP 客户端（参考下方的 #时钟同步一节）会跟踪 RTC 偏移，就需要仅保留单个系统的时钟同步功能，否则 NTP 客户端将无法跟踪其它系统做出的调整，从而导致错误估计 RTC 时钟偏移。
+</p><p>对于 Windows 系统，需要进入<i>日期和时间设置</i>，取消选中时间同步选项。你还可以通过管理员权限执行 <code>w32tm /unregister</code> 来注销时间同步服务：Active Directory 中的设备会<a href="https://social.technet.microsoft.com/Forums/en-US/80950504-d3ff-4ba9-89fe-38e3ad9a5800/disable-time-sync-on-a-windows-2016-server">无视同步设置</a>并<a href="https://superuser.com/questions/1076720/disabling-syncing-the-clock-in-windows-10-not-working">强制同步时间</a>以防止重放攻击。Windows 时间同步例程本就不太精确，甚至需要额外操作才能达到<a href="https://learn.microsoft.com/en-us/windows-server/networking/windows-time-service/support-boundary">一秒精度</a>，因此将其禁用并不会有太大损失。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9dcc5acb2bd6_.E6.97.B6.E5.8C.BA" id="时区"><span id=".E6.97.B6.E5.8C.BA"></span>时区</h2></div>
+<p>检查当前时区：
+</p>
+<pre>$ timedatectl status
+</pre>
+<p>显示可用时区：
+</p>
+<pre>$ timedatectl list-timezones
+</pre>
+<p>修改时区：
+</p>
+<pre># timedatectl set-timezone &lt;Zone&gt;/&lt;SubZone&gt;
+</pre>
+<p>例如：
+</p>
+<pre># timedatectl set-timezone Asia/Shanghai
+</pre>
+<p>此命令会创建一个 <code>/etc/localtime</code> 软链接，指向 <code>/usr/share/zoneinfo/</code> 中的时区文件，如果你要手动创建链接（如在 <a href="#pg5d8a2c5e3ac5">chroot</a> 中无法使用 <code>timedatectl</code> 的情况下），请确保创建的是软链接（参阅 <span class="plainlinks archwiki-template-man" title="$ man 5 localtime"><a href="https://man.archlinux.org/man/localtime.5#DESCRIPTION">localtime(5) § DESCRIPTION</a></span>）：
+</p><p>手动创建(例如 <a href="#pg5d8a2c5e3ac5">chroot</a> 中 无法执行 <code>timedatectl</code>)此链接请确保是相对链接而不是绝对链接，参阅<span class="plainlinks archwiki-template-man" title="$ man 5 localtime"><a href="https://man.archlinux.org/man/localtime.5#DESCRIPTION">localtime(5) § DESCRIPTION</a></span>。
+</p>
+<pre># ln -sf /usr/share/zoneinfo/<i>Zone</i>/<i>SubZone</i> /etc/localtime
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>也可以使用 <i>tzselect</i> 交互式选择时区。</div>
+<p>详情请参考 <span class="plainlinks archwiki-template-man" title="$ man 1 timedatectl"><a href="https://man.archlinux.org/man/timedatectl.1">timedatectl(1)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 5 localtime"><a href="https://man.archlinux.org/man/localtime.5">localtime(5)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_.E5.9F.BA.E4.BA.8E.E5.9C.B0.E7.90.86.E4.BD.8D.E7.BD.AE.E8.AE.BE.E5.AE.9A" id="基于地理位置设定"><span id=".E5.9F.BA.E4.BA.8E.E5.9C.B0.E7.90.86.E4.BD.8D.E7.BD.AE.E8.AE.BE.E5.AE.9A"></span>基于地理位置设定</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>有些桌面环境支持自动选择时区（例如 <a href="#pg1e095fe2c2a6">GNOME#日期与时间</a>）。</div>
+<p>要根据 IP 位置自动设置时区，可以使用地理位置 API 来获取时区信息，例如 <code>curl https://ipapi.co/timezone</code>，然后将输出传递给 <code>timedatectl set-timezone</code> 进行自动设置。有些 IP 位置 API 提供免费服务或免费额度，可参考以下清单：
+</p>
+<ul><li><a href="https://www.abstractapi.com/ip-geolocation-api">Abstract IP geolocation API</a></li>
+<li><a href="https://freegeoip.app">FreegeoIP</a></li>
+<li><a href="https://ip-api.com/">IP-api</a></li>
+<li><a href="https://ipapi.co/">IPAPI</a></li>
+<li><a href="https://ipdata.co">Ipdata</a></li>
+<li><a href="https://ipstack.com/">Ipstack</a></li>
+<li><a href="https://timezoneapi.io/">TimezoneApi</a></li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg9dcc5acb2bd6_.E5.9C.A8.E6.AF.8F.E6.AC.A1_NetworkManager_.E8.BF.9E.E6.8E.A5.E5.88.B0.E7.BD.91.E7.BB.9C.E6.97.B6.E6.9B.B4.E6.96.B0.E6.97.B6.E5.8C.BA" id="在每次_NetworkManager_连接到网络时更新时区"><span id=".E5.9C.A8.E6.AF.8F.E6.AC.A1_NetworkManager_.E8.BF.9E.E6.8E.A5.E5.88.B0.E7.BD.91.E7.BB.9C.E6.97.B6.E6.9B.B4.E6.96.B0.E6.97.B6.E5.8C.BA"></span>在每次 NetworkManager 连接到网络时更新时区</h4></div>
+<p>请参考 <a href="#pg5e6298ca298f">NetworkManager#自动设置时区</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9dcc5acb2bd6_.E6.97.B6.E9.92.9F.E5.81.8F.E7.A7.BB" id="时钟偏移"><span id=".E6.97.B6.E9.92.9F.E5.81.8F.E7.A7.BB"></span>时钟偏移</h2></div>
+<p>所有的时钟都距“真实时间”（代表为<a href="https://en.wikipedia.org/wiki/International_Atomic_Time">国际原子时钟</a>）有一定偏差，世界上没有完美的时钟。石英电子钟的时间是不准确的，但会有固定的误差，这里的“误差”即“时钟偏移”。
+</p><p>用 <code>hwclock</code> 设置硬件时间时，会计算每天偏移的秒数。偏移值是原硬件时间与新设置硬件时间的差，并且考虑上次硬件时间设置时的偏移与上次设置值时的时间。新的偏移值及设置值的时间会写入到 <code>/etc/adjtime</code>，并覆写掉上次的值。因此，在运行 <code>hwclock --adjust</code> 命令时，可以根据偏移修正硬件时钟。如果启用了 <code>hwclock</code> 守护进程，那该步骤在关机时也会进行，但对于使用 systemd 的 Arch 类型系统而言不会出现该情况。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果硬件时间值与原值的差小于 24 小时，偏移量不会重新计算，因为时间过短，无法精确设置偏移。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果在 24 小时内再次设置了硬件时钟，由于 <code>hwclock</code> 认为时间间隔过短无法精确计算偏移，其不会重新计算偏移值。</div>
+<p>如果硬件时钟总是大幅过快或过慢，可能是计算了错误的偏移值（仅适用于运行了 hwclock 守护进程的情况）。该问题会在硬件时钟设置错误，或时间标准与同设备下 Windows 或 macOS 系统不一致的情况下出现。删除文件 <code>/etc/adjtime</code> 可以删除偏移值，然后重新设置正确的硬件时钟和系统时钟，并检查时间标准是不是设置正确。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果在使用 systemd 时要使用 <code>/etc/adjtime</code> 中的偏移值（例如无法或不想使用 NTP 时），需要检查调用 <code>hwclock --adjust</code> 命令，该操作可通过 <a href="#pg093fe1353c86">cron</a> 定时任务实现。</div>
+<p>软件时钟非常精确，但与大多数时钟一样，它也会出现偏移。在极少数情况下，如果内核略过了系统中断，那系统时间就会出现偏差。有些工具可以提高软件时钟的精确度：
+</p>
+<ul><li>参考 #时钟同步。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9dcc5acb2bd6_.E6.97.B6.E9.92.9F.E5.90.8C.E6.AD.A5" id="时钟同步"><span id=".E6.97.B6.E9.92.9F.E5.90.8C.E6.AD.A5"></span>时钟同步</h2></div>
+<p><a href="https://en.wikipedia.org/wiki/Network_Time_Protocol">网络时间协议</a>（NTP）是一个通过包交换和可变延迟网络来同步计算机系统时间的协议。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_.E7.BD.91.E7.BB.9C.E6.97.B6.E9.97.B4.E5.8D.8F.E8.AE.AE.EF.BC.88NTP.EF.BC.89" id="网络时间协议（NTP）"><span id=".E7.BD.91.E7.BB.9C.E6.97.B6.E9.97.B4.E5.8D.8F.E8.AE.AE.EF.BC.88NTP.EF.BC.89"></span>网络时间协议（NTP）</h3></div>
+<p>在 RFC 定义的完整 NTP 支持中，客户端必须能够从多个服务器合并时间，补偿延时并跟踪系统（软件）时钟偏移。以下为 Arch Linux 下可用的 NTP 实现：
+</p>
+<ul><li><b><a href="#pg3ad0a5639384">Chrony</a></b> — 是一个客户端和服务器，适合漫游场景，是为不能始终保持在线的系统而特别设计。在多数情况下比 ntpd 收敛更快，并更接近参考值。可以跟踪硬件时钟（RTC）偏移。</li></ul>
+<dl><dd><a href="https://chrony-project.org/">https://chrony-project.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=chrony">chrony</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgacfb0b28272f">Network Time Protocol daemon</a></b> — 是这个协议的<a href="https://en.wikipedia.org/wiki/reference_implementation">参考实现</a>。</li></ul>
+<dl><dd><a href="https://www.ntp.org/">https://www.ntp.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ntp">ntp</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>ntpd-rs</b> — 带 NTS 支持的全功能 NTP 实现。</li></ul>
+<dl><dd><a href="https://docs.ntpd-rs.pendulum-project.org/">https://docs.ntpd-rs.pendulum-project.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ntpd-rs">ntpd-rs</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg180c29f28349">NTPsec</a></b> — 专注于安全的 NTPd 分支。移除了大量旧代码，但在使用上区别不大。</li></ul>
+<dl><dd><a href="https://ntpsec.org/">https://ntpsec.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ntpsec/">ntpsec</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_.E7.AE.80.E5.8D.95.E7.BD.91.E7.BB.9C.E6.97.B6.E9.97.B4.E5.8D.8F.E8.AE.AE.EF.BC.88SNTP.EF.BC.89" id="简单网络时间协议（SNTP）"><span id=".E7.AE.80.E5.8D.95.E7.BD.91.E7.BB.9C.E6.97.B6.E9.97.B4.E5.8D.8F.E8.AE.AE.EF.BC.88SNTP.EF.BC.89"></span>简单网络时间协议（SNTP）</h3></div>
+<p>功能上比标准 NTP 节点少的都被认为是<a href="https://en.wikipedia.org/wiki/Network_Time_Protocol#SNTP">简单网络时间协议（SNTP）</a>。最简单的 SNTP 客户端会从单台服务器获取时间，不跟踪时钟偏移并直接将其设置到系统上。SNTP 的准确度相对较低，但消耗的系统资源更少。其提供的准确度适用于桌面和嵌入式环境，但不适合用于 NTP 服务器上。以下为 SNTP 的实现：
+</p>
+<ul><li><b><a href="#pgdcf318d43727">ConnMan</a></b> — 带 SNTP 支持的轻量网络管理器。</li></ul>
+<dl><dd><a href="https://web.archive.org/web/20210224075615/https://01.org/connman">https://01.org/connman (waybackmachine)</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=connman">connman</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>ntpclient</b> — 是简单的命令行 NTP 客户端。</li></ul>
+<dl><dd><a href="http://doolittle.icarus.com/ntpclient/">http://doolittle.icarus.com/ntpclient/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ntpclient/">ntpclient</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg4d30bfb86c19">OpenNTPD</a></b> — 是 OpenBSD 项目的一部分，同时实现了 SNTP 客户端和服务器。不支持闰秒。</li></ul>
+<dl><dd><a href="https://www.openntpd.org/">https://www.openntpd.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openntpd">openntpd</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>sntp</b> — NTPd 附带的 SNTP 客户端。它取代了 <i>ntpdate</i> ，并被推荐用于非服务器环境。</li></ul>
+<dl><dd><a href="https://www.ntp.org/">https://www.ntp.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ntp">ntp</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgcadc7fbbdd6c">systemd-timesyncd</a></b> — 是一个简单的 SNTP 守护进程。它只实现了客户端，专用于从远程服务器查询时间，更适用于绝大部分安装的情形。</li></ul>
+<dl><dd><a href="https://systemd.io/">https://systemd.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd">systemd</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9dcc5acb2bd6_.E5.8D.95.E7.94.A8.E6.88.B7.2F.E4.BC.9A.E8.AF.9D.E6.88.96.E4.B8.B4.E6.97.B6.E8.AE.BE.E7.BD.AE" id="单用户/会话或临时设置"><span id=".E5.8D.95.E7.94.A8.E6.88.B7.2F.E4.BC.9A.E8.AF.9D.E6.88.96.E4.B8.B4.E6.97.B6.E8.AE.BE.E7.BD.AE"></span>单用户/会话或临时设置</h2></div>
+<p>For some use cases it may be useful to change the time settings without touching the global system values. For example to test applications relying on the time during development or adjusting the system time zone when logging into a server remotely from another zone. 
+</p><p>To make an application "see" a different date/time than the system one, you can use the <span class="plainlinks archwiki-template-man" title="$ man 1 faketime"><a href="https://man.archlinux.org/man/faketime.1">faketime(1)</a></span> utility (from <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libfaketime">libfaketime</a></span><sup><small>包</small></sup></span>).
+</p><p>If instead you want an application to "see" a different time zone than the system one, set the <code>TZ</code> <a href="#pg18ad99d88887">environment variable</a>, for example: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ date &amp;&amp; export TZ=":/usr/share/zoneinfo/Pacific/Fiji" &amp;&amp; date</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Tue Nov  1 14:34:51 CET 2016
+Wed Nov  2 01:34:51 FJT 2016</pre>
+<p>This is different than just setting the time, as for example it allows to test the behavior of a program with positive or negative UTC offset values, or the effects of DST changes when developing on systems in a non-DST time zone.
+</p><p>Another use case is having different time zones set for different users of the same system: this can be accomplished by setting the <code>TZ</code> variable in the shell's configuration file, see <a href="#pge575f3f9cef9">Environment variables#Defining variables</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9dcc5acb2bd6_.E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7" id="提示和技巧"><span id=".E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7"></span>提示和技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_fake_hwclock" id="fake-hwclock">fake-hwclock</h3></div>
+<p><a href="https://github.com/xanmanning/alarm-fake-hwclock">alarm-fake-hwclock</a> designed especially for system without battery backed up RTC, it includes a systemd service which on shutdown saves the current time and on startup restores the saved time, thus avoiding strange time travel errors. 
+</p><p><a href="#pg54c3351b3e3b">Install</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fake-hwclock-git/">fake-hwclock-git</a></span><sup><small>AUR</small></sup></span>, <a href="#pgf2f8af0a5db6">start/enable</a> the service <code>fake-hwclock.service</code>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_.E8.99.9A.E6.8B.9F_PTP" id="虚拟_PTP"><span id=".E8.99.9A.E6.8B.9F_PTP"></span>虚拟 PTP</h3></div>
+<p>Virtual machine guests may obtain time from the host machine using the PTP (Precision Time Protocol) <code>/dev/ptp0</code> interface. The interface is more accurate compared to using NTP over IP between the host and guest.
+</p>
+<ul><li>On KVM machines, the <code>ptp_kvm</code> kernel module needs to be loaded to provide a virtual PTP device. See <a href="https://www.libertysys.com.au/2024/04/vm-timekeeping-using-the-ptp-hardware-clock-on-kvm/">VM timekeeping: Using the PTP Hardware Clock on KVM</a>.</li>
+<li>On Hyper-V machines, the guest integration should spawn a <code>/dev/ptp0</code> without additional configuration.</li></ul>
+<p><a href="#pg3ad0a5639384">chrony</a> and <a href="#pg004725035950">ntpd</a> can each <a href="https://opensource.com/article/17/6/timekeeping-linux-vms">use the virtual-PTP device</a> to sync the time between guest and host, by configuring the device as if it is a real PTP reference clock.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9dcc5acb2bd6_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9dcc5acb2bd6_.E6.97.B6.E9.97.B4.E6.98.BE.E7.A4.BA.E7.9A.84.E6.97.A2.E4.B8.8D.E6.98.AF_UTC_.E4.B9.9F.E4.B8.8D.E6.98.AF.E6.9C.AC.E5.9C.B0.E6.97.B6.E9.97.B4" id="时间显示的既不是_UTC_也不是本地时间"><span id=".E6.97.B6.E9.97.B4.E6.98.BE.E7.A4.BA.E7.9A.84.E6.97.A2.E4.B8.8D.E6.98.AF_UTC_.E4.B9.9F.E4.B8.8D.E6.98.AF.E6.9C.AC.E5.9C.B0.E6.97.B6.E9.97.B4"></span>时间显示的既不是 UTC 也不是本地时间</h3></div>
+<p>这可能是由多种原因造成的。假如说你的硬件时间使用的是 localtime，但 <code>timedatectl</code>被设为将其用作 UTC 时间，结果是你的时区偏移设置被应用了两次，导致系统显示的既不是UTC也不是本地时间。
+</p><p>要强制校准你的时钟，并且让系统写入正确 UTC 时间到硬件时钟，遵循下面几步：
+</p>
+<ul><li>设置好 <a href="#pg004725035950">ntpd</a>（不需要将其作为服务来运行）；</li>
+<li>正确设置你的时区；</li>
+<li>运行 <code>ntpd -qg</code> 以手动从网络同步时钟，此时在进行时间校正时，会忽略本地 UTC 时间与网络 UTC 时间之间过大的差异；</li>
+<li>运行 <code>hwclock --systohc</code>，将当前软件 UTC 时间写入硬件时间。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9dcc5acb2bd6_.E5.A4.96.E9.83.A8.E8.B5.84.E6.BA.90" id="外部资源"><span id=".E5.A4.96.E9.83.A8.E8.B5.84.E6.BA.90"></span>外部资源</h2></div>
+<ul><li><a href="http://sunnyan.tistory.com/entry/Linux-Clocks-and-Time">Linux Tips - Linux, Clocks, and Time</a></li>
+<li><a href="https://opensource.com/article/17/6/timekeeping-linux-vms">An introduction to timekeeping in Linux VMs</a></li>
+<li><a href="https://data.iana.org/time-zones/tz-link.html">Sources for Time Zone and Daylight Saving Time Data</a> for <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tzdata">tzdata</a></span><sup><small>包</small></sup></span></li>
+<li><a href="https://www.ucolick.org/~sla/leapsecs/timescales.html">Time Scales</a></li>
+<li><a href="https://wiki.gentoo.org/wiki/System_time">Gentoo: System time</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Time">Wikipedia:Time</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807035648
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.219 seconds
+Real time usage: 0.227 seconds
+Preprocessor visited node count: 884/1000000
+Revision size: 19023/2097152 bytes
+Post‐expand include size: 12771/2097152 bytes
+Template argument size: 5686/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 63/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   62.460      1 -total
+ 15.45%    9.650      9 Template:App
+  8.56%    5.344      6 Template:Man
+  8.30%    5.186     37 Template:Ic
+  6.50%    4.059      1 Template:Expansion
+  6.04%    3.770     10 Template:Pkg
+  5.10%    3.186      1 Template:翻译状态
+  4.73%    2.953      5 Template:注意
+  4.06%    2.536      1 Template:相关文章开始
+  3.58%    2.235      3 Template:Related
+-->
+<!-- Render ID 03720c0e-9214-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6707:|#|:idhash:canonical!zh-cn and timestamp 20260807035648 and revision id 34250. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

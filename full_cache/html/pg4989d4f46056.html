@@ -1,0 +1,241 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg4989d4f46056">环境变量</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Environment_variables">Environment variables</a>，最近一次同步于 2024-11-24，若英文版本有所<a href="https://wiki.archlinux.org/title/Environment_variables?diff=0&amp;oldid=819691">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Environment_variables_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgbbbf37294faf">Default applications</a></li>
+<li><a href="#pg88cdcc283b9b">systemd/用户#环境变量</a></li>
+</ul></div>
+<p>环境变量是一个具名对象，包含可被一个或多个应用程序使用的数据。简单来说，它是具有一对名称和值的变量。环境变量的值可以是文件系统上所有可执行程序的位置，默认的编辑器，系统本地化设置等。Linux 新用户可能觉得这种管理变量的方式有点混乱。但是环境变量提供了一种在多个程序和进程间共享配置的简单方式。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4989d4f46056_.E5.B7.A5.E5.85.B7" id="工具"><span id=".E5.B7.A5.E5.85.B7"></span>工具</h2></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=coreutils">coreutils</a></span><sup><small>包</small></sup></span> 软件包含程序 <i>printenv</i> 和 <i>env</i> . 要显示当前环境变量的值：
+</p>
+<pre>$ printenv
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>一些环境变量是属于特定用户的. 比较一般用户和 <i>root</i> 用户的 <i>printenv</i> 就可以看到差异。</div>
+<p>工具 <code>env</code> 可以用指定的环境变量执行一个命令。下面例子把环境变量 <code>EDITOR</code> 设置为 <code>vim</code> 然后执行命令 <i>xterm</i>. 这个操作不会影响全局环境变量 <code>EDITOR</code>.
+</p>
+<pre>$ env EDITOR=vim xterm
+</pre>
+<p><a href="#pgd53258e68888">shell</a> 内置的<span class="plainlinks archwiki-template-man" title="$ man 1p set"><a href="https://man.archlinux.org/man/set.1p">set(1p)</a></span> 命令可以设置 shell 选项值以及位置参数，或显示 shell 变量的名称和值。
+</p><p>每个进程都把它们的环境变量保存在 <code>/proc/$PID/environ</code> 文件中。此文件包含用 nul (<code>\x0</code>) 字符分隔的键值对。用 <a href="#pgeaad1414e3d4">sed</a> 可以获得用户可读的内容，如：<code>sed 's:\x0:\n:g' /proc/$PID/environ</code>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4989d4f46056_.E5.AE.9A.E4.B9.89.E5.8F.98.E9.87.8F" id="定义变量"><span id=".E5.AE.9A.E4.B9.89.E5.8F.98.E9.87.8F"></span>定义变量</h2></div>
+<p>为了避免过多的环境设置，应该限制变量的作用域。图形会话和 systemd 服务要求在明确的位置设置环境变量。变量的作用域可以分为:
+</p>
+<ul><li>全局: 任何用户运用的所有程序，不包含 systemd 服务.</li>
+<li>按用户: 某个用户运行的程序，不包含用户 systemd 服务 (需参考 <a href="#pg71f5edcc580c">Systemd/User#Environment variables</a>) 或图形程序(需参考 #图形环境).</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4989d4f46056_.E5.85.A8.E5.B1.80" id="全局"><span id=".E5.85.A8.E5.B1.80"></span>全局</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4989d4f46056_.E4.BD.BF.E7.94.A8_shell_.E5.88.9D.E5.A7.8B.E5.8C.96.E6.96.87.E4.BB.B6" id="使用_shell_初始化文件"><span id=".E4.BD.BF.E7.94.A8_shell_.E5.88.9D.E5.A7.8B.E5.8C.96.E6.96.87.E4.BB.B6"></span>使用 shell 初始化文件</h4></div>
+<p>大多数 Linux 发行版告诉您在 <code>/etc/profile</code> 或其他位置更改或添加环境变量定义。请记住，还有一些特定于包的配置文件，其中包含变量设置，比如 <code>/etc/locale.conf</code>. 确保维护和管理环境变量，并注意可能包含环境变量的大量文件。原则上，任何 shell 脚本都可以用于初始化环境变量，但按照传统的 UNIX 约定，这些语句只应出现在某些特定的文件中。
+</p><p>下列文件可用于定义系统上的全局环境变量，每个文件都有不同的限制：
+</p>
+<ul><li><code>/etc/environment</code> 被 pam_env 模块使用，与 shell 无关，所以无法使用脚本或通配符展开。此文件仅接受 <code><i>variable=value</i></code> 键值对格式。</li>
+<li><code>/etc/profile</code> <b>仅</b>初始化登录 shell 的变量。但它可以执行脚本(比如 <code>/etc/profile.d/</code> 中的脚本) 并支持所有兼容 <a href="https://en.wikipedia.org/wiki/Bourne_shell">Bash </a> 的 shell。</li>
+<li>特定于 shell 的配置文件——您的 <a href="#pgd53258e68888">Shell</a> 的全局配置文件，初始化变量并运行脚本。例如 <a href="#pg1ca1e15827ff">Bash#Configuration files</a> （例如 <code>~/.bashrc</code>） 或 <a href="#pg187873cfd725">Zsh#Startup/Shutdown files</a> （例如 <code>~/.zshrc</code>）。</li></ul>
+<p>以将 <code>~/bin</code> 和 <code>~/scripts</code> 加入对应用户的 <code>PATH</code> 为例，可以将其放入首选的全局环境变量配置文件 <code>/etc/profile</code> 或 <code>/etc/bash.bashrc</code>：
+</p>
+<pre>set_path(){
+
+    # Check if user id is 1000 or higher
+    [ "$(id -u)" -ge 1000 ] || return
+
+    for i in "$@";
+    do
+        # Check if the directory exists
+        [ -d "$i" ] || continue
+
+        # Check if it is not already in your $PATH.
+        echo "$PATH" | grep -Eq "(^|:)$i(:|$)" &amp;&amp; continue
+
+        # Then append it to $PATH and export it
+        export PATH="${PATH}:$i"
+    done
+}
+
+set_path ~/bin ~/scripts
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4989d4f46056_.E5.9C.A8.E4.B8.8D.E5.90.8C_shell_.E9.97.B4.E5.85.B1.E4.BA.AB.E7.8E.AF.E5.A2.83.E5.8F.98.E9.87.8F" id="在不同_shell_间共享环境变量"><span id=".E5.9C.A8.E4.B8.8D.E5.90.8C_shell_.E9.97.B4.E5.85.B1.E4.BA.AB.E7.8E.AF.E5.A2.83.E5.8F.98.E9.87.8F"></span>在不同 shell 间共享环境变量</h5></div>
+<p>在不同 shell 间共享环境变量的一种方法是创建一个 <code>envsubst</code> 可以直接读取的<b>不带任何注释、空行或空格（bash）</b>的文件（源于 <a href="https://unix.stackexchange.com/questions/176322/share-environment-variables-between-bash-and-fish">[1]</a>）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">.env</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">EDITOR=vim
+XDG_CACHE_HOME=$HOME/.cache
+XDG_CONFIG_HOME=$HOME/.config
+XDG_DATA_HOME=$HOME/.local/share
+XDG_STATE_HOME=$HOME/.local/state</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bashrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">export $(envsubst &lt; .env)</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/fish/config.fish</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">export (envsubst &lt; .env)</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这种做法的缺点是：变量值不可含空格。比如，不能使用这种做法定义<code>EDITOR="emacsclient -t"</code>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4989d4f46056_.E4.BD.BF.E7.94.A8_pam_env" id="使用_pam_env"><span id=".E4.BD.BF.E7.94.A8_pam_env"></span>使用 pam_env</h4></div>
+<p><a href="#pgdacf2e1d6f91">PAM</a> 模块 <span class="plainlinks archwiki-template-man" title="$ man 8 pam_env"><a href="https://man.archlinux.org/man/pam_env.8">pam_env(8)</a></span> 从以下文件中按顺序加载要在环境中设置的变量：<code>/etc/security/pam_env.conf</code> 和 <code>/etc/environment</code>.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这些文件在其他文件之前读取，特别是 <code>~/.profile</code>, <code>~/.bash_profile</code> and <code>~/.zshenv</code> 之前。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>读取 <code>~/.pam_environment</code> 已被弃用，不再起作用，参考 <a href="https://bugs.archlinux.org/task/68945">FS#68945</a>。</div>
+<p><code>/etc/environment</code> 必须由每行单独的一个 <code><i>VARIABLE</i>=<i>value</i></code> 键值对组成，例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/environment</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">EDITOR=nano</pre>
+<p><code>/etc/security/pam_env.conf</code> 使用以下格式：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/security/pam_env.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">VARIABLE [DEFAULT=<i>value</i>] [OVERRIDE=<i>value</i>]</pre>
+<p><code>@{HOME} </code> 和 <code>@{SHELL} </code> 是特殊的变量，展开到 <code>/etc/passwd</code> 中的定义。以下示例说明了如何将 <code>HOME</code> 环境变量展开到另一个变量：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/security/pam_env.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">XDG_CONFIG_HOME   DEFAULT=@{HOME}/.config</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>变量 <code>${HOME} </code> 和 <code>${SHELL} </code> 默认是未设置的，并不链接到 <code>HOME</code> 和 <code>SHELL</code> 环境变量。</div>
+<p>该格式还允许在其它变量值中使用 <code>${<i>VARIABLE</i>} </code> 展开已定义的变量，如下所示：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/security/pam_env.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">GOPATH DEFAULT=${XDG_DATA_HOME}/go</pre>
+<p><code><i>VARIABLE</i>=<i>value</i></code> 键值对也是允许的，但不支持变量展开。请参考 <span class="plainlinks archwiki-template-man" title="$ man 5 pam_env.conf"><a href="https://man.archlinux.org/man/pam_env.conf.5">pam_env.conf(5)</a></span>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4989d4f46056_.E6.8C.89.E7.94.A8.E6.88.B7" id="按用户"><span id=".E6.8C.89.E7.94.A8.E6.88.B7"></span>按用户</h3></div>
+<p>有时并不希望定义全局环境变量，比如要把 <code>/home/my_user/bin</code> 加入 <code>PATH</code> 变量但是不影响其它用户。本地环境变量可以在下面文件定义：
+</p>
+<ul><li><a href="#pgd53258e68888">shell</a> 的用户配置文件，例如 <a href="#pg1ca1e15827ff">Bash#Configuration files</a> 或 <a href="#pg187873cfd725">Zsh#Startup/Shutdown files</a>。
+<ul><li>除非您将变量的范围限制为您打开的终端（例如命令行程序），您需要修改登录 shell。</li></ul></li>
+<li><a href="#pg88cdcc283b9b">systemd 用户环境变量</a>读取自 <code>~/.config/environment.d/*.conf</code>。</li></ul>
+<p>要修改本地用户的 <code>PATH</code> 变量，将以下内容加入 <code>~/.bash_profile</code>
+</p>
+<pre>export PATH="${PATH}:/home/my_user/bin"
+</pre>
+<p>要更新变量，重新登录或 <a href="#pg04471119f812">source</a> 文件： <code>$ source ~/.bash_profile</code>
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>dbus 守护进程和 systemd 用户实例不会继承任何 .bashrc 等文件定义的环境变量。这意味着 dbus 启动的程序如 <a href="#pg3e4423e83620">GNOME Files</a> 默认不会使用这些变量，请参考 <a href="#pg88cdcc283b9b">Systemd/用户#环境变量</a>。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>您可以用 <code>export -p</code> 来查看为用户会话设置的全局和局部环境变量。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4989d4f46056_.E5.9B.BE.E5.BD.A2.E7.8E.AF.E5.A2.83" id="图形环境"><span id=".E5.9B.BE.E5.BD.A2.E7.8E.AF.E5.A2.83"></span>图形环境</h4></div>
+<p>如果环境变量仅影响图形应用程序，您可能希望仅通过在图形会话中设置它来限制其范围。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4989d4f46056_Xorg_.E4.BC.9A.E8.AF.9D" id="Xorg_会话"><span id="Xorg_.E4.BC.9A.E8.AF.9D"></span>Xorg 会话</h5></div>
+<p>修改 Xorg 会话环境的过程取决于其启动方式：
+</p>
+<ul><li>大多数<a href="#pg9aa798802a24">显示管理器</a>读取 <a href="#pgde17e8bd8891">xprofile</a>.</li>
+<li><a href="#pgbe190b056b34">startx</a> 和 <a href="#pg0f2747f56328">SLiM</a> 执行 <a href="#pg05a4704b29d5">xinitrc</a>.</li>
+<li><a href="#pg3cd77fc93ae5">XDM</a> 执行 <code>~/.xsession</code>；请参考 <a href="#pg3cd77fc93ae5">XDM#Defining the session</a>.</li>
+<li><a href="#pg145f4ecf55dc">LightDM</a><a href="https://gitlab.archlinux.org/archlinux/packaging/packages/lightdm/-/blob/main/Xsession">[2]</a> 和 <a href="#pg3438569d0b30">SDDM</a><a href="https://github.com/sddm/sddm/blob/master/data/scripts/Xsession">[3]</a> 为登录 shell 读取额外启动脚本，比如 <code>~/.bash_profile</code> 为 <a href="#pg1ca1e15827ff">bash</a> 或 <code>~/.zprofile</code> 和 <code>~/.zlogin</code> 为 <a href="#pg187873cfd725">zsh</a> <a href="https://github.com/sddm/sddm/blob/master/data/scripts/Xsession">[4]</a></li></ul>
+<p>虽然脚本的结尾取决于它是哪个文件，且任何高级语法都取决于所使用的 shell，但基本用法是通用的：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xprofile, ~/.xinitrc, or ~/.xsession</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+export <i>GUI_VAR</i>=<i>value</i>
+...</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4989d4f46056_Wayland_.E4.BC.9A.E8.AF.9D" id="Wayland_会话"><span id="Wayland_.E4.BC.9A.E8.AF.9D"></span>Wayland 会话</h5></div>
+<p>由于 <a href="#pga21a6be8b605">Wayland</a> 不启动任何 Xorg 相关文件，因此 <a href="#pg89573e816846">GDM</a> 和 <a href="#pg778f2bb029c6">KDE Plasma</a> 读取 <a href="#pg88cdcc283b9b">systemd 用户环境变量</a>。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/environment.d/envvars.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"><i>GUI_VAR</i>=<i>value</i></pre>
+<p>其他支持 Wayland 会话的显示管理器（例如 <a href="#pg3438569d0b30">SDDM</a>）还没有提供这种支持。然而，<a href="#pg145f4ecf55dc">LightDM</a> 和 <a href="#pg3438569d0b30">SDDM</a> 也为 Wayland 会话的登录 shell 读取启动脚本。
+</p><p><a href="#pgfb3ddbd14677">greetd</a> 同时读取 <code>/etc/profile</code> 和 <code>~/.profile</code>——该行为由其 <code>source_profile</code> 控制，默认开启。
+</p>
+
+<p>If your display manager sources startup scripts like <code>~/.bash_profile</code> and you want to use <code>environment.d</code>, you can source it like so:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bash_profile</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># use systemd-environment-d-generator(8) to generate environment, and export those variables
+set -o allexport
+source &lt;(/usr/lib/systemd/user-environment-generators/30-systemd-environment-d-generator)
+set +o allexport
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Other generators in <code>/usr/lib/systemd/user-environment-generators</code> like <code>60-flatpak</code> may not quote the values of environment variables. In this case the output should be sourced with <code>export -- "$(/usr/lib/systemd/user-environment-generators/60-flatpak)"</code></div>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4989d4f46056_.E6.8C.89.E6.A1.8C.E9.9D.A2.E4.BC.9A.E8.AF.9D" id="按桌面会话"><span id=".E6.8C.89.E6.A1.8C.E9.9D.A2.E4.BC.9A.E8.AF.9D"></span>按桌面会话</h5></div>
+<p>一些图形环境（如 <a href="#pg778f2bb029c6">KDE Plasma</a>）支持在登录时执行 shell 脚本，它们可以用来设置环境变量。示例请参考 <a href="#pg5b70e23b1711">KDE#Autostart</a>
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4989d4f46056_.E6.8C.89.E5.8D.95.E4.B8.AA.E7.A8.8B.E5.BA.8F" id="按单个程序"><span id=".E6.8C.89.E5.8D.95.E4.B8.AA.E7.A8.8B.E5.BA.8F"></span>按单个程序</h5></div>
+<p>要仅为特定应用程序而不是整个会话设置环境变量，请编辑应用程序的 <i>.desktop</i> 文件。请参考 <a href="#pg0708dfc008e3">Desktop entries#修改环境变量</a>。
+</p><p>可以通过 <a href="#pg95e65bdea0f3">Steam#Launch options</a> 选项修改 <a href="#pg95e65bdea0f3">Steam</a> 游戏的环境变量。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4989d4f46056_.E6.8C.89.E4.BC.9A.E8.AF.9D.E6.88.96_shell" id="按会话或_shell"><span id=".E6.8C.89.E4.BC.9A.E8.AF.9D.E6.88.96_shell"></span>按会话或 shell</h3></div>
+
+<p><br/>
+有时只需要临时变量。您可能希望从创建的特定目录临时运行可执行文件，而无需键入每个文件的绝对路径，或者在简短的临时 shell 脚本中使用该路径。
+</p><p>例如，可以在当前 shell 中定义 <code>PATH</code> 变量，或者使用 <i>export</i> 命令为所有 shell 定义，直到注销会话。添加一个特定会话目录到 <code>PATH</code>：
+</p>
+<pre>$ export PATH="${PATH}:/home/my_user/tmp/usr/bin"
+</pre>
+<p>添加一个特定 shell 目录到 <code>PATH</code>：
+</p>
+<pre>$ PATH="${PATH}:/home/my_user/tmp/usr/bin"
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4989d4f46056_.E7.A4.BA.E4.BE.8B" id="示例"><span id=".E7.A4.BA.E4.BE.8B"></span>示例</h2></div>
+<p>以下部分列出了 Linux 系统使用的一些常见环境变量，并描述了它们的值。
+</p>
+<ul><li><code>XDG_CURRENT_DESKTOP</code> 是一个 <a href="#pgd0233de132d5">freedesktop.org</a> 变量，包含冒号分隔的字符串列表，标识当前 <a href="#pg973ffa8fdc20">desktop environment</a> <a href="https://specifications.freedesktop.org/mime-apps-spec/latest/file.html">[5]</a>. 活跃开发中环境的标准化值有 <code>GNOME</code>, <code>GNOME-Flashback</code>, <code>KDE</code>, <code>LXDE</code>, <code>LXQt</code>, <code>MATE</code>, <code>TDE</code>, <code>Unity</code>, <code>XFCE</code>, <code>EDE</code>, <code>Cinnamon</code>, <code>Pantheon</code> 和  <code>DDE</code> <a href="https://specifications.freedesktop.org/menu-spec/latest/onlyshowin-registry.html">[6]</a>.
+<ul><li>Cinnamon 的注册时间比其他桌面环境<a href="https://cgit.freedesktop.org/xdg/desktop-file-utils/commit/?id=be0c630a19aa1788ef731def911770ce497d6ba3">晚</a>. 因此，一些软件依旧使用注册前的值 <code>X-CINNAMON</code>, 比如 <a href="#pg5016907af879">Qt</a><a href="https://github.com/qt/qtbase/blob/dev/src/gui/platform/unix/qgenericunixthemes.cpp#L1502">[7]</a>.</li>
+<li><code>Hyprland</code> is informally recognized for <a href="#pgc1bca245b144">Hyprland</a>.</li></ul></li></ul>
+<ul><li><code>XDG_SESSION_DESKTOP</code> 类似于 <code>XDG_CURRENT_DESKTOP</code>, 但只允许单个字符串。尽管名字包含 XDG，<a href="https://gitlab.gnome.org/GNOME/gtk/-/issues/1224#note_270915">但它并没有由 freedesktop.org 标准化</a>。</li></ul>
+<ul><li><code>DE</code> 是一个过时的变量，表明使用的桌面环境。没有权威的文档说明可能的值，但 <a href="#pga1898b9793a9">xdg-utils</a> 为许多桌面环境提供了参考。</li></ul>
+<ul><li><code>DESKTOP_SESSION</code> 类似于 <code>DE</code>，但是用于 <a href="#pg9ecdb3d7e45b">LXDE</a> 桌面环境：当 <code>DESKTOP_SESSION</code> 设置为 <code>LXDE</code>, <i>xdg-open</i> 会使用 <i>pcmanfm</i> 文件关联。</li></ul>
+<ul><li><code>WINDOW_MANAGER</code> 变量有时用于<b>选择</b>桌面环境要使用的 <a href="#pg5b2430d6e5a0">window manager</a>，与其他变量不同，这里的变量是由已经选择的显示管理器或桌面环境设置的，供其他程序读取。</li></ul>
+<ul><li><code>PATH</code> 包含以冒号分隔的目录列表，系统在其中查找可执行文件。当一个一般命令 (例如 <i>ls</i>, <i>systemctl</i> 或 <i>pacman</i>) 由 shell 解释时 (如 <i>bash</i> 或 <i>zsh</i>)， shell 从列表包含的目录中寻找与命令同名的可执行程序并执行。要运行不在 <code>PATH</code> 中的应用程序，必须给出可执行程序的相对或绝对路径，例如 <code>./a.out</code> 或 <code>/bin/ls</code>.</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>安全起见，建议不要将当前工作目录 (<code>.</code>) 加入 <code>PATH</code>，因为它可能欺骗用户执行恶意命令。</div>
+<ul><li><code>HOME</code> 包含当前用户主目录的路径。应用程序可以使用此变量将配置文件等与运行它的用户相关联。</li></ul>
+<ul><li><code>PWD</code> 包含工作目录的路径。</li></ul>
+<ul><li><code>OLDPWD</code> 包含前一个工作目录的路径，即执行最后一个 <i>cd</i> 之前的 <code> PWD </code> 的值。</li></ul>
+<ul><li><code>TERM</code> 包含正在运行的终端类型，例如 <code>xterm-256color</code>. 它由运行在终端中，希望使用终端特定功能的程序使用。</li></ul>
+<ul><li><code>MAIL</code> 包含传入电子邮件的位置。传统的设置是 <code>/var/spool/mail/$LOGNAME</code>.</li></ul>
+<ul><li><code>ftp_proxy</code> 和 <code>http_proxy</code> 分别包含 FTP 和 HTTP 代理服务器：</li></ul>
+<pre>ftp_proxy="ftp://192.168.0.1:21"
+http_proxy="http://192.168.0.1:80"
+</pre>
+<ul><li><code>MANPATH</code> 包含以冒号分隔的目录列表，<i>man</i> 命令在其中搜索手册页。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在 <code>/etc/profile</code>中，有一条注释说 "Man 比我们更擅长解决这个问题", 因此该变量通常不设置。请参考 <span class="plainlinks archwiki-template-man" title="$ man 5 manpath"><a href="https://man.archlinux.org/man/manpath.5">manpath(5)</a></span>.
+</div>
+<ul><li><code>INFODIR</code> 包含以冒号分隔的目录列表，<i>info</i> 命令在其中搜索信息页，比如 <code>/usr/share/info:/usr/local/share/info</code></li></ul>
+<ul><li><code>TZ</code> 可用于为用户设置与系统区域不同的时区。<code>/usr/share/zoneinfo/</code> 中列出的时区可作参考，例如 <code>TZ=":/usr/share/zoneinfo/Pacific/Fiji"</code>. 当 <code>TZ</code> 变量指向 zoneinfo 文件时，应以冒号开头 <a href="https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html">GNU 手册</a>.</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4989d4f46056_.E9.BB.98.E8.AE.A4.E7.A8.8B.E5.BA.8F" id="默认程序"><span id=".E9.BB.98.E8.AE.A4.E7.A8.8B.E5.BA.8F"></span>默认程序</h3></div>
+<ul><li><code>SHELL</code> 包含用户<a href="https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap08.html#tag_08_03">首选 shell </a>的路径。请注意，这不一定是当前运行的 shell。在没有值的情况下，<a href="#pg1ca1e15827ff">Bash</a> 将自动将此变量设置为 <code>/etc/passwd</code>中定义的用户登录 shell，如果无法确定，则将此变量设为 <code>/bin/sh</code>.</li></ul>
+<ul><li><code>PAGER</code> 包含运行用于列出文件内容的程序的命令，例如 <code>/bin/less</code>.</li></ul>
+<ul><li><code>EDITOR</code> 包含运行用于编辑文件的轻量级程序的命令，例如 <code>/usr/bin/nano</code>. 本例中，你可以编写 <a href="#pg77b3799bdb30">X</a> 下的<i>gedit</i> 或 <i>nano</i> 的交互式切换：</li></ul>
+<pre> [ -n "$DISPLAY" ] &amp;&amp; export EDITOR=gedit || export EDITOR=nano
+</pre>
+<ul><li><code>VISUAL</code> 包含运行完整编辑器的命令，该编辑器用于更高要求的任务，如编辑邮件 (例如 <code>vi</code>, <a href="#pg74a2a3e4814c">vim</a>, <a href="#pg9de7470c4ea9">emacs</a> 等)。</li></ul>
+<ul><li><code>BROWSER</code> 包含 web 浏览器的路径。有助于在交互式 shell 配置文件中进行设置，以便根据图形环境的可用性对其进行动态更改，例如 <a href="#pg77b3799bdb30">X</a>:</li></ul>
+<pre> [ -n "$DISPLAY" ] &amp;&amp; export BROWSER=firefox || export BROWSER=links
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>这些默认程序也可以根据是否运行 <a href="#pga21a6be8b605">Wayland compositor</a> 而配置，需要检测的是 <code>WAYLAND_DISPLAY</code> 环境变量。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4989d4f46056_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><a href="https://wiki.gentoo.org/wiki/Handbook:X86/Working/EnvVar">Gentoo:Handbook:X86/Working/EnvVar</a></li>
+<li><a href="https://help.ubuntu.com/community/EnvironmentVariables">Ubuntu Community Wiki - Environment Variables</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807022233
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.275 seconds
+Real time usage: 0.286 seconds
+Preprocessor visited node count: 1376/1000000
+Revision size: 16401/2097152 bytes
+Post‐expand include size: 14370/2097152 bytes
+Template argument size: 6001/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 465/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   95.488      1 -total
+ 16.03%   15.306    126 Template:Ic
+  6.61%    6.310      1 Template:翻译状态
+  6.39%    6.101      7 Template:注意
+  5.75%    5.489      1 Template:Accuracy
+  5.44%    5.193      1 Template:Style
+  4.87%    4.649      2 Template:META_Message
+  4.16%    3.970      1 Template:Warning
+  3.73%    3.563      4 Template:Man
+  2.94%    2.809     10 Template:Hc
+-->
+<!-- Render ID d8cd868e-9206-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3065:|#|:idhash:canonical!zh-cn and timestamp 20260807022233 and revision id 33808. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

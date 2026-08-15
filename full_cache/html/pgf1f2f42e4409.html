@@ -1,0 +1,105 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgf1f2f42e4409">Arch Linux</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="noteTA" id="noteTA-7f3f5856"><div class="noteTA-group"><div data-noteta-group="ArchWiki" data-noteta-group-source="module"></div></div></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Arch_Linux">Arch Linux</a>，最近一次同步于 2025-04-30，若英文版本有所<a href="https://wiki.archlinux.org/title/Arch_Linux?diff=0&amp;oldid=828859">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Arch_Linux_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>Arch Linux 是一个通用操作系统，它是基于 x86-64 架构的一个 <a href="#pg0e81ab922f48">GNU</a>/Linux 发行版。
+</p><p>Arch Linux 采用滚动升级模式，尽全力为用户提供最新的稳定版软件。初始安装完成的 Arch Linux 只是一个基本系统，随后用户可以根据自己的喜好安装需要的软件，并自己动手配置成理想的个性化系统。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf1f2f42e4409_.E6.A0.B8.E5.BF.83.E5.8E.9F.E5.88.99" id="核心原则"><span id=".E6.A0.B8.E5.BF.83.E5.8E.9F.E5.88.99"></span>核心原则</h2></div>
+<p>以下核心原则构成了我们通常所指的 Arch 之道，或者说 Arch 的哲学。对于这些原则或许最好的结词是 Keep It Simple, Stupid（对应中文为“保持简洁，且一目了然”）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_.E7.AE.80.E6.B4.81" id="简洁"><span id=".E7.AE.80.E6.B4.81"></span>简洁</h3></div>
+<p>Arch Linux 将简洁定义为：<b>避免任何不必要的添加、修改和复杂化的增加</b>。它提供的软件包都来自原始开发者（以下简称<a href="https://en.wikipedia.org/wiki/Upstream_(software_development)">上游</a>），且仅进行本发行版（以下简称下游）相关的最少改动。
+</p>
+<ul><li>不包含上游不愿意接受的补丁。绝大部分 Arch 下游补丁都已经被上游接受，会在下一个正式版本里被包含。</li>
+<li>配置文件同样来自上游，下游对它的改动仅包含必需的调整，比如特殊的文件系统路径变动。此外Arch Linux在安装软件包后不会自动<a href="#pg3ef6532bc644">启用</a>和启动软件包提供的服务。</li>
+<li>软件包通常都和一个上游项目直接对应，仅在极少数情况下才会拆分软件包。</li>
+<li>官方不支持图形化配置界面，建议用户使用命令行或文本编辑器修改配置。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_.E7.8E.B0.E4.BB.A3.E5.8C.96" id="现代化"><span id=".E7.8E.B0.E4.BB.A3.E5.8C.96"></span>现代化</h3></div>
+<p>Arch Linux 尽全力使软件处于最新的稳定版本，只要没有出现系统软件包损坏，都会尽量使用最新版本的软件包。
+</p><p>Arch Linux 采用<a href="https://en.wikipedia.org/wiki/Rolling_release">滚动更新</a>的方式，安装之后可以通过命令持续更新系统与软件包。
+</p><p>Arch Linux 现面向 <a href="#pg0e81ab922f48">GNU</a>/Linux 用户提供了许多新特性，包括 <a href="#pgac06dd8bfe95">systemd</a> 初始化系统、现代化的<a href="#pg6c70b7fdfa57">文件系统</a>、LVM2/EVMS、软件磁盘阵列（软 RAID）、<a href="#pge009209061ac">udev</a> 支持、initcpio（附带 mkinitcpio）以及最新的 Linux 内核。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_.E5.AE.9E.E7.94.A8.E6.80.A7" id="实用性"><span id=".E5.AE.9E.E7.94.A8.E6.80.A7"></span>实用性</h3></div>
+<p>Arch Linux 注重实用性，且尽力避免意识形态之争，最终的设计决策都是由开发者之间的共识决定。开发者依赖基于客观事实的技术分析和讨论，避免国家之间政治因素的影响，不被世俗流行观点左右。
+</p><p>Arch Linux 的软件仓库中包含大量的软件包和编译脚本，用户可以按需自由选择。此外仓库中既提供了开源、自由的软件，也提供了闭源软件，即<b>实用性大于意识形态</b>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_.E4.BB.A5.E7.94.A8.E6.88.B7.E4.B8.BA.E4.B8.AD.E5.BF.83" id="以用户为中心"><span id=".E4.BB.A5.E7.94.A8.E6.88.B7.E4.B8.BA.E4.B8.AD.E5.BF.83"></span>以用户为中心</h3></div>
+<p>许多 Linux 发行版都试图变得更加“用户友好”，而 Arch Linux 则一直是、且永远会是“<b>以用户为中心</b>”：
+</p>
+<ul><li>本发行版的目标是满足向它贡献的人的需求，而非吸引尽可能多的用户。</li>
+<li>本发行版的目标用户是熟练的 GNU/Linux 用户，或者任何乐于自己动手、愿意阅读文档、解决自己的问题的人。</li></ul>
+<p>Arch Linux 鼓励每一个用户<a href="#pg7cd5cc0fed34">参与</a>和贡献，报告和帮助修复 <a href="https://gitlab.archlinux.org/groups/archlinux/packaging/-/issues">bugs</a>，提供软件包补丁和参加核心<a href="https://gitlab.archlinux.org/">项目</a>。Arch 开发者都是志愿者，通过持续的贡献成为团队中的一员。<i>Archers</i> 还可以自行贡献软件包到 <a href="#pgf9029631e281">Arch 用户仓库</a>，提升 <a href="#pgd88f60466b0f">ArchWiki 文档质量</a>，在<a href="https://bbs.archlinux.org/">论坛</a>、<a href="https://lists.archlinux.org/mailman3/lists/">邮件列表</a>或者 <a href="#pg6e8132991ce2">IRC</a> 中给其它用户提供技术支持。
+</p><p>Arch Linux 已经是全球许多 GNU/Linux 用户的选择，还有许多<a href="#pgd5dad6d631b4">国际社区</a>在提供帮助和翻译文档。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_.E9.80.9A.E7.94.A8.E6.80.A7" id="通用性"><span id=".E9.80.9A.E7.94.A8.E6.80.A7"></span>通用性</h3></div>
+<p>Arch Linux 作为一种通用 Linux 发行版，它的初始安装仅提供命令行环境。由于 Arch 默认提供最小化安装，用户不需要删除大量不需要的软件包，而是可以从<a href="#pg15c7e809c461">官方软件仓库</a>成千上万的高质量软件包中进行选择，用于搭建自己的系统。目前仅支持 <a href="https://en.wikipedia.org/wiki/x86-64">x86-64</a> 架构。( <a href="https://www.archlinuxcn.org/the-end-of-i686-support/">对 i686 架构的支持已经结束</a>）
+</p><p>Arch Linux 使用 <a href="#pg9ef105bf1e3c">Pacman</a> <a href="https://en.wikipedia.org/wiki/Package_manager">包管理系统</a>实现系统和软件包的滚动更新。并且 Arch Linux 还提供一个类似 ports 的包构建系统（<a href="#pg03306a96a891">Arch Build System</a>），通过它可以轻松从源码构建软件包然后安装，并用一个命令完成同步。您甚至可以用一个命令重新构建整个系统。Arch 还提供 <a href="#pgf9029631e281">Arch 用户仓库</a>，它包含了成千上万个由用户自行维护的 <a href="#pgf9d748a7b27b">PKGBUILD</a> 脚本，配合 <a href="#pg7edcce763396">makepkg</a> 工具，从编译到打包一气呵成。此外用户还能轻松构建和维护属于自己的软件仓库。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf1f2f42e4409_.E5.8E.86.E5.8F.B2.E6.B2.BF.E9.9D.A9" id="历史沿革"><span id=".E5.8E.86.E5.8F.B2.E6.B2.BF.E9.9D.A9"></span>历史沿革</h2></div>
+<p>这些年来，Arch 社区不断成长，与此同时也收到了大量的<a href="#pga39b5d6f8ee3">关注和评论</a>。
+</p><p>除<a href="https://lists.archlinux.org/archives/list/arch-dev-public@lists.archlinux.org/thread/RIZSKIBDSLY4S5J2E2STNP5DH4XZGJMR">少数特例</a>以外，Arch Linux 的开发者大部分是不领工资的志愿者与爱好者，目前也并没有通过 Arch 商业变现的计划。关于Arch Linux 开发的详细历史可以浏览 <a href="https://web.archive.org/web/*/archlinux.org">Wayback Machine 的 Arch 部分</a>和 <a href="https://archlinux.org/news/">Arch Linux 新闻存档</a>及<a href="https://www.archlinuxcn.org/">Arch Linux CN 首页上的中文版新闻列表</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_.E6.97.A9.E6.9C.9F" id="早期"><span id=".E6.97.A9.E6.9C.9F"></span>早期</h3></div>
+<p>加拿大程序员、吉他手 Judd Vinet 从 2001 年早期开始开发 Arch Linux ，并于 2002 年 3 月 11 日正式发行 0.1 版。关于这段历史，他当初是受到 <a href="http://www.slackware.com/">Slackware</a>、<a href="https://en.wikipedia.org/wiki/Berkeley_Software_Distribution">BSD</a>、<a href="https://www.pld-linux.org/">PLD Linux</a> 和 <a href="https://crux.nu/">CRUX</a> 之简洁原则的启发，但在当时苦于这些发行版普遍缺少软件包管理工具，所以 Vinet编写了 <a href="#pg9ef105bf1e3c">Pacman</a> 包管理器，可以自动处理软件包的依赖解析、安装、删除和更新，后来他进一步创建了这个发行版。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_.E4.B8.AD.E6.9C.9F" id="中期"><span id=".E4.B8.AD.E6.9C.9F"></span>中期</h3></div>
+<p><a href="https://wiki.archlinux.org/images/6/64/Archstats2002-2011.svg">这个图表</a>见证了Arch Linux 社区的稳步扩大。而且从早期开始，Arch 就树立起了<a href="https://www.osnews.com/story/4827"><b>开放、友好和社区互助</b>的形象</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_ArchWiki_.E7.9A.84.E8.AF.9E.E7.94.9F" id="ArchWiki_的诞生"><span id="ArchWiki_.E7.9A.84.E8.AF.9E.E7.94.9F"></span>ArchWiki 的诞生</h3></div>
+<p>2005 年 7 月 8 日，由 MediaWiki 搭建的 ArchWiki <a href="#pg2a49754d91ce">开始运行</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_A._Griffin_.E6.97.B6.E4.BB.A3" id="A._Griffin_时代"><span id="A._Griffin_.E6.97.B6.E4.BB.A3"></span>A. Griffin 时代</h3></div>
+<p>2007 年下半年，Judd Vinet 退出了 Arch Linux 的开发，并<a href="https://bbs.archlinux.org/viewtopic.php?id=38024">把领导权交给美国程序员 Aaron Griffin</a>，也就是 Phrakture，他一直到现在都是 Arch Linux 开发者。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_Arch_.E5.AE.89.E8.A3.85.E8.84.9A.E6.9C.AC" id="Arch_安装脚本"><span id="Arch_.E5.AE.89.E8.A3.85.E8.84.9A.E6.9C.AC"></span>Arch 安装脚本</h3></div>
+<p>在 2012 年 7 月的 Arch Linux 安装介质中<a href="https://www.archlinuxcn.org/install-media-20120715-released/">弃用了</a>基于菜单的<i>Arch 安装框架</i>（AIF），改为使用<i>Arch 安装脚本</i>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=arch-install-scripts">arch-install-scripts</a></span><sup><small>包</small></sup></span>）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_Systemd_.E6.97.B6.E4.BB.A3" id="Systemd_时代"><span id="Systemd_.E6.97.B6.E4.BB.A3"></span>Systemd 时代</h3></div>
+<p>2012 到 2013 年期间， Arch 用 Systemd 替换了 System V init ：<a href="https://www.archlinuxcn.org/install-medium-20121006-introduces-systemd/">[1]</a><a href="https://www.archlinuxcn.org/systemd-is-now-the-default-on-new-installations/">[2]</a><a href="https://archlinux.org/news/end-of-initscripts-support/">[3]</a><a href="https://www.archlinuxcn.org/final-sysvinit-deprecation-warning/">[4]</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_.E6.8A.9B.E5.BC.83_i686_.E6.94.AF.E6.8C.81" id="抛弃_i686_支持"><span id=".E6.8A.9B.E5.BC.83_i686_.E6.94.AF.E6.8C.81"></span>抛弃 i686 支持</h3></div>
+<p>鉴于在开发者和社区中对 i686 架构的使用逐渐式微，<a href="https://www.archlinuxcn.org/the-end-of-i686-support/">Arch Linux 对 i686 的支持已经于2017年11月底被抛弃</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_.E9.80.89.E4.B8.BE.E9.A1.B9.E7.9B.AE.E7.9A.84.E9.A2.86.E5.AF.BC.E8.A7.92.E8.89.B2" id="选举项目的领导角色"><span id=".E9.80.89.E4.B8.BE.E9.A1.B9.E7.9B.AE.E7.9A.84.E9.A2.86.E5.AF.BC.E8.A7.92.E8.89.B2"></span>选举项目的领导角色</h3></div>
+<p>2020 年初，Arch 开始启用新的流程选择未来的领袖，详情记载在 <a href="https://wiki.archlinux.org/title/DeveloperWiki:Project_Leader">DeveloperWiki:Project Leader</a>。
+</p><p>Aaron Griffin 决定不再担任项目领导，因此 Arch 通过选举方式正式确认 Levente Polyak 为新的领导，结果记录在<a href="https://www.archlinuxcn.org/the-future-of-the-arch-linux-project-leader/">这里</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf1f2f42e4409_GitLab_.E6.97.B6.E4.BB.A3" id="GitLab_时代"><span id="GitLab_.E6.97.B6.E4.BB.A3"></span>GitLab 时代</h3></div>
+<p><a href="https://www.archlinuxcn.org/git-migration-completed/">2023 年 5 月</a>，Arch Linux 将其打包相关基础设施迁移至自建的 <a href="https://gitlab.archlinux.org/">GitLab 实例</a>。除了内部更改和创新外，这也导致testing 仓库拆分为 core-testing 和 extra-testing， staging 仓库拆分为 core-staging 和 extra-staging，最终 community 合并至 extra。更多相关内容您可以到<a href="https://about.gitlab.com/blog/2023/09/11/migrating-arch-linux-packaging-infrastructure-gitlab/">这里</a>阅读。
+</p><p>6个月后，即 <a href="https://lists.archlinux.org/hyperkitty/list/arch-dev-public@lists.archlinux.org/thread/WYXDTJ3TR2DWRQCDZK44BQDH67IDVGTS/">2023 年 11 月</a>，旧的错误跟踪器（Flyspray）迁移至 GitLab，其协作功能（问题和合并请求）向公众开放。因为存档问题，原处保留一个旧错误跟踪器的静态副本，以保证指向其原有资源的链接（例如随机选择的<a href="https://bugs.archlinux.org/task/56716">FS#56716</a>）仍然有效。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807022939
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc, prevent‐selective‐update]
+CPU time usage: 0.255 seconds
+Real time usage: 0.262 seconds
+Preprocessor visited node count: 120/1000000
+Revision size: 9122/2097152 bytes
+Post‐expand include size: 65473/2097152 bytes
+Template argument size: 106/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.071/7.000 seconds
+Lua memory usage: 1221884/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  102.973      1 -total
+ 92.77%   95.531      1 Template:NoteTA
+  2.39%    2.456      1 Template:Pkg
+  2.14%    2.202      1 Template:翻译状态
+  0.96%    0.989      1 Template:Bug
+-->
+<!-- Render ID d6b7f78e-9207-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2763:|#|:idhash:canonical!zh-cn and timestamp 20260807022939 and revision id 35236. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

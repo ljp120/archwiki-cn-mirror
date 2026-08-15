@@ -1,0 +1,209 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg630f3ead5872">Locale</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Locale">Locale</a>，最近一次同步于 2022-11-15，若英文版本有所<a href="https://wiki.archlinux.org/title/Locale?diff=0&amp;oldid=756132">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Locale_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pge575f3f9cef9">Environment variables</a></li>
+<li><a href="#pg3c625f401395">Localization</a></li>
+</ul></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glibc">glibc</a></span><sup><small>包</small></sup></span> 和应用程序、函数库库使用<a href="https://zh.wikipedia.org/wiki/%E5%8C%BA%E5%9F%9F%E8%AE%BE%E7%BD%AE">区域设置</a>显示本地化的文字、货币、时间、日期、特殊字符等包含地域属性的内容。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg630f3ead5872_.E7.94.9F.E6.88.90.E5.8C.BA.E5.9F.9F.E8.AE.BE.E7.BD.AE" id="生成区域设置"><span id=".E7.94.9F.E6.88.90.E5.8C.BA.E5.9F.9F.E8.AE.BE.E7.BD.AE"></span>生成区域设置</h2></div>
+<p>区域设置的名称通常用 <code>[language][_TERRITORY][.CODESET][@modifier]</code> 的格式表示，<i>language</i> 是 <a href="https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes">ISO 639 语言代码</a>, <i>territory</i> 是 <a href="https://en.wikipedia.org/wiki/ISO_3166-1#Current_codes">ISO 3166 国家代码</a>, <i>codeset</i> 是<a href="https://en.wikipedia.org/wiki/Character_encoding">字符集</a>或 <a href="https://en.wikipedia.org/wiki/ISO/IEC_8859-1">ISO-8859-1</a>、<a href="https://en.wikipedia.org/wiki/UTF-8">UTF-8</a> 这样的编码方式。请参考 <span class="plainlinks archwiki-template-man" title="$ man 3 setlocale"><a href="https://man.archlinux.org/man/setlocale.3">setlocale(3)</a></span>。
+</p><p>要列出所有启用的区域设置，使用：
+</p>
+<pre>$ locale -a
+</pre>
+<p>启用一个区域设置前，需要先生成它。在 <code>/etc/locale.gen</code> 中取消对应的注释，然后执行 <i>locale-gen</i>。注释掉某行，则会移除对应的区域设置。请启用所有用户都可能使用的区域设置及相关#变量。
+</p><p>例如对于使用美式英语和中国简体的用户：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/locale.gen</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+#en_SG ISO-8859-1  
+en_US.UTF-8 UTF-8  
+#en_US ISO-8859-1  
+...
+#zh_CN.GBK GBK  
+zh_CN.UTF-8 UTF-8  
+#zh_CN GB2312  
+...
+</pre>
+<p>编辑完成以后,通过下面的命令生成 Locale：
+</p>
+<pre># locale-gen
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>每次更新 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glibc">glibc</a></span><sup><small>包</small></sup></span> 时 <code>locale-gen</code> 会自动运行。<a href="https://github.com/archlinux/svntogit-packages/blob/packages/glibc/trunk/glibc.install#L2">[1]</a></li>
+<li>建议优先使用 <code>UTF-8</code>。<a href="https://utf8everywhere.org/">[2]</a></li></ul></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg630f3ead5872_.E8.AE.BE.E7.BD.AE.E5.BD.93.E5.89.8D.E5.8C.BA.E5.9F.9F" id="设置当前区域"><span id=".E8.AE.BE.E7.BD.AE.E5.BD.93.E5.89.8D.E5.8C.BA.E5.9F.9F"></span>设置当前区域</h2></div>
+<p>想要显示正在使用的 Locale 和相关的环境变量，运行：
+</p>
+<pre>$ locale
+</pre>
+<p>要使用的区域设置（从前面生成的区域设置中选择）设置在 <code>locale.conf</code> 文件中。每一个 <code>locale.conf</code> 文件都必须包含一些<a href="#pge575f3f9cef9">环境变量</a>赋值语句，其格式与 <i>locale</i> 命令输出的格式相同。
+</p><p>要查看已经生成的区域设置：
+</p>
+<pre>$ localedef --list-archive
+</pre>
+<p>或者使用 <span class="plainlinks archwiki-template-man" title="$ man 1 localectl"><a href="https://man.archlinux.org/man/localectl.1">localectl(1)</a></span>：
+</p>
+<pre>$ localectl list-locales
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg630f3ead5872_.E7.B3.BB.E7.BB.9F.E5.8C.BA.E5.9F.9F.E8.AE.BE.E7.BD.AE" id="系统区域设置"><span id=".E7.B3.BB.E7.BB.9F.E5.8C.BA.E5.9F.9F.E8.AE.BE.E7.BD.AE"></span>系统区域设置</h3></div>
+<p>要设置整个系统使用的区域设置，需要在 <code>/etc/locale.conf</code> 中写入 <code>LANG</code> 变量，以下的 <i>zh_CN.UTF-8</i> 应为 <code>/etc/locale.gen</code> 中某个未注释条目的<b>第一列</b>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">locale.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">LANG=zh_CN.UTF-8</pre>
+<p>或者使用：
+</p>
+<pre># localectl set-locale LANG=zh_CN.UTF-8
+</pre>
+<p>参阅#变量和 <span class="plainlinks archwiki-template-man" title="$ man 1 localectl"><a href="https://man.archlinux.org/man/localectl.1">localectl(1)</a></span> 获得更多细节。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg630f3ead5872_.E5.9C.A8.E7.94.A8.E6.88.B7.E4.BC.9A.E8.AF.9D.E4.B8.AD.E8.A6.86.E7.9B.96.E7.B3.BB.E7.BB.9F.E5.8C.BA.E5.9F.9F.E8.AE.BE.E7.BD.AE" id="在用户会话中覆盖系统区域设置"><span id=".E5.9C.A8.E7.94.A8.E6.88.B7.E4.BC.9A.E8.AF.9D.E4.B8.AD.E8.A6.86.E7.9B.96.E7.B3.BB.E7.BB.9F.E5.8C.BA.E5.9F.9F.E8.AE.BE.E7.BD.AE"></span>在用户会话中覆盖系统区域设置</h3></div>
+<p>系统使用的区域设置可以通过用户编辑自己的 <code>~/$XDG_CONFIG_HOME/locale.conf</code> (通常为 <code>~/.config/locale.conf</code>) 来覆盖。
+</p><p>这些 <code>locale.conf</code> 文件的优先级定义在 <code>/etc/profile.d/locale.sh</code> 中。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>设置用户级区域设置 ，能让 <code>/var/log/</code> 中的日志以英语输出而在用户环境中使用所选语言。</li>
+<li>建立 <code>/etc/skel/.config/locale.conf</code> 文件，可以让所有通过 <i>useradd</i> 命令和 <code>-m</code> 选项创建的新用户自动拥有一份相应的 <code>~/.config/locale.conf</code>。</li></ul></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg630f3ead5872_.E7.AB.8B.E5.8D.B3.E5.90.AF.E7.94.A8.E6.96.B0.E8.AE.BE.E7.BD.AE" id="立即启用新设置"><span id=".E7.AB.8B.E5.8D.B3.E5.90.AF.E7.94.A8.E6.96.B0.E8.AE.BE.E7.BD.AE"></span>立即启用新设置</h3></div>
+<p><code>locale.conf</code> 的变更会在下次登录时生效，要立刻应用新的设置的话，可以运行：
+</p>
+<pre>$ unset LANG
+$ source /etc/profile.d/locale.sh
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>LANG</code> 变量必须先被 <code>unset</code>，否则 <code>locale.sh</code> 不会从 <code>locale.conf</code> 中更新变量。只有新增的或被修改的命令会被自动更新，从 <code>locale.conf</code> 被移除的变量在注销前依然存在。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg630f3ead5872_.E5.85.B6.E5.AE.83.E7.94.A8.E4.BE.8B" id="其它用例"><span id=".E5.85.B6.E5.AE.83.E7.94.A8.E4.BE.8B"></span>其它用例</h3></div>
+<p>和区域设置相关的变量也能像其他的<a href="#pge575f3f9cef9">环境变量</a>一样传递给其它程序。
+</p><p>例如在开发和测试某个程序时,可以这样运行：
+</p>
+<pre>$ LANG=C ./my_application.sh
+</pre>
+<p>类似的，也可以通过设置环境变量让当前 shell 中运行的程序使用特定的区域设置(例如安装系统时)：
+</p>
+<pre>$ export LANG=C
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg630f3ead5872_.E5.8F.98.E9.87.8F" id="变量"><span id=".E5.8F.98.E9.87.8F"></span>变量</h2></div>
+<p><code>locale.conf</code> 文件支持以下环境变量。
+</p>
+<ul><li>LANG</li>
+<li>LANGUAGE</li>
+<li><code>LC_ADDRESS</code></li>
+<li>LC_COLLATE</li>
+<li><code>LC_CTYPE</code></li>
+<li><code>LC_IDENTIFICATION</code></li>
+<li><code>LC_MEASUREMENT</code></li>
+<li><code>LC_MESSAGES</code></li>
+<li><code>LC_MONETARY</code></li>
+<li><code>LC_NAME</code></li>
+<li><code>LC_NUMERIC</code></li>
+<li><code>LC_PAPER</code></li>
+<li><code>LC_TELEPHONE</code></li>
+<li>LC_TIME</li></ul>
+<p><span class="plainlinks archwiki-template-man" title="$ man 7 locale"><a href="https://man.archlinux.org/man/locale.7">locale(7)</a></span> 包含了完整 <code>LC_*</code> 列表，<span class="plainlinks archwiki-template-man" title="$ man 5 locale"><a href="https://man.archlinux.org/man/locale.5">locale(5)</a></span> 包含了详细定义。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>程序在查找本地化相关的变量时遵守<a href="https://www.gnu.org/software/gettext/manual/gettext.html#Locale-Environment-Variables">此优先级顺序</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg630f3ead5872_LANG.EF.BC.9A.E9.BB.98.E8.AE.A4.E7.9A.84.E5.8C.BA.E5.9F.9F.E8.AE.BE.E7.BD.AE" id="LANG：默认的区域设置"><span id="LANG.EF.BC.9A.E9.BB.98.E8.AE.A4.E7.9A.84.E5.8C.BA.E5.9F.9F.E8.AE.BE.E7.BD.AE"></span>LANG：默认的区域设置</h3></div>
+<p>这个变量的值会覆盖掉所有未设置的 <code>LC_*</code> 变量的值。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>假设您是西班牙的英语使用者，并且您希望程序根据西班牙的惯例处理数字和日期，仅消息为英语。您可以将 <code>LANG</code> 设置为 <code>es_ES.UTF-8</code>，并将 <code>LC_MESSAGES</code>（用于消息翻译的用户界面）设置为 <code>en_US.UTF -8</code>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg630f3ead5872_LANGUAGE.EF.BC.9A.E5.90.8E.E5.A4.87.E5.8C.BA.E5.9F.9F.E8.AE.BE.E7.BD.AE" id="LANGUAGE：后备区域设置"><span id="LANGUAGE.EF.BC.9A.E5.90.8E.E5.A4.87.E5.8C.BA.E5.9F.9F.E8.AE.BE.E7.BD.AE"></span>LANGUAGE：后备区域设置</h3></div>
+<p>使用 gettext 翻译的软件会按照 <code>LANGUAGE</code> 选择使用的语言。用户通过这个变量指定一个区域设置<a href="https://www.gnu.org/software/gettext/manual/gettext.html#The-LANGUAGE-variable">列表</a>，如果前面的区域设置缺少翻译，会自动使用后面的区域设置显示界面。例如一个澳大利亚用户可能更希望在没有合适的澳大利亚英语翻译时回退到英式英语而不是美式英语：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">locale.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">LANG=en_AU.UTF-8
+LANGUAGE=en_AU:en_GB:en</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>很多软件并未将其英文 locale 设置为 <code>en</code> 或 <code>en_US</code>，而是使用默认 locale <code>C</code>。如果在 <code>LANGUAGE</code> 中将非英文  locale 设置到 English 之后，例如 <code>LANGUAGE=en_US:en:es_ES</code>，那么即使英语字符存在，应用程序可能会选择使用后备 locale. <a href="https://bugs.kde.org/show_bug.cgi?id=192019">[3]</a> 解决方法是强制在英语 locale 后面设置 <code>C</code>，例如  <code>LANGUAGE=en_US:en:C:es_ES</code>.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg630f3ead5872_LC_TIME.EF.BC.9A.E6.97.B6.E9.97.B4.E5.92.8C.E6.97.A5.E6.9C.9F.E6.A0.BC.E5.BC.8F" id="LC_TIME：时间和日期格式"><span id="LC_TIME.EF.BC.9A.E6.97.B6.E9.97.B4.E5.92.8C.E6.97.A5.E6.9C.9F.E6.A0.BC.E5.BC.8F"></span>LC_TIME：时间和日期格式</h3></div>
+<p>如果 <code>LC_TIME</code> 设置成 <code>en_US.UTF-8</code>，日期的格式为 "MM/DD/YYYY"。要使用 ISO 8601 标准的日期格式( "YYYY-MM-DD" ) ,使用：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">locale.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">LC_TIME=en_DK.UTF-8</pre>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glibc">glibc</a></span><sup><small>包</small></sup></span> 2.29 修复了一个错误，<code>en_US.UTF-8</code> 开始如预期般显示 12 小时格式的时间。如果要使用 24 小时制，请使用 <code>LC_TIME=C.UTF-8</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>使用此变量来格式化日期不是对程序的强制要求。例如，<span class="plainlinks archwiki-template-man" title="$ man 1 date"><a href="https://man.archlinux.org/man/date.1">date(1)</a></span> 使用其自己的参数来格式化时间，<a href="#pg9b5d7fec8088">Firefox</a> 在版本 57 到 84 之间不支持 <code>LC_TIME</code>（<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1429578">Bug 1429578</a>）。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg630f3ead5872_LC_COLLATE.EF.BC.9A.E6.8E.92.E5.BA.8F.E6.A0.BC.E5.BC.8F" id="LC_COLLATE：排序格式"><span id="LC_COLLATE.EF.BC.9A.E6.8E.92.E5.BA.8F.E6.A0.BC.E5.BC.8F"></span>LC_COLLATE：排序格式</h3></div>
+<p>这个变量的值决定排序和正则表达式的格式顺序。
+</p><p>例如将它设置为 <code>C</code> 可以让 <i>ls</i> 命令首先列出点开头的文件，然后是大写字母开头的文件和小写字母开头的文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">locale.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">LC_COLLATE=C</pre>
+<p>另见 <a href="https://superuser.com/a/448294">[4]</a>。
+</p><p>为了避免潜在的问题，Arch Linux 曾经在 <code>/etc/profile</code> 中设置 <code>LC_COLLATE=C</code>，这个方法已经过时了。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg630f3ead5872_LC_ALL.EF.BC.9A.E6.B5.8B.E8.AF.95.E5.92.8C.E6.8E.92.E9.99.A4.E9.97.AE.E9.A2.98" id="LC_ALL：测试和排除问题"><span id="LC_ALL.EF.BC.9A.E6.B5.8B.E8.AF.95.E5.92.8C.E6.8E.92.E9.99.A4.E9.97.AE.E9.A2.98"></span>LC_ALL：测试和排除问题</h3></div>
+<p>这个变量的值会覆盖掉 <code>LANG</code> 和所有 <code>LC_*</code> 变量的值，无论它们是否设置。 如果 <code>LC_ALL</code> 设置为<code>C</code>, 此变量将覆盖  <code>LANGUAGE</code>.
+</p><p>只有 <code>LC_ALL</code> <b>不能</b>出现在 <code>locale.conf</code> 文件中：它只能为了测试和排除问题而设置，例如在 <code>/etc/profile</code> 中。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>LC_ALL=C.UTF-8</code> 与 <code>LC_ALL=C</code> 不同，不会覆盖 <code>LANGUAGE</code>. 请参考 <a href="https://sourceware.org/bugzilla/show_bug.cgi?id=16621">glibc bug 16621</a> 和 <a href="https://savannah.gnu.org/bugs/?62815">gettext bug 62815</a>.</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg630f3ead5872_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg630f3ead5872_.E6.88.91.E7.9A.84.E7.BB.88.E7.AB.AF.E4.B8.8D.E6.94.AF.E6.8C.81_UTF-8" id="我的终端不支持_UTF-8"><span id=".E6.88.91.E7.9A.84.E7.BB.88.E7.AB.AF.E4.B8.8D.E6.94.AF.E6.8C.81_UTF-8"></span>我的终端不支持 UTF-8</h3></div>
+<p>这里列出了一些（不是全部）支持 UTF-8 的终端：
+</p>
+<ul><li>gnustep-terminal</li>
+<li>konsole</li>
+<li><a href="#pga07d49a1594a">mlterm</a></li>
+<li><a href="#pg779b777898ef">rxvt-unicode</a></li>
+<li><a href="#pg30c80f48aedd">st</a></li>
+<li><a href="#pg0f04b181bac3">基于 VTE 的终端</a></li>
+<li><a href="#pg12c4c9eae03a">xterm</a> - 启动时使用参数 <code>-u8</code>，或者配置资源 <code>xterm*utf8: 2</code>。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg630f3ead5872_Gnome-terminal_.2F_rxvt-unicode_.E4.B8.8D.E6.94.AF.E6.8C.81_UTF-8" id="Gnome-terminal_/_rxvt-unicode_不支持_UTF-8"><span id="Gnome-terminal_.2F_rxvt-unicode_.E4.B8.8D.E6.94.AF.E6.8C.81_UTF-8"></span>Gnome-terminal / rxvt-unicode 不支持 UTF-8</h4></div>
+<p>你必须在 UTF-8 的区域设置下运行它们才会有作用。按照上面的方法启用 <code>en_US.UTF-8</code>（或者其它使用 UTF-8 的区域设置）并将它设置成默认区域设置后重启系统。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg630f3ead5872_.E6.88.91.E7.9A.84.E7.B3.BB.E7.BB.9F.E7.9A.84.E8.AF.AD.E8.A8.80.E8.BF.98.E6.98.AF.E4.B8.8D.E5.AF.B9" id="我的系统的语言还是不对"><span id=".E6.88.91.E7.9A.84.E7.B3.BB.E7.BB.9F.E7.9A.84.E8.AF.AD.E8.A8.80.E8.BF.98.E6.98.AF.E4.B8.8D.E5.AF.B9"></span>我的系统的语言还是不对</h3></div>
+<p>可能其它文件设置了本该由 <code>locale.conf</code>，详见<a href="#pge575f3f9cef9">定义环境变量</a>。
+</p><p>如果使用了桌面环境，可能是被桌面环境修改。例如 <a href="#pg1e095fe2c2a6">GNOME</a> 的语言设置会覆盖 <code>locale.conf</code> 中的设置。
+</p><p><a href="#pg5b70e23b1711">KDE</a> Plasma 也通过系统设置修改界面的语言，如果按本文修改后还是原来的区域设置，请<a href="https://bbs.archlinux.org/viewtopic.php?pid=1435219#p1435219">删除</a> <code>~/.config/plasma-localerc</code> (之前是：<code>~/.config/plasma-locale-settings.sh</code>)。
+</p><p>如果您正在结合 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=accountsservice">accountsservice</a></span><sup><small>包</small></sup></span> 使用显示管理器，请遵循 <a href="#pg9aa798802a24">Display manager#为用户会话设置语言</a>中的说明。
+</p><p><a href="#pg145f4ecf55dc">LightDM</a> 将自动使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=accountsservice">accountsservice</a></span><sup><small>包</small></sup></span> 来设配置用户的区域设置（如果已安装）。否则，LightDM 将用户会话配置存储在 <code>~/.dmrc</code> 中。也可能从那里检索到意料外的的区域设置。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg630f3ead5872_.E8.A7.A3.E5.8E.8B.E6.96.87.E4.BB.B6.E7.9A.84.E7.BC.96.E7.A0.81.E4.B8.8D.E6.AD.A3.E7.A1.AE" id="解压文件的编码不正确"><span id=".E8.A7.A3.E5.8E.8B.E6.96.87.E4.BB.B6.E7.9A.84.E7.BC.96.E7.A0.81.E4.B8.8D.E6.AD.A3.E7.A1.AE"></span>解压文件的编码不正确</h3></div>
+<p>老的 Windows 版本 (XP, Vista 和 7) 使用不同的编码方式压缩文件。要解压这些文件，请使用：
+</p>
+<pre>$ unzip -O CP936 <i>file.zip</i>
+
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg630f3ead5872_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://wiki.gentoo.org/wiki/Localization/Guide">Gentoo:Localization/Guide</a></li>
+<li><a href="http://wikigentoo.ksiezyc.pl/Locales.htm">Supposedly 2008, or earlier, Gentoo wiki article</a></li>
+<li><a href="https://icu4c-demos.unicode.org/icu-bin/collation.html">ICU's interactive collation testing</a></li>
+<li><a href="http://www.openi18n.org/">Free Standards Group Open Internationalisation Initiative</a></li>
+<li><a href="https://pubs.opengroup.org/onlinepubs/007908799/xbd/locale.html"><i>The Single UNIX Specification</i> definition of Locale</a> by The Open Group</li>
+<li><a href="https://help.ubuntu.com/community/EnvironmentVariables#Locale_setting_variables">Locale environment variables</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807024917
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.176 seconds
+Real time usage: 0.183 seconds
+Preprocessor visited node count: 899/1000000
+Revision size: 10396/2097152 bytes
+Post‐expand include size: 9717/2097152 bytes
+Template argument size: 4137/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   53.411      1 -total
+ 17.02%    9.093     75 Template:Ic
+ 16.23%    8.669      6 Template:注意
+  8.18%    4.371      6 Template:Man
+  6.82%    3.641      2 Template:提示
+  6.59%    3.518      1 Template:翻译状态
+  5.19%    2.770      5 Template:Pkg
+  3.95%    2.110      1 Template:相关文章开始
+  3.83%    2.044      2 Template:Related
+  3.47%    1.851      5 Template:Hc
+-->
+<!-- Render ID 94dc808e-920a-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3467:|#|:idhash:canonical!zh-cn and timestamp 20260807024917 and revision id 27523. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

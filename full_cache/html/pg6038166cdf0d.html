@@ -1,0 +1,69 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg6038166cdf0d">安全外壳协议</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Secure_Shell">Secure Shell</a>，最近一次同步于 2023-06-05，若英文版本有所<a href="https://wiki.archlinux.org/title/Secure_Shell?diff=0&amp;oldid=777782">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Secure_Shell_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg46a1cfd06473">SSHFS</a></li>
+<li><a href="#pg952352ec20e2">Mosh</a></li>
+<li><a href="#pg636dc702a57a">VPN over SSH</a></li>
+</ul></div>
+<p>根据<a href="https://zh.wikipedia.org/wiki/Secure_Shell">维基百科</a>：
+</p>
+<dl><dd>Secure Shell（安全外壳，简称 SSH）是一种加密的网络传输协议，可在不安全的网络中为网络服务提供安全的传输环境。SSH 最常见的用途是远程登录系统命令行界面和远程执行命令。</dd></dl>
+<p>可以使用 SSH 的服务示例包括 <a href="#pg0d34da84b694">Git</a>，<a href="#pg4bb0ada72a54">rsync</a> 和 <a href="#pg2b799a3215c7">X11 转发</a>。始终使用 SSH 的服务是 <a href="#pg92061aed6a3c">SCP 和 SFTP</a>。
+</p><p>默认情况下，SSH 服务器侦听标准 TCP 端口 22。SSH 客户端程序通常用于建立与接受远程连接的 <i>sshd</i> 守护程序的连接。 两者都普遍存在于大多数现代操作系统中，包括 macOS，GNU/Linux，Solaris 和 OpenVMS。存在各种复杂程度和完整性的专有，免费软件和开源版本。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6038166cdf0d_.E8.BD.AF.E4.BB.B6" id="软件"><span id=".E8.BD.AF.E4.BB.B6"></span>软件</h2></div>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Dropbear_(software)">Dropbear</a></b> — 轻型 SSH 服务器。命令行 ssh 客户端名为 <span class="plainlinks archwiki-template-man" title="$ man 1 dbclient"><a href="https://man.archlinux.org/man/dbclient.1">dbclient(1)</a></span>。</li></ul>
+<dl><dd><a href="https://matt.ucc.asn.au/dropbear/dropbear.html">https://matt.ucc.asn.au/dropbear/dropbear.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dropbear">dropbear</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg4df2d7b1a305">OpenSSH</a></b> — 用于通过 SSH 协议远程登录的高级连接工具</li></ul>
+<dl><dd><a href="https://www.openssh.com/portable.html">https://www.openssh.com/portable.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openssh">openssh</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6038166cdf0d_.E4.BB.85.E6.9C.8D.E5.8A.A1.E7.AB.AF" id="仅服务端"><span id=".E4.BB.85.E6.9C.8D.E5.8A.A1.E7.AB.AF"></span>仅服务端</h3></div>
+<ul><li><b>TinySSH</b> — 一种简约的 SSH 服务器，仅实现 SSHv2 功能的一部分；只依赖 glibc。</li></ul>
+<dl><dd><a href="https://tinyssh.org/">https://tinyssh.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tinyssh">tinyssh</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg6038166cdf0d_.E4.BB.85.E5.AE.A2.E6.88.B7.E7.AB.AF" id="仅客户端"><span id=".E4.BB.85.E5.AE.A2.E6.88.B7.E7.AB.AF"></span>仅客户端</h3></div>
+<ul><li><b><a href="#pg537345df4a45">PuTTY</a></b> — 集成终端的 SSH/Telnet 客户端</li></ul>
+<dl><dd><a href="https://www.chiark.greenend.org.uk/~sgtatham/putty/">https://www.chiark.greenend.org.uk/~sgtatham/putty/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=putty">putty</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6038166cdf0d_.E4.BF.9D.E6.8A.A4" id="保护"><span id=".E4.BF.9D.E6.8A.A4"></span>保护</h2></div>
+<p>请参阅<a href="#pgfefbd690c49d">安全#SSH</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg6038166cdf0d_.E5.8F.A6.E8.AF.B7.E5.8F.82.E8.A7.81" id="另请参见"><span id=".E5.8F.A6.E8.AF.B7.E5.8F.82.E8.A7.81"></span>另请参见</h2></div>
+<ul><li><a href="#pgd1486b2776da">终端复用器</a>（通常通过 SSH 使用）</li>
+<li><a href="https://en.wikipedia.org/wiki/Comparison_of_SSH_clients">Wikipedia:Comparison of SSH clients</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Comparison_of_SSH_servers">Wikipedia:Comparison of SSH servers</a></li>
+<li><a href="https://blog.webernetz.net/ssh-key-fingerprints/">SSH 密钥指纹格式</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807023542
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.095 seconds
+Real time usage: 0.147 seconds
+Preprocessor visited node count: 171/1000000
+Revision size: 1933/2097152 bytes
+Post‐expand include size: 3279/2097152 bytes
+Template argument size: 1439/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   21.851      1 -total
+ 41.12%    8.984      4 Template:App
+ 15.85%    3.464      1 Template:翻译状态
+ 13.92%    3.041      3 Template:Related
+ 12.78%    2.792      4 Template:Pkg
+ 10.87%    2.376      1 Template:相关文章开始
+  8.42%    1.839      1 Template:Man
+  4.76%    1.039      1 Template:META_Related_articles_start
+  3.71%    0.811      1 Template:相关文章结束
+-->
+<!-- Render ID af155f0f-9208-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3781:|#|:idhash:canonical!zh-cn and timestamp 20260807023542 and revision id 33753. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,551 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg82461695094b">mkinitcpio</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/mkinitcpio">mkinitcpio</a>，最近一次同步于 2025-12-27，若英文版本有所<a href="https://wiki.archlinux.org/title/mkinitcpio?diff=0&amp;oldid=858491">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/mkinitcpio_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg375fc9bbcc64">Booster</a></li>
+<li><a href="#pg1a47aefd4d5a">Boot debugging</a></li>
+<li><a href="#pgb185d4cf00ac">dracut</a></li>
+<li><a href="#pg446fdafcb30b">Kernel modules</a></li>
+<li><a href="#pgc58950f08e5c">mkinitcpio/极简 initramfs</a></li>
+<li><a href="#pgac06dd8bfe95">systemd</a></li>
+<li><a href="#pgd819314d422c">统一内核映像</a></li>
+</ul></div>
+<p><a href="https://gitlab.archlinux.org/archlinux/mkinitcpio/mkinitcpio">mkinitcpio</a> 是用于创建 initramfs 映像的 bash 脚本。有关对 initramfs 的一般性介绍，请参阅 <a href="#pg7e866ec617d4">Arch 的启动流程#initramfs</a>。
+</p><p>需要注意的是，存在两种截然的不同方式用于执行<a href="#pg7e866ec617d4">早期用户空间</a>阶段的各项任务：
+</p>
+<dl><dt>基于 systemd 的 initramfs（版本 40 起默认）</dt></dl>
+<dl><dd>systemd 在早期用户空间阶段开始时即被启动。需要执行的任务由常规的 systemd 单元文件决定。参见 <a href="https://www.freedesktop.org/software/systemd/man/latest/bootup.html">systemd 启动流程</a>。</dd></dl>
+<dl><dd><b>优点</b>：
+<ul><li>与 systemd 生态系统的其余部分紧密集成，带来更一致、流畅的启动流程。</li>
+<li>能更有效地并行化某些启动任务，在某些场景下可能缩短整体启动时间。</li>
+<li>提供更全面的功能集，例如 <a href="#pg52b00790fb44">systemd-cryptsetup-generator</a> 与 <a href="#pgac06dd8bfe95">GPT 分区自动挂载</a>功能。</li></ul></dd>
+<dd><b>缺点</b>：
+<ul><li>依赖较多，生成映像较大。由于包含 systemd 二进制文件及其依赖项，通常会导致 initramfs 增大，可能会稍稍延长启动时间。</li></ul></dd></dl>
+<dl><dt>基于 BusyBox 的 initramfs</dt></dl>
+<dl><dd>启动一个 init 脚本，该脚本随后扫描 initramfs 查找需要执行的脚本（即本文中的“运行时钩子”）。</dd></dl>
+<dl><dd><b>优点</b>：
+<ul><li>轻量级，依赖较少，生成映像较小。</li></ul></dd></dl>
+<p><br/>
+具体采用哪种方案取决于 <code>/etc/mkinitcpio.conf</code> 的 <code>HOOKS</code> 数组中是否包含 <code>systemd</code> 钩子。详见 #常用钩子。
+</p><p><br/>
+mkinitcpio 由 Arch Linux 开发者及社区贡献者共同开发。参见<a href="https://gitlab.archlinux.org/archlinux/mkinitcpio/mkinitcpio">公开 Git 仓库</a>。
+</p><p><br/>
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg82461695094b_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p><a href="#pg811194d6beaa">安装</a>软件包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio">mkinitcpio</a></span><sup><small>包</small></sup></span>。这个软件包是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 等软件包的依赖，应该已经自动被安装了。高级用户可以从 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-git/">mkinitcpio-git</a></span><sup><small>AUR</small></sup></span> 获取 mkinitcpio 的最新开发版本。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>若要使用 git 开发版本，强烈建议同时加入 <a href="https://lists.archlinux.org/mailman3/lists/arch-projects.lists.archlinux.org/">arch-projects</a> 邮件列表！</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg82461695094b_.E5.88.9B.E5.BB.BA.E5.92.8C.E5.90.AF.E7.94.A8.E6.98.A0.E5.83.8F" id="创建和启用映像"><span id=".E5.88.9B.E5.BB.BA.E5.92.8C.E5.90.AF.E7.94.A8.E6.98.A0.E5.83.8F"></span>创建和启用映像</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E8.87.AA.E5.8A.A8.E5.8C.B9.E9.85.8D.E7.94.9F.E6.88.90" id="自动匹配生成"><span id=".E8.87.AA.E5.8A.A8.E5.8C.B9.E9.85.8D.E7.94.9F.E6.88.90"></span>自动匹配生成</h3></div>
+<p>每次安装或升级内核时，一 <a href="#pg9ef105bf1e3c">pacman 钩子</a>会自动在 <code>/etc/mkinitcpio.d/</code> 生成 .preset 文件。例如，<code>linux.preset</code> 文件是官方稳定内核 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 生成的。.preset 文件本质上是一个创建 initramfs 映像所需信息的列表，避免手动指定各项参数及输出文件位置。
+</p><p>可自动创建两个映像：
+</p>
+<ul><li>default（默认）映像，根据 #配置中的指令创建。</li>
+<li>fallback（后备）映像，与上述类似，但不使用 autodetect 钩子，因此包含支持大多数硬件的完整模块集。</li></ul>
+<p>默认仅创建 default 映像，fallback 映像必须显式启用。
+</p><p>创建预设文件后，该 pacman 钩子会调用 <code>mkinitcpio</code>，利用 .preset 文件中提供的信息生成映像。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>.preset 文件用于在内核更新后自动重新生成 initramfs，编辑时请务必小心。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E6.89.8B.E5.8A.A8.E7.94.9F.E6.88.90" id="手动生成"><span id=".E6.89.8B.E5.8A.A8.E7.94.9F.E6.88.90"></span>手动生成</h3></div>
+<p>手动运行脚本，参照<span class="plainlinks archwiki-template-man" title="$ man 8 mkinitcpio"><a href="https://man.archlinux.org/man/mkinitcpio.8">mkinitcpio(8)</a></span> 帮助页面获得指引。尤其是当利用内核包生成（重新生成）预设时，使用<code>-p</code>/<code>--preset</code>选项按照预设生成映像。例如 为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 包生成映像，使用这个命令：
+</p>
+<pre># mkinitcpio -p linux
+</pre>
+<p>利用<code>-P</code>/<code>--allpresets</code>选项，根据所有现存的预设文件生成映像。常见的用法是当全局设置#配置变化后用此法重新生成全部的内存映像：
+</p>
+<pre># mkinitcpio -P
+</pre>
+<p>可以按照不同的配置文件创建任意数量的内存映像。想要引导加载的映像必须在相应的<a href="#pg7e866ec617d4">引导加载程序</a>配置中明确写出。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E8.87.AA.E5.AE.9A.E4.B9.89.E7.94.9F.E6.88.90" id="自定义生成"><span id=".E8.87.AA.E5.AE.9A.E4.B9.89.E7.94.9F.E6.88.90"></span>自定义生成</h3></div>
+<p>可以使用相应的配置文件产生一个映像。例如，接下来会根据<code>/etc/mkinitcpio-custom.conf</code>里指令生成初始化内存映像，并且将后者保存在 <code>/boot/initramfs-custom.img</code>。
+</p>
+<pre># mkinitcpio --config /etc/mkinitcpio-custom.conf --generate /boot/initramfs-custom.img
+</pre>
+<p>如果为一个不是当前运行的内核创建映像，增加内核版本号到命令行。已安装的内核版本号可以在<code>/usr/lib/modules/</code>中找到，对于每个内核语法结构和<code>uname -r</code>命令输出结果一致。
+</p>
+<pre># mkinitcpio --generate /boot/initramfs-custom2.img --kernel 5.7.12-arch1-1
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E7.BB.9F.E4.B8.80.E5.86.85.E6.A0.B8.E6.98.A0.E5.83.8F" id="统一内核映像"><span id=".E7.BB.9F.E4.B8.80.E5.86.85.E6.A0.B8.E6.98.A0.E5.83.8F"></span>统一内核映像</h3></div>
+<p>mkinitcpio 既可自行构建<a href="#pgd819314d422c">统一内核映像</a>（UKI），也可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd-ukify">systemd-ukify</a></span><sup><small>包</small></sup></span> 构建。如果系统中未安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd-ukify">systemd-ukify</a></span><sup><small>包</small></sup></span> 或使用 <code>--no-ukify</code> 参数明确禁用它，mkinitcpio 将使用自有实现，但此时将无法使用 ukify 提供的高级功能。
+</p><p>关于构建 UKI 的详细信息，请参阅<a href="#pgd819314d422c">统一内核映像</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg82461695094b_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<p><b>mkinitcpio</b>的主配置文件是<code>/etc/mkinitcpio.conf</code>。也支持附加配置文件（Drop-in），如<code>/etc/mkinitcpio.conf.d/mkhooks.conf</code>（当使用 <code>-c</code>/<code>--config</code> 选项和/或使用了含 <code>ALL_config</code> 的预设时无效）。此外，内核软件包的预配置文件位于<code>/etc/mkinitcpio.d</code>（例如：<code>/etc/mkinitcpio.d/linux.preset</code>）。
+</p><p>用户可以编辑配置文件中的七个变量，参见<span class="plainlinks archwiki-template-man" title="$ man 5 mkinitcpio.conf"><a href="https://man.archlinux.org/man/mkinitcpio.conf.5#VARIABLES">mkinitcpio.conf(5) § VARIABLES</a></span>获得更多细节：
+</p>
+<dl><dt><code>MODULES</code></dt>
+<dd>在钩子扩展运行前需要加载的内核模块。</dd>
+<dt><code>BINARIES</code></dt>
+<dd>内存盘映像中包含的额外的二进制文件（一般是可执行的命令）。</dd>
+<dt><code>FILES</code></dt>
+<dd>内存盘映像中包含的其他文件。</dd>
+<dt><code>HOOKS</code></dt>
+<dd>要执行的钩子扩展，它是在生成映像时执行的脚本。</dd>
+<dt><code>COMPRESSION</code></dt>
+<dd>内存盘映像的压缩方式。</dd>
+<dt><code>COMPRESSION_OPTIONS</code></dt>
+<dd>传递给压缩工具的额外参数，强烈不建议使用，<i>mkinitcpio</i> 可以自动根据压缩算法传递需要的参数(例如对 xz 传递 <code>--check=crc32</code> to xz), 手动设置了错误的参数可能导致系统无法启动。</dd>
+<dt><code>MODULES_DECOMPRESS</code></dt>
+<dd>解压可加载内核模块和固件文件或保持未解压原样。</dd></dl>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>一些系统需要的钩子像 <b>lvm2</b>, <b>mdadm_udev</b>, and <b>encrypt</b> 默认 <b>不是开启的</b> 。参见 #钩子（HOOKS） 仔细遵循指示。</li>
+<li>存在多个硬盘控制器使用相同的节点名字，但是拥有不同的内核模块（例如，两个SCSI/SATA控制器或2个IDE控制器）应该使用 持久化设备命名<a href="#pg2636278c0df5">persistent block device naming</a> 保证正确的设备被挂载。否则在两次系统启动时根系统的位置可能改变导致内核崩溃。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E6.A8.A1.E5.9D.97.EF.BC.88MODULES.EF.BC.89" id="模块（MODULES）"><span id=".E6.A8.A1.E5.9D.97.EF.BC.88MODULES.EF.BC.89"></span>模块（MODULES）</h3></div>
+<p><code>MODULES</code>数组指定了启动过程最开始时就要加载的模块。
+</p><p>如果模块名称后加上一个<code>?</code>问号，那么即使系统无法找到该模块也不会报错。对于自己编译的内核，其中内置了某些模块，在这些模块在钩子或配置文件中显式的列出来时，该功能可能有用。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>如果使用树外文件系统，且需要在早期用户空间挂载时（比如作为根文件系统），对应模块（如 <b>reiser4</b>）<b>必须</b>加入 <code>MODULES</code> 数组中。</li>
+<li>当使用 <b>encrypt</b> 或 <b>sd-encrypt</b> 钩子时,目标系统和运行<i>mkinitcpio</i>系统不同时，键盘模块和/或启动系统期间需要解锁LUKS设备的文件系统模块加入 <code>MODULES</code> 数组。例如，如果需要使用位于一个ext2系统的钥匙文件，但是运行<i>mkinitcpio</i>的系统中ext2文件系统没有被挂载，增加<code>ext2</code>。参见 <a href="https://wiki.archlinux.org/title/Dm-crypt/System_configuration#cryptkey">dm-crypt/System configuration#cryptkey</a> 获得更多细节。</li>
+<li>如果使用USB3接口的键盘，希望用它来解锁LUKS设备。增加<code>usbhid xhci_hcd</code>。</li>
+<li>如果使用显示器连接扩展坞，可能需要加入你的显卡模块使初始化输出信息可见(例如，为大多数英特尔显卡加入 <code>i915</code> )。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E4.BA.8C.E8.BF.9B.E5.88.B6.E6.96.87.E4.BB.B6.E5.92.8C.E6.99.AE.E9.80.9A.E6.96.87.E4.BB.B6.EF.BC.88BINARIES.E3.80.81FILES.EF.BC.89" id="二进制文件和普通文件（BINARIES、FILES）"><span id=".E4.BA.8C.E8.BF.9B.E5.88.B6.E6.96.87.E4.BB.B6.E5.92.8C.E6.99.AE.E9.80.9A.E6.96.87.E4.BB.B6.EF.BC.88BINARIES.E3.80.81FILES.EF.BC.89"></span>二进制文件和普通文件（BINARIES、FILES）</h3></div>
+<p>这两个选项允许用户添加任何文件到映像中。<code>BINARIES</code>、<code>FILES</code>数组在钩子运行之前指定了要加入内存盘映像的文件，可以覆盖钩子扩展提供的文件。<code>BINARIES</code>中的二进制文件会自动放入一个标准的<code>PATH</code>路径，而且会自动加入可执行文件依赖的函数库。<code>FILES</code>中的文件则不进行上述处理，<i>as-is</i>直接原样放入映像。例如：
+</p>
+<pre>FILES=(/etc/modprobe.d/modprobe.conf)
+BINARIES=(kexec)
+</pre>
+<p>注意 <code>BINARIES</code> 和 <code>FILES</code> 是 <a href="#pg1ca1e15827ff">Bash</a>数组，配置支持多个选项，用空格隔开。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E9.92.A9.E5.AD.90.EF.BC.88HOOKS.EF.BC.89" id="钩子（HOOKS）"><span id=".E9.92.A9.E5.AD.90.EF.BC.88HOOKS.EF.BC.89"></span>钩子（HOOKS）</h3></div>
+<p><code>HOOKS</code>设置是此文件中最重要的设置。钩子是一系列的小脚本，描述哪些东西需要加入到映像里面。有些钩子还包含了运行组件，可以提供额外的行特定动作，像启动服务、构建存储栈的块设备等。钩子按照配置文件中<code>HOOKS</code>项中给出的顺序执行。
+</p><p>默认的<code>HOOKS</code>可以满足大部分简单的单硬盘系统。对于堆栈的或多块设备像 <a href="#pg02cd87050dfd">LVM</a>, <a href="#pg1b71ce42139c">RAID</a>, or <a href="#pg8e3a9446707a">dm-crypt</a> 等复杂根分区系统，请查看相应的 Wiki 页面，进行必要的进一步设置。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg82461695094b_.E6.9E.84.E5.BB.BA.E6.97.B6.E9.92.A9.E5.AD.90" id="构建时钩子"><span id=".E6.9E.84.E5.BB.BA.E6.97.B6.E9.92.A9.E5.AD.90"></span>构建时钩子</h4></div>
+<p>构建时钩子位于<code>/usr/lib/initcpio/install</code>，自定义的构建时钩子可能位于<code>/etc/initcpio/install/</code>。这些文件会在运行 mkinitcpio 时被包含进脚本，应该提供如下两个函数：<code>build</code> 和 <code>help</code>。<code>build</code> 函数描述了需要加入映像的模块、文件和二进制文件。mkinitcpio(8) 中的记录的 API 帮助添加这些项目。<code>help</code> 函数在钩子执行后输出描述信息。
+</p><p>列出可用的钩子列表：
+</p>
+<pre>$ mkinitcpio -L
+</pre>
+<p>使用 mkinitcpio 的 <code>-H</code>/<code>--hookhelp</code> 选项输出对于某一钩子的帮助。例如：
+</p>
+<pre>$ mkinitcpio -H udev
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg82461695094b_.E8.BF.90.E8.A1.8C.E6.97.B6.E9.92.A9.E5.AD.90" id="运行时钩子"><span id=".E8.BF.90.E8.A1.8C.E6.97.B6.E9.92.A9.E5.AD.90"></span>运行时钩子</h4></div>
+<p>运行时钩子可以在<code>/usr/lib/initcpio/hooks</code>中找到自定义的运行时钩子在<code>/etc/initcpio/hooks/</code>。 对于任何运行时挂钩，都应该始终有一个同名的构建钩子，它会调用<code>add_runscript</code>将运行时挂钩添加到映像中。 这些文件是由早期用户空间中的BusyBox ash shell调用。除清理钩子以外（清理钩子是倒序执行的），它们始终将按照<code>HOOKS</code>设置中列出的顺序运行。 运行时钩子可能包含以下函数：
+</p><p><code>run_earlyhook</code>: 一旦挂载了API文件系统并且已经解析了内核命令行，便会运行这个函数。 通常，从此处启动早期引导过程所需的额外守护程序（例如udev，它从早期引导过程的开始就被需要）。
+</p><p><code>run_hook</code>: 这个函数在早期钩子挂接后不久便运行。 这是最常见的钩子特点，应在此处进行诸如堆叠块设备的组装之类的操作。
+</p><p><code>run_latehook</code>: 此名称的函数在挂载根设备后运行。 应当谨慎地将其用于根设备的进一步设置，或用于挂载其他文件系统，例如<code>/usr</code>。
+</p><p><code>run_cleanuphook</code>: 该名称的函数将尽可能晚地运行，并且以与配置文件的<code>HOOKS</code>数组中列出函数的相反顺序来运行。 这些钩子应该用于所有的最终清理操作，例如关闭由早期钩子启动的所有守护程序。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>运行时钩子仅仅被BusyBox的init使用。<b>systemd</b> 钩子触发一个 systemd 基础的初始化, 它不需要运行任何运行时钩子，而是使用systemd单元。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg82461695094b_.E6.98.A0.E5.83.8F.E5.90.8E.E5.A4.84.E7.90.86.E9.92.A9.E5.AD.90" id="映像后处理钩子"><span id=".E6.98.A0.E5.83.8F.E5.90.8E.E5.A4.84.E7.90.86.E9.92.A9.E5.AD.90"></span>映像后处理钩子</h4></div>
+<p>映像后处理钩子（post hook）是位于 <code>/usr/lib/initcpio/post/</code>（软件包提供）和 <code>/etc/initcpio/post/</code>（自定义）目录下的可执行文件或 shell 脚本。这些文件会在（重新）生成映像后执行，以执行签名等附加任务。
+</p><p>每个可执行文件会按以下顺序接收参数：
+</p>
+<ol><li>使用的<b>内核</b>（某些情况下可能为空）；</li>
+<li>生成的<b>initramfs 映像</b>位置；</li>
+<li>（可选）生成的<b>统一内核映像</b>位置。</li></ol>
+<p>此外，还会设置以下环境变量：<code>KERNELVERSION</code> 表示完整内核版本，<code>KERNELDESTINATION</code> 表示内核要想正常启动应位于的默认位置。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg82461695094b_.E5.B8.B8.E7.94.A8.E9.92.A9.E5.AD.90" id="常用钩子"><span id=".E5.B8.B8.E7.94.A8.E9.92.A9.E5.AD.90"></span>常用钩子</h4></div>
+<p>下面是一个常见钩子和它们如何影响映像的创建以及运行时的次序。注意这个表格是不完整的，因为一些包会提供一些自定义的钩子。
+</p>
+
+<table class="wikitable">
+<tbody><tr>
+<th>BusyBox init</th>
+<th>systemd init</th>
+<th>构建时钩子</th>
+<th>运行时钩子（仅BusyBox init）
+</th></tr>
+<tr>
+<td colspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>base</b></td>
+<td>设置所有初始目录并安装基础工具和库。除非清楚自己在做什么，否则请始终将此钩子置于首位，因为如果没有 <b>systemd</b> 钩子，该钩子是必需的，提供关键的 BusyBox init 程序。
+<p>当使用 <b>systemd</b> 钩子时，此钩子可选，仅提供一个 BusyBox 恢复 shell。启用 <b>base</b> 后，在<a href="#pgec0856954f1c">内核参数</a>中临时添加 <code>SYSTEMD_SULOGIN_FORCE=1</code> 使用该 shell。
+</p>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>udev</b></td>
+<td rowspan="3" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>systemd</b></td>
+<td>增加 udevd, udevadm,和一小套udev规则进映像。</td>
+<td>从内核中启动udev守护进程和uevents过程; 创建设备节点。因为不需要用户清晰的明确出必须设备这是简化的引导过程，推荐使用。
+</td></tr>
+<tr>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>usr</b></td>
+<td>增加支持<code>/usr</code> 在独立分区。参见#/usr 放到单独分区 获得更多细节。</td>
+<td>在挂载真正根分区后挂载 <code>/usr</code> 分区 。
+</td></tr>
+<tr>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>resume</b></td>
+<td>添加<code>lzo</code>和<code>lz4</code>内核模块，以允许在使用编译时默认值以外的休眠映像压缩算法时恢复。添加 <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-hibernate-resume"><a href="https://man.archlinux.org/man/systemd-hibernate-resume.8">systemd-hibernate-resume(8)</a></span> 二进制文件以支持从通过 <code>HibernateLocation</code> UEFI 变量指定的休眠映像恢复。</td>
+<td>试图从"suspend to disk" 状态重新开始。 参见 <a href="#pg146ac4b0e523">休眠</a> 做进一步设置。
+</td></tr>
+<tr>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>btrfs</b></td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–</td>
+<td>设置必备模块能够让<a href="#pg429e7ec45c9c">Btrfs</a> 支持Btrfs的多设备分区。需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=btrfs-progs">btrfs-progs</a></span><sup><small>包</small></sup></span> 开启功能。Btrfs在单设备时此钩子不需要（<code>filesystems</code>足矣）。</td>
+<td>当<b>udev</b> 钩子或<b>systemd</b>不存在时，运行 <code>btrfs device scan</code> 组装多设备Btrfs根文件系统。安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=btrfs-progs">btrfs-progs</a></span><sup><small>包</small></sup></span> 包使用此钩子。
+</td></tr>
+<tr>
+<td colspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>autodetect</b></td>
+<td>系统扫描后创建设备白名单从而减少内存映像的尺寸。确定校验进入的模块正确性和完整性。为了自动侦测发挥作用，必须放在其他子系统钩子之前。放在'autodetect'钩子之前的钩子将会被完整安装。</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td colspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>microcode</b></td>
+<td>在未压缩的 initramfs 映像前添加适用于 Intel 和 AMD 处理器的早期<a href="#pga6cf703397a3">微码</a>更新文件。使用<code>/usr/lib/firmware/amd-ucode</code>和<code>/usr/lib/firmware/intel-ucode</code>（若可用），否则从<code>/boot/amd-ucode.img</code>和<code>/boot/intel-ucode.img</code>提取。
+<p>若在此之前 <b>autodetect</b> 钩子已调用，则只会添加对应处理器的微码更新文件。
+</p><p>此挂钩已经取代了弃用的<code>--microcode</code>参数和在预设文件中的<code>microcode</code>选项。这使得启动配置中微码的<code>initrd</code>参数行可以删除了，因为它们已被打包进主要的 initramfs 映像中。
+</p>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td colspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>modconf</b></td>
+<td>从<code>/etc/modprobe.d/</code>和<code>/usr/lib/modprobe.d/</code>中包含探测模块配置文件。</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td colspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>kms</b></td>
+<td>为 <a href="#pg1b16260aab54">KMS 早启动</a>添加 GPU 模块。另外还添加了某些笔记本电脑液晶面板中内置的隐私屏幕所需的模块。</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td colspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>keyboard</b></td>
+<td>为键盘设备增加必要的模块。如果USB或串口键盘在早期用户空间起作用加入此钩子（可以输入密码或和shell交互）。有一个副作用，一些非键盘的输入设备也可能加进来，但这并不可靠。此钩子代替老的 <i>usbinput</i>钩子。
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>使用不同的硬件配置启动的系统（例如笔记本电脑连接外置键盘和内置键盘或<a href="https://en.wikipedia.org/wiki/Headless_computer">headless systems</a>）时，此钩子需要放在<b>autodetect</b>之前才能在引导中使用键盘，例如使用<code>encrypt</code>钩子解密加密设备。</div>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>keymap</b></td>
+<td rowspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>sd-vconsole</b></td>
+<td>自<code>/etc/vconsole.conf</code>加入特定的 <a href="#pgf4060c9a0b1f">键盘映射keymap(s)</a> 到映像。在早期用户空间如果使用<a href="#pg29ec7c5af952">系统加密</a>, 尤其全盘加密, 此钩子放在<code>encrypt</code>钩子之前。</td>
+<td>在早期用户空间从 <code>/etc/vconsole.conf</code> 加载指定的键盘映射。
+</td></tr>
+<tr>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>consolefont</b></td>
+<td>自<code>/etc/vconsole.conf</code>中加入特定的 <a href="#pg4100810d190d">终端字体</a> 到映像。</td>
+<td>在早期用户空间自<code>/etc/vconsole.conf</code>里，使用特定的终端字体。
+</td></tr>
+<tr>
+<td colspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>block</b></td>
+<td>加载块设备模块。若在 <code>autodetect</code> 挂钩后调用此挂钩，之添加系统中使用的块设备的模块。模块<code>ahci</code>、<code>sd_mod</code>、<code>usb_storage</code>、<code>uas</code>、<code>mmc_block</code>、<code>nvme</code>、<code>virtio_scsi</code>和<code>virtio_blk</code> 会无条件地添加</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>net</b></td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;"><i>未实现</i></td>
+<td>增加必要网络设备模块。必须安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-nfs-utils">mkinitcpio-nfs-utils</a></span><sup><small>包</small></sup></span> 包, 参见 #使用 net</td>
+<td>支持NFS为基础的根文件系统。
+</td></tr>
+<tr>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>dmraid</b></td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;"><i>?</i></td>
+<td>支持fakeRAID根设备。必须安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dmraid">dmraid</a></span><sup><small>包</small></sup></span> 包。注意如果你的控制器支持，更好选择是<a href="#pge514c9bd219e">mdadm</a> 联合 <b>mdadm_udev</b>钩子支持fakeRAID根设备。参见 #使用 RAID 磁盘阵列 。</td>
+<td>使用<code>dmraid</code>定位组装fakeRAID块设备。
+</td></tr>
+<tr>
+<td colspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>mdadm_udev</b></td>
+<td>通过udev支持组装RAID阵列。必须安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mdadm">mdadm</a></span><sup><small>包</small></sup></span> 包。若在FakeRAID使用这个钩子推荐将 <code>mdmon</code> 加入 <code>BINARIES</code>. 参见 #使用 RAID 磁盘阵列 。</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>encrypt</b></td>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>sd-encrypt</b></td>
+<td>增加<code>dm_crypt</code> 内核模块 和 <code>cryptsetup</code> 工具到映像。 必须安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cryptsetup">cryptsetup</a></span><sup><small>包</small></sup></span>包。 <div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>启动时反复确认<i>keyboard</i>钩子放在解密设备前面。和/或当使用钥匙文件解锁时，存放钥匙文件的文件系统加入#模块（MODULES） 里。</div></td>
+<td>侦测和解锁加密根系统。参见 #运行时配置 。
+<p><b>sd-encrypt</b> 参见 <a href="#pg52b00790fb44">dm-crypt/系统配置#使用systemd-cryptsetup-generator</a>。
+</p>
+</td></tr>
+<tr>
+<td colspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>lvm2</b></td>
+<td>加入设备映射内核模块和<code>lvm</code> 工具到映像。 必须安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lvm2">lvm2</a></span><sup><small>包</small></sup></span> 包。 如果根系统在<a href="#pg02cd87050dfd">LVM</a>这是必须的钩子。</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td colspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>fsck</b></td>
+<td>增加fsck二进制文件和特定系统帮助文件，允许fsck在挂载前处理根系统（和/usr分区如果有）。如果放在<b>autodetect</b>钩子前仅仅加载的定的帮助文件到根系统。强烈推荐使用此钩子，独立<code>/usr</code>分区需要它。强烈建议如果使用的此钩子同时要加入必要模块保证键盘在早期用户空间使用。
+<p>使用这个钩子需要在<a href="#pgec0856954f1c">内核参数</a>加入 <code>rw</code> 参数（<a href="https://bbs.archlinux.org/viewtopic.php?pid=1307895#p1307895">讨论</a>）。参见 <a href="#pg7545319bee41">fsck#启动时检查</a>。
+</p>
+</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td colspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>filesystems</b></td>
+<td>除非在<code>MODULES</code>中加入了文件系统，不然此钩子是必须的。</td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td colspan="2" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;"><b>acpi_override</b></td>
+<td>从 <code>/usr/initcpio/acpi_override/</code> 和 <code>/etc/initcpio/acpi_override/</code> 添加 ACPI 机器语言文件（<i>.aml</i>）到早期未压缩的 initramfs 映像中，使得内核可以在启动早期重载 ACPI 表（比如 <a href="#pgb6adbac7a9ca">DSDT</a>）<a href="https://docs.kernel.org/admin-guide/acpi/initrd_table_override.html">[1]</a></td>
+<td class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">–
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E5.8E.8B.E7.BC.A9.E6.96.B9.E5.BC.8F.28COMPRESSION.29" id="压缩方式(COMPRESSION)"><span id=".E5.8E.8B.E7.BC.A9.E6.96.B9.E5.BC.8F.28COMPRESSION.29"></span>压缩方式(COMPRESSION)</h3></div>
+<p>内核支持几种initramfs的压缩方式 - <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gzip">gzip</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bzip2">bzip2</a></span><sup><small>包</small></sup></span>, lzma, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xz">xz</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lzo">lzo</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lz4">lz4</a></span><sup><small>包</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=zstd">zstd</a></span><sup><small>包</small></sup></span>。mkinitcpio默认使用zstd压缩映像，注意zstd运行的多线程模式（使用了<code>-T0</code>选项，以侦测到内核数量作为线程数量。）
+</p><p>系统中的 <code>mkinitcpio.conf</code> 已经注释掉了各种 <code>COMPRESSION</code> 选项，要使用某个压缩方式，请取消前面的注释，并确认安装了相应的压缩工具包。不指定 <code>COMPRESSION</code> 选项会使用 zstd 压缩的 initramfs 文件。想要创建一个未压缩的映像，在配置中指定<code>COMPRESSION=cat</code> 或者在命令行使用 <code>-z cat</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>lz4 在高压缩率模式(<code>-9</code>)下映像有2.5的压缩比率，以付出最慢的单线程压缩速度为代价，可以获得最快的解压缩速度。lzo使用轻度较好的压缩模式后仍然有较快的解压速度。 zstd 提供多样解决方案, 通过参数使用多线程压缩方式和大范围压缩水平，参见 <span class="plainlinks archwiki-template-man" title="$ man 1 zstd"><a href="https://man.archlinux.org/man/zstd.1#Operation_modifiers">zstd(1) § Operation modifiers</a></span>。 xz在其高压缩预设(<code>-9</code>)中以大约5的缩减因子实现了最小的体积，但代价是解压速度要慢得多。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E5.8E.8B.E7.BC.A9.E9.80.89.E9.A1.B9.28COMPRESSION_OPTIONS.29" id="压缩选项(COMPRESSION_OPTIONS)"><span id=".E5.8E.8B.E7.BC.A9.E9.80.89.E9.A1.B9.28COMPRESSION_OPTIONS.29"></span>压缩选项(COMPRESSION_OPTIONS)</h3></div>
+<p>还有一些额外的标准可以传递到 <code>COMPRESSION</code> 指定的程序，例如：
+</p>
+<pre>COMPRESSION_OPTIONS=(-9)
+</pre>
+<p>这个选项可以留空， <i>mkinitcpio</i> 会确保任何支持的压缩方法有必要的标志来产生一个可以工作的映像。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>使用错误的参数选项可能导致<b>内核不能引导</b>，因为错误参数导致内核不能解压生成的压缩档。</div>
+<p>使用默认的 zstd 压缩时，<code>--long</code>选项在节省自定义内核的空间（特别是在使用 EFI 系统分区作为<code>/boot</code>时的<a href="#pgeaa450c2a061">双系统</a>设置）非常有效。但是，内存有限的系统可能无法使用此选项解压缩 initramfs。还可能需要<code>-v</code> 选项来查看 initramfs 生成期间的详细信息。例如：
+</p>
+<pre>COMPRESSION="zstd"
+COMPRESSION_OPTIONS=(-v -5 --long)
+</pre>
+<p>通过使用 xz 的 <code>-9e</code> 压缩级别并解压可加载内核模块和固件，可以实现最高（但最慢）的压缩：
+</p>
+<pre>COMPRESSION="xz"
+COMPRESSION_OPTIONS=(-9e)
+MODULES_DECOMPRESS="yes"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E6.A8.A1.E5.9D.97.E8.A7.A3.E5.8E.8B.E7.BC.A9.28MODULES_DECOMPRESS.29" id="模块解压缩(MODULES_DECOMPRESS)"><span id=".E6.A8.A1.E5.9D.97.E8.A7.A3.E5.8E.8B.E7.BC.A9.28MODULES_DECOMPRESS.29"></span>模块解压缩(MODULES_DECOMPRESS)</h3></div>
+<p><code>MODULES_DECOMPRESS</code> 控制内核模块与固件文件是否在 initramfs 创建时解压缩。默认为 <code>no</code>。
+</p><p>Arch 使用 19 级 zstd 压缩<a href="#pg3473491e6a48">内核</a>模块和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span>。 当为 initramfs 使用更高的压缩等级，设置<code>MODULES_DECOMPRESS="yes"</code> 可以更大幅度地减少 initramfs 的大小。这会导致在早期启动阶段更高的内存和 CPU 占用，对于内存有限、CPU 性能不足的系统有影响，因为内核将花费更多的时间来解压缩整个 initramfs 映像，而不是加载单个模块和固件时解压缩它们。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>在 initramfs 生成过程接近结束时，所有剩余的 <i>.bz2</i>、<i>.gz</i>、<i>.lz4</i>、<i>.lzma</i>、<i>.lzo</i>、<i>.xz </i> 和 <i>.zst</i> 文件被移动到早期未压缩的 initramfs 映像以避免双重压缩。</div>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg82461695094b_.E8.BF.90.E8.A1.8C.E6.97.B6.E9.85.8D.E7.BD.AE" id="运行时配置"><span id=".E8.BF.90.E8.A1.8C.E6.97.B6.E9.85.8D.E7.BD.AE"></span>运行时配置</h2></div>
+
+<p><br/>
+运行时配置选项可以通过内核命令行传递到 <code>init</code> 以及某些钩子。内核命令行参数通常是由启动引导器提供。下面讨论的参数可以附加到内核命令行以改变默认行为。参见 <a href="#pg2be54bdacb4c">Arch 启动过程</a>和<a href="#pgec0856954f1c">内核参数</a>以获取更多信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E4.BB.8E.E5.9F.BA.E6.9C.AC.E9.92.A9.E5.AD.90.E5.90.AF.E5.8A.A8" id="从基本钩子启动"><span id=".E4.BB.8E.E5.9F.BA.E6.9C.AC.E9.92.A9.E5.AD.90.E5.90.AF.E5.8A.A8"></span>从基本钩子启动</h3></div>
+<dl><dt><code>root=</code></dt>
+<dd>这是内核命令行中指定的最重要的参数，因为它决定了哪一个设备会被挂载为你的正确的 root 设备。mkinitcpio 允许不同的格式，详见<a href="#pg2636278c0df5">Persistent_block_device_naming#Kernel_parameters</a></dd></dl>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>下面的选项会改变 <code>init</code> 在 initramfs 环境中的默认行为。参见 <code>/lib/initcpio/init</code> 获取更多信息。但当启用<code>systemd</code>钩子时，这些参数不起作用，因为来自<code>base</code>钩子的 <code>init</code> 被取代了。</div>
+<dl><dt><code>break</code></dt>
+<dd>如果<code>break</code> 或者 <code>break=premount</code> 被指定，<code>init</code> 会暂停启动过程（在加载钩子之后，但是在挂载根文件系统之前）然后启动一个交互式终端，一般用来排障。如果指定为<code>break=postmount</code>，这个终端会在根目录挂载后启动。退出这个 shell 之后可以继续正常的启动流程。</dd></dl>
+<dl><dt><code>disablehooks=</code></dt>
+<dd>在运行时可以通过添加 <code>disablehooks=hook1{,hook2,...}</code> 禁用某些钩子。例如<pre>disablehooks=resume</pre></dd></dl>
+<dl><dt><code>earlymodules=</code></dt>
+<dd>改变模块加载的顺序。可以通过 <code>earlymodules=mod1{,mod2,...}</code> 指定一些模块提前加载。 (例如，这可以用来确保多个网络接口的正确顺序。)</dd></dl>
+<p>参见: <a href="#pga57cd4863e73">常规故障排除#系统启动问题</a>和 <span class="plainlinks archwiki-template-man" title="$ man 8 mkinitcpio"><a href="https://man.archlinux.org/man/mkinitcpio.8">mkinitcpio(8)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E4.BD.BF.E7.94.A8_RAID_.E7.A3.81.E7.9B.98.E9.98.B5.E5.88.97" id="使用_RAID_磁盘阵列"><span id=".E4.BD.BF.E7.94.A8_RAID_.E7.A3.81.E7.9B.98.E9.98.B5.E5.88.97"></span>使用 RAID 磁盘阵列</h3></div>
+<p>参见 <a href="#pg1b71ce42139c">RAID#Configure mkinitcpio</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E4.BD.BF.E7.94.A8_net" id="使用_net"><span id=".E4.BD.BF.E7.94.A8_net"></span>使用 net</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>NFSv4 仍然不被支持 <a href="https://bugs.archlinux.org/task/28287">FS#28287</a>。</div>
+<p><b>必须的包</b>
+</p><p><code>net</code> 需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-nfs-utils">mkinitcpio-nfs-utils</a></span><sup><small>包</small></sup></span> 包。
+</p><p><b>内核参数</b>
+</p>
+<pre><a href="https://docs.kernel.org/admin-guide/nfs/nfsroot.html">内核文档</a>包含最新的信息和清晰的说明。
+</pre>
+<p><b>ip=</b>
+</p><p>这个参数告诉内核怎样生成设备IP地址和怎样安装路由表。它最多可选9个参数： <code>ip=&lt;client-ip&gt;:&lt;server-ip&gt;:&lt;gw-ip&gt;:&lt;netmask&gt;:&lt;hostname&gt;:&lt;device&gt;:&lt;autoconf&gt;:&lt;dns0-ip&gt;:&lt;dns1-ip&gt;:&lt;ntp0-ip&gt;</code>。
+</p><p>如果这些参数在内核命令行缺失，所有区域将被认为是空白，则根据 <a href="https://docs.kernel.org/admin-guide/nfs/nfsroot.html">kernel documentation</a> 使用默认参数。通常这就意味这内核利用自动配置表来配置。
+</p><p><code>&lt;autoconf&gt;</code> 参数单独作为 <code>ip</code> 的值出现 (没有上面提及的任一参数)。如果值是 <code>ip=off</code> 或 <code>ip=none</code>, 将不会执行自动配置，否则会执行自动配置。最常见的是<code>ip=dhcp</code>.
+</p><p>获取参数具体说明，参见 <a href="https://docs.kernel.org/admin-guide/nfs/nfsroot.html">kernel documentation</a>.
+</p><p><i>例子：</i>
+</p>
+<pre> ip=127.0.0.1:::::lo:none  --&gt; 启用 loopback 接口。
+ ip=192.168.1.1:::::eth2:none --&gt; 启用静态 eth2 接口。
+ ip=:::::eth0:dhcp --&gt; 为 eth0 启用 dhcp。
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>请确保使用内核设备命名 (例如 <i>eth0</i>) 作为 <code>&lt;device&gt;</code> 参数, 不要使用 <a href="#pgf42a74f3af9c">网络配置#Network interfaces</a> 命名 (例如 <i>enp2s0</i>) 因为这个不起作用。</div>
+<p><b>BOOTIF=</b>
+使用多个网卡的时候，此参数可以指定要使用网卡的 Mac 地址。在接口号可能变化或与 IPAPPEND 2 、IPAPPEND 3 选项共用时比较有用。默认使用 eth0.
+</p><p>示例：
+</p>
+<pre>BOOTIF=01-A1-B2-C3-D4-E5-F6  # 注意前缀加"01-" 并且字母要大写。
+</pre>
+<p><b>nfsroot=</b>
+</p><p>如果命令行中没有给出 <code>nfsroot</code> 参数，那么默认的 <code>/tftpboot/%s</code> 会被使用。
+</p>
+<pre> nfsroot=[&lt;server-ip&gt;:]&lt;root-dir&gt;[,&lt;nfs-options&gt;]
+</pre>
+<p>运行<code>mkinitcpio -H net</code> 查看参数详细解释。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E4.BD.BF.E7.94.A8_lvm" id="使用_lvm"><span id=".E4.BD.BF.E7.94.A8_lvm"></span>使用 lvm</h3></div>
+<p>如果你的根分区在 <a href="#pg02cd87050dfd">LVM</a>文件系统中, 参见 <a href="https://wiki.archlinux.org/title/Install_Arch_Linux_on_LVM#Adding_mkinitcpio_hooks">Install Arch Linux on LVM#Adding mkinitcpio hooks</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E4.BD.BF.E7.94.A8.E5.8A.A0.E5.AF.86.E6.A0.B9.E7.9B.AE.E5.BD.95" id="使用加密根目录"><span id=".E4.BD.BF.E7.94.A8.E5.8A.A0.E5.AF.86.E6.A0.B9.E7.9B.AE.E5.BD.95"></span>使用加密根目录</h3></div>
+<p>如果使用<a href="https://wiki.archlinux.org/title/Dm-crypt/Encrypting_an_entire_system">加密根目录</a>，请参考 <a href="https://wiki.archlinux.org/title/Dm-crypt/System_configuration#mkinitcpio">Dm-crypt/System configuration#mkinitcpio</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.2Fusr_.E6.94.BE.E5.88.B0.E5.8D.95.E7.8B.AC.E5.88.86.E5.8C.BA" id="/usr_放到单独分区"><span id=".2Fusr_.E6.94.BE.E5.88.B0.E5.8D.95.E7.8B.AC.E5.88.86.E5.8C.BA"></span>/usr 放到单独分区</h3></div>
+<p>如果将 /usr 放在单独分区，必须满足：
+</p>
+<ul><li>添加 <code>fsck</code> 钩子, <code>/usr</code>在<code>/etc/fstab</code>分区表中的<code>passno</code> 参数设置为<code>2</code> ，以便启动时检查该分区。作为常规推荐 如果想要<code>/usr</code>分区可以在启动时被检查，以上设置是中肯的。没有这个钩子 <code>/usr</code> 永远不能被检查（fsck）。</li></ul>
+<ul><li>如果没使用systemd钩子，请添加<code>usr</code>钩子。这样将会在挂载根系统后挂载<code>/usr</code> 分区。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg82461695094b_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E7.94.9F.E6.88.90_fallback_initramfs_.E6.98.A0.E5.83.8F" id="生成_fallback_initramfs_映像"><span id=".E7.94.9F.E6.88.90_fallback_initramfs_.E6.98.A0.E5.83.8F"></span>生成 fallback initramfs 映像</h3></div>
+<p>自 mkinitcpio 版本 40 起，默认不生成 fallback initramfs 映像。若需要启用：
+</p>
+<ul><li>调整 <code>/etc/mkinitcpio.d/</code> 目录下相应的 <b>.preset</b> 文件：
+<ul><li>注释掉 <code>PRESETS=('default')</code> 行，并取消注释 <code>PRESETS=('default' 'fallback')</code> 行</li>
+<li>取消注释 <code>fallback_image="/boot/initramfs-linux-fallback.img"</code></li>
+<li>取消注释 <code>fallback_options="-S autodetect"</code></li></ul></li>
+<li>重新生成 initramfs。</li>
+<li>更新<a href="#pgee8f2050088a">引导加载程序</a>配置。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>缺少后备 initramfs 可能会使您在默认 initramfs 启动失败时，失去另一个启动系统的选项。请务必手头准备一个可启动的<a href="#pg739b1a956e24">安装介质</a>以备救援之用。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg82461695094b_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E8.A7.A3.E5.8E.8B.E7.BC.A9.E6.98.A0.E5.83.8F" id="解压缩映像"><span id=".E8.A7.A3.E5.8E.8B.E7.BC.A9.E6.98.A0.E5.83.8F"></span>解压缩映像</h3></div>
+<p>如果你对 initrd 映像的内容感到好奇，你可以解压缩它然后看看里面的文件。
+</p><p>initrd 映像是一个 SVR4 CPIO 压缩包，通过 <code>find</code> 和 <code>bsdcpio</code> 命令生成，利用可被内核理解的压缩方式被有选择的压缩，参考#压缩方式(COMPRESSION)。
+</p><p>mkinitcpio 包含了一个叫做 <span class="plainlinks archwiki-template-man" title="$ man 1 lsinitcpio"><a href="https://man.archlinux.org/man/lsinitcpio.1">lsinitcpio(1)</a></span> 的工具，可以列出和/或解压缩出 initramfs 映像的内容。
+</p><p>你可以用下面的命令列出映像中的文件：
+</p>
+<pre># lsinitcpio /boot/initramfs-linux.img
+</pre>
+<p>然后全部解压缩到当前文件夹：
+</p>
+<pre># lsinitcpio -x /boot/initramfs-linux.img
+</pre>
+<p>你也可以用更对人类友好的方式列出映像中的重要的部分：
+</p>
+<pre># lsinitcpio -a /boot/initramfs-linux.img
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E9.87.8D.E6.96.B0.E5.8E.8B.E7.BC.A9.E8.A7.A3.E5.8E.8B.E4.B9.8B.E5.90.8E.E4.BF.AE.E6.94.B9.E8.BF.87.E7.9A.84.E6.98.A0.E5.83.8F" id="重新压缩解压之后修改过的映像"><span id=".E9.87.8D.E6.96.B0.E5.8E.8B.E7.BC.A9.E8.A7.A3.E5.8E.8B.E4.B9.8B.E5.90.8E.E4.BF.AE.E6.94.B9.E8.BF.87.E7.9A.84.E6.98.A0.E5.83.8F"></span>重新压缩解压之后修改过的映像</h3></div>
+<p>激活<code>/usr/bin/mkinitcpio</code>脚本的 <code>build_image</code> 功能使用此参数：
+</p>
+<pre>build_image <i>outfile</i> <i>compression</i>
+</pre>
+<p>将会产生一个拥有<code>build_image</code>功能的新脚本，用上面的参数运行它（<i>outfile</i>输出文件名字，<i>compression</i>压缩工具），将会把当前目录下的内容压缩到一个名字为<code><i>outfile</i></code>的新文件里。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>建议在运行上面的命令产生一个新的<code>/boot/initramfs-linux.img</code>之前把现有的映像重命名作为备份，以便情况不妙时有后悔药吃。如果因为失误导致系统无法启动，你需要用fallback映像或者boot CD启动，然后运行mkinitcpio来overwrite掉之前做的更改，或者你自己修好它然后重新压缩映像。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.22.2Fdev_must_be_mounted.22_when_it_already_is" id='"/dev_must_be_mounted"_when_it_already_is'><span id=".22.2Fdev_must_be_mounted.22_when_it_already_is"></span>"/dev must be mounted" when it already is</h3></div>
+<p><i>mkinitcpio</i>使用这个检测通过判断<code>/dev/fd/</code> 是否存在来判断<code>/dev</code>是否被挂载。如果其他一切看起来都很好，可以通过以下方式手动“创建”：
+</p>
+<pre># ln -s /proc/self/fd /dev/
+</pre>
+<p>(显然, <code>/proc</code> 必须被安装. <i>mkinitcpio</i> 无论如何要求这样,指示它要检测的下一件事。)
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_Possibly_missing_firmware_for_module_XXX" id="Possibly_missing_firmware_for_module_XXXX">Possibly missing firmware for module XXXX</h3></div>
+<p>当内核更新后，initramfs映像被重新构建时，你可能得到以下警告：
+</p>
+<pre>==&gt; WARNING: Possibly missing firmware for module: wd719x
+==&gt; WARNING: Possibly missing firmware for module: aic94xx
+==&gt; WARNING: Possibly missing firmware for module: xhci_pci
+</pre>
+<p>如果产生 <i>default</i>映像时出现这些或相近的信息，那么按照警告要求安装额外的被需要的固件。绝大部分固件通过<a href="#pg811194d6beaa">安装</a>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span>包获得。其他提供固件的包可以查看下表或在<a href="#pg15c7e809c461">官方仓库</a>或 <a href="#pg89cb7b475cfb">AUR</a> 中搜索固件模块名字。
+</p><p>除此以外，警告信息只出现在 <i>fallback</i> 映像生成时，可以按照下面的建议来：
+</p>
+<ul><li>如果不需要使用缺失模块的硬件，可以安全地忽略这些警告。</li>
+<li>如果想要消除这些警告，安装缺失的固件，元包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-firmware/">mkinitcpio-firmware</a></span><sup><small>AUR</small></sup></span> 包括绝大部分可选的固件。也可以手动安装需要的包：</li></ul>
+<dl><dd><table class="wikitable">
+<tbody><tr>
+<th>模块</th>
+<th>包
+</th></tr>
+<tr>
+<td>aic94xx</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aic94xx-firmware/">aic94xx-firmware</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>ast
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ast-firmware/">ast-firmware</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>bfa</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-qlogic">linux-firmware-qlogic</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>bnx2x</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-broadcom">linux-firmware-broadcom</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>liquidio</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-liquidio">linux-firmware-liquidio</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>mlxsw_spectrum</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-mellanox">linux-firmware-mellanox</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>nfp</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-nfp">linux-firmware-nfp</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>qat_420xx</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-intel">linux-firmware-intel</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>qed</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-qlogic">linux-firmware-qlogic</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>qla1280</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-qlogic">linux-firmware-qlogic</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>qla2xxx</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-qlogic">linux-firmware-qlogic</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>wd719x</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wd719x-firmware/">wd719x-firmware</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>xhci_pci<br/>xhci_pci_renesas</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/upd72020x-fw/">upd72020x-fw</a></span><sup><small>AUR</small></sup></span>
+</td></tr></tbody></table></dd></dl>
+<p>如果想去掉警告，但不想浪费磁盘空间在不需要的固件包上，可以禁用 #生成 fallback initramfs 映像。
+</p><p>对于不可用的固件，也可以通过创建占位文件来抑制警告，例如：
+</p>
+<pre># echo "设备不可用" &gt; /usr/lib/firmware/qat_420xx.bin
+# echo "设备不可用" &gt; /usr/lib/firmware/qat_420xx_mmp.bin
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E6.B2.A1.E6.9C.89.E5.8F.91.E7.8E.B0_PS.2F2_.E6.8E.A7.E5.88.B6.E5.99.A8" id="没有发现_PS/2_控制器"><span id=".E6.B2.A1.E6.9C.89.E5.8F.91.E7.8E.B0_PS.2F2_.E6.8E.A7.E5.88.B6.E5.99.A8"></span>没有发现 PS/2 控制器</h3></div>
+<p>在一些主板（主要是早期的但是也有一些新的主板）， i8042 控制器不能被自动侦测到。这很罕见，但是一些人确定没有键盘使用。 可以提前侦测到这种情况。PS/2 接口得到 <code>i8042: PNP: No PS/2 controller found. Probing ports directly</code> 信息，加 <b>atkbd</b> 到 <code>MODULES</code> 数组。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E6.A0.87.E5.87.86.E6.80.A5.E6.95.91.E8.BF.87.E7.A8.8B" id="标准急救过程"><span id=".E6.A0.87.E5.87.86.E6.80.A5.E6.95.91.E8.BF.87.E7.A8.8B"></span>标准急救过程</h3></div>
+<p>使用不正确的初始化内存映像盘经常出现不可引导。因此遵守以下的系统急救过程：
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg82461695094b_.E5.9C.A8.E4.B8.80.E5.8F.B0.E6.9C.BA.E5.99.A8.E5.BC.95.E5.AF.BC.E6.88.90.E5.8A.9F.EF.BC.8C.E4.BD.86.E5.9C.A8.E5.8F.A6.E4.B8.80.E5.8F.B0.E5.BC.95.E5.AF.BC.E5.A4.B1.E8.B4.A5" id="在一台机器引导成功，但在另一台引导失败"><span id=".E5.9C.A8.E4.B8.80.E5.8F.B0.E6.9C.BA.E5.99.A8.E5.BC.95.E5.AF.BC.E6.88.90.E5.8A.9F.EF.BC.8C.E4.BD.86.E5.9C.A8.E5.8F.A6.E4.B8.80.E5.8F.B0.E5.BC.95.E5.AF.BC.E5.A4.B1.E8.B4.A5"></span>在一台机器引导成功，但在另一台引导失败</h4></div>
+<p>在主要映像 initramfs 扫描 <code>/sys</code> 时 <i>mkinitcpio</i>的 <code>autodetect</code> 钩子 过滤掉了 <a href="#pg446fdafcb30b">kernel modules</a> ，这些模块在启动被调用。 如果转移<code>/boot</code> 目录到其他机器，在早期用户空间造成启动失败，原因是新的硬件由于缺失内核模块不能被侦测到。注意USB 2.0 和 3.0 需要不同的模块。
+</p><p>修正这个缺陷，首先试着从引导记录<a href="#pg48d78cd732e6">bootloader</a> 中选择 fallback 映像 ，因为这个映像不使用<code>autodetect</code>过滤模块。 一旦引导成功，在新机器上运行<i>mkinitcpio</i>用正确的模块重建主要映像。如果fallback映像失败，试着用 Arch Linux live CD/USB，使用 arch-chroot 进入系统中, 在新机器上运行 <i>mkinitcpio</i> 。最后的手段，手工增加模块到[#MODULES|手动]]映像中。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg82461695094b_.E6.97.A0.E6.B3.95.E8.AE.BF.E9.97.AE.E6.8E.A7.E5.88.B6.E5.8F.B0.EF.BC.8Croot_.E7.94.A8.E6.88.B7.E8.A2.AB.E9.94.81.E5.AE.9A" id="无法访问控制台，root_用户被锁定"><span id=".E6.97.A0.E6.B3.95.E8.AE.BF.E9.97.AE.E6.8E.A7.E5.88.B6.E5.8F.B0.EF.BC.8Croot_.E7.94.A8.E6.88.B7.E8.A2.AB.E9.94.81.E5.AE.9A"></span>无法访问控制台，root 用户被锁定</h3></div>
+<p><code>systemd</code> 钩子<a href="https://gitlab.archlinux.org/archlinux/packaging/packages/systemd/-/commit/292cdf8a2f7dd7c6c7d91d2b59617391935c837c">会禁用 root 用户</a>。要启用紧急 shell，请临时在<a href="#pgec0856954f1c">内核参数</a>中添加 <code>SYSTEMD_SULOGIN_FORCE=1</code>。
+</p><p>或者，也可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/initcpio-hook-shadowcopy/">initcpio-hook-shadowcopy</a></span><sup><small>AUR</small></sup></span>。安装后，在 <code>/etc/mkinitcpio.conf</code> 中将 <code>shadowcopy</code> 钩子置于 <code>systemd</code> 之后，并使用 <code>mkinitcpio -P</code> 重新生成 initramfs。更多文档请参见其 <a href="https://github.com/iTrooz/initcpio-hook-shadowcopy">GitHub 仓库</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg82461695094b_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li>Linux Kernel documentation on <a href="https://docs.kernel.org/filesystems/ramfs-rootfs-initramfs.html#what-is-rootfs">initramfs, "What is rootfs?"</a></li>
+<li>Linux Kernel documentation on <a href="https://docs.kernel.org/admin-guide/initrd.html">initrd</a></li>
+<li>Wikipedia article on <a href="https://en.wikipedia.org/wiki/initrd">initrd</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807025441
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.488 seconds
+Real time usage: 0.502 seconds
+Preprocessor visited node count: 3093/1000000
+Revision size: 36250/2097152 bytes
+Post‐expand include size: 33681/2097152 bytes
+Template argument size: 12015/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 135/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  242.072      1 -total
+ 32.61%   78.928      1 Template:翻译状态
+  9.46%   22.910    198 Template:Ic
+  7.51%   18.189     24 Template:C
+  6.43%   15.562     39 Template:META_Table_cell
+  4.89%   11.835     15 Template:Grey
+  2.99%    7.238      2 Template:Expansion
+  2.98%    7.220     31 Template:Pkg
+  2.21%    5.353      9 Template:注意
+  2.18%    5.281      2 Template:Tip
+-->
+<!-- Render ID 55fafa8e-920b-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3524:|#|:idhash:canonical!zh-cn and timestamp 20260807025441 and revision id 35238. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

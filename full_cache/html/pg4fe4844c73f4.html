@@ -1,0 +1,96 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg4fe4844c73f4">Linux 固件</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Linux_firmware">Linux firmware</a>，最近一次同步于 2025-07-11，若英文版本有所<a href="https://wiki.archlinux.org/title/Linux_firmware?diff=0&amp;oldid=840734">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Linux_firmware_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg3473491e6a48">内核</a></li>
+<li><a href="#pga6cf703397a3">微码</a></li>
+<li><a href="#pg8f5df3654778">fwupd</a></li>
+</ul></div>
+<p>Linux 固件是和 Linux 内核一同发行的软件包，其包含某些硬件所需的部分或全部功能所需的固件的<a href="https://en.wikipedia.org/wiki/Binary_blob">二进制 blob</a>。这些二进制 blob 不允许被包含于使用了 GPL 许可证的工程，但可以以其他许可证重新发行。
+</p><p>通常需要固件的几种硬件包括：
+</p>
+<ul><li>现代 <a href="https://en.wikipedia.org/wiki/Graphics_processing_unit">GPU</a></li>
+<li><a href="#pg42eb048174ab">有线</a>网络适配器</li>
+<li><a href="#pgf9c69fac770d">无线</a>网络适配器</li>
+<li><a href="#pg20f71a8eddbf">蓝牙</a>控制器</li>
+<li>声卡（<a href="#pgb3b4b5c595bd">专业音频</a>或板载音频）</li></ul>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4fe4844c73f4_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>对于多数用户，推荐<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span> 元包以获取所有常用固件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4fe4844c73f4_.E5.8D.95.E7.8B.AC.E5.AE.89.E8.A3.85.E4.B8.8D.E5.90.8C.E4.BE.9B.E5.BA.94.E5.95.86.E7.9A.84.E5.9B.BA.E4.BB.B6" id="单独安装不同供应商的固件"><span id=".E5.8D.95.E7.8B.AC.E5.AE.89.E8.A3.85.E4.B8.8D.E5.90.8C.E4.BE.9B.E5.BA.94.E5.95.86.E7.9A.84.E5.9B.BA.E4.BB.B6"></span>单独安装不同供应商的固件</h3></div>
+<p>您可以仅安装您系统所使用的部分硬件的固件以节省存储空间。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>缺少必需固件可能导致系统无法操作！</div>
+<p>作为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span> 的依赖与其一同安装的固件：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-amdgpu">linux-firmware-amdgpu</a></span><sup><small>包</small></sup></span> - <a href="#pg4a4bc5e5df24">AMD</a> Radeon GPU</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-atheros">linux-firmware-atheros</a></span><sup><small>包</small></sup></span> - <a href="https://en.wikipedia.org/wiki/Atheros">高通 Atheros</a> Wi-Fi 及蓝牙适配器</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-broadcom">linux-firmware-broadcom</a></span><sup><small>包</small></sup></span> - <a href="#pg269f17a1a0fd">博通</a>和 <a href="https://en.wikipedia.org/wiki/Cypress_Semiconductor">Cypress</a> 网络适配器</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-cirrus">linux-firmware-cirrus</a></span><sup><small>包</small></sup></span> - <a href="https://en.wikipedia.org/wiki/Cirrus_Logic">Cirrus Logic</a> 音频设备</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-intel">linux-firmware-intel</a></span><sup><small>包</small></sup></span> - <a href="#pg9800307f9050">英特尔</a>音频设备，蓝牙适配器，GPU，网络适配器，NPU，网络摄像头和一些其他设备</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-mediatek">linux-firmware-mediatek</a></span><sup><small>包</small></sup></span> - <a href="https://en.wikipedia.org/wiki/MediaTek">MediaTek</a> 和 <a href="https://en.wikipedia.org/wiki/Ralink">Ralink</a> 网络适配器</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-nvidia">linux-firmware-nvidia</a></span><sup><small>包</small></sup></span> - <a href="#pge12579b7d4ac">NVIDIA</a> GPU 和 SoC</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-other">linux-firmware-other</a></span><sup><small>包</small></sup></span> - 其他未分类的设备</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-radeon">linux-firmware-radeon</a></span><sup><small>包</small></sup></span> - <a href="#pgedfe18626036">ATI</a> Radeon GPU</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-realtek">linux-firmware-realtek</a></span><sup><small>包</small></sup></span> - <a href="https://en.wikipedia.org/wiki/Realtek">Realtek</a> 网络及蓝牙适配器</li></ul>
+<p>可选软件包：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-liquidio">linux-firmware-liquidio</a></span><sup><small>包</small></sup></span> - <a href="https://en.wikipedia.org/wiki/Cavium">Cavium</a> LiquidIO server adapters</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-marvell">linux-firmware-marvell</a></span><sup><small>包</small></sup></span> - <a href="https://en.wikipedia.org/wiki/Marvell_Technology">Marvell</a> 网络适配器</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-mellanox">linux-firmware-mellanox</a></span><sup><small>包</small></sup></span> - for <a href="https://en.wikipedia.org/wiki/Mellanox_Technologies">Mellanox</a> Spectrum switches.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-nfp">linux-firmware-nfp</a></span><sup><small>包</small></sup></span> - for <a href="https://en.wikipedia.org/wiki/Netronome">Netronome</a> Flow Processors.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-qcom">linux-firmware-qcom</a></span><sup><small>包</small></sup></span> - for <a href="https://en.wikipedia.org/wiki/Qualcomm">Qualcomm</a> SoCs.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware-qlogic">linux-firmware-qlogic</a></span><sup><small>包</small></sup></span> - for <a href="https://en.wikipedia.org/wiki/QLogic">QLogic</a> networked devices.</li></ul>
+<p>Third-party packages:
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=alsa-firmware">alsa-firmware</a></span><sup><small>包</small></sup></span> - for loader programs in alsa-tools and hotplug firmware loader. See <a href="#pgb16dfd48462f">ALSA#Firmware</a>.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sane-gt68xx-firmware">sane-gt68xx-firmware</a></span><sup><small>包</small></sup></span> - for <a href="http://www.meier-geinitz.de/sane/gt68xx-backend/">gt68xx</a>-based scanners.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sigrok-firmware-fx2lafw">sigrok-firmware-fx2lafw</a></span><sup><small>包</small></sup></span> - for <a href="https://sigrok.org/wiki/Fx2lafw">FX2 logic analyzers</a>.</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sof-firmware">sof-firmware</a></span><sup><small>包</small></sup></span> - <a href="https://www.sofproject.org/">Sound Open Firmware</a>. See <a href="#pgb16dfd48462f">ALSA#Firmware</a>.</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4fe4844c73f4_.E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7" id="提示和技巧"><span id=".E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7"></span>提示和技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4fe4844c73f4_.E6.8E.A2.E6.B5.8B.E5.B7.B2.E5.8A.A0.E8.BD.BD.E7.9A.84.E5.9B.BA.E4.BB.B6" id="探测已加载的固件"><span id=".E6.8E.A2.E6.B5.8B.E5.B7.B2.E5.8A.A0.E8.BD.BD.E7.9A.84.E5.9B.BA.E4.BB.B6"></span>探测已加载的固件</h3></div>
+<p>在调试或选择固件包时，您可能想知晓您的系统加载了哪些固件，请使用<a href="https://docs.kernel.org/admin-guide/dynamic-debug-howto.html">动态调试（dynamic debug）</a>：
+</p>
+<ul><li>添加 <code>dyndbg="func fw_log_firmware_info +p"</code> <a href="#pgec0856954f1c">内核参数</a>。请注意引号可能需要转义，具体取决于您使用的<a href="#pgee8f2050088a">引导加载程序</a>。</li>
+<li>执行以下命令以列出已加载的固件：</li></ul>
+<pre># journalctl -kg 'loaded f'</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4fe4844c73f4_.E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85" id="另请参阅"><span id=".E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85"></span>另请参阅</h2></div>
+<ul><li><a href="https://gitlab.com/kernel-firmware/linux-firmware">上游仓库</a></li>
+<li><a href="https://wiki.gentoo.org/wiki/Linux_firmware">Gentoo:Linux firmware</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807034644
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.112 seconds
+Real time usage: 0.118 seconds
+Preprocessor visited node count: 294/1000000
+Revision size: 3703/2097152 bytes
+Post‐expand include size: 5956/2097152 bytes
+Template argument size: 1088/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   27.820      1 -total
+ 20.44%    5.687     22 Template:Pkg
+ 12.48%    3.473      1 Template:翻译状态
+ 11.22%    3.121      1 Template:Related_articles_start
+  8.08%    2.247      3 Template:Related
+  6.31%    1.756      1 Template:Related_articles_end
+  3.62%    1.006      1 Template:Bc
+  3.61%    1.003      1 Template:Ic
+  3.46%    0.963      1 Template:警告
+  3.17%    0.882      1 Template:META_Related_articles_start
+-->
+<!-- Render ID 9b6ef60f-9212-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8346:|#|:idhash:canonical!zh-cn and timestamp 20260807034644 and revision id 34483. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,276 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgd819314d422c">统一内核映像</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Unified_kernel_image">Unified kernel image</a>，最近一次同步于 2025-04-20，若英文版本有所<a href="https://wiki.archlinux.org/title/Unified_kernel_image?diff=0&amp;oldid=828655">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Unified_kernel_image_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p><a href="https://uapi-group.org/specifications/specs/unified_kernel_image">统一内核映像（Unified Kernel Image，UKI）</a>是一个可执行文件，可直接从 <a href="#pg46c3147defaf">UEFI</a> 固件进行启动，也可以无需或通过简单的配置由引导加载器自动生成。它将一个 UEFI boot stub 程序（例如 <span class="plainlinks archwiki-template-man" title="$ man 7 systemd-stub"><a href="https://man.archlinux.org/man/systemd-stub.7">systemd-stub(7)</a></span>）、一个 Linux <a href="#pg7e866ec617d4">内核映像</a>、一个 <a href="#pgb291c3734675">initrd</a> 以及<a href="https://uapi-group.org/specifications/specs/unified_kernel_image/#uki-components">其它资源</a>打包到了单个 UEFI PE 文件中。
+</p><p>该文件，也就是包括其下的所有元件都可以很方便地进行<a href="#pg4b4af9f551f6">签名</a>，以便与<a href="#pg0e14304dd697">安全启动</a>一起使用。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在该文中，<code><i>esp</i></code> 指代 <a href="#pg635d4bd93303">EFI 系统分区</a>的挂载点。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd819314d422c_.E5.87.86.E5.A4.87.E7.BB.9F.E4.B8.80.E5.86.85.E6.A0.B8.E6.98.A0.E5.83.8F" id="准备统一内核映像"><span id=".E5.87.86.E5.A4.87.E7.BB.9F.E4.B8.80.E5.86.85.E6.A0.B8.E6.98.A0.E5.83.8F"></span>准备统一内核映像</h2></div>
+<p>有多种方法可以生成 UKI 映像，并将其安装到正确位置下（<i>esp/EFI/Linux</i> 目录）。有多种工具都能完成该操作，可根据你的需要和喜好进行选择。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>你只需要完成下面任一种选项。</li>
+<li>可以将 UKI 放置到<a href="#pg46c3147defaf">默认启动路径</a> <code><i>esp</i>/EFI/BOOT/BOOTx64.EFI</code>（对于 32 位 IA32 UEFI 固件为 <code>BOOTIA32.EFI</code>）。使用默认启动路径无需在 NVRAM 显式创建启动项。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_mkinitcpio" id="mkinitcpio">mkinitcpio</h3></div>
+<p>除非安装了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd-ukify">systemd-ukify</a></span><sup><small>包</small></sup></span>，否则 <a href="#pgbd0f46fbac92">mkinitcpio</a> 会自行构建 UKI。在安装了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd-ukify">systemd-ukify</a></span><sup><small>包</small></sup></span> 的情况下，除非指定了 <code>--no-ukify</code> 选项，否则构建 UKI 的工作会被下放给 <i>ukify</i>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd819314d422c_.E5.86.85.E6.A0.B8.E5.91.BD.E4.BB.A4.E8.A1.8C.E5.8F.82.E6.95.B0" id="内核命令行参数"><span id=".E5.86.85.E6.A0.B8.E5.91.BD.E4.BB.A4.E8.A1.8C.E5.8F.82.E6.95.B0"></span>内核命令行参数</h4></div>
+<p>mkinitcpio 支持从 <code>/etc/cmdline.d</code> 文件夹下的命令行参数文件读取<a href="#pgec0856954f1c">内核参数</a>。Mkinitcpio 会将该文件夹下的所有文件内容集中到一个 <i>.conf</i> 文件下，并使用其生成内核命令行参数。命令行文件内以 <code>#</code> 开头的行都将被视为注释，并被 mkinitcpio 忽略掉。请<b>移除掉</b>指向微码和 initramfs 的启动项。
+</p><p>示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/cmdline.d/root.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+
+<ul><li>如果你的根文件系统位于非默认的 Btrfs 子卷下，请确保在 <code>rootflags</code> 中设置了必要的挂载参数。举个例子，如果系统的子卷 ID 是 <code>256</code>，那么就要将 <code>rootflags=subvolid=256</code> 添加到内核命令行中。具体请参考 <a href="#pg429e7ec45c9c">Btrfs#挂载子卷为根挂载点</a>。</li>
+<li><code>rootflags</code> 仅用于启动阶段，因此不需要将 <code>/etc/fstab</code> 中的全部挂载选项都复制过来。<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-remount-fs.service"><a href="https://man.archlinux.org/man/systemd-remount-fs.service.8">systemd-remount-fs.service(8)</a></span> 会在启动后自动读取 <code>/etc/fstab</code>，重新挂载并应用所有挂载选项。</li></ul>
+</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/cmdline.d/security.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># enable apparmor
+lsm=landlock,lockdown,yama,integrity,apparmor,bpf audit=1 audit_backlog_limit=256</pre>
+<p>也可以使用 <code>/etc/kernel/cmdline</code> 配置内核命令行选项，例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/kernel/cmdline</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">root=UUID=0a3407de-014b-458b-b5c1-848e92a327a3 rw quiet bgrt_disable</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>如果根分区<a href="#pgac06dd8bfe95">由 systemd 自动挂载</a>，可以省略 <code>root=</code> 参数。</li>
+<li><code>bgrt_disable</code> 参数可以让 Linux 在加载 ACPI 表后不要显示 OEM 图标。</li></ul>
+</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd819314d422c_.preset_.E6.96.87.E4.BB.B6" id=".preset_文件"><span id=".preset_.E6.96.87.E4.BB.B6"></span>.preset 文件</h4></div>
+<p>下一步，参考如下编辑 <code>/etc/mkinitcpio.d/linux.preset</code> 或是你在使用的预设文件，并指向到 <a href="#pg635d4bd93303">EFI 系统分区</a>的挂载点：
+</p>
+<ul><li>将 <code>PRESETS=</code> 中每一项的 <code><i>PRESET</i>_uki=</code> 参数取消注释（即移除 <code>#</code>），</li>
+<li>可以选择注释掉 <code><i>PRESET</i>_image=</code>，以避免存储多余的 <code>initramfs-*.img</code> 文件，</li>
+<li>对于想要添加启动画面的项，可以在每行 <code><i>PRESET</i>_options=</code> 中添加或取消注释掉 <code>--splash</code> 参数。</li></ul>
+<p>以下为一个可用 <code>linux.preset</code> 示例，用于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 内核并包含 Arch 启动画面：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.d/linux.preset</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># mkinitcpio preset file for the 'linux' package
+
+#ALL_config="/etc/mkinitcpio.conf"
+ALL_kver="/boot/vmlinuz-linux"
+
+PRESETS=('default' 'fallback')
+
+#default_config="/etc/mkinitcpio.conf"
+#default_image="/boot/initramfs-linux.img"
+default_uki="<i>esp</i>/EFI/Linux/arch-linux.efi"
+default_options="--splash=/usr/share/systemd/bootctl/splash-arch.bmp"
+
+#fallback_config="/etc/mkinitcpio.conf"
+#fallback_image="/boot/initramfs-linux-fallback.img"
+fallback_uki="<i>esp</i>/EFI/Linux/arch-linux-fallback.efi"
+fallback_options="-S autodetect"</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>如果你只是想从统一内核映像启动，可以<a href="#pg635d4bd93303">将 ESP 挂载到</a> <code>/efi</code>，并只将必要文件放置到 <a href="#pgc551b9cd7a20">ESP</a> 分区。</li>
+<li>可以通过添加 <code>--cmdline /etc/kernel/<i>fallback_cmdline</i></code> 到 <code>fallback_options</code> 以对后备映像使用不同的 cmdline（例如不带 <code>quiet</code> 参数）。</li>
+<li>要省略嵌入内核命令行，请在 <code><i>PRESET</i>_options=</code> 中添加 <code>--no-cmdline</code> 参数。内核参数将需要通过引导加载器传入。</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code><i>PRESET</i>_uki</code> 选项之前被称作 <code><i>PRESET</i>_efi_image</code>，于 2022 年 11 月变更（参见 <a href="https://gitlab.archlinux.org/archlinux/mkinitcpio/mkinitcpio/-/issues/134">archlinux/mkinitcpio/mkinitcpio#134</a>）；旧选项已被废弃，但现在尚能正常使用。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd819314d422c_pacman_.E9.92.A9.E5.AD.90" id="pacman_钩子"><span id="pacman_.E9.92.A9.E5.AD.90"></span>pacman 钩子</h4></div>
+<p>更新 systemd-stub（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd">systemd</a></span><sup><small>包</small></sup></span> 的一部分），微码（包括 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-ucode">intel-ucode</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=amd-ucode">amd-ucode</a></span><sup><small>包</small></sup></span>）及 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 内核会自动重新构建 UKI，但你可能会想检查下 <code>/etc/pacman.d/hooks/</code> 下如用于 <a href="#pge12579b7d4ac">NVIDIA 驱动</a>的其它 <a href="#pg9ef105bf1e3c">pacman 钩子</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd819314d422c_.E6.9E.84.E5.BB.BA_UKI" id="构建_UKI"><span id=".E6.9E.84.E5.BB.BA_UKI"></span>构建 UKI</h4></div>
+<p>最后，确保用于 UKI 的目录存在，并<a href="#pg82461695094b">重新生成 initramfs</a>。例如，对于 <i>linux</i>预设：
+</p>
+<pre># mkdir -p <i>esp</i>/EFI/Linux
+# mkinitcpio -p linux
+</pre>
+<p>另外，可以移除 <code>/boot</code> 或 <code>/efi</code> 下多余的 <code>initramfs-*.img</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_kernel_install" id="kernel-install">kernel-install</h3></div>
+<p>Kernel-install 是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd">systemd</a></span><sup><small>包</small></sup></span> 提供的另一替代品，并依赖于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd-ukify">systemd-ukify</a></span><sup><small>包</small></sup></span> 构建统一内核映像。首先确保已正确<a href="#pge813f0789723">配置</a>了 kernel-install。
+</p><p>要生成 UKI，需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd-ukify">systemd-ukify</a></span><sup><small>包</small></sup></span>，然后将 <code>kernel-install</code> 的 <i>layout</i> 设为 <code>uki</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/kernel/install.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">layout=uki</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><a href="#pgbd0f46fbac92">mkinitcpio</a> 会负责创建 initrd，然后d <a href="#pgd819314d422c_ukify">#ukify</a> 会进一步生成 UKI。</div>
+<p>为 <a href="#pgd819314d422c_ukify">#ukify</a> 进行的任何配置都必须在 <code>/etc/kernel/uki.conf</code> 中完成，才能被 <a href="#pge813f0789723">kernel-install</a> 使用，例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/kernel/uki.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[UKI]
+Splash=/usr/share/systemd/bootctl/splash-arch.bmp</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>你也可以将 <code>/usr/lib/kernel/uki.conf</code> 模板复制到 <code>/etc/kernel/uki.conf</code>，然后将需要的部分取消注释。<b>不要</b>在该文件中设置命令行参数，否则设定的参数将被忽略。具体信息请参考 <a href="#pge813f0789723">Kernel-install#Kernel command line</a>。</div>
+<p>也可以通过配置默认 <code>uki_generator</code> 来使用 mkinitcpio 生成 UKI：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/kernel/install.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">layout=uki
+uki_generator=mkinitcpio</pre>
+<p>在这种情况下可以不使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd-ukify">systemd-ukify</a></span><sup><small>包</small></sup></span>。你也可以使用其它 <code>initrd_generator</code>，具体信息请参考 <span class="plainlinks archwiki-template-man" title="$ man 8 kernel-install"><a href="https://man.archlinux.org/man/kernel-install.8">kernel-install(8)</a></span>。
+</p><p>为了使配置生效，需要重新安装当前使用的内核软件包。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_dracut" id="dracut">dracut</h3></div>
+<p>请参考 <a href="#pgb185d4cf00ac">dracut#统一内核映像</a>和 <a href="#pgb185d4cf00ac">dracut#升级内核时生成新 initramfs</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_ukify" id="ukify">ukify</h3></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systemd-ukify">systemd-ukify</a></span><sup><small>包</small></sup></span>。如需使用自动签名功能，请一并安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sbsigntools">sbsigntools</a></span><sup><small>包</small></sup></span>。由于 <i>ukify</i> 不能自行生成 initramfs，因此如有需求，需要单独通过 <a href="#pgb185d4cf00ac">dracut</a>，<a href="#pgbd0f46fbac92">mkinitcpio</a> 或 <a href="#pg375fc9bbcc64">booster</a> 进行生成。
+</p><p>最小可用示例如下：
+</p>
+<pre># ukify build --linux=<i>/boot/vmlinuz-linux</i> \
+              --initrd=<i>/boot/initramfs-linux.img</i> \
+              --cmdline="<i>quiet rw</i>"
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果使用了<a href="#pgdc6bceef5651">外置 initramfs 微码映像</a>，必须将 <code>/boot/amd-ucode.img</code> 或 <code>/boot/intel-ucode.img</code> 放置到<b>第一位</b>，放在主 initramfs 映像之前，例如：<code>--initrd=/boot/intel-ucode.img --initrd=/boot/initramfs-linux.img</code>。
+</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>要跳过将 EFI 执行文件复制到 EFI 系统分区的步骤，可对 <i>ukify</i> 使用 <code>--output=<i>esp</i>/EFI/Linux/<i>filename</i>.efi</code> 命令行选项。</li>
+<li>在使用 <code>--cmdline</code> 选项时，可在文件名前使用 <code>@</code> 符号来指定内核参数来源文件（以 <code>/etc/kernel/cmdline</code> 为例，使用 <code>--cmdline=@<i>/path/to/cmdline</i></code>）</li></ul>
+</div>
+<p>更多信息请参考 <span class="plainlinks archwiki-template-man" title="$ man 1 ukify"><a href="https://man.archlinux.org/man/ukify.1">ukify(1)</a></span>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>要在内核/微码/initramfs 改变时自动更新 UKI，只需将 ukify 搭配如 <a href="#pge813f0789723">kernel-install</a> 或 <a href="#pgbd0f46fbac92">mkinitcpio</a> 使用。具体细节请参考之前的 #kernel-install 和 <a href="#pgd819314d422c_mkinitcpio">#mkinitcpio</a> 章节。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_.E6.89.8B.E5.8A.A8.E6.9E.84.E5.BB.BA" id="手动构建"><span id=".E6.89.8B.E5.8A.A8.E6.9E.84.E5.BB.BA"></span>手动构建</h3></div>
+<p>Put the kernel command line you want to use in a file, and create the bundle file using <span class="plainlinks archwiki-template-man" title="$ man 1 objcopy"><a href="https://man.archlinux.org/man/objcopy.1">objcopy(1)</a></span>.
+</p><p>For <a href="#pgdc6bceef5651">microcode</a>, first concatenate the microcode file and your initrd, as follows:
+</p>
+<pre>$ cat <i>esp</i>/<i>cpu_manufacturer</i>-ucode.img <i>esp</i>/initramfs-linux.img &gt; /tmp/combined_initrd.img
+</pre>
+<p>When building the unified kernel image, pass in <code>/tmp/combined_initrd.img</code> as the initrd. This file can be removed afterwards.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>For <a href="#pg46c3147defaf">IA32 UEFI</a>, replace <code>/usr/lib/systemd/boot/efi/linuxx64.efi.stub</code> with <code>/usr/lib/systemd/boot/efi/linuxia32.efi.stub</code> in the following commands.</div>
+<pre>$ align="$(objdump -p /usr/lib/systemd/boot/efi/linuxx64.efi.stub | awk '{ if ($1 == "SectionAlignment"){print $2} }')"
+$ align=$((16#$align))
+$ osrel_offs="$(objdump -h "/usr/lib/systemd/boot/efi/linuxx64.efi.stub" | awk 'NF==7 {size=strtonum("0x"$3); offset=strtonum("0x"$4)} END {print size + offset}')"
+$ osrel_offs=$((osrel_offs + "$align" - osrel_offs % "$align"))
+$ cmdline_offs=$((osrel_offs + $(stat -Lc%s "/usr/lib/os-release")))
+$ cmdline_offs=$((cmdline_offs + "$align" - cmdline_offs % "$align"))
+$ splash_offs=$((cmdline_offs + $(stat -Lc%s "/etc/kernel/cmdline")))
+$ splash_offs=$((splash_offs + "$align" - splash_offs % "$align"))
+$ initrd_offs=$((splash_offs + $(stat -Lc%s "/usr/share/systemd/bootctl/splash-arch.bmp")))
+$ initrd_offs=$((initrd_offs + "$align" - initrd_offs % "$align"))
+$ linux_offs=$((initrd_offs + $(stat -Lc%s "<i>initrd-file</i>")))
+$ linux_offs=$((linux_offs + "$align" - linux_offs % "$align"))
+
+$ objcopy \
+    --add-section .osrel="/usr/lib/os-release" --change-section-vma .osrel=$(printf 0x%x $osrel_offs) \
+    --add-section .cmdline="/etc/kernel/cmdline" \
+    --change-section-vma .cmdline=$(printf 0x%x $cmdline_offs) \
+    --add-section .splash="/usr/share/systemd/bootctl/splash-arch.bmp" \
+    --change-section-vma .splash=$(printf 0x%x $splash_offs) \
+    --add-section .initrd="<i>initrd-file</i>" \
+    --change-section-vma .initrd=$(printf 0x%x $initrd_offs) \
+    --add-section .linux="<i>vmlinuz-file</i>" \
+    --change-section-vma .linux=$(printf 0x%x $linux_offs) \
+    "/usr/lib/systemd/boot/efi/linuxx64.efi.stub" "<i>linux</i>.efi"</pre>
+<p>A few things to note:
+</p>
+<ul><li>The offsets are dynamically calculated so no sections overlap, as recommended in <a href="https://github.com/systemd/systemd/commit/0fa2cac4f0cdefaf1addd7f1fe0fd8113db9360b#commitcomment-76747223">[1]</a>.</li>
+<li>The sections are aligned to what the <code>SectionAlignment</code> field of the PE stub indicates (usually 0x1000).</li>
+<li>The kernel image must be in the last section, to prevent in-place decompression from overwriting the sections that follow, as stated in <a href="https://github.com/systemd/systemd/commit/0fa2cac4f0cdefaf1addd7f1fe0fd8113db9360b#commitcomment-84868898">[2]</a>.</li></ul>
+<p>After creating the image, copy it to the EFI system partition:
+</p>
+<pre># cp <i>linux</i>.efi <i>esp</i>/EFI/Linux/
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd819314d422c_.E4.B8.BA.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8.E5.AF.B9_UKI_.E8.BF.9B.E8.A1.8C.E7.AD.BE.E5.90.8D" id="为安全启动对_UKI_进行签名"><span id=".E4.B8.BA.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8.E5.AF.B9_UKI_.E8.BF.9B.E8.A1.8C.E7.AD.BE.E5.90.8D"></span>为安全启动对 UKI 进行签名</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_sbctl" id="sbctl">sbctl</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sbctl">sbctl</a></span><sup><small>包</small></sup></span> provides a <a href="#pge813f0789723">kernel-install</a> script, a <a href="#pgbd0f46fbac92">mkinitcpio</a> post-hook, and pacman hooks to sign updated binaries.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_mkinitcpio" id="mkinitcpio_2">mkinitcpio</h3></div>
+<p>By using a <a href="#pgbd0f46fbac92">mkinitcpio post hook</a>, the generated unified kernel images can be signed for <a href="#pgf5f38183c9dc">Secure Boot</a>. <a href="#pgf0389bcc2cf2">Create</a> the following file and make it <a href="#pgf46977f5f342">executable</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/initcpio/post/uki-sbsign</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/env bash
+
+uki="$3"
+[[ -n "$uki" ]] || exit 0
+
+keypairs=(<i>/path/to/</i>db.key <i>/path/to/</i>db.crt)
+
+for (( i=0; i&lt;${#keypairs[@]}; i+=2 )); do
+    key="${keypairs[$i]}" cert="${keypairs[(( i + 1 ))]}"
+    if ! sbverify --cert "$cert" "$uki" &amp;&gt;/dev/null; then
+        sbsign --key "$key" --cert "$cert" --output "$uki" "$uki"
+    fi
+done</pre>
+<p>Replace <code><i>/path/to/</i>db.key</code> and <code><i>/path/to/</i>db.crt</code> with the paths to the key pair you want to use for signing the image.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_ukify" id="ukify_2">ukify</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sbsigntools">sbsigntools</a></span><sup><small>包</small></sup></span>，并在 <code>/etc/kernel/uki.conf</code> 中指定 <code>--secureboot-private-key</code> 和 <code>--secureboot-certificate</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd819314d422c_.E5.90.AF.E5.8A.A8" id="启动"><span id=".E5.90.AF.E5.8A.A8"></span>启动</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>当启用<a href="#pg0e14304dd697">安全启动</a>时，内嵌 <code>.cmdline</code> 的统一内核映像会忽略所有传入的命令行参数（无论是通过启动项还是交互式传入）。在不启用安全启动时，通过命令行传入的选项会绕过掉内嵌的 <code>.cmdline</code>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_Limine" id="Limine">Limine</h3></div>
+<p><a href="#pg7b799300dd78">Limine</a> 不会自动检测 UKI，但可以通过编辑 <code>limine.conf</code> 手动进行加载。
+</p><p><b>示例 1：从默认 EFI 系统分区启动 UKI</b>
+</p><p>如果 UKI 位于 <code><i>esp</i>/EFI/Linux/</code> 下，可以在 <code>limine.conf</code> 中添加如下配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">limine.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/Arch Linux
+  protocol: efi
+  path: boot():/EFI/Linux/arch-linux.efi</pre>
+<p><b>示例 2：从其它分区启动 UKI</b>
+</p><p>如果 UKI 文件位于不同的 <a href="#pgfeb479f7aff2">FAT32</a> 分区下，可以通过 <code>guid(<i>PARTUUID</i>)</code> 使用 <a href="#pg21114c396344">PARTUUID</a> 进行指定：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">limine.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/Arch Linux
+  protocol: efi
+  path: guid(<i>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</i>):/EFI/Linux/arch-linux.efi</pre>
+<p>关于支持的路径和配置选项等更多信息，请参考 <a href="https://github.com/limine-bootloader/limine/blob/v8.x/CONFIG.md#Paths">Limine Paths 文档</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_systemd_boot" id="systemd-boot">systemd-boot</h3></div>
+<p><a href="#pg171755f7b428">systemd-boot</a> 会在 <code><i>esp</i>/EFI/Linux/</code> 路径下搜索统一内核映像，无需额外配置。具体细节请参考 <span class="plainlinks archwiki-template-man" title="$ man 7 sd-boot"><a href="https://man.archlinux.org/man/sd-boot.7#FILES">sd-boot(7) § FILES</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_rEFInd" id="rEFInd">rEFInd</h3></div>
+<p><a href="#pg155cf311d887">rEFInd</a> 会自动检测到 EFI 系统分区下的 UKI，并可以进行加载。也可以在 <code>refind.conf</code> 中手动进行指定，参考如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"><i>esp</i>/EFI/refind/refind.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">menuentry "Arch Linux" {
+    icon \EFI\refind\icons\os_arch.png
+    ostype Linux
+    loader \EFI\Linux\arch-linux.efi
+}</pre>
+<p>注意，以该种方式启动时，是不会传入 <code><i>esp</i>/EFI/refind_linux.conf</code> 中的内核参数的。如果 UKI 生成时没有使用 <code>.cmdline</code>，需要在启动项添加 <code>options</code> 一行指定内核参数。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_GRUB" id="GRUB">GRUB</h3></div>
+<p><a href="#pgca9c4017f7ad">GRUB</a> 可以连锁加载 EFI UKI，具体细节请参考 <a href="#pgca9c4017f7ad">GRUB#Chainload 一个统一的内核镜像</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd819314d422c_.E7.9B.B4.E6.8E.A5.E4.BB.8E_UEFI_.E5.90.AF.E5.8A.A8" id="直接从_UEFI_启动"><span id=".E7.9B.B4.E6.8E.A5.E4.BB.8E_UEFI_.E5.90.AF.E5.8A.A8"></span>直接从 UEFI 启动</h3></div>
+<p><a href="#pg996df5ed0532">efibootmgr</a> 可以为 <i>.efi</i> 文件创建 UEFI 启动项：
+</p>
+<pre># efibootmgr --create --disk /dev/sd<i>X</i> --part <i>partition_number</i> --label "Arch Linux" --loader '\EFI\Linux\arch-linux.efi' --unicode
+</pre>
+<p>选项具体作用请参考 <span class="plainlinks archwiki-template-man" title="$ man 8 efibootmgr"><a href="https://man.archlinux.org/man/efibootmgr.8">efibootmgr(8)</a></span>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>UEFI 标准使用反斜杠<code>\</code> 作为路径分隔符，但 <i>efibootmgr</i> 可以自动转换 UNIX 风格的 <code>/</code> 路径分隔符。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd819314d422c_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><a href="https://www.youtube.com/watch?v=7UhwK3g99_0">All Systems Go! talk on UKIs</a></li>
+<li><a href="https://uapi-group.org/specifications/specs/unified_kernel_image/">Unified kernel image specification</a></li>
+<li><a href="https://linderud.dev/blog/mkinitcpio-v31-and-uefi-stubs/">mkinitcpio v31 and UEFI stubs</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807043537
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.304 seconds
+Real time usage: 0.314 seconds
+Preprocessor visited node count: 1134/1000000
+Revision size: 15907/2097152 bytes
+Post‐expand include size: 20174/2097152 bytes
+Template argument size: 10213/2097152 bytes
+Highest expansion depth: 9/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 30/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  149.142      1 -total
+ 56.02%   83.545      1 Template:翻译状态
+ 10.60%   15.808      4 Template:Tip
+  6.41%    9.553     10 Template:Note
+  6.34%    9.457     73 Template:Ic
+  3.78%    5.638      7 Template:Man
+  3.42%    5.099      1 Template:Remove
+  3.11%    4.632     15 Template:Pkg
+  2.06%    3.074     11 Template:Hc
+  1.18%    1.754      1 Template:META_Message
+-->
+<!-- Render ID 6fa33e8e-9219-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7963:|#|:idhash:canonical!zh-cn and timestamp 20260807043537 and revision id 35237. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

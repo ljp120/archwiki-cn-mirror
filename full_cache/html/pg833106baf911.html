@@ -1,0 +1,357 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg833106baf911">简体中文本地化</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgbf65db42be1c">locale</a></li>
+<li><a href="#pgf8eaf67923da">中文本地化</a></li>
+<li><a href="#pg1bd179fbfefb">繁体中文本地化</a></li>
+<li><a href="#pgbdbcbed611fc">安装指南</a></li>
+<li><a href="#pgb2db5e40b019">建议阅读</a></li>
+</ul></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此页面不是纯粹的对 ArchWiki Localization/Simplified Chinese 一文的翻译。</div>
+<p>依据“<a href="#pgf1f2f42e4409">Arch 之道</a>”：我们不会为你配置好一切，因为“喜好和需求，每人皆不同”，但是会尽量确保让配置时方便和简单。事实上，甚至远比使用某些 Linux 中文发行版容易。
+</p><p>本文尽可能提供了各种常见软件的中文化指导。但实际应用中，你可能遇到各种各样的麻烦。遇到了麻烦，不要气馁，解决问题本身就是一种乐趣。你可以通过各种渠道寻求帮助：
+</p>
+<ul><li><a href="https://www.google.com/ncr">Google</a> 等搜索引擎</li>
+<li><a href="https://bbs.archlinux.org/">Arch 官方论坛</a></li>
+<li><a href="#pg1f4e961cb137">Arch Linux 中文社区</a></li></ul>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg833106baf911_.E5.9F.BA.E6.9C.AC.E4.B8.AD.E6.96.87.E6.94.AF.E6.8C.81" id="基本中文支持"><span id=".E5.9F.BA.E6.9C.AC.E4.B8.AD.E6.96.87.E6.94.AF.E6.8C.81"></span>基本中文支持</h2></div>
+<p>要正确显示中文，必需设置正确的 locale 并安装合适的中文字体。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_locale_.E8.AE.BE.E7.BD.AE" id="locale_设置"><span id="locale_.E8.AE.BE.E7.BD.AE"></span>locale 设置</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg833106baf911_.E5.AE.89.E8.A3.85.E4.B8.AD.E6.96.87_locale" id="安装中文_locale"><span id=".E5.AE.89.E8.A3.85.E4.B8.AD.E6.96.87_locale"></span>安装中文 locale</h4></div>
+<p>Linux 中通过 locale 来设置程序运行的本地化环境。根据地区和字符编码的不同，常用的中文 locale 有：
+</p>
+<pre>zh_CN.GB18030
+zh_CN.UTF-8
+zh_HK.UTF-8
+zh_SG.UTF-8
+zh_TW.BIG-5
+zh_TW.UTF-8
+</pre>
+<p>推荐使用 UTF-8 的 locale 而非老旧的各地区编码。需要修改 <code>/etc/locale.gen</code> 文件来设定系统中可以使用的 locale（取消对应项前的注释符号“<code>#</code>”即可）：
+</p>
+<pre>en_US.UTF-8 UTF-8
+zh_CN.UTF-8 UTF-8
+zh_SG.UTF-8 UTF-8
+</pre>
+<p>然后执行 <code>locale-gen</code> 命令，便可以在系统中使用这些 locale。可以通过 <code>locale</code> 命令来查看当前使用的 locale：亦可通过 <code>locale -a</code> 命令来查看目前可以使用的 locale。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg833106baf911_.E9.85.8D.E7.BD.AE.E4.B8.AD.E6.96.87_locale" id="配置中文_locale"><span id=".E9.85.8D.E7.BD.AE.E4.B8.AD.E6.96.87_locale"></span>配置中文 locale</h4></div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg833106baf911_.E9.85.8D.E7.BD.AE.E5.85.A8.E5.B1.80_locale" id="配置全局_locale"><span id=".E9.85.8D.E7.BD.AE.E5.85.A8.E5.B1.80_locale"></span>配置全局 locale</h5></div>
+<p>在 <code>/etc/locale.conf</code> 里可以设置全局的 LANG locale，根据需要可以设置为中文或英文：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /etc/locale.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">LANG=zh_CN.UTF-8
+</pre>
+<p><code>LANG</code> 这个环境变量代表默认的区域设置，具体的含义见 <a href="#pgbf65db42be1c">Locale#LANG：默认的区域设置</a>
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果在 <code>/etc/locale.conf</code> 里把全局的 LANG locale 设置成中文，例如 <code>LANG=zh_CN.UTF-8</code>，会使得 TTY 下也尝试显示中文消息。因为 TTY 下一般没有 CJK 字体，中文可能会显示为豆腐（方块）或问号等。当今大多数桌面用户不使用 TTY，所以一般没有影响。关于 TTY 下的中文字体设置见下文有关章节。</div>
+<p>每个用户单独的 locale 可以在 <code>~/.bashrc</code>、<code>~/.xinitrc</code> 或 <code>~/.xprofile</code> 中设置：
+</p>
+<ul><li><code>.bashrc</code>：每次<b>使用终端时</b>会应用此处的设置。</li>
+<li><code>.xinitrc</code>：每次<b>使用 <a href="#pgbe190b056b34">startx</a> 或 <a href="#pg0f2747f56328">SLiM</a> 来启动 <a href="#pg77b3799bdb30">X</a> 窗口系统时</b>会应用此处的设置。</li>
+<li><code>.xprofile</code>：每次<b>使用 <a href="#pg89573e816846">GDM</a> 等显示管理器时</b>会应用此处的设置。</li></ul>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg833106baf911_.E4.B8.BA.E5.9B.BE.E5.BD.A2.E7.95.8C.E9.9D.A2.E9.85.8D.E7.BD.AE.E4.B8.AD.E6.96.87_locale" id="为图形界面配置中文_locale"><span id=".E4.B8.BA.E5.9B.BE.E5.BD.A2.E7.95.8C.E9.9D.A2.E9.85.8D.E7.BD.AE.E4.B8.AD.E6.96.87_locale"></span>为图形界面配置中文 locale</h5></div>
+<p>如果你选择设置了全局的中文 locale，就不需要再为图形界面专门设置。
+</p><p><a href="#pg89573e816846">GDM</a> 和 <a href="#pg3438569d0b30">SDDM</a> 用户可以在 <a href="#pg1e095fe2c2a6">GNOME</a> 或 <a href="#pg5b70e23b1711">KDE</a> 设置中选择语言。参见<a href="#pg30e2075251d0">显示管理器#为用户会话设置语言</a>。
+</p><p>使用其他的没有自带语言设置的登录管理器的用户，又没有设置全局中文 locale 的，可以在 <code>~/.xinitrc</code> 或 <code>~/.xprofile</code> 里单独设置中文 locale，即添加下面两行到文件的最开头（如果不确定使用哪个文件，都添加）：
+</p>
+<pre>export LANG=zh_CN.UTF-8
+export LANGUAGE=zh_CN:en_US
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>若欲将此两行放至 <code>~/.xinitrc</code> 中，请注意将其放在 <code>exec <i>_example_WM_or_DE_</i></code> 行之前，此为常见错误。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>不推荐使用 <code>export LC_ALL</code> 来覆盖所有 locale 设置，<code>LC_ALL</code> 应该仅用于诊断调试，全局设置 <code>LC_ALL</code> 会为诊断语言设置问题带来不必要的困难。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_.E4.B8.AD.E6.96.87.E5.AD.97.E4.BD.93" id="中文字体"><span id=".E4.B8.AD.E6.96.87.E5.AD.97.E4.BD.93"></span>中文字体</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg833106baf911_.E5.AE.89.E8.A3.85.E5.AD.97.E4.BD.93" id="安装字体"><span id=".E5.AE.89.E8.A3.85.E5.AD.97.E4.BD.93"></span>安装字体</h4></div>
+<p>除了设置好 locale，还需要安装中文字体。
+</p><p>常用的自由（OFL、GPL或其他自由软件协议）中文字体有：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-han-sans-cn-fonts">adobe-source-han-sans-cn-fonts</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-han-serif-cn-fonts">adobe-source-han-serif-cn-fonts</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=noto-fonts-cjk">noto-fonts-cjk</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wqy-microhei">wqy-microhei</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wqy-microhei-lite">wqy-microhei-lite</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wqy-bitmapfont">wqy-bitmapfont</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wqy-zenhei">wqy-zenhei</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-arphic-ukai">ttf-arphic-ukai</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ttf-arphic-uming">ttf-arphic-uming</a></span><sup><small>包</small></sup></span></li></ul>
+<p>系统字体将默认安装到 <code>/usr/share/fonts</code>。如果没有 root 权限或只打算自己使用某些字体，可以直接复制这些字体到 <code>~/.fonts</code> 目录（或其子目录）下面，并把该路径加入 <code>/etc/fonts/local.conf</code> 中。具体参见后面章节。
+</p><p>另见：<a href="http://wiki.debian.org.hk/w/Where_can_I_find_fonts_for_GNU/Linux">[1]</a>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg833106baf911_.E4.B8.AD.E6.96.87.E5.AD.97.E4.BD.93.E9.85.8D.E7.BD.AE" id="中文字体配置"><span id=".E4.B8.AD.E6.96.87.E5.AD.97.E4.BD.93.E9.85.8D.E7.BD.AE"></span>中文字体配置</h4></div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg833106baf911_Fontconfig_.E8.AE.BE.E7.BD.AE" id="Fontconfig_设置"><span id="Fontconfig_.E8.AE.BE.E7.BD.AE"></span>Fontconfig 设置</h5></div>
+<p>Fontconfig 的用户配置文件是 <code>$XDG_CONFIG_HOME/fontconfig/fonts.conf</code>，或存放于 <code>$XDG_CONFIG_HOME/fontconfig/conf.d/</code>。全局配置文件是 <code>/etc/fonts/conf.d</code>。推荐修改前者。
+</p><p>关于中文字体设置，参见：<a href="#pgb8e819c27b39">字体</a>、<a href="#pg3ffaba980b7a">字体配置</a>。
+</p><p><a href="#pg9cfb9537dd69">Font Configuration/Chinese</a> 提供了中文字体的 Fontconfig 示范。
+</p><p>另见：
+</p>
+<ul><li><a href="https://catcat.cc/post/2021-03-07/">用 fontconfig 治理 Linux 中的字体</a></li>
+<li><a href="https://szclsya.me/zh-cn/posts/fonts/linux-config-guide/">Linux 下的字体调校指南</a></li></ul>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg833106baf911_.E4.BF.AE.E6.AD.A3.E7.AE.80.E4.BD.93.E4.B8.AD.E6.96.87.E6.98.BE.E7.A4.BA.E4.B8.BA.E5.BC.82.E4.BD.93.EF.BC.88.E6.97.A5.E6.96.87.EF.BC.89.E5.AD.97.E5.BD.A2" id="修正简体中文显示为异体（日文）字形"><span id=".E4.BF.AE.E6.AD.A3.E7.AE.80.E4.BD.93.E4.B8.AD.E6.96.87.E6.98.BE.E7.A4.BA.E4.B8.BA.E5.BC.82.E4.BD.93.EF.BC.88.E6.97.A5.E6.96.87.EF.BC.89.E5.AD.97.E5.BD.A2"></span>修正简体中文显示为异体（日文）字形</h5></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=noto-fonts-cjk">noto-fonts-cjk</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-han-sans-otc-fonts">adobe-source-han-sans-otc-fonts</a></span><sup><small>包</small></sup></span>（思源黑体）或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-han-serif-otc-fonts">adobe-source-han-serif-otc-fonts</a></span><sup><small>包</small></sup></span>（思源宋体）后，在某些情况下（框架未定义地区）汉字字形与国标标准不符，例如<span lang="ja">关</span>、<span lang="ja">复</span>等字字形过窄，<span lang="ja">门</span>的字形为竖点插入横折钩而非左上斜点等。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此处的字形仅为日语字形示例，并非你字体真的配置错了！你需要查看其他地方和应用程序中文字的字形以检查配置情况。</div>
+<p>这是因为每个程序中可以设置不同的默认字体，比如 Arial 或者 Tahoma，而这些字体的属性由 <a href="#pgc09aab063262">fontconfig</a> 控制，其使用顺序是据地区代码以 A-Z 字母表顺序成默认排序，由于 <code>ja-JP</code> 在 <code>zh_{CN,HK,SG,TW}</code> 之前，故优先显示日文字形。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>Chromium/Chrome/Firefox 浏览器的设置中可单独设置字体，例如将字体选项调成 Noto xxx CJK SC。</div>
+<p>可选用以下方法解决（以简体中文为例）：
+</p>
+<ul><li>确保桌面环境的语言区域设置正确。例如，<a href="#pg5b70e23b1711">KDE可能会生成错误的语言配置文件</a>，相应修复即可。</li>
+<li>只安装符合简体中文国标标准的字体，例如思源字体的简体中文变体包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-han-sans-cn-fonts">adobe-source-han-sans-cn-fonts</a></span><sup><small>包</small></sup></span>和<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-han-serif-cn-fonts">adobe-source-han-serif-cn-fonts</a></span><sup><small>包</small></sup></span>，或者 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/noto-fonts-sc/">noto-fonts-sc</a></span><sup><small>AUR</small></sup></span>。</li>
+<li>在 <code>locale.conf</code> 中添加 <code>LANG=zh_CN.UTF-8</code>，以将简体中文设置为默认语言。由于对 <a href="#pgbf65db42be1c">Locale</a> 定义了框架内地区（即 CJK 优先度），使得默认的优先级被忽略。（不建议，理由见上）</li>
+<li>手动调整优先级，将中文字形调整到日文字形之前。<a href="https://tieba.baidu.com/p/4879946717">[2]</a>在 <code>/etc/fonts/conf.d/</code> 或 <code>/etc/fonts/conf.avail/</code> 下创建文件，例如 <code>64-language-selector-prefer.conf</code>，也可以修改或创建 <code>~/.fonts.conf</code>或在<code>~/.config/fontconfig/conf.d/</code>创建后缀为.conf的文件（仅对该用户生效）。例如针对<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=noto-fonts-cjk">noto-fonts-cjk</a></span><sup><small>包</small></sup></span>的规则，写入：</li></ul>
+<pre>&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE fontconfig SYSTEM "fonts.dtd"&gt;
+&lt;fontconfig&gt;
+  &lt;alias&gt;
+    &lt;family&gt;sans-serif&lt;/family&gt;
+    &lt;prefer&gt;
+      &lt;family&gt;Noto Sans CJK SC&lt;/family&gt;
+      &lt;family&gt;Noto Sans CJK TC&lt;/family&gt;
+      &lt;family&gt;Noto Sans CJK JP&lt;/family&gt;
+    &lt;/prefer&gt;
+  &lt;/alias&gt;
+  &lt;alias&gt;
+      &lt;family&gt;serif&lt;/family&gt;
+      &lt;prefer&gt;
+        &lt;family&gt;Noto Serif CJK SC&lt;/family&gt;
+        &lt;family&gt;Noto Serif CJK TC&lt;/family&gt;
+        &lt;family&gt;Noto Serif CJK JP&lt;/family&gt;
+      &lt;/prefer&gt;
+  &lt;/alias&gt;
+  &lt;alias&gt;
+    &lt;family&gt;monospace&lt;/family&gt;
+    &lt;prefer&gt;
+      &lt;family&gt;Noto Sans Mono CJK SC&lt;/family&gt;
+      &lt;family&gt;Noto Sans Mono CJK TC&lt;/family&gt;
+      &lt;family&gt;Noto Sans Mono CJK JP&lt;/family&gt;
+    &lt;/prefer&gt;
+  &lt;/alias&gt;
+&lt;/fontconfig&gt;</pre>
+<p>如果安装的是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=adobe-source-han-sans-otc-fonts">adobe-source-han-sans-otc-fonts</a></span><sup><small>包</small></sup></span>，写入：
+</p>
+<pre>&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE fontconfig SYSTEM "fonts.dtd"&gt;
+&lt;fontconfig&gt;
+  &lt;alias&gt;
+    &lt;family&gt;sans-serif&lt;/family&gt;
+    &lt;prefer&gt;
+      &lt;family&gt;Source Han Sans SC&lt;/family&gt;
+      &lt;family&gt;Source Han Sans TC&lt;/family&gt;
+      &lt;family&gt;Source Han Sans HW&lt;/family&gt;
+      &lt;family&gt;Source Han Sans K&lt;/family&gt;
+    &lt;/prefer&gt;
+  &lt;/alias&gt;
+  &lt;alias&gt;
+    &lt;family&gt;monospace&lt;/family&gt;
+    &lt;prefer&gt;
+      &lt;family&gt;Source Han Sans SC&lt;/family&gt;
+      &lt;family&gt;Source Han Sans TC&lt;/family&gt;
+      &lt;family&gt;Source Han Sans HW&lt;/family&gt;
+      &lt;family&gt;Source Han Sans K&lt;/family&gt;
+    &lt;/prefer&gt;
+  &lt;/alias&gt;
+&lt;/fontconfig&gt;</pre>
+<p>注意，如果你是在 <code>/etc/fonts/conf.avail</code> 目录下创建的 xml 文件，则将该 xml 文件软链接到 <code>/etc/fonts/conf.d</code> 下，例如：
+</p>
+<pre># ln -s /etc/fonts/conf.avail/64-language-selector-prefer.conf /etc/fonts/conf.d/64-language-selector-prefer.conf
+</pre>
+<p>然后更新字体缓存即可生效：
+</p>
+<pre># fc-cache -fv
+</pre>
+<p>执行以下命令检查，如果出现 <code>NotoSansCJK-Regular.ttc: "Noto Sans CJK SC" "Regular"</code> 则表示设置成功：
+</p>
+<pre># fc-match -s | grep 'Noto Sans CJK'
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_.E4.B8.AD.E6.96.87.E8.BE.93.E5.85.A5.E6.B3.95" id="中文输入法"><span id=".E4.B8.AD.E6.96.87.E8.BE.93.E5.85.A5.E6.B3.95"></span>中文输入法</h3></div>
+<p>常用的中文输入法平台有 <a href="#pg945bbdd1d2b5">IBus</a>、<a href="#pg23c0ca0c34df">Fcitx</a>、<a href="#pg370a22d160ed">Fcitx5</a> 和 <a href="#pg43845bbce1f5">scim</a>。具体安装配置参见各自条目。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>scim 现在维护滞后，不推荐使用。Fcitx 已经停止维护，请改用 Fcitx5。Fcitx5 与 Fcitx 不兼容。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg833106baf911_.E7.BB.88.E7.AB.AF.E4.B8.AD.E6.96.87.E6.94.AF.E6.8C.81" id="终端中文支持"><span id=".E7.BB.88.E7.AB.AF.E4.B8.AD.E6.96.87.E6.94.AF.E6.8C.81"></span>终端中文支持</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_.E5.BC.95.E5.AF.BC.E4.B8.AD.E6.96.87.E6.94.AF.E6.8C.81" id="引导中文支持"><span id=".E5.BC.95.E5.AF.BC.E4.B8.AD.E6.96.87.E6.94.AF.E6.8C.81"></span>引导中文支持</h3></div>
+<p><a href="#pgca9c4017f7ad">GRUB2</a> 支持引导选择界面的中文显示。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_TTY_.E4.B8.AD.E6.96.87.E6.94.AF.E6.8C.81" id="TTY_中文支持"><span id="TTY_.E4.B8.AD.E6.96.87.E6.94.AF.E6.8C.81"></span>TTY 中文支持</h3></div>
+<p>当今大多数桌面用户不需要在 TTY 下显示中文。但如果你确实需要，可以考虑以下方法之一：
+</p>
+<ul><li>使用打了 cjktty 补丁（可绘制包括中文在内的 Unicode BMP 字符）的内核，比如<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/linux-lily">linux-lily</a></span><sup><small><a href="#pgc6e2daf482c3">CNRepo</a></small></sup></span>）。</li>
+<li>使用特殊的中文字体，比如<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/syllazh">syllazh</a></span><sup><small><a href="#pgc6e2daf482c3">CNRepo</a></small></sup></span>，强行将汉字塞进512个字符的限制之内。</li>
+<li>使用第三方的 TTY 软件，例如<a href="#pg7d148943633d">KMSCON</a>等。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg833106baf911_man_.E6.89.8B.E5.86.8C.E9.A1.B5.E7.9A.84.E7.AE.80.E4.BD.93.E4.B8.AD.E6.96.87.E7.BF.BB.E8.AF.91" id="man_手册页的简体中文翻译"><span id="man_.E6.89.8B.E5.86.8C.E9.A1.B5.E7.9A.84.E7.AE.80.E4.BD.93.E4.B8.AD.E6.96.87.E7.BF.BB.E8.AF.91"></span>man 手册页的简体中文翻译</h2></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=man-pages-zh_cn">man-pages-zh_cn</a></span><sup><small>包</small></sup></span> 软件包。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg833106baf911_.E8.BD.AF.E4.BB.B6.E4.B8.AD.E6.96.87.E5.8C.96.E9.85.8D.E7.BD.AE" id="软件中文化配置"><span id=".E8.BD.AF.E4.BB.B6.E4.B8.AD.E6.96.87.E5.8C.96.E9.85.8D.E7.BD.AE"></span>软件中文化配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_Firefox" id="Firefox">Firefox</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=firefox-i18n-zh-cn">firefox-i18n-zh-cn</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_LibreOffice" id="LibreOffice">LibreOffice</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libreoffice-fresh-zh-cn">libreoffice-fresh-zh-cn</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libreoffice-still-zh-cn">libreoffice-still-zh-cn</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_PDF_.E9.98.85.E8.AF.BB.E5.99.A8" id="PDF_阅读器"><span id="PDF_.E9.98.85.E8.AF.BB.E5.99.A8"></span>PDF 阅读器</h3></div>
+<p>多数 PDF 查看器已经支持中文。但也有部分需要安装额外的语言包/字体：
+</p><p>Acrobat 的字体为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/acroread-fonts/">acroread-fonts</a></span><sup><small>AUR</small></sup></span>，或者可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/acroread-fonts-systemwide/">acroread-fonts-systemwide</a></span><sup><small>AUR</small></sup></span> 以使用系统范围的字体。
+</p><p>Okular、<a href="#pg1887440852b0">Evince</a> 等 poppler 相关的阅读器及 <a href="#pg246741cb8f7c">Inkscape</a>、<a href="#pg04cd95a4e409">Krita</a>、MyPaint 等可以处理 pdf 的图像处理工具需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=poppler-data">poppler-data</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_Java" id="Java">Java</h3></div>
+<p>对于 Oracle <a href="#pgf5cd65505569">Java</a> 用户，在 <code>/opt/java/jre/lib/fonts</code> 中建立 <code>fallback</code> 目录，然后链接或拷贝若干中文字体到该目录就能使 java 程序正确显示中文。例如，在已经安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jre/">jre</a></span><sup><small>AUR</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=opendesktop-fonts">opendesktop-fonts</a></span><sup><small>包</small></sup></span> 的情况下，使用执行下面的命令即可：
+</p>
+<pre># ln -s /usr/share/fonts/TTF/odosung.ttc /opt/java/jre/lib/fonts/fallback/
+# cd /opt/java/jre/lib/fonts/fallback/
+# mkfontdir
+# mkfontscale
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_vim" id="vim">vim</h3></div>
+<p>如果 locale 是 UTF-8 编码，用 <a href="#pg74a2a3e4814c">vim</a> 打开其他中文编码的文件可能会乱码。需要在 <code>~/.vimrc</code> 做如下设置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.vimrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+set fileencodings=utf8,cp936,gb18030,big5
+...</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_.E4.B8.AD.E6.96.87.E8.A7.86.E9.A2.91.E5.AD.97.E5.B9.95" id="中文视频字幕"><span id=".E4.B8.AD.E6.96.87.E8.A7.86.E9.A2.91.E5.AD.97.E5.B9.95"></span>中文视频字幕</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg833106baf911_MPlayer" id="MPlayer">MPlayer</h4></div>
+<p>要使 <a href="#pgb6ea2b1dfebb">MPlayer</a> 正确显示字幕，关键是要使字幕文件的编码和 mplayer config 里使用的编码相一致。字幕文件编码为 GBK，则 <code>subcp=cp936</code>；字幕文件编码为 UTF-8，则 <code>subcp=utf8</code>。如果字幕文件编码为 UTF-8，而设置成 <code>subcp=cp936</code>，则会出现部分乱码的情况。另一种更为简单的方法是设置成 <code>subcp=enca:zh:ucs-2</code>，由 enca 负责字幕的编码显示问题。
+</p><p>修改 <code>~/.mplayer/config</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.mplayer/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">font='Noto Sans CJK SC'
+subcp=enca:zh:ucs-2</pre>
+<p>使用下面的命令手动加载字幕：
+</p>
+<pre>$ mplayer xxx.avi -sub xxxxx.srt
+</pre>
+<p>如果使用图形前端（比如 <a href="#pgc3f81454b54d">SMPlayer</a>），会更简单一些，只要在设置对话框里设定缺省字幕编码和字体即可。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg833106baf911_xine" id="xine">xine</h4></div>
+<p>xine 也可以显示中文字幕，但需要制作自己的中文字体。具体可以参考：<a href="https://forum.ubuntu.org.cn/about2760.html">[3]</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg833106baf911_gstreamer" id="gstreamer">gstreamer</h4></div>
+<p>由于使用 gstreamer0.10，totem 1.4.0 应该可以自动加载同名的 srt 字幕。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_LaTeX" id="LaTeX">LaTeX</h3></div>
+<p>首先需要安装 CJK 包，然后需要安装合适的字体。具体可以参考：<a href="http://www.ctex.org">[4]</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg833106baf911_.E4.B9.B1.E7.A0.81.E9.97.AE.E9.A2.98" id="乱码问题"><span id=".E4.B9.B1.E7.A0.81.E9.97.AE.E9.A2.98"></span>乱码问题</h2></div>
+<p>避免乱码基本原则：使用 UTF-8 代替 GBK/GB2312。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_.E6.96.87.E4.BB.B6.E5.90.8D.E4.B9.B1.E7.A0.81" id="文件名乱码"><span id=".E6.96.87.E4.BB.B6.E5.90.8D.E4.B9.B1.E7.A0.81"></span>文件名乱码</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=convmv">convmv</a></span><sup><small>包</small></sup></span>，使用 <code>convmv</code> 命令转换编码格式。示例：
+</p>
+<pre>$ convmv -f GBK -t UTF-8 --notest --nosmart file
+</pre>
+<p><code>-f</code> 指定原始编码，<code>-t</code> 指定输出编码。使用 <code>convmv --list</code> 可查询所有支持的编码。
+<code>--notest</code> 表示非测试而是要进行转码（如果不使用该参数只会打印出转换结果而不会实际转码），<code>--smart</code> 表示如果已经是 UTF-8 则忽略。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_.E6.96.87.E4.BB.B6.E5.86.85.E5.AE.B9.E4.B9.B1.E7.A0.81" id="文件内容乱码"><span id=".E6.96.87.E4.BB.B6.E5.86.85.E5.AE.B9.E4.B9.B1.E7.A0.81"></span>文件内容乱码</h3></div>
+<p>使用 <code>iconv</code> 命令转换格式。示例：
+</p>
+<pre>$ iconv -f GBK -t UTF-8 -o new-file origin-file
+</pre>
+<p><code>-f</code> 指定原始编码，<code>-t</code> 指定输出编码。使用 <code>iconv -l</code> 可查询所有支持的编码。<code>-o</code> 指定输出文件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_zip_.E5.8E.8B.E7.BC.A9.E5.8C.85.E4.B8.AD.E7.9A.84.E6.96.87.E4.BB.B6.E5.90.8D.E4.B9.B1.E7.A0.81" id="zip_压缩包中的文件名乱码"><span id="zip_.E5.8E.8B.E7.BC.A9.E5.8C.85.E4.B8.AD.E7.9A.84.E6.96.87.E4.BB.B6.E5.90.8D.E4.B9.B1.E7.A0.81"></span>zip 压缩包中的文件名乱码</h3></div>
+<p>原因：创建压缩包时使用的文件名编码和解压时不同。
+</p><p>Arch 上一般使用 UTF-8 编码，一般造成这种现象的原因是创建者使用了 Windows 上的默认编码，如简体中文的 GB 系列编码或日文的 JIS 系列编码等。
+</p><p>解决方案：使用 <code>-O</code> 参数指定编码，如
+</p>
+<pre>$ unzip -O gbk file.zip
+</pre>
+<p><code>file.zip</code> 是压缩文件，<code>gbk</code> 是猜测该文件创建时使用的编码格式。
+</p><p>如有可能，建议在 Windows 上不使用 zip 压缩包，而使用 <a href="#pgfd53e9a49a7b">7z</a> 等格式。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_MP3_.E6.96.87.E4.BB.B6.E6.A0.87.E7.AD.BE.E4.B9.B1.E7.A0.81" id="MP3_文件标签乱码"><span id="MP3_.E6.96.87.E4.BB.B6.E6.A0.87.E7.AD.BE.E4.B9.B1.E7.A0.81"></span>MP3 文件标签乱码</h3></div>
+<p>对于用 <a href="#pgdc8e7a283f0c">GStreamer</a> 做后端的播放器，如 <a href="#pg1ea3f746c8a2">Rhythmbox</a>，totem，设置如下的环境变量后即可正确读取 mp3 中 GBK 编码的 ID3 tag：
+</p>
+<pre>export GST_ID3_TAG_ENCODING=GBK:UTF-8:GB18030
+export GST_ID3V2_TAG_ENCODING=GBK:UTF-8:GB18030
+</pre>
+<p>对于 Beep media player，可以在 <code>pefenrence-&gt;plugins-&gt;media</code> 中选中 MPEG Audio plugin 然后点击下方的 Penfenrences，此时会出现一个对话框，选择 title，将 Disable ID3v2 和 Convert non-UTF8 ID3 tags to UTF8 前的选择框选中。然后在 ID3 encoding 中填入 <code>gbk</code>。这样 bmp 就能正确显示 GBK 编码的 ID3 tag。
+</p><p>Quod Libet 播放器支持 tag 编辑及设置 ID3v2 编码。可以在 <code>~/.quodlibet/config</code> 中设置
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.quodlibet/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+id3encoding = gbk
+...</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Quod Libet 默认支持 utf8 编码。</div>
+<p>最为彻底的解决方法为将编码为 gbk 的 id3 tag 转化为 utf8 编码。首先安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-mutagen">python-mutagen</a></span><sup><small>包</small></sup></span>，然后利用下面的命令转换：
+</p>
+<pre>$ mid3iconv -e gbk XXX.mp3
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_Windows_.E5.88.86.E5.8C.BA.E4.B8.8B.E7.9A.84.E4.B8.AD.E6.96.87.E6.96.87.E4.BB.B6.E5.90.8D.E4.B9.B1.E7.A0.81" id="Windows_分区下的中文文件名乱码"><span id="Windows_.E5.88.86.E5.8C.BA.E4.B8.8B.E7.9A.84.E4.B8.AD.E6.96.87.E6.96.87.E4.BB.B6.E5.90.8D.E4.B9.B1.E7.A0.81"></span>Windows 分区下的中文文件名乱码</h3></div>
+<p>一般是因为挂载的字符集与 locale 不同，可以修改 <code>/etc/fstab</code>（如果不了解请仔细阅读 <a href="#pgced0cc449f44">fstab</a>）。如果 locale 是 UTF-8，修改为：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+/dev/sdxx /media/win ntfs defaults,iocharset=utf8 0 0</pre>
+<p>如果 locale 是 GBK，则应该是：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+/dev/sdxx /media/win ntfs defaults,iocharset=cp936 0 0
+...</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_Samba_.E4.B9.B1.E7.A0.81" id="Samba_乱码"><span id="Samba_.E4.B9.B1.E7.A0.81"></span>Samba 乱码</h3></div>
+<p>用 Arch 作为 <a href="#pg3a2ac70f3f85">Samba</a> 服务器时，在 <code>/etc/samba/smb.conf</code> 中加入下面一行就可以解决 Windows 客户端乱码问题：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/samba/smb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+unix charset=gb2312
+...</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg833106baf911_ftp_.E4.B9.B1.E7.A0.81" id="ftp_乱码"><span id="ftp_.E4.B9.B1.E7.A0.81"></span>ftp 乱码</h3></div>
+<p>很多 ftp 站点是 GBK 编码。如果使用 UTF-8 的 locale，下载的文件名可能会乱码。对于 lftp，在 <code>.lftp/rc</code> 下做如下设置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">.lftp/rc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+set ftp:charset "gbk"
+set file:charset "UTF-8"
+...
+</pre>
+<p>对于 gftp，可以在 <code>.gftp/gftprc</code> 中做如下设置即可：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">.gftp/gftprc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+remote_charsets=gb2312
+...</pre>
+<p>但下载下来的文件名仍然是乱码，需要打补丁编译。补丁地址为: <a href="https://www.teatime.com.tw/%7Etommy/linux/gftp_remote_charsets.patch">https://www.teatime.com.tw/%7Etommy/linux/gftp_remote_charsets.patch</a>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg833106baf911_.E7.BF.BB.E8.AF.91.E8.BD.AF.E4.BB.B6" id="翻译软件"><span id=".E7.BF.BB.E8.AF.91.E8.BD.AF.E4.BB.B6"></span>翻译软件</h2></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=stardict">stardict</a></span><sup><small>包</small></sup></span>：星际译王。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sdcv">sdcv</a></span><sup><small>包</small></sup></span>：命令行的星际译王。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ydcv">ydcv</a></span><sup><small>包</small></sup></span>：命令行的有道词典。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/youdao-dict/">youdao-dict</a></span><sup><small>AUR</small></sup></span>：有道词典（图形界面），屏幕取词翻译。</li>
+<li><a href="#pgb28edfb33b7e">GoldenDict</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/goldendict-git/">goldendict-git</a></span><sup><small>AUR</small></sup></span>）：默认都不带字典，可下载相应字典包（支持 Babylon 的词库格式 <code>.BGL</code>，已经不再维护的 StarDict 的词库格式（<code>.ifo</code>/<code>.dict</code>/<code>.idx</code>/<code>.syn</code>），<a href="#pgb8bb3eae5c70">dictd</a> 的词库格式（<code>.index</code>/<code>.dict</code>(<code>.dz</code>） ，ABBYY Lingvo 的词库格式（<code>.dsl</code>/<code>.lsa</code>/<code>.dat</code>），mdict 的词库格式等等。可在互联网上下载这些词典的词库文件导入的 <a href="#pgb28edfb33b7e">GoldenDict</a> 使用（可能有版权问题）。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/moedict/">moedict</a></span><sup><small>AUR</small></sup></span>：一个跨多平台的汉语词典，除汉字、词、成语等，还包含客家话、闽南话、简单的外文翻译、笔顺书写等等，<a href="https://www.moedict.tw/%E8%90%8C">萌典在线地址</a>。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linedict/">linedict</a></span><sup><small>AUR</small></sup></span>：一个通过爬取有道翻译网页得到结果的在线英汉词典,部分支持英汉翻译，模仿 <a href="#pge7090ebee131">dmenu</a> 在屏幕顶端显示结果，使用方便，由于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ydcv">ydcv</a></span><sup><small>包</small></sup></span> 使用的 api 已失效，而有道新的 api 有免费使用次数限制，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linedict/">linedict</a></span><sup><small>AUR</small></sup></span> 是一个较好的替代品。</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807023540
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.400 seconds
+Real time usage: 0.413 seconds
+Preprocessor visited node count: 1181/1000000
+Revision size: 18456/2097152 bytes
+Post‐expand include size: 15905/2097152 bytes
+Template argument size: 5398/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 34/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   82.846      1 -total
+ 13.25%   10.978     80 Template:Ic
+ 10.87%    9.007     28 Template:Pkg
+  4.59%    3.803      6 Template:注意
+  3.70%    3.068      9 Template:AUR
+  3.47%    2.871      9 Template:Hc
+  3.28%    2.717      5 Template:Related
+  3.12%    2.583      1 Template:相关文章开始
+  2.03%    1.685      1 Template:警告
+  1.98%    1.641      2 Template:Cnrepo
+-->
+<!-- Render ID ade4320e-9208-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3473:|#|:idhash:canonical!zh-cn and timestamp 20260807023540 and revision id 34805. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

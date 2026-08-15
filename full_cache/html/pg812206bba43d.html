@@ -1,0 +1,1210 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg812206bba43d">静态数据加密</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Data-at-rest_encryption">Data-at-rest encryption</a>，最近一次同步于 2020-08-19，若英文版本有所<a href="https://wiki.archlinux.org/title/Data-at-rest_encryption?diff=0&amp;oldid=741850">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Data-at-rest_encryption_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg8e3a9446707a">dm-crypt</a></li>
+<li><a href="#pgf99e6a2f1bb8">VeraCrypt</a></li>
+<li><a href="#pg8fbdf5e296d7">eCryptfs</a></li>
+<li><a href="#pgd12167fb0e6f">EncFS</a></li>
+<li><a href="#pg7fd8c340c425">gocryptfs</a></li>
+<li><a href="#pgd16fe308a4b9">fscrypt</a></li>
+<li><a href="#pg5806364b079a">Tomb</a></li>
+<li><a href="#pg9cbfd7f13f85">tcplay</a></li>
+<li><a href="#pg8f4e7555fd6d">GnuPG</a></li>
+<li><a href="#pgaed7e8189309">Sequoia PGP</a></li>
+<li><a href="#pg3135e8095c46">OpenPGP</a></li>
+<li><a href="#pge01e1107cd74">Self-encrypting drives</a></li>
+<li><a href="#pge7dd11d64038">dm-crypt/Encrypting an entire system</a></li>
+</ul></div>
+<p>本文讨论<a href="https://en.wikipedia.org/wiki/Data_at_rest">静态数据</a><a href="https://en.wikipedia.org/wiki/Disk_encryption">加密</a>软件，该软件即时加密/解密写入/读取<a href="#pg8c59a293e515">块设备</a>、<a href="#pg4ed2aedd8fe3">磁盘分区</a>或目录的数据。块设备的示例是硬盘驱动器、闪存驱动器和 DVD。
+</p><p>静态数据加密仅应被视为操作系统现有安全机制的附属品——专注于保护物理访问，同时依赖系统的<b>其他</b>部分提供网络安全和基于用户的访问控制等功能。
+</p><p>对于全盘加密 (Full-disk encryption，FDE)，参阅<a href="#pg29ec7c5af952">Dm-crypt/加密整个系统</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg812206bba43d_.E4.B8.BA.E4.BB.80.E4.B9.88.E8.A6.81.E4.BD.BF.E7.94.A8.E5.8A.A0.E5.AF.86.EF.BC.9F" id="为什么要使用加密？"><span id=".E4.B8.BA.E4.BB.80.E4.B9.88.E8.A6.81.E4.BD.BF.E7.94.A8.E5.8A.A0.E5.AF.86.EF.BC.9F"></span>为什么要使用加密？</h2></div>
+<p>静态数据加密确保文件始终以加密的形式存储在磁盘上。这些文件只有在系统运行并由受信任的用户解锁时才以可读形式提供给操作系统和应用程序（<a href="https://en.wikipedia.org/wiki/Data_in_use">使用中的数据</a>或<a href="https://en.wikipedia.org/wiki/Data_in_transit">传输中的数据</a>）。未经授权的人直接查看磁盘内容，只会发现混乱的随机数据，而不是实际的文件。
+</p><p>例如，这可以防止未经授权的数据查看，当电脑或硬盘：
+</p>
+<ul><li>处于当你离开时不受信任的人可能获得使用机会的场所</li>
+<li>丢失或被盗，如笔记本电脑、上网本或外部存储设备</li>
+<li>在维修店里</li>
+<li>淘汰后被丢弃</li></ul>
+<p>此外，静态数据加密还可用于增加一些安全性，以防止未经授权的篡改操作系统的尝试——例如，可以获得物理访问权限的攻击者趁你不在的时候安装键盘记录程序（keyloggers）或特洛伊木马（Trojan）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>静态数据加密并不能保护你的数据免受所有威胁。</div>
+<p>你仍面临以下潜在风险：
+</p>
+<ul><li>攻击者可能在系统运行期间，且你已经解锁并挂载了磁盘的加密部分时入侵系统（如通过互联网）。</li>
+<li>攻击者可能在计算机运行期间（即使已启用屏幕锁定程序），获取对设备的物理访问权限，或者在计算机停止运行后的极短时间内，借助相关资源实施<a href="https://en.wikipedia.org/wiki/Cold_boot_attack">冷启动攻击</a>。</li>
+<li>政府机构不仅拥有轻易实施上述攻击的资源，还可能通过各种<a href="https://en.wikipedia.org/wiki/Coercion">胁迫</a>手段强迫你交出密钥或密码短语。执法机构若怀疑你可能隐藏了某些可疑信息，这种行为可能是合法的。</li>
+<li><a href="https://en.wikipedia.org/wiki/Deniable_encryption#rubber">橡胶管密码分析法（Rubber-hose cryptanalysis）</a>，即暴力威胁。另请参阅<a href="https://xkcd.com/538/">XKCD #538</a></li></ul>
+<p>为了抵御能够在你使用系统之前对其进行篡改的专业攻击者，必须配置极高强度的磁盘加密方案（例如，具备完整性校验且无明文引导分区的全系统加密）。即便如此，这也无法防范所有类型的篡改（例如硬件键盘记录器）。最优的应对策略或许是<a href="https://wiki.archlinux.org/title/Hardware-based_full-disk_encryption">基于硬件的全盘加密</a>与<a href="https://en.wikipedia.org/wiki/Trusted_Computing">可信计算</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>静态数据加密也无法防止他人直接<a href="#pg8e3f3779e38c">擦除你的磁盘</a>。建议<a href="#pg8581f12fbcf8">定期备份</a>，以确保数据安全。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E7.B3.BB.E7.BB.9F.E6.95.B0.E6.8D.AE.E5.8A.A0.E5.AF.86" id="系统数据加密"><span id=".E7.B3.BB.E7.BB.9F.E6.95.B0.E6.8D.AE.E5.8A.A0.E5.AF.86"></span>系统数据加密</h3></div>
+<p>虽然仅加密用户数据本身（通常位于家目录中，或在数据 DVD 等可移动媒体上）是最简单且侵入性最小的方法，但是它有一些明显的缺点。
+在现代计算机系统中，有许多后台进程可能会在硬盘驱动器的非加密区域中缓存和存储有关用户数据或部分数据本身的信息，例如：
+</p>
+<dl><dd><ul><li>交换分区（swap）
+<ul><li>（可能的补救措施：禁用交换，或使用<a href="#pg8c7c1f3b0832">加密过的交换分区</a>）</li></ul></li>
+<li><code>/tmp</code>（用户应用程序创建的临时文件）
+<ul><li>（可能的补救措施：避免此类应用程序；在<a href="#pg5b6e894bc3da">ramdisk</a>内挂载<code>/tmp</code>）</li></ul></li>
+<li><code>/var</code> （日志文件和数据库等；例如，<a href="#pg290006998244">mlocate</a>将所有文件名的索引存储在<code>/var/lib/mlocate/mlocate.db</code>中)</li></ul></dd></dl>
+<p>解决办法就是对系统和用户数据都进行加密，阻止未经授权的对可能被系统缓存的隐私数据的物理访问。不过，这样也带来了一个缺点——必须在启动时对磁盘的加密部分进行解锁。系统数据加密的另一个好处是，它给具有物理访问权限的人安装诸如<a href="https://en.wikipedia.org/wiki/Keystroke_logging">键盘记录器</a>或 rootkits 之类的恶意软件带来了麻烦。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg812206bba43d_.E5.87.86.E5.A4.87" id="准备"><span id=".E5.87.86.E5.A4.87"></span>准备</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E9.80.89.E6.8B.A9.E8.AE.BE.E7.BD.AE" id="选择设置"><span id=".E9.80.89.E6.8B.A9.E8.AE.BE.E7.BD.AE"></span>选择设置</h3></div>
+<p>根据你的目的（请阅读上文#为什么要使用加密？）及系统参数选取合适的加密设置。
+</p><p>此外，你需要回答下列问题：
+</p>
+<dl><dt>你想抵御什么样的“攻击者”？</dt></dl>
+<ul><li>在你的系统被关闭、被盗等情形下窥探你的磁盘的普通用户</li>
+<li>可在你使用你的系统前后反复获得读写权限的专业密码分析员</li>
+<li>任何介于这两者之间的人</li></ul>
+<dl><dt>你想加密什么？</dt></dl>
+<ul><li>仅用户数据</li>
+<li>用户数据和系统数据</li>
+<li>仅机密数据，也就是你的数据的子集</li></ul>
+<dl><dt>交换分区（swap）、<code>/tmp</code> 等，应如何处理？</dt></dl>
+<ul><li>禁用或挂载为 ramdisk</li>
+<li>被加密的交换分区
+<ul><li>将交换文件作为全盘加密的一部分</li>
+<li>单独加密交换分区</li></ul></li></ul>
+<dl><dt>应如何解锁磁盘的加密部分？</dt></dl>
+<ul><li>使用密码
+<ul><li>同账户登录密码</li>
+<li>不同于账户登录密码</li></ul></li>
+<li>使用密钥文件（例如将其置于随身携带的或保存在安全地方的U盘上）</li>
+<li>二者兼有</li></ul>
+<dl><dt><i>何时</i>解锁磁盘的加密部分？</dt></dl>
+<ul><li>引导前</li>
+<li>引导过程中</li>
+<li>登录账户时</li>
+<li>按需手动解锁<b>（账户登录后）</b></li></ul>
+<dl><dt>应如何满足多用户需求？</dt></dl>
+<ul><li>不需要</li>
+<li>使用每个用户都知道的共享密码（或密钥文件）</li>
+<li>用于磁盘的同一加密部分的，被独立分发的、可撤销的密码（或密钥文件）</li>
+<li>为不同的用户分配磁盘的加密部分</li></ul>
+<p>接下来你可以做出所需的技术选择（参阅上文#可用方法，以及下文#加密是怎么运作的），关于：
+</p>
+<ul><li>块设备加密与文件系统叠加加密的对比</li>
+<li>密钥管理</li>
+<li>密码及操作模式</li>
+<li>元数据存储</li>
+<li>“下层目录”的位置（在文件系统叠加加密的情况下）</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98" id="准备磁盘"><span id=".E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98"></span>准备磁盘</h3></div>
+<p>在一（部分）磁盘上设置加密之前，先考虑安全地擦除它。这包括用零字节或随机字节的流覆盖整个驱动器或分区，并且出于以下一个或两个原因而做：
+</p>
+<dl><dt>防止恢复以前存储的数据</dt></dl>
+<p>当文件系统创建或修改这些特定扇区所保存的数据时，磁盘加密不会改变单个扇区仅按需覆盖的事实（请参阅下面的#加密是怎么运作的。文件系统认为“当前未使用”的扇区不会被触及，并且可能仍包含来自先前文件系统的数据残余。确保无法<a href="https://en.wikipedia.org/wiki/Data_recovery">恢复</a>之前存储在驱动器上的所有数据的唯一方法是手动擦除它。
+为此，使用零字节或随机字节都没有关系（尽管使用零字节擦除会快得多）。
+</p>
+<dl><dt>防止泄露加密驱动器上的使用模式</dt></dl>
+<p>理想情况下，磁盘的整个加密部分应该与均匀随机数据无法区分。这样，未经授权的人就无法知道哪些扇区以及多少个扇区实际上包含加密数据——这本身可能是一个理想的目标（作为真正机密性的一部分），也可以作为抵御试图破解加密的攻击者的额外屏障。
+为了实现这个目标，使用高质量随机字节擦除磁盘至关重要。
+</p><p>第二个目标仅与块设备加密结合使用才有意义，因为在文件系统叠加加密的情况下，无论如何都可以轻松定位加密数据（以独特的加密文件的形式出现于宿主文件系统中）。另请注意，即使你只打算加密特定文件夹，如果你想删除以前以未加密形式存储在该文件夹中的文件，则必须擦除整个分区（由于<a href="https://en.wikipedia.org/wiki/File_system_fragmentation">磁盘碎片</a>）。如果同一分区上还有其他文件夹，则必须备份它们，然后再将它们移回。
+</p><p>确定要执行哪种磁盘擦除后，请参阅文章<a href="#pg8e3f3779e38c">安全地擦除磁盘</a>以获取技术说明。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>在决定使用哪种方法对硬盘驱动器进行安全擦除时，请记住，只要驱动器被用作加密驱动器，就不需要多次执行此操作。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E5.8F.AF.E7.94.A8.E6.96.B9.E6.B3.95" id="可用方法"><span id=".E5.8F.AF.E7.94.A8.E6.96.B9.E6.B3.95"></span>可用方法</h3></div>
+
+<p>所有静态数据加密方法都是这样操作的：虽然磁盘实际存放的是加密数据，但只要加密容器（即磁盘中存放加密数据的逻辑部分）被“解锁”并被挂载，那么操作系统和应用程序就会把它 "看成 "相应的普通的可读数据。
+</p><p>为此，用户需要提供一些“机密信息”（通常采用密钥文件和/或密码短语的形式），从这些信息中可以派生出实际的加密密钥（并在会话期间存储在内核密钥环中）。
+</p><p>如果你对这种操作完全不熟悉，还请阅读下文#加密是怎么运作的的部分。
+</p><p>可用的静态数据加密方法可以按其操作层分为两种类型：
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg812206bba43d_.E6.A0.88.E5.BC.8F.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E5.8A.A0.E5.AF.86" id="栈式文件系统加密"><span id=".E6.A0.88.E5.BC.8F.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E5.8A.A0.E5.AF.86"></span>栈式文件系统加密</h4></div>
+<p>作为堆叠在已有文件系统之上的层而实现的文件系统叠加加密方案，使所有写入启用加密的文件夹的文件在底层文件系统将其写入磁盘之前就被即时加密，并在文件系统从磁盘读取它们时被解密。这样，文件以加密的形式存储在宿主文件系统中（意味着它们的内容，通常还有它们的文件/文件夹名称，都被长度大致相同的随机数据所取代），但除此之外，它们仍然以正常的文件/符号链接/硬链接等形式存在于该文件系统中，如同没有加密一样。
+</p><p>它的实现方式是，为了解锁宿主文件系统中存储原始加密文件的文件夹（“下层目录”），它被挂载（使用一个特殊的堆叠的伪文件系统）到它本身或可选的不同位置（“上层目录”），然后相同的文件以可读的形式出现——直到它再次被卸载，或系统被关闭。
+</p><p>此类别中可用的加密方案是<a href="#pg8fbdf5e296d7">eCryptfs</a>和<a href="#pgd12167fb0e6f">EncFS</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg812206bba43d_.E4.BA.91.E5.AD.98.E5.82.A8.E4.BC.98.E5.8C.96" id="云存储优化"><span id=".E4.BA.91.E5.AD.98.E5.82.A8.E4.BC.98.E5.8C.96"></span>云存储优化</h5></div>
+<p>如果你正在部署文件系统叠加加密，以实现与第三方控制的位置(如云存储服务)的零知识同步（zero-knowledge synchronization），你可能需要考虑替代 eCryptfs 和 EncFS 的方案，因为他们并不是为了通过 Internet 传输文件这一目的而优化的。有一些解决方案是为了这个目的而设计的：
+</p>
+<ul><li><a href="#pg7fd8c340c425">gocryptfs</a></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cryptomator/">cryptomator</a></span><sup><small>AUR</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cryptomator-bin/">cryptomator-bin</a></span><sup><small>AUR</small></sup></span> （跨平台）</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cryfs">cryfs</a></span><sup><small>包</small></sup></span></li></ul>
+<p>请注意，一些云存储服务直接通过他们自己的<a href="#pg138157ab9926">客户端应用程序</a>提供零知识加密（zero-knowledge encryption）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg812206bba43d_.E5.9D.97.E8.AE.BE.E5.A4.87.E5.8A.A0.E5.AF.86" id="块设备加密"><span id=".E5.9D.97.E8.AE.BE.E5.A4.87.E5.8A.A0.E5.AF.86"></span>块设备加密</h4></div>
+<p>另者，块设备加密（block device encryption）方法操作于文件系统层<b>之下</b>，确保写入某个块设备（即整个磁盘、分区或充当<a href="https://en.wikipedia.org/wiki/loop_device">回环设备</a>的文件）的所有内容都是加密的。这意味着当块设备处于脱机（offline）状态时，它的整个内容看起来就像一大团随机数据（a large blob of random data），无法确定它包含什么样的文件系统和数据。通过一种特殊方式将受保护的容器（在本例中为块设备）挂载到任意位置，再次访问数据。
+</p><p>Arch Linux 中提供了以下几种“块设备加密”方案：
+</p>
+<dl><dt>loop-AES</dt>
+<dd>loop-AES 是 cryptoloop 的继任者，是一种安全、快速的系统加密解决方案。然而，loop-AES 被认为不如其他选择易用（less user-friendly），因为它需要非标准内核支持（non-standard kernel support）。</dd></dl>
+<dl><dt>dm-crypt</dt>
+<dd><a href="#pg8e3a9446707a">dm-crypt</a> 是由 Linux 内核提供的标准设备映射器加密（standard device-mapper encryption）功能。喜欢全面掌握分区及密钥管理的各个方面的人直接用它就行了。对 dm-crypt 的管理是通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cryptsetup">cryptsetup</a></span><sup><small>包</small></sup></span> 用户空间实用程序完成的。它可用于以下类型的块设备加密：<b>LUKS（默认）</b>、<b>plain</b>，并且具备有限的用于 <b>loopAES</b> 和 <b>Truecrypt</b> 设备的功能。
+<ul><li>默认情况下使用的 LUKS 是一个额外的便利层，它将 dm-crypt 所需的所有设置信息存储在磁盘本身上，并抽象分区和密钥管理，以提高易用性和加密安全性。</li>
+<li>plain 模式下的 dm-crypt，作为原始的内核功能，并没有采用便利层。用它来应用（与 LUKS 类型）同样的加密强度是比较困难的。这样做时，会产生更长的密码或密钥文件（二者被统称为 keys）。但是，它具有其他优点，描述于下文#块设备加密与文件系统叠加加密的对比<sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>之中。</li></ul></dd></dl>
+<dl><dt>TrueCrypt/VeraCrypt</dt>
+<dd>一种可移植（portable）格式，支持整个磁盘/分区或文件容器的加密，兼容所有主流操作系统。对 TrueCrypt 的开发于2014年5月被其开发者停止。其分支 <a href="#pgf99e6a2f1bb8">VeraCrypt</a> 于2016年被审计。</dd></dl>
+<p>关于选定的操作层的实际含义，参阅下文#块设备加密与文件系统叠加加密的对比<sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>，以及对 <a href="https://www.systutorials.com/docs/linux/packages/ecryptfs-utils-111/ecryptfs-faq.html#compare">eCryptfs</a>的总体描述。参阅<a href="#pg546e612b15b0">Category:Encryption</a>，了解下表比较的方法的可用内容，以及未包括在表中的其他工具。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E5.9D.97.E8.AE.BE.E5.A4.87.E5.8A.A0.E5.AF.86.E4.B8.8E.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E5.8F.A0.E5.8A.A0.E5.8A.A0.E5.AF.86.E7.9A.84.E5.AF.B9.E6.AF.94" id="块设备加密与文件系统叠加加密的对比"><span id=".E5.9D.97.E8.AE.BE.E5.A4.87.E5.8A.A0.E5.AF.86.E4.B8.8E.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E5.8F.A0.E5.8A.A0.E5.8A.A0.E5.AF.86.E7.9A.84.E5.AF.B9.E6.AF.94"></span>块设备加密与文件系统叠加加密的对比</h3></div>
+<table class="wikitable left-align-row-headers" style="text-align:center;">
+<tbody><tr>
+<th>
+</th>
+<th>块设备加密
+</th>
+<th>原生/叠加式文件系统加密
+</th></tr>
+<tr>
+<th>加密
+</th>
+<td>块设备
+</td>
+<td>文件
+</td></tr>
+<tr>
+<th>加密数据的容器可能是……
+</th>
+<td>磁盘、磁盘分区，或作为回环设备使用的文件
+</td>
+<td>现有文件系统中的目录
+</td></tr>
+<tr>
+<th>与文件系统的关系
+</th>
+<td>在文件系统层下运行：不关心加密块设备的内容是文件系统、分区表、LVM 设置还是其他任何内容
+</td>
+<td>通过文件系统原生功能，或向现有文件系统添加额外的叠加加密层来实现加密。两者都会在文件写入/读取时自动加密/解密。，以在文件写入或读取时自动进行加密/解密
+</td></tr>
+<tr>
+<th>加密文件元数据（文件数、目录结构、文件大小、权限、最后修改时间等）
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<br/>（使用 'discard' 可能会暴露文件的大小）
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">部分<br/>（文件名会被加密，其他元数据是否可见取决于具体功能实现）
+</td></tr>
+<tr>
+<th>可被用于可用于定制加密整个硬盘（包括分区表）（包括分区表）
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th>可被用于加密交换空间
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th>可被用作加密数据容器而无需预先分配固定大小的加密数据容器
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否<br/>（使用 'discard' 可能允许稀疏分配的容器，代价是暴露文件的大小）
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th>可被用于保护无法直接访问块设备的现有文件系统，例如NFS 或 Samba 共享、云存储等
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否<sup>1</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<sup>2</sup>
+</td></tr>
+<tr>
+<th>允许对加密文件进行允许对加密文件进行离线文件级备份
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr></tbody></table>
+<ol><li>理论上在这些文件系统中，一个单独的文件也可以被用作容器（通过虚拟回环设备），但这样实际上就不再是在使用该文件系统（以及它提供的功能）了。</li>
+<li>对于 ZFS 不适用。对于其他文件系统原生加密方式，可能会存在挂载限制。</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E6.AF.94.E8.BE.83.E8.A1.A8" id="比较表"><span id=".E6.AF.94.E8.BE.83.E8.A1.A8"></span>比较表</h3></div>
+
+<p>“dm-crypt +/- LUKS” 一栏表示 dm-crypt 在 LUKS（"+"）和 plain（"-"）加密模式下的功能。如果某个特定功能需要使用 LUKS，则以“（使用 LUKS）”表示。同样，“（不使用 LUKS）”表示使用 LUKS 会阻碍实现该功能，应使用 plain 模式。
+</p>
+<table class="wikitable left-align-row-headers" style="text-align:center; cell-padding:100px;">
+<tbody><tr>
+<th class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">概要（Summary）
+</th>
+<th>Loop-AES
+</th>
+<th><a href="#pg8e3a9446707a">dm-crypt</a> +/- LUKS
+</th>
+<th><a href="#pgf99e6a2f1bb8">VeraCrypt</a>
+</th>
+<th><a href="#pgefb77a75bb9b">ZFS</a>
+</th>
+<th><a href="#pgd16fe308a4b9">fscrypt</a>
+</th>
+<th><a href="#pg8fbdf5e296d7">eCryptfs</a>
+</th>
+<th><a href="#pgd12167fb0e6f">EncFS</a>
+</th>
+<th><a href="#pg7fd8c340c425">gocryptfs</a>
+</th></tr>
+<tr>
+<th>加密类型
+</th>
+<td>块设备
+</td>
+<td>块设备
+</td>
+<td>块设备
+</td>
+<td>原生文件系统或块设备
+</td>
+<td>原生文件系统
+</td>
+<td>堆叠式文件系统
+</td>
+<td>堆叠式文件系统
+</td>
+<td>堆叠式文件系统
+</td></tr>
+<tr>
+<th>说明（Note）
+</th>
+<td>存在时间最长的一种；可能是速度最快的；适用于旧系统
+</td>
+<td>Linux 上块设备加密的事实标准；非常灵活
+</td>
+<td>TrueCrypt 的受维护分支，支持 TrueCrypt 和 VeraCrypt 卷
+</td>
+<td>加密功能相对较新（2019 年）；通过 ZVOL 提供加密块设备
+</td>
+<td>Chrome OS 和 Android 加密的默认方案
+</td>
+<td>比 EncFS 稍快；单个加密文件可在不同系统间移动
+</td>
+<td>最容易使用的一种；支持非 root 用户管理
+</td>
+<td>EncFS 的潜在继任者
+</td></tr>
+<tr>
+<th>在 Arch Linux 中的可用性
+</th>
+<td>需要手动编译、自定义内核
+</td>
+<td><b>内核模块：</b>已随默认内核提供；<b>工具：</b><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=device-mapper">device-mapper</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cryptsetup">cryptsetup</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=veracrypt">veracrypt</a></span><sup><small>包</small></sup></span>
+</td>
+<td><a href="#pgefb77a75bb9b">ZFS#安装</a>
+</td>
+<td><b>内核模块：</b>已随默认内核提供；<b>工具：</b><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fscrypt">fscrypt</a></span><sup><small>包</small></sup></span>
+</td>
+<td><b>内核模块：</b>已随默认内核提供；<b>工具：</b><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ecryptfs-utils">ecryptfs-utils</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=encfs">encfs</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gocryptfs">gocryptfs</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<th>许可证
+</th>
+<td>GPL
+</td>
+<td>GPL
+</td>
+<td>Apache License 2.0，部分代码受 TrueCrypt License v3.0 约束
+</td>
+<td>CDDL
+</td>
+<td>GPL（内核）、Apache 2.0（用户空间工具）
+</td>
+<td>GPL
+</td>
+<td>GPL
+</td>
+<td>MIT
+</td></tr>
+<tr>
+<th>加密实现
+</th>
+<td>内核空间
+</td>
+<td>内核空间
+</td>
+<td>内核空间
+</td>
+<td>内核空间
+</td>
+<td>内核空间
+</td>
+<td>用户空间（<a href="#pg28f17f5cf109">FUSE</a>）
+</td>
+<td>用户空间（<a href="#pg28f17f5cf109">FUSE</a>）
+</td>
+<td>用户空间（<a href="#pg28f17f5cf109">FUSE</a>）
+</td></tr>
+<tr>
+<th>加密元数据存储
+</th>
+<td>？
+</td>
+<td>使用 LUKS：LUKS 标头
+</td>
+<td>（已解密）设备的开始/结束位置
+<p>(<a href="https://www.veracrypt.fr/en/VeraCrypt%20Volume%20Format%20Specification.html">格式规范</a>)
+</p>
+</td>
+<td>DSL（数据集和快照层；
+<p><a href="https://www.youtube.com/watch?v=frnLiXclAMo">演讲</a>/
+<a href="https://blog.heckel.xyz/wp-content/uploads/2017/01/zfs-encryption-nov-2016.pdf">幻灯片</a>)
+</p>
+</td>
+<td>每个文件系统根目录中的 <code>.fscrypt</code> 目录
+</td>
+<td>每个加密文件的标头
+</td>
+<td>每个 EncFS 容器顶层的控制文件
+</td>
+<td>？
+</td></tr>
+<tr>
+<th>封装后的加密密钥存储
+</th>
+<td>？
+</td>
+<td>使用 LUKS：LUKS 标头
+</td>
+<td>（已解密）设备的开始/结束位置
+<p>(<a href="https://www.veracrypt.fr/en/VeraCrypt%20Volume%20Format%20Specification.html">格式规范</a>)
+</p>
+</td>
+<td>DSL（数据集和快照层；
+<p><a href="https://www.youtube.com/watch?v=frnLiXclAMo">演讲</a>/
+<a href="https://blog.heckel.xyz/wp-content/uploads/2017/01/zfs-encryption-nov-2016.pdf">幻灯片</a>)
+</p>
+</td>
+<td>每个文件系统根目录中的 <code>.fscrypt</code> 目录
+</td>
+<td>可存储于任意位置的密钥文件
+</td>
+<td>可存储于任意位置的密钥文件
+<p><a href="https://github.com/rfjakob/encfs-next/blob/master/encfs/encfs.pod#environment-variables">[1]</a>
+<a href="https://github.com/vgough/encfs/issues/48#issuecomment-69301831">[2]</a>
+</p>
+</td>
+<td>？
+</td></tr></tbody></table>
+<table class="wikitable left-align-row-headers" style="text-align:center; cell-padding:100px;">
+<tbody><tr>
+<th class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">可用功能（Usability features）
+</th>
+<th>Loop-AES
+</th>
+<th><a href="#pg8e3a9446707a">dm-crypt</a> +/- LUKS
+</th>
+<th><a href="#pgf99e6a2f1bb8">VeraCrypt</a>
+</th>
+<th><a href="#pgefb77a75bb9b">ZFS</a>
+</th>
+<th><a href="#pgd16fe308a4b9">fscrypt</a>
+</th>
+<th><a href="#pg8fbdf5e296d7">eCryptfs</a>
+</th>
+<th><a href="#pgd12167fb0e6f">EncFS</a>
+</th>
+<th><a href="#pg7fd8c340c425">gocryptfs</a>
+</th></tr>
+<tr>
+<th>非 root 用户可以创建/销毁加密数据容器
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td>受限
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th>提供GUI
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><a href="#pgd12167fb0e6f">可选</a>
+</p>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th>支持登录时自动挂载
+</th>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p>使用 <a href="#pgf99e6a2f1bb8">systemd 和 /etc/crypttab</a>
+</p>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p>使用 <a href="#pgefb77a75bb9b">systemd</a>
+</p>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th>支持在不活动时自动卸载
+</th>
+<td>？
+</td>
+<td>？
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><a href="https://github.com/rfjakob/gocryptfs/blob/master/Documentation/MANPAGE.md#-i-duration--idle-duration">[3]</a>
+</p>
+</td></tr>
+<tr>
+<th class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">安全特性（Security features）
+</th>
+<th>Loop-AES
+</th>
+<th><a href="#pg8e3a9446707a">dm-crypt</a> +/- LUKS
+</th>
+<th><a href="#pgf99e6a2f1bb8">VeraCrypt</a>
+</th>
+<th><a href="#pgefb77a75bb9b">ZFS</a>
+</th>
+<th><a href="#pgd16fe308a4b9">fscrypt</a>
+</th>
+<th><a href="#pg8fbdf5e296d7">eCryptfs</a>
+</th>
+<th><a href="#pgd12167fb0e6f">EncFS</a>
+</th>
+<th><a href="#pg7fd8c340c425">gocryptfs</a>
+</th></tr>
+<tr>
+<th>支持的加密算法
+</th>
+<td>AES
+</td>
+<td>AES、Anubis、CAST5/6、Twofish、Serpent、Camellia、Blowfish……（内核 Crypto API 提供的所有算法）
+</td>
+<td>AES、Twofish、Serpent、Camellia、Kuznyechik
+</td>
+<td>AES
+</td>
+<td>AES、ChaCha12
+</td>
+<td>AES、Blowfish、Twofish……
+</td>
+<td>AES、Blowfish、Twofish，以及系统中可用的其他密码算法
+</td>
+<td>AES
+</td></tr>
+<tr>
+<th>完整性保护（Integrity）
+</th>
+<td>无
+</td>
+<td>LUKS2 中可选
+</td>
+<td>无
+</td>
+<td>CCM、GCM
+</td>
+<td>无
+</td>
+<td>无（默认模式）<br/>HMAC（paranoia 模式）
+</td>
+<td>无
+</td>
+<td>GCM
+</td></tr>
+<tr>
+<th>支持加盐
+</th>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<br/>（使用 LUKS）
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th>支持级联多个密码算法
+</th>
+<td>？
+</td>
+<td>不支持在单个设备中级联，但块设备可以级联
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p>AES-Twofish、AES-Twofish-Serpent、Serpent-AES、Serpent-Twofish-AES、Twofish-Serpent
+</p>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th>支持密钥槽扩散（key-slot diffusion）
+</th>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<br/>（使用 LUKS）
+</td>
+<td>？
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>？
+</td>
+<td>？
+</td>
+<td>？
+</td></tr>
+<tr>
+<th>防止密钥擦除攻击（key scrubbing）
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<br/>（不使用 LUKS）
+</td>
+<td>？
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>？
+</td>
+<td>？
+</td>
+<td>？
+</td></tr>
+<tr>
+<th>支持同一加密数据使用多个（可独立撤销的）密钥
+</th>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是<br/>（使用 LUKS）
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>？
+</td></tr></tbody></table>
+<table class="wikitable left-align-row-headers" style="text-align:center; cell-padding:100px;">
+<tbody><tr>
+<th class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">性能特性（Performance features）
+</th>
+<th>Loop-AES
+</th>
+<th><a href="#pg8e3a9446707a">dm-crypt</a> +/- LUKS
+</th>
+<th><a href="#pgf99e6a2f1bb8">VeraCrypt</a>
+</th>
+<th><a href="#pgefb77a75bb9b">ZFS</a>
+</th>
+<th><a href="#pgd16fe308a4b9">fscrypt</a>
+</th>
+<th><a href="#pg8fbdf5e296d7">eCryptfs</a>
+</th>
+<th><a href="#pgd12167fb0e6f">EncFS</a>
+</th>
+<th><a href="#pg7fd8c340c425">gocryptfs</a>
+</th></tr>
+<tr>
+<th>多线程支持
+</th>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><a href="https://kernelnewbies.org/Linux_2_6_38#head-49f5f735853f8cc7c4d89e5c266fe07316b49f4c">[4]</a>
+</p>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td>？
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th>支持硬件加速加密
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><a href="https://github.com/vgough/encfs/issues/118">[5]</a>
+</p>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">块设备加密特有功能（Block device encryption specific）
+</th>
+<th>Loop-AES
+</th>
+<th><a href="#pg8e3a9446707a">dm-crypt</a> +/- LUKS
+</th>
+<th><a href="#pgf99e6a2f1bb8">VeraCrypt</a>
+</th>
+<th><a href="#pgefb77a75bb9b">ZFS</a>
+</th>
+<th class="archwiki-table-cell-background-grey" colspan="4" rowspan="2" style="vertical-align: middle; text-align: center;">
+</th></tr>
+<tr>
+<th>支持（手动）就地调整加密块设备大小
+</th>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">堆叠式文件系统加密特有功能（Stacked filesystem encryption specific）
+</th>
+<th class="archwiki-table-cell-background-grey" colspan="3" rowspan="5" style="vertical-align: middle; text-align: center;">
+</th>
+<th><a href="#pgefb77a75bb9b">ZFS</a>
+</th>
+<th><a href="#pgd16fe308a4b9">fscrypt</a>
+</th>
+<th><a href="#pg8fbdf5e296d7">eCryptfs</a>
+</th>
+<th><a href="#pgd12167fb0e6f">EncFS</a>
+</th>
+<th><a href="#pg7fd8c340c425">gocryptfs</a>
+</th></tr>
+<tr>
+<th>支持的文件系统
+</th>
+<td>ZFS
+</td>
+<td>ext4、F2FS、UBIFS
+</td>
+<td>ext3、ext4、xfs（有注意事项）、jfs、nfs……
+</td>
+<td>ext3、ext4、xfs（有注意事项）、jfs、nfs、cifs……
+<p><a href="https://github.com/vgough/encfs">[6]</a>
+</p>
+</td>
+<td>任意文件系统
+</td></tr>
+<tr>
+<th>可以加密文件名
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><a href="https://zfsonlinux.org/manpages/0.8.3/man8/zfs.8.html#lbAO">[7]</a>
+</p>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<th>可以<b>不</b>加密文件名
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><a href="https://github.com/rfjakob/gocryptfs/blob/master/Documentation/MANPAGE.md#-plaintextnames">[8]</a>
+</p>
+</td></tr>
+<tr>
+<th>优化处理稀疏文件
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr></tbody></table>
+<table class="wikitable left-align-row-headers" style="text-align:center; cell-padding:100px;">
+<tbody><tr>
+<th class="archwiki-table-cell-background-grey" style="vertical-align: middle; text-align: center;">兼容性与流行度（Compatibility &amp; prevalence）
+</th>
+<th>Loop-AES
+</th>
+<th><a href="#pg8e3a9446707a">dm-crypt</a> +/- LUKS
+</th>
+<th><a href="#pgf99e6a2f1bb8">VeraCrypt</a>
+</th>
+<th><a href="#pgefb77a75bb9b">ZFS</a>
+</th>
+<th><a href="#pgd16fe308a4b9">fscrypt</a>
+</th>
+<th><a href="#pg8fbdf5e296d7">eCryptfs</a>
+</th>
+<th><a href="#pgd12167fb0e6f">EncFS</a>
+</th>
+<th><a href="#pg7fd8c340c425">gocryptfs</a>
+</th></tr>
+<tr>
+<th>支持的 Linux 内核版本
+</th>
+<td>2.0 或更新版本
+</td>
+<td>CBC 模式自 2.6.4 起支持，ESSIV 自 2.6.10 起支持，LRW 自 2.6.20 起支持，XTS 自 2.6.24 起支持
+</td>
+<td>？
+</td>
+<td>2.6.32 或更新版本（截至 0.8.3）
+</td>
+<td>4.1 或更新版本
+</td>
+<td>？
+</td>
+<td>2.4 或更新版本
+</td>
+<td>？
+</td></tr>
+<tr>
+<th>加密数据也可以从 Windows 访问
+</th>
+<td>？
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><br/><a href="https://openzfsonwindows.org/">OpenZFS on Windows</a>
+(<a href="https://github.com/openzfsonwindows/ZFSin">仓库</a>)
+</p>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+<p><br/>（需要管理员权限）
+</p>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><br/><a href="https://github.com/bailey27/cppcryptfs">cppcryptfs 移植版</a>
+</p>
+</td></tr>
+<tr>
+<th>加密数据也可以从 Mac OS X 访问
+</th>
+<td>？
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><br/><a href="https://openzfsonosx.org/">OpenZFS on OS X</a>
+(<a href="https://github.com/openzfsonosx/zfs">仓库</a>)
+</p>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><a href="https://github.com/vgough/encfs/wiki/Mac-OS-X">[9]</a>
+</p>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><a href="https://github.com/rfjakob/gocryptfs?tab=readme-ov-file#platforms">[10]</a>
+<br/>（测试版质量）
+</p>
+</td></tr>
+<tr>
+<th>加密数据也可以从 FreeBSD 访问
+</th>
+<td>？
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><br/><a href="https://zfsonfreebsd.github.io/ZoF/">ZFS on FreeBSD</a>
+（原生；
+<a href="https://github.com/zfsonfreebsd/ZoF">仓库</a>）
+</p>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>？
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+<p><a href="https://www.freshports.org/sysutils/fusefs-encfs/">[11]</a>
+</p>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+<p><a href="https://github.com/rfjakob/gocryptfs/discussions/741">[12]</a>
+</p>
+</td></tr>
+<tr>
+<th>应用于
+</th>
+<td>？
+</td>
+<td>Debian/Ubuntu 安装程序（系统加密）<br/>Fedora 安装程序
+</td>
+<td>？
+</td>
+<td>？
+</td>
+<td>Android、Chrome OS
+</td>
+<td>？
+</td>
+<td>？
+</td>
+<td>？
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E7.A4.BA.E4.BE.8B" id="示例"><span id=".E7.A4.BA.E4.BE.8B"></span>示例</h3></div>
+<p>在实践中，结果可能是这样的：
+</p>
+<dl><dt>示例 1</dt>
+<dd>仅利用用户的家目录（home directory）里的一个被用 <a href="#pgd12167fb0e6f">EncFS</a> 加密的路径名为 <code>~/Private</code> 的虚拟文件夹的简单的（内部硬盘驱动器）用户数据加密
+<ul><li>被 on-disk 存储的文件的加密版本位于 <code>~/.Private</code>（encrypted versions of the files stored on-disk in <code>~/.Private</code>）</li>
+<li>使用专用密码按需解锁</li></ul></dd></dl>
+<dl><dt>示例 2</dt>
+<dd>部分系统加密，每个用户的主目录用 <a href="#pg8fbdf5e296d7">ECryptfs</a> 加密
+<ul><li>使用账户登录密码，在各个用户登录时被解锁</li>
+<li>具有<a href="#pg2bf97cd1c31b">用LUKS的dm-crypt</a>加密的 <code>swap</code> 和 <code>/tmp</code> 分区，使用每个会话自动生成的一次性密钥</li>
+<li>禁止 <b>slocate</b>（及类似的应用程序）索引或缓存 <code>/home</code> 的内容</li></ul></dd></dl>
+<dl><dt>示例 3</dt>
+<dd>系统加密——具有<a href="#pg2bf97cd1c31b">用LUKS的dm-crypt</a>加密的整个硬盘驱动器，<code>/boot</code> 分区除外（不过，用 <a href="#pge7dd11d64038">GRUB</a> 引导时，<code>/boot</code> 可被加密）
+<ul><li>使用密码或带有密钥文件的 U 盘，在引导期间解锁</li>
+<li>每个用户可能有不同的密码/密钥——可独立撤销的</li>
+<li>可用 <a href="#pge7dd11d64038">LUKS on LVM</a> 实现跨驱动器加密或灵活性分区布局</li></ul></dd></dl>
+<dl><dt>示例 4</dt>
+<dd>隐藏式/plain 系统加密——具有 <a href="#pg8e3a9446707a">plain dm-crypt</a> 加密的整个硬盘驱动器
+<ul><li>USB-boot，使用专用密码 + 带有密钥文件的U盘</li>
+<li>在挂载前检查数据完整性</li>
+<li><code>/boot</code> 分区位于上述U盘上</li></ul></dd></dl>
+<dl><dt>示例 5</dt>
+<dd>文件容器加密——将预分配的文件用作用户数据的加密容器
+<ul><li>用<a href="#pgb01e3fe42629">Dm-crypt/加密不具有根目录的文件系统#文件容器</a>加密类似 <code>~/.volume.img</code> 这样的文件</li>
+<li>通过将整个容器复制到远程主机上进行不定期的备份</li></ul></dd></dl>
+<p>当然还有许多其他的组合。你应该仔细计划什么样的设置适合你的系统。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg812206bba43d_.E5.8A.A0.E5.AF.86.E6.98.AF.E6.80.8E.E4.B9.88.E8.BF.90.E4.BD.9C.E7.9A.84" id="加密是怎么运作的"><span id=".E5.8A.A0.E5.AF.86.E6.98.AF.E6.80.8E.E4.B9.88.E8.BF.90.E4.BD.9C.E7.9A.84"></span>加密是怎么运作的</h2></div>
+<p>本节旨在作为对常规磁盘加密的核心设置的概念和过程的高级介绍。
+</p><p>它不涉及技术或数学细节（请查阅相应的文献），但应该让系统管理员大致了解不同的设置选择（尤其是关于密钥管理）如何影响可用性和安全性。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E5.9F.BA.E6.9C.AC.E5.8E.9F.E5.88.99" id="基本原则"><span id=".E5.9F.BA.E6.9C.AC.E5.8E.9F.E5.88.99"></span>基本原则</h3></div>
+<p>出于磁盘加密的目的，每个块设备（或文件系统叠加加密情况下的单个文件）被划分为等长的<b>扇区</b>，例如 512 字节（4,096 位）。然后在每个扇区的基础上进行加密/解密，因此磁盘上块设备/文件的第 n 个扇区将存储原始数据的第 n个扇区的加密版本。
+</p><p>每当操作系统或应用程序从块设备/文件请求某个数据片段时，包含数据的整个扇区（或扇区们）将被从磁盘读取，被即时解密，并被临时存储在内存中：
+</p>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;">           ╔═══════╗
+  扇区 1   ║“？？？……”║
+           ╠═══════╣         ╭┈┈┈╮
+  扇区 2   ║“？？？……”║         ┊ 密钥 ┊
+           ╠═══════╣         ╰┈┬┈╯
+          :              :              │
+           ╠═══════╣             ▼             ┣┉┉┉┉┉┉┉┫
+  扇区 n   ║“？？？……”║━━━━━（解密）━━━━▶┋“甲乙丙……”┋   扇区 n
+           ╠═══════╣                            ┣┉┉┉┉┉┉┉┫
+          :              :
+           ╚═══════╝
+
+              磁盘上加密的                                RAM 中解密的数据
+              块设备或文件                      
+        
+</pre>
+<p>同样，在每次写入操作中，所有受影响的扇区都一定会被彻底地重加密（而其余扇区不受影响）。
+</p><p>为了能够对数据进行解密/加密，磁盘加密系统需要知道与之相关的唯一的秘密 "钥匙"。每当要挂载相关的加密块设备或文件夹时，必须提供与其相对应的密钥（以下称为“主密钥”）。
+</p><p>密钥的熵对于加密的安全性至关重要。一个随机生成的一定长度的字节串，例如32字节（256比特），虽具有所需的安全性，却没法记忆，也无法在挂载期间手动应用。
+</p><p>出于这个原因，有两种技术被用作辅助手段。第一种是应用密码学来增加主密钥的熵值，通常涉及一个单独的人类友好的口令。对于不同类型的加密，#比较表列出了各自的特点。第二种方法是创建一个具有高熵的密钥文件，并将其存储在与要加密的数据驱动器分开的介质上。
+</p><p>另请参阅<a href="https://en.wikipedia.org/wiki/Authenticated_encryption">维基百科：认证加密（英文页面）</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E5.AF.86.E9.92.A5.E3.80.81.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E5.92.8C.E5.AF.86.E7.A0.81.E7.9F.AD.E8.AF.AD" id="密钥、密钥文件和密码短语"><span id=".E5.AF.86.E9.92.A5.E3.80.81.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6.E5.92.8C.E5.AF.86.E7.A0.81.E7.9F.AD.E8.AF.AD"></span>密钥、密钥文件和密码短语</h3></div>
+<p>以下是如何使用密钥文件来存储、加密保护主密钥的示例：
+</p>
+<dl><dt>存储在明文密钥文件中</dt></dl>
+<p>简直（以可读形式）将主密钥存储在文件中是最简单的选择。该文件——被称为“密钥文件”——可以放置于你保存在安全位置的 U 盘上，并且仅在你想要挂载磁盘的加密部分时（例如在启动或登录期间）将它连接到计算机。
+</p>
+<dl><dt>以受密码保护的形式存储在密钥文件或磁盘本身中</dt></dl>
+<p>主密钥（以及加密数据）可以使用一段必须记下来且每次你想要挂载加密的块设备或文件夹时都必须输入的保密密码短语（secret passphrase）进行保护。有关详细信息，请参阅下面的#加密的元数据。
+</p>
+<dl><dt>给每个会话随机生成一个临时的</dt></dl>
+<p>在某些情况下，例如在加密交换空间（swap）或 <code>/tmp</code> 分区时，根本不需要保留永久的主密钥。可以给每个会话随机生成一个新的一次性密钥，而无需任何用户交互。这意味着一旦被卸载，写入相关分区的所有文件都不能被<b>任何人</b>再次解密——在那些特定的用例中，这非常好。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E5.8A.A0.E5.AF.86.E7.9A.84.E5.85.83.E6.95.B0.E6.8D.AE" id="加密的元数据"><span id=".E5.8A.A0.E5.AF.86.E7.9A.84.E5.85.83.E6.95.B0.E6.8D.AE"></span>加密的元数据</h3></div>
+<p>加密技术经常使用密码函数来增强主密钥本身的安全性。在挂载加密设备时，密码或密钥文件通过这些（密码函数）传递，只有结果才能解锁主密钥以解密数据。
+</p><p>一个常见的设置是（通过一种“密钥导出函数（key derivation function）”）对密码短语（passphrase）应用所谓的“密钥拉伸（key stretching）”，并使用生成的增强密码短语作为挂载密钥来解密（之前以加密的形式存储的）实际的主密钥：
+</p>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;"> ╭┈┈┈┈┈┈┈╮                           ╭┈┈┈┈┈╮
+ ┊ 挂载密码短语 ┊━━━━⎛密钥导出⎞━━━▶┊ 挂载密钥 ┊
+ ╰┈┈┈┈┈┈┈╯   ,──⎝  函数  ⎠        ╰┈┈┬┈┈╯
+ ╭──╮          ╱                               │
+ │ 盐 │────´                                  │
+ ╰──╯                                           │
+ ╭───────╮                                 ▼           ╭┈┈┈┈╮
+ │ 加密的主密钥 │━━━━━━━━━━━━━━━（解密）━━━▶┊ 主密钥 ┊
+ ╰───────╯                                              ╰┈┈┈┈╯
+</pre>
+<p><b>密钥导出函数</b>（如 PBKDF2 或 scrypt）刻意地放慢速度（它应用一个哈希函数的多次迭代，例如 HMAC-SHA-512 的 1000 次迭代），因此通过暴力破解来找到密码短语变得不可行。对于认证用户的正常用例，每个会话只需要计算一次，因此小的减速不是问题。
+它（密钥导出函数）还需要一个额外的数据块，即所谓的“<b>盐</b>”，作为一个参数——在设置磁盘加密期间随机生成一次，并被作为加密元数据的一部分不受保护地存储。因为每次设置的值都不同，攻击者无法使用密钥导出函数的预计算表来加速暴力破解。
+</p><p><b>加密的主密钥</b>可以与加密的数据一起存储在磁盘上。这样，加密数据的机密性完全取决于保密密码短语。
+</p><p>可以通过将加密的主密钥存储在密钥文件中来获得额外的安全性，例如U 盘。这提供了<b>双重身份验证(two-factor authentication)</b>：现在访问加密数据需要只有你<b>知道</b>的内容（密码短语），以及只有你<b>拥有</b>的内容（密钥文件）。
+</p><p>实现双重身份验证的另一种方法是增强上述密钥检索方案，以数学方式将密码短语与从（位于U 盘或类似设备上的）一个或多个外部文件读取的字节数据“结合”起来，然后将其传递给密钥导出函数。任何文件都在考虑范围之中，例如有助于#合理推诿<sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>的普通的JPEG图像。不过，在这种情况下，它们仍然被称为“密钥文件”。
+</p><p>在其导出后，只要挂载了加密的块设备或文件夹，主密钥就会被安全地存储在内存中（例如，在内核密钥环中）。
+</p><p>不过，它通常不直接用于对磁盘数据进行加/解密。
+例如，在文件系统叠加加密的情形中，每个文件都可以自动分配它自己的加密密钥。每当文件要被读取/修改时，这个文件密钥首先需要用主密钥进行解密，然后它本身才能用于对文件内容进行加/解密。
+</p>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;">                           ╭┈┈┈┈┈╮
+                           ┊  主密钥  ┊
+   磁盘上的文件：          ╰┈┈┬┈┈╯
+  ┌──────────┐       │
+  ╎╭────────╮╎       ▼         ╭┈┈┈┈┈╮
+  ╎│ 加密的文件密钥 │━━━（解密）━━▶┊ 文件密钥 ┊
+  ╎╰────────╯╎                  ╰┈┈┬┈┈╯
+  ╎┌────────┐╎                        ▼          ┌┈┈┈┈┈┈┈┈┈┐
+  ╎│ 加密的文件内容 │◀━━━━━━━━━━（加/解密）━━▶┊ 可读取的文件内容 ┊
+  ╎└────────┘╎                                    └┈┈┈┈┈┈┈┈┈┘
+  └──────────┘
+</pre>
+<p>以类似的方式，在文件系统叠加加密的情形下，可以使用单独的密钥（例如，每个文件夹一个）来加密文件名。
+</p><p>在块设备加密的情况下，每个设备使用一个主密钥，因此使用所有数据。一些方法提供了为同一设备分配多个密码短语/密钥文件的特性，而另一些方法则没有。有些使用上述函数来保护主密钥，有些则把密钥安全的控制权完全交给用户。通过 <a href="#pg8e3a9446707a">dm-crypt</a> 在 plain 或 LUKS 模式下使用的加密参数解释两个例子。
+</p><p>当比较两种模式使用的参数时，我们注意到 dm-crypt plain 模式有关于如何定位密钥文件的参数（如<code>--keyfile-size</code>、<code>--keyfile-offset</code>）。dm-crypt LUKS 模式不需要这些，因为每个块设备在开头都包含一个带有加密元数据的标头。标头包括使用的密码、加密的主密钥本身以及派生解密所需的参数。后面的参数又来自于主密钥初始加密时使用的选项（如<code>--iter-time</code>、<code>--use-random</code>）。
+</p><p>对于不同技术的优/缺点，请参考#比较表或浏览特定页面。
+</p><p>另请参阅：
+</p>
+<ul><li><a href="https://en.wikipedia.org/wiki/Passphrase">Wikipedia:Passphrase</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Key_(cryptography)">Wikipedia:Key (cryptography)</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Key_management">Wikipedia:Key management</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Key_derivation_function">Wikipedia:Key derivation function</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E5.AF.86.E7.A0.81.E5.92.8C.E6.93.8D.E4.BD.9C.E6.A8.A1.E5.BC.8F" id="密码和操作模式"><span id=".E5.AF.86.E7.A0.81.E5.92.8C.E6.93.8D.E4.BD.9C.E6.A8.A1.E5.BC.8F"></span>密码和操作模式</h3></div>
+<p>用于在相对于给定加密密钥彼此对应的未加密和加密数据（所谓的“明文（plaintext）”和“密文（ciphertext）”）之间进行转换的实际算法称为“<b>密码（cipher）</b>”。
+</p><p>磁盘加密采用“块密码（block cipher）”，它对固定长度的数据块进行操作，例如16 字节（128 位）。在撰写本文时，主要使用的是：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>
+</th>
+<th>块大小
+</th>
+<th>密钥大小
+</th>
+<th>注释
+</th></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">AES</a>
+</td>
+<td>128 bits
+</td>
+<td>128、192 或 256 bits
+</td>
+<td>经 NSA 批准用于保护“机密”和“绝密”机密的美国政府信息（当使用 192 或256位的密钥大小时）
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Blowfish_(cipher)">Blowfish</a>
+</td>
+<td>64 bits
+</td>
+<td>32–448 bits
+</td>
+<td>最早公开的无专利安全密码之一，因此在 Linux上非常成熟
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Twofish">Twofish</a>
+</td>
+<td>128 bits
+</td>
+<td>128、192 或 256 bits
+</td>
+<td>作为 Blowfish的继任者而开发，但尚未得到广泛使用
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Serpent_(cipher)">Serpent</a>
+</td>
+<td>128 bits
+</td>
+<td>128、192 或 256 bits
+</td>
+<td>被认为是入围AES决赛的五个算法中最安全的<a href="https://csrc.nist.gov/archive/aes/round2/r2report.pdf">[13]</a><a href="https://www.cl.cam.ac.uk/~rja14/Papers/serpentcase.pdf">[14]</a><a href="https://www.cl.cam.ac.uk/~rja14/Papers/serpent.pdf">[15]</a>.
+</td></tr></tbody></table>
+<p>加/解密扇区（见上文<sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>）是通过将其划分为与密码的块大小相匹配的小块来实现的，并遵循特定的规则集（所谓的“<b>操作模式（mode of operation）</b>”）将密码连续地应用于各个块。
+</p><p>仅将其不加以修改地单独应用于每个区块（被称为 "<b>电子编码本（electronic codebook，ECB）</b>"模式）是不安全的。因为如果相同的 16 字节明文总会产生相同的16 字节密文，攻击者可轻易识别出存储在磁盘上的密文中的加密模式。
+</p><p>实践中使用的最基本（且常见的）操作模式是“<b>密码分组链接（cipher-block chaining，CBC）</b>”。使用此模式加密扇区时，每个明文数据块以数学方式与前一个块的密文组合，然后使用密码对其进行加密。对于第一个块，由于它之前没有密文，因此使用了一个特殊的预生成的数据块（data block），该数据块与扇区的加密的元数据（cryptographic metadata）一起存储，称为“<b>初始化向量 (initialization vector，IV)</b>”：
+</p>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;">                                          ╭─────╮
+                                          │初始化向量│
+                                          ╰──┬──╯
+           ╭  ╠═════╣       ╭─密钥    │      ┣┉┉┉┉┉┫
+           │  ║          ║       ▼          ▼      ┋          ┋       . 开始
+           ┴  ║"????????"║◀━（密码）━━━（+）━━┋"Hello, W"┋ 块  ╱╰──┐
+        文件或 ║          ║                           ┋          ┋ 1   ╲╭──┘
+      块设备的 ║          ║-─────────╮      ┋          ┋       '
+      n 号扇区 ╟─────╢       ╭─密钥    │      ┠┉┉┉┉┉┨
+           ┬  ║          ║       ▼          ▼      ┋          ┋
+           │  ║"????????"║◀━（密码）━━━（+）━━┋"orld!!!!"┋ 块
+           │  ║          ║                           ┋          ┋ 2 
+           │  ║          ║-─────────╮      ┋          ┋
+           │  ╟─────╢                   │      ┠┉┉┉┉┉┨
+           │  ║          ║                   ▼      ┋          ┋
+          :   :   ...   :        ...         ...     :   ...   :  ...
+
+                磁盘上的密文                             RAM 中的明文
+</pre>
+<p>类似地，在解密时，程序是反过来的。
+</p><p>对应于每个扇区的唯一的初始化向量的生成是值得注意的。最简单的选择是把现成的数值（如扇区号码）以某种可预见的方式计算。但这将给可以重复访问系统的攻击者执行所谓的<a href="https://en.wikipedia.org/wiki/Watermarking_attack">水印攻击</a>以可乘之机。为了预防这种情况，可以使用一种称为 “加密的盐扇区初始化向量 （Encrypted salt-sector initialization vector，<b>ESSIV</b>）”的方法来生成初始化向量，使它们在潜在攻击者看来完全随机。
+</p><p>还有许多其他更复杂的操作模式可用于磁盘加密，它们已经提供了针对此类攻击的内置安全性（因此不需要 ESSIV）。
+有些还可以额外保证加密数据的真实性（即确认它没有被无权访问密钥的人修改/损坏）。
+</p><p>另请参见：
+</p>
+<ul><li><a href="https://en.wikipedia.org/wiki/Disk_encryption_theory">Wikipedia:Disk encryption theory</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Block_cipher">Wikipedia:Block cipher</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation">Wikipedia:Block cipher modes of operation</a></li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg812206bba43d_.E6.B5.81.E5.AF.86.E7.A0.81" id="流密码"><span id=".E6.B5.81.E5.AF.86.E7.A0.81"></span>流密码</h4></div>
+<p>流密码以数据流的方式工作，不需要“操作模式”这样的概念。然而，磁盘加密所需的特性（例如“wide-block”）意味着需要在其基础上添加额外层。就 Linux 系统上的磁盘加密而言，主要例子是 <a href="https://lwn.net/Articles/776721/">Adiantum</a> 配置中的 XChaCha12，即 xchacha12,aes-adiantum，专为硬件不支持 AES 加速的低端系统设计。Adiantum 在此类硬件上运行速度快，并且能够保证加密数据的真实性。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E5.90.88.E7.90.86.E6.8E.A8.E8.AF.BF" id="合理推诿"><span id=".E5.90.88.E7.90.86.E6.8E.A8.E8.AF.BF"></span>合理推诿</h3></div>
+<p>参见 <a href="https://en.wikipedia.org/wiki/Plausible_deniability">Wikipedia:Plausible deniability</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg812206bba43d_.E7.94.A8.E4.BA.8E.E7.A3.81.E7.9B.98.E5.8A.A0.E5.AF.86.E5.9C.BA.E6.99.AF.E7.9A.84.E6.95.B0.E6.8D.AE.E5.A4.87.E4.BB.BD" id="用于磁盘加密场景的数据备份"><span id=".E7.94.A8.E4.BA.8E.E7.A3.81.E7.9B.98.E5.8A.A0.E5.AF.86.E5.9C.BA.E6.99.AF.E7.9A.84.E6.95.B0.E6.8D.AE.E5.A4.87.E4.BB.BD"></span>用于磁盘加密场景的数据备份</h2></div>
+<p><span id="Backup_for_disk_encryption_scenarios"></span>
+</p><p>为防止数据丢失，制作用户数据的<a href="#pgbb7568ec4406">备份</a>。一般来说，你的被加密数据的备份也应该加密。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg812206bba43d_.E5.9D.97.E8.AE.BE.E5.A4.87.E5.8A.A0.E5.AF.86_2" id="块设备加密_2"><span id=".E5.9D.97.E8.AE.BE.E5.A4.87.E5.8A.A0.E5.AF.86_2"></span>块设备加密</h3></div>
+<p>有多种选择：你可以将加密容器（encryption container）所在的磁盘块设备（disk block device）备份为映像（image），例如 <code>/dev/sd<i>x</i></code>；也可以备份加密容器内的文件系统，例如 <code>/dev/mapper/<i>dm_name</i></code>；亦可备份里面的文件，例如使用 <a href="#pg4bb0ada72a54">rsync</a>。 以下部分列出了每个选项的优点和缺点。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg812206bba43d_.E7.A3.81.E7.9B.98.E5.9D.97.E8.AE.BE.E5.A4.87.E5.A4.87.E4.BB.BD" id="磁盘块设备备份"><span id=".E7.A3.81.E7.9B.98.E5.9D.97.E8.AE.BE.E5.A4.87.E5.A4.87.E4.BB.BD"></span>磁盘块设备备份</h4></div>
+<p>磁盘块设备备份会：
+</p>
+<ul><li>按原样加密，具有与工作副本（working copy）相同的安全级别</li>
+<li>包含你的 LUKS 标头</li>
+<li>总是和磁盘块设备一样大</li>
+<li>难以使用高级备份策略，例如增量备份、压缩或重复数据删除</li>
+<li>易于恢复到新磁盘因其亦恢复加密容器</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg812206bba43d_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E6.88.96.E6.96.87.E4.BB.B6.E5.A4.87.E4.BB.BD" id="文件系统或文件备份"><span id=".E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E6.88.96.E6.96.87.E4.BB.B6.E5.A4.87.E4.BB.BD"></span>文件系统或文件备份</h4></div>
+<p>文件系统或文件备份，它：
+</p>
+<ul><li><b>不</b>按原样加密</li>
+<li>应在通过网络传输之前或保存到磁盘时进行加密。需做额外的工作</li>
+<li>未必具有与工作副本相同的安全级别</li>
+<li>不包含你的LUKS标头</li>
+<li>仅与文件系统上的已用空间一样大，比如看看<a href="#pg724e06fa6c76">partclone</a></li>
+<li>可使用高级备份策略，例如增量备份、压缩或重复数据删除</li>
+<li>需要手动将加密容器恢复到新磁盘，例如通过恢复 LUKS 标头的备份</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg812206bba43d_LUKS_.E6.A0.87.E5.A4.B4.E5.A4.87.E4.BB.BD" id="LUKS_标头备份"><span id="LUKS_.E6.A0.87.E5.A4.B4.E5.A4.87.E4.BB.BD"></span>LUKS 标头备份</h4></div>
+<p>如果使用 LUKS，则可以<a href="#pg8ad7aef74953">对 LUKS 标头进行备份</a>：定期检查与同步这些备份是有意义的，尤其是在密码已被撤销的情况下。
+</p><p>但是，如果你有数据备份，并且想要恢复它，你可以使用 cryptsetup 从头开始重新创建 LUKS 加密分区，然后恢复数据，因此备份 LUKS 标头不如备份数据重要。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807032609
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.360 seconds
+Real time usage: 0.375 seconds
+Preprocessor visited node count: 1363/1000000
+Revision size: 44248/2097152 bytes
+Post‐expand include size: 25392/2097152 bytes
+Template argument size: 4949/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 3840/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  106.638      1 -total
+  7.67%    8.178      9 Template:Grey
+  6.72%    7.162     15 Template:META_Table_cell
+  5.05%    5.386     64 Template:Yes
+  5.04%    5.370      6 Template:是
+  4.93%    5.257      2 Template:Expansion
+  4.72%    5.029      4 Template:R
+  4.60%    4.910      2 Template:G
+  3.48%    3.716      9 Template:Pkg
+  3.36%    3.585     24 Template:Ic
+-->
+<!-- Render ID bb50ea8e-920f-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2987:|#|:idhash:canonical!zh-cn and timestamp 20260807032609 and revision id 35516. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

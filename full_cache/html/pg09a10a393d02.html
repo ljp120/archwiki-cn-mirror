@@ -1,0 +1,373 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg09a10a393d02">平铺式窗口管理器比较</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Comparison_of_tiling_window_managers">Comparison of tiling window managers</a>，最近一次同步于 2024-12-08，若英文版本有所<a href="https://wiki.archlinux.org/title/Comparison_of_tiling_window_managers?diff=0&amp;oldid=822466">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Comparison_of_tiling_window_managers_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文对最流行的<i>平铺式</i><a href="#pg3d6d7c1e6c7c">窗口管理器</a>（相对于<i>浮动式</i>窗口管理器）进行了公正的比较。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09a10a393d02_Comparison_table" id="Comparison_table">Comparison table</h2></div>
+<p>The following table lists the most popular tiling window managers alongside notable features, providing readers with a quick overview.
+</p>
+<table class="wikitable sortable" style="text-align: center;">
+<tbody><tr>
+<th scope="col">Window Manager
+</th>
+<th scope="col">Written in
+</th>
+<th scope="col">Configured with
+</th>
+<th scope="col">Management style
+</th>
+<th scope="col">System tray support
+</th>
+<th scope="col">On-the-fly reload
+</th>
+<th class="unsortable" scope="col">Information bars
+</th>
+<th scope="col">Compositing
+</th>
+<th class="unsortable" scope="col">Default layouts
+</th>
+<th class="unsortable" scope="col">Pixel usage
+</th>
+<th class="unsortable" scope="col">External control
+</th>
+<th scope="col">Library
+</th>
+<th class="unsortable" scope="col">Multiple (n) monitor behavior
+</th>
+<th scope="col">ICCCM/EWMH compliant
+</th>
+<th scope="col">Maintenance
+</th></tr>
+<tr>
+<th><a href="#pg24b8665395f7">Awesome</a>
+</th>
+<td>C</td>
+<td>Lua</td>
+<td>Dynamic</td>
+<td>Built-in</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Built-in, images and text</td>
+<td>External</td>
+<td>max, nh-stack (and invert), nv-stack (and invert), free</td>
+<td>Variable borders, optional h-tab titles</td>
+<td>dbus (if enabled)</td>
+<td>XCB</td>
+<td>n-tags (workspaces). Per default 9  are enabled. <a href="https://awesomewm.org/images/6mon.medium.png">Example</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pg4755edd2cf81">bspwm</a>
+</th>
+<td>C</td>
+<td>Anything</td>
+<td>Hybrid</td>
+<td>None</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Can write internal state to a FIFO</td>
+<td>External</td>
+<td>v-split, h-split</td>
+<td>Variable borders</td>
+<td>via <code>bspc</code></td>
+<td>XCB</td>
+<td>Monitors hold Desktops</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pgd927e4187724">dwm</a>
+</th>
+<td>C</td>
+<td>C (recompile)</td>
+<td>Dynamic</td>
+<td>Optional Patch</td>
+<td><a href="#pgd927e4187724">Optional</a></td>
+<td>Built-in, reads from root window name</td>
+<td>External</td>
+<td>v-stack, max</td>
+<td></td>
+<td>via <a href="https://dwm.suckless.org/patches/dwmfifo">dwmfifo</a></td>
+<td>Xlib</td>
+<td>n regions, 9 workspaces fixed to each region</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pg23c0b511852c">FrankenWM</a>
+</th>
+<td>C</td>
+<td>C (recompile)</td>
+<td>Dynamic</td>
+<td>None</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否, outputs information to stdout, which can easily be parsed and displayed by an external monitor or panel (dzen2, conky, etc)</td>
+<td>External</td>
+<td>v-stack (and invert), h-stack (and invert), dual-v/h-stack, grid, fibonacci (vh-stack), rows, columns, max, free</td>
+<td>Variable borders</td>
+<td></td>
+<td>XCB</td>
+<td></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pgdd00ace85194">herbstluftwm</a>
+</th>
+<td>C++</td>
+<td>Anything</td>
+<td>Manual</td>
+<td>None</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td></td>
+<td>External</td>
+<td>vertical, horizontal, grid, max, tabbed</td>
+<td>1-pix borders</td>
+<td>commands via <code>herbstclient</code></td>
+<td>Xlib</td>
+<td>n regions, 9 workspaces visible in any region</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pg04e8e3ac1488">i3</a>
+</th>
+<td>C</td>
+<td>Text</td>
+<td>Manual</td>
+<td>i3bar</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是 (Layout is preserved)</td>
+<td>text piped to i3bar (<code>i3status</code>/<code>conky</code> and others can be used)</td>
+<td>External</td>
+<td>tree, v-split, h-split, stacked, tabbed, max, can be nested infinitely</td>
+<td>None, 1-pix or 2-pix, optional titlebars, can hide edge borders</td>
+<td>commands via ipc (or i3-msg, which uses ipc)</td>
+<td>XCB</td>
+<td>n regions</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pg07a5909a3279">LeftWM</a>
+</th>
+<td>Rust</td>
+<td>RON (user settings) / Anything (themes)</td>
+<td>Dynamic</td>
+<td>None</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是, many options through theme system</td>
+<td>External</td>
+<td>v-stack, columns, rows</td>
+<td>Variable based on theme</td>
+<td>supports <code>_NET_ACTIVE_WINDOW</code> and sending commands to a named pipe</td>
+<td>Xlib</td>
+<td>Workspaces and monitors are not tied. Many workspaces for monitor or many monitors for workspace</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pg5b9c56c000f1">Notion</a>
+</th>
+<td>C, Lua</td>
+<td>Lua, compatible with Ion3 configs</td>
+<td>Manual</td>
+<td>trayion, stalonetray</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>configurable</td>
+<td>?</td>
+<td>h-tab, max</td>
+<td>Configurable borders and titlebars/tabs</td>
+<td>EWMH, arbitrary Lua scripts which have access to the rich internal API</td>
+<td>Xlib</td>
+<td>n workspaces on each monitor. Supports on-the-fly changes in topology</td>
+<td></td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pgbbc1b50bf190">qtile</a>
+</th>
+<td>Python</td>
+<td>Python</td>
+<td>Dynamic</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>External</td>
+<td>tree, v-split, h-split, stacked, tabbed, max</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否 borders, although customizable</td>
+<td>Hooks, Server mode</td>
+<td>XCB</td>
+<td></td>
+<td></td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pg52d2715967a0">Ratpoison</a>
+</th>
+<td>C</td>
+<td>Text</td>
+<td>Manual</td>
+<td>None</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>External</td>
+<td>max</td>
+<td></td>
+<td></td>
+<td>Xlib</td>
+<td></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pg626a8256f96e">Snapwm</a>
+</th>
+<td>C</td>
+<td>Reloadable Text</td>
+<td>Dynamic</td>
+<td>None</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Built-in, reads from root window name</td>
+<td>External</td>
+<td>nVertical, Fullscreen, nHorizontal, Grid, Center Stacking</td>
+<td>Variable borders, no titles</td>
+<td></td>
+<td>Xlib</td>
+<td>Number of desktops distributed evenly between monitors</td>
+<td></td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pg5fa16bb228fc">Spectrwm</a>
+</th>
+<td>C</td>
+<td>Text</td>
+<td>Dynamic</td>
+<td>None</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>Built-in, reads from user script</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>nv-stack, nh-stack, max</td>
+<td>1-pix borders, no titles</td>
+<td></td>
+<td>XCB</td>
+<td>n regions, 10 workspaces visible in any region</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pg4eecc6b6087b">Stumpwm</a>
+</th>
+<td>Common Lisp</td>
+<td>Common Lisp</td>
+<td>Manual</td>
+<td>StumpTray</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>External</td>
+<td>max</td>
+<td></td>
+<td>SLIME server ("Swank")</td>
+<td>CLX (Xlib-equivalent)</td>
+<td></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>Active
+</td></tr>
+<tr>
+<th><a href="#pg73ce307a54af">xmonad</a>
+</th>
+<td>Haskell</td>
+<td>Haskell</td>
+<td>Dynamic</td>
+<td>None</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是, with xmonad-contrib and an external manager</td>
+<td>nv-stack, nh-stack, max</td>
+<td>Variable borders, no titles</td>
+<td>via <a href="https://hackage.haskell.org/package/xmonad-contrib/docs/XMonad-Hooks-ServerMode.html">XMonad-Hooks-ServerMode</a></td>
+<td>Xlib</td>
+<td>n regions, 9 workspaces visible in any region</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是 / via <a href="https://hackage.haskell.org/package/xmonad-contrib-0.17.1/docs/XMonad-Hooks-EwmhDesktops.html">XMonad-Hooks-EwmhDesktops</a></td>
+<td>Active
+</td></tr>
+<tr class="sortbottom">
+<th>Window Manager</th>
+<th>Written in</th>
+<th>Configured with</th>
+<th>Management style</th>
+<th>System tray support</th>
+<th>On-the-fly reload</th>
+<th>Information bars</th>
+<th>Compositing</th>
+<th>Default layouts</th>
+<th>Pixel usage</th>
+<th>External control</th>
+<th>Library</th>
+<th>Multiple (n) monitor behavior</th>
+<th>ICCCM/EWMH compliant</th>
+<th>Maintenance
+</th></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>External control can also be achieved by programs like <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdotool">xdotool</a></span><sup><small>包</small></sup></span> which simulate keystrokes.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09a10a393d02_Management_style" id="Management_style">Management style</h3></div>
+<p>Dynamic management emphasizes automatic management of window layouts for speed and simplicity. Manual management emphasizes manual adjustment of layout and sizing with potentially more precise control, at the cost of more time spent moving and sizing windows.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09a10a393d02_Layouts" id="Layouts">Layouts</h3></div>
+<p>A number of common layout types appear in several tiling WMs, although the terminology varies somewhat.
+</p>
+<ul><li>max: one window shown fullscreen (with or without a status bar, title and borders). Aka: monocle (dwm, monsterwm).</li>
+<li>h-stack: master area in top half, other windows stack up horizontally in the bottom half. The master area may be resizable. May be inverted top-bottom (wmfs). Aka: bottom stack (dwm), bstack(monsterwm).</li>
+<li>v-stack: master area in left half, other windows stack up vertically in the right half. The master area may be resizable. May be inverted left-right (wmfs). Aka: tile (dwm, monsterwm).</li>
+<li>nh-stack: h-stack allowing &gt;=1 windows in master area. Aka: nbstack (dwm)</li>
+<li>nv-stack: v-stack allowing &gt;=1 windows in master area. Aka: ntile (dwm)</li>
+<li>mirror-h: nh-stack with stacks above and below the master area</li>
+<li>mirror-v: nv-stack with stacks to the left and right of the master area</li>
+<li>h-tab: one window shown fullscreen with all window titles shown horizontally (like browser tabs)</li>
+<li>v-tab: one window shown fullscreen with all window titles shown vertically. Aka: stack (wmii).</li>
+<li>h-split: a keybinding splits the current window horizontally creating space for another</li>
+<li>v-split: a keybinding splits the current window vertically creating space for another</li>
+<li>columns: manual layout style which treats windows as belonging to vertical columns</li>
+<li>rows: manual layout style which treats windows as belonging to horizontal rows</li>
+<li>grid: window positions and sizes based on a regular NxM grid. May be automatic (like wmfs, monsterwm) or manual (like Subtle).</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg09a10a393d02_Key_bindings" id="Key_bindings">Key bindings</h3></div>
+<p>Tiling window managers are usually designed to be used entirely with the keyboard or with keyboard &amp; mouse. This is for speed (reaching for and moving a mouse is slow) and ease of use. Sensible key bindings are crucial to making workflow fast and efficient. Some default sets are better than others, but generally the keys can be rebound as desired by the user.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg09a10a393d02_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="#pga21a6be8b605">平铺式 Wayland 混成器列表</a></li>
+<li><a href="https://sawfish.wikia.com/wiki/Comparison_of_extensible_window_managers">可扩展窗口管理器比较</a>比较了可通过脚本"扩展"的窗口管理器，如 xmonad 和 Sawfish。</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807155910
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.184 seconds
+Real time usage: 0.190 seconds
+Preprocessor visited node count: 253/1000000
+Revision size: 8390/2097152 bytes
+Post‐expand include size: 6221/2097152 bytes
+Template argument size: 691/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  103.741      1 -total
+ 73.95%   76.717      1 Template:翻译状态
+  6.00%    6.229     24 Template:是
+  4.33%    4.489     10 Template:否
+  4.11%    4.269      1 Template:Tip
+  3.84%    3.986      1 Template:G
+  2.66%    2.758      1 Template:R
+  1.89%    1.958      1 Template:Pkg
+  1.88%    1.948      2 Template:META_Table_cell
+  1.50%    1.555      5 Template:Ic
+-->
+<!-- Render ID ed4a670e-9278-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8023:|#|:idhash:canonical!zh-cn and timestamp 20260807155910 and revision id 33763. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

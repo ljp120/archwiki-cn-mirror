@@ -1,0 +1,233 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg49a53c288b70">man 手册</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span></p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Man_page">Man page</a>，最近一次同步于 2025-07-22，若英文版本有所<a href="https://wiki.archlinux.org/title/Man_page?diff=0&amp;oldid=841430">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Man_page_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg60b1626ea28f">在终端输出彩色#man</a></li>
+</ul></div>
+<p><a href="https://en.wikipedia.org/wiki/Man_page">man 手册页</a>，指 "manual pages"，是类 UNIX 系统的标准手册工具，包括<a href="#pg83506eae4ba0">Arch Linux</a>。这个命令常常被显示为 <span class="plainlinks archwiki-template-man" title="$ man 1 man"><a href="https://man.archlinux.org/man/man.1">man(1)</a></span>。
+</p><p>man手册页被设计成独立的文档，不能引用其它手册页面，于是这限制了它们在讨论相似话题时指向其它的手册页面。这与支持超链接的 <a href="#pg0e81ab922f48">Info 文档</a>形成鲜明对比，<a href="#pg0e81ab922f48">GNU</a>正在将 man 手册替换成 info 文档。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg49a53c288b70_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=man-db">man-db</a></span><sup><small>包</small></sup></span> 提供了 <i>man</i> 命令，<a href="#pg4bb6491c480c">less</a> 是 <i>man</i> 的默认分页器。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mandoc">mandoc</a></span><sup><small>包</small></sup></span> 同样可供使用。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=man-pages">man-pages</a></span><sup><small>包</small></sup></span> 既提供Linux和POSIX.1的man页面。<a href="https://gitlab.archlinux.org/archlinux/packaging/packages/man-pages/-/blob/main/PKGBUILD#L64-67">[1]</a>
+</p><p>中文用户可以选择安装中文版本，其余语言版本见<a href="https://wiki.archlinux.org/title/Man_page#Installation">英文wiki</a>:
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=man-pages-zh_cn">man-pages-zh_cn</a></span><sup><small>包</small></sup></span> 简体中文版本</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=man-pages-zh_tw">man-pages-zh_tw</a></span><sup><small>包</small></sup></span> 繁体中文版本</li></ul>
+<p>你也可以搜索所有可用的本地man页面在<a href="https://archlinux.org/packages/?sort=&amp;q=man-pages">官方仓库</a>和<a href="https://aur.archlinux.org/packages?K=man-pages">AUR</a>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg49a53c288b70_.E9.98.85.E8.AF.BB.E6.89.8B.E5.86.8C.E9.A1.B5" id="阅读手册页"><span id=".E9.98.85.E8.AF.BB.E6.89.8B.E5.86.8C.E9.A1.B5"></span>阅读手册页</h2></div>
+<p>通过以下命令阅读man手册页：
+</p>
+<pre>$ man <i>手册名</i>
+</pre>
+<p>man手册页分为很多<a href="https://en.wikipedia.org/wiki/Man_page#Manual_sections">段落</a>。每个段落有一段介绍，像<span class="plainlinks archwiki-template-man" title="$ man 1 intro"><a href="https://man.archlinux.org/man/intro.1">intro(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 2 intro"><a href="https://man.archlinux.org/man/intro.2">intro(2)</a></span>等等。完整的列表可以参考:<span class="plainlinks archwiki-template-man" title="$ man 7 man-pages"><a href="https://man.archlinux.org/man/man-pages.7#Sections_of_the_manual_pages">man-pages(7) § Sections of the manual pages</a></span> .
+</p><p>man手册页通过名称和所属分类标识。有些不同分类的man手册页名字可能相同，比如 <span class="plainlinks archwiki-template-man" title="$ man 1 man"><a href="https://man.archlinux.org/man/man.1">man(1)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 7 man"><a href="https://man.archlinux.org/man/man.7">man(7)</a></span>，这时需要额外指明分类以访问需要的手册。例如：
+</p>
+<pre>$ man 5 passwd
+</pre>
+<p>会显示有关文件<code>/etc/passwd</code>，而非命令 <code>passwd</code>，的内容。
+</p><p>相同地，我们也可以使用man页面后用一'.'分开，并追加一段落号:
+</p>
+<pre>$ man passwd.5
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg49a53c288b70_.E6.90.9C.E7.B4.A2.E6.89.8B.E5.86.8C.E9.A1.B5" id="搜索手册页"><span id=".E6.90.9C.E7.B4.A2.E6.89.8B.E5.86.8C.E9.A1.B5"></span>搜索手册页</h2></div>
+<p>如果用户压根儿不知道要查阅的手册的名称，该怎么办呢？没事，通过 <code>-k</code> 或者 <code>--apropos</code> 参数就可以按给定关键词搜索相关手册。例如，要查阅有关密码的手册（“password”）：
+</p><p>关键词搜索特性是从一个专用的缓存生成的。默认情况下你没有这个缓存，所以无论你搜什么，都会提示你<i>nothing appropriate</i>。你可以通过下面的命令来生成这个缓存：
+</p>
+<pre># mandb
+</pre>
+<p>每当你安装新的manpage之后都需要运行这个命令，缓存才会更新。
+</p><p>现在你可以开始搜索了。例如，要查阅有关密码的手册（“password”）,可以使用下面的命令:
+</p>
+<pre>$ man -k password
+$ man --apropos password
+$ apropos password
+</pre>
+<p>关键字可以使用正则表达式。
+</p><p>如果你想全文搜索的话，你可以用<code>-K</code>选项：
+</p>
+<pre>$ man -K password
+</pre>
+<p>通过<code>whatis</code>命令，可以只显示需要的man手册页的简要信息。如果只是想获取对命令 ls 的简要说明，使用以下命令：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ whatis ls</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ls (1p)              - list directory contents
+ls (1)               - list directory contents
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg49a53c288b70_.E9.A1.B5.E9.9D.A2.E5.AE.BD.E5.BA.A6" id="页面宽度"><span id=".E9.A1.B5.E9.9D.A2.E5.AE.BD.E5.BA.A6"></span>页面宽度</h2></div>
+<p>man页面宽度由环境变量<code>MANWIDTH</code> 来控制。
+</p><p>
+如果终端中的列数很小（比如窗口宽度很小），换行可能会出现错误。这会很影响你阅读。你可以通过设置在<code>man</code>调用时设置<code>MANWIDTH</code>来修复。如<a href="#pg1ca1e15827ff">Bash</a>：</p><pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bashrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">man() {
+    local width=$(tput cols)
+    [ $width -gt $MANWIDTH ] &amp;&amp; width=$MANWIDTH
+    env MANWIDTH=$width \
+    man "$@"
+}
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg49a53c288b70_.E9.98.85.E8.AF.BB.E6.9C.AC.E5.9C.B0man.E9.A1.B5.E9.9D.A2" id="阅读本地man页面"><span id=".E9.98.85.E8.AF.BB.E6.9C.AC.E5.9C.B0man.E9.A1.B5.E9.9D.A2"></span>阅读本地man页面</h2></div>
+<p>你可以通过以下软件来查看man面：
+</p>
+<ul><li><b><a href="#pg9de7470c4ea9">Emacs</a></b> — The extensible and self-documenting editor can also be used to read man pages with the built-in M-x <code>man</code> command.</li></ul>
+<dl><dd><a href="https://www.gnu.org/software/emacs/">https://www.gnu.org/software/emacs/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=emacs">emacs</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>GNOME Help</b> — Help viewer for <a href="#pg1e095fe2c2a6">GNOME</a>. Part of <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/gnome/">gnome</a></span><sup><small>包组</small></sup></span>. It can show man pages via <code>yelp man:&lt;name&gt;</code> or the undocumented <code>Ctrl+L</code> keybinding from an existing window.</li></ul>
+<dl><dd><a href="https://apps.gnome.org/Yelp/">https://apps.gnome.org/Yelp/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=yelp">yelp</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>KHelpCenter</b> — Application to show <a href="#pg5b70e23b1711">KDE</a> Applications' documentation. Part of <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/kde-system/">kde-system</a></span><sup><small>包组</small></sup></span>. Man pages are in <i>UNIX manual pages</i> or by running <code>khelpcenter man:&lt;name&gt;</code>.</li></ul>
+<dl><dd><a href="https://apps.kde.org/khelpcenter/">https://apps.kde.org/khelpcenter/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=khelpcenter">khelpcenter</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Konqueror">Konqueror</a></b> — KDE file manager and web browser. It can show man pages via <code>man:&lt;name&gt;</code>.</li></ul>
+<dl><dd><a href="https://konqueror.org/">https://konqueror.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=konqueror">konqueror</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgb11b7c104bf6">neovim</a></b> — The editor can be used to read man pages using the built-in <code>:Man <i>name</i></code> command, or configured as a man pager with <code>export MANPAGER='nvim +Man!'</code>. Supports highlighting and navigation between command-line flags, keywords, and other man pages. Automatically generates an outline using section headers, command-line flags, and keywords as entries (available via <code>gO</code>).</li></ul>
+<dl><dd><a href="https://neovim.io/">https://neovim.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=neovim">neovim</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>xman</b> — Provides a categorized look at man pages.</li></ul>
+<dl><dd><a href="https://xorg.freedesktop.org/">https://xorg.freedesktop.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xman">xorg-xman</a></span><sup><small>包</small></sup></span></dd></dl>
+<p>使用如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lynx">lynx</a></span><sup><small>包</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=firefox">firefox</a></span><sup><small>包</small></sup></span> 等浏览器来查看man页面可以使用户获得如阅读<code>info</code>页面的超链接优势，你可以使用以下替代方案：
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49a53c288b70_.E8.BD.AC.E6.8D.A2.E4.B8.BA_HTML" id="转换为_HTML"><span id=".E8.BD.AC.E6.8D.A2.E4.B8.BA_HTML"></span>转换为 HTML</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg49a53c288b70_mandoc" id="mandoc">mandoc</h4></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mandoc">mandoc</a></span><sup><small>包</small></sup></span>来转换页面，如 <code>free(1)</code>:
+</p>
+<pre>$ mandoc -Thtml -Ostyle=style.css /usr/share/man/man1/free.1.gz &gt; free.html
+</pre>
+<p>然后在你的浏览器中打开<code>free.html</code>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49a53c288b70_man2html" id="man2html">man2html</h3></div>
+<p>首先，安装软件包<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=man2html">man2html</a></span><sup><small>包</small></sup></span>。
+</p><p>然后使用它转换man手册页：
+</p>
+<pre>$ man free | man2html -compress -cgiurl man$section/$title.$section$subsection.html &gt; ~/man/free.html
+</pre>
+<p>此外，<code>man2html</code>还可以把man页转换为便于打印的文本文件：
+</p>
+<pre>$ man free | man2html -bare &gt; ~/free.txt
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49a53c288b70_man__H" id="man_-H">man -H</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=man-db">man-db</a></span><sup><small>包</small></sup></span>提供的man也具有浏览器阅读功能：
+</p>
+<pre>$ man -H free
+</pre>
+<p>由<code>BROWSER</code>环境变量决定使用的浏览器。也可以使用 <code>man -Hlynx</code>（H后无空格）这样的形式手动设置浏览器。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg49a53c288b70_roffit" id="roffit">roffit</h4></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/roffit/">roffit</a></span><sup><small>AUR</small></sup></span>。
+</p><p>转化一个man页面：
+</p>
+<pre>$ gunzip -c /usr/share/man/man1/free.1.gz | roffit &gt; free.html
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49a53c288b70_.E8.BD.AC.E6.8D.A2.E4.B8.BA_PDF" id="转换为_PDF"><span id=".E8.BD.AC.E6.8D.A2.E4.B8.BA_PDF"></span>转换为 PDF</h3></div>
+<p>man pages 是可以打印的，遵循 <span class="plainlinks archwiki-template-man" title="$ man 1 troff"><a href="https://man.archlinux.org/man/troff.1">troff(1)</a></span> 格式，本来就是一种打印设置语言。因此，你可以很容易地通过<b>groff</b>将man页面转换为输出设备支持的任意格式，这也被<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=man-db">man-db</a></span><sup><small>包</small></sup></span> 所使用。通过<span class="plainlinks archwiki-template-man" title="$ man 1 groff"><a href="https://man.archlinux.org/man/groff.1">groff(1)</a></span> (如果你使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mandoc">mandoc</a></span><sup><small>包</small></sup></span>，请使用<span class="plainlinks archwiki-template-man" title="$ man 1 mandoc"><a href="https://man.archlinux.org/man/mandoc.1">mandoc(1)</a></span>）的<code>-T</code>选项来列出所有输出设备。
+</p><p>如下命令将会为你导出PDF文件：
+</p><p>$ man -Tpdf ''manpage'' &gt; ''filename''
+</p><p>注意，这里只能使用Times字体的硬编码大小，一些man页面是特地为终端查看而设计的，并且不会在PDF或PS格式中正确被渲染。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49a53c288b70_Qman" id="Qman">Qman</h3></div>
+<p>这是一个提供查看man页面的界面的替代软件，它支持像超链接和历史记录等现代的功能，安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/qman-git/">qman-git</a></span><sup><small>AUR</small></sup></span>。然后你可以使用<code>qman</code>来代替<code>man</code>了：
+</p>
+<pre>$ qman ls    # 显示ls的man页面
+$ qman -k ls # 'ls'上执行apropos命令
+</pre>
+<p>查看这个项目的 <a href="https://github.com/plp13/qman">GitHub页面</a>以了解更多
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49a53c288b70_.E5.8F.AF.E9.80.89.E9.85.8D.E7.BD.AE" id="可选配置"><span id=".E5.8F.AF.E9.80.89.E9.85.8D.E7.BD.AE"></span>可选配置</h3></div>
+<p><i>Qman</i> 的配置文件在 <code>~/.config/qman.conf</code> (用户的) or <code>/etc/xdg/qman.conf</code> (全局的).
+</p><p>如果你正在使用一个支持256色和Unicode的现代终端，你可能想要使用一个<a href="https://github.com/plp13/qman/blob/main/config/themes/modernity.conf">自定义配置</a>来为这个软件提供一个更现代化的界面
+</p><p>默认的<i>Qman</i>是通过<code>xdg-open</code>来打开超链接和电子邮件链接。你可以通过在你的配置文件中添加如下行来更改：
+</p>
+<pre>[misc]
+browser_path=/path/to/your/browser
+mailer_path=/path/to/your/email/client
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg49a53c288b70_.E4.BD.BF.E7.94.A8.E5.9C.A8.E7.BA.BF.E6.89.8B.E5.86.8C.E9.A1.B5" id="使用在线手册页"><span id=".E4.BD.BF.E7.94.A8.E5.9C.A8.E7.BA.BF.E6.89.8B.E5.86.8C.E9.A1.B5"></span>使用在线手册页</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>一些发行版与Arch Linux不同的man页面，这可能是补丁后或过时版本的页面</div><p>许多网站提供在线man手册页，详细列表参见：
+</p><ul><li><a href="https://man.archlinux.org">Arch Linux manual pages</a>—contains man pages from Arch Linux packages. Used for <a href="#pg9badce2a0963">man page links</a> from the wiki. You can also use the <code>!archman</code> bang with search engines like <a href="https://duckduckgo.com/bangs">DuckDuckGo</a> or <a href="https://search.brave.com/bangs">Brave</a> to search through the Arch manual pages directly.</li>
+<li><a href="https://man7.org/linux/man-pages/index.html">man7.org</a>—The Linux man-pages project. Upstream of the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=man-pages">man-pages</a></span><sup><small>包</small></sup></span> package. The online pages currently show an outdated version of man-pages (<a href="https://man7.org/linux/man-pages/changelog.html">5.13</a>, released in 2021).</li>
+<li><a href="https://manned.org/">manned.org</a>—collection from various Linux distributions, BSD, etc., with multiple package versions</li>
+<li><a href="https://linux.die.net/man/">linux.die.net</a></li>
+<li><a href="https://man.cx/">man.cx</a>—Man pages extracted from Debian testing.</li>
+<li><a href="https://manpages.debian.org/">Debian man pages</a></li>
+<li><a href="https://manpages.ubuntu.com/">Ubuntu man pages</a></li>
+<li><a href="https://leaf.dragonflybsd.org/cgi/web-man">DragonFlyBSD man pages</a></li>
+<li><a href="https://www.freebsd.org/cgi/man.cgi">FreeBSD man pages</a></li>
+<li><a href="https://man.netbsd.org/">NetBSD man pages</a></li>
+<li><a href="https://man.openbsd.org">OpenBSD man pages</a></li>
+<li><a href="https://man.cat-v.org/plan_9/">Plan 9 Manual — Volume 1</a></li>
+<li><a href="https://man.cat-v.org/inferno/">Inferno Manual — Volume 1</a></li>
+<li><a href="https://www.unix.com/man-page-repository.php">The UNIX and Linux forums man page repository</a></li></ul>
+<p>注意， <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=man-pages">man-pages</a></span><sup><small>包</small></sup></span>提供的是POSIX.1-2017 (见<a href="https://gitlab.archlinux.org/archlinux/packaging/packages/man-pages/-/blob/main/PKGBUILD#L64-67">[2]</a>)的man页面，一个官方的在线参考也存在于：
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg49a53c288b70_.E5.80.BC.E5.BE.97.E6.B3.A8.E6.84.8F.E7.9A.84man.E9.A1.B5.E9.9D.A2" id="值得注意的man页面"><span id=".E5.80.BC.E5.BE.97.E6.B3.A8.E6.84.8F.E7.9A.84man.E9.A1.B5.E9.9D.A2"></span>值得注意的man页面</h2></div>
+<p>这列举了一些可能帮助你更深度理解很多事情的页面，但这并不是很详尽。它们中的一些可能给你一个很好的参考（如ASCII表）
+</p>
+<ul><li><span class="plainlinks archwiki-template-man" title="$ man 7 ascii"><a href="https://man.archlinux.org/man/ascii.7">ascii(7)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 7 boot"><a href="https://man.archlinux.org/man/boot.7">boot(7)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 7 charsets"><a href="https://man.archlinux.org/man/charsets.7">charsets(7)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 1 chmod"><a href="https://man.archlinux.org/man/chmod.1">chmod(1)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 7 credentials"><a href="https://man.archlinux.org/man/credentials.7">credentials(7)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 5 fstab"><a href="https://man.archlinux.org/man/fstab.5">fstab(5)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 7 file-hierarchy"><a href="https://man.archlinux.org/man/file-hierarchy.7">file-hierarchy(7)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 1 systemd"><a href="https://man.archlinux.org/man/systemd.1">systemd(1)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 1p locale"><a href="https://man.archlinux.org/man/locale.1p">locale(1p)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 5 locale"><a href="https://man.archlinux.org/man/locale.5">locale(5)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 7 locale"><a href="https://man.archlinux.org/man/locale.7">locale(7)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 3 printf"><a href="https://man.archlinux.org/man/printf.3">printf(3)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 5 proc"><a href="https://man.archlinux.org/man/proc.5">proc(5)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 7 regex"><a href="https://man.archlinux.org/man/regex.7">regex(7)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 7 signal"><a href="https://man.archlinux.org/man/signal.7">signal(7)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 5 term"><a href="https://man.archlinux.org/man/term.5">term(5)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 7 term"><a href="https://man.archlinux.org/man/term.7">term(7)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 5 termcap"><a href="https://man.archlinux.org/man/termcap.5">termcap(5)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 5 terminfo"><a href="https://man.archlinux.org/man/terminfo.5">terminfo(5)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 7 utf-8"><a href="https://man.archlinux.org/man/utf-8.7">utf-8(7)</a></span></li></ul>
+<p>你也可以看：<a href="https://man7.org/linux/man-pages/dir_section_7.html">category 7 (miscellaneous) pages</a>:
+</p>
+<pre>$ man -s 7 -k ".*" 
+</pre>
+<p>Arch Linux 的特定页面：
+</p>
+<ul><li><span class="plainlinks archwiki-template-man" title="$ man 5 alpm-hooks"><a href="https://man.archlinux.org/man/alpm-hooks.5">alpm-hooks(5)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 3 libalpm"><a href="https://man.archlinux.org/man/libalpm.3">libalpm(3)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 8 makepkg"><a href="https://man.archlinux.org/man/makepkg.8">makepkg(8)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 5 makepkg.conf"><a href="https://man.archlinux.org/man/makepkg.conf.5">makepkg.conf(5)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 1 makepkg-template"><a href="https://man.archlinux.org/man/makepkg-template.1">makepkg-template(1)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 8 mkinitcpio"><a href="https://man.archlinux.org/man/mkinitcpio.8">mkinitcpio(8)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 8 pacman"><a href="https://man.archlinux.org/man/pacman.8">pacman(8)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 5 pacman.conf"><a href="https://man.archlinux.org/man/pacman.conf.5">pacman.conf(5)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 8 pacman-conf"><a href="https://man.archlinux.org/man/pacman-conf.8">pacman-conf(8)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 8 pacman-key"><a href="https://man.archlinux.org/man/pacman-key.8">pacman-key(8)</a></span></li></ul>
+
+<!-- 
+NewPP limit report
+Cached time: 20260807052145
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.306 seconds
+Real time usage: 0.315 seconds
+Preprocessor visited node count: 1642/1000000
+Revision size: 11035/2097152 bytes
+Post‐expand include size: 23108/2097152 bytes
+Template argument size: 8507/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 163/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  173.278      1 -total
+ 48.25%   83.606      1 Template:翻译状态
+ 12.61%   21.847     39 Template:Man
+  6.37%   11.032      6 Template:App
+  5.36%    9.296      1 Template:Expansion
+  4.06%    7.031      1 Template:META_Message
+  3.95%    6.848     27 Template:Pkg
+  2.61%    4.517     30 Template:Ic
+  2.23%    3.866      1 Template:小写标题
+  1.51%    2.625      1 Template:Warning
+-->
+<!-- Render ID e17e868e-921f-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3499:|#|:idhash:canonical!zh-cn and timestamp 20260807052145 and revision id 34183. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

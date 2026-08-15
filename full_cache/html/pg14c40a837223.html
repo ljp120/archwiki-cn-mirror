@@ -1,0 +1,71 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg14c40a837223">Emacs/软件包</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg9de7470c4ea9">Emacs</a></li>
+<li><a href="#pgafc953581baa">Emacs/运行</a></li>
+<li><a href="#pg66450fb8afdd">Emacs/使用</a></li>
+<li><a href="#pgaa59341f7e53">Emacs/提示与技巧</a></li>
+<li><a href="#pgdff090deed5f">Emacs/疑难解答</a></li>
+<li><a href="#pg581be9986cc0">文本编辑器</a></li>
+<li><a href="#pg74a2a3e4814c">Vim</a></li>
+</ul></div>
+
+<p>Emacs 的功能可以通过第三方软件包进行扩展。官方支持使用内置的软件包管理器 <code>package.el</code>，不过 Emacs 社区成员还编写了其他一些软件包管理器。<code>package.el</code> 依靠变量 <code>package-archives</code> 查找软件包。默认情况下，这包括 <a href="https://elpa.gnu.org/">Emacs Lisp Package Archive (ELPA)</a>。<code>M-x list-packages</code> 将创建一个缓冲区，列出 Emacs 知道的所有软件包。手册（<a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Packages.html">(info "(emacs) Packages")</a> ）包含更多信息。
+</p><p>可以添加第三方软件包存档。其中使用最广泛的是 <a href="https://melpa.org/">MELPA</a>。
+</p><p>许多流行的扩展以软件包的形式出现在官方软件仓库中，更多的扩展则通过<a href="#pg89cb7b475cfb">AUR</a>提供。这些软件包的名称通常带有 <i>emacs-</i> 前缀（例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=emacs-lua-mode">emacs-lua-mode</a></span><sup><small>包</small></sup></span>），但也不总是如此（例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/auctex/">auctex</a></span><sup><small>AUR</small></sup></span>）。
+</p><p>有些软件包可能需要修改配置文件才能激活，以便在 Emacs 会话中使用其功能。例如，如果安装了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/auctex/">auctex</a></span><sup><small>AUR</small></sup></span>，则需要在配置文件中添加 
+</p>
+<pre>(load "auctex.el" nil t t)
+(load "preview-latex.el" nil t t)
+</pre>
+<p>到配置文件中。其他软件包会在源代码的注释部分或 README 中告诉你如何激活它们。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg14c40a837223_.E8.BD.AF.E4.BB.B6.E9.95.9C.E5.83.8F.E6.BA.90" id="软件镜像源"><span id=".E8.BD.AF.E4.BB.B6.E9.95.9C.E5.83.8F.E6.BA.90"></span>软件镜像源</h2></div>
+<p>中国大陆用户可能会需要 ELPA 镜像站以加速软件包下载。
+</p><p><a href="https://mirrors.cernet.edu.cn/list/elpa">校园网联合镜像站</a>列出了国内已知许多 ELPA 镜像。
+</p><p>对于大多数镜像源，需要设置 <code>package-archives</code>。比如用<a href="https://mirrors.bfsu.edu.cn/">北京外国语大学开源软件镜像站</a>提供的 GNU ELPA 和 MELPA 镜像：
+</p>
+<pre>(setq package-archives '(("gnu"    . "<a href="https://mirrors.bfsu.edu.cn/elpa/gnu/">https://mirrors.bfsu.edu.cn/elpa/gnu/</a>")
+                         ("nongnu" . "<a href="https://mirrors.bfsu.edu.cn/elpa/nongnu/">https://mirrors.bfsu.edu.cn/elpa/nongnu/</a>")
+                         ("melpa"  . "<a href="https://mirrors.bfsu.edu.cn/elpa/melpa/">https://mirrors.bfsu.edu.cn/elpa/melpa/</a>")))
+(package-initialize) ;; 您的配置文件里可能已经有了这一行</pre>
+<p>浏览各镜像站帮助页面以获取详细信息。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg14c40a837223_use_package" id="use-package">use-package</h2></div>
+<p>自 <a href="https://www.gnu.org/savannah-checkouts/gnu/emacs/news/NEWS.29.1">Emacs 29.1</a> 起，<b>use-package</b> 已随 Emacs 一起提供。<i>use-package</i> 宏允许你以声明的方式在启动文件中设置软件包自定义。它可以帮你处理许多原本需要大量重复模板代码的事情。它可以帮助进行常见的自定义，如绑定键、设置钩子、自定义用户选项和 face、自动加载等。它还能帮助你保持 Emacs 的启动速度，即使你使用了很多（甚至上百个）软件包。
+</p><p>请注意，use-package 并不是软件包管理器。尽管 use-package 具有与 Emacs 软件包管理器接口的实用功能，但它的主要用途是帮助配置和加载软件包，而不是管理软件包的下载、升级和安装。
+</p><p>更多信息，请参阅 Info 手册 “(use-package) Top”（在线阅读：<a href="https://elpa.gnu.org/devel/doc/use-package.html">https://elpa.gnu.org/devel/doc/use-package.html</a> ）。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807041024
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.101 seconds
+Real time usage: 0.106 seconds
+Preprocessor visited node count: 160/1000000
+Revision size: 3392/2097152 bytes
+Post‐expand include size: 2422/2097152 bytes
+Template argument size: 1002/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   19.869      1 -total
+ 15.56%    3.092      1 Template:扩充
+ 12.89%    2.561      1 Template:相关文章开始
+ 10.23%    2.032      1 Template:Pkg
+  8.82%    1.752      1 Template:META_Message
+  7.78%    1.545      5 Template:Ic
+  7.54%    1.499      7 Template:相关
+  6.20%    1.232      2 Template:AUR
+  5.75%    1.142      2 Template:Bc
+  4.40%    0.875      1 Template:META_Related_articles_start
+-->
+<!-- Render ID e9d1c40e-9215-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8153:|#|:idhash:canonical!zh-cn and timestamp 20260807041024 and revision id 33616. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

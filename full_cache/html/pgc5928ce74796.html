@@ -1,0 +1,70 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgc5928ce74796">Atom (文本编辑器)</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN">
+<p><a href="https://atom.io/">Atom</a> 是一个由 GitHub 开发的开源文本编辑器，采用 MIT 证书授权方式。它主要用 CoffeeScript 和 Javascript 编写，并使用 Node.js 作为运行时环境。超过4,000个插件和1,000种主题使它具有很强的扩展性。它使用其内建的 apm 软件包管理器管理软件包和主题。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc5928ce74796_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>以下软件包都可用于安装Atom:
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/atom/">atom</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/atom-editor-git/">atom-editor-git</a></span><sup><small>AUR</small></sup></span></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc5928ce74796_.E6.8F.92.E4.BB.B6" id="插件"><span id=".E6.8F.92.E4.BB.B6"></span>插件</h2></div>
+<p>它的插件可以在Atom软件中或者使用apm命令完成安装，正确的apm命令语法是：
+</p>
+<pre>$ apm install <i>package_name1</i> <i>package_name2</i> <i>package_name3</i> ...
+</pre>
+<p>一些包已经被预装到Atom中，未预装包中值得注意的有：
+</p>
+<ul><li><a href="https://atom.io/packages/build">build</a> 使Atom可以编译源代码。</li>
+<li><a href="https://atom.io/packages/git-plus">git-plus</a> 允许开发者在Atom中管理Git库。</li>
+<li><a href="https://atom.io/packages/markdown-writer">markdown-writer</a> 将Atom变为一个有效的Markdown编辑器。</li>
+<li><a href="https://atom.io/packages/script">script</a> 使Atom可以基于文件名运行脚本。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc5928ce74796_.E9.97.AE.E9.A2.98.E5.A4.84.E7.90.86" id="问题处理"><span id=".E9.97.AE.E9.A2.98.E5.A4.84.E7.90.86"></span>问题处理</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc5928ce74796_.E7.8E.AF.E5.A2.83.E5.8F.98.E9.87.8F.E8.AE.BE.E7.BD.AE.E6.9C.AA.E8.A2.AB.E4.BD.BF.E7.94.A8" id="环境变量设置未被使用"><span id=".E7.8E.AF.E5.A2.83.E5.8F.98.E9.87.8F.E8.AE.BE.E7.BD.AE.E6.9C.AA.E8.A2.AB.E4.BD.BF.E7.94.A8"></span>环境变量设置未被使用</h3></div>
+<p>你可能会遇到一些因为软件包使用环境变量而引起的问题，像<a href="https://atom.io/packages/go-plus">go-plus</a> (<code>$GOPATH not found</code>)。而且，问题只有在通过文件管理器打开Atom时才会出现（这是由DBUS引发的，因而不会使用在 <code>.bashrc</code> 中定义的环境变量）。
+</p><p>你可以通过<a href="#pg88cdcc283b9b">Systemd/用户#环境变量</a>为DBUS-spawned进程创建可用的环境变量
+</p><p>关于这个问题的更多内容，请参考 <a href="#pge575f3f9cef9">Environment variables#Per user</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc5928ce74796_.E6.97.A0.E6.B3.95.E5.88.A0.E9.99.A4.E6.96.87.E4.BB.B6" id="无法删除文件"><span id=".E6.97.A0.E6.B3.95.E5.88.A0.E9.99.A4.E6.96.87.E4.BB.B6"></span>无法删除文件</h3></div>
+<p><a href="https://electron.atom.io/">Electron</a> 程序默认使用 <code>gvfs-trash</code> 删除文件，不使用 <a href="#pg1e095fe2c2a6">GNOME</a> 的用户可以使用 <code>ELECTRON_TRASH</code> 环境变量设置删除工具。
+</p><p>例如要在 <a href="#pgb8d7c68cf276">Plasma</a> 中删除文件:
+</p>
+<pre>$ ELECTRON_TRASH=kioclient5 atom
+</pre>
+<p>目前 Electron 支持 <code>kioclient5</code>, <code>kioclient</code>, <code>trash-cli</code> 和 <code>gvfs-trash</code> (默认)。 更多信息请参考 <a href="https://github.com/electron/electron/pull/7178">Github 页面</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc5928ce74796_.E5.90.AF.E5.8A.A8.E6.97.B6.E9.BB.91.E5.B1.8F" id="启动时黑屏"><span id=".E5.90.AF.E5.8A.A8.E6.97.B6.E9.BB.91.E5.B1.8F"></span>启动时黑屏</h3></div>
+<p>在某些显卡，例如 <a href="#pgbedf72352aa7">VirtualBox</a> 客户系统中，只有使用 <code>--disable-gpu</code> 禁用硬件加速的显卡，或者编辑配置文件 <code>.atom/config.cson</code> 并在<code>editor</code>中增加或更改 <code>useHardwareAcceleration: false</code>，Atom 才会渲染窗口。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc5928ce74796_.E6.97.A0.E6.8B.BC.E5.86.99.E6.A3.80.E6.9F.A5" id="无拼写检查"><span id=".E6.97.A0.E6.8B.BC.E5.86.99.E6.A3.80.E6.9F.A5"></span>无拼写检查</h3></div>
+<p>请确保 hunspell 和<a href="https://archlinux.org/packages/?sort=&amp;q=hunspell&amp;maintainer=&amp;flagged=">需要的字典</a>已经安装.
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808000519
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.078 seconds
+Real time usage: 0.081 seconds
+Preprocessor visited node count: 156/1000000
+Revision size: 2698/2097152 bytes
+Post‐expand include size: 1787/2097152 bytes
+Template argument size: 523/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   11.268      1 -total
+ 33.09%    3.729      1 Template:弃用
+ 20.99%    2.365     12 Template:Ic
+ 15.53%    1.750      1 Template:META_Message
+ 11.84%    1.334      2 Template:AUR
+-->
+<!-- Render ID d75e958e-92bc-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2814:|#|:idhash:canonical!zh-cn and timestamp 20260808000519 and revision id 33587. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

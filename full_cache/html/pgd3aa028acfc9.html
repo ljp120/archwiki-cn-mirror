@@ -1,0 +1,157 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgd3aa028acfc9">SCP 与 SFTP</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg46a1cfd06473">SSHFS</a></li>
+<li><a href="#pg811a18be156a">SFTP chroot</a></li>
+<li><a href="#pg7c6ec3066835">Pure-FTPd</a></li>
+</ul></div>
+
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/SCP_and_SFTP">SCP and SFTP</a>，最近一次同步于 2024-09-05，若英文版本有所<a href="https://wiki.archlinux.org/title/SCP_and_SFTP?diff=0&amp;oldid=815869">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/SCP_and_SFTP_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>The <a href="https://en.wikipedia.org/wiki/Secure_copy">Secure copy (SCP)</a> is a protocol to transfer files via a <a href="#pgf572ecc9f480">Secure Shell</a> connection. The <a href="https://en.wikipedia.org/wiki/SSH_file_transfer_protocol">SSH file transfer protocol (SFTP)</a> is a related protocol, also relying on a secure shell back-end. Both protocols allow secure file transfers, encrypting passwords and transferred data. The SFTP protocol, however, features additional capabilities like, for example, resuming broken transfers or remote file manipulation like deletion.
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd3aa028acfc9_Secure_file_transfer_protocol_.28SFTP.29" id="Secure_file_transfer_protocol_(SFTP)"><span id="Secure_file_transfer_protocol_.28SFTP.29"></span>Secure file transfer protocol (SFTP)</h2></div>
+<p>Install and configure <a href="#pg4df2d7b1a305">OpenSSH</a>. Once running, SFTP is available by default.
+</p><p>Access files with the <i>sftp</i> program or <a href="#pg46a1cfd06473">SSHFS</a>. Many standard FTP programs should work as well.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd3aa028acfc9_Secure_file_transfer_protocol_.28SFTP.29_with_a_chroot_jail" id="Secure_file_transfer_protocol_(SFTP)_with_a_chroot_jail"><span id="Secure_file_transfer_protocol_.28SFTP.29_with_a_chroot_jail"></span>Secure file transfer protocol (SFTP) with a chroot jail</h2></div>
+<p>Sysadmins can jail a subset of users to a chroot jail using <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openssh">openssh</a></span><sup><small>包</small></sup></span> thus restricting their access to a particular directory tree.  This can be useful to simply share some files without granting full system access or shell access.  Users with this type of setup may use SFTP clients such as <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=filezilla">filezilla</a></span><sup><small>包</small></sup></span> to put/get files in the chroot jail.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd3aa028acfc9_Setup_the_filesystem" id="Setup_the_filesystem">Setup the filesystem</h3></div>
+<p>Create a jail directory:
+</p>
+<pre># mkdir -p /var/lib/jail
+</pre>
+<p>Optionally, bind mount the filesystem to be shared to this directory. In this example, <code>/mnt/data/share</code> is to be used.  It is owned by root and has octal permissions of 755.
+</p>
+<pre># mount -o bind /mnt/data/share /var/lib/jail
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>Consider adding an entry to <code>/etc/fstab</code> to make the bind mount survive a reboot.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd3aa028acfc9_Create_an_unprivileged_user" id="Create_an_unprivileged_user">Create an unprivileged user</h3></div>
+<p>Create the share user and setup a good password:
+</p>
+<pre># useradd -g sshusers -d /var/lib/jail foo
+# passwd foo
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd3aa028acfc9_Setup_OpenSSH" id="Setup_OpenSSH">Setup OpenSSH</h3></div>
+<p>Add the following to the end of <code>/etc/ssh/sshd_config</code> to enable the share and to enforce the restrictions:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ssh/sshd_config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+ Match group sshusers
+  ChrootDirectory %h
+  X11Forwarding no
+  AllowTcpForwarding no
+  PasswordAuthentication yes
+  ForceCommand internal-sftp
+</pre>
+<p><a href="#pgdf6211f8fea3">Restart</a> <code>sshd.service</code> to re-read the configuration file. See <a href="#pg811a18be156a">SFTP chroot</a> to configure the keys correctly when using chroot or it will get permission denied.
+</p><p>Test that in fact, the restrictions are enforced by attempting an ssh connection via the shell. The ssh server should return a polite notice of the setup:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ssh foo@someserver.com</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">foo@someserver.com's password:
+This service allows sftp connections only.
+Connection to someserver.com closed.
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgd3aa028acfc9_Secure_copy_protocol_.28SCP.29" id="Secure_copy_protocol_(SCP)"><span id="Secure_copy_protocol_.28SCP.29"></span>Secure copy protocol (SCP)</h2></div>
+<p><a href="#pg54c3351b3e3b">Install</a>, configure and <a href="#pg073992cb666a">start</a> <a href="#pg4df2d7b1a305">OpenSSH</a>. It contains the <i>scp</i> utility to transfer files.
+</p><p>More features are available by installing additional packages, for example <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rssh/">rssh</a></span><sup><small>AUR</small></sup></span> or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=scponly">scponly</a></span><sup><small>包</small></sup></span> described below.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Since OpenSSH 9.0 the <i>scp</i> utility uses the SFTP protocol by default. The <code>-O</code> option must be used to use the legacy SCP protocol.</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>The scp protocol is outdated, inflexible and not readily fixed. Its authors recommend the use of more modern protocols like sftp and rsync for file transfer instead.<a href="https://lists.mindrot.org/pipermail/openssh-unix-dev/2019-March/037672.html">[1]</a></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd3aa028acfc9_General_Usage" id="General_Usage">General Usage</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd3aa028acfc9_Linux_to_Linux" id="Linux_to_Linux">Linux to Linux</h4></div>
+<p>Copy file from a remote host to local host SCP example:
+</p>
+<pre>$ scp username@from_host:file.txt /local/directory/
+</pre>
+<p>Copy file from local host to a remote host SCP example:
+</p>
+<pre>$ scp file.txt username@to_host:/remote/directory/
+</pre>
+<p>Copy directory from a remote host to local host SCP example:
+</p>
+<pre>$ scp -r username@from_host:/remote/directory/  /local/directory/
+</pre>
+<p>Copy directory from local host to a remote host SCP example:
+</p>
+<pre>$ scp -r /local/directory/ username@to_host:/remote/directory/
+</pre>
+<p>Copy file from remote host to remote host SCP example:
+</p>
+<pre>$ scp username@from_host:/remote/directory/file.txt username@to_host:/remote/directory/
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd3aa028acfc9_Linux_to_Windows" id="Linux_to_Windows">Linux to Windows</h4></div>
+<p>Use a Windows program such as <a href="https://winscp.net/eng/download.php">WinSCP</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgd3aa028acfc9_Scponly" id="Scponly">Scponly</h3></div>
+<p><a href="https://github.com/scponly/scponly/wiki">Scponly</a> is a limited shell for allowing users scp/sftp access and only scp/sftp access. Additionally, one can setup <i>scponly</i> to chroot the user into a particular directory increasing the level of security. 
+</p><p><a href="#pg54c3351b3e3b">install</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=scponly">scponly</a></span><sup><small>包</small></sup></span>. 
+</p><p>For existing users, simply set the user's shell to scponly:
+</p>
+<pre># usermod -s /usr/bin/scponly <i>username</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd3aa028acfc9_Adding_a_chroot_jail" id="Adding_a_chroot_jail">Adding a chroot jail</h4></div>
+<p>The package comes with a script to create a chroot. To use it, run: 
+</p>
+<pre># /usr/share/doc/scponly/setup_chroot.sh
+</pre>
+<ul><li>Provide answers</li>
+<li>Check that <code>/path/to/chroot</code> has <code>root:root</code> owner and <code>r-x</code> for others</li>
+<li>Change the shell for selected user to <code>/usr/bin/scponlyc</code></li>
+<li>sftp-server may require some libnss modules such as libnss_files. Copy them to chroot's <code>/lib</code> path.</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgd3aa028acfc9_Uploads_to_Chroot_jail_root_dir" id="Uploads_to_Chroot_jail_root_dir">Uploads to Chroot jail root dir</h4></div>
+<p>For security reasons the directory set as the chroot directory must be owned by root with only root having write access to it otherwise sftp/ssh connections will be denied. This of course means regular users cannot upload files to the root directory. In order to get around this while not compromising security you can create a folder inside the chroot directory which the regular user or group has write access to, e.g:
+</p>
+<pre># cd /var/lib/jail
+# mkdir uploads
+# chown :sshusers uploads
+# chmod 730 uploads
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>This will only allow users of group "sshusers" to upload to (but not list the contents of) the "uploads" directory. Use <code>chmod 770</code> to allow sshusers to view contents.</div>
+<p>Some applications utilizing SFTP do not allow input of sub-directories when performing operations (e.g. uploading files), and will attempt to upload files to the chroot base directory (which will be denied). In order to force these applications to use a specific sub-directory you can append the following to the "ForceCommand" option:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ssh/sshd_config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+ Match group sshusers
+  ...
+  ForceCommand internal-sftp -d /uploads
+</pre>
+<p>Users on connect will then have their start directory change to the specified sub-directory (remember to restart the sshd server).
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807101332
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.121 seconds
+Real time usage: 0.127 seconds
+Preprocessor visited node count: 306/1000000
+Revision size: 6464/2097152 bytes
+Post‐expand include size: 5200/2097152 bytes
+Template argument size: 1796/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   39.998      1 -total
+ 13.17%    5.268      1 Template:Related_articles_start
+ 12.33%    4.930      1 Template:Merge
+  7.12%    2.848      2 Template:Note
+  6.99%    2.796      4 Template:Pkg
+  5.61%    2.245     11 Template:Ic
+  5.55%    2.219      1 Template:Tip
+  5.54%    2.217      1 Template:Related_articles_end
+  5.46%    2.185      3 Template:Related
+  4.81%    1.923      1 Template:Aur
+-->
+<!-- Render ID a47aba0e-9248-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7921:|#|:idhash:canonical!zh-cn and timestamp 20260807101332 and revision id 33668. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

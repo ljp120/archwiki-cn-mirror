@@ -1,0 +1,292 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg3f2b467b705f">联想 ThinkPad E14 Gen 2 (Intel)</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_E14_Gen_2_(Intel)">Lenovo_ThinkPad_E14_Gen_2_(Intel)</a>，最近一次同步于 2024/07/13，若英文版本有所<a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_E14_Gen_2_(Intel)?diff=0&amp;oldid=809003">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_E14_Gen_2_(Intel)_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<table class="wikitable" style="float: right;">
+<tbody><tr>
+<th>硬件</th>
+<th>PCI/USB ID</th>
+<th>可用?
+</th></tr>
+<tr>
+<td>TrackPoint</td>
+<td></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>触摸板</td>
+<td></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>显卡 (Intel)</td>
+<td><code>8086:9a49</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>显卡 (NVIDIA)</td>
+<td><code>10de:1f97</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>摄像头</td>
+<td><code>04f2:b6c2</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>以太网</td>
+<td><code>10ec:8168</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>蓝牙</td>
+<td><code>8087:0026</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>声卡</td>
+<td><code>8086:a0c8</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>无线局域网</td>
+<td><code>8086:a0f0</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>TPM 2.0</td>
+<td></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr></tbody></table>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3f2b467b705f_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>在安装时，禁用 <a href="#pgf5f38183c9dc">Secure Boot</a>，并请为 <a href="#pgdc6bceef5651">microcode</a> <a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-ucode">intel-ucode</a></span><sup><small>包</small></sup></span> 并为 <a href="#pgcf92ea97092d">Intel graphics</a> 安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span> .
+</p><p>若您想使用 <a href="#pge12579b7d4ac">NVIDIA</a> 显卡, 尝试 <a href="#pg172970a5f8dd">nouveau</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3f2b467b705f_.E5.8F.AF.E8.AE.BF.E9.97.AE.E6.80.A7" id="可访问性"><span id=".E5.8F.AF.E8.AE.BF.E9.97.AE.E6.80.A7"></span>可访问性</h2></div>
+<p>BIOS 系统有两种模式，<b>Quick</b> 和 <b>Diagnostics</b>。两者都可以正确安装和启动 Arch Linux。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3f2b467b705f_Quick" id="Quick">Quick</h3></div>
+<p>BIOS 的外观简洁，色彩不是很丰富，但更现代、更流畅，因此可以很好地与 OCR 软件配合使用。但是，它需要用户使用鼠标。另外，在启动系统前，中间显示<a href="#pg254f6116058e">Lenovo</a>的标志。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>盲人用户应请求有视力的人帮助更改 BIOS 设置</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3f2b467b705f_Diagnostics" id="Diagnostics">Diagnostics</h3></div>
+<p>外观将是传统的蓝色和白色，使用带有锯齿的字体，但你不需要鼠标，只需要键盘。 此外，在启动系统之前，它会使用黑白锯齿字体显示计算机信息。
+</p><p>服务手册还包含触发某些功能所需的快捷方式，例如启动菜单和设置 (<code>Enter</code>)。
+</p><p>使用 <code>F1</code> 进入 BIOS，使用 <code>F12</code> 进入启动菜单。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3f2b467b705f_.E5.9B.BA.E4.BB.B6" id="固件"><span id=".E5.9B.BA.E4.BB.B6"></span>固件</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>此设备没有 BIOS 扬声器，而是使用内置扬声器。哔声可能比预期的要响亮。</li>
+<li>要禁用此功能，请在启动前快速关闭 FnLock 并按 <code>F1</code>。</li></ul>
+</div>
+<p>您可以使用 TPM 2.0 <code>BIOS&gt;Security&gt;Secure Chip</code>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3f2b467b705f_.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8" id="安全启动"><span id=".E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8"></span>安全启动</h3></div>
+<p>在 Arch Linux 安装后，您可以配置
+</p>
+<pre>BIOS&gt;Security&gt;Secure boot
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3f2b467b705f_.E5.9B.BA.E4.BB.B6.E6.95.B0.E6.8D.AE.E8.B7.AF.E5.BE.84" id="固件数据路径"><span id=".E5.9B.BA.E4.BB.B6.E6.95.B0.E6.8D.AE.E8.B7.AF.E5.BE.84"></span>固件数据路径</h3></div>
+
+<div class="mw-heading mw-heading4"><h4 data-bm="pg3f2b467b705f_.E6.97.A5.E5.BF.97" id="日志"><span id=".E6.97.A5.E5.BF.97"></span>日志</h4></div>
+
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3f2b467b705f_.E5.A3.B0.E5.8D.A1" id="声卡"><span id=".E5.A3.B0.E5.8D.A1"></span>声卡</h2></div>
+<p>安装 extra 仓库的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sof-firmware">sof-firmware</a></span><sup><small>包</small></sup></span>。
+</p><p>跟进 <a href="#pgb16dfd48462f">ALSA</a> 以了解更多细节。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3f2b467b705f_.E8.93.9D.E7.89.99" id="蓝牙"><span id=".E8.93.9D.E7.89.99"></span>蓝牙</h2></div>
+<p>安装后，参见<a href="#pg20f71a8eddbf">蓝牙</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3f2b467b705f_.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86" id="电源管理"><span id=".E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86"></span>电源管理</h2></div>
+<p>没有已知问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3f2b467b705f_.E7.94.B5.E6.BA.90.E6.8C.89.E9.92.AE" id="电源按钮"><span id=".E7.94.B5.E6.BA.90.E6.8C.89.E9.92.AE"></span>电源按钮</h3></div>
+<p>此设备有检测到一个电源按钮和一个睡眠按钮。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ loginctl seat-status</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">seat0
+        Sessions: *3
+         Devices:
+                  ├─/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/LNXVIDEO:00/input/input9
+                  │ input:input9 "Video Bus"
+                  ├─/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/device:45/LNXVIDEO:01/input/input10
+                  │ input:input10 "Video Bus"
+                  ├─/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0C:00/input/input0
+                  │ input:input0 "Power Button"
+                  ├─/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0D:00/input/input2
+                  │ input:input2 "Lid Switch"
+                  ├─/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0E:00/input/input1
+                  │ input:input1 "Sleep Button"
+                  ├─/sys/devices/pci0000:00/0000:00:02.0/drm/card0
+                  [...]</pre>
+<p>在这种情况下，<code>PNP0C0C:00</code> (<code>/dev/input/event0</code>) <b>是</b>一个物理存在的电源按钮。您可以通过抑制电源按钮操作来验证这一点。
+</p>
+<pre># systemd-inhibit --what=handle-power-key sleep 1h
+</pre>
+
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>如果您使用桌面环境，此命令可能对您无效。</li>
+<li>已测试无效的桌面环境列表: KDE Plasma, Gnome.</li>
+<li>这是因为桌面环境接管了 <b>handle-power-key</b> 事件。</li>
+<li>要更改此设置，请在对应桌面环境的设置中找到电源管理，然后将按下电源键的反应设为<b>无</b>。</li></ul>
+</div>
+<p>然后追踪事件：
+</p>
+<pre># stdbuf -o0 evemu-record /dev/input/event0
+</pre>
+<p>如果提示不存在 <code>evemu-record</code>，<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=evemu">evemu</a></span><sup><small>包</small></sup></span>.
+</p><p>按下电源按钮应该会记录一个按下事件。
+</p><p>固件将发送多次按下电源按钮的事件，因此您的机器很可能只需要几秒钟即可关闭电源。这是因为 systemd 在按下电源按钮时会终止它正在等待的进程/单元。
+</p><p>有关处理特定密钥的更多信息，请参阅 <span class="plainlinks archwiki-template-man" title="$ man 5 logind.conf"><a href="https://man.archlinux.org/man/logind.conf.5">logind.conf(5)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3f2b467b705f_.E7.9D.A1.E7.9C.A0.E5.92.8C.E5.94.A4.E9.86.92" id="睡眠和唤醒"><span id=".E7.9D.A1.E7.9C.A0.E5.92.8C.E5.94.A4.E9.86.92"></span>睡眠和唤醒</h3></div>
+<p>您可以使用带有睡眠按钮的 USB 键盘。
+</p><p>还有一个睡眠按钮/暂停键。它是一个由固件处理的虚拟键，在使用 #Unmarked 键绑定之一时会被触发，这会挂起您的设备。使用以下命令来禁止处理挂起键：
+</p>
+<pre># systemd-inhibit --what=sleep sleep 1h
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li><b>handle-suspend-key</b> 也被桌面环境接管，请查看 #电源按钮。</li>
+<li>但 <b>sleep</b> 不是。</li></ul></div>
+<p>根据<code>xev</code>测试，每个按键都有<code>XF86WakeUp</code>的功能。
+</p><p>所以在使设备睡眠后，您可以按任意键恢复。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3f2b467b705f_.E5.8A.9F.E8.83.BD.E9.94.AE" id="功能键"><span id=".E5.8A.9F.E8.83.BD.E9.94.AE"></span>功能键</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>按键
+</th>
+<th>可见？<sup>1</sup>
+</th>
+<th>标记？<sup>2</sup>
+</th>
+<th>效果
+</th></tr>
+<tr>
+<td><code>Fn+Esc</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>启用 FnLock
+</td></tr>
+<tr>
+<td><code>Fn+F1</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86AudioMute</code>
+</td></tr>
+<tr>
+<td><code>Fn+F2</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86AudioLowerVolume</code>
+</td></tr>
+<tr>
+<td><code>Fn+F3</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86AudioRaiseVolume</code>
+</td></tr>
+<tr>
+<td><code>Fn+F4</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86AudioMicMute</code>
+</td></tr>
+<tr>
+<td><code>Fn+F5</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86MonBrightnessDown</code>
+</td></tr>
+<tr>
+<td><code>Fn+F6</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86MonBrightnessUp</code>
+</td></tr>
+<tr>
+<td><code>Fn+F7</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86Display</code>
+</td></tr>
+<tr>
+<td><code>Fn+F8</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86WLAN</code>
+</td></tr>
+<tr>
+<td><code>Fn+F9</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>通知中心（仅限 Windows）
+</td></tr>
+<tr>
+<td><code>Fn+F10</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>接听（仅限 Windows）
+</td></tr>
+<tr>
+<td><code>Fn+F11</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>挂断（仅限 Windows）
+</td></tr>
+<tr>
+<td><code>Fn+F12</code></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><code>XF86Favorites</code>
+</td></tr>
+<tr>
+<td><code>Fn+Print</code></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>选择屏幕截图区域（仅限 Windows）
+</td></tr></tbody></table>
+<ol><li>按键对 <code>xev</code> 和类似工具可见</li>
+<li>物理键上有一个符号，描述了它的功能</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3f2b467b705f_.E6.9C.AA.E6.A0.87.E8.AE.B0.E7.9A.84.E9.94.AE.E7.BB.91.E5.AE.9A" id="未标记的键绑定"><span id=".E6.9C.AA.E6.A0.87.E8.AE.B0.E7.9A.84.E9.94.AE.E7.BB.91.E5.AE.9A"></span>未标记的键绑定</h3></div>
+
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3f2b467b705f_Intel_Wi_Fi_6_AX201" id="Intel_Wi-Fi_6_AX201">Intel Wi-Fi 6 AX201</h2></div>
+<p>对于配备英特尔 AX201 Wi-Fi 适配器的型号，该接口在使用电池运行时可以进行节电，这会增加网络延迟。
+</p><p>为避免此问题，您可以按照 <a href="#pg3bfeacfb89ba">Power management#Network interfaces</a> 中的说明禁用节电。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808041349
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.163 seconds
+Real time usage: 0.167 seconds
+Preprocessor visited node count: 725/1000000
+Revision size: 7144/2097152 bytes
+Post‐expand include size: 13945/2097152 bytes
+Template argument size: 3486/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   59.075      1 -total
+ 12.71%    7.510     33 Template:Yes_(简体中文)
+ 11.24%    6.641      4 Template:Expansion
+  9.52%    5.626     41 Template:Ic
+  9.05%    5.348      5 Template:No_(简体中文)
+  6.07%    3.587      1 Template:G
+  5.85%    3.453      1 Template:翻译状态
+  5.42%    3.199      4 Template:META_Message
+  4.49%    2.655      4 Template:Pkg
+  4.29%    2.536      1 Template:R
+-->
+<!-- Render ID 8e6c088e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3388:|#|:idhash:canonical!zh-cn and timestamp 20260808041349 and revision id 33845. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

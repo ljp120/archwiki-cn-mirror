@@ -1,0 +1,95 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgc98463d66943">语言检查</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Language_checking">Language checking</a>，最近一次同步于 2022-12-13，若英文版本有所<a href="https://wiki.archlinux.org/title/Language_checking?diff=0&amp;oldid=760220">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Language_checking_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文介绍<a href="https://en.wikipedia.org/wiki/Spell_checker">拼写检查</a>和<a href="https://en.wikipedia.org/wiki/Grammar_checker">语法检查</a>软件。
+</p><p>大部分的拼写检查都包含两部分：逻辑处理程序和字典，请同时安装。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc98463d66943_.E6.8B.BC.E5.86.99.E6.A3.80.E6.9F.A5.E5.99.A8" id="拼写检查器"><span id=".E6.8B.BC.E5.86.99.E6.A3.80.E6.9F.A5.E5.99.A8"></span>拼写检查器</h2></div>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/GNU_Aspell">GNU Aspell</a></b> — 希望最终能取代 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ispell">ispell</a></span><sup><small>包</small></sup></span> 的拼写检查工具，请参考 <span class="plainlinks archwiki-template-man" title="$ man 1 aspell"><a href="https://man.archlinux.org/man/aspell.1">aspell(1)</a></span> 和 <a href="http://aspell.net/man-html/index.html">info document</a>.</li></ul>
+<dl><dd><a href="http://aspell.net/">http://aspell.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=aspell">aspell</a></span><sup><small>包</small></sup></span>, <a href="https://archlinux.org/packages/?q=aspell-">dictionaries</a>, <a href="https://aur.archlinux.org/packages/?SeB=n&amp;K=aspell-">dictionaries in AUR</a></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Hunspell">Hunspell</a></b> — Spell checker and morphological analyzer library and program, see also <span class="plainlinks archwiki-template-man" title="$ man 1 hunspell"><a href="https://man.archlinux.org/man/hunspell.1">hunspell(1)</a></span>.</li></ul>
+<dl><dd><a href="https://hunspell.github.io/">https://hunspell.github.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hunspell">hunspell</a></span><sup><small>包</small></sup></span>, <a href="https://archlinux.org/packages/?q=hunspell-">dictionaries in the official repositories</a>, <a href="https://aur.archlinux.org/packages/?SeB=n&amp;K=hunspell-">dictionaries in AUR</a></dd></dl>
+<ul><li><b>Nuspell</b> — Spell checker library and program designed as a modern alternative to hunspell, see also <span class="plainlinks archwiki-template-man" title="$ man 1 nuspell"><a href="https://man.archlinux.org/man/nuspell.1">nuspell(1)</a></span>.</li></ul>
+<dl><dd><a href="https://nuspell.github.io/">https://nuspell.github.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nuspell">nuspell</a></span><sup><small>包</small></sup></span>, supports hunspell dictionaries</dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Ispell">Ispell</a></b> — Interactive spell-checking program for Unix, see also <span class="plainlinks archwiki-template-man" title="$ man 1 ispell"><a href="https://man.archlinux.org/man/ispell.1">ispell(1)</a></span>.</li></ul>
+<dl><dd><a href="https://www.cs.hmc.edu/~geoff/ispell.html">https://www.cs.hmc.edu/~geoff/ispell.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ispell">ispell</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc98463d66943_Language_specific" id="Language-specific">Language-specific</h3></div>
+<ul><li><b>Hspell</b> — Hebrew spell-checker</li></ul>
+<dl><dd><a href="http://www.ivrix.org.il/projects/spell-checker/">http://www.ivrix.org.il/projects/spell-checker/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hspell">hspell</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Voikko</b> — Finnish spelling and grammar checker, hyphenator and collection of related linguistic data</li></ul>
+<dl><dd><a href="https://voikko.sourceforge.net">https://voikko.sourceforge.net</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libvoikko">libvoikko</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc98463d66943_Enchant" id="Enchant">Enchant</h3></div>
+<p><a href="https://en.wikipedia.org/wiki/Enchant_(software)">Enchant</a> is a wrapper library for generic spell checking, developed as part of <a href="#pga573217eea5a">AbiWord</a>, supporting all above spell checkers apart from Ispell.
+</p><p>Enchant is available as the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=enchant">enchant</a></span><sup><small>包</small></sup></span> package. It is also provided by the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/enchant-pure/">enchant-pure</a></span><sup><small>AUR</small></sup></span> package with minimal dependencies. For its usage and ordering file, see <span class="plainlinks archwiki-template-man" title="$ man 1 enchant-2"><a href="https://man.archlinux.org/man/enchant-2.1">enchant-2(1)</a></span>.
+</p><p>Enchant is used by many applications through the following <a href="#pg6438c4cbb62c">GTK</a> libraries:
+</p>
+<ul><li><b>gspell</b> — Flexible API to implement spell checking in GTK applications.</li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Projects/gspell">https://wiki.gnome.org/Projects/gspell</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gspell">gspell</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>GtkSpell</b> — Provides word-processor-style highlighting and replacement of misspelled words in a GtkTextView widget.</li></ul>
+<dl><dd><a href="http://gtkspell.sourceforge.net/">http://gtkspell.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gtkspell">gtkspell</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gtkspell3">gtkspell3</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgc98463d66943_.E6.8B.BC.E5.86.99.E6.A3.80.E6.9F.A5.E8.AF.B4.E6.89.80.E6.9C.89.E6.96.87.E6.9C.AC.E9.83.BD.E6.98.AF.E9.94.99.E8.AF.AF.E7.9A.84" id="拼写检查说所有文本都是错误的"><span id=".E6.8B.BC.E5.86.99.E6.A3.80.E6.9F.A5.E8.AF.B4.E6.89.80.E6.9C.89.E6.96.87.E6.9C.AC.E9.83.BD.E6.98.AF.E9.94.99.E8.AF.AF.E7.9A.84"></span>拼写检查说所有文本都是错误的</h4></div>
+<p>如果安装字典也没用，可能是<code>enchant</code>出问题了。查看aspell识别到的词典文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ aspell dicts</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">en
+en_GB
+...etc</pre>
+<p>如果你需要的语言不在其中，添加下面的内容到<code>/usr/share/enchant/enchant.ordering</code>：
+</p>
+<pre>en_GB:aspell # 以en_GB为例
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc98463d66943_Applications" id="Applications">Applications</h3></div>
+<p><a href="#pg9b5d7fec8088">Firefox</a>, <a href="#pgcd88917e409e">Thunderbird</a>, <a href="#pgad69d7c7a814">Chromium</a> and <a href="#pgaa27357d651e">LibreOffice</a> can all use system-wide installed Hunspell dictionaries as well as dictionaries/other spell checkers installed through their own extension systems. See the following sections:
+</p>
+<ul><li><a href="#pg9b5d7fec8088">Firefox#Spell checking</a></li>
+<li><a href="#pgcd88917e409e">Thunderbird#Spell checking</a></li>
+<li><a href="#pgaa27357d651e">LibreOffice#Spell checking</a></li></ul>
+<p><a href="#pga573217eea5a">AbiWord</a> and <a href="#pg59c3fd392541">Gedit</a> use Enchant.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgc98463d66943_.E8.AF.AD.E6.B3.95.E6.A3.80.E6.9F.A5.E5.99.A8" id="语法检查器"><span id=".E8.AF.AD.E6.B3.95.E6.A3.80.E6.9F.A5.E5.99.A8"></span>语法检查器</h2></div>
+<ul><li><b>LanguageTool</b> — Open source language checker, written in <a href="#pgf5cd65505569">Java</a>.</li></ul>
+<dl><dd><a href="https://www.languagetool.org">https://www.languagetool.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=languagetool">languagetool</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Style and Diction</b> — Diction identifies wordy and commonly misused phrases. Style analyses surface characteristics of a document.</li></ul>
+<dl><dd><a href="https://www.gnu.org/software/diction/">https://www.gnu.org/software/diction/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/diction/">diction</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>TeXtidote</b> — Language checker for LaTeX documents, relies on LanguageTool.</li></ul>
+<dl><dd><a href="https://sylvainhalle.github.io/textidote/">https://sylvainhalle.github.io/textidote/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/textidote-bin/">textidote-bin</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgc98463d66943_Applications" id="Applications_2">Applications</h3></div>
+<p><a href="#pg9b5d7fec8088">Firefox</a>, <a href="#pgcd88917e409e">Thunderbird</a>, <a href="#pgad69d7c7a814">Chromium</a> and <a href="#pgaa27357d651e">LibreOffice</a> all support grammar checking only through extensions. For LibreOffice, see <a href="#pgaa27357d651e">LibreOffice#Grammar checking</a>.
+</p><p><a href="#pga573217eea5a">AbiWord</a> has a built-in grammar checker, see <a href="#pga573217eea5a">AbiWord#Grammar checking</a>.
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808021608
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.115 seconds
+Real time usage: 0.120 seconds
+Preprocessor visited node count: 434/1000000
+Revision size: 4019/2097152 bytes
+Post‐expand include size: 9301/2097152 bytes
+Template argument size: 4876/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   30.956      1 -total
+ 57.70%   17.861     11 Template:App
+ 13.98%    4.328     12 Template:Pkg
+ 13.70%    4.242      5 Template:Man
+ 12.01%    3.717      1 Template:翻译状态
+  3.93%    1.217      2 Template:AUR
+  3.92%    1.212      1 Template:Aur
+  3.88%    1.201      1 Template:Hc
+  3.67%    1.135      2 Template:Ic
+-->
+<!-- Render ID 1dbcf00e-92cf-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6613:|#|:idhash:canonical!zh-cn and timestamp 20260808021608 and revision id 33868. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

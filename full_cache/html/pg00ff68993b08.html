@@ -1,0 +1,600 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg00ff68993b08">光盘驱动器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg6797fd67e241">Codecs</a></li>
+<li><a href="#pgb6ea2b1dfebb">MPlayer</a></li>
+<li><a href="#pgf8789106b477">dvdbackup</a></li>
+<li><a href="#pgf5e46801cf61">MEncoder</a></li>
+<li><a href="#pgd51d0aabbd96">Blu-ray</a></li>
+<li><a href="#pg86af74c3469e">Convert any Movie to DVD Video</a></li>
+</ul></div>
+<p>来自维基百科：
+</p>
+<dl><dd>在计算机领域，Optical disc drive（ODD）是一种光盘驱动器，它使用激光或可见光频谱内或附近的电磁波作为向光盘读写数据过程的一部分。</dd></dl>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg00ff68993b08_.E5.88.BB.E5.BD.95" id="刻录"><span id=".E5.88.BB.E5.BD.95"></span>刻录</h2></div>
+
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>有很大数量的光学驱动器和碟片是有很大不同的。通常，在需要可靠性的时候，推荐使用慢速刻录。如果你遇到了未预期的行为时，尝试使用刻录器所支持的最慢速度刻录。</div>
+<p>光盘驱动器的刻录过程包括创建或获得一个图像并将其写入光学介质。该镜像原则上可以是任何数据文件。如果你想挂载生成的介质，那么它通常是一个ISO 9660文件系统的镜像文件。音频和多媒体光盘通常是从 <i>.bin</i> 文件刻录的，在 <i>.toc</i> 文件或 <i>.cue</i> 文件的控制下，告诉所需的轨道布局。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E5.AE.89.E8.A3.85.E5.88.BB.E5.BD.95.E5.B7.A5.E5.85.B7" id="安装刻录工具"><span id=".E5.AE.89.E8.A3.85.E5.88.BB.E5.BD.95.E5.B7.A5.E5.85.B7"></span>安装刻录工具</h3></div>
+<p>如果你想要使用 GUI 程序，见 #Burning CD/DVD/BD with a GUI。
+</p><p>这里列出的程序是面向命令行的。它们是大多数用于CD、DVD和BD的免费GUI程序所使用的后端。当涉及到故障排除或编写刻录活动的脚本时，GUI用户可能会用到它们。
+</p><p>你至少需要一个创建文件系统镜像的程序和一个能够将数据刻录到你所需要的媒体类型的程序。
+</p><p>可用于创建ISO9660类型镜像的应用有:
+</p>
+<ul><li><span class="plainlinks archwiki-template-man" title="$ man 8 mkisofs"><a href="https://man.archlinux.org/man/mkisofs.8">mkisofs(8)</a></span> 自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cdrtools">cdrtools</a></span><sup><small>包</small></sup></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 1 xorriso"><a href="https://man.archlinux.org/man/xorriso.1">xorriso(1)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 1 xorrisofs"><a href="https://man.archlinux.org/man/xorrisofs.1">xorrisofs(1)</a></span> 自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libisoburn">libisoburn</a></span><sup><small>包</small></sup></span></li></ul>
+<p>常见的选择是 <i>mkisofs</i>，因为它的资格最老。
+</p><p>可用于刻录媒体文件的应用有:
+</p>
+<ul><li><span class="plainlinks archwiki-template-man" title="$ man 1 cdrdao"><a href="https://man.archlinux.org/man/cdrdao.1">cdrdao(1)</a></span> 自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cdrdao">cdrdao</a></span><sup><small>包</small></sup></span> (仅 CD, 格式仅 TOC/CUE/BIN)</li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 1 cdrecord"><a href="https://man.archlinux.org/man/cdrecord.1">cdrecord(1)</a></span> 自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cdrtools">cdrtools</a></span><sup><small>包</small></sup></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 1 cdrskin"><a href="https://man.archlinux.org/man/cdrskin.1">cdrskin(1)</a></span> 自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libburn">libburn</a></span><sup><small>包</small></sup></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 1 growisofs"><a href="https://man.archlinux.org/man/growisofs.1">growisofs(1)</a></span> 自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dvd%2Brw-tools">dvd+rw-tools</a></span><sup><small>包</small></sup></span> (仅 DVD 和 BD)</li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 1 xorriso"><a href="https://man.archlinux.org/man/xorriso.1">xorriso(1)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 1 xorrecord"><a href="https://man.archlinux.org/man/xorrecord.1">xorrecord(1)</a></span> 自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libisoburn">libisoburn</a></span><sup><small>包</small></sup></span></li></ul>
+<p>常见的对于 CD 的选择有 <i>cdrecord</i>，而对于 DVD 和 BD 来说，<i>growisofs</i> 是常见的选择。因为 <i>cdrecord</i> 是第一个不需要解释文件就可以刻录 CD 的程序：<i>growisofs</i> 是第一个提供 DVD 与 BD 写入而没有烧录程序的人为限制的。为将 TOC/CUE/BIN 烧录到 CD，安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cdrdao">cdrdao</a></span><sup><small>包</small></sup></span>。
+</p><p>自由的 GUI 烧录程序至少依赖于一个上述包。
+</p><p>在这份文档中，<i>xorrisofs</i> 支持 <i>mkisofs</i> 选项。
+</p><p><i>cdrskin</i> 支持 <i>cdrecord</i> 选项 ; <i>xorrecord</i> 在不处理音频 CD 时也支持它。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E4.BB.8E.E5.B7.B2.E5.AD.98.E5.9C.A8.E7.9A.84.E6.96.87.E4.BB.B6.E6.9E.84.E5.BB.BA.E4.B8.80.E4.B8.AA_ISO_.E9.95.9C.E5.83.8F" id="从已存在的文件构建一个_ISO_镜像"><span id=".E4.BB.8E.E5.B7.B2.E5.AD.98.E5.9C.A8.E7.9A.84.E6.96.87.E4.BB.B6.E6.9E.84.E5.BB.BA.E4.B8.80.E4.B8.AA_ISO_.E9.95.9C.E5.83.8F"></span>从已存在的文件构建一个 ISO 镜像</h3></div>
+<p>先将需要的文件拷贝到一个文件夹，是创建一个 ISO 镜像的最简单办法。例如：<code>./for.iso</code>。
+</p><p>然后用 <i>mkisofs</i> 生成这个镜像：
+</p>
+<pre>$ mkisofs -V "<i>ARCHIVE_2013_07_27</i>" -J -r -o <i>isoimage.iso</i> <i>./for_iso</i>
+</pre>
+<p>这些选项在下列的节中被解释。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg00ff68993b08_.E5.9F.BA.E6.9C.AC.E9.80.89.E9.A1.B9" id="基本选项"><span id=".E5.9F.BA.E6.9C.AC.E9.80.89.E9.A1.B9"></span>基本选项</h4></div>
+<dl><dt><code>-V</code></dt>
+<dd>（分配给）文件系统的名称。ISO 9660 标准限定了 32 字节的长度，同样，这些字符被限制为："A"-"Z"，"0"-"9"以及"_"。卷标签可能展示为挂载点，如果这个介质是被自动挂载的。</dd>
+<dt><code>-J</code></dt>
+<dd>启用 <a href="https://en.wikipedia.org/wiki/Joliet_(file_system)">Joliet</a> 扩展, 允许特定空间用 Unicode 存储文件名称。(最高每个文件 64 UTF-16 字符)。</dd>
+<dt><code>-joliet-long</code></dt>
+<dd>增加 Joliet 表命名的最大长度，从 64 到 103 字符。 不符合Joliet规范，通常不受支持。</dd>
+<dt><code>-r</code></dt>
+<dd>启用 <a href="https://en.wikipedia.org/wiki/Rock_Ridge">Rock Ridge</a> 扩展，POSIX 文件系统到一个镜像，包括 255 字符长度的文件名和 Unix 风格文件拓展名。</dd>
+<dt><code>-o</code></dt>
+<dd>为输出的 ISO 镜像设置文件路径。</dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg00ff68993b08_.E7.A7.BB.E6.A4.8D.E7.82.B9" id="移植点"><span id=".E7.A7.BB.E6.A4.8D.E7.82.B9"></span>移植点</h4></div>
+<p>可以让 "mkisofs" 查找文件和目录从制定路径
+</p>
+<pre>$ mkisofs -V "<i>BACKUP_2013_07_27</i>" -J -r -o <i>backup_2013_07_27.iso</i> \
+  -graft-points \
+  /photos=/home/<i>user</i>/photos \
+  /mail=/home/<i>user</i>/mail \
+  /photos/holidays=/home/<i>user</i>/holidays/photos
+</pre>
+<p><code>-graft-points</code> 允许识别由ISO文件系统中的目标地址组成的“路径规范” (如 <code>/photos</code>) 和源地址 (如 <code>/home/user/photos</code>). 使用 "=" 字符分隔。
+</p><p>这个例子将 文件夹 <code>/home/user/photos</code><code>/home/user/mail</code> and <code>/home/user/holidays/photos</code> 分别设为 ISO 镜像中的 <code>/photos</code>, <code>/mail</code> and <code>/photos/holidays</code>。
+</p><p><i>mkisofs</i> 和 <i>xorrisofs</i> 使用相同的参数。使用安全备份，为 <i>xorrisofs</i> 加上 <code>--for_backup</code>，这将记录事件 ACL 并为每个文件存储 MD5 校验值。
+</p><p>见 <span class="plainlinks archwiki-template-man" title="$ man 8 mkisofs"><a href="https://man.archlinux.org/man/mkisofs.8">mkisofs(8)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 1 xorrisofs"><a href="https://man.archlinux.org/man/xorrisofs.1">xorrisofs(1)</a></span> 手册以获得更多关于命令的参数的信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E6.8C.82.E8.BD.BD.E4.B8.80.E4.B8.AA_ISO_.E9.95.9C.E5.83.8F" id="挂载一个_ISO_镜像"><span id=".E6.8C.82.E8.BD.BD.E4.B8.80.E4.B8.AA_ISO_.E9.95.9C.E5.83.8F"></span>挂载一个 ISO 镜像</h3></div>
+<p>你可以挂载一个 ISO 镜像，如果你想要浏览它的文件。
+我们可以使用下面的指令挂载一个 ISO 镜像：
+</p>
+<pre># mount -t iso9660 -o ro,loop <i>/path/to/file.iso</i> <i>/mount-point</i>
+</pre>
+<p>浏览完毕后，一定记得卸载：
+</p>
+<pre># umount /mount-point
+</pre>
+<p>无 Root 用户挂载镜像，见 <a href="#pg17c091d35ff8">Mounting images as user</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E8.BD.AC.E6.8D.A2_img.2Fccd_.E5.88.B0_iso" id="转换_img/ccd_到_iso"><span id=".E8.BD.AC.E6.8D.A2_img.2Fccd_.E5.88.B0_iso"></span>转换 img/ccd 到 iso</h3></div>
+<p>转换 <code>img</code>/<code>ccd</code> 镜像, 你可使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ccd2iso">ccd2iso</a></span><sup><small>包</small></sup></span>:
+</p>
+<pre>$ ccd2iso <i>~/image.img</i> <i>~/image.iso</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E7.9F.A5.E6.99.93.E4.BD.A0.E7.9A.84.E8.AE.BE.E5.A4.87.E7.9A.84.E5.90.8D.E7.A7.B0" id="知晓你的设备的名称"><span id=".E7.9F.A5.E6.99.93.E4.BD.A0.E7.9A.84.E8.AE.BE.E5.A4.87.E7.9A.84.E5.90.8D.E7.A7.B0"></span>知晓你的设备的名称</h3></div>
+<p>为剩余部分，假定你设的记录设备的节为 <code>/dev/sr0</code>
+</p><p>用下面的指令检查
+</p>
+<pre>$ cdrecord dev=<i>/dev/sr0</i> -checkdrive
+</pre>
+<p>这将报告这个设备的 <code>Vendor_info</code> 和 <code>Indentification</code>。
+</p><p>如果没有找到设备，检查一切 <code>/dev/sr*</code> 是否存在，当他们提供了读写权限 (<code>wr-</code>） 到你的组。
+</p><p>如果没有 <code>/dev/sr*</code> 存在，尝试手动<a href="#pg446fdafcb30b">加载</a>模块 <code>sr_mod</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E8.AF.BB.E5.8F.96_CD.2FDVD_.E7.9A.84.E5.8D.B7.E5.90.8D" id="读取_CD/DVD_的卷名"><span id=".E8.AF.BB.E5.8F.96_CD.2FDVD_.E7.9A.84.E5.8D.B7.E5.90.8D"></span>读取 CD/DVD 的卷名</h3></div>
+<p>如果你想获得名称或标签，使用<i>dd</i>:
+</p>
+<pre>$ dd if=<i>/dev/sr0</i> bs=1 skip=32808 count=32
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E4.BB.8E_CD.2C_DVD_.E6.88.96_BD_.E4.B8.AD.E5.88.9B.E5.BB.BA_ISO_.E9.95.9C.E5.83.8F" id="从_CD,_DVD_或_BD_中创建_ISO_镜像"><span id=".E4.BB.8E_CD.2C_DVD_.E6.88.96_BD_.E4.B8.AD.E5.88.9B.E5.BB.BA_ISO_.E9.95.9C.E5.83.8F"></span>从 CD, DVD 或 BD 中创建 ISO 镜像</h3></div>
+<p>为从介质中拷贝数据，并不让空块填充它，先确定它的块/扇区数量与大小（多数为每个 2048）。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ isosize -x /dev/sr0</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">sector count: 2041796, sector size: 2048
+</pre>
+<p>或
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ isoinfo -d -i /dev/sr0 | awk '/block size|Volume size/'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Logical block size is: 2048
+Volume size is: 2041796
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>别忘记把<code>/dev/sr0</code>换成你的光驱。</div>
+<p>然后用<a href="#pge09a1da9829f">dd</a>用获得的数据拷出来：
+</p>
+<pre>$ dd if=/dev/sr0 of=discmage.iso bs=<i>sector_size</i> count=<i>sector_count</i> status=progress
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果介质坏了，建议用类似于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ddrescue">ddrescue</a></span><sup><small>包</small></sup></span> 这样的专门工具，见 <a href="#pg0bde4888e89f">Disk cloning#Using ddrescue</a> 。</div>
+<p>如果原介质是可启动的，它的拷贝也将是一个可启动镜像。你可能将它用于虚拟机的虚拟光驱或将它烧录到光学介质，这也将是可启动的。 <a href="https://askubuntu.com/questions/147800/ripping-dvd-to-iso-accurately#874945">[1]</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E6.93.A6.E9.99.A4CD-RW.E5.92.8CDVD-RW" id="擦除CD-RW和DVD-RW"><span id=".E6.93.A6.E9.99.A4CD-RW.E5.92.8CDVD-RW"></span>擦除CD-RW和DVD-RW</h3></div>
+<p>使用过的CD-RW介质需要在写上以前记录的数据之前被擦除。这可以通过以下方式完成
+</p>
+<pre>$ cdrecord -v dev=<i>/dev/sr0</i> blank=fast
+</pre>
+<p>清空有两个选项：blank=fast 和 blank=all。完全清空的持续时间与完全写操作一样长。它覆盖了光盘上的有效载荷数据。然而这不应该被认为是安全地使这些数据不可读。为了这个目的，建议用随机数据进行几次全写运行。
+</p><p>替代命令有：
+</p>
+<pre>$ cdrskin -v dev=<i>/dev/sr0</i> blank=fast
+$ xorriso -outdev <i>/dev/sr0</i> -blank as_needed
+</pre>
+<p>擦除 DVD-RW 使用 <i>dvd+rw-format</i> 工具来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dvd%2Brw-tools">dvd+rw-tools</a></span><sup><small>包</small></sup></span>:
+</p>
+<pre>$ dvd+rw-format -blank=fast <i>/dev/sr0</i>
+</pre>
+<p>替代命令有：
+</p>
+<pre>$ cdrecord -v dev=<i>/dev/sr0</i> blank=fast
+$ cdrskin -v dev=<i>/dev/sr0</i> blank=deformat_sequential_quickest
+$ xorriso -outdev <i>/dev/sr0</i> -blank deformat_quickest
+</pre>
+<p>这种快速消隐的DVD-RW不适合多时段使用，也不能接受未预知长度的输入流。为此，人们必须使用以下方法之一：
+</p>
+<pre>$ cdrecord -v dev=<i>/dev/sr0</i> blank=all
+$ dvd+rw-format -blank=full <i>/dev/sr0</i>
+$ cdrskin -v dev=<i>/dev/sr0</i> blank=as_needed
+$ xorriso -outdev <i>/dev/sr0</i> -blank as_needed
+</pre>
+<p>其他媒体类型要么是一次性写入（CD-R、DVD-R、DVD+R、BD-R），要么是无需擦除的可重写（DVD-RAM、DVD+RW、BD-RE）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E6.A0.BC.E5.BC.8F.E5.8C.96_DVD-RW" id="格式化_DVD-RW"><span id=".E6.A0.BC.E5.BC.8F.E5.8C.96_DVD-RW"></span>格式化 DVD-RW</h3></div>
+<p>格式化过的 DVD-RW 介质可以在不提前擦除的情况下重写。所以考虑在其生命周期内格式化一次。
+</p>
+<pre>$ dvd+rw-format -force <i>/dev/sr0</i>
+$ cdrskin -v dev=<i>/dev/sr0</i> blank=format_if_needed
+$ xorriso -outdev <i>/dev/sr0</i> -format as_needed
+</pre>
+<p>不像 DVD-RAM, DVD+RW 和 BD-RE，格式化的 DVD-RW 无法被用于（低速）硬盘直写，而是需要驱动 ptcdvd。见 <span class="plainlinks archwiki-template-man" title="$ man 8 pktsetup"><a href="https://man.archlinux.org/man/pktsetup.8">pktsetup(8)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E6.A0.BC.E5.BC.8F.E5.8C.96_BD-RE_.E5.92.8C_BD-R" id="格式化_BD-RE_和_BD-R"><span id=".E6.A0.BC.E5.BC.8F.E5.8C.96_BD-RE_.E5.92.8C_BD-R"></span>格式化 BD-RE 和 BD-R</h3></div>
+<p>BD-RE 需要在使用前格式化。当检测到未格式化状态时，烧录程序会自动完成它。然而，数据存储区域的大小可能会受到上述DVD-RW格式命令的影响。
+</p><p>BD-R 可以是格式化的或非格式化的。非格式化的写入将会全程普通速度写入，并提供最大的存储空间。格式化的可以在写入操作时检查，坏块会从空闲块中被替换。这可能会把速度降到一半于普通速度。普通的格式化会使存储空间下降 768MiB。
+</p><p>growisofs 默认会格式化 BD-R，其他的不会。growisofs 可不进行格式化。cdrskin 和 xorriso 可以完全速度写入格式化的 BD-RE 或 BD-R:
+</p>
+<pre> $ growisofs -use-the-force-luke=spare:none ...growisofs.or.mkisofs.options...
+ $ cdrskin stream_recording=on ...cdrecord.options...
+ $ xorriso -stream_recording on ...xorriso.commands...
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E7.83.A7.E5.BD.95.E4.B8.80.E4.B8.AA_ISO_.E9.95.9C.E5.83.8F.E5.88.B0_CD.E3.80.81DVD_.E6.88.96_BD.E3.80.82" id="烧录一个_ISO_镜像到_CD、DVD_或_BD。"><span id=".E7.83.A7.E5.BD.95.E4.B8.80.E4.B8.AA_ISO_.E9.95.9C.E5.83.8F.E5.88.B0_CD.E3.80.81DVD_.E6.88.96_BD.E3.80.82"></span>烧录一个 ISO 镜像到 CD、DVD 或 BD。</h3></div>
+<p>为烧录一个 ISO 镜像文件 <code>isoimage.iso</code> 到光学介质，
+为CD: 
+</p>
+<pre>$ cdrecord -v -sao dev=<i>/dev/sr0</i> <i>isoimage.iso</i>
+</pre>
+<p>为 DVD 或 BD:
+</p>
+<pre>$ growisofs -dvd-compat -Z <i>/dev/sr0</i>=<i>isoimage.iso</i>
+</pre>
+<p>为 CD、BD 或 DVD:
+</p>
+<pre>$ xorriso -as cdrecord -v dev=<i>/dev/sr0</i> -sao <i>isoimage.iso</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><br/>
+<ul><li>当你准备写入时，确保介质未挂载。当介质包含一个可读的文件系统时，管挂载可能是自动的。在最好的情况下，它会防止烧录程序使用烧录设备。在最坏的情况下，可能会因为读取操作弄坏设备。所以，在不能确定的情况下，<pre># umount /dev/sr0</pre></li>
+<li><i>growisofs</i> 有个关于 BD-R 空白介质的<a href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=713016">小 bug</a>。它会报出一个错误信息在烧录完成后。像 <i>k3b</i> 这样的程序会认为整个烧录过程失败了。为防止这个问题：
+<ul><li>这样 <code>dvd+rw-format <i>/dev/sr0</i></code> 格式化在使用 <i>growisofs</i> 之前。</li>
+<li>或用 <i>growisofs</i> 选项 <code>-use-the-force-luke=spare:none</code></li></ul></li></ul></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E9.AA.8C.E8.AF.81.E7.83.A7.E5.BD.95.E7.9A.84ISO.E9.95.9C.E5.83.8F" id="验证烧录的ISO镜像"><span id=".E9.AA.8C.E8.AF.81.E7.83.A7.E5.BD.95.E7.9A.84ISO.E9.95.9C.E5.83.8F"></span>验证烧录的ISO镜像</h3></div>
+<p>你可以验证烧录的介质的完整性，以确保它不包含错误。在验证之前一定要弹出介质并重新插入。这将保证任何内核缓存不会被用来读取数据。
+</p><p>首先计算原始ISO镜像的MD5校验值：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ md5sum isoimage.iso</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"> e5643e18e05f5646046bb2e4236986d8 isoimage.iso
+</pre>
+<p>之后在介质上为每个 ISO 文件系统计算 MD5。不过一些类型的介质完全提交给烧录程序相同数量的数据，很多其他的尾随的垃圾也会被读取。所以你需要限制为 ISO 镜像文件读取的大小。
+</p>
+<pre>$ blocks=$(expr $(du -b isoimage.iso | awk '{print $1}') / 2048)
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ dd if=/dev/sr0 bs=2048 count=$blocks | md5sum</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">43992+0 records in
+43992+0 records out
+90095616 bytes (90 MB, 86 MiB) copied, 0.359539 s, 251 MB/s
+e5643e18e05f5646046bb2e4236986d8  -</pre>
+<p>每次执行都需要给出相同的 MD5 校验值（这：<code>e5643e18e05f5646046bb2e4236986d8</code>）。如果没有，你可能会一同获得一个 I/O 错误自 <code>dd</code> 的运行中。当你感兴趣的时候，<a href="#pgcfe31b67199d">dmesg</a> 可能告诉你 SCSI 错误和块编号。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_ISO_9660_.E5.92.8C.E8.BF.90.E8.A1.8C.E6.97.B6.E7.83.A7.E5.BD.95" id="ISO_9660_和运行时烧录"><span id="ISO_9660_.E5.92.8C.E8.BF.90.E8.A1.8C.E6.97.B6.E7.83.A7.E5.BD.95"></span>ISO 9660 和运行时烧录</h3></div>
+<p>没有必要存储一个应急的 ISO 文件系统在硬盘，在它写到光学介质前。在写到一个空设备缓冲区的时候，只有极老的 CD 驱动器在极老的电脑上运行会遭受错误。
+</p><p>如果你省略了 <i>mkisofs</i> 的 <code>-o</code> 选项，它将写一个 ISO 镜像到标准输出。这可被用管道导到烧录程序。
+</p>
+<pre>$ mkisofs -V "ARCHIVE_2013_07_27" -J -r ./for_iso | \
+  cdrecord -v dev=/dev/sr0 -waiti -
+</pre>
+<p>选项 <code>-waiti</code> 此处并非必须. 它避免 <i>cdrecord</i> 在 <i>mkisofs</i> 在其输出前写入到介质。这将允许 <i>mkisofs</i> 排除干扰的去读取已开始烧录的介质。见关于多会话的下一节。
+</p><p>在 DVD 和 BD 中, 你可能让 <i>growisofs</i> 为你操作 <i>mkisofs</i> 并在运行烧录它的输出：
+</p>
+<pre>$ growisofs -Z <i>/dev/sr0</i> -V "<i>ARCHIVE_2013_07_27</i>" -r -J <i>./for_iso</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E5.A4.9A.E4.BC.9A.E8.AF.9D" id="多会话"><span id=".E5.A4.9A.E4.BC.9A.E8.AF.9D"></span>多会话</h3></div>
+<p>ISO-9960 多会话意味着一个介质使用只读文件系统的同时，依然可以在第一个未被使用的块地址写，并且在这个块上会有新的 ISO 树。这个新树协同于新加的或覆写的文件的数据块。数据的块在旧的 ISO 树中的，无法再被写。
+</p><p>Linux 和其他操作系统将挂载在介质上的最新的会话上的文件夹树。最新的树也将正常的显示旧会话的文件。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg00ff68993b08_.E4.BD.BF.E7.94.A8_cdrecord_.E7.9A.84.E5.A4.9A.E4.BC.9A.E8.AF.9D" id="使用_cdrecord_的多会话"><span id=".E4.BD.BF.E7.94.A8_cdrecord_.E7.9A.84.E5.A4.9A.E4.BC.9A.E8.AF.9D"></span>使用 cdrecord 的多会话</h4></div>
+<p>CD-R 和 CD-RW  在 <code>-multi</code> 参数使用时保持可写（或者说可追加）
+</p>
+<pre>$ cdrecord -v -multi dev=<i>/dev/sr0</i> <i>isoimage.iso</i>
+</pre>
+<p>之后，可以用这个下一个会话的参数在介质中查询
+</p>
+<pre>$ m=$(cdrecord dev=<i>/dev/sr0</i> -msinfo)
+</pre>
+<p>通过这些参数的帮助，和驱动器中的可读介质，你可以制作一个附加的 ISO 会话
+</p>
+<pre>$ mkisofs -M <i>/dev/sr0</i> -C "$m" \
+   -V "<i>ARCHIVE_2013_07_28</i>" -J -r -o <i>session2.iso</i> <i>./more_for_iso</i>
+</pre>
+<p>最后添加这些会话到介质并使其再次可追加
+</p>
+<pre>$ cdrecord -v -multi dev=<i>/dev/sr0</i> <i>session2.iso</i>
+</pre>
+<p><i>cdrskin</i> 和 <i>xorrecord</i> 也可做这些到 DVD-R, DVD+R, BD-R 和 未格式化的 DVD-RW 上。<i>cdrecord</i> 使多会话可被用于最新的 DVD-R 和 DVD-RW。当然，这也可用于 CD-R 和 CD-RW。
+</p><p><i>growisofs</i> 和 <i>xorriso</i> 也可做这些，并且隐藏大部分复杂操作。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg00ff68993b08_.E4.BD.BF.E7.94.A8_growisofs_.E7.9A.84.E5.A4.9A.E4.BC.9A.E8.AF.9D" id="使用_growisofs_的多会话"><span id=".E4.BD.BF.E7.94.A8_growisofs_.E7.9A.84.E5.A4.9A.E4.BC.9A.E8.AF.9D"></span>使用 growisofs 的多会话</h4></div>
+<p>默认情况下，<i>growisofs</i> 使用 <i>mkisofs</i> 作为多数创建 ISO 镜像的参数的默认后端。见 <i>mkisofs</i> 的例子。它不使用 <code>-o</code> 和 <code>-C</code>。默认它使用 <i>mkisofs</i>。如果你要指定使用其他后端程序，需要设定环境变量 <code>MKISOFS</code>：
+</p>
+<pre>$ export MKISOFS="xorrisofs"
+</pre>
+<p>这应该在光学介质上建立一个新的 ISO 文件系统，被选项 <code>-Z</code> 压缩
+</p>
+<pre>$ growisofs -Z <i>/dev/sr0</i> -V "<i>ARCHIVE_2013_07_27</i>" -r -J <i>./for_iso</i>
+</pre>
+<p>这应为新会话加入更多文件到一个存在的 ISO 文件系统，被 <code>-M</code>压缩
+</p>
+<pre>$ growisofs -M <i>/dev/sr0</i> -V "<i>ARCHIVE_2013_07_28</i>" -r -J <i>./more_for_iso</i>
+</pre>
+<p>更加详细的信息请参阅 <span class="plainlinks archwiki-template-man" title="$ man 1 growisofs"><a href="https://man.archlinux.org/man/growisofs.1">growisofs(1)</a></span> 手册，以及 <i>mkisofs</i> 和 <i>xorrisofs</i> 的手册。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg00ff68993b08_.E4.BD.BF.E7.94.A8_xorriso_.E7.9A.84.E5.A4.9A.E4.BC.9A.E8.AF.9D" id="使用_xorriso_的多会话"><span id=".E4.BD.BF.E7.94.A8_xorriso_.E7.9A.84.E5.A4.9A.E4.BC.9A.E8.AF.9D"></span>使用 xorriso 的多会话</h4></div>
+<p><i>xorriso</i> 应从介质的空白区域建立一个 ISO文件系统。所以它将占用区域，并且，如果这个区域存储了数据，则会让其无效。参数 <code>-blank as_needed</code> 可应用于所有可重用媒介甚至是 在硬盘中的 ISO 镜像文件。这不会在应用到空白的单次介质时报错。
+</p>
+<pre>$ xorriso -outdev <i>/dev/sr0</i> -blank as_needed \
+          -volid "<i>ARCHIVE_2013_07_27</i>" -joliet on -add <i>./for_iso</i> --
+</pre>
+<p>如果 <code>-dev</code> 而不是 <code>-outdev</code> 被使用，在无空白可写介质上，<i>xorriso</i> 会添加新的碟片文件。当然，<code>-blank</code>在此处不能使用。
+</p>
+<pre>$ xorriso -dev <i>/dev/sr0</i> \
+          -volid "<i>ARCHIVE_2013_07_28</i>" -joliet on -add <i>./more_for_iso</i> --
+</pre>
+<p>详见 <span class="plainlinks archwiki-template-man" title="$ man 1 xorriso"><a href="https://man.archlinux.org/man/xorriso.1">xorriso(1)</a></span> 手册页及其例子。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_BD_.E7.BC.BA.E9.99.B7.E7.AE.A1.E7.90.86" id="BD_缺陷管理"><span id="BD_.E7.BC.BA.E9.99.B7.E7.AE.A1.E7.90.86"></span>BD 缺陷管理</h3></div>
+<p>BD-RE 和被格式化过的 BD-R 媒介通常会在开启了 BD 缺陷管理的情况下写入。这个特性在数据还存在设备缓冲区时读取这些数据块。为避免低读取质量，这些数据块会被写到（或者说重定向到）空区域。
+</p><p>这种检查读取使写速最多降到 BD 介质或驱动器的极限的一半（有时甚至更坏）。大量使用这些空区域也会导致在读取操作中产生大量延迟。所以，BD 缺陷管理并非总是被人想要开启的。
+</p><p><i>cdrecord</i> 并不格式化 BD-R。但是，在 BD-RE 介质上避免 BD 缺陷管理没有意义。 
+</p><p><i>growisofs</i> 默认格式化 BD-R。使用参数<code>-use-the-force-luke=spare:none</code> 可以避免使用 BD 缺陷管理。但是，在 BD-RE 介质上避免 BD 缺陷管理没有意义。 
+</p><p><i>cdrskin</i>、 <i>xorriso</i> 和 <i>xorrecord</i> 默认并不格式化 BD-R。它们需要分别使用<code>cdrskin blank=format_if_needed</code>、<code>xorriso -format as_needed</code>、 <code>xorrecord blank=format_overwrite</code>。这三个程序可以在 BD-RE 和已格式化的 BD-R 上关闭 BD 缺陷管理，通过分别使用 <code>cdrskin stream_recording=on</code>、<code>xorriso -stream_recording on</code>、<code>xorrecord stream_recording=on</code>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E7.83.A7.E5.BD.95.E4.B8.80.E4.B8.AA.E9.9F.B3.E9.A2.91_CD" id="烧录一个音频_CD"><span id=".E7.83.A7.E5.BD.95.E4.B8.80.E4.B8.AA.E9.9F.B3.E9.A2.91_CD"></span>烧录一个音频 CD</h3></div>
+<p>创建你的音频轨，并在不压缩的情况下存储他们为 16 bit、44100 Hz 的立体声 WAV 文件。为将 MP3 文件转换为 WAV 文件，确保 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lame">lame</a></span><sup><small>包</small></sup></span> 已经安装。<i>cd</i> 到你存储 MP3 文件的目录，并执行
+</p>
+<pre>$ for i in *.mp3; do lame --decode "$i" "$(basename "$i" .mp3)".wav; done
+</pre>
+<p>为避免你在烧录由 LAME 转换而来的 WAV 文件时报错，尝试使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mpg123">mpg123</a></span><sup><small>包</small></sup></span> 解码：
+</p>
+<pre>$ for i in *.mp3; do mpg123 --rate 44100 --stereo --buffer 3072 --resync -w $(basename "$i" .mp3).wav $i; done
+</pre>
+<p>为将 AAC 转换至 WAV，确保 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=faad2">faad2</a></span><sup><small>包</small></sup></span> 已经安装，然后执行：
+</p>
+<pre>$ for i in *.m4a; do faad $i; done
+</pre>
+<p>为修复一个已存在的 WAV 文件的码率（或者其他的很多格式），尝试使用包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sox">sox</a></span><sup><small>包</small></sup></span>：
+</p>
+<pre>$ for i in *.wav; do sox "$i" -c 2 -r 44100 "$(basename "$i" .wav)"-ok.wav; done
+</pre>
+<p>这些音频文件会被按照它们的文件名，以字母表顺序排列在轨中，如 <code>01.wav</code>, <code>02.wav</code>, <code>03.wav</code> 等等。用以下的指令来模拟烧录 WAV 文件到 音频 CD 中。
+</p>
+<pre>$ cdrecord <b>-dummy</b> -v -pad speed=1 dev=/dev/sr<i>0</i> -dao -swab *.wav
+</pre>
+<p>如果以上操作都正常工作，你可以移除 <code>-dummy</code> 来实际烧录 CD。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>用以上方法烧录出的碟可能无法在所有的 CD 播放器中播放。对于一个仅音频的碟（丢弃一些音频轨元数据），加入 -audio 标志</div>
+<p>使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cdrdao">cdrdao</a></span><sup><small>包</small></sup></span> 包，执行以下指令，亦可创建“内容表”。
+</p>
+<pre>$ {
+</pre>
+<pre>    echo "CD_DA"
+</pre>
+<pre>    for file in *.wav ; do
+</pre>
+<pre>      echo "TRACK AUDIO"
+</pre>
+<pre>      echo "FILE \"$file\" 0"
+</pre>
+<pre>    done
+</pre>
+<pre>  } &gt; <b>toc</b>
+</pre>
+<p>这将使轨道之间不存在间隙。或者，如果您想在某些音轨之间插入 <i>X</i> 秒的间隙，您可以编辑 toc 文件，并在该音轨的 TRACK AUDIO 和 file 行之间插入以下行:
+</p><p>PREGAP 00:0<i>X</i>:00
+</p><p>然后，烧录文件：
+</p>
+<pre>$ cdrdao write --speed <i>X</i> toc
+</pre>
+<p>刻录速度可以调节，更低的烧录速度产生更高质量的结果。这是因为音频 CD 格式较数据存储格式的高级错误矫正更少。
+</p><p>用 <a href="#pgb6ea2b1dfebb">MPlayer</a> 来测试新的音频 CD：
+</p>
+<pre>$ mplayer cdda://
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E7.83.A7.E5.BD.95.E4.B8.80.E4.B8.AA_BIN.2FCUE" id="烧录一个_BIN/CUE"><span id=".E7.83.A7.E5.BD.95.E4.B8.80.E4.B8.AA_BIN.2FCUE"></span>烧录一个 BIN/CUE</h3></div>
+<p>用以下指令烧录一个 BIN 或 CUE 镜像：
+</p>
+<pre>$ cdrdao write --device <i>/dev/sr0</i> <i>image.cue</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg00ff68993b08_.E6.B7.B7.E5.90.88.E6.A8.A1.E5.BC.8F.E7.9A.84_TOC.2FCUE.2FBIN_.E7.A2.9F" id="混合模式的_TOC/CUE/BIN_碟"><span id=".E6.B7.B7.E5.90.88.E6.A8.A1.E5.BC.8F.E7.9A.84_TOC.2FCUE.2FBIN_.E7.A2.9F"></span>混合模式的 TOC/CUE/BIN 碟</h4></div>
+<p>ISO 镜像仅存储数据轨。如果你想要创建一个混合模式的碟（数据轨及多音频轨），你需要创建一对 TOC 及 BIN。
+</p>
+<pre>$ cdrdao read-cd --read-raw --datafile <i>image.bin</i> --driver generic-mmc:0x20000 --device <i>/dev/cdrom</i> <i>image.toc</i>
+</pre>
+<p>一些软件只接受一对 CUE 及 BIN，你可以使用 <i>toc2cue</i>（包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cdrdao">cdrdao</a></span><sup><small>包</small></sup></span> 包中） 创建一个 CUE 表：
+</p>
+<pre>$ toc2cue <i>image.toc</i> <i>image.cue</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E7.83.A7.E5.BD.95.E7.A8.8B.E5.BA.8F.E5.90.8E.E7.AB.AF.E7.9A.84.E9.97.AE.E9.A2.98" id="烧录程序后端的问题"><span id=".E7.83.A7.E5.BD.95.E7.A8.8B.E5.BA.8F.E5.90.8E.E7.AB.AF.E7.9A.84.E9.97.AE.E9.A2.98"></span>烧录程序后端的问题</h3></div>
+<p>如果你使用中出了问题，你可以向 cdwrite@other.debian.org 请求建议，或尝试向程序的 man 页中所列出的邮箱地址求助。
+</p><p>告知他们你尝试的命令及参数、介质类型（如 CD-R、DVD+RW），以及程序运行时的表现（程序信息、非预期表现等），你可能会被告知尝试获得程序最新版本，或者是开发版本来使测试可以通过。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E7.94.A8_GUI_.E7.A8.8B.E5.BA.8F.E7.83.A7.E5.BD.95_CD.2FDVD.2FBD" id="用_GUI_程序烧录_CD/DVD/BD"><span id=".E7.94.A8_GUI_.E7.A8.8B.E5.BA.8F.E7.83.A7.E5.BD.95_CD.2FDVD.2FBD"></span>用 GUI 程序烧录 CD/DVD/BD</h3></div>
+<p>这里有一些可用的用于烧录 CD 的 GUI 程序。
+</p><p>参见 <a href="https://en.wikipedia.org/wiki/Comparison_of_disc_authoring_software">Wikipedia:Comparison of disc authoring software</a>。
+</p>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/AcetoneISO">AcetoneISO</a></b> — All-in-one ISO 工具 (支持 BIN、 MDF、 NRG、 IMG、 DAA、 DMG、 CDI、 B5I、 BWI、 PDI 和 ISO).</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/acetoneiso">https://sourceforge.net/projects/acetoneiso</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/acetoneiso2/">acetoneiso2</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>BashBurn</b> — 轻量的基于终端目录前端的 CD/DVD 烧录工具</li></ul>
+<dl><dd><a href="http://bashburn.dose.se/">http://bashburn.dose.se/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bashburn">bashburn</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Brasero_(software)">Brasero</a></b> — 被尽可能设计的简单的为 GNOME 桌面设计的光盘烧录程序</li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Apps/Brasero">https://wiki.gnome.org/Apps/Brasero</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=brasero">brasero</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>cdw</b> — <i>cdrecord</i>、 <i>mkisofs</i>、 <i>growisofs</i>、 <i>dvd+rw-mediainfo</i>、 <i>dvd+rw-format</i> 和 <i>xorriso</i> 的 Ncurses 前端。</li></ul>
+<dl><dd><a href="http://cdw.sourceforge.net/">http://cdw.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cdw/">cdw</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Graveman</b> — 基于 GTK 的 CD/DVD 烧录程序。。它需要配置到真实的烧录设备上。</li></ul>
+<dl><dd><a href="https://graveman.tuxfamily.org/">https://graveman.tuxfamily.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/graveman/">graveman</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>isomaster</b> — ISO 镜像编辑者。</li></ul>
+<dl><dd><a href="http://littlesvr.ca/isomaster">http://littlesvr.ca/isomaster</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/isomaster/">isomaster</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/K3b">K3b</a></b> — 基于 KDElibs 的多特性的及易用的 CD 烧录和翻录程序。</li></ul>
+<dl><dd><a href="https://userbase.kde.org/K3b">https://userbase.kde.org/K3b</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=k3b">k3b</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/X-CD-Roast">X-CD-Roast</a></b> — 写入 CD 和 DVD 用的 <i>cdrtools</i> 轻量端。</li></ul>
+<dl><dd><a href="http://www.xcdroast.org/">http://www.xcdroast.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xcdroast/">xcdroast</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Xfce#Xfburn">Xfburn</a></b> — 支持 CD 和 DVD （-RW）、ISO 镜像，且支持 BurnFree 的，基于 libburnia 库的简单前端。</li></ul>
+<dl><dd><a href="https://docs.xfce.org/apps/xfburn/start">https://docs.xfce.org/apps/xfburn/start</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xfburn">xfburn</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>xorriso-tcltk</b> — xorriso 的图形前端，用于烧录入 ISO 和 CD/DVD/BD 的工具。</li></ul>
+<dl><dd><a href="https://www.gnu.org/software/xorriso/">https://www.gnu.org/software/xorriso/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libisoburn">libisoburn</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg00ff68993b08_.E6.92.AD.E6.94.BE" id="播放"><span id=".E6.92.AD.E6.94.BE"></span>播放</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_CD" id="CD">CD</h3></div>
+<p>CD的音频播放需要<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libcdio">libcdio</a></span><sup><small>包</small></sup></span> 软件包。为了使KDE应用程序如Dolphin能够读取CD中的音频，你需要安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=audiocd-kio">audiocd-kio</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_DVD" id="DVD">DVD</h3></div>
+<p>如果你想播放加密的DVD，你必须安装诸如libdvd*软件包。
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libdvdread">libdvdread</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libdvdcss">libdvdcss</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libdvdnav">libdvdnav</a></span><sup><small>包</small></sup></span></li></ul>
+<p>除此之外，你还需要安装媒体播放器。热门的DVD播放器包括<a href="#pgb6ea2b1dfebb">MPlayer</a>, <a href="https://en.wikipedia.org/wiki/Xine">xine</a> 和 <a href="#pgf08ba452154b">VLC</a>。 参见<a href="#pg58f89a7cd9f4">视频播放</a>上的列表和对于 <a href="#pgb6ea2b1dfebb">MPlayer</a> 的特殊介绍。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_Blu_ray" id="Blu-ray">Blu-ray</h3></div>
+<p>参见 <a href="#pgd51d0aabbd96">Blu-ray#Playback</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg00ff68993b08_.E7.BF.BB.E5.BD.95" id="翻录"><span id=".E7.BF.BB.E5.BD.95"></span>翻录</h2></div>
+<p><a href="https://en.wikipedia.org/wiki/Ripping">翻录</a>是指把音视频内容从可移除介质或媒体流拷到硬盘中的过程。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E9.9F.B3.E9.A2.91_CD" id="音频_CD"><span id=".E9.9F.B3.E9.A2.91_CD"></span>音频 CD</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg00ff68993b08_.E6.8E.A7.E5.88.B6.E5.8F.B0" id="控制台"><span id=".E6.8E.A7.E5.88.B6.E5.8F.B0"></span>控制台</h4></div>
+<ul><li><b>abcde</b> — Comprehensive command-line tool for ripping audio CDs.</li></ul>
+<dl><dd><a href="https://abcde.einval.com/">https://abcde.einval.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/abcde/">abcde</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>cdda2wav</b> — CD-audio extraction program with paranoia support.</li></ul>
+<dl><dd><a href="http://www.cdda2wav.de/">http://www.cdda2wav.de/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cdrtools">cdrtools</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/cdparanoia">cdparanoia</a></b> — Compact Disc Digital Audio (CDDA) Digital Audio Extraction (DAE) tool.</li></ul>
+<dl><dd><a href="https://xiph.org/paranoia/index.html">https://xiph.org/paranoia/index.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cdparanoia">cdparanoia</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>cyanrip</b> — Extensive CD ripper with musicbraniz integration, error detection, log generation, many formats, HDCD decoding, covert art automatic download.</li></ul>
+<dl><dd><a href="https://github.com/cyanreg/cyanrip/">https://github.com/cyanreg/cyanrip/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cyanrip/">cyanrip</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>redumper</b> — An advanced byte perfect disc dumper supporting incremental dumps, advanced SCSI/C2 repair, intelligent audio CD offset detection and a lot of other features.</li></ul>
+<dl><dd><a href="https://github.com/superg/redumper/tree/main/">https://github.com/superg/redumper/tree/main/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/redumper/">redumper</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>ripright</b> — Minimal CD ripper modeled on autorip.</li></ul>
+<dl><dd><a href="https://www.mcternan.me.uk/ripright/">https://www.mcternan.me.uk/ripright/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ripright/">ripright</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/ripit">ripit</a></b> — Command-line ripper that supports MusicBrainz, freeddb and various codecs.</li></ul>
+<dl><dd><a href="https://www.ripit.pl/">https://www.ripit.pl/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ripit/">ripit</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>shnsplit</b> — Splits .wav and .flac files according to a CUE sheet and encodes the resulting pieces. A useful companion to ABCDE.</li></ul>
+<dl><dd><a href="http://shnutils.freeshell.org/shntool/">http://shnutils.freeshell.org/shntool/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/shntool/">shntool</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>whipper</b> — CD ripper aiming for accuracy over speed. Uses cdparanoia, MusicBrainz, AccurateRip.</li></ul>
+<dl><dd><a href="https://github.com/whipper-team/whipper">https://github.com/whipper-team/whipper</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=whipper">whipper</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg00ff68993b08_.E5.9B.BE.E5.BD.A2.E5.8C.96" id="图形化"><span id=".E5.9B.BE.E5.BD.A2.E5.8C.96"></span>图形化</h4></div>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Asunder_(software)">Asunder</a></b> — GTK-based CD ripping program.</li></ul>
+<dl><dd><a href="http://littlesvr.ca/asunder/">http://littlesvr.ca/asunder/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=asunder">asunder</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Audex</b> — Audio grabber tool for CD-ROM drives based on KDE.</li></ul>
+<dl><dd><a href="https://userbase.kde.org/Audex">https://userbase.kde.org/Audex</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=audex">audex</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Fre:ac">fre:ac</a></b> — Audio converter and CD ripper with support for various popular formats and encoders.</li></ul>
+<dl><dd><a href="https://freac.org/">https://freac.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/freac/">freac</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Goobox</b> — CD player and ripper for GNOME.</li></ul>
+<dl><dd><a href="https://people.gnome.org/~paobac/goobox/">https://people.gnome.org/~paobac/goobox/</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2022-09-22 ⓘ]</sup> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=goobox">goobox</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Grip_(software)">Grip</a></b> — Fast and light CD ripper within the GNOME project that resembles <a href="https://en.wikipedia.org/wiki/Audiograbber">Audiograbber</a>.</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/grip/">https://sourceforge.net/projects/grip/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/grip/">grip</a></span><sup><small>AUR</small></sup></span>.</dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/K3b">K3b</a></b> — Feature-rich and easy to handle CD/DVD burning and ripping application based on KDElibs.</li></ul>
+<dl><dd><a href="https://userbase.kde.org/K3b">https://userbase.kde.org/K3b</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=k3b">k3b</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>KAudioCreator</b> — KDE program for ripping and encoding Audio-CDs. Unmaintained and <a href="https://bugs.archlinux.org/task/67618">does not start anymore</a>.</li></ul>
+<dl><dd><a href="https://invent.kde.org/unmaintained/kaudiocreator">https://invent.kde.org/unmaintained/kaudiocreator</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/kaudiocreator-git/">kaudiocreator-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>ripperX</b> — GTK program to rip CD audio tracks and encode them to the Ogg, MP3, or FLAC formats.</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/ripperx/">https://sourceforge.net/projects/ripperx/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ripperx/">ripperx</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>rubyripper</b> — Audio disc ripper that tries to deliver a secure rip through multiple rippings of the same track and corrections of any differences.</li></ul>
+<dl><dd><a href="https://github.com/bleskodev/rubyripper">https://github.com/bleskodev/rubyripper</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rubyripper/">rubyripper</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Sound_Juicer">Sound Juicer</a></b> — CD ripper for GNOME.</li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Apps/SoundJuicer">https://wiki.gnome.org/Apps/SoundJuicer</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sound-juicer">sound-juicer</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>soundKonverter</b> — Front-end to various audio converters.</li></ul>
+<dl><dd><a href="https://www.linux-apps.com/content/show.php?content=29024">https://www.linux-apps.com/content/show.php?content=29024</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/soundkonverter/">soundkonverter</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E8.A7.86.E9.A2.91_DVD" id="视频_DVD"><span id=".E8.A7.86.E9.A2.91_DVD"></span>视频 DVD</h3></div>
+<p>参见 <a href="https://en.wikipedia.org/wiki/Comparison_of_DVD_ripper_software">Wikipedia:Comparison of DVD ripper software</a>.
+</p><p>翻录一个 DVD 的过程常常能拆分为两个子项目：
+</p>
+<ol><li><b>数据解压</b>——把音频与视频复制到硬盘，</li>
+<li><a href="https://en.wikipedia.org/wiki/Transcode">转码</a>——把解压过后的数据转换为适宜的格式。</li></ol>
+<p>一些工具可以同时完成两项工作，其他的则聚焦于其中一项。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg00ff68993b08_.E6.8E.A7.E5.88.B6.E5.8F.B0_2" id="控制台_2"><span id=".E6.8E.A7.E5.88.B6.E5.8F.B0_2"></span>控制台</h4></div>
+<ul><li><b><a href="#pgf8789106b477">dvdbackup</a></b> — Tool for pure data extraction which does not transcode. It is useful for creating <i>exact</i> copies of encrypted DVDs in conjunction with <b>libdvdcss</b> or for decrypting video for other utilities unable to read encrypted DVDs.</li></ul>
+<dl><dd><a href="http://dvdbackup.sourceforge.net/">http://dvdbackup.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dvdbackup">dvdbackup</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgd5cab245336d">FFmpeg</a></b> — Complete and free Internet live audio and video broadcasting solution for Linux/Unix, capable to do a direct rip in any format (audio/video) from a DVD-Video ISO image, just select the input as the ISO image and proceed with the desired options. It also allows to downmixing, shrinking, spliting, selecting streams among other features.</li></ul>
+<dl><dd><a href="https://ffmpeg.org/">https://ffmpeg.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ffmpeg">ffmpeg</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/HandBrake">HandBrake CLI</a></b> — Simple yet powerful video transcoder ideal for batch mkv/x264 ripping.</li></ul>
+<dl><dd><a href="https://handbrake.fr/">https://handbrake.fr/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=handbrake-cli">handbrake-cli</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgf5e46801cf61">MEncoder</a></b> — Free command line video decoding, encoding and filtering tool. It supports ripping and transcoding DVD-Video.</li></ul>
+<dl><dd><a href="http://www.mplayerhq.hu/">http://www.mplayerhq.hu/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mencoder">mencoder</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>subtitleripper</b> — Convert DVD subtitles into text format.</li></ul>
+<dl><dd><a href="https://subtitleripper.sourceforge.net/">https://subtitleripper.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/subtitleripper/">subtitleripper</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Transcode</b> — Video/DVD ripper and encoder for the terminal/console. It is <a href="https://www.linuxfromscratch.org/blfs/view/8.3/multimedia/transcode.html">outdated/no longer actively maintained</a>.</li></ul>
+<dl><dd>|| <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/transcode/">transcode</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Vobcopy</b> — Copies DVD <i>.vob</i> files to hard disk, decrypting them on the way.</li></ul>
+<dl><dd><a href="https://github.com/barak/vobcopy">https://github.com/barak/vobcopy</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vobcopy/">vobcopy</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg00ff68993b08_.E5.9B.BE.E5.BD.A2.E5.8C.96_2" id="图形化_2"><span id=".E5.9B.BE.E5.BD.A2.E5.8C.96_2"></span>图形化</h4></div>
+<ul><li><b>dvd::rip</b> — Front-end to <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/transcode/">transcode</a></span><sup><small>AUR</small></sup></span>, used to extract DVD's to the hard disk and transcode or extract and transcode on-the-fly.</li></ul>
+<dl><dd><a href="https://www.exit1.org/dvdrip/">https://www.exit1.org/dvdrip/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dvdrip/">dvdrip</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/HandBrake">HandBrake</a></b> — Simple yet powerful video transcoder ideal for batch mkv/x264 ripping. GTK version.</li></ul>
+<dl><dd><a href="https://handbrake.fr/">https://handbrake.fr/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=handbrake">handbrake</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/K3b">K3b</a></b> — Feature-rich and easy to handle CD/DVD burning and ripping application based on KDElibs.</li></ul>
+<dl><dd><a href="https://userbase.kde.org/K3b">https://userbase.kde.org/K3b</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=k3b">k3b</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>OGMRip</b> — An application and a set of libraries for ripping and encoding DVD into AVI, OGM, MP4, or Matroska files using a wide variety of codecs. It relies on mplayer, mencoder, ogmtools, mkvtoolnix, mp4box, oggenc, lame, and faac to perform its tasks.</li></ul>
+<dl><dd><a href="http://ogmrip.sourceforge.net/">http://ogmrip.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ogmrip/">ogmrip</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E9.9F.B3.E9.A2.91_DVD" id="音频_DVD"><span id=".E9.9F.B3.E9.A2.91_DVD"></span>音频 DVD</h3></div>
+<ul><li><b>Python Audio Tools</b> — Includes dvda2track, which is easy to use command line tool to extract DVD-Audio tracks to uncompressed wav files.</li></ul>
+<dl><dd><a href="http://audiotools.sourceforge.net/">http://audiotools.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/audiotools/">audiotools</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E5.A4.9A.E6.A0.BC.E5.BC.8F" id="多格式"><span id=".E5.A4.9A.E6.A0.BC.E5.BC.8F"></span>多格式</h3></div>
+<ul><li><b>Aaru</b> — Software for archival ripping of CDs, DVDs, and harddrives</li></ul>
+<dl><dd><a href="https://aaru.app">https://aaru.app</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/aaru/">aaru</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg00ff68993b08_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_Brasero_.E6.97.A0.E6.B3.95.E4.BD.BF.E9.9F.B3.E9.A2.91_CD_.E5.BD.92.E4.B8.80.E5.8C.96.EF.BC.88normalize.EF.BC.89" id="Brasero_无法使音频_CD_归一化（normalize）"><span id="Brasero_.E6.97.A0.E6.B3.95.E4.BD.BF.E9.9F.B3.E9.A2.91_CD_.E5.BD.92.E4.B8.80.E5.8C.96.EF.BC.88normalize.EF.BC.89"></span>Brasero 无法使音频 CD 归一化（normalize）</h3></div>
+<p>如果你在第一步“归一化”的时候就出错了，一个解决方法是在在<i>编辑 &gt; 插件</i>菜单中关闭归一化插件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_VLC:_Error_.22..._.E6.97.A0.E6.B3.95.E6.89.93.E5.BC.80_.2Fdev.2Fdvd.22" id='VLC:_Error_"..._无法打开_/dev/dvd"'><span id="VLC:_Error_.22..._.E6.97.A0.E6.B3.95.E6.89.93.E5.BC.80_.2Fdev.2Fdvd.22"></span>VLC: Error "... 无法打开 /dev/dvd"</h3></div>
+<p>如 VLC 如下报错
+</p>
+<pre>vlc dvdread could not open the disc "/dev/dvd"
+</pre>
+<p>这可能是因为设备节点 <code>/dev/dvd</code> 不在你的系统中。Udev 不再创建 <code>/dev/dvd</code>，并用 <code>/dev/sr0</code> 替代。你需要通过修改 VLC 配置文件 <code>~/.config/vlc/vlcrc</code> 来修复这个问题：
+</p>
+<pre># DVD device (string)
+dvd=/dev/sr0
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_DVD_.E9.A9.B1.E5.8A.A8.E5.99.A8.E5.BE.88.E5.90.B5" id="DVD_驱动器很吵"><span id="DVD_.E9.A9.B1.E5.8A.A8.E5.99.A8.E5.BE.88.E5.90.B5"></span>DVD 驱动器很吵</h3></div>
+<p>如果系统因为放 DVD 视频变的非常吵，可能是因为碟转的太快了。执行以下指令调节速度：
+</p>
+<pre># eject -x 12 /dev/dvd
+</pre>
+<p>有时要：
+</p>
+<pre># hdparm -E12 /dev/dvd
+</pre>
+<p>任何光驱支持的速度均可使用（0 是最大速度）。<a href="https://michal.kosmulski.org/computing/tips/cd-rom-speed.html">调节 CD-ROM 和 DVD-ROM 光驱速度</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E6.92.AD.E6.94.BE.E5.90.8E.E7.AB.AF.E6.97.A0.E6.B3.95.E5.9C.A8.E6.96.B0.E7.9A.84.E7.94.B5.E8.84.91.EF.BC.88.E6.96.B0_DVD_.E9.A9.B1.E5.8A.A8.E5.99.A8.EF.BC.89.E4.B8.8A.E5.B7.A5.E4.BD.9C" id="播放后端无法在新的电脑（新_DVD_驱动器）上工作"><span id=".E6.92.AD.E6.94.BE.E5.90.8E.E7.AB.AF.E6.97.A0.E6.B3.95.E5.9C.A8.E6.96.B0.E7.9A.84.E7.94.B5.E8.84.91.EF.BC.88.E6.96.B0_DVD_.E9.A9.B1.E5.8A.A8.E5.99.A8.EF.BC.89.E4.B8.8A.E5.B7.A5.E4.BD.9C"></span>播放后端无法在新的电脑（新 DVD 驱动器）上工作</h3></div>
+<p>如果你有一台新的电脑（新的 DVD 光驱），而你的播放后端无法工作，那么原因可能是因为<a href="https://en.wikipedia.org/wiki/DVD_region_code">区域码</a>没有设置。你可以阅读前链所贴出的文章来用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/regionset/">regionset</a></span><sup><small>AUR</small></sup></span> 包设置地区码。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E8.BF.99.E4.BA.9B.E7.A8.8B.E5.BA.8F.E6.97.A0.E6.B3.95.E7.BF.BB.E5.BD.95.E6.88.96.E7.BC.96.E7.A0.81.E4.B8.80.E4.B8.AA_DVD_.E5.88.B0.E6.88.91.E7.9A.84.E7.A1.AC.E7.9B.98.E4.B8.8A" id="这些程序无法翻录或编码一个_DVD_到我的硬盘上"><span id=".E8.BF.99.E4.BA.9B.E7.A8.8B.E5.BA.8F.E6.97.A0.E6.B3.95.E7.BF.BB.E5.BD.95.E6.88.96.E7.BC.96.E7.A0.81.E4.B8.80.E4.B8.AA_DVD_.E5.88.B0.E6.88.91.E7.9A.84.E7.A1.AC.E7.9B.98.E4.B8.8A"></span>这些程序无法翻录或编码一个 DVD 到我的硬盘上</h3></div>
+<p>确保你的 DVD 光驱已经正确配置地区。否则，你会得到大量莫名其妙的 <a href="https://en.wikipedia.org/wiki/Content_Scramble_System">CSS</a> 相关错误。用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/regionset/">regionset</a></span><sup><small>AUR</small></sup></span> 包来配置地区。
+</p><p>如果在地区已经配置好后，翻录仍然不能工作，参考 <a href="https://videolan.videolan.me/libdvdcss/">libdvdcss 开发者文档</a>来启动日志信息，以及设置其他的相关选项。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_GUI_.E7.A8.8B.E5.BA.8F.E5.A3.B0.E7.A7.B0.E5.90.8E.E7.AB.AF.E5.87.BA.E4.BA.86.E9.97.AE.E9.A2.98" id="GUI_程序声称后端出了问题"><span id="GUI_.E7.A8.8B.E5.BA.8F.E5.A3.B0.E7.A7.B0.E5.90.8E.E7.AB.AF.E5.87.BA.E4.BA.86.E9.97.AE.E9.A2.98"></span>GUI 程序声称后端出了问题</h3></div>
+<p>如果你使用一个GUI程序并遇到问题，而该程序的日志将其归咎于一些后台程序，那么请尝试通过记录的后台程序参数来重现该问题。
+无论你是否成功重现，你都可以向#烧录程序后端的问题章节中提到的地方报告记录的步骤和你自己的发现。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg00ff68993b08_.E7.89.B9.E4.BE.8B.EF.BC.9A.E4.BB.8B.E8.B4.A8.E9.94.99.E8.AF.AF.E6.88.96.E5.86.99.E9.94.99.E8.AF.AF" id="特例：介质错误或写错误"><span id=".E7.89.B9.E4.BE.8B.EF.BC.9A.E4.BB.8B.E8.B4.A8.E9.94.99.E8.AF.AF.E6.88.96.E5.86.99.E9.94.99.E8.AF.AF"></span>特例：介质错误或写错误</h4></div>
+<p>这里有一些关于驱动器不适配介质的典型信息。这只能通过使用不同的驱动器或不同的介质来解决。使用不同的程序几乎没有帮助。
+</p><p>使用 growisofs 作为后端的Brasero：
+</p>
+<pre>BraseroGrowisofs stderr: :-[ WRITE@LBA=0h failed with SK=3h/ASC=0Ch/ACQ=00h]: Input/output error
+</pre>
+<p>使用 libburn 作为后端的 Brasero：
+</p>
+<pre>BraseroLibburn Libburn reported an error SCSI error on write(16976,16): [3 0C 00] Write error
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_BD-R_DL_50GB_.E5.9C.A8.E5.B0.9D.E8.AF.95.E5.86.99.E7.AC.AC.E4.BA.8C.E9.9D.A2.E6.97.B6.E5.87.BA.E9.94.99" id="BD-R_DL_50GB_在尝试写第二面时出错"><span id="BD-R_DL_50GB_.E5.9C.A8.E5.B0.9D.E8.AF.95.E5.86.99.E7.AC.AC.E4.BA.8C.E9.9D.A2.E6.97.B6.E5.87.BA.E9.94.99"></span>BD-R DL 50GB 在尝试写第二面时出错</h3></div>
+<p>使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dvd%2Brw-tools">dvd+rw-tools</a></span><sup><small>包</small></sup></span> 包中的 <i>growisofs</i> 烧录 50GB BD-R DL 光碟时可能返回一个致命的错误，并损伤数据，如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ growisofs -Z /dev/sr0 -J -R -V "label" files</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Executing 'mkisofs -J -R -V label files | builtin_dd of=/dev/sr0 obs=32k seek=0'
+I: -input-charset not specified, using utf-8 (detected in locale settings)
+  0.03% done, estimate finish Fri Jan 29 19:50:36 2016
+  0.05% done, estimate finish Fri Jan 29 19:50:36 2016
+  0.08% done, estimate finish Fri Jan 29 19:50:36 2016
+/dev/sr0: pre-formatting blank BD-R for 49.8GB...
+/dev/sr0: "Current Write Speed" is 8.2x4390KBps.
+  0.11% done, estimate finish Sat Jan 30 03:29:13 2016
+  0.13% done, estimate finish Sat Jan 30 02:10:01 2016
+...
+ 63.20% done, estimate finish Fri Jan 29 20:43:45 2016
+:-[ WRITE@LBA=b6d820h failed with SK=3h/WRITE ERROR]: Input/output error
+:-( write failed: Input/output error
+/dev/sr0: flushing cache
+/dev/sr0: closing track
+/dev/sr0: closing session
+:-[ CLOSE SESSION failed with SK=5h/INVALID FIELD IN CDB]: Input/output error
+/dev/sr0: reloading tray
+</pre>
+<p>这在开始写第二面时发生（即 25GB 左右）。使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cdrtools">cdrtools</a></span><sup><small>包</small></sup></span> 中的 <i>cdrecord</i> 写入没有问题。测试光驱：'HL-DT-ST BD-RE  WH16NS40' LG。测试光盘： Verbatim BD-R DL 6x discs (#96911)。<a href="https://bugs.archlinux.org/task/47797">FS#47797</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg00ff68993b08_.E5.85.89.E7.9B.98.E6.89.98.E7.9B.98.E8.87.AA.E5.8A.A8.E5.90.88.E4.B8.8A" id="光盘托盘自动合上"><span id=".E5.85.89.E7.9B.98.E6.89.98.E7.9B.98.E8.87.AA.E5.8A.A8.E5.90.88.E4.B8.8A"></span>光盘托盘自动合上</h3></div>
+<p>如果用 <code>eject</code> 指令，或是按下光驱的按钮来弹出光盘后，托盘又自动合上导致无法取出光盘，可以尝试这个指令：
+</p>
+<pre># sysctl -w dev.cdrom.autoclose=0
+</pre>
+<p>如果问题解决了，可以按照如下方式将此设置持久化：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/60-cdrom-autoclose.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">dev.cdrom.autoclose = 0</pre>
+<p>如果以上方法没有生效的话，还有个办法是：用以下的指令，从内核中卸载光盘模块：
+</p>
+<pre># rmmod sr_mod
+</pre>
+<p>这个驱动器现在应该正常了，但系统也不会再装载任何光盘。在把光盘放到光驱后，通过以下指令来重新激活该模块：
+</p>
+<pre># modprobe sr_mod
+</pre>
+<p>光盘就应该装载了。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg00ff68993b08_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li>在美国，对物理存在的介质备份在这些情况下允许：<a href="https://web.archive.org/web/20230401223641/https://www.riaa.com/resources-learning/about-piracy/">关于非法复制 - RIAA</a>。</li>
+<li><a href="https://dev.lovelyhq.com/libburnia/web/wiki">Libburnia 项目的主页</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807025708
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.388 seconds
+Real time usage: 0.400 seconds
+Preprocessor visited node count: 2157/1000000
+Revision size: 34530/2097152 bytes
+Post‐expand include size: 36594/2097152 bytes
+Template argument size: 18504/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 880/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  119.473      1 -total
+ 26.38%   31.517     43 Template:App
+  8.27%    9.881     43 Template:Pkg
+  7.54%    9.012     14 Template:Man
+  6.52%    7.795     59 Template:Ic
+  3.97%    4.744     24 Template:AUR
+  3.43%    4.096      1 Template:Expansion
+  3.25%    3.883      3 Template:注意
+  2.75%    3.281      1 Template:Warning
+  2.16%    2.575      6 Template:Related
+-->
+<!-- Render ID ad99660f-920b-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3625:|#|:idhash:canonical!zh-cn and timestamp 20260807025708 and revision id 33708. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

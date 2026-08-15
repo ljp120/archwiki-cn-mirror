@@ -1,0 +1,1748 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pga36e924883ca">CUPS/打印机特定问题</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg9c40a97c403d">CUPS</a></li>
+<li><a href="#pg4ab933f4c6c6">CUPS/问题解决</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/CUPS/Printer-specific_problems">CUPS/Printer-specific problems</a>，最近一次同步于 2024-8-25，若英文版本有所<a href="https://wiki.archlinux.org/title/CUPS/Printer-specific_problems?diff=0&amp;oldid=815287">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/CUPS_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Printer-specific_problems_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<p>本文包含特定于打印机或制造商的<a href="#pg9c40a97c403d">CUPS</a>说明。
+如果此处尚未列出您的打印机，或者列出的驱动程序都不能正常工作，请参阅 <a href="https://www.openprinting.org/printers">OpenPrinting</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果您在此列表中添加了打印机，请考虑将您的条目贡献到 <a href="https://wiki.linuxfoundation.org/openprinting/database/databaseintro">OpenPrinting</a> - 这样其他发行版的用户也会从中受益！</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga36e924883ca_Brother" id="Brother">Brother</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>有些打印机型号可以在多个条目中找到，因为它们有多个软件包或驱动程序。</div>
+<p>适用于多种型号的驱动程序：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>Printers
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr>
+<tr>
+<td>DCP-1510 series (DCP-1510, DCP-1510r, DCP-1511, DCP-1512, DCP-1512r, DCP-1518)</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcp1510/">brother-dcp1510</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-7010, DCP-7020, DCP-7025, DCP-8060, DCP-8065DN, FAX-2820, FAX-2920, HL-2030, HL-2040, HL-2070N, HL-5240, HL-5250DN, HL-5270DN, HL-5280DW, MFC-7220, MFC-7225N, MFC-7420, MFC-7820N, MFC-8460N, MFC-8660DN, MFC-8860DN, MFC-8870DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-cups-wrapper-laser/">brother-cups-wrapper-laser</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>HL-4040CN, HL-4040CDN, HL-4050CDN, HL-4070CDW, MFC-9440CN, MFC-9450CDN, MFC-9840CDW, DCP-9040CN, DCP-9042CDN, DCP-9045CDN</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-cups-wrapper-ac/">brother-cups-wrapper-ac</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-1510 series, DCP-1600 series, DCP-7030, DCP-7040, DCP-7055, DCP-7055W, DCP-7060D, DCP-7065DN, DCP-7080, DCP-L2500D series, DCP-L2520D series, DCP-L2540DW series, HL-1110 series, HL-1200 series, HL-2030 series, HL-2140 series, HL-2220 series, HL-2270DW series, HL-5030 series, HL-L2300D series, HL-L2320D series, HL-L2340D series, HL-L2360D series, MFC-1910W, MFC-1919NW, MFC-7240, MFC-7360N, MFC-7365DN, MFC-7840W, Lenovo M7605D</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brlaser/">brlaser</a></span><sup><small>AUR</small></sup></span><br/><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brlaser-git/">brlaser-git</a></span><sup><small>AUR</small></sup></span></td>
+<td>Unofficial driver, may be compatible with more models
+</td></tr></tbody></table>
+<p>适用于一种型号的驱动程序：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr>
+<tr>
+<td>DCP-135C</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcp135c/">brother-dcp135c</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-150C</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcp150c/">brother-dcp150c</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-150C</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcp150c/">brother-dcp150c</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-2550DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcp-l2550dw/">brother-dcp-l2550dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-B7500D</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcpb7500d/">brother-dcpb7500d</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-L3550CDW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcpl3550cdw/">brother-dcpl3550cdw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Use IPP driver as described <a href="https://aur.archlinux.org/packages/brother-dcpl3550cdw/#comment-728480">here</a> and <a href="https://www.printerforums.net/threads/brother-dcp-l3550cdw.68978/">here</a>.
+</td></tr>
+<tr>
+<td>DCP-7020</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>Or Brother's driver.
+</td></tr>
+<tr>
+<td>DCP-7030</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcp7030/">brother-dcp7030</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-7065DN</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcp7065dn/">brother-dcp7065dn</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-7090DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcp7090dw/">brother-dcp7090dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-9020CDW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcp-9020cdw/">brother-dcp-9020cdw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-9022CDW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcp-9022cdw/">brother-dcp-9022cdw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-J515W</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcp-j515w/">brother-dcp-j515w</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-J4110DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcpj4110dw/">brother-dcpj4110dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DCP-J1200W</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcpj1200w/">brother-dcpj1200w</a></span><sup><small>AUR</small></sup></span></td>
+<td>"DCPJ1200W" is added automatically to cups when installing this aur package. multilib not required. SANE drivers for this model: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brscan5/">brscan5</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>DCP-T735DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-dcpt735dw/">brother-dcpt735dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>FAX-2820</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-cups-wrapper-laser/">brother-cups-wrapper-laser</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>FAX-2840</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-fax2840/">brother-fax2840</a></span><sup><small>AUR</small></sup></span></td>
+<td>Or <a href="#pg68274fc5facc">foomatic</a> - works mostly with <code>hpijs-pcl5e.ppd</code>. Same as the HL-2170W.
+</td></tr>
+<tr>
+<td>FAX-2940</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-fax2940/">brother-fax2940</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>HL-1110</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brlaser-git/">brlaser-git</a></span><sup><small>AUR</small></sup></span></td>
+<td>Tested and it works
+</td></tr>
+<tr>
+<td>HL-2030</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>Or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hl2030/">brother-hl2030</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>HL-2035</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>Should be compatible with any drivers for the HL-2030.
+</td></tr>
+<tr>
+<td>HL-2040</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>Or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hl2040/">brother-hl2040</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>HL-2130</td>
+<td><a href="#pg68274fc5facc">foomatic</a> (using the HL-2140 driver)</td>
+<td>Or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>HL-2135W</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-brgenml1/">brother-brgenml1</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>HL-2140</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>Or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hl2140/">brother-hl2140</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>HL-2170W</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>Or Brother's driver.
+</td></tr>
+<tr>
+<td>HL-2230</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>Same as HL-2170W. Select HL-2170W as the driver in CUPS admin when adding a printer.
+</td></tr>
+<tr>
+<td>HL-2250DN</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-brgenml1/">brother-brgenml1</a></span><sup><small>AUR</small></sup></span></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hl2250dn/">brother-hl2250dn</a></span><sup><small>AUR</small></sup></span> is broken?
+</td></tr>
+<tr>
+<td>HL-2270DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hl2270dw/">brother-hl2270dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>HL-2280DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hl2280dw/">brother-hl2280dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>HL-3045CN</td>
+<td>Install Brother's driver or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hl3040cn/">brother-hl3040cn</a></span><sup><small>AUR</small></sup></span>.</td>
+<td>
+</td></tr>
+<tr>
+<td>HL-3140CW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hl3140cw/">brother-hl3140cw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Use IPP and Brother's driver to avoid page-shrinking and endless blank printouts
+</td></tr>
+<tr>
+<td>HL-3150CDW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hl3150cdw/">brother-hl3150cdw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>HL-3170CDW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hl3170cdw/">brother-hl3170cdw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>HL-4150CDN</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hl4150cdn/">brother-hl4150cdn</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>HL-5140</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>Or Brother's driver.
+</td></tr>
+<tr>
+<td>HL-5340</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>Using the <i>Generic PCL 6/PCL XL Printer - CUPS+Gutenprint</i> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gutenprint">gutenprint</a></span><sup><small>包</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=foomatic-db-gutenprint-ppds">foomatic-db-gutenprint-ppds</a></span><sup><small>包</small></sup></span>). Or Brother's driver, which may result in failed prints with postscript errors.
+</td></tr>
+<tr>
+<td>HL-L2300D</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hll2300d/">brother-hll2300d</a></span><sup><small>AUR</small></sup></span></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brlaser-git/">brlaser-git</a></span><sup><small>AUR</small></sup></span> works better. Using the brother driver, only defaults are honored and print-specific settings are ignored.
+</td></tr>
+<tr>
+<td>HL-L2340DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hll2340dw/">brother-hll2340dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>HL-L2350DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hll2350dw/">brother-hll2350dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>HL-L2360DN</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hll2360d/">brother-hll2360d</a></span><sup><small>AUR</small></sup></span></td>
+<td>Or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brlaser-git/">brlaser-git</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>HL-L2360DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hll2360d/">brother-hll2360d</a></span><sup><small>AUR</small></sup></span></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brlaser-git/">brlaser-git</a></span><sup><small>AUR</small></sup></span> should works.
+</td></tr>
+<tr>
+<td>HL-L2365DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hll2360d/">brother-hll2360d</a></span><sup><small>AUR</small></sup></span></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brlaser-git/">brlaser-git</a></span><sup><small>AUR</small></sup></span> should works.
+</td></tr>
+<tr>
+<td>HL-L2380DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hll2380dw/">brother-hll2380dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>HL-L2390DW</td>
+<td>Arch-provided Brother Driver</td>
+<td>Choose the <code>ipp</code> Driverless Brother Printer that appears on the list of #Network printers.
+</td></tr>
+<tr>
+<td>HL-L2395DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hll2395dw/">brother-hll2395dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Use the <code>socket</code> protocol as described in #Network printers
+</td></tr>
+<tr>
+<td>HL-L3230CDW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hll3230cdw/">brother-hll3230cdw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Or <a href="https://github.com/splitbrain/archlinux-brother-hll3230cdw">https://github.com/splitbrain/archlinux-brother-hll3230cdw</a>
+</td></tr>
+<tr>
+<td>HL-L3270CDW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hll3270cdw/">brother-hll3270cdw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Use the <code>lpd</code> protocol as described in #Network printers.
+</td></tr>
+<tr>
+<td>HL-L5100DN</td>
+<td>HP LaserJet Foomatic driver</td>
+<td>This model will emulate a HP LaserJet. Use the <code>lpd</code> protocol as described in #Network printers.
+</td></tr>
+<tr>
+<td>HL-L8360CDW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-hll8360cdw-cups-bin/">brother-hll8360cdw-cups-bin</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>MFC-420CN</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-420cn/">brother-mfc-420cn</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>MFC-440CN</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-440cn/">brother-mfc-440cn</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>MFC-7360N</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc7360n/">brother-mfc7360n</a></span><sup><small>AUR</small></sup></span></td>
+<td>Or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brlaser-git/">brlaser-git</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>MFC-7460DN</td>
+<td><a href="#pg6718fd5f9407">Gutenprint</a></td>
+<td>Use the <i>Generic PCL 6 Printer wide margin - CUPS+Gutenprint</i> driver, with address <code>ipp://hostname-or-ip/pcl_p1</code>.
+</td></tr>
+<tr>
+<td>MFC-7840W</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-7840w/">brother-mfc-7840w</a></span><sup><small>AUR</small></sup></span></td>
+<td>Or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brlaser-git/">brlaser-git</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td>MFC-9320CW</td>
+<td>Install Brother's driver.</td>
+<td>
+</td></tr>
+<tr>
+<td>MFC-9332CDW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-9332cdw/">brother-mfc-9332cdw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>MFC-9840CDW</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>Or Brother's driver. This printer also works with the generic PCL-6 driver from the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gutenprint">gutenprint</a></span><sup><small>包</small></sup></span> package. Use <b>pcl_p1</b> for the printer's address when using the PCL-6 driver.
+</td></tr>
+<tr>
+<td>MFC-J1300DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-j1300dw/">brother-mfc-j1300dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Use the <code>ipp</code> protocol as described in #Network printers.
+</td></tr>
+<tr>
+<td>MFC-J435W</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-j435w/">brother-mfc-j435w</a></span><sup><small>AUR</small></sup></span></td>
+<td>Use <code>lpd://[printer_addr]/BINARY_P1</code> or <code>http://[printer_addr]/POSTSCRIPT_P1</code> as described in the comments section of the AUR package page.
+</td></tr>
+<tr>
+<td>MFC-J470DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-j470dw/">brother-mfc-j470dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Use the <code>ipp</code> protocol as described in #Network printers.
+</td></tr>
+<tr>
+<td>MFC-J4710DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-j4710dw/">brother-mfc-j4710dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>MFC-J480DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-j480dw/">brother-mfc-j480dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Use the <code>ipp</code> protocol as described in #Network printers.
+</td></tr>
+<tr>
+<td>MFC-J5520DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-j5520dw/">brother-mfc-j5520dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>MFC-J5845DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-j5845dw/">brother-mfc-j5845dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Use the <code>ipp</code> protocol as described in #Network printers.
+</td></tr>
+<tr>
+<td>MFC-J5910DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-j5910dw/">brother-mfc-j5910dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>MFC-J650DW</td>
+<td>Install Brother's driver.</td>
+<td>
+</td></tr>
+<tr>
+<td>MFC-J885DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-j885dw/">brother-mfc-j885dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>MFC-J985DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-j985dw/">brother-mfc-j985dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>MFC-L2700DN</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-l2700dn/">brother-mfc-l2700dn</a></span><sup><small>AUR</small></sup></span></td>
+<td>Please look also at the comments section of the AUR package page.
+</td></tr>
+<tr>
+<td>MFC-L2700DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-l2700dw/">brother-mfc-l2700dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Please look also at the comments section of the AUR package page.
+</td></tr>
+<tr>
+<td>MFC-L2710DN</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-l2700dn/">brother-mfc-l2700dn</a></span><sup><small>AUR</small></sup></span></td>
+<td>Use the <code>ipp</code> protocol as described in #Network printers.
+</td></tr>
+<tr>
+<td>MFC-L2710DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-l2710dw/">brother-mfc-l2710dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Use the <code>lpd</code> protocol as described in #Network printers.
+</td></tr>
+<tr>
+<td>MFC-L2720DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-l2720dw/">brother-mfc-l2720dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Please look also at the comments section of the AUR package page.
+</td></tr>
+<tr>
+<td>MFC-L2730DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-l2730dw/">brother-mfc-l2730dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Please look also at the comments section of the AUR package page.
+</td></tr>
+<tr>
+<td>MFC-L2740DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-l2740dw/">brother-mfc-l2740dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Please look also at the comments section of the AUR package page.
+</td></tr>
+<tr>
+<td>MFC-L3770CDW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-l3770cdw/">brother-mfc-l3770cdw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Please look also at the comments section of the AUR package page.
+</td></tr>
+<tr>
+<td>MFC-L5800DW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-l5750dw/">brother-mfc-l5750dw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>MFC-L8600CDW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-mfc-l8600cdw/">brother-mfc-l8600cdw</a></span><sup><small>AUR</small></sup></span></td>
+<td>Please follow the instructions on the AUR page.
+</td></tr>
+<tr>
+<td>QL-500</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-ql500/">brother-ql500</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>QL-570</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-ql570/">brother-ql570</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>QL-580N</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-ql580n/">brother-ql580n</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>QL-650TD</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-ql650td/">brother-ql650td</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>QL-700</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-ql700/">brother-ql700</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>QL-710W</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-ql710w/">brother-ql710w</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>QL-720NW</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-ql720nw/">brother-ql720nw</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>QL-1050</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-ql1050/">brother-ql1050</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>QL-1050N</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-ql1050n/">brother-ql1050n</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>QL-1060</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-ql1060n/">brother-ql1060n</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>QL-1110NWB</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-ql1110nwb/">brother-ql1110nwb</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>TD-2020</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-td2020/">brother-td2020</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>TD-2120N</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-td2120n/">brother-td2120n</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>TD-2130N</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-td2130n/">brother-td2130n</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>TD-4000</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-td4000/">brother-td4000</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>TD-4100N</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brother-td4100n/">brother-td4100n</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_.E7.BD.91.E7.BB.9C.E6.89.93.E5.8D.B0.E6.9C.BA" id="网络打印机"><span id=".E7.BD.91.E7.BB.9C.E6.89.93.E5.8D.B0.E6.9C.BA"></span>网络打印机</h3></div>
+<p>对于网络打印机，请使用 <code>ipp://<b>打印机_ip</b>/ipp/port1</code> 作为打印机地址。
+对于某些较老的打印机，这可能不起作用。如果不行，请尝试使用 <code>lpd://<b>打印机_ip</b>/BINARY_P1</code> 代替。
+</p><p>某些打印机使用套接字协议。对于这些打印机，请使用 <code>socket://<b>打印机_IP</b>:9100</code>。
+对于 http，使用 <code>http://<b>打印机_ip</b>/POSTSCRIPT_P1</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_.E5.AE.9A.E5.88.B6.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F" id="定制驱动程序"><span id=".E5.AE.9A.E5.88.B6.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F"></span>定制驱动程序</h3></div>
+<p>Brother 公司在其网站上提供源代码压缩包、rpm 或 deb 格式的定制驱动程序。<a href="#pgf240c37e456e">打包 Brother 打印机驱动程序</a>包括创建 <a href="#pgf9d748a7b27b">PKGBUILD</a> 使用现有 RPM 包。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>源码包可能是 rpm 包的更好替代品，前提是它们包含所有需要的文件。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga36e924883ca_.E6.89.8B.E5.8A.A8.E5.AE.89.E8.A3.85_RPM_.E8.BD.AF.E4.BB.B6.E5.8C.85" id="手动安装_RPM_软件包"><span id=".E6.89.8B.E5.8A.A8.E5.AE.89.E8.A3.85_RPM_.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>手动安装 RPM 软件包</h4></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>这最好在 <a href="#pgf9d748a7b27b">PKGBUILD</a> 中自动完成。</div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rpmextract">rpmextract</a></span><sup><small>包</small></sup></span> 软件包, 并使用 <code>rpmextract.sh</code> 解压缩所有 rpm 包。解压缩两个文件后将创建一个 var 和一个 usr 目录，将这两个目录中的内容移至相应的根目录。
+</p><p>运行 <code>/usr/local/Brother/cupswrapper</code> 中的 cups wrapper 文件。这会自动安装和配置 brother 打印机。
+</p><p>对于某些驱动程序，可能需要从，<a href="#pg9d2c9cc56d04">multilib</a> 安装 32 位库。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_.E5.8D.87.E7.BA.A7.E5.9B.BA.E4.BB.B6" id="升级固件"><span id=".E5.8D.87.E7.BA.A7.E5.9B.BA.E4.BB.B6"></span>升级固件</h3></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=net-snmp">net-snmp</a></span><sup><small>包</small></sup></span> 并运行:
+</p>
+<pre>$ snmpwalk -c public $PRINTER_IP | grep -A 1 3.6.1.4.1.2435.2.4.3.99.3.1.6.1.2
+</pre>
+<p>或者：
+</p>
+<pre>$ snmpwalk -v 2c -c public 192.168.23.11 iso.3.6.1.4.1.2435.2.4.3.99.3.1.6.1.2
+</pre>
+<p>此时，您将获得相关数据，从而从 Brother 获得有效的固件下载链接。该文件应与下面的文件相似：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">request.xml</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"> &lt;REQUESTINFO&gt;
+    &lt;FIRMUPDATETOOLINFO&gt;
+        &lt;FIRMCATEGORY&gt;MAIN&lt;/FIRMCATEGORY&gt;
+        &lt;OS&gt;LINUX&lt;/OS&gt;
+        &lt;INSPECTMODE&gt;1&lt;/INSPECTMODE&gt;
+    &lt;/FIRMUPDATETOOLINFO&gt;
+ 
+    &lt;FIRMUPDATEINFO&gt;
+        &lt;MODELINFO&gt;
+            &lt;SELIALNO&gt;&lt;/SELIALNO&gt;
+            &lt;NAME&gt;MFC-9330CDW&lt;/NAME&gt;
+            &lt;SPEC&gt;0401&lt;/SPEC&gt;
+            &lt;DRIVER&gt;&lt;/DRIVER&gt;
+            &lt;FIRMINFO&gt;
+                &lt;FIRM&gt;
+                    &lt;ID&gt;MAIN&lt;/ID&gt;
+                    &lt;VERSION&gt;R1506121801:4504&lt;/VERSION&gt;
+                &lt;/FIRM&gt;
+                &lt;FIRM&gt;
+                    &lt;ID&gt;SUB1&lt;/ID&gt;
+                    &lt;VERSION&gt;1.07&lt;/VERSION&gt;
+                &lt;/FIRM&gt;
+                &lt;FIRM&gt;
+                    &lt;ID&gt;SUB2&lt;/ID&gt;
+                    &lt;VERSION&gt;L1505291600&lt;/VERSION&gt;
+                &lt;/FIRM&gt;
+            &lt;/FIRMINFO&gt;
+        &lt;/MODELINFO&gt;
+        &lt;DRIVERCNT&gt;1&lt;/DRIVERCNT&gt;
+        &lt;LOGNO&gt;2&lt;/LOGNO&gt;
+        &lt;ERRBIT&gt;&lt;/ERRBIT&gt;
+        &lt;NEEDRESPONSE&gt;1&lt;/NEEDRESPONSE&gt;
+    &lt;/FIRMUPDATEINFO&gt;
+ &lt;/REQUESTINFO&gt;
+</pre>
+<p>将此文件发送给 Brother：
+</p>
+<pre>$ curl -X POST -d @request.xml <a href="https://firmverup.brother.co.jp/kne_bh7_update_nt_ssl/ifax2.asmx/fileUpdate">https://firmverup.brother.co.jp/kne_bh7_update_nt_ssl/ifax2.asmx/fileUpdate</a> -H "Content-Type:text/xml" &gt; response.xml
+</pre>
+<p>在 <code>response.xml</code> 中，您可以找到包含固件下载 URL 的 <code>&lt;PATH&gt;</code> 标记。接下来，下载固件并将其推送到打印机，然后让打印机进行处理。在此之前，请将管理员密码更改为已知密码，因为该密码将被用作登录 FTP 站点的用户名（非常糟糕的做法，请勿这样做）。 
+</p>
+<pre>$ wget <a href="http://update-akamai.brother.co.jp/CS/LZ4266_W.djf">http://update-akamai.brother.co.jp/CS/LZ4266_W.djf</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2023-07-30 ⓘ]</sup>
+$ ftp $PRINTER_IP|
+ftp&gt; bin
+ftp&gt; hash
+ftp&gt; send LZ4266_W.djf
+ftp&gt; bye
+</pre>
+<p>这样，打印机就会重新启动，并安装最新的固件，（希望）你的打印问题也就迎刃而解了。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_IPP_over_USB" id="IPP-over-USB">IPP-over-USB</h3></div>
+<p>在使用某些型号的 USB 端口时，您可能会遇到一些问题。
+</p><p>Brother 提供了一个 shell 脚本来创建 udev 规则，以防止使用 IPP-over-USB。这可能会解决 USB 打印问题，但意味着你需要使用传统的 LPR 驱动程序。请参阅 <a href="https://support.brother.com/g/b/faqend.aspx?c=us_ot&amp;lang=en&amp;prod=mfcl9570cdw_us_eu_as&amp;faqid=faq00100729_000">FAQ 文章</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga36e924883ca_Canon" id="Canon">Canon</h2></div>
+<p>There are many possible drivers for Canon printers. <a href="https://gimp-print.sourceforge.net/p_Supported_Printers.php">Many Canon printers</a> are supported by <a href="#pg6718fd5f9407">Gutenprint</a> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=foomatic-db-ppds">foomatic-db-ppds</a></span><sup><small>包</small></sup></span>. Some of Canon's LBP, iR, and MF printers use a driver supporting the UFR II/UFR II LT/LIPSLX protocols,  <a href="#pga36e924883ca_UFRII">#UFRII</a> . Others use the <a href="#pga36e924883ca_CARPS">#CARPS</a>, or <a href="#pga36e924883ca_cnijfilter">#cnijfilter</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cnijfilter2/">cnijfilter2</a></span><sup><small>AUR</small></sup></span> / <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cnijfilter2-bin/">cnijfilter2-bin</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>), or <a href="#pg5c07558564ab">Canon CAPT</a> drivers.
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr>
+<tr>
+<td>iP4300</td>
+<td rowspan="2"><a href="#pg6718fd5f9407">Gutenprint</a></td>
+<td>Or use the <a href="https://www.turboprint.info/">TurboPrint</a> driver.
+</td></tr>
+<tr>
+<td>PIXMA G4000 series</td>
+<td>Misidentifies itself as Canon G3010 Series. Use Canon PIXMA G4000 - CUPS+Gutenprint driver instead.
+</td></tr>
+<tr>
+<td>LBP810</td>
+<td rowspan="34"><a href="#pg5c07558564ab">Canon CAPT</a></td>
+<td>
+</td></tr>
+<tr>
+<td>LBP1120</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP1210</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP2900</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3000</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3010</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3018</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3050</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3100</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3108</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3150</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3200</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3210</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3250</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3300</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3310</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP3500</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP5000</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP5050 series</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP5100</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP5300</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP6000</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP6018</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP6020</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP6200</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP6300</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP6300n</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP6310dn</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP7010C</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP7018C</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP7200Cdn (network mode)</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP7200C series</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP7210Cdn</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP9100C</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP7110cw (network mode)</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cnrdrvcups-lb/">cnrdrvcups-lb</a></span><sup><small>AUR</small></sup></span> v 5.00
+</td></tr>
+<tr>
+<td>LBP112</td>
+<td rowspan="11"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cndrvcups-lt/">cndrvcups-lt</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>LBP113w</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP151dw</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP6018nl</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP6030</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP6040</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP6230</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP6240</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP7100c</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP7110c</td>
+<td>
+</td></tr>
+<tr>
+<td>LBP8100</td>
+<td>
+</td></tr>
+<tr>
+<td>MF216n (network over ldp)</td>
+<td rowspan="5"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cndrvcups-lb-bin/">cndrvcups-lb-bin</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>MF635Cx</td>
+<td>
+</td></tr>
+<tr>
+<td>MF4720w</td>
+<td>
+</td></tr>
+<tr>
+<td>MF4770n</td>
+<td>
+</td></tr>
+<tr>
+<td>MF8080Cw</td>
+<td>See <a href="#pg9c40a97c403d">CUPS#Network</a> for discovery.
+</td></tr>
+<tr>
+<td>FAX-L400</td>
+<td rowspan="21"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/carps-cups-git/">carps-cups-git</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>FP-L170</td>
+<td>Should work, unverified
+</td></tr>
+<tr>
+<td>ICD300</td>
+<td>
+</td></tr>
+<tr>
+<td>imageCLASS D300</td>
+<td>
+</td></tr>
+<tr>
+<td>L380</td>
+<td>Should work, unverified
+</td></tr>
+<tr>
+<td>L389</td>
+<td>Should work, unverified
+</td></tr>
+<tr>
+<td>L390</td>
+<td>
+</td></tr>
+<tr>
+<td>L408S</td>
+<td>
+</td></tr>
+<tr>
+<td>LASERCLASS 500</td>
+<td>Should work, unverified
+</td></tr>
+<tr>
+<td>LC180</td>
+<td>
+</td></tr>
+<tr>
+<td>LC310</td>
+<td>
+</td></tr>
+<tr>
+<td>LC380S</td>
+<td>
+</td></tr>
+<tr>
+<td>LC398S</td>
+<td>
+</td></tr>
+<tr>
+<td>MF350</td>
+<td>Should work, unverified
+</td></tr>
+<tr>
+<td>MF3110</td>
+<td>
+</td></tr>
+<tr>
+<td>MF5630</td>
+<td>
+</td></tr>
+<tr>
+<td>MF5650</td>
+<td>Should work, unverified
+</td></tr>
+<tr>
+<td>MF5730</td>
+<td>
+</td></tr>
+<tr>
+<td>MF5750</td>
+<td>
+</td></tr>
+<tr>
+<td>MF5770</td>
+<td>
+</td></tr>
+<tr>
+<td>PC-D300</td>
+<td>
+</td></tr>
+<tr>
+<td>MG4200 series</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cnijfilter-mg4200/">cnijfilter-mg4200</a></span><sup><small>AUR</small></sup></span></td>
+<td>Avoid the <a href="#pg9c40a97c403d">web interface</a> when adding the printer as it will not find the PPD file.
+</td></tr>
+<tr>
+<td>MB2350</td>
+<td rowspan="9"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cnijfilter2/">cnijfilter2</a></span><sup><small>AUR</small></sup></span><br/><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cnijfilter2-bin/">cnijfilter2-bin</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup></td>
+<td>
+</td></tr>
+<tr>
+<td>MB5450</td>
+<td>
+</td></tr>
+<tr>
+<td>MX490</td>
+<td>
+</td></tr>
+<tr>
+<td>MX492</td>
+<td>
+</td></tr>
+<tr>
+<td>TR150</td>
+<td>
+</td></tr>
+<tr>
+<td>TR8500 series</td>
+<td>
+</td></tr>
+<tr>
+<td>TS202</td>
+<td>
+</td></tr>
+<tr>
+<td>TS3100 series</td>
+<td>
+</td></tr>
+<tr>
+<td>TS8050</td>
+<td>Without <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cnijfilter2/">cnijfilter2</a></span><sup><small>AUR</small></sup></span> printing will fail with a filter error or you might get "Rendering Completed" and nothing will print
+</td></tr>
+<tr>
+<td>TS9020</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/canon-ts9020/">canon-ts9020</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>TR8600 series</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/canon-tr8600-series/">canon-tr8600-series</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr></tbody></table>
+<p>Some Canon printers will use a similar setup to the iP4500, so consider modifying the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cnijfilter-ip4500/">cnijfilter-ip4500</a></span><sup><small>AUR</small></sup></span> package for other, similar printers.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_UFRII" id="UFRII">UFRII</h3></div>
+<p>Many LBP, iR, and MF printers use a protocol that has had several names over the years: UFR II, UFR II LT, LIPSLX. There are multiple packages for these printers in AUR, and at least the imageCLASS MF4570dn and i-SENSYS MF633C are reported to only work with the older v3.70 version.
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cnrdrvcups-lb/">cnrdrvcups-lb</a></span><sup><small>AUR</small></sup></span> v 5.00: latest version built from source
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cndrvcups-lb/">cndrvcups-lb</a></span><sup><small>AUR</small></sup></span> 3.70 and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cndrvcups-common-lb/">cndrvcups-common-lb</a></span><sup><small>AUR</small></sup></span> 4.10: older version built from source
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cndrvcups-lb-bin/">cndrvcups-lb-bin</a></span><sup><small>AUR</small></sup></span> v3.70: uses Canon provided binaries with location/config adjustments to make them work on Arch Linux
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cndrvcups-lt/">cndrvcups-lt</a></span><sup><small>AUR</small></sup></span> v5.00: uses Canon provided binaries for other printers (e.g. LBP6030).
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_CARPS" id="CARPS">CARPS</h3></div>
+<p>Some of Canon's printers use Canon's proprietary CARPS (<i>Canon Advanced Raster Printing System</i>) driver.
+<a href="https://www.rainbow-software.org/2014/01/23/cups-driver-for-canon-carps-printers/">Rainbow Software</a> have managed to reverse engineer the CARPS data format and have successfully created a CARPS CUPS driver, which is available as <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/carps-cups-git/">carps-cups-git</a></span><sup><small>AUR</small></sup></span>.
+The project's <a href="https://github.com/ondrej-zary/carps-cups">GitHub</a> page includes a list of working printers.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_USB_over_IP_.28BJNP.29" id="USB_over_IP_(BJNP)"><span id="USB_over_IP_.28BJNP.29"></span>USB over IP (BJNP)</h3></div>
+<p>Some Canon printers use Canon's proprietary USB over IP BJNP protocol to communicate over the network. There is a CUPS backend for this, which is available as <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cups-bjnp/">cups-bjnp</a></span><sup><small>AUR</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_cnijfilter" id="cnijfilter">cnijfilter</h3></div>
+<p>Some printers using the cnijfilter drivers support the <code>cnijnet</code> protocol. To find the <a href="#pg9c40a97c403d">printer URI</a> run
+</p>
+<pre>$ cnijnetprn --search auto
+</pre>
+<p>and use the <code>cnijnet:/</code> URI in the output.
+</p><p>Other driver versions, as is the case for the current version of <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cnijfilter2/">cnijfilter2</a></span><sup><small>AUR</small></sup></span>, provide the <code>cnijlgmon3</code> binary to search for available printers.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cnijlgmon3</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">network cnijbe2://Canon/?port=net&amp;serial=60-12-81-A7-7D-34 "Canon MB2300 series" "Canon-MB2300-series_60-12-81-A7-7D-34"</pre>
+<p>The printer can be added to cups using the <code>cnijbe2</code> url and an appropriate <code>.ppd</code> file, which should be shipped with your driver. 
+</p>
+<pre>$ lpadmin -p CustomPrinterNameMB2300 -P /usr/share/cups/model/canonmb2300.ppd -v "cnijbe2://Canon/?port=net&amp;serial=60-12-81-A7-7D-34" -E
+</pre>
+<p>The argument <code>serial</code> in the cnijbe2 url corresponds to the MAC address of the printer.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_IPP_Everywhere" id="IPP_Everywhere">IPP Everywhere</h3></div>
+<p>For recent Canon printers, like the G7000 series, it can be hard to find a valid driver. However, it is possible to use a driverless installation using IPP Everywhere.
+</p><p>If you have installed avahi, CUPS should be able to detect your printer automatically.
+</p><p>However, if it fails, you can always enter your printer settings manually. In CUPS web interface select <code>Internet Printing Protocol (ipp)</code> and enter the IPP URL of the printer. Then at the driver selection screen select<code>Generic &gt; {current_make_and_model} - IPP Everywhere ™</code>.
+</p><p>For the G7000 series the IPP URL is <code>ipp://&lt;printer_ip&gt;</code> or <code>ipps://&lt;printer_ip&gt;</code>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga36e924883ca_Dell" id="Dell">Dell</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr>
+<tr>
+<td>1250C
+</td>
+<td rowspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/foo2zjs-nightly/">foo2zjs-nightly</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td rowspan="2">The printer may also work with the <a href="#pga36e924883ca_Phaser_6000B">Xerox Phaser 6000B driver</a>.
+</td></tr>
+<tr>
+<td>C1660NW
+</td></tr>
+<tr>
+<td>E515
+</td>
+<td rowspan="2">Install <a href="https://downloads.dell.com/FOLDER03040853M/1/Printer_E515dw_Driver_Dell_A00_LINUX.zip">Dell's driver</a>.
+</td>
+<td rowspan="2">Both <i>e515dwcupswrapper-3.2.0-1.i386.deb</i> and <i>e515dwlpr-3.2.0-1.i386.deb</i> need to be installed. You could either write a <a href="#pgf9d748a7b27b">PKGBUILD</a>, use <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/debtap/">debtap</a></span><sup><small>AUR</small></sup></span>, or use <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dpkg">dpkg</a></span><sup><small>包</small></sup></span> (using dpkg is not recommended as the files will not be managed by <a href="#pg9ef105bf1e3c">pacman</a>). The driver works on both the x86_64 and i386 platforms, but may require <a href="#pg9d2c9cc56d04">multilib</a>.
+</td></tr>
+<tr>
+<td>E515dw
+</td></tr>
+<tr>
+<td>S1130n</td>
+<td rowspan="16"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dell-unified-driver/">dell-unified-driver</a></span><sup><small>AUR</small></sup></span></td>
+<td rowspan="16">Driver conflicts with <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/samsung-unified-driver-printer/">samsung-unified-driver-printer</a></span><sup><small>AUR</small></sup></span> (as <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dell-unified-driver/">dell-unified-driver</a></span><sup><small>AUR</small></sup></span> appears to be based on the Samsung one, and they create several of the same files)
+</td></tr>
+<tr>
+<td>1130
+</td></tr>
+<tr>
+<td>1133
+</td></tr>
+<tr>
+<td>1135n
+</td></tr>
+<tr>
+<td>1815
+</td></tr>
+<tr>
+<td>2145cn
+</td></tr>
+<tr>
+<td>2335dn
+</td></tr>
+<tr>
+<td>2355dn
+</td></tr>
+<tr>
+<td>5330
+</td></tr>
+<tr>
+<td>B1160
+</td></tr>
+<tr>
+<td>B1160w
+</td></tr>
+<tr>
+<td>B1165nfw
+</td></tr>
+<tr>
+<td>B1260dn
+</td></tr>
+<tr>
+<td>B1265dfw
+</td></tr>
+<tr>
+<td>B1265dnf
+</td></tr>
+<tr>
+<td>B2365dnf
+</td></tr>
+<tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga36e924883ca_Epson" id="Epson">Epson</h2></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/epson-inkjet-printer-escpr/">epson-inkjet-printer-escpr</a></span><sup><small>AUR</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/epson-inkjet-printer-escpr2/">epson-inkjet-printer-escpr2</a></span><sup><small>AUR</small></sup></span> are sets of drivers using the Epson Inkjet Printer Driver (ESC/P-R) for Linux.
+</p><p>Drivers for multiple printer modules:
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>To the editor:
+<ul><li>The drivers can be downloaded from Epson: <a href="https://support.epson.net/linux/Printer/LSB_distribution_pages/en/escpr.php">escpr</a>, <a href="https://support.epson.net/linux/Printer/LSB_distribution_pages/en/escpr2.php">escpr2</a></li>
+<li>Under "ARM ESC/P-R (2) Driver", look for "Or if you want to use the source package for arm CPU, please _click here_." Since the download links normally are the same, wget may be used:</li></ul>
+<pre>   # wget --trust-server-names "<a href="https://download.ebz.epson.net/dsc/du/02/DriverDownloadInfo.do?LG2=JA&amp;CN2=US&amp;CTI=176&amp;PRN=Linux%20src%20package&amp;OSC=LX&amp;DL">https://download.ebz.epson.net/dsc/du/02/DriverDownloadInfo.do?LG2=JA&amp;CN2=US&amp;CTI=176&amp;PRN=Linux%20src%20package&amp;OSC=LX&amp;DL</a>"  # escpr
+   # wget --trust-server-names "<a href="https://download.ebz.epson.net/dsc/du/02/DriverDownloadInfo.do?LG2=JA&amp;CN2=US&amp;CTI=178&amp;PRN=Linux%20src%20package&amp;OSC=LX&amp;DL">https://download.ebz.epson.net/dsc/du/02/DriverDownloadInfo.do?LG2=JA&amp;CN2=US&amp;CTI=178&amp;PRN=Linux%20src%20package&amp;OSC=LX&amp;DL</a>"  # escpr2
+</pre>
+<ul><li>To list all PPDs within the $TARGZ_FILE (replace with actual tarball, e.g. epson-inkjet-printer-escpr-1.8.1-1.tar.gz or epson-inkjet-printer-escpr2-1.2.8-1.tar.gz), this shell command may be used:</li></ul>
+<pre>   # tar -ztf $TARGZ_FILE --wildcards '*.ppd' | sed -e 's/epson-inkjet-printer-escpr[0-9]*-.*\/ppd\///; s/-epson-escpr[0-9]*-en.ppd//; s/Epson-//; y/_/ /' | sort -V - | sed -e 's/\([0-9]\)\(\s\)\([0-9]\)/\1\/\3/g' | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/, /g'
+</pre>
+<ul><li>Do not use if you're unsure!</li></ul>
+</div>
+<table class="wikitable">
+<tbody><tr>
+<th>Printers
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr>
+<tr>
+<td>Artisan 630, Artisan 700, Artisan 710, Artisan 720, Artisan 730, Artisan 800, Artisan 810, Artisan 830, Artisan 837, Artisan 1430, EC-C110 Series, EP-10VA Series, EP-30VA Series, EP-306 Series, EP-315 Series, EP-702A, EP-703A, EP-704A, EP-705A Series, EP-706A Series, EP-707A Series, EP-708A Series, EP-709A Series, EP-710A Series, EP-711A Series, EP-712A Series, EP-713A Series, EP-714A Series, EP-715A Series, EP-716A Series, EP-774A, EP-775A Series, EP-776A Series, EP-777A Series, EP-801A, EP-802A, EP-803A, EP-804A, EP-805A Series, EP-806A Series, EP-807A Series, EP-808A Series, EP-810A Series, EP-811A Series, EP-812A Series, EP-813A Series, EP-814A Series, EP-815A Series, EP-816A Series, EP-901A, EP-901F, EP-902A, EP-903A, EP-903F, EP-904A, EP-904F, EP-905A Series, EP-905F Series, EP-906F Series, EP-907F Series, EP-976A3 Series, EP-977A3 Series, EP-978A3 Series, EP-979A3 Series, EP-4004, EP-M552T Series, EP-M553T Series, EP-M570T Series, ET-1110 Series, ET-1810 Series, ET-2400 Series, ET-2500 Series, ET-2550 Series, ET-2600 Series, ET-2610 Series, ET-2650 Series, ET-2700 Series, ET-2710 Series, ET-2720 Series, ET-2750 Series, ET-2760 Series, ET-2800 Series, ET-2810 Series, ET-2820 Series, ET-2850 Series, ET-4500 Series, ET-4550 Series, ET-4700 Series, ET-4800 Series, ET-7700 Series, ET-7750 Series, ET-16500 Series, ET-M1100 Series, ET-M1120 Series, ET-M2120 Series, EW-052A Series, EW-M571T Series, EW-M660FT Series, EW-M770T Series, EW-M970A3T Series, EW-M5071FT Series, E-150, E-200, E-300, E-330, E-330S, E-340, E-350, E-360 Series, E-370 Series, E-500, E-520, E-530, E-600, E-700, E-720, E-800, E-810, E-820, E-830 Series, E-840 Series, E-850 Series, K200, K300, L364 Series, L375 Series, L385 Series, L386 Series, L395 Series, L396 Series, L405 Series, L455 Series, L475 Series, L485 Series, L486 Series, L495 Series, L565 Series, L575 Series, L605 Series, L655 Series, L805 Series, L810 Series, L850 Series, L1110 Series, L1455 Series, L3050 Series, L3060 Series, L3070 Series, L3100 Series, L3110 Series, L3150 Series, L3160 Series, L3250 Series, L3260 Series, L4150 Series, L4160 Series, L4260 Series, L5190 Series, L5290 Series, L7160 Series, L7180 Series, M200 Series, M205 Series, M1100 Series, M1120 Series, M2110 Series, M2120 Series, ME 200, ME OFFICE 510, ME OFFICE 520, ME OFFICE 530, ME OFFICE 560W, ME OFFICE 570, ME OFFICE 620F, ME OFFICE 650FN, ME OFFICE 700FW, ME OFFICE 900WD, ME OFFICE 940FW, ME OFFICE 960FWD, ME Office 600F, ME-301 Series, ME-303 Series, ME-400 Series, NX230 TX230, NX430 TX435, PF-70 Series, PF-71 Series, PF-81 Series, PM-400 Series, PM-A750, PM-A820, PM-A840, PM-A840S, PM-A890, PM-A920, PM-A940, PM-A950, PM-A970, PM-D600, PM-D800, PM-D870, PM-G850, PM-G4500, PM-T960, PM-T990, PX-5V, PX-7V, PX-046A Series, PX-047A Series, PX-048A Series, PX-049A Series, PX-205 Series, PX-404A, PX-405A Series, PX-434A, PX-435A Series, PX-436A Series, PX-437A Series, PX-501A, PX-502A, PX-503A, PX-504A, PX-505F Series, PX-535F Series, PX-601F, PX-602F, PX-603F, PX-605F Series, PX-673F, PX-675F Series, PX-1600F, PX-1700F, PX-5600, PX-A620, PX-A640, PX-A650, PX-A720, PX-A740, PX-B700, PX-B750F, PX-FA700, PX-G5300, PX-M160T Series, PX-M350F, PX-M650A, PX-M650F, PX-M740F, PX-M741F, PX-M840F, PX-M840FX, PX-M860F, PX-M5040F, PX-M5041F, PX-M7050FP, PX-M7050FX, PX-M7050 Series, PX-S05 Series, PX-S06 Series, PX-S155 Series, PX-S160T Series, PX-S170T Series, PX-S170UT Series, PX-S350, PX-S505 Series, PX-S740, PX-S840, PX-S840X, PX-S860, PX-S5040, PX-S7050PS, PX-S7050X, PX-S7050 Series, PictureMate 500, PictureMate Deluxe, PictureMate Express, PictureMate PM 200, PictureMate PM 210, PictureMate PM 215, PictureMate PM 225, PictureMate PM 235, PictureMate PM 240, PictureMate PM 245, PictureMate PM 250, PictureMate PM 260, PictureMate PM 270, PictureMate PM 280, PictureMate PM 290, PictureMate PM 300, PictureMate PM 310, ST-2000 Series, ST-C2100 Series, Stylus CX2800, Stylus CX2900, Stylus CX3700, Stylus CX3800, Stylus CX3900, Stylus CX4200, Stylus CX4800, Stylus CX4900, Stylus CX5000, Stylus CX5900, Stylus CX6000, Stylus CX7300, Stylus CX7400, Stylus CX7700, Stylus CX7800, Stylus CX8300, Stylus CX8400, Stylus CX9300F, Stylus CX9400Fax, Stylus DX3800, Stylus DX4000, Stylus DX4200, Stylus DX4800, Stylus DX5000, Stylus DX7400, Stylus DX8400, Stylus DX9400F, Stylus NX200, Stylus NX210, Stylus NX230, Stylus NX300, Stylus NX330, Stylus NX400, Stylus NX410, Stylus NX420, Stylus NX430, Stylus NX510, Stylus NX530, Stylus NX620, Stylus NX635, Stylus Office BX300F, Stylus Office BX305, Stylus Office BX305 Plus, Stylus Office BX310FN, Stylus Office BX320FW, Stylus Office BX525WD, Stylus Office BX535WD, Stylus Office BX600FW, Stylus Office BX610FW, Stylus Office BX620FWD, Stylus Office BX630FW, Stylus Office BX635FWD, Stylus Office BX925, Stylus Office BX935, Stylus Office TX300F, Stylus Office TX320F, Stylus Office TX510FN, Stylus Office TX515FN, Stylus Office TX525FW, Stylus Office TX600FW, Stylus Office TX610FW, Stylus Office TX620FWD, Stylus Photo 1400, Stylus Photo 1410, Stylus Photo 1430, Stylus Photo 1500, Stylus Photo PX650, Stylus Photo PX660, Stylus Photo PX700W, Stylus Photo PX710W, Stylus Photo PX720WD, Stylus Photo PX730, Stylus Photo PX800FW, Stylus Photo PX810FW, Stylus Photo PX820FWD, Stylus Photo PX830, Stylus Photo R240, Stylus Photo R250, Stylus Photo R260, Stylus Photo R265, Stylus Photo R270, Stylus Photo R340, Stylus Photo R350, Stylus Photo R360, Stylus Photo R380, Stylus Photo R390, Stylus Photo R1900, Stylus Photo R2000, Stylus Photo R2880, Stylus Photo R3000, Stylus Photo RX520, Stylus Photo RX530, Stylus Photo RX560, Stylus Photo RX580, Stylus Photo RX585, Stylus Photo RX590, Stylus Photo RX595, Stylus Photo RX610, Stylus Photo RX640, Stylus Photo RX650, Stylus Photo RX680, Stylus Photo RX685, Stylus Photo RX690, Stylus Photo TX650, Stylus Photo TX700W, Stylus Photo TX710W, Stylus Photo TX720WD, Stylus Photo TX730, Stylus Photo TX800FW, Stylus Photo TX810FW, Stylus SX200, Stylus SX210, Stylus SX218, Stylus SX230, Stylus SX235, Stylus SX400, Stylus SX410, Stylus SX420W, Stylus SX430, Stylus SX440, Stylus SX510W, Stylus SX525WD, Stylus SX535WD, Stylus SX600FW, Stylus SX610FW, Stylus SX620FW, Stylus TX200, Stylus TX210, Stylus TX220, Stylus TX230, Stylus TX235, Stylus TX400, Stylus TX410, Stylus TX420W, Stylus TX430, Stylus TX550W, Stylus TX560WD, TX220 NX220, TX320 WorkForce320, TX420 NX420, TX720 Artisan720, TX820 Artisan830, WF-100 Series, WF-110 Series, WF-2110 Series, WF-2510 Series, WF-2520 Series, WF-2530 Series, WF-2540 Series, WF-2630 Series, WF-2650 Series, WF-2660 Series, WF-2750 Series, WF-2760 Series, WF-2810 Series, WF-2820 Series, WF-2830 Series, WF-2840 Series, WF-2850 Series, WF-2870 Series, WF-2910 Series, WF-2930 Series, WF-2950 Series, WF-3010 Series, WF-3520 Series, WF-3530 Series, WF-3540 Series, WF-3620 Series, WF-3640 Series, WF-4630 Series, WF-4640 Series, WF-5110 Series, WF-5190 Series, WF-5620 Series, WF-5690 Series, WF-6090 Series, WF-6530 Series, WF-6590 Series, WF-7110 Series, WF-7510 Series, WF-7511 Series, WF-7515 Series, WF-7520 Series, WF-7521 Series, WF-7525 Series, WF-7610 Series, WF-7620 Series, WF-8010 Series, WF-8090 Series, WF-8510 Series, WF-8590 Series, WF-M1130 Series, WF-M1560 Series, WF-M5190 Series, WF-M5690 Series, WF-R4640 Series, WF-R5190 Series, WF-R5690 Series, WF-R8590 Series, WP-4010 Series, WP-4011 Series, WP-4015 Series, WP-4020 Series, WP-4022 Series, WP-4023 Series, WP-4025 Series, WP-4090 Series, WP-4091 Series, WP-4092 Series, WP-4095 Series, WP-4511 Series, WP-4515 Series, WP-4520 Series, WP-4521 Series, WP-4525 Series, WP-4530 Series, WP-4531 Series, WP-4532 Series, WP-4533 Series, WP-4535 Series, WP-4540 Series, WP-4545 Series, WP-4590 Series, WP-4592 Series, WP-4595 Series, WP-M4011 Series, WP-M4015 Series, WP-M4095 Series, WP-M4521 Series, WP-M4525 Series, WP-M4595 Series, WorkForce 310, WorkForce 320, WorkForce 435, WorkForce 500, WorkForce 520, WorkForce 545, WorkForce 600, WorkForce 610, WorkForce 620, WorkForce 630, WorkForce 645, WorkForce 840, WorkForce 845, XP-55 Series, XP-65 Series, XP-200 Series, XP-201/204/208 Series, XP-202/203/206 Series, XP-205/207 Series, XP-211/214/216 Series, XP-212/213 Series, XP-215/217 Series, XP-220 Series, XP-225 Series, XP-235 Series, XP-240 Series, XP-243/245/247 Series, XP-255/257 Series, XP-300 Series, XP-302/303/305/306 Series, XP-310 Series, XP-312/313/315 Series, XP-320 Series, XP-322/323/325 Series, XP-330 Series, XP-332/335 Series, XP-340 Series, XP-342/343/345 Series, XP-352/355 Series, XP-400 Series, XP-402/403/405/406 Series, XP-410 Series, XP-412/413/415 Series, XP-420 Series, XP-422/423/425 Series, XP-430 Series, XP-432/435 Series, XP-440 Series, XP-442/445 Series, XP-452/455 Series, XP-510 Series, XP-520 Series, XP-530 Series, XP-540 Series, XP-600 Series, XP-610 Series, XP-620 Series, XP-630 Series, XP-640 Series, XP-700 Series, XP-710 Series, XP-720 Series, XP-750 Series, XP-760 Series, XP-800 Series, XP-810 Series, XP-820 Series, XP-830 Series, XP-850 Series, XP-860 Series, XP-900 Series, XP-950 Series, XP-960 Series, XP-2100 Series, XP-2150 Series, XP-2200 Series, XP-3100 Series, XP-3150 Series, XP-3200 Series, XP-4100 Series, XP-4150 Series, XP-4200 Series, XP-7100 Series
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/epson-inkjet-printer-escpr/">epson-inkjet-printer-escpr</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td>version 1.8.1
+</td></tr>
+<tr>
+<td>EC-4020 Series, EC-4030 Series, EC-4040 Series, EC-C7000 Series, EM-C800BAM, EM-C800 Series, EP-50V Series, EP-879A Series, EP-880A Series, EP-881A Series, EP-882A Series, EP-883A Series, EP-884A Series, EP-885A Series, EP-886A Series, EP-982A3 Series, EP-C800BAM, EP-C800 Series, ET-2830 Series, ET-2840 Series, ET-3700 Series, ET-3710 Series, ET-3750 Series, ET-3760 Series, ET-3800 Series, ET-3830 Series, ET-3840 Series, ET-3850 Series, ET-4750 Series, ET-4760 Series, ET-4810 Series, ET-4850 Series, ET-5150 Series, ET-5170 Series, ET-5180 Series, ET-5800 Series, ET-5850 Series, ET-5880 Series, ET-8500 Series, ET-8550 Series, ET-8700 Series, ET-14100 Series, ET-15000 Series, ET-16150 Series, ET-16600 Series, ET-16650 Series, ET-16680 Series, ET-18100 Series, ET-M1140 Series, ET-M1170 Series, ET-M1180 Series, ET-M2140 Series, ET-M2170 Series, ET-M3140 Series, ET-M3170 Series, ET-M3180 Series, ET-M16600 Series, ET-M16680 Series, EW-M530F Series, EW-M630T Series, EW-M634T Series, EW-M670FT Series, EW-M674FT Series, EW-M752T Series, EW-M754T Series, EW-M873T Series, EW-M973A3T Series, EW-M5610FT Series, L3550 Series, L3560 Series, L5590 Series, L6160 Series, L6170 Series, L6190 Series, L6260 Series, L6270 Series, L6290 Series, L6460 Series, L6490 Series, L6550 Series, L6570 Series, L6580 Series, L8050 Series, L8100 Series, L8160 Series, L8180 Series, L11050 Series, L11160 Series, L14150 Series, L15150 Series, L15160 Series, L15180 Series, L18050 Series, M1050 Series, M1140 Series, M1170 Series, M1180 Series, M2050 Series, M2140 Series, M2170 Series, M3140 Series, M3170 Series, M3180 Series, M15140 Series, M15180 Series, PM-520 Series, PX-M161T Series, PX-M270FT Series, PX-M270T Series, PX-M380F, PX-M381FL, PX-M382F, PX-M680F Series, PX-M730F Series, PX-M780F Series, PX-M781F Series, PX-M791FT Series, PX-M880FX, PX-M884F, PX-M885F, PX-M886FL, PX-M887F, PX-M890FX, PX-M5080F Series, PX-M5081F Series, PX-M6010F Series, PX-M6011F Series, PX-M6711FT Series, PX-M6712FT Series, PX-M7070FX, PX-M7080FX, PX-M7090FX, PX-M7110F, PX-M7110FP, PX-S161T Series, PX-S270T Series, PX-S380, PX-S381L, PX-S382, PX-S383L, PX-S730 Series, PX-S880X, PX-S884, PX-S885, PX-S887, PX-S890X, PX-S5010 Series, PX-S5080 Series, PX-S6010 Series, PX-S6710T Series, PX-S7070X, PX-S7090X, PX-S7110, PX-S7110P, ST-3000 Series, ST-4000 Series, ST-C4100 Series, ST-C5000 Series, ST-C5500 Series, ST-C8000 Series, ST-C8090 Series, ST-M1000 Series, ST-M3000 Series, WF-2860 Series, WF-2880 Series, WF-2960 Series, WF-3720 Series, WF-3730 Series, WF-3820 Series, WF-4720 Series, WF-4730 Series, WF-4740 Series, WF-4820 Series, WF-4830 Series, WF-7210 Series, WF-7310 Series, WF-7710 Series, WF-7720 Series, WF-7820 Series, WF-7830 Series, WF-7840 Series, WF-C529RB, WF-C529RBAM, WF-C529R Series, WF-C579RB, WF-C579RBAM, WF-C579R Series, WF-C869R Series, WF-C878RB, WF-C878R Series, WF-C879RB, WF-C879RBAM, WF-C879R Series, WF-C4310 Series, WF-C4810 Series, WF-C5210 Series, WF-C5290BA, WF-C5290BAM, WF-C5290 Series, WF-C5310 Series, WF-C5390BAM, WF-C5390 Series, WF-C5710 Series, WF-C5790BA, WF-C5790BAM, WF-C5790 Series, WF-C5810 Series, WF-C5890BAM, WF-C5890 Series, WF-C5891 Series, WF-C8190B, WF-C8190 Series, WF-C8610 Series, WF-C8690B, WF-C8690 Series, WF-M4119 Series, WF-M4619 Series, WF-M5298 Series, WF-M5299BAM, WF-M5299 Series, WF-M5399BAM, WF-M5399 Series, WF-M5799BAM, WF-M5799 Series, WF-M5899BAM, WF-M5899 Series, XP-970 Series, XP-5100 Series, XP-5150 Series, XP-5200 Series, XP-6000 Series, XP-6100 Series, XP-8500 Series, XP-8600 Series, XP-8700 Series, XP-15000 Series
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/epson-inkjet-printer-escpr2/">epson-inkjet-printer-escpr2</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td>version 1.2.15
+</td></tr>
+<tr>
+<th>Printers
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr></tbody></table>
+<p>Drivers and/or notes for specific Epson printer models:
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr>
+<tr>
+<td>AcuLaser C900</td>
+<td></td>
+<td>This printer uses Epson's driver, with a device URI of '<b>usb://EPSON/AL-C900'</b>, and may need the pipsplus service to be running.
+</td></tr>
+<tr>
+<td>LP-S5000</td>
+<td></td>
+<td>This printer requires a <a href="#pga36e924883ca_Avasys">custom driver from Avasys</a>.
+</td></tr>
+<tr>
+<td>TX125</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/epson-inkjet-printer-n10-nx127/">epson-inkjet-printer-n10-nx127</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_Utilities" id="Utilities">Utilities</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga36e924883ca_escputil" id="escputil">escputil</h4></div>
+<p>escputil is part of the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gutenprint">gutenprint</a></span><sup><small>包</small></sup></span> package, and performs some utility functions on Epson printers such as nozzle cleaning.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga36e924883ca_mtink" id="mtink">mtink</h4></div>
+<p>This is a printer status monitor which enables to get the remaining ink quantity, to print test patterns, to reset printer and to clean nozzle. It use an intuitive graphical user interface.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga36e924883ca_Stylus_toolbox" id="Stylus-toolbox">Stylus-toolbox</h4></div>
+<p>This is a GUI using escputil and cups drivers. It supports nearly all USB printer of Epson and displays ink quantity, can clean and align print heads and print test patterns.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_Custom_drivers" id="Custom_drivers">Custom drivers</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga36e924883ca_Avasys" id="Avasys">Avasys</h4></div>
+
+<p>"Source" code of the driver is available on the <a href="https://www.avasys.jp">avasys website</a>, in Japanese, however it includes a 32 bit binary which will cause problem on 64 bit system.
+</p>
+<ul><li><a href="#pg54c3351b3e3b">Install</a> the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=psutils">psutils</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bc">bc</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libstdc%2B%2B5/">libstdc++5</a></span><sup><small>AUR</small></sup></span> packages (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lib32-libstdc%2B%2B5/">lib32-libstdc++5</a></span><sup><small>AUR</small></sup></span> on 64bit).</li>
+<li>Download the source code of the driver.</li>
+<li>Compile and install the driver.</li></ul>
+<pre>$ ./configure --prefix=/usr
+$ make
+# make install
+</pre>
+<p>If you have any problems on a 64 system, some other lib32 libraries may be required. Please adjust this page if that is the case.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_Adding_missing_paper_sizes" id="Adding_missing_paper_sizes">Adding missing paper sizes</h3></div>
+<p>Some of the PPD files in <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/epson-inkjet-printer-escpr2/">epson-inkjet-printer-escpr2</a></span><sup><small>AUR</small></sup></span> are missing paper size definitions for media that is supported by the printers and the filter. It is relatively straightforward to add the missing media types to the PPD files.
+</p><p>To begin, download the PKGBUILD for the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/epson-inkjet-printer-escpr2/">epson-inkjet-printer-escpr2</a></span><sup><small>AUR</small></sup></span> package, either with an AUR helper or from a snapshot tarball. Once in the directory with the PKGBUILD, download and extract the source of the package by running <code>makepkg --nobuild</code>.
+</p><p>Change directory to <code>src/epson-inkjet-printer-escpr2-$PKGVER</code>. Open the file <code>src/optBase.h</code> in a text editor for reference.
+</p><p>Identify the PPD used by your printer in the <code>ppd</code> directory. For example, a Workforce 7710 printer uses <code>Epson-WF-7710_Series-epson-escpr2-en.ppd</code>. Let us call it <code>your_ppd_filename</code>. Convert the relevant PPD to a PPD compiler source file using the <code>ppdi</code> utility from the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cups">cups</a></span><sup><small>包</small></sup></span> package.
+</p>
+<pre>$ ppdi -o your_ppd_filename.drv ppd/your_ppd_filename.ppd
+</pre>
+<p>Open the newly-created <code>your_ppd_filename.drv</code> in a text editor. Identify the section of the file with a lot of lines starting with <code>CustomMedia</code>. Duplicate one such line to modify. For example:
+</p>
+<pre>CustomMedia "Legal/US Legal" 612.00 1008.00 8.40 8.40 8.40 8.40 "&lt;&lt;/PageSize[612.00 1008.00]/ImagingBBox null&gt;&gt;setpagedevice" "&lt;&lt;/PageRegion[612.00 1008.00]/ImagingBBox null&gt;&gt;setpagedevice"
+</pre>
+<p>The pair of numbers <code>612.00 1008.00</code> represents the width and height of the paper in inches, multiplied by 72. Replace all three instances of these numbers with the dimensions of the paper you want to add. For example to add 11"x17" paper, replace the numbers with <code>792.00 1224.00</code>.
+</p><p>The string <code>"Legal/US Legal"</code> identifies the paper. On the left side of the slash, <code>Legal</code> is a magic identifier that the filter uses to identify the paper size. Replace it with the one you want to use. Refer to the <code>mediaSizeData</code> array in <code>optBase.h</code> for a list of possible values. The string to the right of the slash can be set to any human-readable value.
+</p><p>If you want to enable borderless printing for a paper size, prefix the magic identifier string you just found with the letter T. So <code>Letter</code> would become <code>TLetter</code>. Additionally, change the four numbers <code>8.40 8.40 8.40 8.40</code> to <code>0.00 0.00 0.00 0.00</code>.
+</p><p>For example, I was able to add 11x17 paper to the PPD for a Workforce 7710 by adding the following lines:
+</p>
+<pre>CustomMedia "USB/US B(11x17 in)" 792.00 1224.00 8.40 8.40 8.40 8.40 "&lt;&lt;/PageSize[792.00 1224.00]/ImagingBBox null&gt;&gt;setpagedevice" "&lt;&lt;/PageRegion[792.00 1224.00]/ImagingBBox null&gt;&gt;setpagedevice"
+CustomMedia "TUSB/US B(11x17 in) (Borderless)" 792.00 1224.00 0.00 0.00 0.00 0.00 "&lt;&lt;/PageSize[792.00 1224.00]/ImagingBBox null&gt;&gt;setpagedevice" "&lt;&lt;/PageRegion[792.00 1224.00]/ImagingBBox null&gt;&gt;setpagedevice"
+</pre>
+<p>Once you have added your custom size, recompile <code>your_ppd_filename.drv</code> into a PPD file with ppdc (also from <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cups">cups</a></span><sup><small>包</small></sup></span>):
+</p>
+<pre>$ ppdc your_ppd_filename.drv
+</pre>
+<p>This will create a ppd file in the <code>ppd</code> directory with a file name derived from the <code>PCFileName</code> parameter in <code>your_ppd_filename.drv</code>. You can test this file by uploading it to the CUPS web interface, or install it permanently by overwriting the original PPD file and making the package with <code>makepkg</code>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga36e924883ca_HP" id="HP">HP</h2></div>
+<p>参见 <a href="#pgd27173103f52">CUPS/Troubleshooting#HP issues</a>。
+</p><p>大多数惠普打印机将使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span>，有些可能使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hpoj/">hpoj</a></span><sup><small>AUR</small></sup></span>，而多功能激光打印机可能需要使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hpuld/">hpuld</a></span><sup><small>AUR</small></sup></span>。某些激光打印机还可能由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/foo2zjs-nightly/">foo2zjs-nightly</a></span><sup><small>AUR</small></sup></span> 支持。
+</p><p>请注意，如果 <code>lpinfo -m</code> 提示驱动程序 "需要专有插件"，则需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hplip-plugin/">hplip-plugin</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>打印机
+</th>
+<th>驱动程序/过滤器
+</th>
+<th>备注
+</th></tr>
+<tr>
+<td>DeskJet 710C</td>
+<td rowspan="8"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pnm2ppa/">pnm2ppa</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>DeskJet 712C</td>
+<td>
+</td></tr>
+<tr>
+<td>DeskJet 720C</td>
+<td>
+</td></tr>
+<tr>
+<td>DeskJet 722C</td>
+<td>
+</td></tr>
+<tr>
+<td>DeskJet 820se</td>
+<td>
+</td></tr>
+<tr>
+<td>DeskJet 820Cxi</td>
+<td>
+</td></tr>
+<tr>
+<td>DeskJet 1000Cse</td>
+<td>
+</td></tr>
+<tr>
+<td>DeskJet 1000Cxi</td>
+<td>
+</td></tr>
+<tr>
+<td>Envy 5640 series</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>Envy 6452 series</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span></td>
+<td>Search using mDNS/Bonjour
+</td></tr>
+<tr>
+<td>Envy 7800 series</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span></td>
+<td>Have not tried <a href="#pg68274fc5facc">foomatic</a> yet
+</td></tr>
+<tr>
+<td>LaserJet P1606dn</td>
+<td rowspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span> + <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hplip-plugin/">hplip-plugin</a></span><sup><small>AUR</small></sup></span></td>
+<td>Or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/foo2zjs-nightly/">foo2zjs-nightly</a></span><sup><small>AUR</small></sup></span>, or <a href="#pg9c40a97c403d">AirPrint</a>.
+</td></tr>
+<tr>
+<td>LaserJet Pro MFP M126nw</td>
+<td>
+</td></tr>
+<tr>
+<td>LaserJet Pro MFP M281fdw</td>
+<td rowspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span></td>
+<td>No proprietary drivers as of 2019-04-18
+</td></tr>
+<tr>
+<td>Photosmart 2575</td>
+<td>Or use the hpijs driver in <a href="#pg68274fc5facc">foomatic</a>.
+</td></tr>
+<tr>
+<td>LaserJet MFP M433</td>
+<td rowspan="7"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hpuld/">hpuld</a></span><sup><small>AUR</small></sup></span></td>
+<td>
+</td></tr>
+<tr>
+<td>LaserJet MFP M436</td>
+<td>
+</td></tr>
+<tr>
+<td>LaserJet MFP M72625 72630</td>
+<td>
+</td></tr>
+<tr>
+<td>Laser 10x Series</td>
+<td>
+</td></tr>
+<tr>
+<td>Laser MFP 13x Series</td>
+<td>
+</td></tr>
+<tr>
+<td>Color Laser 15x Series</td>
+<td>
+</td></tr>
+<tr>
+<td>Color Laser MFP 17x Series</td>
+<td>
+</td></tr>
+<tr>
+<th>打印机
+</th>
+<th>驱动程序/过滤器
+</th>
+<th>备注
+</th></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_HPLIP" id="HPLIP">HPLIP</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>自 hplip v3.17.11 起，hpijs 不再可用。如果您有使用 hpijs 的打印机，它们将无法打印。您必须修改它们，并选择新的 hpcups 驱动程序。</li>
+<li>至少从 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span> v3.22.10 开始，"hp-setup "在使用 <code>hpfax://</code> 访问打印机时会崩溃，并显示信息 <code>无法与设备通信。请检查设备并重试</code>。这可能是由于缺少 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hplip-plugin/">hplip-plugin</a></span><sup><small>AUR</small></sup></span>，但可以通过禁用打印机本身的传真支持来解决。</li></ul>
+</div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span> 为 HP DeskJet、OfficeJet、Photosmart、Business Inkjet 和部分 LaserJet 打印机提供了驱动程序，还提供了一个易于使用的设置工具。有关支持的打印机列表，请参见 <a href="https://developers.hp.com/hp-linux-imaging-and-printing/supported_devices/index">https://developers.hp.com/hp-linux-imaging-and-printing/supported_devices/index</a> 。
+</p><p>hp-setup 需要安装 <a href="#pg9c40a97c403d">CUPS</a> 并启动 <code>cups.service</code> 以保存打印机。hp-setup 还需要 lsusb 软件，该软件由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=usbutils">usbutils</a></span><sup><small>包</small></sup></span> 软件包提供。
+</p><p>使用图形用户界面 qt 前端运行设置工具：
+</p>
+<pre>$ hp-setup -u
+</pre>
+<p>使用命令行前端运行设置工具：
+</p>
+<pre>$ hp-setup -i
+</pre>
+<p>直接设置网络连接的 HP 打印机的配置：
+</p>
+<pre>$ hp-setup -i <i>ip_address</i>
+</pre>
+<p>To run systray spool manager:
+</p>
+<pre>$ hp-systray
+</pre>
+<p>为给定的 IP 地址生成 URI：
+</p>
+<pre># hp-makeuri <i>&lt;ip address&gt;</i>
+</pre>
+<p>PPD 文件位于 <code>/usr/share/ppd/HP/</code> 中。
+</p><p>如果您的打印机<a href="https://developers.hp.com/hp-linux-imaging-and-printing/binary_plugin.html">被列为需要二进制插件</a>，请从 <a href="#pg89cb7b475cfb">AUR</a> 安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hplip-plugin/">hplip-plugin</a></span><sup><small>AUR</small></sup></span> 软件包。
+如果需要安装二进制插件 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hplip-plugin/">hplip-plugin</a></span><sup><small>AUR</small></sup></span>，您需要在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span> 识别 PPD 之前<a href="#pg6ec215b93a06">启动</a> <code>cups.service</code>。如果还不行，请重启打印机并在打印机<i>关闭</i>状态下登录。然后打开打印机并进行测试打印。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span>依赖于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=foomatic-db-engine">foomatic-db-engine</a></span><sup><small>包</small></sup></span>，这导致通过网络用户界面向 CUPS 添加打印机时，无法显示驱动程序列表（<code>Unable to get list of printer drivers</code>）。可能的解决方法
+<ul><li><b>要么：</b>首先安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span>，然后从 <code>/usr/share/ppd/HP/</code> 获取与打印机匹配的 PPD 文件。然后，完全删除 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span> 以及任何不必要的依赖项。最后，使用 CUPS Web UI 手动安装打印机，选择获取的 PPD 文件，然后重新安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span>。重启后，打印机就可以正常工作了。</li>
+<li><b>要么：</b> 删除 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=foomatic-db">foomatic-db</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=foomatic-db-engine">foomatic-db-engine</a></span><sup><small>包</small></sup></span> 以及所有不必要的依赖项。重新安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span> 并重启 CUPS。使用 CUPS Web UI 安装打印机，现在它应该能自动找到驱动程序。无需重启。</li></ul></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_HPULD" id="HPULD">HPULD</h3></div>
+<p>更多信息请参阅<a href="https://wiki.debian.org/CUPSPrintQueues#hpuld">Debian:CUPSPrintQueues#hpuld</a>。
+</p><p>软件包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hpuld/">hpuld</a></span><sup><small>AUR</small></sup></span> 将稀少的 "HP + ULD" 软件包合并为一个软件包。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_foo2zjs" id="foo2zjs">foo2zjs</h3></div>
+<p><a href="https://web.archive.org/web/20210129024712/http://foo2zjs.rkkda.com/">foo2zjs</a> 支持部分惠普激光打印机。截至 2018 年 6 月，hplip 软件包干扰了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/foo2zjs-nightly/">foo2zjs-nightly</a></span><sup><small>AUR</small></sup></span>，详情见<a href="https://bbs.archlinux.org/viewtopic.php?pid=1662809">此 forum post</a> 和 <a href="https://bugs.archlinux.org/task/58815">FS#58815</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga36e924883ca_Kodak" id="Kodak">Kodak</h2></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/c2esp/">c2esp</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> is free software. <a href="https://sourceforge.net/projects/cupsdriverkodak/">Upstream notes</a> it is likely to work on all ESP and Hero printers/scanners.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga36e924883ca_Konica_Minolta" id="Konica_Minolta">Konica Minolta</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr>
+<tr>
+<td>Minolta Magicolor 1600W</td>
+<td rowspan="7"><a href="#pg68274fc5facc">foomatic</a></td>
+<td>
+</td></tr>
+<tr>
+<td>Minolta Magicolor 1680MF</td>
+<td>
+</td></tr>
+<tr>
+<td>Minolta Magicolor 1690MF</td>
+<td>
+</td></tr>
+<tr>
+<td>Minolta Magicolor 2480MF</td>
+<td>
+</td></tr>
+<tr>
+<td>Minolta Magicolor 2490MF</td>
+<td>
+</td></tr>
+<tr>
+<td>Minolta Magicolor 2530DL</td>
+<td>
+</td></tr>
+<tr>
+<td>Minolta Magicolor 4690MF</td>
+<td>
+</td></tr>
+<tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_foo2zjs" id="foo2zjs_2">foo2zjs</h3></div>
+<p><a href="#pga36e924883ca_foo2zjs">#foo2zjs</a>, mentioned above for supporting some HP printers, also support some Minolta printers.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga36e924883ca_Lexmark" id="Lexmark">Lexmark</h2></div>
+<p>Note that most Lexmark printers are now supported by CUPS without needing further installation. See also <a href="#pg56d0e1ee6bb8">SANE/Scanner-specific problems#Lexmark</a> for Lexmark scanners issues.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_Utilities" id="Utilities_2">Utilities</h3></div>
+<p>Lexmark provides a utility called <i>lexijtools</i> with the drivers.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_Custom_drivers" id="Custom_drivers_2">Custom drivers</h3></div>
+
+<p>Lexmark does provide Linux drivers for all their hardware.
+The following packages are required:
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cups">cups</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sane">sane</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ncurses">ncurses</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libusb">libusb</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libxext">libxext</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libxtst">libxtst</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libxi">libxi</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libstdc%2B%2B5/">libstdc++5</a></span><sup><small>AUR</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=krb5">krb5</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lua">lua</a></span><sup><small>包</small></sup></span> (for the automated installer)</li>
+<li><a href="#pgf5cd65505569">Java</a> (for the automated installer, and some of the Lexmark tools)</li></ul>
+<p>The drivers will need to be <a href="http://support.lexmark.com/index?page=driversdownloads">downloaded</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2022-09-17 ⓘ]</sup> from Lexmark's website. Preferably, create a package (see <a href="#pgca951d402f98">Creating packages</a>) and install it.  Here is a basic <a href="#pgf9d748a7b27b">PKGBUILD</a> that still needs work but will give an idea of what is required.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PKGBUILD</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Contributor: Todd Partridge (Gen2ly) toddrpartridge (at) yahoo
+
+pkgname=cups-lexmark-Z2300-2600
+pkgver=1
+pkgrel=1
+pkgdesc="Lexmark Z2300 and 2600 Series printer driver for cups"
+arch=('i686')
+url="http://www.lexmark.com/"
+license=('custom')
+depends=('cups' 'glibc' 'ncurses' 'libusb' 'libxext' 'libxtst' 'libxi' 'libstdc++5' 'krb5' 'lua' 'java-runtime')
+conflicts=('z600' 'cjlz35le-cups' 'cups-lexmark-700')
+source=(lexmark-inkjet-08-driver-1.0-1.i386.tar.gz.sh)
+md5sums=(3c37eb87e3dad4853bf29344f9695134)
+
+package() {
+  # Extract installer
+  sh lexmark-inkjet-08-driver-1.0-1.i386.tar.gz.sh --target Installer-Files
+  cd Installer-Files
+  mkdir Driver
+  tar xvvf instarchive_all --lzma -C Driver/
+  cd Driver
+  tar xv lexmark-inkjet-08-driver-1.0-1.i386.tar.gz -C $pkgdir
+}
+</pre>
+<p>Keep in mind you can use the automated installer but doing so will leave the resulting changes untracked. The PPD will be installed into <code>/usr/local/lexmark/lxk08/etc/</code> or similar, depending on the printer model.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga36e924883ca_Oki" id="Oki">Oki</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr>
+<tr>
+<td>C110</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>
+</td></tr>
+<tr>
+<td>MC561</td>
+<td><a href="#pg9c40a97c403d">foomatic-db-nonfree</a></td>
+<td>
+</td></tr>
+<tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga36e924883ca_Ricoh" id="Ricoh">Ricoh</h2></div>
+<p>Install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/openprinting-ppds-pxlmono-ricoh/">openprinting-ppds-pxlmono-ricoh</a></span><sup><small>AUR</small></sup></span> if your device is black and white, or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/openprinting-ppds-pxlcolor-ricoh/">openprinting-ppds-pxlcolor-ricoh</a></span><sup><small>AUR</small></sup></span> if it is color. Note that Ricoh copiers are sometimes branded as Savin, Gestetner, Lanier, Rex-Rotary, Nashuatec, and/or IKON. So, if you have a device bearing one of these brands, it may be supported by these drivers as well.
+</p>
+<ul><li><a href="https://www.openprinting.org/driver/pxlmono-Ricoh">List of supported black and white models</a></li>
+<li><a href="https://www.openprinting.org/driver/pxlcolor-Ricoh">List of supported color models</a></li></ul>
+<p>For cheap <a href="https://en.wikipedia.org/wiki/en:Graphics_Device_Interface#GDI_printers">GDI-only winprinters</a>, which do not support PCL (Ricoh series SP100 and SP200) try out <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ricoh-sp100-git/">ricoh-sp100-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>.
+</p><p>SG or GX series printers requiring <a href="https://en.wikipedia.org/wiki/en:Refined_Printing_Command_Stream">RPCS</a> drivers may be suppported by <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ricoh-rpcs-cups-bin/">ricoh-rpcs-cups-bin</a></span><sup><small>AUR</small></sup></span>, which provides PPDs and needed filter programs found on the Japanese Ricoh website.
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr>
+<tr>
+<td>SP 112</td>
+<td rowspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ricoh-sp100-git/">ricoh-sp100-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>
+</td></tr>
+<tr>
+<td>SP 201n
+</td></tr>
+<tr>
+<td>IPSiO GX e3300</td>
+<td rowspan="19"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ricoh-rpcs-cups-bin/">ricoh-rpcs-cups-bin</a></span><sup><small>AUR</small></sup></span></td>
+<td rowspan="19">As the Japanese products seem to be called IPSiO instead of Aficio, products not listed here could still work with specific printer models.
+</td></tr>
+<tr>
+<td>IPSiO GX e5500
+</td></tr>
+<tr>
+<td>IPSiO SG 2010L
+</td></tr>
+<tr>
+<td>IPSiO SG 2100
+</td></tr>
+<tr>
+<td>IPSiO SG 3100
+</td></tr>
+<tr>
+<td>IPSiO SG 3100SF
+</td></tr>
+<tr>
+<td>IPSiO SG 7100
+</td></tr>
+<tr>
+<td>SG 2200
+</td></tr>
+<tr>
+<td>SG 2300
+</td></tr>
+<tr>
+<td>SG 3100KE
+</td></tr>
+<tr>
+<td>SG 3120SF
+</td></tr>
+<tr>
+<td>SG 3120B SF
+</td></tr>
+<tr>
+<td>SG 3200
+</td></tr>
+<tr>
+<td>SG 3300
+</td></tr>
+<tr>
+<td>SG 5100
+</td></tr>
+<tr>
+<td>SG 5100FT
+</td></tr>
+<tr>
+<td>SG 5200
+</td></tr>
+<tr>
+<td>SG 5200FT
+</td></tr>
+<tr>
+<td>SG 7200
+</td></tr>
+<tr>
+<td>213W</td>
+<td><i>Generic PCL Laser</i></td>
+<td>Obtain a WPS code by holding down the wifi button for 2 seconds, then hitting the stop/start button.
+</td></tr>
+<tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga36e924883ca_Samsung" id="Samsung">Samsung</h2></div>
+<p>自 2016 年或 2017 年起，三星不再从事打印机/扫描仪业务。截至 2019 年，惠普部分支持部分三星打印机/扫描仪。2016 年之前，三星是主要参与者，这也是现在还有很多三星机器的原因。此外，Linux 和 CUPS 也在不断发展。所有这一切的要旨是，三星产品的支持处于变动之中。
+</p><p>有关三星打印机/扫描仪信息的一个主要网站是  <a href="https://www.bchemnet.com/suldr/">Samsung Unified Linux Driver Repository</a>。尽管网站名为 "Samsung Unified Linux Driver Repository"，但它并不隶属于三星（惠普）。它也不是专门针对 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/samsung-unified-driver/">samsung-unified-driver</a></span><sup><small>AUR</small></sup></span> 的。但实际推荐的驱动程序是三星（惠普）的封闭源代码。另一方面，<code>samsung-unified-driver</code> 也涵盖 Windows 和 Mac。它可能是获取三星打印机和扫描仪驱动程序的第一站，因为它（或曾经）声称几乎支持所有这些设备。请注意，<code>samsung-unified-driver</code> 包含的软件可以独立运行，而不是与 cups 绑定。如果你无法让打印机与 cups 软件一起工作，不妨试试这条路。
+</p><p>不过，还有更多的选择。概况见 <a href="https://www.bchemnet.com/suldr/alternatives.html">alternatives</a>。
+</p>
+<ul><li>据报道，在 CJX-XXX 系列中，至少有 CJX-1000、CJX-1050W 和 CJX-2000FW 可以与 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/c2esp/">c2esp</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>一起使用，尽管 <code>c2esp</code> 据称是柯达产品专用的。</li>
+<li>对于 <a href="https://ghostarchive.org/archive/vj6tA">Samsung Printer Language</a>，有 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=splix">splix</a></span><sup><small>包</small></sup></span>。有关支持的型号列表，请参阅其<a href="https://splix.sourceforge.net/">主页</a>。其他 SPL 三星打印机，即使不在该列表中，也可以使用 <code>splix</code>。</li>
+<li>由 <a href="#pga36e924883ca_foo2zjs">#foo2zjs</a> 软件包提供的 <code>foo2qpdl</code> 也支持 QPDL（Quick Page Description Language）打印机，其中一些由<code>splix</code>支持。已知可工作的型号列表<a href="https://web.archive.org/web/20210312142508/http://www.foo2qpdl.rkkda.com/">在这</a>。</li></ul>
+<p><code>c2esp</code> 、 <code>splix</code> 和 <code>foo2zjs</code> 都是自由软件。
+</p><p>您还应注意，许多 Samsung 打印机都支持 PostScript。它有可能与 CUPS 通用 PostScript 打印机一起工作，特别是如果它只是黑白打印机，没有添加扫描仪。通用驱动程序可能缺少功能或功能有限，例如在支持双面打印、色彩控制和分辨率设置方面，而且打印质量可能较低。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga36e924883ca_Xerox_or_FujiXerox" id="Xerox_or_FujiXerox">Xerox or FujiXerox</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr>
+<tr>
+<td>DocuPrint 203A</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hplip">hplip</a></span><sup><small>包</small></sup></span></td>
+<td>Using the <b>DocuPrint P8e(hpijs)</b> driver, or the Brother driver on FujiXerox's website (see <a href="#pga36e924883ca_Brother">#Brother</a> for more information on how to install custom Brother drivers).
+</td></tr>
+<tr>
+<td>Phaser 3020</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xerox-phaser-3020/">xerox-phaser-3020</a></span><sup><small>AUR</small></sup></span></td>
+<td>Also supports Phaser 3052, 3117, 3140, 3155, 3160, 3200MFP, 3250, 3260, 3300MFP, 3320, 3435, 3600, 6110MFP, WorkCentre 3025, 3210, 3215, 3220, 3225, 3315, 3325, 3550, 4118, PE120, PE220, FaxCentre 2218.
+</td></tr>
+<tr>
+<td>Phaser 3100MFP</td>
+<td>Install Xerox's driver</td>
+<td>See <a href="#pga36e924883ca_Phaser_3100MFP">#Phaser 3100MFP</a> for more instructions.
+</td></tr>
+<tr>
+<td>Phaser 6115MFP</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>
+</td></tr>
+<tr>
+<td>Phaser 6121MFP</td>
+<td><a href="#pg68274fc5facc">foomatic</a></td>
+<td>
+</td></tr>
+<tr>
+<td>Xerox Workcentre 3119</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=splix">splix</a></span><sup><small>包</small></sup></span></td>
+<td>Since Samsung SCX-4200 is the rebranded Xerox 3119, splix package works for both
+</td></tr>
+<tr>
+<th>Printer
+</th>
+<th>Driver/filter
+</th>
+<th>Notes
+</th></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga36e924883ca_Custom_drivers" id="Custom_drivers_3">Custom drivers</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga36e924883ca_Phaser_3100MFP" id="Phaser_3100MFP">Phaser 3100MFP</h4></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>This section involves installing packages without <a href="#pg9ef105bf1e3c">pacman</a>. These directions should ideally be automated with a <a href="#pgf9d748a7b27b">PKGBUILD</a>.</div>
+<p>Once you have downloaded the drivers, execute the driver installer and accept the licence:
+</p>
+<pre># cd printer
+# ./XeroxPhaser3100.install
+</pre>
+<p>Note that the driver is 32 bit, so some 32 bit libraries will be required on an x86_64 system: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-libpng12">lib32-libpng12</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-zlib">lib32-zlib</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-libjpeg6-turbo">lib32-libjpeg6-turbo</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-libcups">lib32-libcups</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-libxext">lib32-libxext</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-libx11">lib32-libx11</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-gcc-libs">lib32-gcc-libs</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lib32-libstdc%2B%2B5/">lib32-libstdc++5</a></span><sup><small>AUR</small></sup></span>
+</p><p>For the scanner, create an <code>/etc/sane.d</code> directory if it does not already exist, because it is needed by the installer:
+</p>
+<pre># mkdir -p /etc/sane.d
+</pre>
+<p>Now install the driver:
+</p>
+<pre># cd scanner/
+# ./XeroxPhaser3100sc.install
+</pre>
+<p>Again, on an x86_64 install, 32 bit libraries will be needed.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga36e924883ca_Phaser_6000B" id="Phaser_6000B">Phaser 6000B</h4></div>
+<p><a href="#pg54c3351b3e3b">Install</a> the <a href="https://github.com/aur-archive/xerox-phaser-6010">xerox-phaser-6010</a> package (archived from the AUR).
+The driver may require older versions of <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nettle">nettle</a></span><sup><small>包</small></sup></span> and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnutls">gnutls</a></span><sup><small>包</small></sup></span> to be installed, since the binary blob linked against older versions of the shared libraries provided by those packages. The oldest known-good versions are <code>nettle-2.7.1-1</code> and <code>gnutls-3.3.13-1</code>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga36e924883ca_Phaser_6125N" id="Phaser_6125N">Phaser 6125N</h4></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>This section involves installing packages without <a href="#pg9ef105bf1e3c">pacman</a>. These directions should ideally be automated with a <a href="#pgf9d748a7b27b">PKGBUILD</a>.</div>
+<p>FujiXerox does not support Linux on this model. An old rpm <a href="https://onlinesupport.fujixerox.com/tiles/common/hc_drivers_download.jsp?system=%27Linux%27&amp;shortdesc=null&amp;xcrealpath=http://www.fujixeroxprinters.com/downloads/uploaded/dpc525a_linux_.0.0.tar_81c2.zip">is available</a><sup title="最后检查状态：SSL error">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2022-09-17 ⓘ]</sup> but does not seem to work.
+</p><p>A slightly adapted <a href="https://rickvanderzwet.nl/trac/personal/wiki/XeroxPhaser6125N">custom driver</a> has been found to work out of the box.
+</p><p>To install the tarball, run:
+</p>
+<pre># tar -C / --keep-newer-files -xvzf cups-xerox-phaser-6125n-1.0.0.tar.gz
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260808035410
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.523 seconds
+Real time usage: 0.534 seconds
+Preprocessor visited node count: 2775/1000000
+Revision size: 55681/2097152 bytes
+Post‐expand include size: 58253/2097152 bytes
+Template argument size: 15170/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 796/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  155.426      1 -total
+ 15.21%   23.635    147 Template:AUR
+  7.01%   10.896     53 Template:Pkg
+  6.08%    9.446     77 Template:Ic
+  5.52%    8.579      6 Template:Note
+  2.98%    4.630      1 Template:Related_articles_start
+  2.62%    4.073      6 Template:Broken_package_link
+  2.53%    3.939      3 Template:Dead_link
+  2.21%    3.436      1 Template:需要翻译
+  1.87%    2.900      1 Template:Style
+-->
+<!-- Render ID cfaee90e-92dc-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7874:|#|:idhash:canonical!zh-cn and timestamp 20260808035410 and revision id 34470. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

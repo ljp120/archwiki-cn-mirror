@@ -1,0 +1,220 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pge293c5f6dad1">pacman/软件包签名</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Pacman/Package_signing">Pacman/Package signing</a>，最近一次同步于 2022-10-27，若英文版本有所<a href="https://wiki.archlinux.org/title/Pacman/Package_signing?diff=0&amp;oldid=747357">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Pacman_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Package_signing_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg8f4e7555fd6d">GnuPG</a></li>
+<li><a href="#pg47183e1a8ccc">DeveloperWiki:Package signing</a></li>
+</ul></div>
+<p>为了保证软件包来自开发者, Pacman 使用<a href="https://www.gnupg.org/gph/en/manual.html#AEN385">信任网络</a>中的 <a href="https://www.gnupg.org/">GnuPG 密钥</a>进行软件包验证。<a href="https://archlinux.org/master-keys/">这个网址</a>记录了 Archlinux 的主密钥。其中至少三个主密匙被用来签署官方开发者和授信用户自己的密钥，而他们将用这些密钥签署自己的包。用户在配置 pacman-key 时也会生成一个唯一的密钥。所以信任网络也会把用户的密钥连接到五大主密钥上面。
+</p><p>信任网络示例:
+</p>
+<ul><li><b>自定义软件包</b>: 用户自己构建软件包并用本地密钥签名。</li>
+<li><b>非官方软件包</b>: 开发者构建软并签名软件包。用户需要用自己的密钥签名开发者的密钥，将其变为可信。</li>
+<li><b>官方软件包</b>: 开发者构建软件包，而开发者的密钥已经被 Arch 主密钥签名。最终用户用自己的密钥签名主密钥，这样就能信任所有官方开发者。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>HKP协议使用11371/tcp端口用来通信。为了从服务器得到签署的密钥（使用pacman-key），这个端口必须打开。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge293c5f6dad1_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_.E9.85.8D.E7.BD.AE_pacman" id="配置_pacman"><span id=".E9.85.8D.E7.BD.AE_pacman"></span>配置 pacman</h3></div>
+<p><code>/etc/pacman.conf</code> 中的 <code>SigLevel</code> 配置用 <code>pacman -S</code> 安装软件时使用的检查级别。文件的注释中列出了几个可选设置，<span class="plainlinks archwiki-template-man" title="$ man 5 pacman.conf"><a href="https://man.archlinux.org/man/pacman.conf.5#PACKAGE_AND_DATABASE_SIGNATURE_CHECKING">pacman.conf(5) § PACKAGE AND DATABASE SIGNATURE CHECKING</a></span> 有详细介绍。签名检查可以全局配置或针对某个仓库配置。如果 <code>SigLevel</code> 在 [options] 节中进行了全局设置，那么所有的包都必须签名。如果使用 <code>pacman.conf</code> 中默认的 <code>LocalFileSigLevel</code> ，所有编译和用 <code>pacman -U</code> 安装的软件包都不需要使用 <code>makepkg</code> 进行签名。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>尽管所有的官方软件包现在都进行了签名，但是在2018年11月的时候签名数据库<a href="https://bbs.archlinux.org/viewtopic.php?id=242258">还在开发</a>。如果设置了 <code>Required</code> ，那么 <code>DatabaseOptional</code> 也应该被设置。</div>
+<p>默认的设置下，系统只安装被授信的密钥签署的软件包。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SigLevel = Required DatabaseOptional</pre>
+<p><code>TrustedOnly</code> 是 pacman 的默认设置。
+</p><p>默认配置的效果与下行等同：
+</p>
+<pre>SigLevel = Required DatabaseOptional TrustedOnly
+</pre>
+<p>上面这些也可以在仓库内部进行设置，比如：
+</p>
+<pre>[core]
+SigLevel = PackageRequired # ’Optional’ here would turn off a global ’Required’ for this repository
+Include = /etc/pacman.d/mirrorlist</pre>
+<p>软件仓库中的软件启用了签名验证，但是并不要求仓库数据库也被签名了。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>SigLevel <code>TrustAll</code> 设置仅仅为了测试而存在，使用它会信任未被验证的密钥。对于所有的官方软件源你应该使用 <code>TrustedOnly</code> 。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_.E5.88.9D.E5.A7.8B.E5.8C.96.E5.AF.86.E9.92.A5.E7.8E.AF" id="初始化密钥环"><span id=".E5.88.9D.E5.A7.8B.E5.8C.96.E5.AF.86.E9.92.A5.E7.8E.AF"></span>初始化密钥环</h3></div>
+<p>要初始化 pacman 密钥:
+</p>
+<pre># pacman-key --init
+
+初始化密钥，需要收集到足够的<a href="https://en.wikipedia.org/wiki/Entropy_(computing)">熵</a>。请随意移动鼠标，随机按键盘或者运行一些磁盘读写操作（比如在其他终端运行<code>ls -R /</code>或者<code>find / -name foo</code> 或者 <code>dd if=/dev/sda8 of=/dev/tty7</code>之类的)应该会收集足够的熵。如果你的系统没有足够的熵，这项工作需要好几个小时，但是如果你有，那么就会快多了。
+</pre>
+<p>这会在 <code>/etc/pacman.d/gnupg</code> 初始化密钥并生成系统主密钥。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果<code>pacman-key --init</code>运行时系统没有足够的熵，可能会需要很长时间。请在目标机器上安装 <a href="#pg3b5009cc5f71">haveged</a> 或 <a href="#pga80655ce0089">rng-tools</a>。然后在用 root 权限执行<code>pacman-key --init</code> 前<a href="#pg073992cb666a">启动</a> <code>haveged.service</code>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge293c5f6dad1_.E7.AE.A1.E7.90.86.E5.AF.86.E9.92.A5" id="管理密钥"><span id=".E7.AE.A1.E7.90.86.E5.AF.86.E9.92.A5"></span>管理密钥</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_.E9.AA.8C.E8.AF.81.E4.B8.BB.E5.AF.86.E9.92.A5" id="验证主密钥"><span id=".E9.AA.8C.E8.AF.81.E4.B8.BB.E5.AF.86.E9.92.A5"></span>验证主密钥</h3></div>
+<p>通过以下命令进行配置：
+</p>
+<pre># pacman-key --populate
+</pre>
+<p>该命令对 <a href="https://archlinux.org/master-keys/">Master Signing Keys</a> 进行验证，when prompted as these are used to co-sign (and therefore trust) all other packager's keys.
+</p><p>PGP 通常很长(2048 位或更长)，不太容易使用，所以通常创建一个40位十六进制指纹，最后八位被称为密钥 ID，是密钥的名字。长签名可以用来检测两个密钥是否相同。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_.E5.AE.98.E6.96.B9.E5.BC.80.E5.8F.91.E8.80.85.E5.AF.86.E9.92.A5" id="官方开发者密钥"><span id=".E5.AE.98.E6.96.B9.E5.BC.80.E5.8F.91.E8.80.85.E5.AF.86.E9.92.A5"></span>官方开发者密钥</h3></div>
+<p>官方开发者和 TU 的密钥已经被主密钥签名认证，所以不需要用 pacman-key 认证它们。pacman 遇到不认识的签名时，它将会询问是否从密钥服务器（设置在<code>/etc/pacman.d/gnupg/gpg.conf</code>文件中，或在命令行中使用<code>--keyserver</code>选项）下载。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>维基百科提供了一份<a href="https://en.wikipedia.org/wiki/Key_server_(cryptographic)">公钥服务器列表</a>。</div>
+<p>下载开发者密钥后，以后都不需要下载。以后会用它验证所有这个开发者构建的软件包。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<p>如果开发者和 TU 的密钥是较早之前导入，它们的签名可能还不存在于本地数据库，用下面命令更新：
+</p>
+<pre># pacman-key --refresh-keys
+</pre>
+ 当使用<code>--refresh-keys</code> 时，本地签名也会被远程查找，并收到未找到的消息，这是正常的。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_.E5.AF.BC.E5.85.A5.E9.9D.9E.E5.AE.98.E6.96.B9.E5.AF.86.E9.92.A5" id="导入非官方密钥"><span id=".E5.AF.BC.E5.85.A5.E9.9D.9E.E5.AE.98.E6.96.B9.E5.AF.86.E9.92.A5"></span>导入非官方密钥</h3></div>
+<p>可以通过此方法在pacman密钥环中添加你自己的密钥，或者启用已签名的<a href="#pg09ba3fa9b29b">非官方软件仓库</a>。
+</p><p>首先从密钥持有者手中拿到密钥 ID(<code><i>keyid</i></code>)，然后把密钥加入密钥环：
+</p>
+<ul><li>如果密钥位于密钥服务器，通过下面命令导入：<pre># pacman-key -r <i>keyid</i></pre></li></ul>
+<ul><li>如果提供了地址，先下载，然后用下面密钥导入：<pre># pacman-key --add <i>/path/to/downloaded/keyfile</i></pre></li></ul>
+<p>对于所有要签名的密钥，都通过指纹进行验证：
+</p>
+<pre>$ pacman-key -f <i>keyid</i>
+</pre>
+<p>最后，本地签名导入的密钥：
+</p>
+<pre># pacman-key --lsign-key <i>keyid</i>
+</pre>
+<p>现在可以用这个密钥签名软件包了。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_.E7.94.A8GPG.E8.B0.83.E8.AF.95" id="用GPG调试"><span id=".E7.94.A8GPG.E8.B0.83.E8.AF.95"></span>用GPG调试</h3></div>
+<p>如果需要，可以直接使用GPG调试pacman钥匙环，例如：
+</p>
+<pre># gpg --homedir /etc/pacman.d/gnupg --list-keys
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge293c5f6dad1_.E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7" id="提示和技巧"><span id=".E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7"></span>提示和技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_.E5.AE.9A.E6.9C.9F.E5.8D.87.E7.BA.A7.E7.B3.BB.E7.BB.9F" id="定期升级系统"><span id=".E5.AE.9A.E6.9C.9F.E5.8D.87.E7.BA.A7.E7.B3.BB.E7.BB.9F"></span>定期升级系统</h3></div>
+<p>定期使用 <a href="#pg9ef105bf1e3c">pacman#升级软件包</a>更新系统可以防止绝大部分签名错误。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge293c5f6dad1_.E6.89.8B.E5.8A.A8.E6.9B.B4.E6.96.B0.E5.AF.86.E9.92.A5.E7.8E.AF" id="手动更新密钥环"><span id=".E6.89.8B.E5.8A.A8.E6.9B.B4.E6.96.B0.E5.AF.86.E9.92.A5.E7.8E.AF"></span>手动更新密钥环</h4></div>
+<p>如果有时不可避免地在一段时间里没有更新系统，或者在安装系统时使用的<a href="#pgbdbcbed611fc">安装映像</a>版本较旧，可能会遇到密钥环过旧而导致的签名错误，提示为“文件签名损坏”。这时你可以在更新系统之前手动同步包数据库并升级 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=archlinux-keyring">archlinux-keyring</a></span><sup><small>包</small></sup></span>：
+</p>
+<pre># pacman -Sy archlinux-keyring
+</pre>
+<p>此命令成功以后，应<b>立即</b>升级所有软件包以避免<a href="#pg6dc71ab03a8f">部分升级</a>：
+</p>
+<pre># pacman -Su
+</pre>
+<p>如果你是在安装系统的过程中，可以跳过此 <code>pacman -Su</code> 命令，因为接下来将要运行的 <code>pacstrap</code> 命令会在新安装的系统中安装最新的软件包。
+</p><p>这是<b>唯一</b>可以接受的使用 <code>-Sy</code> 升级软件包而不被视为<a href="#pg6dc71ab03a8f">部分升级</a>的情况。其余情况下你总是应该使用 <code>pacman -Syu</code> 来升级系统。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_Update_system_time_regularly" id="Update_system_time_regularly">Update system time regularly</h3></div>
+<p>When the <a href="#pg9dcc5acb2bd6">系统时间</a> is faulty, signing keys could be considered expired (or invalid) and signature checks on packages will fail. Synchronize the system clock regularly by using the <a href="#pgacfb0b28272f">Network Time Protocol daemon</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge293c5f6dad1_.E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3" id="问题解决"><span id=".E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3"></span>问题解决</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_error__signature_from_xxx_is_invalid" id="error:_signature_from_xxx_is_invalid">error: signature from xxx is invalid</h3></div>
+<p>Pacman-key 依赖于<a href="#pg9dcc5acb2bd6">系统时间</a>。如果系统时间是错误的，将会获得一个报错：
+</p>
+<pre>error: PackageName: signature from "User &lt;email@archlinux.org&gt;" is invalid
+error: failed to commit transaction (invalid or corrupted package (PGP signature))
+Errors occured, no packages were upgraded.</pre>
+<p>如果是使用 ntpd, (root权限) 执行 <code>ntpd -qg</code>，然后执行 <code>hwclock -w</code>.
+</p><p>如果使用的是其他 NTP 客户端，请参考<a href="#pg9dcc5acb2bd6">系统时间#时钟同步</a>。
+</p><p>如果问题依然存在，请尝试下面方法：
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_.E5.88.A0.E9.99.A4.E6.8A.A5.E9.94.99.E7.9A.84.E5.8C.85" id="删除报错的包"><span id=".E5.88.A0.E9.99.A4.E6.8A.A5.E9.94.99.E7.9A.84.E5.8C.85"></span>删除报错的包</h3></div>
+<p>如果相同的包持续失败，并且您确定 pacman-key 的相关操作是正确的，可以尝试移除软件包 <code>rm /var/cache/pacman/pkg/<i>packagename</i></code>  或者<a href="#pg9ef105bf1e3c">清空所有缓存</a>，然后可以重新下载软件包。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_.E9.87.8D.E7.BD.AE.E6.89.80.E6.9C.89.E5.AF.86.E9.92.A5" id="重置所有密钥"><span id=".E9.87.8D.E7.BD.AE.E6.89.80.E6.9C.89.E5.AF.86.E9.92.A5"></span>重置所有密钥</h3></div>
+<p>如果要删除或重置系统，删除 <code>/etc/pacman.d/gnupg</code> 目录并重新运行 <code>pacman-key --init</code>。通过 <code>pacman-key --populate</code> 重新添加默认密钥。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_.E7.A6.81.E7.94.A8.E7.AD.BE.E5.90.8D.E6.A3.80.E6.9F.A5" id="禁用签名检查"><span id=".E7.A6.81.E7.94.A8.E7.AD.BE.E5.90.8D.E6.A3.80.E6.9F.A5"></span>禁用签名检查</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>小心使用，禁用签名检查，pacman 会自动安装不信任的软件包。</div>
+<p>如果不在意软件包签名，可以完全禁用 PGP 签名检查，编辑 <code>/etc/pacman.conf</code> 并取消注释 [options] 下的如下行:
+</p>
+<pre>SigLevel = Never
+ #LocalFileSigLevel = Optional
+#RemoteFileSigLevel = Required
+
+</pre>
+<p>需要同时注释掉单独软件源的 SigLevel 设置，因为他们会覆盖全局设置。
+</p><p>这样就不会进行任何签名检查，和 pacman 4 之前一样。如果这样，就不需要用 pacman-key 建立密钥环。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_.E5.AF.86.E9.92.A5.E5.AF.BC.E5.85.A5.E5.A4.B1.E8.B4.A5" id="密钥导入失败"><span id=".E5.AF.86.E9.92.A5.E5.AF.BC.E5.85.A5.E5.A4.B1.E8.B4.A5"></span>密钥导入失败</h3></div>
+<p>有三种可能的情况导致这个问题：
+</p>
+<ul><li>过期的<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=archlinux-keyring">archlinux-keyring</a></span><sup><small>包</small></sup></span> 包。</li>
+<li>不正确的系统时间。</li>
+<li>你的ISP屏蔽了用于导入 PGP keys 的端口。</li>
+<li><i>pacman</i> 缓存中包含之前的未签名软件包</li>
+<li>未正确设置 <code>dirmngr</code></li></ul>
+<p>过期的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=archlinux-keyring">archlinux-keyring</a></span><sup><small>包</small></sup></span> 包可能会导致这个问题，根据情况采用下面的解决方法
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge293c5f6dad1_.E5.88.87.E6.8D.A2.E5.85.AC.E9.92.A5.E6.9C.8D.E5.8A.A1.E5.99.A8" id="切换公钥服务器"><span id=".E5.88.87.E6.8D.A2.E5.85.AC.E9.92.A5.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>切换公钥服务器</h4></div>
+<p>如果这样没有起作用，并且系统时间是正确的，你可以尝试切换到 Ubuntu 提供的公钥服务器(keyserver)。编辑 <code>/etc/pacman.d/gnupg/gpg.conf</code> 将 <code>keyserver</code> 行替换为
+</p>
+<pre>keyserver hkp://keyserver.ubuntu.com
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge293c5f6dad1_.E6.B8.85.E7.90.86.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.BC.93.E5.AD.98" id="清理软件包缓存"><span id=".E6.B8.85.E7.90.86.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.BC.93.E5.AD.98"></span>清理软件包缓存</h4></div>
+<p>如果上面方法都不起作用，pacman 缓存 <code>/var/cache/pacman/pkg/</code> 可以包含之前下载的未签名软件包，手动清空缓存：
+</p>
+<pre># pacman -Sc
+
+=== Signature is unknown trust ===
+</pre>
+<p>在执行 <code>pacman -Syu</code> 时可能出现下面错误：
+</p>
+<pre>error: <i>package-name</i>: signature from "<i>packager</i>" is unknown trust
+</pre>
+<p>这是因为  <code><i>package-name</i></code> 软件包使用的 <code><i>packager</i></code> 的密钥不被本地的 pacman-key gpg 数据库信任。可能是密钥在加入密钥链之后失效了，可以通过下面方法解决：
+</p>
+<ul><li>用 <code>pacman-key --refresh-keys</code> 刷新密钥</li>
+<li>本地手动签署密钥</li>
+<li>刷新所有密钥</li>
+<li>将 <code>SigLevel</code> 设置成 <code>TrustAll</code> (不推荐)</li></ul>
+<p>后面两个选项将会破坏信任连，所以请谨慎使用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge293c5f6dad1_.E9.80.9A.E8.BF.87.E4.BB.A3.E7.90.86.E6.9B.B4.E6.96.B0.E5.AF.86.E9.92.A5" id="通过代理更新密钥"><span id=".E9.80.9A.E8.BF.87.E4.BB.A3.E7.90.86.E6.9B.B4.E6.96.B0.E5.AF.86.E9.92.A5"></span>通过代理更新密钥</h3></div>
+<p>要使用代理更新密钥，必须同时在 <code>/etc/gnupg/dirmngr.conf</code> 和 <code>/etc/pacman.d/gnupg/dirmngr.conf</code> 中设置 <code>honor-http-proxy</code> 选项。更多信息请阅读 <a href="#pg8f4e7555fd6d">GnuPG#Use a keyserver</a>.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果 <i>pacman-key</i> 没有用 <code>honor-http-proxy</code> 选项，执行失败，重启可能能够解决问题。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge293c5f6dad1_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><a href="#pga4d04933d874">DeveloperWiki:Package Signing Proposal for Pacman</a></li>
+<li><a href="http://allanmcrae.com/2011/08/pacman-package-signing-1-makepkg-and-repo-add/">Pacman Package Signing – 1: Makepkg and Repo-add</a></li>
+<li><a href="http://allanmcrae.com/2011/08/pacman-package-signing-2-pacman-key/">Pacman Package Signing – 2: Pacman-key</a></li>
+<li><a href="http://allanmcrae.com/2011/08/pacman-package-signing-3-pacman/">Pacman Package Signing – 3: Pacman</a></li>
+<li><a href="http://allanmcrae.com/2011/12/pacman-package-signing-4-arch-linux/">Pacman Package Signing – 4: Arch Linux</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807030559
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.148 seconds
+Real time usage: 0.154 seconds
+Preprocessor visited node count: 607/1000000
+Revision size: 11671/2097152 bytes
+Post‐expand include size: 6944/2097152 bytes
+Template argument size: 3124/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 39/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   46.110      1 -total
+ 13.54%    6.244     49 Template:Ic
+  7.81%    3.603      4 Template:注意
+  6.70%    3.090      1 Template:翻译状态
+  6.17%    2.845      1 Template:小写标题
+  5.37%    2.475      3 Template:Pkg
+  4.60%    2.121      1 Template:Man
+  4.57%    2.106      1 Template:相关文章开始
+  4.50%    2.077      2 Template:Related
+  3.67%    1.693      2 Template:警告
+-->
+<!-- Render ID ea19918e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3656:|#|:idhash:canonical!zh-cn and timestamp 20260807030559 and revision id 34198. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,49 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg5e8e58afbe44">PHP 打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/PHP_package_guidelines">PHP package guidelines</a>，最近一次同步于 2020-05-20，若英文版本有所<a href="https://wiki.archlinux.org/title/PHP_package_guidelines?diff=0&amp;oldid=614505">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/PHP_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – PHP – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<p>本文档介绍了为 PHP 库创建 <a href="#pgf9d748a7b27b">PKGBUILD</a> 的过程。本文档的目标读者是 PHP 库的打包人员。对于 PHP Web 应用程序，请参阅 <a href="#pga4012eb9e457">Web application package guidelines</a>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5e8e58afbe44_.E8.BD.AF.E4.BB.B6.E5.8C.85.E5.90.8D.E7.A7.B0" id="软件包名称"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E5.90.8D.E7.A7.B0"></span>软件包名称</h2></div>
+<p>对于模块，软件包名称应以 <code>php-</code> 开头，其余名称应通过将库名称转换为小写字母并用连字符分隔来从库名称构造。 例如，与 <code>File iterator</code> 相对应的软件包名称将是 <code>php-file-iterator</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5e8e58afbe44_.E6.89.93.E5.8C.85.E6.96.87.E4.BB.B6.E7.9A.84.E4.BD.8D.E7.BD.AE" id="打包文件的位置"><span id=".E6.89.93.E5.8C.85.E6.96.87.E4.BB.B6.E7.9A.84.E4.BD.8D.E7.BD.AE"></span>打包文件的位置</h2></div>
+<p>PHP 软件包应将文件安装到 <code>/usr/share/php/</code> 中。此路径应位于 php.ini include_path 或 open_basedir 指令中，以便能够在 PHP Web 应用程序中包含库文件。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5e8e58afbe44_.E4.BD.93.E7.B3.BB.E6.9E.B6.E6.9E.84" id="体系架构"><span id=".E4.BD.93.E7.B3.BB.E6.9E.B6.E6.9E.84"></span>体系架构</h2></div>
+<p>在大多数情况下，<code>arch</code> 数组应包含 <code>'any'</code> ，因为大多数 PHP 软件包都是与体系架构无关的。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807193611
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.075 seconds
+Real time usage: 0.080 seconds
+Preprocessor visited node count: 77/1000000
+Revision size: 1031/2097152 bytes
+Post‐expand include size: 2427/2097152 bytes
+Template argument size: 162/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%    8.560      1 -total
+ 37.16%    3.181      1 Template:翻译状态
+ 21.64%    1.852      1 Template:Package_guidelines
+ 17.61%    1.507      6 Template:Ic
+-->
+<!-- Render ID 3e69538e-9297-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3637:|#|:idhash:canonical!zh-cn and timestamp 20260807193611 and revision id 33661. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

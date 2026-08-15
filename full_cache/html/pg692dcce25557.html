@@ -1,0 +1,136 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg692dcce25557">网桥</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN">
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Network_bridge">Network_bridge</a>，最近一次同步于 2015-05-07，若英文版本有所<a href="https://wiki.archlinux.org/title/Network_bridge?diff=0&amp;oldid=367464">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Network_bridge_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg793c391d7bf9">Bridge with netctl</a></li>
+</ul></div>
+<p>网桥是一种软件配置，用于连结两个或更多个不同网段。网桥的行为就像是一台虚拟的网络交换机，工作于透明模式（即其他机器不必关注网桥的存在与否）。任意的真实物理设备（例如 <code>eth0</code>）和虚拟设备（例如 <code>tap0</code>）都可以连接到网桥。
+</p><p>本文讲述如何创建至少包含一个以太网设备的网桥，这种应用常见于<a href="#pg434f3f4063b1">QEMU</a>、设置基于软件的访问点等场景。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg692dcce25557_.E5.88.9B.E5.BB.BA.E7.BD.91.E6.A1.A5" id="创建网桥"><span id=".E5.88.9B.E5.BB.BA.E7.BD.91.E6.A1.A5"></span>创建网桥</h2></div>
+<p>创建网桥有多种途径。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg692dcce25557_.E9.80.9A.E8.BF.87_bridge-utils" id="通过_bridge-utils"><span id=".E9.80.9A.E8.BF.87_bridge-utils"></span>通过 bridge-utils</h3></div>
+<p>本节讲述用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bridge-utils">bridge-utils</a></span><sup><small>包</small></sup></span> 软件包里面的 <i>brctl</i> 工具管理网桥。该软件包已进入官方仓库（<a href="#pg0a3e16d13281">official repositories</a>）。<i>brctl</i> 的完整选项清单请参阅 <span class="plainlinks archwiki-template-man" title="$ man 8 brctl"><a href="https://man.archlinux.org/man/brctl.8">brctl(8)</a></span>。
+</p><p>新建一个网桥：
+</p>
+<pre># brctl addbr <i>bridge_name</i>
+</pre>
+<p>添加一个设备（例如<code>eth0</code>）到网桥：
+</p>
+<pre># brctl addif <i>bridge_name</i> eth0
+</pre>
+<p>显示当前存在的网桥及其所连接的网络端口：
+</p>
+<pre>$ brctl show
+</pre>
+<p>启动网桥：
+</p>
+<pre># ip link set up dev <i>bridge_name</i>
+</pre>
+<p>删除网桥，需要先关闭它：
+</p>
+<pre># ip link set dev <i>bridge_name</i> down
+# brctl delbr <i>bridge_name</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg692dcce25557_.E9.80.9A.E8.BF.87_iproute2" id="通过_iproute2"><span id=".E9.80.9A.E8.BF.87_iproute2"></span>通过 iproute2</h3></div>
+<p>本节讲述用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iproute2">iproute2</a></span><sup><small>包</small></sup></span> 软件包里面的 <i>ip</i> 工具管理网桥。该软件包包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base">base</a></span><sup><small>包</small></sup></span> 包组中。
+</p><p>创建一个网桥并设置其状态为已启动：
+</p>
+<pre># ip link add name <i>bridge_name</i> type bridge
+# ip link set dev <i>bridge_name</i> up
+</pre>
+<p>添加一个网络端口（比如 eth0）到网桥中，要求先将该端口设置为混杂模式并启动该端口：
+</p>
+<pre># ip link set dev eth0 promisc on
+# ip link set dev eth0 up
+</pre>
+<p>把该端口添加到网桥中，再将其所有者设置为 <code><i>bridge_name</i></code> 就完成了配置：
+</p>
+<pre># ip link set dev eth0 master <i>bridge_name</i>
+</pre>
+<p>要显示现存的网桥及其关联的端口，可以用 <i>bridge</i> 工具（它也是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iproute2">iproute2</a></span><sup><small>包</small></sup></span> 的组成部分）。详阅 <span class="plainlinks archwiki-template-man" title="$ man 8 bridge"><a href="https://man.archlinux.org/man/bridge.8">bridge(8)</a></span>。
+</p>
+<pre># bridge link show
+</pre>
+<p>若要删除网桥，应首先移除它所关联的所有端口，同时关闭端口的混杂模式并关闭端口以将其恢复至原始状态。
+</p>
+<pre># ip link set eth0 promisc off
+# ip link set eth0 down
+# ip link set dev eth0 nomaster
+</pre>
+<p>当网桥的配置清空后就可以将其删除：
+</p>
+<pre># ip link delete <i>bridge_name</i> type bridge
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg692dcce25557_.E9.80.9A.E8.BF.87_netctl" id="通过_netctl"><span id=".E9.80.9A.E8.BF.87_netctl"></span>通过 netctl</h3></div>
+<p>参阅 <a href="#pg793c391d7bf9">Bridge with netctl</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg692dcce25557_.E9.80.9A.E8.BF.87_systemd-networkd" id="通过_systemd-networkd"><span id=".E9.80.9A.E8.BF.87_systemd-networkd"></span>通过 systemd-networkd</h3></div>
+<p>参阅 <a href="#pg30593d9cf652">systemd-networkd#Bridge interface</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg692dcce25557_.E9.80.9A.E8.BF.87_NetworkManager" id="通过_NetworkManager"><span id=".E9.80.9A.E8.BF.87_NetworkManager"></span>通过 NetworkManager</h3></div>
+<p>Gnome's NetworkManager can create bridges, but currently will not auto-connect to them. Open Network Settings, add a new interface of type Bridge, add a new bridged connection, and select the MAC address of the device to attach to the bridge.
+</p><p>Now, find the UUID of the attached device (by default named "bridge0 slave 1"):
+</p>
+<pre>$ nmcli connection
+</pre>
+<p>Finally, enable that connection:
+</p>
+<pre>$ nmcli con up &lt;UUID&gt;
+</pre>
+<p>If NetworkManager's default interface for the device you added to the bridge connects automatically, you may want to disable that by clicking the gear next to it in Network Settings, and unchecking "Connect automatically" under "Identity."
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg692dcce25557_.E5.88.86.E9.85.8D_IP_.E5.9C.B0.E5.9D.80" id="分配_IP_地址"><span id=".E5.88.86.E9.85.8D_IP_.E5.9C.B0.E5.9D.80"></span>分配 IP 地址</h2></div>
+<p>When the bridge is fully set up, it can be assigned an IP address:
+</p>
+<pre># ip addr add dev <i>bridge_name</i> 192.168.66.66/24
+</pre>
+
+<div class="mw-heading mw-heading2"><h2 data-bm="pg692dcce25557_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg692dcce25557_.E7.BD.91.E6.A1.A5.E4.BD.BF.E7.94.A8.E6.97.A0.E7.BA.BF.E7.BD.91.E7.BB.9C.E7.AB.AF.E5.8F.A3" id="网桥使用无线网络端口"><span id=".E7.BD.91.E6.A1.A5.E4.BD.BF.E7.94.A8.E6.97.A0.E7.BA.BF.E7.BD.91.E7.BB.9C.E7.AB.AF.E5.8F.A3"></span>网桥使用无线网络端口</h3></div>
+<p>To add a wireless interface to a bridge, you first have to assign the wireless interface to an access point or start an access point with <a href="#pg3ccf0d5298af">hostapd</a>. Otherwise the wireless interface will not be added to the bridge.
+</p><p>See also <a href="https://wiki.debian.org/BridgeNetworkConnections#Bridging_with_a_wireless_NIC">Bridging with a wireless NIC</a> on Debian wiki.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg692dcce25557_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><a href="https://www.linuxfoundation.org/collaborate/workgroups/networking/bridge">Official documentation for bridge-utils</a></li>
+<li><a href="https://www.linuxfoundation.org/collaborate/workgroups/networking/iproute2">Official documentation for iproute2</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807030522
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.118 seconds
+Real time usage: 0.124 seconds
+Preprocessor visited node count: 271/1000000
+Revision size: 4448/2097152 bytes
+Post‐expand include size: 5105/2097152 bytes
+Template argument size: 1381/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   30.584      1 -total
+ 16.25%    4.970      1 Template:过时
+ 14.39%    4.400      3 Template:META_Message
+ 10.21%    3.124      1 Template:翻译状态
+  9.31%    2.848      1 Template:Bad_translation_(简体中文)
+  8.91%    2.724      4 Template:Pkg
+  8.90%    2.723      1 Template:Expansion
+  7.80%    2.386      2 Template:Man
+  7.19%    2.198      1 Template:相关文章开始
+  5.99%    1.832      1 Template:Related
+-->
+<!-- Render ID d40bd10e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7019:|#|:idhash:canonical!zh-cn and timestamp 20260807030522 and revision id 33835. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

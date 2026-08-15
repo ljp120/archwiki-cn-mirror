@@ -1,0 +1,503 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg4dd7b88ce4b3">Bubblewrap/示例</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Bubblewrap/Examples">Bubblewrap/Examples</a>，最近一次同步于 2026-03-10，若英文版本有所<a href="https://wiki.archlinux.org/title/Bubblewrap/Examples?diff=0&amp;oldid=857627">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Bubblewrap_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Examples_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4dd7b88ce4b3_dhcpcd" id="dhcpcd">dhcpcd</h2></div>
+<p>创建一个简单的 <a href="#pg0d07347d2df8">dhcpcd</a> 沙箱：
+</p>
+<ul><li>确定可用的内核命名空间（kernel namespaces）：</li></ul>
+<pre>$ ls /proc/self/ns 
+cgroup  ipc  mnt  net  pid  uts
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>缺少 <code>user</code> 意味着内核以 <code>CONFIG_USER_NS=n</code> 参数构建或是被限制了用户命名空间（user namespace）。</div>
+<ul><li>将宿主的整个 <code>/</code> 目录以读写模式绑定到沙箱中的 <code>/</code>。</li>
+<li>将一个新的 devtmpfs 文件系统挂载到沙箱中的 <code>/dev</code>。</li>
+<li>创建一个新的 <a href="https://en.wikipedia.org/wiki/Inter-process_communication">IPC（进程间通信）</a>和 <a href="#pgaf57e242338f">cgroups（控制组)</a> 命名空间。</li>
+<li>创建一个新的 UTS 命名空间并将 <code>dhcpcd</code> 设置为主机名（hostname）。</li></ul>
+<pre># /usr/bin/bwrap --bind / / --dev /dev --unshare-ipc --unshare-cgroup --unshare-uts --hostname dhcpcd /usr/bin/dhcpcd -q -b
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4dd7b88ce4b3_Unbound" id="Unbound">Unbound</h2></div>
+<p>创建一个稍颗粒化和复杂的 <a href="#pg8323da89a762">Unbound</a> 沙箱： 
+</p>
+<ul><li>将宿主系统的 <code>/usr</code> 目录以只读模式绑定到沙箱中的 <code>/usr</code>。</li>
+<li>将宿主系统的 <code>/usr/lib</code> 目录软链接到沙箱中的 <code>/lib64</code>。</li>
+<li>将宿主系统的 <code>/etc</code> 目录以只读模式绑定到沙箱中的 <code>/etc</code>。</li>
+<li>在沙箱中创建空的 <code>/var</code> 和 <code>/run</code> 目录。</li>
+<li>将一个新的 devtmpfs 文件系统挂载到沙箱中的 <code>/dev</code>。</li>
+<li>创建一个新的 IPC（进程间通信）和 <a href="https://en.wikipedia.org/wiki/Process_identifier">PID（进程标识符）</a>以及控制组命名空间（control group namespaces）。</li>
+<li>创建一个新的 UTS 命名空间并将 <code>unbound</code> 设置为主机名（hostname）。</li></ul>
+<pre># /usr/bin/bwrap --ro-bind /usr /usr --symlink usr/lib /lib64 --ro-bind /etc /etc --dir /var --dir /run --dev /dev --unshare-ipc --unshare-pid --unshare-cgroup --unshare-uts --hostname unbound /usr/bin/unbound -d
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>参见 <a href="#pgac06dd8bfe95">systemd#修改现存单元文件</a>以了解如何启用 systemd 单元文件的 bubblewrapping，包括 <code>unbound.service</code>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4dd7b88ce4b3_MuPDF" id="MuPDF">MuPDF</h2></div>
+
+<p><br/>
+在 shell 包装器（wrapper）中创建环境时，能体现出 bwrap 的强大和灵活性：
+</p>
+<ul><li>将宿主系统的 <code>/usr/bin</code> 目录以只读模式绑定到沙箱中的 <code>/usr/bin</code>。</li>
+<li>将宿主系统的 <code>/usr/lib</code> 目录以只读模式绑定到沙箱中的 <code>/usr/lib</code>。</li>
+<li>将宿主系统的 <code>/usr/lib</code> 目录软链接到沙箱中的 <code>/lib64</code>。</li>
+<li>在沙箱中创建一个 <a href="#pg96f7efa88158">tmpfs</a> 文件系统，覆盖 <code>/usr/lib/gcc</code>。
+<ul><li>这么做可以有效地<a href="https://en.wikipedia.org/wiki/Blacklist_(computing)">阻止</a> <code>/usr/lib/gcc</code> 中的内容出现在沙箱中。</li></ul></li>
+<li>在沙箱中创建一个新的 tmpfs 文件系统，作为 <code>$HOME</code> 目录。</li>
+<li>将 <code>.Xauthority</code> 文件和“Documents”目录以只读模式绑定到沙箱。
+<ul><li>这么做可以有效且递归地允许访问 <code>.Xauthority</code> 文件和“Documents”目录。</li></ul></li>
+<li>在沙箱中创建一个新的 tmpfs 文件系统，作为 <code>/tmp</code> 目录。</li>
+<li>将 <a href="https://en.wikipedia.org/wiki/X_Window_System">X11</a> socket 以只读模式绑定到沙箱中以允许访问。</li>
+<li>复制并创建用于容纳宿主内核所支持的所有命名空间的私有容器（private containers）。
+<ul><li>如果内核不支持非特权的（non-privileged）用户命名空间，跳过创建过程并继续操作。</li></ul></li>
+<li>勿将网络组件放置到私有命名空间内。
+<ul><li>这么做可以允许联网访问 URI 超链接。</li></ul></li></ul>
+<pre>#!/bin/sh
+#~/bwrap/mupdf.sh
+(exec bwrap \
+--ro-bind /usr/bin /usr/bin \
+--ro-bind /usr/lib /usr/lib \
+--symlink usr/lib /lib64 \
+--tmpfs /usr/lib/gcc \
+--tmpfs $HOME \
+--ro-bind $HOME/.Xauthority $HOME/.Xauthority \
+--ro-bind $HOME/Documents $HOME/Documents \
+--tmpfs /tmp \
+--ro-bind /tmp/.X11-unix/X0 /tmp/.X11-unix/X0 \
+ --unshare-all \
+--share-net \
+/usr/bin/mupdf "$@")
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>使用 <code>/usr/bin/sh</code> 执行作为已存在的可执行项目的替代的命令包装器以调试和验证沙箱中的内容和文件系统结构。</div>
+<pre>$ bwrap \
+--ro-bind /usr/bin /usr/bin \
+--ro-bind /usr/lib /usr/lib \
+--symlink usr/lib /lib64 \
+--tmpfs /usr/lib/gcc \
+--tmpfs $HOME \
+--ro-bind $HOME/.Xauthority $HOME/.Xauthority \
+--ro-bind $HOME/Desktop $HOME/Desktop \
+--tmpfs /tmp \
+--ro-bind /tmp/.X11-unix/X0 /tmp/.X11-unix/X0 \
+--unshare-all \
+--share-net \
+ /usr/bin/sh
+bash-4.4$ ls -AF
+.Xauthority  Documents/
+</pre>
+<p>或许在构建一个被 bubblewrap 的文件系统时需考虑到的最重要的规则是：“命令应该按出现的顺序依次执行”。
+根据上面的 <a href="https://mupdf.com/">MuPDF</a> 示例：
+</p>
+<ul><li>首先创建了一个 tmpfs 文件系统，其次是绑定并挂载 <code>.Xauthority</code> 文件和“Documents”目录：</li></ul>
+<pre>--tmpfs $HOME \
+--ro-bind $HOME/.Xauthority $HOME/.Xauthority \
+--ro-bind $HOME/Documents $HOME/Documents \
+</pre>
+<pre>bash-4.4$ ls -a
+.  ..  .Xauthority  Desktop
+</pre>
+<ul><li>如果在绑定挂载 <code>.Xauthority</code> 后再创建 tmpfs 文件系统，结果将覆盖先前文件，因此沙箱中只能够找到“Documents”这个目录：</li></ul>
+<pre>--ro-bind $HOME/.Xauthority $HOME/.Xauthority \
+--tmpfs $HOME \
+--ro-bind $HOME/Desktop $HOME/Desktop \
+</pre>
+<pre>bash-4.4$ ls -a
+.  ..  Desktop
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4dd7b88ce4b3_p7zip" id="p7zip">p7zip</h2></div>
+<p>还未对<a href="https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2016-9296">已知漏洞</a>进行修补的应用程序是 bubblewrap 的主要候选对象：
+</p>
+<ul><li>将宿主系统中的 <code>/usr/bin/7za</code> 可执行文件路径以只读模式绑定到沙箱中。</li>
+<li>将宿主系统的 <code>/usr/lib</code> 目录软链接到沙箱中的 <code>/lib64</code>。</li>
+<li>用 tmpfs 文件系统覆盖以禁用沙箱中 <code>/usr/lib/modules</code> 和 <code>/usr/lib/systemd</code> 的内容。</li>
+<li>将一个新的 devtmpfs 文件系统挂载到沙箱中的 <code>/dev</code>。</li>
+<li>将宿主系统的 <code>/sandbox</code> 目录以读写模式绑定到沙箱中的 <code>/sandbox</code>。
+<ul><li><i>7za</i> 仅会在宿主的 <code>/sandbox</code> 目录中运行，或在被 shell 包装器调用时，在其子文件夹中运行。</li></ul></li>
+<li>为应用程序及其进程创建新的 cgroup、IPC、network、PID 和 UTS 命名空间。
+<ul><li>如果内核不支持非特权的用户命名空间，跳过创建过程并继续操作。</li>
+<li>新创建的 network 命名空间将阻止沙箱获取网络访问权限。</li></ul></li>
+<li>为沙箱<a href="#pgf42a74f3af9c">设置计算机名</a>，例如 <code>p7zip</code>。</li>
+<li>取消设置 <code>XAUTHORITY</code> <a href="#pg4989d4f46056">环境变量</a>以隐藏 X11 conection cookie 的位置。
+<ul><li><i>7za</i> 正常运行时不需要连接到 X11 显示服务。</li></ul></li>
+<li>启动一个新的终端会话，防止键盘输入从沙箱中逃逸。</li></ul>
+<pre>#!/bin/sh
+#~/bwrap/pz7ip.sh
+(exec bwrap \
+--ro-bind /usr/bin/7za /usr/bin/7za \
+--symlink usr/lib /lib64 \
+--tmpfs /usr/lib/modules \
+--tmpfs /usr/lib/systemd \
+--dev /dev \
+--bind /sandbox /sandbox \
+--unshare-all \
+--hostname p7zip \
+--unsetenv XAUTHORITY \
+--new-session \
+/usr/bin/7za "$@")
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><i>/usr/bin/sh</i> 和 <i>/usr/bin/ls</i> 必须在可执行文件路径中才能遍历和验证沙箱的文件系统。</div>
+<pre>bwrap \
+--ro-bind /usr/bin/7za /usr/bin/7za \
+<b>--ro-bind /usr/bin/ls /usr/bin/ls \</b>
+<b>--ro-bind /usr/bin/sh /usr/bin/sh \</b>
+--symlink usr/lib /lib64 \
+--tmpfs /usr/lib/modules \
+--tmpfs /usr/lib/systemd \
+--dev /dev \
+--bind /sandbox /sandbox \
+--unshare-all \
+--hostname p7zip \
+--unsetenv XAUTHORITY \
+--new-session \
+/usr/bin/sh
+bash: no job control in this shell
+bash-4.4$ ls -AF         
+dev/  lib64@  usr/
+bash-4.4$ ls -l /usr/lib/modules 
+total 0
+bash-4.4$ ls -l /usr/lib/systemd
+total 0
+bash-4.4$ ls -AF /dev
+console  full  null  ptmx@  pts/  random  shm/  stderr@  stdin@  stdout@  tty  urandom  zero
+bash-4.4$ ls -A /usr/bin
+7za  ls  sh
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4dd7b88ce4b3_Firefox" id="Firefox">Firefox</h2></div>
+<p>面向网络且拥有巨大的潜在被攻击面的应用程序同样是 bubblewrap 的理想候选对象：
+</p>
+<ul><li>将 <a href="#pg8dd204067b88">Transmission</a> 包含在沙箱中以响应磁力链接和种子链接并启动。</li>
+<li>示例的 wrap 在<a href="#pg1e095fe2c2a6">GNOME</a>（<a href="#pga21a6be8b605">Wayland</a>）下支持音频（<a href="#pga942ba974b3d">PulseAudio</a>）和打印服务（<a href="#pg9c40a97c403d">CUPS</a>/<a href="#pg242a535d9977">Avahi</a>）。
+<ul><li><code>~/.config/transmission/settings.json</code> 中的 PATH 应反映 <code>--setenv HOME</code> 变量。</li></ul></li>
+<li>环境中的按键绑定不支持变量扩展，因此使用了完整路径。</li>
+<li>同时还支持 <a href="#pg9b5d7fec8088">WebRenderer</a> 和硬件加速混成。</li></ul>
+<pre>bwrap \
+--symlink usr/lib /lib \
+--symlink usr/lib64 /lib64 \
+--symlink usr/bin /bin \
+--symlink usr/bin /sbin \
+--ro-bind /usr/lib /usr/lib \
+--ro-bind /usr/lib64 /usr/lib64 \
+--ro-bind /usr/bin /usr/bin \
+--ro-bind /usr/lib/firefox /usr/lib/firefox \
+--ro-bind /usr/share/applications /usr/share/applications \
+--ro-bind /usr/share/gtk-3.0 /usr/share/gtk-3.0 \
+--ro-bind /usr/share/fontconfig /usr/share/fontconfig \
+--ro-bind /usr/share/icu /usr/share/icu \
+--ro-bind /usr/share/drirc.d /usr/share/drirc.d \
+--ro-bind /usr/share/fonts /usr/share/fonts \
+--ro-bind /usr/share/glib-2.0 /usr/share/glib-2.0 \
+--ro-bind /usr/share/glvnd /usr/share/glvnd \
+--ro-bind /usr/share/icons /usr/share/icons \
+--ro-bind /usr/share/libdrm /usr/share/libdrm \
+--ro-bind /usr/share/mime /usr/share/mime \
+--ro-bind /usr/share/X11/xkb /usr/share/X11/xkb \
+--ro-bind /usr/share/icons /usr/share/icons \
+--ro-bind /usr/share/mime /usr/share/mime \
+--ro-bind /etc/fonts /etc/fonts \
+--ro-bind /etc/resolv.conf /etc/resolv.conf \
+--ro-bind /usr/share/ca-certificates /usr/share/ca-certificates \
+--ro-bind /etc/ssl /etc/ssl \
+--ro-bind /etc/ca-certificates /etc/ca-certificates \
+--dir "$XDG_RUNTIME_DIR" \
+--ro-bind "$XDG_RUNTIME_DIR/pulse" "$XDG_RUNTIME_DIR/pulse" \
+--ro-bind "$XDG_RUNTIME_DIR/wayland-1" "$XDG_RUNTIME_DIR/wayland-1" \
+--dev /dev \
+--dev-bind /dev/dri /dev/dri \
+--ro-bind /sys/dev/char /sys/dev/char \
+--ro-bind /sys/devices/pci0000:00 /sys/devices/pci0000:00 \
+--proc /proc \
+--tmpfs /tmp \
+--bind /home/example/.mozilla /home/example/.mozilla \
+--bind /home/example/.config/transmission /home/example/.config/transmission \
+--bind /home/example/Downloads /home/example/Downloads \
+--setenv HOME /home/example \
+--setenv GTK_THEME Adwaita:dark \
+--setenv MOZ_ENABLE_WAYLAND 1 \
+--setenv PATH /usr/bin \
+--hostname RESTRICTED \
+--unshare-all \
+--share-net \
+--die-with-parent \
+--new-session \
+/usr/bin/firefox
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4dd7b88ce4b3_.E5.A2.9E.E5.BC.BA.E9.9A.90.E7.A7.81.E4.BF.9D.E6.8A.A4" id="增强隐私保护"><span id=".E5.A2.9E.E5.BC.BA.E9.9A.90.E7.A7.81.E4.BF.9D.E6.8A.A4"></span>增强隐私保护</h3></div>
+<ul><li>移除特定条目可以增加访问限制。
+<ul><li>移除下面的条目可以取消音频支持：</li></ul></li></ul>
+<pre>--ro-bind "$XDG_RUNTIME_DIR/pulse" "$XDG_RUNTIME_DIR/pulse" \
+</pre>
+<ul><li><code>/sandbox</code> 作为用户所定义的目录，并没有特殊含义，仅用于存放所需的个人资料信息。
+<ul><li>可通过脚本或定时任务，也可手动将<a href="#pg5cc59e2910b1">清理过的配置文件</a>复制到 <code>/sandbox</code>。</li></ul></li></ul>
+<pre>$ cp -pR ~/.mozilla /sandbox/
+</pre>
+<p>文件位置可以来自网络共享、USB 挂载设备，或是来自本地文件系统，甚至是 <a href="#pgfdbcc5602284">ramfs 或 tmpfs</a>。
+</p>
+<ul><li>设置 <code>/home/r</code> 以隐藏真实的 <code>/home/example</code>。</li>
+<li>设置新的用户标识符和组标识符。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>确保新的用户标识符（UID）和组标识符（GID）不会与 <code>/etc/passwd</code> 和 <code>/etc/groups</code> 中已存在的值相冲突。</div>
+<pre>bwrap \
+....
+--bind /sandbox/.mozilla /home/r/.mozilla \
+--bind /sandbox/Downloads /home/r/Downloads \
+...
+--setenv HOME /home/r \
+...
+--uid 200 --gid 400 \
+...
+/usr/bin/firefox --no-remote --private-window
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4dd7b88ce4b3_Chromium" id="Chromium">Chromium</h2></div>
+<p>下面是 Wayland 下运行 Chromium 沙箱的简单示例：
+</p>
+<pre>bwrap \
+    --symlink usr/lib /lib \
+    --symlink usr/lib64 /lib64 \
+    --symlink usr/bin /bin \
+    --symlink usr/bin /sbin \
+    --ro-bind /usr/lib /usr/lib \
+    --ro-bind /usr/lib64 /usr/lib64 \
+    --ro-bind /usr/bin /usr/bin \
+    --ro-bind /etc /etc \
+    --ro-bind /usr/lib/chromium /usr/lib/chromium \
+    --ro-bind /usr/share /usr/share \
+    --dev /dev \
+    --dev-bind /dev/dri /dev/dri \
+    --proc /proc \
+    --ro-bind /sys/dev/char /sys/dev/char \
+    --ro-bind /sys/devices /sys/devices \
+    --ro-bind /run/dbus /run/dbus \
+    --dir "$XDG_RUNTIME_DIR" \
+    --ro-bind "$XDG_RUNTIME_DIR/wayland-1" "$XDG_RUNTIME_DIR/wayland-1" \
+    --ro-bind "$XDG_RUNTIME_DIR/pipewire-0" "$XDG_RUNTIME_DIR/pipewire-0" \
+    --ro-bind "$XDG_RUNTIME_DIR/pulse" "$XDG_RUNTIME_DIR/pulse" \
+    --tmpfs /tmp \
+    --dir $HOME/.cache \
+    --bind $HOME/.config/chromium $HOME/.config/chromium \
+    --bind $HOME/Downloads $HOME/Downloads \
+    /usr/bin/chromium --enable-features=UseOzonePlatform --ozone-platform=wayland</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>如果用户正在使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 内核，由于 <code>kernel.unprivileged_userns_clone</code> <a href="#pg7b7cc2bbe79a">sysctl</a> 已被设置为 0，会无法实现沙箱运行 chromium。用户可以自行设置为 1，但不建议这么做（<a href="https://bugs.archlinux.org/task/36969">FS#36969</a>）。
+<p>一种解决方法是让 chromium 使用 bubblewrap 创建的命名空间。可以用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zypak/">zypak</a></span><sup><small>AUR</small></sup></span> 实现，这个方法同样被 flatpak 用于在一个额外命名空间中运行基于 electron 的应用程序。<a href="https://github.com/valoq/bwscripts/blob/master/profiles/signal-desktop">这个链接</a>是有关如何使用 zypak 运行 chromium/electron 的示例代码。
+</p>
+</div>
+<ul><li><a href="#pgfd2dc6e44edd">PipeWire</a>：<code>--ro-bind "$XDG_RUNTIME_DIR/pipewire-0" "$XDG_RUNTIME_DIR/pipewire-0" \</code>
+<ul><li>不使用 pipewire 的用户可移除此行内容。</li></ul></li>
+<li><code>--bind $HOME/.config/chromium $HOME/.config/chromium \</code> 将用户的 chromium 配置目录以读写模式挂载到沙箱中。</li>
+<li><code>--bind $HOME/Downloads $HOME/Downloads \</code> 将用户的“~/Downloads”目录以读写模式挂载到沙箱中。</li>
+<li>通过增加更多隔离处理可优化本例。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4dd7b88ce4b3_Steam" id="Steam">Steam</h2></div>
+
+<p><br/>
+Steam 正常运行时需要访问 D-Bus。
+</p><p>下面的示例使用 <code>xdg-dbus-proxy</code> 将有限的宿主系统 bus 访问权限暴露给沙箱。一旦 bwrap 退出，此 proxy 将被一同终止。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">steam.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/env python3
+from glob import glob
+import os
+from pathlib import Path
+import subprocess
+
+HOME = Path.home()
+XDG_RUNTIME_DIR = Path(os.getenv("XDG_RUNTIME_DIR", "/tmp"))
+XDG_CACHE_HOME = Path(os.getenv("XDG_CACHE_HOME", HOME / ".cache"))
+XDG_DATA_HOME = Path(os.getenv("XDG_DATA_HOME", HOME / ".local/share"))
+DBUS_PROXY_PATH = XDG_RUNTIME_DIR / "bus-proxy"
+DBUS_PROXY_PATH.mkdir(exist_ok=True, parents=True)
+
+# 
+STEAM_HOME = XDG_DATA_HOME / "steam_home"
+STEAM_HOME.mkdir(exist_ok=True, parents=True)
+
+# xdg-dbus-proxy
+r, w = os.pipe()
+session_bus_proxy = DBUS_PROXY_PATH / str(os.getpid())
+system_bus_proxy = DBUS_PROXY_PATH / f"{os.getpid()}-system"
+subprocess.Popen([
+    "/usr/bin/xdg-dbus-proxy",
+    f"--fd={w}",
+    # session bus
+    os.environ["DBUS_SESSION_BUS_ADDRESS"],
+    str(session_bus_proxy),
+    "--filter",
+    "--own=com.steampowered.*",
+    "--talk=org.freedesktop.portal.*",
+    "--talk=org.gnome.SettingsDaemon.MediaKeys",
+    "--talk=org.kde.StatusNotifierWatcher",
+    "--talk=org.freedesktop.ScreenSaver",
+    "--talk=org.freedesktop.PowerManagement",
+    "--talk=org.freedesktop.Notifications",
+    # systrem bus
+    "unix:path=/run/dbus/system_bus_socket",
+    str(system_bus_proxy),
+    "--filter",
+    "--talk=org.freedesktop.UPower",
+    "--talk=org.freedesktop.UDisks2",  # used by wine
+], pass_fds=[w])
+# wait xdg-dbus-proxy to start
+os.read(r, 1)
+os.set_inheritable(r, True)
+
+# bwrap
+argv: list[str] = [
+    "bwrap",
+    "--bind", str(STEAM_HOME), str(HOME),
+    "--proc", "/proc",
+    "--dev", "/dev",
+    "--dir", "/tmp",
+    "--unshare-cgroup-try",
+    "--unshare-pid",
+    "--unshare-user-try",
+    "--unshare-uts",
+    "--die-with-parent",
+    "--sync-fd", str(r), # ensures dbus proxy stops when the bwrap bwrap quits
+    "--bind", str(system_bus_proxy), "/run/dbus/system_bus_socket",
+    "--bind", str(session_bus_proxy), str(XDG_RUNTIME_DIR / "bus"),
+]
+def rw(*paths): argv.extend([i for path in paths for i in ("--bind-try", str(path), str(path))])
+def ro(*paths): argv.extend([i for path in paths for i in ("--ro-bind-try", str(path), str(path))])
+def dev(*paths): argv.extend([i for path in paths for i in ("--dev-bind-try", str(path), str(path))])
+def link(*links): argv.extend([i for link in links for i in ("--symlink", str(link[0]), str(link[1]))])
+
+
+rw(
+    "/usr",
+    "/etc",
+    "/opt",
+    "/run/systemd/resolve/",
+    # WARNING: Forwarding the X11 is insecure and might lead to sandbox escapes
+    "/tmp/.X11-unix",
+    "/tmp/.ICE-unix",
+    *glob(str(XDG_RUNTIME_DIR / "wayland*")),
+    # audio
+    "/var/lib/alsa/",
+    *glob(str(XDG_RUNTIME_DIR / "pulse*")),
+    *glob(str(XDG_RUNTIME_DIR / "pipewire*")),
+    # shader cache
+    XDG_CACHE_HOME / "mesa_shader_cache",
+    XDG_CACHE_HOME / "mesa_shader_cache_db",
+    XDG_CACHE_HOME / "nv",
+    XDG_CACHE_HOME / "nvidia",
+    XDG_CACHE_HOME / "radv_builtin_shaders",
+    XDG_CACHE_HOME / "radv_builtin_shaders64",
+    # steam
+    XDG_DATA_HOME / "Steam",
+)
+link(
+    ("/usr/bin", "/bin"),
+    ("/usr/bin", "/sbin"),
+    ("/usr/lib", "/lib"),
+    ("/usr/lib64", "/lib64"),
+    ("/run", "/var/run"),
+)
+dev(
+    "/dev/dri",
+    "/dev/input",
+    "/dev/hugepages",
+    *glob("/dev/nvidia*"),
+    "/dev/snd",
+    "/dev/fuse",
+    "/sys/block/",
+    "/sys/bus/",
+    "/sys/class/",
+    "/sys/dev/",
+    "/sys/devices/",
+    "/sys/module/",
+)
+os.execvp("bwrap", argv + ["--sync-fd", str(r), "/usr/lib/steam/steam"])</pre>
+<ul><li>本例中将 <code>$XDG_DATA_HOME/steam_home</code> 挂载为 <code>$HOME</code>。用户可以自行将 <code>STEAM_HOME</code> 修改为其他位置。</li>
+<li>Use the <code>rw()</code> or <code>ro()</code> functions to grant read/write or read-only access, respectively, to a host path. For example, <code>rw("HOME/.config/unity3d")</code>.</li>
+<li>使用 <code>rw()</code> 或 <code>ro()</code> 以授予宿主 path 的读写或只读权限。例如 <code>rw("HOME/.config/unity3d")</code>。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4dd7b88ce4b3_NPM.2C_Node_Version_Manager_.28NVM.29.2C_Maven_Java" id="NPM,_Node_Version_Manager_(NVM),_Maven_Java"><span id="NPM.2C_Node_Version_Manager_.28NVM.29.2C_Maven_Java"></span>NPM, Node Version Manager (NVM), Maven Java</h2></div>
+<p>为能在项目的工作目录中使用 bubblewrap 运行“npm”，可以参考下面的命令示例。
+</p><p>Bubblewrap 能够与 Angular、Cypress 和 Maven Java 共同使用并工作良好。X11 和 Wayland 需要被包含在最开始，因为 Cypress 会启动一个基于 Electron 的图形界面。
+</p><p>假设用户在项目工作目录下执行 <code>npm install</code>，同时“npm”需要读写 <code>node_modules</code>、<code>package.json</code> 等文件，这种方式允许在程序启动目录中拥有完整的文件访问权限。同时“npm”和“nvm”（<code>npm -g install ...</code>）也可以访问的全局安装目录。此外 Cypress 也可以运行在 X11 或 Wayland 下。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>绑定到 zsh、maven 和其他的目录可能与实际情况有所不同。</div>
+<pre>bwrap_arguments=(
+    # 避免成为僵尸进程
+    --die-with-parent
+
+    # 依赖项需要网络访问
+    --unshare-all
+    --share-net
+
+    # 创建正确的运行环境
+    --tmpfs /
+    --tmpfs /run
+    --dir /tmp
+    --dev /dev
+    --proc /proc
+    --ro-bind /bin /bin
+    --ro-bind /sbin /sbin
+    --ro-bind /usr /usr
+    --ro-bind /etc /etc
+    --ro-bind /lib /lib
+    --ro-bind /lib64 /lib64
+    --ro-bind /sys /sys
+    --ro-bind /var /var
+
+    # systemd-resolve for dns
+    --ro-bind /run/systemd/resolve /run/systemd/resolve
+
+    # npm 初始化仓库时会使用 git，确保已配置好 email 和 username 项
+    --ro-bind $XDG_CONFIG_HOME/git/config $XDG_CONFIG_HOME/git/config
+
+    # zsh has to look everywhere cool
+    --ro-bind $XDG_CONFIG_HOME/zsh/.zshrc $XDG_CONFIG_HOME/zsh/.zshrc
+    --ro-bind $XDG_CONFIG_HOME/zsh/.zshenv $XDG_CONFIG_HOME/zsh/.zshenv
+    --ro-bind $HOME/.zshenv $HOME/.zshenv
+
+    # Maven
+    --ro-bind /opt/maven /opt/maven
+    --ro-bind $HOME/.m2 $HOME/.m2
+
+    # NPM
+    --bind "$XDG_DATA_HOME/npm" "$XDG_DATA_HOME/npm"
+
+    # npm、cypress、nvm、maven 等程序需要使用 cache
+    --bind "$XDG_CACHE_HOME" "$XDG_CACHE_HOME"
+
+    # x11, needed for cypress
+    --ro-bind "$XAUTHORITY" "$XAUTHORITY"
+
+    # wayland, might be useful
+    --ro-bind "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"
+
+    # 假定运行时所在的目录是项目工作目录，并且拥有完全的访问权限
+    --bind "$(pwd)" "$(pwd)"
+)
+
+# 以上方指定的参数运行 bwrap 处理的用户命令：
+$ bwrap "${bwrap_arguments[@]}" "$@"</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807191347
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.272 seconds
+Real time usage: 0.285 seconds
+Preprocessor visited node count: 692/1000000
+Revision size: 20277/2097152 bytes
+Post‐expand include size: 14360/2097152 bytes
+Template argument size: 9368/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  158.526      1 -total
+ 69.78%  110.626      1 Template:翻译状态
+  5.86%    9.292     69 Template:Ic
+  4.36%    6.905      2 Template:Accuracy
+  4.35%    6.900      1 Template:警告
+  2.59%    4.113      4 Template:注意
+  1.49%    2.357      2 Template:META_Message
+  1.23%    1.943      1 Template:Pkg
+  1.08%    1.713      2 Template:提示
+  0.81%    1.286      2 Template:Bc
+-->
+<!-- Render ID 1d53338e-9294-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8365:|#|:idhash:canonical!zh-cn and timestamp 20260807191347 and revision id 34936. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

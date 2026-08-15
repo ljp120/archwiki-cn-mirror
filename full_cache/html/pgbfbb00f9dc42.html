@@ -1,0 +1,142 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgbfbb00f9dc42">Minecraft/Java 版服务端</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Minecraft/Java_Edition_server">Minecraft/Java Edition server</a>，最近一次同步于 2025-03-17，若英文版本有所<a href="https://wiki.archlinux.org/title/Minecraft/Java_Edition_server?diff=0&amp;oldid=828102">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Minecraft_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Java_Edition_server_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>Minecraft 是一个<a href="https://en.wikipedia.org/wiki/Multiplayer_video_game">多人游戏</a>。它使用<a href="https://en.wikipedia.org/wiki/Client-server_model">客户端-服务端模型</a>，游戏本体是一个可以独立游玩的客户端，连接到服务器时也可以和其他玩家一起游玩。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>第三方可以运行 Minecraft 服务端。您应当阅读它们的隐私政策来知晓它们如何处理您的数据。一些服务器需要登录第三方账户，还有一些支持通过小额交易购买物品。即使这可能违反了 <a href="https://www.minecraft.net/zh-hans/eula">Minecraft 最终用户许可协议 (“EULA”)</a>，具体取决于服务器销售的内容。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbfbb00f9dc42_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>Java 版 Minecraft 服务端可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/minecraft-server/">minecraft-server</a></span><sup><small>AUR</small></sup></span> 包来安装。它附带一个 <a href="#pgac06dd8bfe95">systemd</a> 单元文件和一个小巧的控制脚本。
+</p><p>请参阅#可用于替代的服务端来了解一些可替代 Minecraft 服务端的应用的简介。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbfbb00f9dc42_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<p>安装过程会创建 <code>minecraft</code> 用户和用户组。出于安全原因，我们推荐创建一个特殊的 minecraft 用户。在一个无特权用户下运行 Minecraft 可以使任何攻破您的服务器的人仅获得该用户的权限，而您自己的则完好无损。
+不过，您需要安全地将您的用户添加到 <code>minecraft</code> 组，并授予该组 <code>/srv/minecraft</code>（默认）目录的写权限以修改 Minecraft 服务端配置。确保<code>/srv/minecraft</code> 目录下的所有文件均属于 <code>minecraft</code> 用户，或者让其他用户拥有这些文件的读写权。如果服务端无法访问某些文件且没有足够的权限将错误消息写入日志，那么它会出错。
+</p><p>这个软件包提供了一个 systemd 服务和一个计时器来自动备份。默认情况下，备份位于服务器根目录的 <code>backup</code> 文件夹下。为节省磁盘空间，服务端只会保留 10 个最新的备份（可通过  <code>KEEP_BACKUPS</code> 进行配置）。相关的 systemd 文件是 <code>minecraftd-backup.timer</code> 和 <code>minecraftd-backup.service</code>。您可凭喜好<a href="#pgfbacf3a1812d">编辑</a>它们，例如遵循自定义的备份周期。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_.E5.90.AF.E5.8A.A8.E6.9C.8D.E5.8A.A1.E7.AB.AF" id="启动服务端"><span id=".E5.90.AF.E5.8A.A8.E6.9C.8D.E5.8A.A1.E7.AB.AF"></span>启动服务端</h3></div>
+<p>您可以通过 systemd 或命令行来启动服务端。无论使用哪种方式，服务端都被封装在 <code>minecraft</code> 用户的 <a href="#pgf321cb9cdda1">tmux</a> 会话中。使用 systemd，你可以<a href="#pg75b0ec583607">启动/启用</a>其包含的 <code>minecraftd.service</code>。此外，也可以执行：
+</p>
+<pre># minecraftd start
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_.E6.8E.A5.E5.8F.97_EULA" id="接受_EULA"><span id=".E6.8E.A5.E5.8F.97_EULA"></span>接受 EULA</h3></div>
+<p>要运行 Minecraft 服务端，您必须接受 EULA（End User License Agreement，最终用户许可协议），您只需在安装后接受即可。<a href="https://en.wikipedia.org/wiki/EULA">EULA</a> 文件由服务端软件包创建，位于 <code>/srv/minecraft/eula.txt</code>。请编辑该文件来声明您接受 EULA。您只需编辑：
+</p>
+<pre>eula=false
+</pre>
+<p>将其值改为 <code>true</code>。以下是一份被接受的 EULA 的样例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/srv/minecraft/eula.txt</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#By changing the setting below to TRUE you are indicating your agreement to our EULA (<a href="https://account.mojang.com/documents/minecraft_eula">https://account.mojang.com/documents/minecraft_eula</a>).
+#Sat Sep 11 11:11:11 PDT 2011
+eula=true</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_.E9.98.B2.E7.81.AB.E5.A2.99.E9.85.8D.E7.BD.AE" id="防火墙配置"><span id=".E9.98.B2.E7.81.AB.E5.A2.99.E9.85.8D.E7.BD.AE"></span>防火墙配置</h3></div>
+<p><code>server.properties</code> 包含三个设置用于确定您使用的端口：
+</p><p><code>server-port</code> 用于确定监听传入连接所使用的 <code>TCP</code> 端口，默认为 <code>25565</code>。
+</p><p><code>query.port</code> 用于确定共享游戏信息所使用的 <code>UDP</code> 端口，默认为 <code>25565</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>要注意 <code>server.port</code> 是 TCP 而 <code>query.port</code> 是 UDP，它们可以共用同一端口。要启用 query，您还需要单独设置 <code>enable-query=true</code>。</div>
+<p><code>rcon.port</code> 用于确定远程连接管理终端所使用的 TCP 端口， 前提是您需要允许远程连接，默认端口为 <code>25575</code>。要启用 rcon，您需要单独设置 <code>enable-rcon=true</code> 和 <code>rcon.password=...</code>。
+</p><p>您至少应当开启 <code>server-port</code> 以允许传入连接，建议允许 query 并开启 <code>query.port</code>。此外，允许远程控制会带来风险，开启前请三思。
+</p><p>以上是官方服务端的配置方法。若您使用其他替代的服务端，请阅读它们的文档以获取更多细节及配置方法。
+</p><p>参阅 <a href="https://minecraft.wiki/Tutorials/Setting_up_a_server">[1]</a> 和 <a href="https://minecraft.wiki/Server.properties">[2]</a> 以获取更多信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_.E6.9C.8D.E5.8A.A1.E7.AB.AF.E7.AE.A1.E7.90.86.E8.84.9A.E6.9C.AC" id="服务端管理脚本"><span id=".E6.9C.8D.E5.8A.A1.E7.AB.AF.E7.AE.A1.E7.90.86.E8.84.9A.E6.9C.AC"></span>服务端管理脚本</h3></div>
+<p>您可以使用软件包提供的 <code>minecraftd</code> 脚本来容易地管理服务端。它可以执行一些简单的诸如 <code>start</code>、<code>stop</code>、<code>restart</code> 的基本命令或使用 <code>console</code> 连接到会话。更进一步地，您可以使用 <code>status</code> 查看状态信息，用 <code>backup</code> 备份服务端的世界目录，用 <code>restore</code> 从备份恢复您的世界或使用 <code>command <i>要执行的命令</i></code> 在服务器控制台上运行单条命令。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>关于服务器控制台（可通过 <code>minecraftd console</code> 访问），请知晓您可以使用 <code>ctrl+b</code> <code>d</code> 快捷键退出任意 <a href="#pgf321cb9cdda1">tmux</a> 会话。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_.E8.B0.83.E6.95.B4" id="调整"><span id=".E8.B0.83.E6.95.B4"></span>调整</h3></div>
+<p>要调整默认设置（如最大 RAM、线程数等），请修改 <code>/etc/conf.d/minecraft</code>。
+</p><p>例如，更多的高级用户可能会想将 <code>IDLE_SERVER</code> 设为 <code>true</code>，这会使服务端在 <code>IDLE_IF_TIME</code> 定义的时长（默认为 20 分钟）内没有玩家后暂停。当服务端被暂停时，一个 <code>idle_server</code> 会使用来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nmap">nmap</a></span><sup><small>包</small></sup></span> 的 <span class="plainlinks archwiki-template-man" title="$ man 1 ncat"><a href="https://man.archlinux.org/man/ncat.1">ncat(1)</a></span>（或其他 <a href="#pg732e81ef4cca">netcat</a> 实现）监听 Minecraft 端口，当有连接传入时，会立即启动服务端。这可能会推迟暂停后的第一个连入请求，但它可以显著降低 CPU 和内存占用，实现更合理的资源及功耗水平。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果在第一次运行时启用该选项，<code>/srv/minecraft/eula.txt</code> 将不会被创建，初次启动时您需要禁用它。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbfbb00f9dc42_.E5.8F.AF.E7.94.A8.E4.BA.8E.E6.9B.BF.E4.BB.A3.E7.9A.84.E6.9C.8D.E5.8A.A1.E7.AB.AF" id="可用于替代的服务端"><span id=".E5.8F.AF.E7.94.A8.E4.BA.8E.E6.9B.BF.E4.BB.A3.E7.9A.84.E6.9C.8D.E5.8A.A1.E7.AB.AF"></span>可用于替代的服务端</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_Spigot.EF.BC.88.E5.8C.BA.E5.88.AB.E4.BA.8ECraftbukkit.EF.BC.89" id="Spigot（区别于Craftbukkit）"><span id="Spigot.EF.BC.88.E5.8C.BA.E5.88.AB.E4.BA.8ECraftbukkit.EF.BC.89"></span>Spigot（区别于Craftbukkit）</h3></div>
+<p><a href="https://www.spigotmc.org/">Spigot（水龙头服）</a>是世界上使用最广泛的修改版服务端。您可使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/spigot/">spigot</a></span><sup><small>AUR</small></sup></span> 安装它。spigot 的 PKGBUILD 在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/minecraft-server/">minecraft-server</a></span><sup><small>AUR</small></sup></span> 上构建，这意味着它具有自己的 systemd 单元文件、spigot 脚本和相应的脚本配置文件。其二进制文件名为 <code>spigot</code>，与 <code>minecraftd</code> 的命令相同。配置文件位于 <code>/etc/conf.d/spigot</code>。
+</p><p>确保您已阅读#配置章节，并无论何处都将所有的 <code>minecraftd</code> 替换为 <code>spigot</code> 。
+</p><p>它与 <a href="https://bukkit.org/">Bukkit（水桶服）</a>有点故事，且在 bukkit 陨落后越发受到欢迎。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_Cuberite" id="Cuberite">Cuberite</h3></div>
+<p><a href="https://cuberite.org/">Cuberite</a> 是一个高性能且可扩展的服务端，由 C++ 和 Lua 编写 ，其性能远超原版 Minecraft 服务端，但其与最新的 Minecraft 客户端不完全兼容（一些游戏特性可能会缺失或不工作）。
+</p><p>Cuberite Minecraft 服务端可作为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cuberite/">cuberite</a></span><sup><small>AUR</small></sup></span> 安装，其在 <code>8080</code> 端口默认提供一个简单的 web 界面，可以通过浏览器设置大部分的服务器选项，cuberite 的 PKGBUILD 在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/minecraft-server/">minecraft-server</a></span><sup><small>AUR</small></sup></span> 的文件上构建，这意味着 cuberite 服务端提供了它自己的 systemd 单元文件、cuberite 脚本和相应的脚本配置文件。其二进制文件名为 <code>cuberite</code>，与 <code>minecraftd</code> 的命令相同，配置文件位于 <code>/etc/conf.d/cuberite</code>。
+</p><p>确保您已阅读#配置并将您遇到的所有的 <code>minecraftd</code> 替换为 <code>cuberite</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_PaperMC" id="PaperMC">PaperMC</h3></div>
+<p><a href="https://papermc.io">PaperMC（纸服）</a>是一个 Minecraft 服务端，兼容 Spigot 的插件，旨在提供更佳性能。通过  <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/papermc/">papermc</a></span><sup><small>AUR</small></sup></span> 安装该服务端。
+</p><p>确保您已阅读#配置并将您遇到的所有 <code>minecraftd</code> 替换为 <code>papermc</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_Forge" id="Forge">Forge</h3></div>
+<p><a href="https://minecraftforge.net">Forge</a> 是一个使用广泛的 Minecraft 模组 API。有以下服务端软件包可用：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/forge-server/">forge-server</a></span><sup><small>AUR</small></sup></span> 最新版本的 Minecraft</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/forge-server-1.15.2/">forge-server-1.15.2</a></span><sup><small>AUR</small></sup></span> for Minecraft 1.15.2</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/forge-server-1.14.4/">forge-server-1.14.4</a></span><sup><small>AUR</small></sup></span> for Minecraft 1.14.4</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/forge-server-1.12.2/">forge-server-1.12.2</a></span><sup><small>AUR</small></sup></span> for Minecraft 1.12.2</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/forge-server-1.11.2/">forge-server-1.11.2</a></span><sup><small>AUR</small></sup></span> for Minecraft 1.11.2</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/forge-server-1.10.2/">forge-server-1.10.2</a></span><sup><small>AUR</small></sup></span> for Minecraft 1.10.2</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/forge-server-1.9.4/">forge-server-1.9.4</a></span><sup><small>AUR</small></sup></span> for Minecraft 1.9.4</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/forge-server-1.8.9/">forge-server-1.8.9</a></span><sup><small>AUR</small></sup></span> for Minecraft 1.8.9</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/forge-server-1.7.10/">forge-server-1.7.10</a></span><sup><small>AUR</small></sup></span> for Minecraft 1.7.10</li></ul>
+<p>确保您已阅读#配置并将遇到的所有 <code>minecraftd</code> 替换为 <code>forged</code> （若是旧版则还需加上版本号，形同 <code>forge-x.x.xd</code>）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_Fabric" id="Fabric">Fabric</h3></div>
+<p><a href="https://fabricmc.net/">Fabric</a> 是为 Minecraft 开发的一个轻量化、实验性的模组工具链。通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fabric-server/">fabric-server</a></span><sup><small>AUR</small></sup></span> 安装其服务端软件包。
+</p><p>确保您已阅读#配置并将遇到的所有 <code>minecraftd</code> 替换为 <code>fabricd</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_Quilt" id="Quilt">Quilt</h3></div>
+<p><a href="https://quiltmc.org/">Quilt</a> 是一个主要为 Minecraft 开发、开源的、社区驱动的模组工具链。通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/quilt-server/">quilt-server</a></span><sup><small>AUR</small></sup></span> 安装其服务端软件包。
+</p><p>确保您已阅读#配置并将遇到的所有 <code>minecraftd</code> 替换为 <code>quiltd</code>。
+</p><p>Quilt 是 Fabric 的一个分支，意味着其可以向下兼容一些 Fabric 模组。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbfbb00f9dc42_.E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7" id="提示和技巧"><span id=".E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7"></span>提示和技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_Minecraft_.E6.9C.8D.E5.8A.A1.E5.99.A8.E7.AB.AF.E5.8F.A3" id="Minecraft_服务器端口"><span id="Minecraft_.E6.9C.8D.E5.8A.A1.E5.99.A8.E7.AB.AF.E5.8F.A3"></span>Minecraft 服务器端口</h3></div>
+
+<p>Minecraft 服务端默认在 <code>25565</code> 端口上运行，当输入的地址不带端口时默认使用该端口。
+</p><p>大部分 Minecraft 服务器提供商需要购买高级服务以使用默认的 Minecraft 端口。因此若您使用的端口不是 <code>25565</code>，您需要在域名或地址后加上一个冒号（<b>:</b>）和您的服务器为游戏分配的端口。例如，若您的地址是 <code>43.12.122.96</code>，端口是 <code>28543</code>，那么您需要连接到<code>43.12.122.96:28543</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbfbb00f9dc42_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgbfbb00f9dc42_.E6.97.A5.E5.BF.97" id="日志"><span id=".E6.97.A5.E5.BF.97"></span>日志</h3></div>
+<p>Screen 日志存储在 <code>/tmp/spigot_spigot_command_dump.txt</code> 文件中。如果 <i>systemctl</i> 无法启动服务,请检查 <i>screen</i> 日志。
+</p><p><a href="#pg47c5e1af4d24">Journal</a> 日志存储在 <code>spigot.service</code>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgbfbb00f9dc42_.E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85" id="另请参阅"><span id=".E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85"></span>另请参阅</h2></div>
+<ul><li>一些打包好的服务端提供从自动备份到多线程服务器等所有功能，请参阅 <a href="https://minecraftservers.gamepedia.com/Server_wrappers">Server Wrappers</a> 以了解更多信息。然而 <a href="#pg89cb7b475cfb">AUR</a> 提供的管理脚本应当可以满足大部分需求。</li>
+<li>您可能会想要设置一个 <a href="#pg55073694bd79">systemd 定时器</a>，例如与 <a href="https://zh.minecraft.wiki/w/辅助程序与编辑器#Mappers">mapper</a> 一起使用以为您的世界定时生成地图。</li>
+<li>确保定时备份地图，可以使用提供的管理脚本（见阅#配置或 <a href="#pg4bb0ada72a54">rsync</a>）。</li>
+<li>另见<a href="https://zh.minecraft.wiki/w/Tutorial:架设Java版服务器">架设 Java 版服务器</a>。</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807031524
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.162 seconds
+Real time usage: 0.168 seconds
+Preprocessor visited node count: 836/1000000
+Revision size: 10891/2097152 bytes
+Post‐expand include size: 9515/2097152 bytes
+Template argument size: 3011/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   48.736      1 -total
+ 17.42%    8.489     74 Template:Ic
+  9.30%    4.533      4 Template:Note
+  7.93%    3.865      1 Template:Expansion
+  6.72%    3.277      1 Template:翻译状态
+  5.19%    2.528     16 Template:AUR
+  3.64%    1.772      1 Template:META_Message
+  3.57%    1.741      1 Template:Pkg
+  3.53%    1.720      1 Template:Aur
+  3.38%    1.649      1 Template:Man
+-->
+<!-- Render ID 3addba0f-920e-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8064:|#|:idhash:canonical!zh-cn and timestamp 20260807031524 and revision id 34185. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

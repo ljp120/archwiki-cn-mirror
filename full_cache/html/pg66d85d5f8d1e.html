@@ -1,0 +1,94 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg66d85d5f8d1e">软件包补丁</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Patching_packages">Patching packages</a>，最近一次同步于 2026-02-28，若英文版本有所<a href="https://wiki.archlinux.org/title/Patching_packages?diff=0&amp;oldid=862738">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Patching_packages_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgf054312e26a1">创建软件包</a></li>
+</ul></div>
+<p>本文涵盖了如何在 <a href="#pg8d559a1b1a4f">Arch 构建系统</a>（ABS）中为软件包创建和应用补丁。
+</p><p><a href="https://en.wikipedia.org/wiki/Patch_(computing)">补丁</a>描述了一个或多个文件的行更改。补丁通常用于自动更改源代码。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg66d85d5f8d1e_.E5.88.9B.E5.BB.BA.E8.A1.A5.E4.B8.81" id="创建补丁"><span id=".E5.88.9B.E5.BB.BA.E8.A1.A5.E4.B8.81"></span>创建补丁</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果你只是想要更改一两行，你可能会想使用 <a href="#pgc9277cee06e3">sed</a>。</div>
+<p><a href="https://en.wikipedia.org/wiki/diff">diff</a> 工具会逐行比较文件。将它的输出保存下来你就得到了一个补丁，如 <code>diff --unified --recursive --text foo bar &gt; foobar.patch</code>（可以将参数简写为 <code>diff -ura</code>）。如果你传递了目录， <i>diff</i> 会比较它们包含的文件。
+</p>
+<ol><li>如果你已将构建了软件包，请删除 <code>src</code> 目录。</li>
+<li>运行 <code>makepkg --nobuild</code>/<code>makepkg -o</code> 会下载并提取 <code>PKGBUILD</code> 中声明的源文件，但不会进行构建。如果你正在创建补丁的系统上没有必要的依赖，你可能需要转而使用 <code>makepkg --nobuild --nodeps</code>/<code>makepkg -od</code>。</li>
+<li>在 <code>src</code> 目录中创建两份提取的目录的副本，一个作为原始版本，一个作为你修改过的版本，下面我们会将他们称为 <code>package.orig</code> 和 <code>package.new</code>。</li>
+<li>在 <code>package.new</code> 目录中进行你的更改。</li>
+<li>运行 <code>diff -ura package.orig package.new --color</code> 并检查补丁是否看起来良好。</li>
+<li>运行 <code>diff -ura package.orig package.new &gt; package.patch</code> 来生成补丁。</li>
+<li>进入 <code>package.orig</code> 目录并使用 <code>patch --strip=1 --input=../package.patch</code>（可以简写为 <code>patch -p1 -i ../package.patch</code>）命令来应用补丁。运行 <code>makepkg --noextract --install</code>/<code>makepkg -ei</code> 命令构建并安装更改后的软件包来验证补丁是否正常工作。</li></ol>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>你也可以使用 <a href="#pg0d34da84b694">Git</a> 的 <code>git diff</code> 或 <code>git format-patch</code> 命令 <a href="https://stackoverflow.com/questions/6658313/generate-a-git-patch-for-a-specific-commit">[1]</a>。</div>
+<p>更多信息参见 <span class="plainlinks archwiki-template-man" title="$ man 1 diff"><a href="https://man.archlinux.org/man/diff.1">diff(1)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 1 git-diff"><a href="https://man.archlinux.org/man/git-diff.1">git-diff(1)</a></span>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>大部分 git 托管平台（例如 GitHub 和 GitLab）支持为特定提交或合并生成补丁，只需在其 URL 结尾添加 <code>.patch</code>。对于 GitHub，请考虑在 URL 最后添加 <code>?full_index=1</code> 参数，以避免未来对象哈希值长度变更导致的校验值不匹配错误。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg66d85d5f8d1e_.E5.BA.94.E7.94.A8.E8.A1.A5.E4.B8.81" id="应用补丁"><span id=".E5.BA.94.E7.94.A8.E8.A1.A5.E4.B8.81"></span>应用补丁</h2></div>
+<p>本节概述如何在 <code>PKGBUILD</code> 的 <code>prepare()</code> 函数中应用你创建或从网络下载的补丁。请遵循以下步骤：
+</p>
+<ol><li>为补丁文件在 <code>PKGBUILD</code> 的 <code>source</code> 数组中添加一个条目，将该条目与原始源 url 之间用空格隔开。如果该文件可在网上获得，你可以提供完整的 URL ，它将被自动下载并放在 <code>src</code> 目录中。如果它是你自己创建的补丁，则应将补丁文件与 <code>PKGBUILD</code> 文件放在同一目录中，并只需将文件名添加到 <code>source</code> 数组中，以便将其复制到 <code>src</code> 目录中。如果你要分发 <code>PKGBUILD</code>，就需要将补丁与 <code>PKGBUILD</code> 一同发布。</li>
+<li>然后使用 <code>makepkg -g &gt;&gt; PKGBUILD</code> 或者 <code>updpkgsums</code>（来自于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacman-contrib">pacman-contrib</a></span><sup><small>包</small></sup></span>）来更新 <code>sha512sums</code> 数组。或者手动添加一个条目到 <code>sha512sums</code> 数组； 你可以使用 <i>sha512sum</i> 工具来生成你的补丁的校验和。</li>
+<li>如果 <code>PKGBUILD</code> 中还没有 <code>prepare()</code> 函数，就创建一个。</li>
+<li>第一步是在 <code>prepare()</code> 函数中进入到需要被打补丁的目录，可以通过 <code>cd $pkgname-$pkgver</code> 来完成。<code>$pkgname-$pkgver</code> 通常是源码包解包后的目录名，但并不总是这样。</li>
+<li>现在你只需要在这个目录里面应用补丁。这可以通过在 <code>prepare()</code> 函数中添加 <code>patch -p1 -i <i>pkgname</i>.patch</code> 来完成。将 <code><i>pkgname</i>.patch</code> 改成包含 diff 的文件的名字（由于其在 <code>PKGBUILD</code> 的 <code>source</code> 数组中，因此已被自动复制到 <code>src</code> 目录下）。</li></ol>
+<p>一个 prepare 函数示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PKGBUILD</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">prepare() {
+    cd $pkgname-$pkgver
+    patch -Np1 -i ../eject.patch
+}
+</pre>
+<p>或者不先 cd，直接使用 <code>patch</code> 的 <code>--directory</code>/<code>-d</code> 参数：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PKGBUILD</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">prepare() {
+    patch -d $pkgname-$pkgver -Np1 -i ../eject.patch
+}
+</pre>
+<p>从终端运行 <code>makepkg</code>，如果一切顺利，补丁会被自动应用，并且你的新软件包会包含补丁中的更改。如果不是这样的话，你可能需要试验一下 patch 的 <code>--strip</code>/<code>-p</code> 选项。在试验的时候，你会发现 <code>--dry-run</code>, <code>--reverse</code> 或者 <code>--verbose</code> 选项会有用。更多信息参见 <span class="plainlinks archwiki-template-man" title="$ man 1 patch"><a href="https://man.archlinux.org/man/patch.1">patch(1)</a></span>。 
+</p><p>基本上它的工作原理如下：如果 diff 文件被用于将补丁应用到 <code>myversion/</code> 中的文件，那么 diff 文件将被应用于 <code>myversion/file</code>。你当前的运行目录为 <code>yourversion/</code>（即 <code>PKGBUILD</code> 中 cd 进的目录），在将补丁应用到文件时，需要将 <code>myversion/</code> 部分移除，只应用到 <code>file</code> 文件，所以需要使用 <code>-p1</code> 参数将路径中的第一个目录移除。但如果需要修补 <code>myfiles/myversion</code> 中的文件，就需要使用 <code>-p2</code> 移除两个目录。
+</p><p>如果你不应用一个 <code>-p</code> 选项，它将会去掉所有目录结构。如果所有文件都在基目录中的时候是可以的，但是如果补丁是在 <code>myversion/</code> 上创建的，并且有一个被编辑的文件是 <code>myversion/src/file</code>，当你从 <code>yourversion</code> 目录以不带 <code>-p</code> 参数应用补丁的时候，它会尝试为一个名为 <code>yourversion/file</code> 的文件打补丁。
+</p><p>大多数开发者从被打补丁的目录的父目录创建补丁，因此 <code>-p1</code> 通常是正确的。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg66d85d5f8d1e_.E4.BD.BF.E7.94.A8_quilt" id="使用_quilt"><span id=".E4.BD.BF.E7.94.A8_quilt"></span>使用 quilt</h2></div>
+<p>一个更简单的创建补丁的方法是使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=quilt">quilt</a></span><sup><small>包</small></sup></span>，它为管理大量补丁提供了更好的支持，例如应用补丁，更新补丁和将被打补丁的文件回退到原始状态。<a href="https://wiki.debian.org/UsingQuilt">Debian</a> 使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=quilt">quilt</a></span><sup><small>包</small></sup></span> 来管理他们的补丁。使用 quilt 生成和应用补丁、回退被打补丁的文件的基本用法和信息可参考<a href="http://www.shakthimaan.com/downloads/glv/quilt-tutorial/quilt-doc.pdf">使用 Quilt</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg66d85d5f8d1e_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="http://www.kegel.com/academy/opensource.html">http://www.kegel.com/academy/opensource.html</a> —— 有关修补文件的有用信息</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807155816
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.130 seconds
+Real time usage: 0.136 seconds
+Preprocessor visited node count: 704/1000000
+Revision size: 6554/2097152 bytes
+Post‐expand include size: 5631/2097152 bytes
+Template argument size: 1870/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   49.794      1 -total
+ 17.94%    8.934     73 Template:Ic
+  7.34%    3.657      1 Template:翻译状态
+  6.10%    3.035      3 Template:Man
+  5.54%    2.757      1 Template:Tip
+  5.06%    2.522      3 Template:Pkg
+  4.40%    2.193      1 Template:相关文章开始
+  3.99%    1.987      1 Template:Related
+  3.51%    1.749      2 Template:注意
+  2.66%    1.325      2 Template:Hc
+-->
+<!-- Render ID cd1aa80e-9278-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3675:|#|:idhash:canonical!zh-cn and timestamp 20260807155816 and revision id 34893. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

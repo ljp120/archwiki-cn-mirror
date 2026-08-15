@@ -1,0 +1,605 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pga0bdbde91ee9">背光</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Backlight">Backlight</a>，最近一次同步于 2023-02-03，若英文版本有所<a href="https://wiki.archlinux.org/title/Backlight?diff=0&amp;oldid=765631">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Backlight_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="noteTA" id="noteTA-7f3f5856"><div class="noteTA-group"><div data-noteta-group="ArchWiki" data-noteta-group-source="module"></div></div></div>
+<p>屏幕亮度调节可能有点难以控制。在一些计算机上，可能缺失了物理硬件开关，并且软件解决方案也可能工作得不好。但是通常地，我们可以对于给定的硬件，找到对应的方法来调节屏幕亮度。本文旨在总结所有可能的调节屏幕亮度和背光（Backlight）的方法。
+</p><p>我们有很多方法可以用来控制显示器、笔记本电脑或者集成面板（比如 iMac）。根据<a href="https://bugs.launchpad.net/ubuntu/+source/xserver-xorg-video-intel/+bug/397617">这些（英文）</a><a href="https://lore.kernel.org/patchwork/patch/528936/#708706">讨论（英文）</a>和这个<a href="https://wiki.ubuntu.com/Kernel/Debugging/Backlight">维基页面（英文）</a>，控制的方法可以分为以下几种：
+</p>
+<ul><li>亮度由供应商指定的热键控制，而操作系统没有对应的接口用于调节屏幕亮度。</li>
+<li>亮度由 <a href="#pga0bdbde91ee9_ACPI">ACPI</a>，图形或者平台的驱动来控制。在这种情况下，亮度控制通过 <code>/sys/class/backlight</code> 暴露给用户。用户空间基于此，提供了背光实用程序。</li>
+<li>可以通过 <a href="#pga0bdbde91ee9_setpci">setpci</a> 来写入到显卡的寄存器，来控制亮度。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>由于 OLED 屏幕没有背光，因此在配置 OLED 屏幕的笔记本的时候，无法通过更改背光来控制亮度。在这种情况下，可以使用 PWM 控制，或者通过软件色彩校正来调节。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga0bdbde91ee9_.E7.A1.AC.E4.BB.B6.E6.8E.A5.E5.8F.A3" id="硬件接口"><span id=".E7.A1.AC.E4.BB.B6.E6.8E.A5.E5.8F.A3"></span>硬件接口</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_ACPI" id="ACPI">ACPI</h3></div>
+<p>屏幕背光的亮度由背光LED或阴极的电平来调节，且通常由视频ACPI内核模块调节。此模块的接口以位于<code>/sys/class/backlight/</code>的<span class="plainlinks archwiki-template-man" title="$ man 5 sysfs"><a href="https://man.archlinux.org/man/sysfs.5">sysfs(5)</a></span>目录的形式提供。
+</p><p>具体的目录名称由显卡型号决定。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls /sys/class/backlight/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">acpi_video0
+</pre>
+<p>此处，背光由ATI显卡管理。Intel显卡对应的目录名为<code>intel_backlight</code>。下方的例子使用<code>acpi_video0</code>。如果使用Intel显卡，直接将例子中的<code>acpi_video0</code>替换为<code>intel_backlight</code>即可。
+</p><p>目录包含以下文件与子目录：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls /sys/class/backlight/acpi_video0/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">actual_brightness  brightness         max_brightness     subsystem/    uevent             
+bl_power           device/            power/             type
+</pre>
+<p>最大亮度可从<code>max_brightness</code>处读取，通常为15。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /sys/class/backlight/acpi_video0/max_brightness</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">15
+</pre>
+<p>要设置亮度，可以向<code>brightness</code>写入代表亮度等级的数值。数值大于最大亮度值可能会导致错误。
+</p>
+<pre># echo 5 &gt; /sys/class/backlight/acpi_video0/brightness
+</pre>
+<p>默认情况下，仅<code>root</code>可以通过此方法更改亮度。要让<code>video</code>组的用户也可以更改亮度，可以使用以下<a href="#pge009209061ac">udev</a>规则：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/backlight.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp video $sys$devpath/brightness", RUN+="/bin/chmod g+w $sys$devpath/brightness"</pre>
+
+<p><br/>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga0bdbde91ee9_.E5.86.85.E6.A0.B8.E5.91.BD.E4.BB.A4.E8.A1.8C.E9.80.89.E9.A1.B9" id="内核命令行选项"><span id=".E5.86.85.E6.A0.B8.E5.91.BD.E4.BB.A4.E8.A1.8C.E9.80.89.E9.A1.B9"></span>内核命令行选项</h4></div>
+<p>有时由于主板实现不同，或者ACPI本身的异常，ACPI可能无法正常工作。这会导致一些奇怪的情况，比如亮度通知不准确。受影响的设备包括双显卡笔记本（比如NVIDIA/Radeon独显+Intel/AMD集显）。此外，ACPI有时需要注册自己的<code>acpi_video0</code>背光源，即使已经存在一个背光源（如<code>intel_backlight</code>），这可以通过添加以下<a href="#pgec0856954f1c">内核参数</a>之一来完成：
+</p>
+<pre>acpi_backlight=video
+acpi_backlight=vendor
+acpi_backlight=native
+</pre>
+<p>如果更改<code>acpi_video0</code>背光源无法真正更改亮度，可能需要使用<code>acpi_backlight=none</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>在使用NVIDIA Optimus的笔记本上，内核参数<code>nomodeset</code>可能与背光调节冲突。</li>
+<li>在华硕（ASUS）笔记本上可能需要加载<code>asus-nb-wmi</code><a href="#pg6dbfce2ea89d">内核模块</a>。</li>
+<li>在Dell XPS 13上禁用Legacy boot会导致背光支持异常。</li></ul>
+</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga0bdbde91ee9_Udev.E8.A7.84.E5.88.99" id="Udev规则"><span id="Udev.E8.A7.84.E5.88.99"></span>Udev规则</h4></div>
+<p>ACPI接口可用时，背光等级可以在引导时使用<a href="#pge009209061ac">udev</a>规则设置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/81-backlight.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Set backlight level to 8
+SUBSYSTEM=="backlight", ACTION=="add", KERNEL=="acpi_video0", ATTR{brightness}="8"</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>systemd-backlight服务会在启动时自动恢复先前的亮度等级。要避免与上述规则冲突，参考#保存与恢复能力。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>要根据电源状态设置背光，参见<a href="#pga6e29fecd7a5">电源管理#使用脚本和 udev 规则</a>，并在脚本中使用你喜欢的背光实用程序。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_setpci" id="setpci">setpci</h3></div>
+<p>部分情况下（比如Intel Mobile 945GME <a href="https://bugs.launchpad.net/ubuntu/+source/xserver-xorg-video-intel/+bug/397617">[1]</a>），可以通过设置显卡寄存器来调整背光。请注意，这种方法是通过直接操作硬件来调整背光，可能有风险，而且通常不是一个好主意。并非所有的显卡都支持这种方法。
+</p><p>使用此方法时，需要先使用<code>lspci</code>来确定显卡的位置。
+</p>
+<pre># setpci -s 00:02.0 F4.B=0
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_.E5.A4.96.E9.83.A8.E6.98.BE.E7.A4.BA.E5.99.A8" id="外部显示器"><span id=".E5.A4.96.E9.83.A8.E6.98.BE.E7.A4.BA.E5.99.A8"></span>外部显示器</h3></div>
+<p><a href="https://en.wikipedia.org/wiki/Display_Data_Channel#DDC.2FCI">DDC/CI</a>（显示数据通道命令接口）可用于通过I2C与实现MCCS（显示器控制命令集）的外部显示器通信。DDC可以在受支持的显示器上控制亮度、对比度、输入等。可以通过OSD（屏幕菜单，On-Screen Display）面板操作的设置通常也可以通过DDC管理。如果<code>/dev/i2c-*</code>设备不存在，可能需要加载<code>i2c-dev</code><a href="#pg6dbfce2ea89d">内核模块</a>。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ddcutil">ddcutil</a></span><sup><small>包</small></sup></span>可以用于查询和设置亮度相关设置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># ddcutil capabilities | grep "Feature: 10"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">  Feature: 10 (Brightness)
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># ddcutil getvcp 10</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">VCP code 0x10 (Brightness                    ): current value =    60, max value =   100</pre>
+<pre># ddcutil setvcp 10 70
+</pre>
+<p>或者也可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ddcci-driver-linux-dkms/">ddcci-driver-linux-dkms</a></span><sup><small>AUR</small></sup></span> 以在 sysfs 中暴露外部显示器接口。加载 <code>ddcci</code> <a href="#pg6dbfce2ea89d">内核模块</a>后，可以使用任意的背光实用程序。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>在比较新的内核上，需要打补丁才能成功编译 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ddcci-driver-linux-dkms/">ddcci-driver-linux-dkms</a></span><sup><small>AUR</small></sup></span>，参见<a href="https://gitlab.com/ddcci-driver-linux/ddcci-driver-linux/-/merge_requests/17">此 PR</a>。</li>
+<li>同时使用<code>ddcci</code>和<code>i2c-dev</code>可能导致资源冲突，类似于<code>Device or resource busy</code>（设备或资源忙）的报错。</li>
+<li>使用NVIDIA专有驱动的用户可能需要向<code>/etc/X11/xorg.conf.d/20-nvidia.conf</code>（由<i>nvidia-xconfig</i>生成）的<code>Device</code>部分添加<code>Option "RegistryDwords" "RMUseSwI2c=0x01; RMI2cSpeed=100"</code>，或向<code>/etc/modprobe/conf.d/nvidia.conf</code>添加<code>options nvidia NVreg_RegistryDwords=RMUseSwI2c=0x01;RMI2cSpeed=100</code>。使用<code>grep RegistryDwords /proc/driver/nvidia/params</code>命令，并检查其中的值是否为空来验证设置是否被正确应用。参见<a href="https://forums.developer.nvidia.com/t/gddccontrol-issues-with-nvidia-drivers-i2c-monitor-display-ddc-dp-hdmi-failing/30427/33">[2]</a>和<a href="https://forums.developer.nvidia.com/t/gddccontrol-issues-with-nvidia-drivers-i2c-monitor-display-ddc-dp-hdmi-failing/30427/61">[3]</a>。</li>
+<li>若显示器启用了会自动调整VCP功能的功能（比如<a href="https://en.wikipedia.org/wiki/Contrast_ratio#Dynamic_contrast_.28DC.29">动态对比度</a>或BenQ显示器的视力保护（<i>Eye Care</i>）技术），<code>ddcutil</code>可能会无法设置这些VCP功能。</li>
+<li>要将屏幕亮度控制绑定到快捷键，为非超级用户启用访问相关的I2C设备的权限可能会方便一些。通过添加<code>i2c</code>用户组并调整<a href="#pge009209061ac">udev</a>让I2C设备的拥有者为该用户组即可。参见<a href="https://raspberrypi.stackexchange.com/a/4472">[4]</a>。</li>
+<li>若安装了<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ddcutil">ddcutil</a></span><sup><small>包</small></sup></span>，该包提供<code>/usr/share/ddcutil/data/90-nvidia-i2c.conf</code>文件，可以直接复制到<code>/etc/X11/xorg.conf.d/</code>，不用手动编写<a href="#pga36c0aff60be">Xorg</a>配置文件。该包同时为<a href="#pge009209061ac">udev</a>规则提供<code>/usr/share/ddcutil/data/45-ddcutil-i2c.rules</code>和<code>/usr/share/ddcutil/data/45-ddcutil-usb.rules</code>。</li></ul>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga0bdbde91ee9_.E5.85.B3.E9.97.AD.E8.83.8C.E5.85.89" id="关闭背光"><span id=".E5.85.B3.E9.97.AD.E8.83.8C.E5.85.89"></span>关闭背光</h2></div>
+
+<p>关闭背光（Backlight）（比如说当锁屏的时候)，可以有效地保护电源电量。理想情况下，在<a href="#pga36c0aff60be">Xorg</a>图形会话中，下列命令应该可以运行：
+</p>
+<pre>$ xset dpms force off
+</pre>
+<p>这个背光（Backlight）可以通过鼠标的移动或者键盘的输入来再次打开。或者，<code>xset s</code> 应该可以用来完成相似的作用。
+</p><p>如果上面的命令没有完成，那么可能是因为 <i>vbetool</i> 起作用。注意，然而，在这种情况下，背光（Backlight）必须手动再次打开，（关闭背光的）命令如下：
+</p>
+<pre>$ vbetool dpms off
+</pre>
+<p>开启背光的的命令是：
+</p>
+<pre>$ vbetool dpms on
+</pre>
+<p>比如，这个命令可以用于在使用 <a href="#pg2b172a4074ba">acpid</a> 的时候，在关闭笔记本盖子的时候使用（来关上显示器背光）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga0bdbde91ee9_.E4.BF.9D.E5.AD.98.E4.B8.8E.E6.81.A2.E5.A4.8D.E8.83.BD.E5.8A.9B" id="保存与恢复能力"><span id=".E4.BF.9D.E5.AD.98.E4.B8.8E.E6.81.A2.E5.A4.8D.E8.83.BD.E5.8A.9B"></span>保存与恢复能力</h2></div>
+<p><a href="#pgac06dd8bfe95">systemd</a>包提供了模板服务<code>systemd-backlight@.service</code>，默认启用且为“静态”单元。该服务在关机时保存背光亮度等级，并在开机时恢复。此模板服务使用<a href="#pga0bdbde91ee9_ACPI">#ACPI</a>段落提到的ACPI方法，且会为<code>/sys/class/backlight/</code>下的每一个文件夹生成一个对应的服务。比如，如果有文件夹名为<code>acpi_video0</code>，则会生成一个叫<code>systemd-backlight@backlight:acpi_video0.service</code>的服务。如果希望开机时设置背光使用其他方法，推荐停止systemd-backlight服务恢复背光，只需要设置<a href="#pgec0856954f1c">内核参数</a><code>systemd.restore_state=0</code>。参见<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-backlight@.service"><a href="https://man.archlinux.org/man/systemd-backlight%40.service.8">systemd-backlight@.service(8)</a></span>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>部分笔记本有多个显卡（比如使用Optimus），可能会导致背光恢复失败。此时可以尝试<a href="#pgac06dd8bfe95">屏蔽（mask）</a>该服务的实例（比如<code>acpi_video1</code>则禁用<code>systemd-backlight@backlight:acpi_video1</code>）。</div>
+<p>此外，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brillo/">brillo</a></span><sup><small>AUR</small></sup></span>和<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/light/">light</a></span><sup><small>AUR</small></sup></span>等实用程序也有保存与恢复背光的能力。提及到的这两个可以为每个用户单独恢复屏幕亮度（尚无systemd单元支持这么做）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga0bdbde91ee9_.E8.83.8C.E5.85.89.E5.AE.9E.E7.94.A8.E7.A8.8B.E5.BA.8F" id="背光实用程序"><span id=".E8.83.8C.E5.85.89.E5.AE.9E.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>背光实用程序</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>下表列出的程序可以用于控制屏幕亮度。所有的都支持Wayland，并非必须使用X。部分（比如<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=brightnessctl">brightnessctl</a></span><sup><small>包</small></sup></span>或<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/light/">light</a></span><sup><small>AUR</small></sup></span>）会添加udev规则以允许<code>video</code>（或<code>input</code>）用户组的成员更改亮度。</div>
+<table class="wikitable sortable">
+<tbody><tr>
+<th>包名
+</th>
+<th>控制键盘背光
+</th>
+<th>适应环境光
+</th>
+<th>语言
+</th>
+<th>许可协议
+</th>
+<th>注释
+</th></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=acpilight">acpilight</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>Python3
+</td>
+<td>GPL-3.0-or-later
+</td>
+<td>提供"xbacklight"可执行程序
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/backlight_control/">backlight_control</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>C
+</td>
+<td>MIT
+</td>
+<td>非常小巧和简单。支持相对调整。
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/blight/">blight</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>Python3
+</td>
+<td>ISC
+</td>
+<td>使用logind接口。仅限于本地用户，但不要求为suid或video用户组成员。
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brightd/">brightd</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>C
+</td>
+<td>GPL-2.0
+</td>
+<td>当有一段时间没有用户输入时，会调暗屏幕。
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=brightnessctl">brightnessctl</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>C
+</td>
+<td>MIT
+</td>
+<td>-
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/brillo/">brillo</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>C
+</td>
+<td>GPL-3.0-only
+</td>
+<td>支持平滑和相对调整。
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clight/">clight</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td>C
+</td>
+<td>GPL-3.0-or-later
+</td>
+<td>管理屏幕色温（仅<a href="#pga36c0aff60be">Xorg</a>），且在一段时间后平滑调暗亮度。支持环境光传感器<a href="https://github.com/FedeDP/Clightd/wiki/Sensors">[5]</a>。支持将摄像头用作环境光传感器。
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/enlighten-git/">enlighten-git</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>C
+</td>
+<td>GPL-3.0-or-later
+</td>
+<td>-
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/illum-git/">illum-git</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>C
+</td>
+<td>AGPL-3.0
+</td>
+<td>会对按键做出反应。
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/light/">light</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>C
+</td>
+<td>GPL-3.0-only
+</td>
+<td>无额外依赖。不依赖X服务器。
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lux/">lux</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>Shell
+</td>
+<td>MIT
+</td>
+<td>-
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/macbook-lighter/">macbook-lighter</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td>Bash,Perl
+</td>
+<td>GPL
+</td>
+<td>用于Macbook的屏幕/键盘背光CLI程序，自动适应环境光。
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wlr-brightness-git/">wlr-brightness-git</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>C
+</td>
+<td>MIT
+</td>
+<td>还支持需要伽马调整的新一些的OLED显示器。使用wlroots。
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wluma/">wluma</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td>Rust
+</td>
+<td>ISC
+</td>
+<td>根据屏幕内容和环境光自动调节亮度。可以使用摄像头或时间模拟环境光传感器。支持键盘和外部显示器。使用wlroots。
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ybacklight/">ybacklight</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>Perl
+</td>
+<td>GPL-2.0
+</td>
+<td>与xbacklight类似但使用sysfs驱动程序的小型Perl脚本。
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xbacklight-notify/">xbacklight-notify</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>C
+</td>
+<td>MIT
+</td>
+<td>简单的通知守护进程
+</td></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>涉及这些实用程序的命令可以绑定到<a href="#pg8110fdf8ce6e">Keyboard shortcuts#Xorg</a><sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>中描述的<code>XF86MonBrightnessUp</code>和<code>XF86MonBrightnessDown</code>键盘按键。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_xbacklight" id="xbacklight">xbacklight</h3></div>
+<p>可以使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xbacklight">xorg-xbacklight</a></span><sup><small>包</small></sup></span>设置亮度。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>xbacklight仅支持<a href="#pg7b57f700d367">Intel</a>。其他驱动（比如<span class="ilh-all" data-foreign-title="Radeon" data-lang-code="en" data-lang-name="英语" data-orig-title="Radeon"><span class="ilh-page"><a href="#pg130ab50f6008">Radeon</a></span></span>）尚不支持RandR背光属性。</li>
+<li>xbacklight目前不支持modesetting驱动<a href="https://gitlab.freedesktop.org/xorg/xserver/issues/47">[6]</a>。</li></ul></div>
+<p>要设置亮度为最大值的50%：
+</p>
+<pre>$ xbacklight -set 50
+</pre>
+<p>可以使用增量代替绝对值，例如增加或减少10%的亮度：
+</p>
+<pre>$ xbacklight -inc 10
+$ xbacklight -dec 10
+</pre>
+<p>如果报错“No outputs have backlight property”（没有输出拥有背光属性），是因为xrandr/xbacklight没有选择<code>/sys/class/backlight</code>中正确的目录。可以通过在<code>/etc/X11/xorg.conf.d/20-<i>video</i>.conf</code>中设置Device（设备）部分的<code>Backlight</code>选项来指定目录。比如，目录名为<code>intel_backlight</code>且使用<a href="#pg7b57f700d367">Intel</a>驱动，则该部分可按下述配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-intel.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Device"
+    Identifier  "Intel Graphics"
+    Driver      "intel"
+    Option      "Backlight"  "intel_backlight"
+EndSection</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在独显+集显混合配置上使用该方式可能会导致无法预测的屏幕更新卡顿/延迟，以及用户界面应用程序画面中被分配给独显的部分可能产生闪烁效果。只有在其他方式都无法使用的时候才建议使用此方案。</div>
+<p>参见<a href="https://bugs.archlinux.org/task/27677">FS#27677</a>和 <a href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=651741">https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=651741</a> 。
+</p><p>如果启用<a href="#pgcf92ea97092d">Intel Fastboot</a>，也有可能会报错<code>No outputs have backlight property</code>。这种情况下，使用以上方法可能导致Xorg在启动时崩溃。此时建议禁用Intel Fastboot以解决问题。<a href="https://bugs.freedesktop.org/show_bug.cgi?id=108225">已知</a>这会导致亮度控制的问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_light" id="light">light</h3></div>
+<p>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/light/">light</a></span><sup><small>AUR</small></sup></span>并将你使用的用户添加到<code>video</code>用户组。
+</p><p>将背光亮度提高5%：
+</p>
+<pre>$ light -A 5
+</pre>
+<p>将背光亮度降低5%：
+</p>
+<pre>$ light -U 5
+</pre>
+<p>将背光亮度设为100%：
+</p>
+<pre> $ light -S 100
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_.E5.9C.A8GNOME.E4.B8.AD.E4.BD.BF.E7.94.A8DBus" id="在GNOME中使用DBus"><span id=".E5.9C.A8GNOME.E4.B8.AD.E4.BD.BF.E7.94.A8DBus"></span>在GNOME中使用DBus</h3></div>
+<p>亮度也可以像GNOME设置那样进行调整。使用此方法时，GNOME的用户界面会反映出所做的更改。
+</p>
+<pre>$ gdbus call --session --dest org.gnome.SettingsDaemon.Power --object-path /org/gnome/SettingsDaemon/Power --method org.freedesktop.DBus.Properties.Set org.gnome.SettingsDaemon.Power.Screen Brightness "&lt;int32 50&gt;"
+</pre>
+<p>使用该方法也可以实现用键盘控制亮度。
+</p>
+<pre>$ gdbus call --session --dest org.gnome.SettingsDaemon.Power --object-path /org/gnome/SettingsDaemon/Power --method org.gnome.SettingsDaemon.Power.Screen.StepUp
+$ gdbus call --session --dest org.gnome.SettingsDaemon.Power --object-path /org/gnome/SettingsDaemon/Power --method org.gnome.SettingsDaemon.Power.Screen.StepDown
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_.E5.9C.A8KDE.E4.B8.AD.E4.BD.BF.E7.94.A8DBus" id="在KDE中使用DBus"><span id=".E5.9C.A8KDE.E4.B8.AD.E4.BD.BF.E7.94.A8DBus"></span>在KDE中使用DBus</h3></div>
+<p>参见 <a href="https://userbase.kde.org/KDE_Connect/Tutorials/Useful_commands#Brightness_settings">https://userbase.kde.org/KDE_Connect/Tutorials/Useful_commands#Brightness_settings</a> 。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga0bdbde91ee9_.E8.89.B2.E5.BD.A9.E6.A0.A1.E6.AD.A3" id="色彩校正"><span id=".E8.89.B2.E5.BD.A9.E6.A0.A1.E6.AD.A3"></span>色彩校正</h2></div>
+
+<p>色彩校正并不会改变实际背光的功率，仅仅只是修改视频<a href="https://en.wikipedia.org/wiki/Lookup_table#Lookup_tables_in_image_processing">查找表</a>。也就是说，这样并不会像上述方法一样，调低亮度就可以节省电量。无论如何，如果背光控制完全不可用的时候（比如使用OLED屏幕的台式机和笔记本），可以尝试用色彩校正。
+</p>
+<ul><li><b>Clight</b> — 旨在全面管理显示器的用户守护程序实用程序。它可以根据一天中的当前时间来管理屏幕温度，就和Redshift一样。如果配置文件中未设置纬度或经度，它将尝试使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=geoclue">geoclue</a></span><sup><small>包</small></sup></span>来检索用户位置。它也支持日出和日落的固定时间。</li></ul>
+<dl><dd><a href="https://github.com/FedeDP/Clight">https://github.com/FedeDP/Clight</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clight/">clight</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>icc-brightness</b> — 通过应用ICC颜色配置文件控制OLED显示器亮度。</li></ul>
+<dl><dd><a href="https://github.com/udifuchs/icc-brightness">https://github.com/udifuchs/icc-brightness</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/icc-brightness-gnome-git/">icc-brightness-gnome-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Monica</b> — 显示器校准工具。它作为xgamma的前端来改变伽玛校正。</li></ul>
+<dl><dd><a href="https://web.archive.org/web/20090815224839/http://www.pcbypaul.com/software/monica.html">https://web.archive.org/web/20090815224839/http://www.pcbypaul.com/software/monica.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/monica/">monica</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgfd5f4152e2a0">Redshift</a></b> — 色温调节工具。可以根据你的环境调节屏幕的色温。如果晚上在屏幕前工作，可以帮助眼睛减少疼痛。灵感来自<a href="https://en.wikipedia.org/wiki/f.lux">f.lux</a>。</li></ul>
+<dl><dd><a href="http://jonls.dk/redshift/">http://jonls.dk/redshift/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=redshift">redshift</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>xcalib</b> — 轻量级监视器校准加载程序，可以加载跨桌面应用程序共享的ICC监视器配置文件。</li></ul>
+<dl><dd><a href="https://github.com/OpenICC/xcalib">https://github.com/OpenICC/xcalib</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xcalib">xcalib</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>xgamma</b> — 更改监视器的伽马校正。</li></ul>
+<dl><dd><a href="https://xorg.freedesktop.org/">https://xorg.freedesktop.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xgamma">xorg-xgamma</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_Wayland" id="Wayland">Wayland</h3></div>
+<p><a href="#pgfd5f4152e2a0">Redshift</a>暂不支持Wayland（除非打补丁或者使用衍生版本，比如<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/redshift-wayland-git/">redshift-wayland-git</a></span><sup><small>AUR</small></sup></span>）。但是仍可以在启动混成器前在<a href="#pg7dfeabbd827f">tty</a>中应用想要的色温设置。比如：
+</p>
+<pre>$ redshift -m drm -PO 3000
+</pre>
+<p>或者，部分混成器也支持运行时应用色彩校准：
+</p>
+<ul><li><a href="#pg1e095fe2c2a6">GNOME</a>可以使用内置的<a href="#pg1e095fe2c2a6">夜间模式</a>。</li>
+<li><a href="#pg778f2bb029c6">KDE Plasma</a>也可以使用内置的<a href="#pg5b70e23b1711">夜间模式</a>。</li>
+<li>Sway 1.0或其他基于wlroots的混成器，包括Orbital，可以使用Redshift的衍生版本、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gammastep">gammastep</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clight/">clight</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wlsunset-git/">wlsunset-git</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wl-gammarelay/">wl-gammarelay</a></span><sup><small>AUR</small></sup></span>。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_Xorg.EF.BC.9A.E4.BD.BF.E7.94.A8xrandr.E8.B0.83.E8.8A.82.E8.A7.86.E8.A7.89.E4.BA.AE.E5.BA.A6" id="Xorg：使用xrandr调节视觉亮度"><span id="Xorg.EF.BC.9A.E4.BD.BF.E7.94.A8xrandr.E8.B0.83.E8.8A.82.E8.A7.86.E8.A7.89.E4.BA.AE.E5.BA.A6"></span>Xorg：使用xrandr调节视觉亮度</h3></div>
+<p><a href="#pgaa98d1ed067b">xrandr</a>可以用于调节视觉亮度。
+</p><p>要将视觉亮度调至最大值以上（其问题与上方提到的NVIDIA设置的情况相同）：
+</p>
+<pre>$ xrandr --output <i>output_name</i> --brightness 2
+</pre>
+<p>这会将画面亮度翻倍（大致上），但是这么调高亮度会牺牲色彩的质量，但它特别适合环境光非常明亮的情况下（如阳光直射）。
+</p><p>也可以指定小于1（例如 0.5）的值来降低视觉亮度，这在显示设备位于暗处且没有背光控制可用时（例如台式机）是有用的。
+</p><p>例子中的所连接设备的<i>output name</i>（输出名称）可以通过调用<code>xrandr</code>确定：
+</p>
+<pre>$ xrandr | grep -w connected | cut -f '1' -d ' '
+</pre>
+<p>也可以修改以上命令并设置为命令别名来快速更改亮度：
+</p>
+<pre>$ alias b='echo -e "enter brightness:\n"; read val; xrandr  --output <i>output name</i> --brightness "${val}"'
+</pre>
+<p>要在背光文件修改时自动调用xrandr，可以像这样使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/oled-shmoled/">oled-shmoled</a></span><sup><small>AUR</small></sup></span>：
+</p>
+<pre>$ oled_shmoled <i>output_name</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_NVIDIA.E8.AE.BE.E7.BD.AE" id="NVIDIA设置"><span id="NVIDIA.E8.AE.BE.E7.BD.AE"></span>NVIDIA设置</h3></div>
+<p><a href="#pge12579b7d4ac">NVIDIA</a>专有驱动的用户可以通过<a href="#pge12579b7d4ac">nvidia-settings</a>实用程序的“X Server Color Correction”部分修改显示亮度。但请注意，此处的“亮度”与背光的亮度（光的强度）没有任何关系，仅仅只是调整色彩输出。仅当其他手段全部无法使用时可以使用该方案，但要注意这并不能帮助节约电量。增加此“亮度”会完全扭曲色彩输出，使得最终显示效果类似于过曝。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga0bdbde91ee9_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_.E8.83.8C.E5.85.89PWM.E8.B0.83.E5.88.B6.E9.A2.91.E7.8E.87.EF.BC.88.E4.BB.85Intel_i915.EF.BC.89" id="背光PWM调制频率（仅Intel_i915）"><span id=".E8.83.8C.E5.85.89PWM.E8.B0.83.E5.88.B6.E9.A2.91.E7.8E.87.EF.BC.88.E4.BB.85Intel_i915.EF.BC.89"></span>背光PWM调制频率（仅Intel i915）</h3></div>
+
+<p><br/>
+带LED背光的笔记本电脑有时会出现屏幕闪烁。这是因为控制LED背光亮度的最有效方法是快速开关LED，改变它们开启的时间长度。
+</p><p>然而，LED开关的频率，即所谓的PWM（脉宽调制）频率，可能不够高，以至于眼睛无法将其感知为恒定的亮度，而是看到闪烁的情况。这会导致一些人出现头痛和眼睛疲劳等症状。
+</p><p>如果使用Intel i915 GPU，则可以调整PWM频率以消除闪烁现象。
+</p><p>PWM的周期（与频率互为倒数）储存于<code>0xC8254</code>寄存器的两个高位字节（如果使用Intel GM45芯片组，则寄存器地址为<code>0x61254</code>）。要操作寄存器的值，请从官方源安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-gpu-tools">intel-gpu-tools</a></span><sup><small>包</small></sup></span>。
+</p><p>要增加频率，就需要减少周期。比如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># intel_reg read 0xC8254</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">0xC8254 : 0x12281228</pre>
+<p>要将PWM频率加倍，请将两个高位字节（4个高位十六进制数位）除以2，然后向寄存器的两个高位字节写入结果，保持低位字节不变：
+</p>
+<pre># intel_reg write 0xC8254 0x09141228
+</pre>
+<p>您可以使用在线计算器来计算所需的值 <a href="https://devbraindom.blogspot.com/2013/03/eliminate-led-screen-flicker-with-intel.html">https://devbraindom.blogspot.com/2013/03/eliminate-led-screen-flicker-with-intel.html</a>
+</p><p>要自动设置新频率，请考虑编写udev规则或安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/intelpwm-udev/">intelpwm-udev</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_.E4.BA.AE.E5.BA.A6.E5.8F.8D.E8.BD.AC.EF.BC.88.E4.BB.85Intel_i915.EF.BC.89" id="亮度反转（仅Intel_i915）"><span id=".E4.BA.AE.E5.BA.A6.E5.8F.8D.E8.BD.AC.EF.BC.88.E4.BB.85Intel_i915.EF.BC.89"></span>亮度反转（仅Intel i915）</h3></div>
+<p>症状：
+</p>
+<ul><li>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span>后，systemd-backlight.service在系统引导时将背光关闭
+<ul><li>可能的解决方案：屏蔽（mask）systemd-backlight.service</li></ul></li>
+<li>从X切换到另一个虚拟终端（VT）会关闭背光</li>
+<li>亮度调节键/按钮效果相反（即按亮度+反而会让屏幕变暗）</li></ul>
+<p>可通过添加<code>i915.invert_brightness=1</code>至<a href="#pgec0856954f1c">内核参数</a>列表来解决这个问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_.E6.97.A0.E6.B3.95.E6.8E.A7.E5.88.B6eDP.E9.9D.A2.E6.9D.BF.E4.BA.AE.E5.BA.A6.EF.BC.88.E4.BB.85Intel_i915.EF.BC.89" id="无法控制eDP面板亮度（仅Intel_i915）"><span id=".E6.97.A0.E6.B3.95.E6.8E.A7.E5.88.B6eDP.E9.9D.A2.E6.9D.BF.E4.BA.AE.E5.BA.A6.EF.BC.88.E4.BB.85Intel_i915.EF.BC.89"></span>无法控制eDP面板亮度（仅Intel i915）</h3></div>
+<p>嵌入式显示端口（eDP）v1.2 为通过AUX通道工作的背光和其他控件引入了新的显示面板控制协议 <a href="https://www.vesa.org/wp-content/uploads/2010/12/DisplayPort-DevCon-Presentation-eDP-Dec-2010-v3.pdf">[7]</a>
+</p><p>默认情况下，i915驱动可能尝试使用PWM调节背光亮度，此时可能无法工作。
+</p><p>要通过使用AUX通道写入DPCD寄存器来设置背光，请设置<code>i915.enable_dpcd_backlight=1</code><a href="#pgec0856954f1c">内核参数</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 5.4后，参数类型已从bool更改为int。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_sysfs.E4.BF.AE.E6.94.B9.E4.BA.86.EF.BC.8C.E4.BD.86.E4.BA.AE.E5.BA.A6.E6.97.A0.E5.8F.98.E5.8C.96" id="sysfs修改了，但亮度无变化"><span id="sysfs.E4.BF.AE.E6.94.B9.E4.BA.86.EF.BC.8C.E4.BD.86.E4.BA.AE.E5.BA.A6.E6.97.A0.E5.8F.98.E5.8C.96"></span>sysfs修改了，但亮度无变化</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此行为及临时修复方案可以于Dell M6700 + NVIDIA K5000m（BIOS版本为A10以前）和Clevo P750ZM（Eurocom P5 Pro Extreme）+ NVIDIA 980m上复现和成功使用。</div>
+<p>在某些系统中，键盘上的亮度热键可以正确地修改<code>/sys/class/backlight/acpi_video0/actual_brightness</code>中ACPI接口的值，但是屏幕的亮度却不会改变。<a href="#pg712e4adaddad">桌面环境</a>提供的亮度调节可能也没有作用。
+</p><p>如果您已经测试了推荐的内核参数，并且只有<code>xbacklight</code>工作，那么您可能面临者BIOS和内核驱动程序之间的不兼容。
+</p><p>在这种情况下，唯一的解决方案是等待来自BIOS或GPU驱动程序制造商的修复。
+</p><p>临时的修复方案为使用inotify内核API来在每次<code>/sys/class/backlight/acpi_video0/actual_brightness</code>的值更改的时候调用<code>xbacklight</code>。
+</p><p>首先<a href="#pg811194d6beaa">安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=inotify-tools">inotify-tools</a></span><sup><small>包</small></sup></span>。然后创建含有调用inotify的脚本，让其在引导时启动，或者也可以通过<a href="#pg9604da0ac74d">自动启动</a>手段启动。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/xbacklightmon</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+
+path=/sys/class/backlight/acpi_video0
+
+luminance() {
+    read -r level &lt; "$path"/actual_brightness
+    factor=$((100 / max))
+    printf '%d\n' "$((level * factor))"
+}
+
+read -r max &lt; "$path"/max_brightness
+
+xbacklight -set "$(luminance)"
+
+inotifywait -me modify --format '' "$path"/actual_brightness | while read; do
+    xbacklight -set "$(luminance)"
+done
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_MATE.E4.B8.8B.E8.83.8C.E5.85.89.E4.B8.8D.E5.B7.A5.E4.BD.9C" id="MATE下背光不工作"><span id="MATE.E4.B8.8B.E8.83.8C.E5.85.89.E4.B8.8D.E5.B7.A5.E4.BD.9C"></span>MATE下背光不工作</h3></div>
+<p>确保<a href="#pg54c3351b3e3b">已安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mate-power-manager">mate-power-manager</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_Xfce.E4.B8.8B.E8.83.8C.E5.85.89.E6.8C.89.E9.94.AE.E4.B8.8D.E5.B7.A5.E4.BD.9C" id="Xfce下背光按键不工作"><span id="Xfce.E4.B8.8B.E8.83.8C.E5.85.89.E6.8C.89.E9.94.AE.E4.B8.8D.E5.B7.A5.E4.BD.9C"></span>Xfce下背光按键不工作</h3></div>
+<p>在xfce4中，<a href="https://docs.xfce.org/xfce/xfce4-power-manager/start">Xfce4电源管理器</a>处理亮度按键。
+</p><p>在部分Xfce环境中，“处理显示亮度按键”（Handle display brightness keys）的设置可能默认为关闭。
+</p><p>要再次启用亮度按键，打开<a href="https://docs.xfce.org/xfce/xfce4-power-manager/preferences">Xfce4电源管理器对话框</a>并开启“处理显示亮度按键”：
+</p>
+<pre>$ xfce4-power-manager -c
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_xbacklight.E8.BF.94.E5.9B.9E.EF.BC.9ANo_outputs_have_backlight_property" id="xbacklight返回：No_outputs_have_backlight_property"><span id="xbacklight.E8.BF.94.E5.9B.9E.EF.BC.9ANo_outputs_have_backlight_property"></span>xbacklight返回：No outputs have backlight property</h3></div>
+<p>取决于安装的显卡，有时来自<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xbacklight">xorg-xbacklight</a></span><sup><small>包</small></sup></span>的xbacklight可能会返回消息“No outputs have backlight property”（没有输出拥有背光属性）。安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=acpilight">acpilight</a></span><sup><small>包</small></sup></span>，此包提供备选的xbacklight程序，可能可以工作。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga0bdbde91ee9_.E4.BD.BF.E7.94.A8amdgpu.E9.A9.B1.E5.8A.A8.E6.97.B6.E6.AF.8F.E6.AC.A1.E9.87.8D.E5.90.AF.E5.90.8E.E4.BA.AE.E5.BA.A6.E9.83.BD.E4.BC.9A.E5.8F.98.E4.B8.BA.E6.9C.80.E5.A4.A7.E5.80.BC" id="使用amdgpu驱动时每次重启后亮度都会变为最大值"><span id=".E4.BD.BF.E7.94.A8amdgpu.E9.A9.B1.E5.8A.A8.E6.97.B6.E6.AF.8F.E6.AC.A1.E9.87.8D.E5.90.AF.E5.90.8E.E4.BA.AE.E5.BA.A6.E9.83.BD.E4.BC.9A.E5.8F.98.E4.B8.BA.E6.9C.80.E5.A4.A7.E5.80.BC"></span>使用amdgpu驱动时每次重启后亮度都会变为最大值</h3></div>
+<p>由于近期amdgpu驱动的<a href="https://bugzilla.kernel.org/show_bug.cgi?id=203905">bug</a>，背光的<code>actual_brightness</code>值可能返回十六位整型数值，而<code>max_brightness</code>中指定的数值为八位。这会导致<code>systemd-backlight</code>服务在系统引导时尝试恢复亮度，但尝试恢复到的亮度值总是大于最大亮度值，进而变成调为最大亮度（255）。
+</p><p>在该错误没有得到解决的期间，一种可能的解决方法是在恢复之前将存储的亮度修改（截断）到正确的范围内。这可以通过脚本和服务单元来完成：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">fix-brightness.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+
+# Change the line below according to your hardware
+BRIGHTNESS_FILE="/var/lib/systemd/backlight/pci-0000:04:00.0:backlight:amdgpu_bl0"
+BRIGHTNESS=$(cat "$BRIGHTNESS_FILE")
+BRIGHTNESS=$(($BRIGHTNESS*255/65535))
+BRIGHTNESS=${BRIGHTNESS/.*} # truncating to int, just in case
+echo $BRIGHTNESS &gt; "$BRIGHTNESS_FILE"</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">fix-brightness.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Convert 16-bit brightness values to 8-bit before systemd-backlight applies it
+Before=systemd-backlight@backlight:amdgpu_bl0.service
+
+[Service]
+Type=oneshot
+ExecStart=&lt;path to the script above&gt;
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>在部分系统上，驱动返回的背光等级确实在正确的范围[0, 255]内，但systemd仍然不能恢复为正确的亮度值。这有可能是由于<a href="https://gitlab.freedesktop.org/drm/amd/-/issues/1337">内核</a>中的冲突。这种情况下，截断亮度等级没有用处，因为已经在正确范围内。临时的解决方法包括在关机前向systemd保存亮度等级。这可以通过以下脚本和服务单元来完成：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">fix-brightness.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+
+# Backlight level from systemd's perspective (change if needed)
+readonly SYSTEMD_BACKLIGHT_FILE='/var/lib/systemd/backlight/pci-0000:04:00.0:backlight:amdgpu_bl0'
+
+# Backlight level from AMDGPU driver
+readonly AMDGPU_BACKLIGHT_FILE='/sys/class/backlight/amdgpu_bl0/brightness'
+
+# Read current value from the driver and apply it to systemd
+readonly AMDGPU_BACKLIGHT_VALUE=$(cat "$AMDGPU_BACKLIGHT_FILE")
+echo "$AMDGPU_BACKLIGHT_VALUE" &gt; "$SYSTEMD_BACKLIGHT_FILE"</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">fix-brightness.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Save brightness value from AMDGPU
+DefaultDependencies=no
+After=final.target
+
+[Service]
+Type=oneshot
+ExecStart=&lt;到上方脚本的路径&gt;
+
+[Install]
+WantedBy=final.target</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807053608
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.499 seconds
+Real time usage: 0.510 seconds
+Preprocessor visited node count: 1582/1000000
+Revision size: 27014/2097152 bytes
+Post‐expand include size: 100073/2097152 bytes
+Template argument size: 14590/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 2/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 376/5000000 bytes
+Lua time usage: 0.064/7.000 seconds
+Lua memory usage: 1221896/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  209.434      1 -total
+ 38.96%   81.597      1 Template:NoteTA
+ 10.85%   22.717      9 Template:注意
+  5.52%   11.553      1 Template:Link-en
+  4.29%    8.989     66 Template:Ic
+  3.33%    6.982      2 Template:Accuracy
+  3.26%    6.833      3 Template:Tip
+  3.17%    6.648     12 Template:Yes
+  2.98%    6.236      6 Template:App
+  2.91%    6.090     20 Template:No
+-->
+<!-- Render ID e3e1e00f-9221-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2829:|#|:idhash:canonical!zh-cn and timestamp 20260807053608 and revision id 34754. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

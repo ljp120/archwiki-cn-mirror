@@ -1,0 +1,441 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgcb28ba980ed7">固态硬盘</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Solid_State_Drives">Solid_State_Drives</a>，最近一次同步于 2025-02-05，若英文版本有所<a href="https://wiki.archlinux.org/title/Solid_State_Drives?diff=0&amp;oldid=826135">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Solid_State_Drives_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg80203e25c950">固态硬盘/NVMe</a></li>
+<li><a href="#pg80f72e0236ed">固态硬盘/存储单元擦除</a></li>
+<li><a href="#pg95bcbd921521">基准测试</a></li>
+<li><a href="#pg5f7223c277dc">性能优化#存储设备</a></li>
+</ul></div>
+<p>本文介绍如何管理<a href="https://zh.wikipedia.org/wiki/%E5%9B%BA%E6%80%81%E7%A1%AC%E7%9B%98">固态硬盘</a>（SSD）等基于闪存的存储设备。
+</p><p>如果要针对特定目的对 SSD 进行分区，请参考<a href="https://zh.wikipedia.org/wiki/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%88%97%E8%A1%A8#.E4.B8.BA.E9.97.AA.E5.AD.98.E3.80.81.E5.9B.BA.E6.80.81.E7.A1.AC.E7.9B.98.E4.BC.98.E5.8C.96.E7.9A.84.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F">针对闪存优化的文件系统清单</a>。
+</p><p>对于一般用途，您只需选择喜好的<a href="#pg6c70b7fdfa57">文件系统</a>并启用 <a href="#pgcb28ba980ed7_TRIM">#TRIM</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgcb28ba980ed7_.E4.BD.BF.E7.94.A8" id="使用"><span id=".E4.BD.BF.E7.94.A8"></span>使用</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_TRIM" id="TRIM">TRIM</h3></div>
+<p>在机械硬盘上，删除操作是在文件系统层级上处理的<a href="https://www.redhat.com/sysadmin/linux-delete-file-rm">[1]</a>，而 SSD 会向硬盘主控通知特定区域的空间可以被再次使用。由于每次写入操作都会对闪存单元一定磨损，因此主控会使用算法来将写操作平衡到闪存的所有单元上，这被称作<a href="https://zh.wikipedia.org/wiki/%E8%80%97%E6%90%8D%E5%B9%B3%E5%9D%87%E6%8A%80%E8%A1%93">耗损平均技术</a>。在不使用 NVMe <a href="https://en.wikipedia.org/wiki/Trim_(computing)#NVM_Express">DEALLOCATE</a>，SAS <a href="https://zh.wikipedia.org/wiki/Trim%E5%91%BD%E4%BB%A4#SCSI">UNMAP</a> 或 <a href="https://zh.wikipedia.org/wiki/Trim%E5%91%BD%E4%BB%A4#ATA">ATA_TRIM</a> 命令（多数 SSD 都支持）的情况下，如果没有空余的存储块，主控就需要反复搬运数据以空出一个最小擦除单元，并擦除该单元以写入数据，导致写入耗时增加（详见：<a href="https://zh.wikipedia.org/wiki/%E5%86%99%E5%85%A5%E6%94%BE%E5%A4%A7">写入放大</a>）。关于 SSD 空间占满前后的性能对比可参考 <a href="https://www.techspot.com/review/737-ocz-vector-150-ssd/page9.html">TechSpot 的评测</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果要使用 TRIM，<b>只能</b>在定期 TRIM 和持续性 TRIM 间二选一。Linux 社区认为持续性 TRIM <b>不是</b>首选的 TRIM 方法，例如 Ubuntu 就默认使用定期 TRIM <a href="https://askubuntu.com/questions/1034169/is-trim-enabled-on-my-ubuntu-18-04-installation">[2]</a>，Debian 也不建议使用<a href="https://wiki.debian.org/SSDOptimization#Mounting_SSD_filesystems">持续性 TRIM</a>，红帽建议尽可能选择使用定期 TRIM <a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/managing_file_systems/discarding-unused-blocks_managing-file-systems">[3]</a>。</div>
+<p>自 Linux 内核版本 3.8 开始，对 TRIM 的支持不断被添加到不同的<a href="#pg6c70b7fdfa57">文件系统</a>中。见下表：
+</p>
+<table class="wikitable sortable">
+<tbody><tr>
+<th>文件系统</th>
+<th>持续性 TRIM <br/>（<code>discard</code> 选项）</th>
+<th>定期 TRIM <br/>（<i>fstrim</i>）</th>
+<th>参考与备注
+</th></tr>
+<tr>
+<td><a href="#pgd0b81baa1ee5">Bcachefs</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>
+</td></tr>
+<tr>
+<td><a href="#pg429e7ec45c9c">Btrfs</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>从 6.2 内核版本开始默认<a href="#pg429e7ec45c9c">启用</a>异步 discard
+</td></tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/exFAT">exFAT</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>从 5.13 内核版本开始支持 <i>fstrim</i> <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit?id=654762df2ec7d61b05acc788afbffaba52d658fe">[4]</a>
+</td></tr>
+<tr>
+<td><a href="#pg226ab64889d4">ext3</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>
+</td></tr>
+<tr>
+<td><a href="#pgb5dd09f37b3e">ext4</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>“discard, nodiscard(*)” <a href="https://docs.kernel.org/admin-guide/ext4.html?highlight=discard,%20nodiscard(*)#options">[5]</a>
+</td></tr>
+<tr>
+<td><a href="#pgac7283731cf0">F2FS</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>
+</td></tr>
+<tr>
+<td><a href="#pg55a5ea624780">JFS</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><a href="https://www.phoronix.com/scan.php?page=news_item&amp;px=MTE5ODY">[6]</a>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/NILFS">NILFS2</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>
+</td></tr>
+<tr>
+<td rowspan="2"><a href="#pg172996877d67">NTFS</a>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td><a href="https://docs.kernel.org/filesystems/ntfs3.html">ntfs3</a> 内核驱动仅支持持续性 TRIM
+</td></tr>
+<tr>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><a href="#pg50f8f3d23b2e">NTFS-3G</a> 驱动仅支持定期 TRIM
+</td></tr>
+<tr>
+<td><a href="#pg5407b9e74c08">VFAT</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>从 4.19 内核版本开始支持 <i>fstrim</i> <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=f663b5b38fffeb31841f8bfaf0ef87a445b0ffee">[7]</a>
+</td></tr>
+<tr>
+<td><a href="#pg97815ebb0436">XFS</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td><a href="https://xfs.org/index.php/FITRIM/discard">[8]</a>
+</td></tr>
+<tr>
+<td><a href="#pgad14227759fd">Swap</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td>理论上不是个“文件系统”，但也适用于 TRIM。“once” 选项在启动时提供了定期 TRIM 的功能，具体请参考 <span class="plainlinks archwiki-template-man" title="$ man 8 swapon"><a href="https://man.archlinux.org/man/swapon.8">swapon(8)</a></span>
+</td></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>在启用 TRIM 功能前，请确保 SSD 支持 TRIM，否则可能导致数据丢失！</div>
+<p>要检查 TRIM 支持，执行：
+</p>
+<pre>$ lsblk --discard
+</pre>
+<p>若 DISC-GRAN（discard granularity）和 DISC-MAX（discard max bytes）列上的数值不为零，则表示对应设备支持 TRIM。
+</p><p>对于 SATA SSD，可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hdparm">hdparm</a></span><sup><small>包</small></sup></span> 检测 TRIM 支持：以<a href="#pg09ac28aa217b">根用户</a>执行 <code>hdparm -I /dev/sda | grep TRIM</code>。注意：<code>hdparm</code> 不支持 NVMe SSD。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcb28ba980ed7_.E5.AE.9A.E6.9C.9F_TRIM" id="定期_TRIM"><span id=".E5.AE.9A.E6.9C.9F_TRIM"></span>定期 TRIM</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=util-linux">util-linux</a></span><sup><small>包</small></sup></span> 提供了 <code>fstrim.service</code> 和 <code>fstrim.timer</code> 两个 <a href="#pgac06dd8bfe95">systemd</a> 单元文件。<a href="#pg3ef6532bc644">启用</a> <code>fstrim.timer</code> 计时器会在每周激活服务，在所有已挂载的支持 <i>discard</i> 操作的文件系统上执行 <span class="plainlinks archwiki-template-man" title="$ man 8 fstrim"><a href="https://man.archlinux.org/man/fstrim.8">fstrim(8)</a></span>。
+</p><p>该计时器使用 <code>/var/lib/systemd/timers/stamp-fstrim.timer</code>（将在服务第一次启动时创建）的时间戳来判断上次运行的时间。因此，不必担心服务被过于频繁地调用（类似 <i>anacron</i>）。
+</p><p>单元的状态与活动记录可通过 <a href="#pg95a389d97781">journalctl</a> 查看。若要修改运行的周期或执行的指令，可<a href="#pg965c4680152b">编辑</a>单元文件。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcb28ba980ed7_.E6.8C.81.E7.BB.AD.E6.80.A7_TRIM" id="持续性_TRIM"><span id=".E6.8C.81.E7.BB.AD.E6.80.A7_TRIM"></span>持续性 TRIM</h4></div>
+<p>除定期执行 TRIM 指令外（若使用 <code>fstrim.timer</code> 则默认为每周一次），也可每次在文件被删除后就立即执行 TRIM 指令（这被称为持续性 TRIM）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>在 <a href="https://zh.wikipedia.org/wiki/SATA#SATA_3.1">SATA 3.1</a> 前，所有 TRIM 指令都是非队列化的，因此使用持续性 TRIM 将造成系统频繁卡顿，这种情况下应使用 #定期 TRIM。另外，某些设备（具体请参考 <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/ata/libata-core.c">Linux 源码</a>中的 <code>__ata_dev_quirks</code> 内带有 <code>ATA_QUIRK_NO_NCQ_TRIM</code> 的项）使用队列化 TRIM 命令会造成严重的数据损坏，因此系统会对这些设备强制发送非队列化的 TRIM 命令，具体请参考 <a href="https://en.wikipedia.org/wiki/Trim_(computing)#Disadvantages">Wikipedia:Trim_(computing)#Disadvantages</a>。</div>
+<p>要使用持续性 TRIM，在 <code>/etc/fstab</code> 中对应挂载点指定 <code>discard</code> 选项：
+</p>
+<pre>/dev/sda1  /           ext4  defaults,<b>discard</b>   0  1
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>不能在 <code>/etc/fstab</code> 中为 XFS <code>/</code> 分区指定 discard 挂载选项。根据<a href="https://bbs.archlinux.org/viewtopic.php?id=143254">此帖子</a>，必须使用 <code>rootflags=discard</code> <a href="#pgec0856954f1c">内核参数</a>。</div>
+<p>对于Ext4文件系统，也可用 <i>tune2fs</i> 将 <code>discard</code> 设置为一个<a href="#pgf63e2c04d59e">默认挂载选项</a>：
+</p>
+<pre># tune2fs -o discard /dev/sd<b>XY</b>
+</pre>
+<p>对于可移动设备，由于配置后的分区在其它设备上也会使用默认挂载选项，使用此方式而不是在 <code>/etc/fstab</code> 中新增条目尤其有用。这样，在其他计算机上挂载分区时，就不需要每次修改 <code>/etc/fstab</code> 了。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此默认挂载选项不会在 <code>/proc/mounts</code> 中列出。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcb28ba980ed7_Trim_.E6.95.B4.E4.B8.AA.E8.AE.BE.E5.A4.87" id="Trim_整个设备"><span id="Trim_.E6.95.B4.E4.B8.AA.E8.AE.BE.E5.A4.87"></span>Trim 整个设备</h4></div>
+<p>当在全新安装或想卖掉你的 SSD 时，你可能想 Trim 整个设备，这时候可以使用 <a href="#pg80f72e0236ed">blkdiscard</a> 命令。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcb28ba980ed7_LVM" id="LVM">LVM</h4></div>
+<p>由 LVM 逻辑卷上的文件系统产生的 TRIM 请求将直达对应物理卷，无需额外的配置。
+</p><p><a href="#pg02cd87050dfd">LVM</a> 操作（<i>lvremove</i>，<i>lvreduce</i>等）默认不会产生 TRIM 请求，以便使用 <span class="plainlinks archwiki-template-man" title="$ man 8 vgcfgrestore"><a href="https://man.archlinux.org/man/vgcfgrestore.8">vgcfgrestore(8)</a></span> 恢复之前的卷组设定。<code>/etc/lvm/lvm.conf</code> 中的 <code>issue_discards</code> 设置决定是否在逻辑卷不再占用物理卷空间时将 discard 发送给底层物理卷。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在修改 <code>issue_discards</code> 设置前，请仔细阅读<code>/etc/lvm/lvm.conf</code>中的注释。<code>issue_discards</code> 设置不会影响由逻辑卷文件系统产生的 TRIM 请求（如在文件系统内删除文件）传递到硬盘，也不会影响 thin pool 中的空间管理。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>启用 <code>issue_discards</code> 后，将不能再使用 <i>vgcfgrestore</i> 恢复卷组元数据。一旦执行 LVM 命令，将无法撤销。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcb28ba980ed7_dm_crypt" id="dm-crypt">dm-crypt</h4></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>dm-crypt 支持将 discard 请求传递到底层块设备上。这不一定能提升 SSD 的性能<a href="https://lore.kernel.org/linux-raid/508FA2C6.2050800@hesbynett.no/">[9]</a>，而且还有安全风险，因此默认不被启用。</div>
+<p>为 LUKS 和普通 dm-crypt 设备启用 discard 的步骤请参考 <a href="#pg2d5af776f6fd">dm-crypt/特殊应用#固态硬盘的Discard/TRIM支持</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcb28ba980ed7_swap" id="swap">swap</h4></div>
+<p>可以通过将 <code>discard</code> 选项添加到 <a href="#pgced0cc449f44">fstab</a> 中的 swap 设备条目或调用 <code>swapon</code> 时传递 <code>--discard</code> 选项为 swap 启用 discard。
+</p><p>在使用 <a href="#pgac06dd8bfe95">Systemd#GPT分区自动挂载</a>时，discard <i>不会</i>被自动应用到 swap 分区。
+</p><p>See <span class="plainlinks archwiki-template-man" title="$ man 8 swapon"><a href="https://man.archlinux.org/man/swapon.8">swapon(8)</a></span> for discussion on when swap is discarded: <code>discard=once</code> or <code>discard=pages</code>. If <code>discard</code> is specified without a specific mode, the default is to enable both.
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>对于使用 mdadm 的 RAID 配置，为 swapon 启用 discard 会导致系统在启动和运行时锁死。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_.E6.8F.90.E5.8D.87.E6.80.A7.E8.83.BD" id="提升性能"><span id=".E6.8F.90.E5.8D.87.E6.80.A7.E8.83.BD"></span>提升性能</h3></div>
+<p>参见<a href="#pg5f7223c277dc">性能优化#存储设备</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcb28ba980ed7_.E6.B8.85.E7.A9.BA_SSD" id="清空_SSD"><span id=".E6.B8.85.E7.A9.BA_SSD"></span>清空 SSD</h4></div>
+<p>有时用户可能会想将 SSD 的存储单元重置回出厂状态，从而恢复到<a href="https://www.anandtech.com/show/2738/8">出厂时的写入性能</a>。由于 TRIM 只对文件删除有用，而对替换操作（如增量保存）无能为力，因此就算 SSD 带有原生 TRIM 支持，其写入性能还是会随时间逐渐下降。
+</p><p>无论是 <a href="#pg80f72e0236ed">SATA</a> 还是 <a href="#pg80f72e0236ed">NVMe</a> SSD，都可以参考<a href="#pg80f72e0236ed">固态硬盘/存储单元擦除</a>中的对应步骤进行重置。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果你想通过清除存储单元来清除数据，靠 SSD 控制器来执行该操作可能并不安全可靠。如果你不信任 SSD 制造商或担心固件中潜在的 bug，可以参考 <a href="#pg8e3f3779e38c">安全地擦除磁盘#闪存</a> 中的信息和范例进行手动擦除。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_.E5.AE.89.E5.85.A8" id="安全"><span id=".E5.AE.89.E5.85.A8"></span>安全</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcb28ba980ed7_.E5.86.BB.E7.BB.93.EF.BC.88Frozen.EF.BC.89.E6.A8.A1.E5.BC.8F" id="冻结（Frozen）模式"><span id=".E5.86.BB.E7.BB.93.EF.BC.88Frozen.EF.BC.89.E6.A8.A1.E5.BC.8F"></span>冻结（Frozen）模式</h4></div>
+<p>有些主板的固件会在初始化时向 SATA 设备发送 ATA SECURITY FREEZE LOCK 命令，将硬盘设为冻结模式（即切换到 SEC2 状态，禁用安全、非锁定并冻结）。同样，有些 SSD 和 HDD 在出厂时也会设成该状态。可以通过 <a href="#pg62a34c92338a">hdparm</a> 和 <a href="#pgf3fd55c81dde">smartctl</a> 的输出确认该现象：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># hdparm -I /dev/sda</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Security:
+ 	Master password revision code = 65534
+ 		supported
+ 	<b>not	enabled</b>
+ 	<b>not	locked</b>
+ 		<b>frozen</b>
+ 	not	expired: security count
+ 		supported: enhanced erase
+ 	4min for SECURITY ERASE UNIT. 2min for ENHANCED SECURITY ERASE UNIT.</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># smartctl -g security /dev/sda</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ATA Security is:  Disabled, frozen [SEC2]
+</pre>
+<p>格式化或安装系统等操作不受冻结模式的影响。
+</p><p>上面的 <i>hdparm</i> 输出显示设备在启动时<b>未被 HDD 密码锁定</b>，<b>frozen</b> 冻结状态可防止恶意软件在运行时对设备设置密码进行锁定。
+</p><p>如果你想手动为“冻结”的设备设置密码，需要主板 BIOS 支持该功能的。由于<a href="https://en.wikipedia.org/wiki/Hardware-based_full_disk_encryption">硬件加密</a>的需要，很多笔记本都支持该功能，但台式机/服务器主板上则不然。以 Intel DH67CL/BL 主板为例，需要通过板上跳线将主板设为“维护模式”才能访问该设置。<a href="https://sstahlman.blogspot.in/2014/07/hardware-fde-with-intel-ssd-330-on.html?showComment=1411193181867#c4579383928221016762">[10]</a>
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>除非你十分清楚自己在干什么，否则不要试图用 <i>hdparm</i> 来改变上述的 <b>lock</b> 安全设置。</div>
+<p>如果你想擦除 SSD，请参考<a href="#pg8e3f3779e38c">安全地擦除磁盘#hdparm</a> 和 <a href="#pg80f72e0236ed">/存储单元擦除</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgcb28ba980ed7_.E4.BB.8E.E7.9D.A1.E7.9C.A0.E4.B8.AD.E5.94.A4.E9.86.92.E6.97.B6.E8.AE.BE.E7.BD.AE_SATA_SSD_.E4.B8.BA.E5.86.BB.E7.BB.93.E6.A8.A1.E5.BC.8F" id="从睡眠中唤醒时设置_SATA_SSD_为冻结模式"><span id=".E4.BB.8E.E7.9D.A1.E7.9C.A0.E4.B8.AD.E5.94.A4.E9.86.92.E6.97.B6.E8.AE.BE.E7.BD.AE_SATA_SSD_.E4.B8.BA.E5.86.BB.E7.BB.93.E6.A8.A1.E5.BC.8F"></span>从睡眠中唤醒时设置 SATA SSD 为冻结模式</h5></div>
+<p>当从 S3 睡眠状态唤醒时，SATA SSD 很可能会回到 SEC1 状态（禁用安全、非锁定、非冻结），导致其有可能受 <a href="#pg80f72e0236ed">/存储单元擦除</a>中描述的 ATA SECURITY ERASE UNIT 命令攻击。
+</p><p>要防止这一问题，可以<a href="#pg146ac4b0e523">在每次唤醒后</a>运行一个脚本：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/systemd/system-sleep/ssd-freeze.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+if [ "$1" = 'post' ]; then
+	sleep 1
+	if hdparm --security-freeze /dev/disk/by-id/<i>ata-name-of-disk</i>; then
+		logger "$0: SSD freeze command executed successfully"
+	else
+		logger "$0: SSD freeze command failed"
+	fi	
+fi</pre>
+<p>如果系统有多个存储设备和/或移动 USB 盘，可以通过 <a href="#pg62a34c92338a">Hdparm#使用 udev 规则使配置持久化</a>为所有硬盘（包括机械硬盘）指定 <code>--security-freeze</code>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcb28ba980ed7_.E7.A1.AC.E4.BB.B6.E5.8A.A0.E5.AF.86" id="硬件加密"><span id=".E7.A1.AC.E4.BB.B6.E5.8A.A0.E5.AF.86"></span>硬件加密</h4></div>
+<p>正如#冻结（Frozen）模式中提到的，在设备支持的情况下，在 BIOS 中为存储设备（SSD/HDD）设置密码可能同时会启用硬件加密。如果设备同时符合 OPAL 标准，即使 BIOS 没有设置密码的功能，硬件加密也可能启动，具体请参考 <a href="#pge01e1107cd74">Self-encrypting drives</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgcb28ba980ed7_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<p>你遇到的问题可能是由于 SSD 固件而不是 Linux 产生的。在尝试排除故障前，请检查固件是否有更新：
+</p>
+<ul><li>SSD 的固件</li>
+<li><a href="#pgbb000ca624e1">主板的 BIOS/UEFI 固件</a></li></ul>
+<p>即使是固件的 bug，也可能在不更新固件的情况下避免。若没有固件更新可用，或你不想进行固件更新，以下内容可能有所帮助。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_.E5.A4.84.E7.90.86_NCQ_.E9.94.99.E8.AF.AF" id="处理_NCQ_错误"><span id=".E5.A4.84.E7.90.86_NCQ_.E9.94.99.E8.AF.AF"></span>处理 NCQ 错误</h3></div>
+<p>部分 SSD 和 SATA 芯片组在 Linux 的原生命令队列（NCQ）下不能正常工作。通过 <a href="#pg47c5e1af4d24">journal</a> 可看到如下错误信息: 
+</p>
+<pre>ata9: exception Emask 0x0 SAct 0xf SErr 0x0 action 0x10 frozen
+ata9.00: failed command: READ FPDMA QUEUED
+ata9.00: cmd 60/04:00:d4:82:85/00:00:1f:00:00/40 tag 0 ncq 2048 in
+res 40/00:18:d3:82:85/00:00:1f:00:00/40 Emask 0x4 (timeout)
+</pre>
+<p>要在系统启动时禁用 NCQ，需要在<a href="#pgee8f2050088a">引导加载程序</a>配置的内核命令行中添加 <code>libata.force=noncq</code>。例如，要仅为硬盘 0 端口 9 禁用 NCQ，可以使用：<code>libata.force=9.00:noncq</code>
+</p><p>或者，可通过 sysfs 在不重启的情况下为指定设备禁用 NCQ：
+</p>
+<pre># echo 1 &gt; /sys/block/sdX/device/queue_depth
+</pre>
+<p>如果更新固件并完成操作后问题仍未解决或导致了其他问题，请<a href="#pgbd58e8d9d126">提交 bug 报告</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_.E5.A4.84.E7.90.86.E4.B8.8E_SATA_.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86.E6.9C.89.E5.85.B3.E7.9A.84.E9.94.99.E8.AF.AF" id="处理与_SATA_电源管理有关的错误"><span id=".E5.A4.84.E7.90.86.E4.B8.8E_SATA_.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86.E6.9C.89.E5.85.B3.E7.9A.84.E9.94.99.E8.AF.AF"></span>处理与 SATA 电源管理有关的错误</h3></div>
+<p>某些 SSD（如 Transcend MTS400 或 Crucial M550）搭配特定 SATA 控制器时，在 <a href="https://en.wikipedia.org/wiki/Aggressive_Link_Power_Management">ALPM</a> 启用时会出现故障。
+</p><p>Linux 从 4.16 版本开始默认启用，也可能会被节能守护进程（例如 <a href="#pg10f1d5521407">TLP</a> 和 <a href="#pga426d657903e">Laptop Mode Tools</a>）启用。更多信息请参考<a href="#pga6e29fecd7a5">电源管理#SATA 活动链路电源管理</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_.E6.94.AF.E6.8C.81_TRIM_.E7.9A.84.E5.A4.96.E6.8E.A5_SSD" id="支持_TRIM_的外接_SSD"><span id=".E6.94.AF.E6.8C.81_TRIM_.E7.9A.84.E5.A4.96.E6.8E.A5_SSD"></span>支持 TRIM 的外接 SSD</h3></div>
+
+<p>有多个 USB 转 SATA 桥接芯片（如 VL715，VL716 等）及 USB 转 PCIe 桥接芯片（如 <a href="https://icybox.de/en/product.php?id=71">IB-1817M-C31</a> 外置 NVMe 硬盘盒使用的 <a href="https://www.jmicron.com/PDF/brief/jms583.pdf">JMicron JMS583</a>）支持类似 TRIM 的命令，这些命令可通过 <a href="https://zh.wikipedia.org/wiki/USB%E8%BF%9E%E6%8E%A5%E7%9A%84SCSI">USB Attached SCSI</a> 驱动程序（在 Linux 下称为"uas"）发送。
+</p><p>然而内核可能不会自动检测到并启用这一功能。
+假设有问题的设备为 /dev/sdX，可以通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sg3_utils">sg3_utils</a></span><sup><small>包</small></sup></span> 使用以下命令确定是否为这种情况：
+</p>
+<pre># sg_readcap -l /dev/sdX
+</pre>
+<p>如果输出中有一行写着“Logical block provisioning: lbpme=0”，就意味着由于没有设置 LBPME 位，内核认为该设备不支持“<a href="https://www.seagate.com/files/staticfiles/support/docs/manual/Interface%20manuals/100293068k.pdf#G4.1427908">Logical Block Provisioning Management</a>”。
+</p><p>在这种情况下，就需要找出设备上的<a href="https://www.seagate.com/files/staticfiles/support/docs/manual/Interface%20manuals/100293068k.pdf#G4.3076244">“Logical Block Provisioning”中的“Vital Product Data”（VPD）页</a>是否说明了支持的解除数据映射机制。可以使用该命令进行查看：
+</p>
+<pre># sg_vpd -a /dev/sdX
+</pre>
+<p>查看有无类似下面的输出:
+</p>
+<pre>Unmap command supported (LBPU): 1
+Write same (16) with unmap bit supported (LBPWS): 0
+Write same (10) with unmap bit supported (LBPWS10): 0
+</pre>
+<p>在该示例中，设备支持“UNMAP”命令。
+</p><p>此外，查看以下命令的输出：
+</p>
+<pre>$ cat /sys/block/sdX/device/scsi_disk/*/provisioning_mode
+</pre>
+<p>如果输出为“full”，则表明内核没有检测到该设备有能力解除数据映射。
+除了“full”外，内核的 SCSI 存储驱动目前可以识别以下 provisioning_mode 的值：
+</p>
+<pre>unmap
+writesame_16
+writesame_10
+writesame_zero
+disabled
+</pre>
+<p>对于以上示例，现在可以通过将“unmap”写入到“provisioning_mode”让内核使用“unmap”模式：
+</p>
+<pre># echo "unmap" &gt;/sys/block/sdX/device/scsi_disk/*/provisioning_mode
+</pre>
+<p>现在就可以在 /dev/sdX 上使用 blkdiscard 等工具，或是对 /dev/sdX 上的文件系统上使用 fstrim。
+</p><p>如果想在特定厂商或产品设备连接时自动启用一个“provisioning_mode”，可以使用 <a href="#pge009209061ac">udev</a>。首先找到 USB Vendor 和 Product ID：
+</p>
+<pre>$ cat /sys/block/sdX/../../../../../../idVendor
+$ cat /sys/block/sdX/../../../../../../idProduct
+</pre>
+<p>然后创建或修改相应的 <a href="#pge009209061ac">udev</a> 规则（本例中使用 idVendor 152d 和 idProduct 0583）：
+</p>
+<pre># echo 'ACTION=="add|change", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="0583", SUBSYSTEM=="scsi_disk", ATTR{provisioning_mode}="unmap"' &gt;&gt;/etc/udev/rules.d/10-uas-discard.rules
+</pre>
+<p>（也可以使用 <code>lsusb</code> 命令来查看 idVendor/idProduct。）
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgcb28ba980ed7_.E5.9B.BA.E4.BB.B6.E6.9B.B4.E6.96.B0" id="固件更新"><span id=".E5.9B.BA.E4.BB.B6.E6.9B.B4.E6.96.B0"></span>固件更新</h2></div>
+<p>如果设备制造商支持，建议使用 <a href="#pg8f5df3654778">fwupd</a> 工具来更新固件。
+</p><p>检查当前固件版本：
+</p>
+<pre># smartctl -i /dev/<i>ssd_device</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_.E5.A8.81.E5.88.9A.EF.BC.88ADATA.EF.BC.89" id="威刚（ADATA）"><span id=".E5.A8.81.E5.88.9A.EF.BC.88ADATA.EF.BC.89"></span>威刚（ADATA）</h3></div>
+<p>威刚不支持在 Linux 下更新 SSD 固件。可以在<a href="https://www.adata.com/en/support/consumer?tab=downloads&amp;download=driver">支持页</a>下载仅支持 Windows 的 SSD ToolBox 工具，也可从<a href="https://www.xpg.com/en/support/xpg?tab=downloads&amp;download=driver">支持页</a>下载 ADATA XPG 来对 SSD 进行监控、TRIM、基准测试或更新固件。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>不建议尝试通过 <a href="#pg39e5cd9380ff">Wine</a> 来更新固件，<a href="#pg39e5cd9380ff">Wine</a> 不是被设计来处理硬件接口操作的。使用 <a href="#pg39e5cd9380ff">Wine</a> 可能使固件更新不完整，导致 SSD 变砖。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_.E8.8B.B1.E7.9D.BF.E8.BE.BE.EF.BC.88Crucial.EF.BC.89" id="英睿达（Crucial）"><span id=".E8.8B.B1.E7.9D.BF.E8.BE.BE.EF.BC.88Crucial.EF.BC.89"></span>英睿达（Crucial）</h3></div>
+<p>英睿达提供了以 ISO 镜像文件升级固件的选项。<a href="https://www.crucial.com/usa/en/support-ssd">在 SSD 支持页</a>选择产品后，下载“Manual Boot File”可获取 ISO 镜像。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>英睿达提供的 ISO 镜像似乎不是 hybrid 格式。如果直接使用 <code>dd</code> 命令将镜像复制到设备上，由于没有配置 <a href="#pg3fb7df0ff769">MBR</a>，将导致无法从该设备启动。要解决这一问题，可安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=syslinux">syslinux</a></span><sup><small>包</small></sup></span> 并执行 <code>isohybrid path/to/image.iso</code>。</div>
+<p>Crucial M4 用户可通 过<code>smartctl</code> 检查是否有需要的固件更新：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ smartctl --all /dev/sd<b>X</b></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">==&gt; WARNING: This drive may hang after 5184 hours of power-on time:
+<a href="https://www.tomshardware.com/news/Crucial-m4-Firmware-BSOD,14544.html">https://www.tomshardware.com/news/Crucial-m4-Firmware-BSOD,14544.html</a>
+See the following web page for firmware updates:
+<a href="https://www.crucial.com/usa/en/support-ssd">https://www.crucial.com/usa/en/support-ssd</a>
+</pre>
+<p>建议看见这个警告的用户备份所有重要数据并<b>立即更新</b>。参见<a href="https://www.rojtberg.net/1008/updating-crucial-mx100-firmware-with-ubuntu/">该指引</a>来使用 ISO 镜像和 grub 更新 Crucial MX100 的固件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_.E8.8B.B1.E7.89.B9.E5.B0.94.EF.BC.88Intel.EF.BC.89" id="英特尔（Intel）"><span id=".E8.8B.B1.E7.89.B9.E5.B0.94.EF.BC.88Intel.EF.BC.89"></span>英特尔（Intel）</h3></div>
+<p>对于无法使用 Windows 版本 <a href="https://downloadcenter.intel.com/download/30380/">Intel® Solid-State Drive Toolbox</a> 软件的系统，英特尔提供了一个基于 Linux live 系统的<a href="https://downloadcenter.intel.com/download/18363">固件更新工具</a>。
+</p><p>此外，还可用使用 <a href="https://downloadcenter.intel.com/download/29337/Intel-Memory-and-Storage-Tool-CLI-Command-Line-Interface-?product=83425">Intel Memory and Storage (MAS) Tool</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/intel-mas-cli-tool/">intel-mas-cli-tool</a></span><sup><small>AUR</small></sup></span>）命令行工具在 Linux 下刷入固件。（其<a href="https://downloadmirror.intel.com/822151/342329_CLI_IMAS_Tool_Install_Guide_Public_Rev011US.pdf">PDF用户指南</a>）
+</p><p>例如，要检查固件状态：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># intelmas show -intelssd 0</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">DevicePath : /dev/nvme0n1
+DeviceStatus : Healthy
+Firmware : 002C
+FirmwareUpdateAvailable : The selected Intel SSD contains current firmware as of this tool release.
+</pre>
+<p>如果只有一个 Intel SSD，可以省略 <code>-intelssd 0</code>；如果要指定第二块 SSD，则修改为 <code>-intelssd 1</code>，依此类推。
+</p><p>如果有可用的更新，可通过 <code>intelmas load -intelssd 0</code> 来应用。PDF 用户指南建议进行操作后重启并再进行一次。所有设备的最新固件都作为 MAS 工具的一部分发布，无需单独下载。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_.E9.87.91.E5.A3.AB.E9.A1.BF.EF.BC.88Kingston.EF.BC.89" id="金士顿（Kingston）"><span id=".E9.87.91.E5.A3.AB.E9.A1.BF.EF.BC.88Kingston.EF.BC.89"></span>金士顿（Kingston）</h3></div>
+<p>基于 Sandforce 的硬盘可以使用 KUF 工具，可从 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/kingston_fw_updater/">kingston_fw_updater</a></span><sup><small>AUR</small></sup></span> 获取。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_Mushkin" id="Mushkin">Mushkin</h3></div>
+<p>不那么出名的 Mushkin 牌固态硬盘同样使用 Sandforce 控制器，也提供了 Linux 版的升级工具 (和 Kingston 的几乎一样)。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_OCZ" id="OCZ">OCZ</h3></div>
+<p>OCZ 为 Linux 提供了 <a href="https://www.ocz.com/us/download/clout">Command Line Online Update Tool (CLOUT)</a>。相关软件包可在 AUR 找到：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ocz-ssd-utility/">ocz-ssd-utility</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ocztoolbox/">ocztoolbox</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/oczclout/">oczclout</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_.E4.B8.89.E6.98.9F.EF.BC.88Samsung.EF.BC.89" id="三星（Samsung）"><span id=".E4.B8.89.E6.98.9F.EF.BC.88Samsung.EF.BC.89"></span>三星（Samsung）</h3></div>
+<p>除了使用 Magician 软件外，也有其它方法升级固件（尽管三星认为这是“不受支持”的）。Magician 软件可以创建包含固件更新的启动盘，然而三星不再为消费级 SSD 提供该软件。此外，三星提供的<a href="https://www.samsung.com/semiconductor/minisite/ssd/download/tools.html">可引导 ISO 镜像</a>也能用来更新固件。另外一种方法是使用 <i>magician</i> 工具（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/samsung_magician-consumer-ssd/">samsung_magician-consumer-ssd</a></span><sup><small>AUR</small></sup></span>）。Magician 只支持三星品牌的 SSD，不支持三星为其它 OEM（如联想）制造的 SSD。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>对于这些信息，三星提供得并不十分明确。他们似乎有 4 个不同的固件更新页面，每个都介绍了不同的更新方法。</div>
+<p>如果你想通过在 Linux 下创建的 Live USB 来更新固件（而不是在 Windows 下使用三星的 Magician 软件），参见<a href="https://web.archive.org/web/20160322230114/fomori.org/blog/?p=933">[11]</a>。注意，该文章描述的通过 <a href="#pg3fb7df0ff769">MBR</a> 创建可启动 U 盘的方法在一些新主板上（例如 <a href="https://www.intel.com/content/www/us/en/support/articles/000057401/intel-nuc.html">Intel NUC</a>）不再受支持。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcb28ba980ed7_.E5.9C.A8_Linux_.E4.B8.8B.E6.9B.B4.E6.96.B0" id="在_Linux_下更新"><span id=".E5.9C.A8_Linux_.E4.B8.8B.E6.9B.B4.E6.96.B0"></span>在 Linux 下更新</h4></div>
+<p>以下方法可以原生（不使用可启动 U 盘）更新 SSD 固件。首先，访问<a href="https://www.samsung.com/semiconductor/minisite/ssd/download/tools">三星的下载页</a>，进入”Samsung SSD Firmware“一节，然后下载适用于你的 SSD 的最新固件（ISO 镜像）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>若 ISO 镜像中没有下面提到的 <code>initrd</code> Linux 镜像，请跳到#较旧的 SSD 一节。</div>
+<p>从 ISO 镜像中解压 Linux <code>initrd</code> 镜像（将 <i>samsung_ssd_firmware</i> 替换为对应的 ISO 镜像文件名）：
+</p>
+<pre>$ bsdtar xf <i>samsung_ssd_firmware</i>.iso initrd
+</pre>
+<p>解压 <code>root/fumagician/</code>。该目录中包含固件更新文件：
+</p>
+<pre>$ bsdtar xf initrd root/fumagician
+</pre>
+<p>最后，以根用户权限运行 <code>root/fumagician/fumagician</code>，确认成功更新固件后，重启计算机。
+</p><p>如果重启后固件版本没有变化，可以执行 <code>root/fumagician/fumagician 2&gt; log</code> 并检查日志里的报错。例如，如果日志里写着 'unzip is not available'，就说明需要安装 unzip 或从 initrd 中提取 unzip。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgcb28ba980ed7_.E8.BE.83.E6.97.A7.E7.9A.84_SSD" id="较旧的_SSD"><span id=".E8.BE.83.E6.97.A7.E7.9A.84_SSD"></span>较旧的 SSD</h4></div>
+<p>有些 SSD 固件 ISO 中包含 FreeDOS 镜像而不是 Linux <code>initrd</code> 镜像，故需要采取不同的更新方法。下表展示了这些 SSD 及固件的相对路径：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>SSD 型号</th>
+<th>FreeDOS 镜像路径</th>
+<th>固件包路径
+</th></tr>
+<tr>
+<td>470，830</td>
+<td><code>BTDSK.IMG</code></td>
+<td><code>SSR/</code>
+</td></tr>
+<tr>
+<td>840</td>
+<td><code>isolinux/btdsk.img</code></td>
+<td rowspan="2"><code>samsung/DSRD/</code>
+</td></tr>
+<tr>
+<td>840 EVO（mSATA），Pro</td>
+<td><code>ISOLINUX/BTDSK.IMG</code>
+</td></tr></tbody></table>
+<p>首先，从 ISO 镜像中解压 FreeDOS 镜像（将 <i>samsung_ssd_firmware</i> 替换为对应的 ISO 镜像文件名，<i>freedos_image_path</i> 替换为 FreeDOS 镜像路径，下同）：
+</p>
+<pre>$ bsdtar xf <i>samsung_ssd_firmware</i>.iso <i>freedos_image_path</i>
+</pre>
+<p>将 FreeDOS 镜像挂载到 <code>/mnt/</code>：
+</p>
+<pre># mount <i>freedos_image_path</i> /mnt
+</pre>
+<p>从 Magician SSD management utility 的 <i>Disk Number</i> 获取 SSD 对应的硬盘编号：
+</p>
+<pre># magician --list
+</pre>
+<p>更新 SSD 固件（将 <i>firmware_package_path</i> 替换为对应的固件包路径）：
+</p>
+<pre># magician --disk <i>Disk Number</i> --firmware-update --fwpackage-path /mnt/<i>firmware_package_path</i>
+</pre>
+<p>最后，以根用户权限执行 <code>magician --list</code>，检查输出中 <i>Firmware</i> 对应的固件版本是否成功更新，并重启计算机。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgcb28ba980ed7_.E9.97.AA.E8.BF.AA.EF.BC.88SanDisk.EF.BC.89" id="闪迪（SanDisk）"><span id=".E9.97.AA.E8.BF.AA.EF.BC.88SanDisk.EF.BC.89"></span>闪迪（SanDisk）</h3></div>
+<p>对于 SanDisk SSD Toolkit 不支持的操作系统，闪迪提供了 ISO 镜像来进行固件更新。
+</p><p>你必须选择对应 <i>SSD 型号</i><b>和</b><i>容量</i>（例如 60GB <b>或</b> 256GB）正确的固件。烧录 ISO 镜像后，从创建的 CD/DVD 启动盘启动计算机即可（或许能使用 USB 启动盘）。
+</p><p>此外，由于 ISO 镜像只包含了 Linux 内核及 initrd，也可以将它们提取到 <code>/boot</code> 分区下，并用 <a href="#pgca9c4017f7ad">GRUB</a> 或 <a href="#pg0ca06688075c">Syslinux</a> 启动来更新固件。
+</p><p>另见：
+</p>
+<ul><li>SanDisk Extreme SSD <a href="https://forums.sandisk.com/t/sandisk-extreme-ssd-firmware-download-for-mac-and-linux-and-pc/74022">Manual Firmware update version R211</a></li>
+<li>SanDisk Ultra SSD <a href="https://forums.sandisk.com/t/sandisk-ultra-ssd-firmware-download-for-mac-and-linux-and-pc/74277">Manual Firmware update version 365A13F0</a></li>
+<li>SanDisk Ultra+ SSD <a href="https://forums.sandisk.com/t/sandisk-ultra-ssd-manual-firmware-update-version-x2316rl/74263">Manual Firmware update version X2316RL</a> - 以根用户权限执行 <code>smartctl -i dev/disk/by-id/*SanDisk!(*part*)</code> 检查是否使用了“H2”或“HP”型号。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgcb28ba980ed7_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://www.reddit.com/r/archlinux/comments/rkwjm/what_should_i_keep_in_mind_when_installing_on_ssd/">Discussion on Reddit about installing Arch on an SSD</a></li>
+<li><a href="https://lore.kernel.org/linux-btrfs/20120830215008.GB2879@localhost.localdomain/">Re: Varying Leafsize and Nodesize in Btrfs</a></li>
+<li><a href="https://lore.kernel.org/linux-btrfs/5052700D.4020003@gmail.com/">Re: SSD alignment and Btrfs sector size</a></li>
+<li><a href="https://forums.anandtech.com/threads/erase-block-alignment-misinformation.2266113/">Erase Block (Alignment) Misinformation?</a></li>
+<li><a href="https://superuser.com/questions/492084/is-alignment-to-erase-block-size-needed-for-modern-ssds">Is alignment to erase block size needed for modern SSD's?</a></li>
+<li><a href="https://lore.kernel.org/linux-btrfs/jgui4j$th5$1@dough.gmane.org/">Btrfs support for efficient SSD operation (data blocks alignment)</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807035119
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.281 seconds
+Real time usage: 0.291 seconds
+Preprocessor visited node count: 1063/1000000
+Revision size: 26729/2097152 bytes
+Post‐expand include size: 17389/2097152 bytes
+Template argument size: 6803/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   75.933      1 -total
+  9.50%    7.215     56 Template:Ic
+  7.37%    5.598     22 Template:是
+  6.01%    4.564      7 Template:注意
+  5.26%    3.997      1 Template:Style
+  5.09%    3.863      4 Template:否
+  4.73%    3.588      1 Template:G
+  4.60%    3.492      1 Template:翻译状态
+  4.37%    3.315      4 Template:Man
+  3.51%    2.662      4 Template:Pkg
+-->
+<!-- Render ID 3f58a18e-9213-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3799:|#|:idhash:canonical!zh-cn and timestamp 20260807035119 and revision id 34225. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

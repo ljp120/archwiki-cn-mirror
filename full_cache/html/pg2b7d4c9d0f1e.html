@@ -1,0 +1,137 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg2b7d4c9d0f1e">东方 Project</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Touhou">Touhou</a>，最近一次同步于 2025-01-16，若英文版本有所<a href="https://wiki.archlinux.org/title/Touhou?diff=0&amp;oldid=808668">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Touhou_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p><a href="https://zh.wikipedia.org/wiki/%E6%9D%B1%E6%96%B9Project">东方Project</a> 是一种<a href="https://baike.baidu.com/item/弹幕射击游戏/8682817?fr=aladdin">弹幕游戏</a>(在西方又被叫做 "bullet-hell shooters")
+</p><p>东方Project (Touhou Project) 是一个弹幕类游戏系列的合称。
+弹幕类游戏是一种2D射击类游戏，大多由美丽且难度极大的弹幕组成。
+东方Project作为现在最多同人作品的射击游戏，现在已经渗透到各个领域，比如说Linux这个与任何一款Windows游戏八杆子打不着的地方…
+</p><p>虽然东方Project系列的原作游戏难度较大，但同时也是一个让人上瘾的游戏。
+</p><p>本页的目标是帮助Arch Linux用户安装东方本作及其它与东方相关的包。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2b7d4c9d0f1e_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>PC-98上的游戏可以使用 Linux-native X Neko Project II emulator (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xnp2/">xnp2</a></span><sup><small>AUR</small></sup></span>)来运行。
+</p><p>以下的AUR包都需要<a href="#pg39e5cd9380ff">Wine</a>来运行(以及<a href="#pg21c12012f112">Timidity++</a>来播放MIDI音乐).有一个基于python的引擎正在开发中，并会用来代替wine。在AUR中的游戏都是免费试用版。你可以简单的用完整版把试用版换掉（如果你有完整版的话）。
+</p><p>下面是已经在AUR中打包好的软件包：
+</p>
+<ul><li>th6:东方红魔乡 〜 the Embodiment of Scarlet Devil.——<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/th06-demo-wine/">th06-demo-wine</a></span><sup><small>AUR</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/th06-demo-pytouhou/">th06-demo-pytouhou</a></span><sup><small>AUR</small></sup></span></li>
+<li>th7:东方妖妖梦 〜 Perfect Cherry Blossom.——<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/th07/">th07</a></span><sup><small>AUR</small></sup></span></li>
+<li>th8:东方永夜抄 〜 Imperishable Night.——<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/th08/">th08</a></span><sup><small>AUR</small></sup></span></li></ul>
+<p>我们需要帮助<a href="#pgd227943cb79f">打包</a>更多的东方游戏到<a href="#pg89cb7b475cfb">AUR</a>中。以下是一些尚未打包到AUR中，但有免费版放出，需要有人进行打包的：
+</p>
+<ul><li>th7.5:东方萃梦想 〜 Immaterial and Missing Power</li>
+<li>th9:东方花映冢 〜 Phantasmagoria of Flower View</li>
+<li>th10:东方风神录 〜 Mountain of Faith</li>
+<li>th10.5:东方绯想天 〜 Scarlet Weather Rhapsody</li>
+<li>th11:东方地灵殿 〜 Subterranean Animism</li>
+<li>th12:东方星莲船 〜 Undefined Fantastic Object</li>
+<li>th13:东方神灵庙 〜 Ten Desires</li>
+<li>th13.5:东方心绮楼 〜 Hopeless Masquerade.</li>
+<li>th14:东方辉针城 〜 Double Dealing Character</li>
+<li>th14.5:东方深秘录 〜 Urban Legend in Limbo</li>
+<li>th15:东方绀珠传 〜 Legacy of Lunatic Kingdom</li>
+<li>th15.5:东方凭依华 〜 Antinomy of Common Flowers</li>
+<li>th16:东方天空璋 〜 Hidden Star in Four Seasons</li>
+<li>th17:东方鬼形兽 〜 Wily Beast and Weakest Creature</li>
+<li>th18:东方虹龙洞 〜 Unconnected Marketeers</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2b7d4c9d0f1e_Python.E5.BC.95.E6.93.8E" id="Python引擎"><span id="Python.E5.BC.95.E6.93.8E"></span>Python引擎</h3></div>
+<p><a href="https://linkmauve.fr/doc/touhou/">Linkmauve</a> 制作了一个实验性质的基于python的游戏引擎。现在这个引擎还不稳定， 和正式作比起来更像是一个目标。参考 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pytouhou-hg/">pytouhou-hg</a></span><sup><small>AUR</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/th06-demo-data/">th06-demo-data</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2b7d4c9d0f1e_.E5.85.B6.E5.AE.83.E4.BF.A1.E6.81.AF" id="其它信息"><span id=".E5.85.B6.E5.AE.83.E4.BF.A1.E6.81.AF"></span>其它信息</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2b7d4c9d0f1e_.E5.AE.89.E8.A3.85.E5.AE.8C.E6.95.B4.E7.89.88.E6.B8.B8.E6.88.8F" id="安装完整版游戏"><span id=".E5.AE.89.E8.A3.85.E5.AE.8C.E6.95.B4.E7.89.88.E6.B8.B8.E6.88.8F"></span>安装完整版游戏</h3></div>
+<p>如果你有永夜抄或者妖妖梦的完整版的话，你可以放到你的主文件夹或者overlay里。这样就能在liveCD/磁盘里安装了。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>.th08</code> 是东方永夜抄的 wineprefix 文件夹，而<code>.th07</code> 东方妖妖梦的文件夹。</div>
+<ol><li>找到完整游戏的文件夹</li>
+<li>在主文件夹(/home)下查看隐藏文件并找到“.th08”和“.th07”这2个文件夹</li>
+<li>把完整游戏文件复制到隐藏文件(“.th08”和“.th07”)</li>
+<li>运行游戏</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2b7d4c9d0f1e_MIDI_.E9.9F.B3.E6.BA.90" id="MIDI_音源"><span id="MIDI_.E9.9F.B3.E6.BA.90"></span>MIDI 音源</h3></div>
+<p>试用版只提供MIDI文件，所以你需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=timidity%2B%2B">timidity++</a></span><sup><small>包</small></sup></span> 和一些音源 (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=freepats-general-midi">freepats-general-midi</a></span><sup><small>包</small></sup></span>)。
+</p><p>然后再把下面几行加入 Timidity++ 的配置文件中去：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/timidity++/timidity.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">dir /usr/share/timidity/freepats
+source /etc/timidity++/freepats/freepats.cfg
+</pre>
+<p>请记住要在玩游戏之前<a href="#pg6ec215b93a06">启动</a> <code>timidity.service</code> <a href="#pg983913bfd458">用户单元</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2b7d4c9d0f1e_Windows.E6.97.B6.E4.BB.A3.E6.B8.B8.E6.88.8F.E4.B8.AD.E7.9A.84.E9.9F.B3.E9.A2.91" id="Windows时代游戏中的音频"><span id="Windows.E6.97.B6.E4.BB.A3.E6.B8.B8.E6.88.8F.E4.B8.AD.E7.9A.84.E9.9F.B3.E9.A2.91"></span>Windows时代游戏中的音频</h3></div>
+<p>如果你发现你在任何Windows时代或以后的游戏(&gt;=th06)没有音频，请确保安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-alsa-lib">lib32-alsa-lib</a></span><sup><small>包</small></sup></span>和<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-alsa-plugins">lib32-alsa-plugins</a></span><sup><small>包</small></sup></span>，并重新检查你的配置（在winecfg）。此外，设置游戏中的音频为“WAV”模式。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2b7d4c9d0f1e_Steam.E7.89.88.E6.9C.AC" id="Steam版本"><span id="Steam.E7.89.88.E6.9C.AC"></span>Steam版本</h2></div>
+<p>你可以在<a href="https://store.steampowered.com/curator/42231740-Touhou-Official-Games-Info/list/93128">这个列表</a>中找到Steam上可用的东方游戏。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2b7d4c9d0f1e_thcrap" id="thcrap">thcrap</h3></div>
+<p><a href="https://www.thpatch.net/">Touhou Community Reliant Automatic Patcher</a> (thcrap) 主要用于促进<a href="https://en.wikipedia.org/wiki/Touhou_Project">东方Project</a>游戏的自更新、多语言翻译，在<a href="https://thpatch.net/">Touhou Patch Center</a>上，但理论上可以用于这些游戏的任何其他补丁，而不需要通过该网站。
+</p><p>使用thcrap启动东方游戏的最简单方法是使用<a href="https://github.com/tactikauan/thcrap-steam-proton-wrapper">thcrap-steam-proton-wrapper</a>脚本。
+</p>
+<ul><li>从Steam下载你购买的游戏。</li></ul>
+<ul><li><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/thcrap-steam-proton-wrapper-git/">thcrap-steam-proton-wrapper-git</a></span><sup><small>AUR</small></sup></span>。对于<a href="#pge822df3d71e0">Flatpak</a>版本的Steam，请从<i>Flathub</i>安装<code>com.valvesoftware.Steam.Utility.thcrap_steam_proton_wrapper</code>。</li>
+<li>更改你的东方游戏启动选项。右键点击Steam库中的东方游戏，然后点击<i>属性</i>。在<i>常规</i>选项卡下，更改<i>启动选项</i>为</li></ul>
+<pre>thcrap_proton -c <i>en.js</i> -- %command%
+</pre>
+<p>查看<a href="https://github.com/tactikauan/thcrap-steam-proton-wrapper">手册</a>以使用其他语言启动东方游戏。
+</p>
+<ul><li>第一次启动游戏时，它会要求你安装thcrap。</li>
+<li>之后，它会更新thcrap并启动游戏。当thcrap窗口出现时，建议你在设置中取消选中<i>在后台保持更新程序运行</i>，以便在你退出时Steam可以正确关闭游戏。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2b7d4c9d0f1e_thprac" id="thprac">thprac</h3></div>
+<p><a href="https://github.com/touhouworldcup/thprac">thprac</a> 是一个练习工具。添加<code>-p</code>选项将安装并使用thprac启动东方游戏。
+</p>
+<pre>thcrap_proton -p -c en.js -- %command%
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2b7d4c9d0f1e_vpatch" id="vpatch">vpatch</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Vsync Patches (vpatch) 仅适用于原始磁盘中的可执行文件。你需要一个来自原始磁盘的<code>.exe</code>文件，而不是Steam版本。参见<a href="https://en.touhouwiki.net/wiki/Purchasing_Guide">这个</a>购买指南。</div>
+<p>Vsync补丁减少了输入延迟（按下按钮时游戏响应更快）。
+</p>
+<ul><li>从<a href="https://en.touhouwiki.net/wiki/Game_Tools_and_Modifications#Vsync_Patches">touhouwiki</a>下载补丁。</li></ul>
+<ul><li>将<code>vpatch.exe</code>、<code>vpatch.ini</code>和<code>vpatch_thxx.dll</code>复制到你的游戏目录<code>~/.local/share/Steam/steamapps/common/thxx/</code>（或<code>~/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/common/thxx/</code>对于Flatpak版本的Steam）。</li></ul>
+<ul><li>使用你喜欢的文本编辑器打开游戏目录中的<code>vpatch.ini</code>。我们将更改窗口大小。对于TH10，默认窗口非常小。首先，在<code>[Window]</code>部分下设置<code>enabled = 1</code>。如果使用4K显示器，设置<i>Width = 2667</i>和<i>Height = 2000</i>。如果使用1080p显示器，设置<i>Width = 1280</i>和<i>Height = 960</i>。基于<a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2196860604">这个</a>教程。要修复Th10 Marisa B 3.xx的功率错误，请在<code>[Option]</code>部分添加<code>BugFixTh10Power3 = 1</code>。</li></ul>
+<ul><li>备份原始的Steam可执行文件<code>~/.local/share/Steam/steamapps/common/thxx/thxx.exe</code>。这是为了方便，你总是可以使用Steam中的<i>验证本地文件</i>来恢复它。</li></ul>
+<ul><li>将<code>~/.local/share/Steam/steamapps/common/thxx/thxx.exe</code>替换为你从原始磁盘合法获得的文件。</li></ul>
+<ul><li>将Steam游戏启动选项更改为</li></ul>
+<pre>thcrap_proton -v -c en.js -- %command%
+</pre>
+<dl><dd><code>-v</code>标志让Steam运行<code>vpatch.exe</code>。</dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2b7d4c9d0f1e_.E7.9B.B8.E5.85.B3.E9.93.BE.E6.8E.A5" id="相关链接"><span id=".E7.9B.B8.E5.85.B3.E9.93.BE.E6.8E.A5"></span>相关链接</h2></div>
+<ul><li><a href="https://thwiki.cc/東方Project">THBwiki上的东方Project</a></li>
+<li><a href="https://zh.moegirl.org.cn/东方Project">萌娘百科上的东方Project</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E4%B8%9C%E6%96%B9Project">维基百科上的东方Project</a></li>
+<li><a href="https://zh.touhouwiki.net/wiki/于Linux运行">东方Project在LINUX运行</a></li>
+<li><a href="https://en.touhouwiki.net/wiki/Running_in_Linux_and_MacOS_X">在Linux和MacOS X上运行东方游戏</a></li>
+<li><a href="#pgd227943cb79f">Wine PKGBUILD Guidelines</a></li>
+<li><a href="https://www.reddit.com/r/touhou/comments/yypp3q/how_to_use_thcrap_touhou_community_reliant/">如何在Steam Deck上使用thcrap（Touhou Community Reliant Automatic Patcher）</a></li>
+<li><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2196860604">[WIN/LINUX] 使用ThCRAP的英文补丁，加上V-Sync补丁，全部在Steam内完成</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807025518
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.104 seconds
+Real time usage: 0.107 seconds
+Preprocessor visited node count: 324/1000000
+Revision size: 8129/2097152 bytes
+Post‐expand include size: 4657/2097152 bytes
+Template argument size: 1242/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 86/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   21.960      1 -total
+ 14.50%    3.183      1 Template:翻译状态
+ 13.97%    3.067      2 Template:注意
+ 13.89%    3.050     20 Template:Ic
+ 11.76%    2.582      4 Template:Pkg
+  9.56%    2.100      8 Template:AUR
+  4.97%    1.092      1 Template:Hc
+-->
+<!-- Render ID 6c08bb0e-920b-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3892:|#|:idhash:canonical!zh-cn and timestamp 20260807025518 and revision id 34283. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

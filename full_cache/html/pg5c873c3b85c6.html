@@ -1,0 +1,62 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg5c873c3b85c6">联想 ThinkPad T520</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_T520">Lenovo ThinkPad T520</a>，最近一次同步于 2020-04-10，若英文版本有所<a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_T520?diff=0&amp;oldid=605278">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_T520_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5c873c3b85c6_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>安装工作无需进行进一步的设置调整。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5c873c3b85c6_.E6.98.BE.E5.8D.A1" id="显卡"><span id=".E6.98.BE.E5.8D.A1"></span>显卡</h2></div>
+<p>BIOS选项 Display-&gt;Graphics Device 可以切换到以下设置：
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5c873c3b85c6_.E9.9B.86.E6.88.90.E6.98.BE.E5.8D.A1" id="集成显卡"><span id=".E9.9B.86.E6.88.90.E6.98.BE.E5.8D.A1"></span>集成显卡</h3></div>
+<p>使用 xf86-video-intel 驱动程序。nvidia 卡将被关闭，这意味着系统将消耗更少的电量，并且您不必担心安装 nvidia 驱动程序。 
+</p><p>集成的图形足够快，可以运行某些较旧的游戏。
+如果您不使用要求苛刻的3D应用程序，则这是一个不错的选择。
+</p><p>此模式的主要缺点是 DisplayPort 无法工作，因为它已硬连线至 Nvidia 卡。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5c873c3b85c6_.E7.A6.BB.E6.95.A3.E6.98.BE.E5.8D.A1" id="离散显卡"><span id=".E7.A6.BB.E6.95.A3.E6.98.BE.E5.8D.A1"></span>离散显卡</h3></div>
+<p>这将为您在所有应用程序中提供良好的一致3D性能，而不必担心大黄蜂的复杂性。如果您想要一种简单的方法来连接和使用DisplayPort监视器，这也是一个不错的选择。
+</p><p>您无法从 intel-gfx 上运行并关闭分立的 nvidia 卡来省电。另一个缺点是您不能使用此模式在 VGA 和 DP 上运行带有2个外接显示器的三重云台。这是硬件限制，离散的 nvidia 卡和集成的 Intel 卡都只能驱动最多2个不同的屏幕。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5c873c3b85c6_NVidia_Optimus" id="NVidia_Optimus">NVidia Optimus</h3></div>
+<p>如果选择此选项，请将 "OS Detection for NVIDIA Optimus" BIOS选项设置为 Disabled.
+</p><p>有关如何在Linux上同时使用两张卡的详细信息，请参见<a href="#pg0f53b4421948">Bumblebee</a>页面。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5c873c3b85c6_.E4.BD.BF.E7.94.A8_dock" id="使用_dock"><span id=".E4.BD.BF.E7.94.A8_dock"></span>使用 dock</h2></div>
+<p>见 <a href="#pgc3bbf3bf4b7c">dockd</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5c873c3b85c6_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5c873c3b85c6_.E4.BD.BF.E7.94.A8.E7.A6.BB.E6.95.A3.E6.98.BE.E5.8D.A1.E6.97.B6.EF.BC.8C.E5.B1.8F.E5.B9.95.E4.BC.9A.E5.9C.A8.E7.99.BB.E5.BD.95.E6.8F.90.E7.A4.BA.E4.B9.8B.E5.89.8D.E5.86.BB.E7.BB.93" id="使用离散显卡时，屏幕会在登录提示之前冻结"><span id=".E4.BD.BF.E7.94.A8.E7.A6.BB.E6.95.A3.E6.98.BE.E5.8D.A1.E6.97.B6.EF.BC.8C.E5.B1.8F.E5.B9.95.E4.BC.9A.E5.9C.A8.E7.99.BB.E5.BD.95.E6.8F.90.E7.A4.BA.E4.B9.8B.E5.89.8D.E5.86.BB.E7.BB.93"></span>使用离散显卡时，屏幕会在登录提示之前冻结</h3></div>
+<p>如果您使用 GRUB2 启动，则其帧缓冲区图形模式会在以后的启动过程中引起问题。请参阅 <a href="#pgc9828c7a368e">GRUB/Tips and tricks#Disable framebuffer</a>。
+</p><p>您也可以尝试设置 nomodeset 内核命令行标志：:
+</p><p><a href="#pg1b16260aab54">Kernel mode setting#Disabling modesetting</a>
+</p><p>尽管当前（2013年10月，内核3.11.6），仅当我禁用 GRUB2 帧缓冲区但不设置任何 nomodeset 内核选项时，我的T520才以“离散显卡”模式启动。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807070206
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.056 seconds
+Real time usage: 0.059 seconds
+Preprocessor visited node count: 50/1000000
+Revision size: 2047/2097152 bytes
+Post‐expand include size: 871/2097152 bytes
+Template argument size: 96/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%    3.472      1 Template:翻译状态
+100.00%    3.472      1 -total
+-->
+<!-- Render ID e64a370e-922d-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3392:|#|:idhash:canonical!zh-cn and timestamp 20260807070206 and revision id 33849. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

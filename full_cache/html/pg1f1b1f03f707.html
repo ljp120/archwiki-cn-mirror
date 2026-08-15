@@ -1,0 +1,317 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg1f1b1f03f707">图形处理器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Graphics_processing_unit">Graphics processing unit</a>，最近一次同步于 2026-07-14，若英文版本有所<a href="https://wiki.archlinux.org/title/Graphics_processing_unit?diff=0&amp;oldid=881409">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Graphics_processing_unit_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pge12579b7d4ac">NVIDIA</a></li>
+<li><a href="#pg4a4bc5e5df24">AMDGPU</a></li>
+<li><a href="#pg7b57f700d367">Intel</a></li>
+<li><a href="#pga21a6be8b605">Wayland</a></li>
+<li><a href="#pga36c0aff60be">Xorg</a></li>
+<li><a href="#pgb19d18f87176">OpenGL</a></li>
+<li><a href="#pg813471eccd07">Vulkan</a></li>
+<li><a href="#pge457f2232320">硬件视频加速</a></li>
+<li><a href="#pgb92e07bf7ccb">外接显卡</a></li>
+</ul></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E5%9B%BE%E5%BD%A2%E5%A4%84%E7%90%86%E5%99%A8">图形处理器</a> (graphics processing unit, GPU) 是计算机中负责生成显示器所显示画面的硬件，也经常（不严谨地）称为<a href="https://zh.wikipedia.org/wiki/%E6%98%BE%E5%8D%A1">显卡</a> (graphics card)。存在两种类型的设备：<a href="https://zh.wikipedia.org/wiki/%E5%9B%BE%E5%BD%A2%E5%A4%84%E7%90%86%E5%99%A8#.E6.95.B4.E5.90.88.E5.BC.8F.E5.9C.96.E5.BD.A2.E8.99.95.E7.90.86.E5.99.A8">集成显卡</a> (integrated GPU, iGPU) 和<a href="https://zh.wikipedia.org/wiki/%E5%9B%BE%E5%BD%A2%E5%A4%84%E7%90%86%E5%99%A8#.E7.8D.A8.E7.AB.8B.E9.A1.AF.E7.A4.BA.E5.8D.A1">独立显卡</a> (discrete GPU, dGPU)。在中文语境下，有时集成显卡也会不严谨地称为“<a href="https://zh.wikipedia.org/wiki/%E6%A0%B8%E8%8A%AF%E6%98%BE%E5%8D%A1">核显</a>”。
+</p><p>由于 GPU 擅长并行计算，因此催生了<span class="ilh-all" data-foreign-title="general-purpose computing on graphics processing units" data-lang-code="en" data-lang-name="英语" data-orig-title="通用图形处理器"><span class="ilh-page"><a href="#pgaccdca19ad66">通用图形处理器</a></span></span> (GPGPU)。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1f1b1f03f707_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>Linux 内核中已经包含了用于硬件加速帧缓冲的显卡驱动。然而，<a href="#pgb19d18f87176">OpenGL</a>、<a href="#pg813471eccd07">Vulkan</a>、<a href="#pge457f2232320">硬件视频加速</a>和 <a href="#pga36c0aff60be">Xorg</a> 的 2D 加速仍然需要用户空间驱动支持。
+</p><p>首先，识别设备型号（输出中的第一行以及 <i>Subsystem</i> 一项显示了具体型号）：
+</p>
+<pre>$ lspci -v -nn -d ::03xx
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>这里的 <code>::03</code> 表示“<a href="https://admin.pci-ids.ucw.cz/read/PD/03">显示控制器</a> PCI 设备类”，并且 <code>xx</code> 表示“该类的任何子类”。您可以在安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hwdata">hwdata</a></span><sup><small>包</small></sup></span> 后，在 <code>/usr/share/hwdata/pci.ids</code> 文件中搜索 <code>Display controller</code> 查看。</div>
+<p>然后，安装所需的显卡驱动。参阅下方三个品牌的表格。 
+</p><p>对于 32 位软件，需要启用 <a href="#pg9d2c9cc56d04">multilib</a> 仓库并安装以 <i>lib32-</i> 为前缀的用户空间驱动，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-mesa">lib32-mesa</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-vulkan-radeon">lib32-vulkan-radeon</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-nvidia-utils">lib32-nvidia-utils</a></span><sup><small>包</small></sup></span> 等等。
+</p><p>对于 X11，其它 <a href="https://dri.freedesktop.org/wiki/DDX/">Device Dependent X (DDX)</a> 驱动可以在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/xorg-drivers/">xorg-drivers</a></span><sup><small>包组</small></sup></span> 中找到，或者可以搜索 <a href="https://aur.archlinux.org/packages?K=xf86-video">xf86-video</a>。大部分情况下，您不需要安装任何 DDX 驱动；详情参阅 <a href="#pga36c0aff60be">Xorg#驱动安装</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1f1b1f03f707_AMD" id="AMD">AMD</h3></div>
+<p>AMD 支持开源驱动。曾经提供过一个专有驱动，但已经不再打包了。<a href="https://www.amd.com/en/resources/support-articles/release-notes/RN-AMDGPU-UNIFIED-LINUX-25-10-1.html">[1]</a><a href="https://lists.archlinux.org/archives/list/aur-requests@lists.archlinux.org/thread/P5XHCIBVBY7PBPUC7AV3QD4CTROCRYSG/#KPTEHMZ2GPTRMXR37D25HJ4HY2KYPVKJ">[2]</a>
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>要寻找从型号名（如 <i>Radeon RX 6600</i>）到 GPU 家族名（如 <i>RDNA 2</i>）的对照表，参阅 <a href="https://en.wikipedia.org/wiki/List_of_AMD_graphics_processing_units#Features_overview">Wikipedia:List of AMD graphics processing units#Features overview</a>.</div>
+<p>有关各个 GPU 家族对 <a href="#pgfa90809d9e47">VA-API</a> 的支持情况，参阅<a href="#pge457f2232320">硬件视频加速#对照表</a>了解详情。
+</p>
+<table class="wikitable" style="text-align:center">
+<tbody><tr>
+<th>文档
+</th>
+<th>GPU 家族
+</th>
+<th>DRM 驱动
+</th>
+<th>OpenGL
+</th>
+<th>Vulkan
+</th>
+<th>VA-API
+</th></tr>
+<tr>
+<td><a href="#pg4a4bc5e5df24">AMDGPU</a>
+</td>
+<td>GCN 3 及更新（如 RDNA 1-4）
+</td>
+<td rowspan="5">包含在 <a href="#pg7994e8c92126">Linux</a> 中
+</td>
+<td rowspan="4"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vulkan-radeon">vulkan-radeon</a></span><sup><small>包</small></sup></span>
+</td>
+<td rowspan="3"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="#pg4a4bc5e5df24">AMDGPU</a><sup>1</sup> / <a href="#pgedfe18626036">ATI</a>
+</td>
+<td>GCN 1&amp;2
+</td>
+<td>取决于选择的驱动
+</td></tr>
+<tr>
+<td rowspan="4"><a href="#pgedfe18626036">ATI</a>
+</td>
+<td>TeraScale 1-3
+</td>
+<td rowspan="3">无
+</td></tr>
+<tr>
+<td>R300 到 R500
+</td>
+<td rowspan="2">无
+</td></tr>
+<tr>
+<td>R100 &amp; R200
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa-amber">mesa-amber</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>Rage 4 及更旧
+</td>
+<td colspan="4">无可用驱动 <a href="https://www.x.org/wiki/RadeonFeature/">[3]</a><a href="https://www.phoronix.com/news/Linux-6.3-Dropping-Old-DRM">[4]</a>
+</td></tr></tbody></table>
+<ol><li>自从 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span>≥6.19 以来默认启用，但其余版本也可以手动选择驱动</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1f1b1f03f707_Intel" id="Intel">Intel</h3></div>
+<p>Intel 提供并支持开源驱动，除了旧的基于 PowerVR 的显卡（GMA 3600 系列）不支持以外。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>Intel 所说的 Gen <i>N</i> 硬件并不是指 CPU 的代数，它指的是 <a href="https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units">GPU 的代数</a>，和 CPU 的不一样。</div>
+<p>有关各个 GPU 家族对 <a href="#pgfa90809d9e47">VA-API</a> 的支持情况，参阅<a href="#pge457f2232320">硬件视频加速#对照表</a>了解详情，下面只列出了软件包。
+</p>
+<table class="wikitable" style="text-align:center">
+<tbody><tr>
+<th>文档
+</th>
+<th>GPU 家族
+</th>
+<th>DRM 驱动
+</th>
+<th>OpenGL
+</th>
+<th>Vulkan
+</th>
+<th>VA-API
+</th></tr>
+<tr>
+<td rowspan="7"><a href="#pg9800307f9050">Intel 图形处理器</a>
+</td>
+<td>Gen 12.1 及更新
+</td>
+<td rowspan="6">包含在 <a href="#pg7994e8c92126">Linux</a> 中
+</td>
+<td rowspan="5"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span>
+</td>
+<td rowspan="3"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vulkan-intel">vulkan-intel</a></span><sup><small>包</small></sup></span><sup>1</sup>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-media-driver">intel-media-driver</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>Gen 8 到 11
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-media-driver">intel-media-driver</a></span><sup><small>包</small></sup></span><br/>或旧版 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva-intel-driver">libva-intel-driver</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>Gen 7 &amp; 7.5
+</td>
+<td rowspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva-intel-driver">libva-intel-driver</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>Gen 5 &amp; 6
+</td>
+<td rowspan="3">无
+</td></tr>
+<tr>
+<td>Gen 3 到 4.5
+</td>
+<td rowspan="2">无
+</td></tr>
+<tr>
+<td>Gen 2
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa-amber">mesa-amber</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>Gen 1
+</td>
+<td colspan="4">无可用驱动 <a href="https://www.phoronix.com/news/Linux-6.3-Dropping-Old-DRM">[5]</a>
+</td></tr></tbody></table>
+<ol><li>Gen 7 和 7.5 只有<a href="https://gitlab.freedesktop.org/mesa/mesa/-/blob/d067d6e16335c5f2697f14f396c9f62fee649fdc/src/intel/vulkan_hasvk/anv_device.c#L1614">不完整的支持</a>，Gen 8 被限制在 Vulkan 1.3。</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1f1b1f03f707_NVIDIA" id="NVIDIA">NVIDIA</h3></div>
+<p>NVIDIA 不支持完全开源的驱动。他们从 2022 年起改为使用一种混合方案（开源内核 DRM 驱动和闭源用户空间驱动）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>要寻找从型号名（如 <i>RTX 4060</i>）到 GPU 家族名（如 <i>NV190</i>）的对照表，参阅 <a href="https://nouveau.freedesktop.org/CodeNames.html">nouveau wiki 上的代号页面</a>。</div>
+<p>参阅<a href="#pge457f2232320">硬件视频加速#NVIDIA</a>以了解支持哪些 API，并参阅<a href="#pge457f2232320">硬件视频加速#VDPAU 驱动</a>了解各个 GPU 家族的支持详情。
+</p>
+<table class="wikitable" style="text-align:center">
+<tbody><tr>
+<th>许可
+</th>
+<th>文档
+</th>
+<th>GPU 家族
+</th>
+<th>DRM 驱动
+</th>
+<th>OpenGL
+</th>
+<th>Vulkan
+</th></tr>
+<tr>
+<td rowspan="3">开源
+</td>
+<td rowspan="3"><a href="#pg172970a5f8dd">Nouveau</a><sup>1</sup>
+</td>
+<td><a href="https://nouveau.freedesktop.org/CodeNames.html#NVE0">Kepler (NVE0/GKXXX)</a> 及更新
+</td>
+<td rowspan="3">包含在 <a href="#pg7994e8c92126">Linux</a> 中
+</td>
+<td rowspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vulkan-nouveau">vulkan-nouveau</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://nouveau.freedesktop.org/CodeNames.html#NV30">Rankine (NV30)</a> 到 <a href="https://nouveau.freedesktop.org/CodeNames.html#NVC0">Fermi (NVC0/GF1XX)</a>
+</td>
+<td rowspan="2">无
+</td></tr>
+<tr>
+<td><a href="https://nouveau.freedesktop.org/CodeNames.html#NV04">Fahrenheit (NV04/05)</a> 到 <a href="https://nouveau.freedesktop.org/CodeNames.html#NV20">Kelvin (NV20)</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa-amber">mesa-amber</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>开源 DRM 驱动、专有用户空间驱动
+</td>
+<td rowspan="6"><a href="#pge12579b7d4ac">NVIDIA</a><sup>1</sup>
+</td>
+<td><a href="https://nouveau.freedesktop.org/CodeNames.html#NV160">Turing (NV160/TUXXX)</a> 及更新
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-open">nvidia-open</a></span><sup><small>包</small></sup></span>
+</td>
+<td colspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td rowspan="5">专有
+</td>
+<td><a href="https://nouveau.freedesktop.org/CodeNames.html#NV110">Maxwell (NV110/GMXXX)</a> 到 <br/> <a href="https://nouveau.freedesktop.org/CodeNames.html#NV190">Ada Lovelace (NV190/ADXXX)</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvidia-580xx-dkms/">nvidia-580xx-dkms</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td colspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvidia-580xx-utils/">nvidia-580xx-utils</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://nouveau.freedesktop.org/CodeNames.html#NVE0">Kepler (NVE0/GKXXX)</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvidia-470xx-dkms/">nvidia-470xx-dkms</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td colspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvidia-470xx-utils/">nvidia-470xx-utils</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://nouveau.freedesktop.org/CodeNames.html#NVC0">Fermi (NVC0/GF1XX)</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvidia-390xx-dkms/">nvidia-390xx-dkms</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvidia-390xx-utils/">nvidia-390xx-utils</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td rowspan="2">无
+</td></tr>
+<tr>
+<td><a href="https://nouveau.freedesktop.org/CodeNames.html#NV50">Tesla (NV50/G80-90-GT2XX)</a>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvidia-340xx-dkms/">nvidia-340xx-dkms</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nvidia-340xx-utils/">nvidia-340xx-utils</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://nouveau.freedesktop.org/CodeNames.html#NV40">Curie (NV40/G70)</a> 及更旧
+</td>
+<td colspan="3">不再打包
+</td></tr></tbody></table>
+<ol><li>对于同时使用集成显卡和独立显卡、且启用了 NVIDIA Optimus 的笔记本电脑，参阅 <a href="#pg9ff9e1bc1c96">NVIDIA Optimus</a>。</li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1f1b1f03f707_.E5.8A.A0.E8.BD.BD" id="加载"><span id=".E5.8A.A0.E8.BD.BD"></span>加载</h2></div>
+<p>大部分驱动的内核模块会在系统启动时自动加载。
+</p><p>如果没有自动加载，那么：
+</p>
+<ul><li>确保您<b>没有</b>在<a href="#pgec0856954f1c">内核参数</a>中设置 <code>nomodeset</code> 或 <code>vga=</code>，因为加载内核显卡驱动需要<a href="#pg4955543b232e">内核级显示模式设置</a>。</li>
+<li>以及，检查您是否使用<a href="#pg6dbfce2ea89d">内核模块#黑名单</a>禁用了显卡驱动。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1f1b1f03f707_.E7.9B.91.E6.8E.A7" id="监控"><span id=".E7.9B.91.E6.8E.A7"></span>监控</h2></div>
+<p>监控 GPU 的工具经常用于查看 GPU 的温度、核心和显存 (VRAM) 使用率、以及 P-state。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1f1b1f03f707_CLI" id="CLI">CLI</h4></div>
+<ul><li><b>amdgpu_top</b> — 显示 AMDGPU 使用率的工具</li></ul>
+<dl><dd><a href="https://github.com/Umio-Yasuno/amdgpu_top">https://github.com/Umio-Yasuno/amdgpu_top</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=amdgpu_top">amdgpu_top</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>nvtop</b> — 支持 AMD、Intel 和 NVIDIA 的 GPU 进程监视器</li></ul>
+<dl><dd><a href="https://github.com/Syllo/nvtop">https://github.com/Syllo/nvtop</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvtop">nvtop</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>radeontop</b> — GPU 使用率查看器，支持显示总体的活动百分比和各个部分的使用情况。支持 ATI R600 或更新的显卡，以及使用 <a href="#pg4a4bc5e5df24">AMDGPU</a> 驱动的显卡。</li></ul>
+<dl><dd><a href="https://github.com/clbr/radeontop">https://github.com/clbr/radeontop</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=radeontop">radeontop</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>nvidia-smi</b> — NVIDIA 专有驱动捆绑的命令行监控工具，支持 Fermi 或更新的 <a href="#pge12579b7d4ac">NVIDIA</a> GPU</li></ul>
+<dl><dd><a href="https://docs.nvidia.com/deploy/nvidia-smi/index.html">https://docs.nvidia.com/deploy/nvidia-smi/index.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg1f1b1f03f707_GUI" id="GUI">GUI</h4></div>
+<ul><li><b>amdgpu_top</b> — 显示 AMDGPU 使用率的工具</li></ul>
+<dl><dd><a href="https://github.com/Umio-Yasuno/amdgpu_top">https://github.com/Umio-Yasuno/amdgpu_top</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=amdgpu_top">amdgpu_top</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>AmdGuid</b> — 一个基础的风扇控制 GUI，完全使用 Rust 编写</li></ul>
+<dl><dd><a href="https://github.com/Eraden/amdgpud">https://github.com/Eraden/amdgpud</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/amdguid-wayland-bin/">amdguid-wayland-bin</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/amdguid-glow-bin/">amdguid-glow-bin</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Radeon Profile</b> — 用于读取和更改 AMD Radeon 显卡当前时钟频率的 Qt5 工具</li></ul>
+<dl><dd><a href="https://github.com/emerge-e-world/radeon-profile">https://github.com/emerge-e-world/radeon-profile</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/radeon-profile-git/">radeon-profile-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>TuxClocker</b> — 基于 Qt5 的监控和超频工具</li></ul>
+<dl><dd><a href="https://github.com/Lurkki14/tuxclocker">https://github.com/Lurkki14/tuxclocker</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tuxclocker/">tuxclocker</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Plasma System Monitor</b> — 一个显示系统传感器、进程信息和其它系统资源的界面。捆绑在 <a href="#pg5b70e23b1711">KDE Plasma</a> 中。</li></ul>
+<dl><dd><a href="https://apps.kde.org/plasma-systemmonitor/">https://apps.kde.org/plasma-systemmonitor/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=plasma-systemmonitor">plasma-systemmonitor</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>LACT</b> — 在 Linux 系统上控制您的 AMD、Nvidia 或 Intel GPU</li></ul>
+<dl><dd><a href="https://github.com/ilya-zlobintsev/LACT">https://github.com/ilya-zlobintsev/LACT</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lact">lact</a></span><sup><small>包</small></sup></span></dd></dl>
+<!-- 
+NewPP limit report
+Cached time: 20260807022814
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.255 seconds
+Real time usage: 0.264 seconds
+Preprocessor visited node count: 635/1000000
+Revision size: 9505/2097152 bytes
+Post‐expand include size: 15094/2097152 bytes
+Template argument size: 5532/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.014/7.000 seconds
+Lua memory usage: 541250/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  113.068      1 -total
+ 37.51%   42.415      1 Template:Link-en
+  7.95%    8.989      4 Template:Tip
+  7.72%    8.731     10 Template:App
+  7.53%    8.514     28 Template:Pkg
+  6.81%    7.704      9 Template:Related
+  5.03%    5.685      1 Template:Related_articles_start
+  4.52%    5.107      1 Template:翻译状态
+  3.37%    3.806     12 Template:AUR
+  2.36%    2.666      1 Template:Related_articles_end
+-->
+<!-- Render ID a40dff0e-9207-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8515:|#|:idhash:canonical!zh-cn and timestamp 20260807022814 and revision id 35496. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

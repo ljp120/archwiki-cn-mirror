@@ -1,0 +1,185 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgfdfac14ad1cb">X 资源</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgee37e74b8f6f">X Logical Font Description</a></li>
+<li><a href="#pg5319995350d6">dotfiles</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/X_resources">X resources</a>，最近一次同步于 2024-8-1，若英文版本有所<a href="https://wiki.archlinux.org/title/X_resources?diff=0&amp;oldid=813650">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/X_resources_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<p><i><b>X 资源</b></i> <b>文件</b>是一个用户级配置<i>点文件</i>，通常位于 <code>~/.Xresources</code>。
+它可用于设置<a href="https://en.wikipedia.org/wiki/X_resources">X 资源</a>，即 X 客户端程序的配置参数。
+</p><p>除其他用途外，它们可用于：
+</p>
+<ul><li>配置终端首选项（如终端颜色）</li>
+<li>设置 DPI、抗锯齿、hinting 和其他 X 字体设置</li>
+<li>更改 <a href="#pg2e2005378336">Xcursor 主题</a></li>
+<li>主题 <a href="#pgd7e8cd404dcb">XScreenSaver</a></li>
+<li>配置低级 X 应用程序，如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xclock">xorg-xclock</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xpdf">xpdf</a></span><sup><small>包</small></sup></span>、<a href="#pg779b777898ef">rxvt-unicode</a>)</li></ul>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdfac14ad1cb_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xrdb">xorg-xrdb</a></span><sup><small>包</small></sup></span> 软件包来获得 <i>X 服务器资源数据库工具</i>，<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-docs">xorg-docs</a></span><sup><small>包</small></sup></span> 来获得 X.org 文档。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdfac14ad1cb_Configuration" id="Configuration">Configuration</h2></div>
+<p><span class="plainlinks archwiki-template-man" title="$ man 7 X"><a href="https://man.archlinux.org/man/X.7#RESOURCES">X(7) § RESOURCES</a></span> and <span class="plainlinks archwiki-template-man" title="$ man 3 XrmGetDatabase"><a href="https://man.archlinux.org/man/XrmGetDatabase.3#FILE_SYNTAX">XrmGetDatabase(3) § FILE SYNTAX</a></span> provide detailed information on <i>X resources</i> mechanism and file syntax.
+</p><p><code>~/.Xresources</code> is a conventional file name, <code>xrdb</code> does not claim it. You can use any other file names, like <code>~/.config/X11/Xresources</code> and <code>~/.config/X11/Xresources.d/<i>application-name</i></code> (also see <a href="#pgfdfac14ad1cb_Samples">#Samples</a> and <a href="#pgfdfac14ad1cb_Include_files">#Include files</a>).
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdfac14ad1cb_Basic_syntax" id="Basic_syntax">Basic syntax</h3></div>
+<p>The syntax of an <i>X resources</i> file is a sequence of <i>resource lines</i> as follows:
+</p>
+<pre>application_name.Class.resourceName: value
+      application_name.resourceName: value
+                 Class.resourceName: value
+      application_name*resourceName: value
+                      *resourceName: value
+</pre>
+<p><code>application_name</code> and <code>Class</code> substrings will never contain a dot (<code>.</code>), the <code>resourceName</code> substring may contain a dot. For example, <code>Dialog.bodyFont</code> is a <a href="#pgd7e8cd404dcb">XScreenSaver</a> internal resource that is specified to set the body font and fallback font:
+</p>
+<pre>xscreensaver-auth.default.Dialog.bodyFont: times new roman 12, dejavu serif 12
+</pre>
+<dl><dt>application_name</dt>
+<dd>The name of the application, such as <code>urxvt</code>, <code>xpdf</code>, <code>xterm</code>, etc. Also may be called the <i>instance name</i>.</dd></dl>
+<dl><dt>Class</dt>
+<dd>The classification used to group resources together. Class names are typically uppercase.</dd></dl>
+<dl><dt>resourceName</dt>
+<dd>The name of the resource whose value is to be set. Resources are typically lowercase with uppercase concatenation.</dd></dl>
+<dl><dt>value</dt>
+<dd>The actual value of the resource. This can be one of three types:
+<ul><li>Integer (whole numbers)</li>
+<li>Boolean (true/false, yes/no, on/off)</li>
+<li>String (a string of characters) — for example a word (<code>white</code>), a color (<code>#ffffff</code>), or a path (<code>/usr/bin/firefox</code>)</li></ul></dd></dl>
+<dl><dt>delimiters</dt></dl>
+<ul><li>A dot (<code>.</code>) is a <i>tight binding</i> and is used to separate immediately adjacent components (in other words, to signify each step down into the hierarchy) — in the above example we start at application name, then descend into Class, and finally into the resource itself.</li>
+<li>An asterisk (<code>*</code>) is a <i>loose binding</i> and is used to represent any number of components, including none.</li>
+<li>A colon (<code>:</code>) is used to separate the resource name from the value.</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>From resource file syntax point of view, everything before a colon (<code>:</code>) is a resource name. From the user perspective, we often call <i>resource</i> only the rightmost component. In other words, <i>resource name</i> is a string consisted of <i>application name</i>, <i>Class</i> and <i>resource name</i> substrings. That might be the source of confusion.</li>
+<li>Resource naming schema is totally application-dependent. While one application might use <code>application_name.Class.resourceName</code>, another might understand <code>application_name.resourceName</code> and <code>Class.resourceName</code> only.</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdfac14ad1cb_Wildcard_matching" id="Wildcard_matching">Wildcard matching</h3></div>
+<p>Question mark (<code>?</code>) and asterisk (<code>*</code>) can be used as wildcards, making it easy to write a single rule that can be applied to many different applications or elements. <code>?</code> is used to match any single component name, while <code>*</code> is used to represent any number of intervening components including none.
+</p><p>Using the previous example, if you want to apply the same font to all programs (not just XScreenSaver) that contain the class name <code>Dialog</code> which contains the resource name <code>headingFont</code>, you could write:
+</p>
+<pre><b>?</b>.Dialog.headingFont:     -*-fixed-bold-r-*-*-*-100-*-*-*-*-iso8859-1
+</pre>
+<p>If you want to apply this same rule to all programs that contain the resource <code>headingFont</code>, regardless of its class, you could write:
+</p>
+<pre><b>*</b>headingFont:    -*-fixed-bold-r-*-*-*-100-*-*-*-*-iso8859-1
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>Question mark (<code>?</code>) is like component name, so <i>binding character</i> — dot (<code>.</code>) or asterisk (<code>*</code>) — next to it is required.</li>
+<li>Asterisk (<code>*</code>) is a <i>binding character</i> itself, there is no need in placing dot next to it, and a sequence of dot(s) and asterisk(s) is replaced with a single asterisk during file processing.</li></ul>
+</div>
+<p>See <span class="plainlinks archwiki-template-man" title="$ man 3 XrmGetResource"><a href="https://man.archlinux.org/man/XrmGetResource.3#MATCHING_RULES">XrmGetResource(3) § MATCHING RULES</a></span> for more information.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdfac14ad1cb_Comments" id="Comments">Comments</h3></div>
+<p>Lines starting with an exclamation mark (<code>!</code>) are ignored, for example:
+</p>
+<pre>! The following rule will be ignored because it has been commented out
+!Xft.antialias: true
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>The exclamation mark must be the first character on the line.</li>
+<li>If you have a <a href="https://en.wikipedia.org/wiki/C_preprocessor">C preprocessor</a>, such as <a href="https://gcc.gnu.org/onlinedocs/cpp/">GNU CPP</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gcc">gcc</a></span><sup><small>包</small></sup></span>), installed you can use <a href="#pgd84368fa8a45">C</a>-style (<code>//</code> and <code>/* … */</code>) comments (also see <a href="#pgfdfac14ad1cb_Samples">#Samples</a>).</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdfac14ad1cb_Include_files" id="Include_files">Include files</h3></div>
+<p>To spread resource configuration across multiple files (e.g. to use its own file for each application), use <i>C preprocessor</i> <code>#include</code> <i>directive</i>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/X11/Xresources</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#include "Xresources.d/fonts"
+#include "Xresources.d/rxvt-unicode"
+#include "Xresources.d/xscreensaver"
+#include "Xresources.d/xterm"
+</pre>
+<p>If files that are referenced with <i>#include</i> are not reachable from the applied configuration file directory, you need to pass a directory to search for:
+</p>
+<pre>$ xrdb -load -I<i>${HOME}/.config/X11 ~/.Xresources</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdfac14ad1cb_Default_settings" id="Default_settings">Default settings</h3></div>
+<p>To see the default settings for your installed X11 applications, look in <code>/usr/share/X11/app-defaults/</code>.
+</p><p>Detailed information on program-specific resources is usually provided in the man page for the program. <span class="plainlinks archwiki-template-man" title="$ man 1 xterm"><a href="https://man.archlinux.org/man/xterm.1#RESOURCES">xterm(1) § RESOURCES</a></span> is a good example, as it contains a list of X resources and their default values.
+</p><p>To see the currently loaded resources:
+</p>
+<pre>$ xrdb -query -all
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdfac14ad1cb_Samples" id="Samples">Samples</h3></div>
+<ul><li><a href="#pg62400c6b447c">Color output in console#Terminal emulators</a></li>
+<li><a href="#pg1c1dc51994ca">Cursor themes#X resources</a></li>
+<li><a href="#pg5f4c7de3e275">Font configuration#Applications without fontconfig support</a></li>
+<li><a href="#pg779b777898ef">rxvt-unicode#Configuration</a></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 1 xpdf"><a href="https://man.archlinux.org/man/xpdf.1#OPTIONS">xpdf(1) § OPTIONS</a></span></li>
+<li><a href="#pg12c4c9eae03a">Xterm#Configuration</a></li>
+<li><a href="https://github.com/mrdotx/dotfiles/tree/master/.config/X11">klassiker (mrdotx)</a> — <a href="#pg779b777898ef">Rxvt-unicode</a> patch developer <a href="#pg5319995350d6">dotfiles</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdfac14ad1cb_.E7.94.A8.E6.B3.95" id="用法"><span id=".E7.94.A8.E6.B3.95"></span>用法</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdfac14ad1cb_.E5.8A.A0.E8.BD.BD.E8.B5.84.E6.BA.90.E6.96.87.E4.BB.B6" id="加载资源文件"><span id=".E5.8A.A0.E8.BD.BD.E8.B5.84.E6.BA.90.E6.96.87.E4.BB.B6"></span>加载资源文件</h3></div>
+<p>资源存储在 X 服务器中，因此只需读取一次。<i>远程</i>X11 客户端（如<a href="#pg4df2d7b1a305">通过 SSH 转发</a>）也可以访问这些资源。
+</p><p>加载资源文件（如传统的 <code>.Xresources</code>），替换任何当前设置：
+</p>
+<pre>$ xrdb <i>~/.Xresources</i>
+</pre>
+<p>加载资源文件，并与当前设置合并：
+</p>
+<pre>$ xrdb -merge <i>~/.Xresources</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>大多数<a href="#pg30e2075251d0">显示管理器</a>会在登录时加载 <code>~/.Xresources</code> 文件。</li>
+<li>X11 程序启动时会读取较旧的 <code>~/.Xdefaults</code> 文件，但前提是当前会话中未使用过 <i>xrdb</i>。<a href="https://groups.google.com/forum/#!msg/comp.windows.x/hQBEdql8l-Q/hF3DETcIHGwJ">[1]</a></li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdfac14ad1cb_xinitrc" id="xinitrc">xinitrc</h3></div>
+<p>如果使用默认的 <a href="#pg05a4704b29d5">xinitrc</a> 副本作为 <code>.xinitrc</code> ，它已经合并了 <code>~/.Xresources</code>。
+</p><p>如果您使用的是自定义的，请添加：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">.xinitrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[[ -f ~/.Xresources ]] &amp;&amp; xrdb -merge -I$HOME ~/.Xresources</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>请勿在 <code>~/.xinitrc</code> 中设置 xrdb 命令的后台。否则，在 xrdb 之后启动的程序可能会在加载完成前查找资源。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdfac14ad1cb_.E8.8E.B7.E5.8F.96.E8.B5.84.E6.BA.90.E5.80.BC" id="获取资源值"><span id=".E8.8E.B7.E5.8F.96.E8.B5.84.E6.BA.90.E5.80.BC"></span>获取资源值</h3></div>
+<p>如果要获取某个资源的值（例如在 bash 脚本中使用），可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xgetres/">xgetres</a></span><sup><small>AUR</small></sup></span>：
+</p>
+<pre>$ xgetres xscreensaver.Dialog.headingFont
+-*-fixed-bold-r-*-*-*-100-*-*-*-*-iso8859-1
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdfac14ad1cb_Troubleshooting" id="Troubleshooting">Troubleshooting</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdfac14ad1cb_Parsing_errors" id="Parsing_errors">Parsing errors</h3></div>
+<p><a href="#pg9aa798802a24">Display manager</a>s such as <a href="#pg89573e816846">GDM</a> may use the <code>--nocpp</code> argument for <i>xrdb</i>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdfac14ad1cb_No_output_from_xrdb__query" id="No_output_from_xrdb_-query">No output from xrdb -query</h3></div>
+<p>It is not rare for <code>xrdb -query</code> to output nothing. Try following #Load resource file and <a href="#pgfdfac14ad1cb_xinitrc">#xinitrc</a> from above. And note some of the files mentioned there could be empty.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdfac14ad1cb_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://engineering.purdue.edu/ECN/Support/KB/Docs/UsingTheXdefaultsFil">Using the .Xdefaults File</a> 由 Purdue Engineering Computer Network 提供</li>
+<li><a href="https://unix.stackexchange.com/questions/216723/xterm-or-xterm-in-configuration-file/292992#292992">Overlooked Points of X Resources</a> 由 Thomas Dickey 提供</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808003300
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.157 seconds
+Real time usage: 0.164 seconds
+Preprocessor visited node count: 718/1000000
+Revision size: 8918/2097152 bytes
+Post‐expand include size: 9646/2097152 bytes
+Template argument size: 3524/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 109/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   53.006      1 -total
+ 13.31%    7.058      5 Template:Note
+ 11.25%    5.964      1 Template:Related_articles_start
+ 11.00%    5.833     47 Template:Ic
+ 10.66%    5.652      1 Template:需要翻译
+ 10.10%    5.356      5 Template:Man
+  7.58%    4.019      1 Template:META_Message
+  5.26%    2.789      5 Template:Pkg
+  3.81%    2.022      1 Template:META_Related_articles_start
+  3.74%    1.984      2 Template:Related
+-->
+<!-- Render ID b567120e-92c0-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7865:|#|:idhash:canonical!zh-cn and timestamp 20260808003300 and revision id 34221. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

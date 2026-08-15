@@ -1,0 +1,157 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgfdbcc5602284">Firefox/在 RAM 中存储配置</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Firefox/Profile_on_RAM">Firefox/Profile on RAM</a>，最近一次同步于 2025-01-04，若英文版本有所<a href="https://wiki.archlinux.org/title/Firefox/Profile_on_RAM?diff=0&amp;oldid=824212">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Firefox_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Profile_on_RAM_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>假设有多余的内存可用，将 <a href="#pg9b5d7fec8088">Firefox</a> 的缓存或完整配置文件放入 RAM 中可以带来显著的优势。若选择部分迁移，不仅其本身会带来优势，还比默认配置响应更快。其优势包括但不限于：
+</p>
+<ul><li>减少磁盘读写操作；</li>
+<li>提高响应速度；</li>
+<li>可在 Firefox 中几乎即时地执行许多操作（如快速搜索和历史记录查询）。</li></ul>
+<p>这可以使用 <a href="#pg96f7efa88158">tmpfs</a> 实现。
+</p><p>由于放入 RAM 中的数据无法在系统关闭后继续保存，如果需要持久化数据（如迁移配置文件时），需要借助脚本在系统关闭前将数据同步回磁盘。而仅迁移缓存快速但覆盖面较小，可以稍微提升用户体验，同时在每次重启时清空 Firefox 缓存。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>缓存存储在与 Firefox 默认配置文件文件夹（<code>/home/$USER/.mozilla/firefox/</code>）<b>不同</b>的位置：<code>/home/$USER/.cache/mozilla/firefox/&lt;profile&gt;</code>。这与其它浏览器（如 Chromium）的处理方式相似。因此，章节 #使用工具将配置文件迁移到 RAM 和 #手动将配置文件迁移到 RAM <b>不涉及</b>缓存的迁移和同步，而仅限于配置文件的调整。有关更多细节，请参阅 <a href="#pga0bc35debb7f">Profile-sync-daemon</a> 的第一条“注意”。<a href="#pg494980c7859a">Anything-sync-daemon</a> 可以用于实现与选项 2 类似的缓存文件夹操作。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdbcc5602284_.E4.BB.85.E5.B0.86.E7.BC.93.E5.AD.98.E8.BF.81.E7.A7.BB.E5.88.B0_RAM" id="仅将缓存迁移到_RAM"><span id=".E4.BB.85.E5.B0.86.E7.BC.93.E5.AD.98.E8.BF.81.E7.A7.BB.E5.88.B0_RAM"></span>仅将缓存迁移到 RAM</h2></div>
+<p>参见 <a href="#pg1ba73eaeffc3">Firefox/微调#关闭磁盘缓存</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdbcc5602284_.E4.BD.BF.E7.94.A8.E5.B7.A5.E5.85.B7.E5.B0.86.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6.E8.BF.81.E7.A7.BB.E5.88.B0_RAM" id="使用工具将配置文件迁移到_RAM"><span id=".E4.BD.BF.E7.94.A8.E5.B7.A5.E5.85.B7.E5.B0.86.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6.E8.BF.81.E7.A7.BB.E5.88.B0_RAM"></span>使用工具将配置文件迁移到 RAM</h2></div>
+<p>将浏览器配置文件重新定位到 <a href="#pg96f7efa88158">tmpfs</a>，可全局提升浏览器的响应速度，并减少驱动器的 I/O 操作，其中<a href="#pg5f7223c277dc">固态硬盘受益最大</a>。
+</p><p>使用一个主动管理脚本可以实现最大程度的可靠性和易用性。在 AUR 中有多个可用的脚本。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdbcc5602284_Profile_sync_daemon" id="Profile-sync-daemon">Profile-sync-daemon</h3></div>
+<p>参见 <a href="#pga0bc35debb7f">Profile-sync-daemon</a> 页面以获取更多信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdbcc5602284_firefox_sync" id="firefox-sync">firefox-sync</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/firefox-sync/">firefox-sync</a></span><sup><small>AUR</small></sup></span> 对于仅使用单个配置文件的用户来说已经足够，它使用类似于下文 #脚本中的脚本和 systemd 服务。
+</p><p>根据 #开始之前中的建议，确认并备份当前的 Firefox 配置文件。
+</p><p>使用<a href="#pg8c0a8dbf9b36">附加配置片段</a>将配置文件作为参数传递： <code>-p <i>profile_id</i>.default</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>该操作可能会删除配置文件，请备份以准备在启动服务后立即从备份中恢复。</div>
+<p>然后<a href="#pg75b0ec583607">启动/启用</a> <code>firefox-sync.service</code> <a href="#pg983913bfd458">用户单元</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdbcc5602284_.E6.89.8B.E5.8A.A8.E5.B0.86.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6.E8.BF.81.E7.A7.BB.E5.88.B0_RAM" id="手动将配置文件迁移到_RAM"><span id=".E6.89.8B.E5.8A.A8.E5.B0.86.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6.E8.BF.81.E7.A7.BB.E5.88.B0_RAM"></span>手动将配置文件迁移到 RAM</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdbcc5602284_.E5.BC.80.E5.A7.8B.E4.B9.8B.E5.89.8D" id="开始之前"><span id=".E5.BC.80.E5.A7.8B.E4.B9.8B.E5.89.8D"></span>开始之前</h3></div>
+<p>请务必在可能影响 Firefox 配置文件之前将其备份，以便快速恢复。首先，通过访问 <code>about:profiles</code> 页面，查看正在使用的配置文件目录。使用 <code>tar</code> 进行备份（替换 <b><code>xyz.default</code></b> 为正在使用的配置文件目录）：
+</p>
+<pre>$ tar zcvfp ~/firefox_profile_backup.tar.gz ~/.mozilla/firefox/<b>xyz.default</b>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdbcc5602284_.E8.84.9A.E6.9C.AC" id="脚本"><span id=".E8.84.9A.E6.9C.AC"></span>脚本</h3></div>
+<p>此脚本改编自 <a href="https://www.verot.net/firefox_tmpfs.htm">verot.net 的 Speed up Firefox with tmpfs</a>。
+</p><p>脚本首先会将 Firefox 的配置文件移动到一个新的静态位置，在 <code>/dev/shm</code> 中创建一个子目录，在原位置使用软链接指向它，然后将配置文件的内容填充到该目录中。和之前一样，并且直到本文结束，替换所有粗体 <b><code>xyz.default</code></b> 字符串为 Firefox 配置文件目录。唯一必须更改的值仍然是 <b><code>xyz.default</code></b>。
+</p><p>在安装 <a href="#pg4bb0ada72a54">rsync</a> 后，<a href="#pgeb027b34b7ae">创建</a>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.local/bin/firefox-sync.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+
+static=<i>static-$1</i>
+link=<i>$1</i>
+volatile=<i>/dev/shm/firefox-$1-$USER</i>
+
+IFS=
+set -efu
+
+cd ~/.mozilla/firefox
+
+if [ ! -r $volatile ]; then
+	mkdir -m0700 $volatile
+fi
+
+if [ "$(readlink $link)" != "$volatile" ]; then
+	mv $link $static
+	ln -s $volatile $link
+fi
+
+if [ -e $link/.unpacked ]; then
+	rsync -av --delete --exclude .unpacked ./$link/ ./$static/
+else
+	rsync -av ./$static/ ./$link/
+	touch $link/.unpacked
+fi</pre>
+<p>将脚本设为<a href="#pg778bd495870f">可执行</a>，然后运行以下命令以关闭 Firefox 并测试脚本：
+</p>
+<pre>$ killall firefox firefox-bin
+$ ls ~/.mozilla/firefox/
+$ ~/.local/bin/firefox-sync.sh <b>xyz.default</b>
+</pre>
+<p>再次运行 Firefox 并评估结果。脚本第二次运行时，会将 RAM 配置文件复制回磁盘来保留它。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdbcc5602284_.E8.87.AA.E5.8A.A8.E5.8C.96" id="自动化"><span id=".E8.87.AA.E5.8A.A8.E5.8C.96"></span>自动化</h3></div>
+<p>鉴于忘记同步配置文件可导致的灾难性后果，自动化此过程会是一个合乎逻辑的选择。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfdbcc5602284_systemd" id="systemd">systemd</h4></div>
+<p><a href="#pgeb027b34b7ae">创建</a>以下脚本：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/systemd/user/firefox-profile@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Firefox profile memory cache
+
+[Install]
+WantedBy=default.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=%h/.local/bin/firefox-sync.sh %i
+ExecStop=%h/.local/bin/firefox-sync.sh %i</pre>
+<p>然后，运行 <a href="#pg16fc2566d30b">daemon-reload</a> 并<a href="#pg5a37de39c354">启用/启动</a> <code>firefox-profile@<b>xyz.default</b>.service</code> <a href="#pg983913bfd458">用户单元</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfdbcc5602284_cron_.E5.AE.9A.E6.97.B6.E4.BB.BB.E5.8A.A1" id="cron_定时任务"><span id="cron_.E5.AE.9A.E6.97.B6.E4.BB.BB.E5.8A.A1"></span>cron 定时任务</h4></div>
+<p>使用 <code>crontab</code> 操作用户的 <a href="#pg093fe1353c86">cron</a> 表：
+</p>
+<pre>$ crontab -e
+</pre>
+<p>添加一行每隔 30 分钟运行脚本：
+</p>
+<pre>*/30 * * * * ~/.local/bin/firefox-sync.sh <b>xyz.default</b>
+</pre>
+<p>或者添加以下内容，每隔 2 小时运行一次：
+</p>
+<pre>0 */2 * * * ~/.local/bin/firefox-sync.sh <b>xyz.default</b>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfdbcc5602284_.E7.99.BB.E5.BD.95.2F.E6.B3.A8.E9.94.80.E6.97.B6.E8.BF.9B.E8.A1.8C.E5.90.8C.E6.AD.A5" id="登录/注销时进行同步"><span id=".E7.99.BB.E5.BD.95.2F.E6.B3.A8.E9.94.80.E6.97.B6.E8.BF.9B.E8.A1.8C.E5.90.8C.E6.AD.A5"></span>登录/注销时进行同步</h4></div>
+<p>若使用 <a href="#pg1ca1e15827ff">bash</a>，在登录/注销文件中运行 #脚本：
+</p>
+<pre>$ echo 'bash -c "~/.local/bin/firefox-sync.sh <b>xyz.default</b> &gt; /dev/null &amp;"' | tee -a ~/.bash_logout ~/.bash_login
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果同时存在 <code>~/.bash_profile</code> 和 <code>~/.bash_login</code> 并且两者都可读，bash 只会读取前者，因此可能需要使用 <code>~/.bash_profile</code> 替代 <code>~/.bash_login</code>。</div>
+<p>对于 <a href="#pg187873cfd725">zsh</a>，使用 <code>~/.zlogin</code> 和 <code>~/.zlogout</code> 代替：
+</p>
+<pre>$ echo 'bash -c "~/.local/bin/firefox-sync.sh <b>xyz.default</b> &gt; /dev/null &amp;"' | tee -a ~/.zlog{in,out}
+</pre>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdbcc5602284_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="#pg96f7efa88158">tmpfs</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808010801
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.099 seconds
+Real time usage: 0.105 seconds
+Preprocessor visited node count: 244/1000000
+Revision size: 5983/2097152 bytes
+Post‐expand include size: 4047/2097152 bytes
+Template argument size: 2085/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   18.751      1 -total
+ 22.95%    4.303      2 Template:注意
+ 22.33%    4.187      1 Template:翻译状态
+ 16.16%    3.030     18 Template:Ic
+  7.50%    1.406      2 Template:Hc
+  5.78%    1.084      1 Template:AUR
+  5.07%    0.950      1 Template:警告
+-->
+<!-- Render ID 99b23a8e-92c5-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8050:|#|:idhash:canonical!zh-cn and timestamp 20260808010801 and revision id 33619. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,282 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg266d4b7ba9d4">虚拟现实(VR)</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Virtual_reality">Virtual reality</a>，最近一次同步于 2020-09-04，若英文版本有所<a href="https://wiki.archlinux.org/title/Virtual_reality?diff=0&amp;oldid=634309">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Virtual_reality_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p><a href="https://en.wikipedia.org/wiki/%E8%99%9A%E6%8B%9F%E7%8E%B0%E5%AE%9E">虚拟现实</a>是使用各种外围设备，头戴式显示器或<a href="https://en.wikipedia.org/wiki/Cave_automatic_virtual_environment">CAVEs</a>和跟踪器为用户模拟环境的一系列过程。虚拟显示技术不会从屏幕上向您显示静态视点，而是将您的视点相对于您站立的位置（在贴头或投影的表面上）进行渲染，以提供与您自己的眼睛观看视角相同的效果。
+</p><p>许多虚拟现实的设备已经发布或即将发布，这为人们带来了不是那么昂贵，身临其境的虚拟现实环境。这些设备大多数都具有全部或部分Linux支持，并且许多具有<a href="#pg89cb7b475cfb">AUR</a>软件包。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg266d4b7ba9d4_.E7.8E.AF.E5.A2.83.E5.85.BC.E5.AE.B9.E5.88.97.E8.A1.A8" id="环境兼容列表"><span id=".E7.8E.AF.E5.A2.83.E5.85.BC.E5.AE.B9.E5.88.97.E8.A1.A8"></span>环境兼容列表</h2></div>
+
+<p><b>Legend:</b>
+</p>
+<ul><li>绿色: 原生支持</li>
+<li>黄色: 通过工具集支持或部分支持</li>
+<li>红色: 不完整支持</li>
+<li>无色: 未知/未完成/计划支持</li></ul>
+<table class="wikitable">
+<tbody><tr>
+<th>
+</th>
+<th>Oculus Rift
+</th>
+<th>OSVR
+</th>
+<th>OpenVR
+</th>
+<th>Leap Motion
+</th>
+<th>Razer Hydra
+</th></tr>
+<tr>
+<th>Dolphin (从源仓库 fork 的 VR 版本)
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">
+</td>
+<td>
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">部分完成
+</td>
+<td>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">
+</td></tr>
+<tr>
+<th>Dolphin (官方 OSVR 支持)
+</th>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">通过 OSVR
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">
+</td>
+<td>
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">通过 OSVR
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">通过 OSVR
+</td></tr>
+<tr>
+<th>Minecrift (Minecraft VR)
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">
+</td>
+<td>(计划) 通过 OSVR-SteamVR
+</td>
+<td>(计划)
+</td>
+<td>(计划) 通过 OSVR
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">
+</td></tr>
+<tr>
+<th>Janus VR
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">通过 OSVR
+</td></tr>
+<tr>
+<th>Team Fortress 2
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">通过 OpenVR
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">通过 OSVR-SteamVR
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">不完整支持，随机修复状态
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">通过 OSVR
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">通过 OSVR
+</td></tr>
+<tr>
+<th>Half Life 2
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">显示处于一只眼黑，一只眼无色的状态
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">通过 OSVR-SteamVR
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">显示处于一只眼黑，一只眼无色的状态
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">通过 OSVR
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">通过 OSVR
+</td></tr>
+<tr>
+<th>VRUI VR 工具集和演示
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">
+</td></tr>
+<tr>
+<th>4089: The Ghost Within
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">通过 OpenVR
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">通过 OSVR-SteamVR
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">直到V社修复问题之前都不完善
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">通过 OSVR
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">通过 OSVR
+</td></tr>
+<tr>
+<th>Games/Programs in Wine
+</th>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">在 OVRSDK 版本 &lt;=0.5.0.0, 且 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/oculus-wine-wrapper-git/">oculus-wine-wrapper-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wine-unity3d-git/">wine-unity3d-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>上支持
+</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">跟踪器工作完美。 但是在Unity演示没有Render Manager的工作时有问题，使用Render Manager的Unity演示会出现白屏或者黑屏。
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg266d4b7ba9d4_.E6.94.AF.E6.8C.81.E7.9A.84.E8.AE.BE.E5.A4.87.E5.92.8C.E5.B7.A5.E5.85.B7.E9.9B.86" id="支持的设备和工具集"><span id=".E6.94.AF.E6.8C.81.E7.9A.84.E8.AE.BE.E5.A4.87.E5.92.8C.E5.B7.A5.E5.85.B7.E9.9B.86"></span>支持的设备和工具集</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_OpenXR" id="OpenXR">OpenXR</h3></div>
+<p>OpenXR是一种开放的，不收费用的标准，用于访问虚拟现实以及增强现实的平台和设备。它由Khronos集团维护，并被大多数行业所采用，大多数运行时都支持OpenXR。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_Monado" id="Monado">Monado</h3></div>
+<p>Monado是由Collabora开发的开源OpenXR运行时。它正在开发中，旨在提供支持大多数耳机的通用运行时。你可以在 <a href="https://monado.freedesktop.org/">https://monado.freedesktop.org/</a> 上查看进度
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_OpenVR_.2F_SteamVR" id="OpenVR_/_SteamVR"><span id="OpenVR_.2F_SteamVR"></span>OpenVR / SteamVR</h3></div>
+<p>Valve致力于通过OpenVR创建用于VR开发的开放API。不幸的是，当API开放时，实际的默认实现（SteamVR）却没有进行开放。它提供了一个OpenXR标准的运行时。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg266d4b7ba9d4_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h4></div>
+<p>安装 <a href="#pg95e65bdea0f3">Steam</a>, 通过Steam里的下载按钮下载SteamVR。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg266d4b7ba9d4_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h4></div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg266d4b7ba9d4_.E9.85.8D.E7.BD.AE.E5.92.8C.E5.90.AF.E5.8A.A8.E9.94.99.E8.AF.AF" id="配置和启动错误"><span id=".E9.85.8D.E7.BD.AE.E5.92.8C.E5.90.AF.E5.8A.A8.E9.94.99.E8.AF.AF"></span>配置和启动错误</h5></div>
+<p>SteamVR / OpenVR创建一个配置目录〜/.openvr，该目录可能在不同的版本上出现配置错误。删除该目录，然后完全卸载/重新安装SteamVR可以解决。
+</p><p>在某些配置下，访问Rift显然也很麻烦。一种替代方法是使用OSVR-SteamVR驱动程序和OSVR-Oculus-Rift插件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_OpenHMD" id="OpenHMD">OpenHMD</h3></div>
+<p><a href="http://www.openhmd.net/">OpenHMD</a> 目标是为沉浸式技术提供免费和开源的API和驱动程序，例如具有内置头部跟踪功能的头戴式显示器。目标是在便携式跨平台封装中实现尽可能多设备的支持。
+</p><p>OpenHMD支持多种设备，例如Oculus Rift，HTC Vive，Sony PSVR，Deepoon E2等。
+</p><p>可以从第三方获得 .NET，Java，Perl，Python和Rust的编程语言绑定。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg266d4b7ba9d4_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h4></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/openhmd-git/">openhmd-git</a></span><sup><small>AUR</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg266d4b7ba9d4_SteamVR_.E6.94.AF.E6.8C.81" id="SteamVR_支持"><span id="SteamVR_.E6.94.AF.E6.8C.81"></span>SteamVR 支持</h4></div>
+<p>可以将OpenHMD与SteamVR一起使用。为此，您需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/steamvr-openhmd-git/">steamvr-openhmd-git</a></span><sup><small>AUR</small></sup></span> 并创建符号链接，该链接指向SteamVR驱动程序目录中的OpenHMD SteamVR驱动程序，例如：
+</p>
+<pre> ln -s /usr/lib/steamvr/openhmd ~/.steam/steam/steamapps/common/SteamVR/drivers/openhmd
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg266d4b7ba9d4_.E8.BF.87.E6.97.B6.E7.9A.84.E8.AE.BE.E5.A4.87.E5.92.8C.E5.B7.A5.E5.85.B7.E9.9B.86" id="过时的设备和工具集"><span id=".E8.BF.87.E6.97.B6.E7.9A.84.E8.AE.BE.E5.A4.87.E5.92.8C.E5.B7.A5.E5.85.B7.E9.9B.86"></span>过时的设备和工具集</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_OSVR" id="OSVR">OSVR</h3></div>
+<p>OSVR是由Sensics，Inc（一家历史悠久的VR公司）和Razer共同努力创建的VR的完全或几乎完全开放的软件API，最终开发人员只需要将各自的头戴式耳机挂接一些功能即可获得一流的支持。它支持最广泛的外围设备，并通过JSON配置文件具有极其灵活的配置。
+</p><p>它还提供了一个插件，使其可以用作OpenVR实施，使您可以使用它与支持的任何设备一起玩OpenVR / SteamVR游戏。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg266d4b7ba9d4_.E9.85.8D.E7.BD.AE_2" id="配置_2"><span id=".E9.85.8D.E7.BD.AE_2"></span>配置</h4></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/osvr-core-git/">osvr-core-git</a></span><sup><small>AUR</small></sup></span>, 还有一些其他需要支持的独立设备，现在支持的插件有：
+<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/osvr-oculus-rift-git/">osvr-oculus-rift-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/osvr-leap-motion-git/">osvr-leap-motion-git</a></span><sup><small>AUR</small></sup></span>
+</p><p>如果希望将OSVR与SteamVR / OpenVR游戏和应用程序一起使用，安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/osvr-steamvr-git/">osvr-steamvr-git</a></span><sup><small>AUR</small></sup></span>链接驱动到SteamVR，
+运行OSVR服务器，并通过以下命令使其在后台运行:
+</p>
+<pre>   osvr_server /usr/share/osvrcore/sample-configs/your_device_config.json
+</pre>
+<p>您可能希望自定义配置以适合您的个人需求。
+</p><p>要测试您的安装是否正常并且跟踪器可用，请安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/osvr-tracker-viewer-git/">osvr-tracker-viewer-git</a></span><sup><small>AUR</small></sup></span> 和执行 <code>OSVRTrackerView</code>. 您应该看到OSVR可以拾取的每个跟踪器的一组轴。如果不这样做，请运行 <code>osvr_print_tree</code> 以查看可用的跟踪器或是否存在配置问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_Oculus_Rift" id="Oculus_Rift">Oculus Rift</h3></div>
+<p>Oculus Rift 已经停止支持Linux了，更多请见
+</p><p><a href="#pgf0d6d4bd3c2a">Oculus Rift</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_Leap_Motion" id="Leap_Motion">Leap Motion</h3></div>
+<p>Leap Motion是一款价格实惠的手持跟踪器，可以轻松地安装在HMD的面板上，以允许您与虚拟对象进行交互。不幸的是，最新的Orion软件不适用于Linux，因此当前可用的跟踪功能正常但存在很多错误，它仅真正适用于Linux上的社交互动。但由于它的成本不到HMD或等效跟踪系统的1/10，因此它仍然是相当有用的设备。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg266d4b7ba9d4_.E9.85.8D.E7.BD.AE_3" id="配置_3"><span id=".E9.85.8D.E7.BD.AE_3"></span>配置</h4></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/leap-motion-driver/">leap-motion-driver</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/osvr-leap-motion-git/">osvr-leap-motion-git</a></span><sup><small>AUR</small></sup></span> 可选择安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/leap-motion-sdk/">leap-motion-sdk</a></span><sup><small>AUR</small></sup></span>. 
+</p><p>要配置，启用 <code>leapd.service</code> 需执行 <code>LeapControlPanel</code>. 要测试跟踪是否有效，请运行安装随附的 <code>Playground</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg266d4b7ba9d4_.E6.94.AF.E6.8C.81.E7.9A.84.E8.BD.AF.E4.BB.B6" id="支持的软件"><span id=".E6.94.AF.E6.8C.81.E7.9A.84.E8.BD.AF.E4.BB.B6"></span>支持的软件</h2></div>
+<p>当前，有一些应用程序可以在Rift和Linux上正常运行，其中一些应用程序位于AUR中。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_Dolphin_.28VR_fork_.E7.89.88.E6.9C.AC.29" id="Dolphin_(VR_fork_版本)"><span id="Dolphin_.28VR_fork_.E7.89.88.E6.9C.AC.29"></span>Dolphin (VR fork 版本)</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dolphin-emu-vr-git/">dolphin-emu-vr-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> 是Gamecube的仿真器，具有一些修补程序，可使其具有完整的头部追踪立体渲染效果，并带有许多自定义功能，使游戏在VR中开箱即用（例如，禁用剔除功能，让您查看整个世界）。
+</p><p>鉴于Dolphin项目已开始正式支持上游OSVR，因此大部分支持已停止。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>当将此应用程序与Rift一起使用时，它可以在纵向（直接）模式下正常工作，并且应在不旋转Rift的情况下运行，这样可以最小化延迟。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_Dolphin_.28.E5.AE.98.E6.96.B9_OSVR_.E6.94.AF.E6.8C.81.29" id="Dolphin_(官方_OSVR_支持)"><span id="Dolphin_.28.E5.AE.98.E6.96.B9_OSVR_.E6.94.AF.E6.8C.81.29"></span>Dolphin (官方 OSVR 支持)</h3></div>
+<p>olphin项目已开始致力于使用OSVR正式增加对VR的支持，可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dolphin-emu-osvr-git/">dolphin-emu-osvr-git</a></span><sup><small>AUR</small></sup></span>获得支持。 它甚至可以使用OSVR的路径树输入作为控制器输入，这样您就可以使用收缩或六轴控制器输入作为Wiimote输入。但是，在某些地方支持有限，因为和原始的Oculus-only 的fork版本差别较大。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_wine.E4.B8.AD.E7.9A.84.E6.B8.B8.E6.88.8F.E5.92.8C.E7.A8.8B.E5.BA.8F" id="wine中的游戏和程序"><span id="wine.E4.B8.AD.E7.9A.84.E6.B8.B8.E6.88.8F.E5.92.8C.E7.A8.8B.E5.BA.8F"></span>wine中的游戏和程序</h3></div>
+<p>使用Wine时，许多应用程序具有一定程度的兼容性问题，但通常需要进行一些程度的调整才能使其按预期运行。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/oculus-wine-wrapper-git/">oculus-wine-wrapper-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> 是一个实用工具，用于在运行Wine时修补Oculus SDK的Linux和Windows版本之间的差异。它为Wine应用程序创建要使用的共享内存上下文，从而允许该应用程序访问本机Oculus SDK。但似乎没有必要将SDK安装到wineprefix。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg266d4b7ba9d4_Unity_.E6.B8.B8.E6.88.8F" id="Unity_游戏"><span id="Unity_.E6.B8.B8.E6.88.8F"></span>Unity 游戏</h4></div>
+<p>为了在基于Unity的游戏中获得最佳性能，理想情况下，您应使用<code>-force-opengl</code>使其强制为opengl模式。 但是，对于未打补丁的Wine上，目前尚不可能做到这一点，因为它试图强制执行的WGL上下文与典型的GLX上下文有一些差异<a href="https://wiki.unity3d.com/index.php/Running_Unity_on_Linux_through_Wine#.22-force-opengl.22_option_crashing_Unity_.28Experimental_fix.29">有相关描述</a><sup title="最后检查状态：domain name not resolved">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2021-11-19 ⓘ]</sup>。 使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wine-unity3d-git/">wine-unity3d-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> 包 将使您可以使用本机OpenGL运行这些游戏，从而可以在计算机上以不错的性能进行游戏。但是，玩家尝试更改视频模式或将设置弄乱，因此需要提供默认的视频设置。此外，由于它使用的是本机OpenGL，因此nvidia的__GL_THREADED_OPTIMIZATIONS可以显着提高性能。总体而言，该命令应如下所示：
+</p>
+<pre>   env __GL_THREADED_OPTIMIZATIONS=1 wine UnityGame.exe -screen-height 1080 -screen-width 1920 -popupwindow -force-opengl
+</pre>
+<p>或者使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/oculus-wine-wrapper-git/">oculus-wine-wrapper-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>:
+</p>
+<pre>   env __GL_THREADED_OPTIMIZATIONS=1 oculus-wine-wrapper UnityGame.exe -screen-height 1080 -screen-width 1920 -popupwindow -force-opengl
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_Minecrift_.28Minecraft_VR.29" id="Minecrift_(Minecraft_VR)"><span id="Minecrift_.28Minecraft_VR.29"></span>Minecrift (Minecraft VR)</h3></div>
+<p>可在<a href="https://www.reddit.com/r/oculus_linux/comments/2shnbk/minecrift_linuxmac_support_coming_soon_steps_to/">这里</a>找到使用最新的JRift（本机Java rift运行时）版本运行现有Minecrift版本的指南。 您可能会希望在使用Rift时安装较旧的版本，因为JRift已不断更新以匹配Oculus SDK。
+</p><p>另外，许多用户报告说使用JRE8的性能要好于JRE7。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>使用Rift时，此应用程序可在纵向（直接）模式下正常工作，并且应在不旋转Rift的情况下运行。但是，从15年5月12日开始，游戏中的GUI将显示为拉长的16：9矩形，而不是停留在屏幕比例上。这虽然是可用的，但是表现不理想。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_JanusVR" id="JanusVR">JanusVR</h3></div>
+<p>“janusVR：一个沉浸式，协作的多维互联网。” JanusVR是一款应用程序，可让您在多人游戏体验中浏览3D网站。janusvr的AUR包可以使用: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/janusvr/">janusvr</a></span><sup><small>AUR</small></sup></span>
+</p><p>当JanusVR升级时，AUR软件包不会自动更新，但是当有新版本可用时，应用程序会告诉您，发生这种情况时，只需重新构建新软件包即可。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此应用程序可在纵向（直接）模式下正常使用（从42.3开始），并且应在不旋转Rift的情况下运行。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg266d4b7ba9d4_Leap_Motion_.E6.94.AF.E6.8C.81" id="Leap_Motion_支持"><span id="Leap_Motion_.E6.94.AF.E6.8C.81"></span>Leap Motion 支持</h4></div>
+<p>Leap Motion使您可以通过手势输入，并且上世界上的其他人看到。您将需要将Leap安装到HMD的前面，并确保使用的是默认的头像。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg266d4b7ba9d4_.E5.85.B6.E4.BB.96.E6.B3.A8.E6.84.8F.E4.BA.8B.E9.A1.B9" id="其他注意事项"><span id=".E5.85.B6.E4.BB.96.E6.B3.A8.E6.84.8F.E4.BA.8B.E9.A1.B9"></span>其他注意事项</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg266d4b7ba9d4_.E5.90.AF.E7.94.A8OpenAL.E5.8F.8C.E8.80.B3.E6.A8.A1.E5.BC.8F.E6.94.AF.E6.8C.81" id="启用OpenAL双耳模式支持"><span id=".E5.90.AF.E7.94.A8OpenAL.E5.8F.8C.E8.80.B3.E6.A8.A1.E5.BC.8F.E6.94.AF.E6.8C.81"></span>启用OpenAL双耳模式支持</h3></div>
+<p>请查看 <a href="#pg94f32a2e73db">Gaming#Binaural audio with OpenAL</a>.
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807121037
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.195 seconds
+Real time usage: 0.202 seconds
+Preprocessor visited node count: 1217/1000000
+Revision size: 11173/2097152 bytes
+Post‐expand include size: 20334/2097152 bytes
+Template argument size: 8302/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 16/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   73.485      1 -total
+ 29.11%   21.392     34 Template:META_Table_cell
+ 18.80%   13.814      7 Template:Y
+ 17.65%   12.973     15 Template:R
+ 16.25%   11.943     12 Template:G
+  7.91%    5.811      7 Template:Broken_package_link
+  6.89%    5.060     17 Template:Aur
+  5.53%    4.061      1 Template:Style
+  4.76%    3.499      1 Template:翻译状态
+  3.23%    2.372      1 Template:Dead_link
+-->
+<!-- Render ID ffb4a88e-9258-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3961:|#|:idhash:canonical!zh-cn and timestamp 20260807121037 and revision id 33861. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

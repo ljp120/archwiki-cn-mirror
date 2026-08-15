@@ -1,0 +1,109 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg30216a466efc">Electron 打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – Electron – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Electron_package_guidelines">Electron package guidelines</a>，最近一次同步于 2025-06-29，若英文版本有所<a href="https://wiki.archlinux.org/title/Electron_package_guidelines?diff=0&amp;oldid=839615">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Electron_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<p>This document covers standards and guidelines on writing <a href="#pgf9d748a7b27b">PKGBUILD</a>s for <a href="#pgafb05f48c1a9">Electron</a>.
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg30216a466efc_Using_the_system_electron" id="Using_the_system_electron">Using the system electron</h2></div>
+<p>Arch Linux provides versioned <a href="https://archlinux.org/packages/?q=electron">electron*</a> packages and an <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=electron">electron</a></span><sup><small>包</small></sup></span> metapackage for the latest version. They can be used to run an electron application via a shell script wrapper:
+</p>
+<pre>#!/bin/sh
+
+exec /usr/bin/electron34 /path/to/<i>appname</i>/ "$@"</pre>
+<p>The <code><i>appname</i>/</code> directory, or alternatively a file bundle called <code><i>appname</i>.asar</code>, can be found in a prebuilt electron application as the <code>resources/app/</code> folder (or <code>resources/app.asar</code>). Everything else is just a copy of the electron runtime and can be removed from the final package.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Applications that require <code>ELECTRON_RUN_AS_NODE=1</code>, e.g. <a href="#pg761d4119d014">Visual Studio Code</a>, cannot use <code>/usr/bin/electron*</code>. See <a href="https://gitlab.archlinux.org/archlinux/packaging/packages/code">code.sh</a>.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg30216a466efc_Editing_version_on_package_json" id="Editing_version_on_package.json">Editing version on package.json</h3></div>
+<p>It is dangerous to edit version of Electron in <code>package.json</code> or <code>package-lock.json</code> using <code>sed</code>. You can use <code>npm pkg set devDependencies.electron=$(cat /usr/lib/electron*/version)</code> instead.
+</p>
+
+<p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg30216a466efc_Building_compiled_extensions_against_the" id="Building_compiled_extensions_against_the_system_electron">Building compiled extensions against the system electron</h3></div>
+<p>Some electron applications have compiled native extensions which link to the electron runtime, and must be built using the correct electron version. Since npm/yarn will always build against a private prebuilt copy of electron, patch the electron dependency from <code>package.json</code> to reference the same version as the system electron dependency. The build system will download the prebuilt copy it requires, compile the native extensions, and package everything into a final distribution, but this can be pruned during the <code>package()</code> step as usual.
+</p><p>Alternatively, you can remove the electron dependency from <code>package.json</code> and set the correct environment variables before running npm:
+</p>
+<pre>export npm_config_target=$(tail /usr/lib/electron/version)
+export npm_config_arch=x64
+export npm_config_target_arch=x64
+export npm_config_disturl=<a href="https://electronjs.org/headers">https://electronjs.org/headers</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2023-10-29 ⓘ]</sup>
+export npm_config_runtime=electron
+export npm_config_build_from_source=true
+HOME="$srcdir/.electron-gyp" npm install
+</pre>
+<p>Set <code>HOME</code> to a path inside the <code>$srcdir</code> so the build process does not place any files in your real <code>HOME</code> directory. Make sure to adjust the path for all further commands that make use of the <code>.electron-gyp</code> cache.
+</p><p>(more details <a href="https://www.electronjs.org/docs/latest/tutorial/using-native-node-modules#using-npm">in Electron docs</a>).
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg30216a466efc_Using_electron_builder_with_system_elect" id="Using_electron-builder_with_system_electron">Using electron-builder with system electron</h3></div>
+<p>Many projects use <b>electron-builder</b> to build and package the Javascript file and Electron binaries. By default electron-builder downloads the entire electron version that is defined in the package management file (e.g. <code>package.json</code>). This might not be desired if you want to use the system electron and save the bandwidth since you are going to throw away the electron binaries anyway. The electron-builder provides the configurations <code>electronDist</code> and <code>electronVersion</code>, to specify a custom path of Electron and the version the application is packaged for respectively.
+</p><p>Find the electron-builder configuration file (e.g. <code>electron-builder.json</code>) and add the following settings:
+</p>
+<ul><li><code>electronDist</code> to　<code>/usr/lib/electron34</code> for <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=electron34">electron34</a></span><sup><small>包</small></sup></span></li>
+<li><code>electronVersion</code> to the contents of <code>/usr/lib/electron34/version</code> (without the leading <code>v</code> if exists)</li></ul>
+<p>Packages that apply this: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rocketchat-desktop/">rocketchat-desktop</a></span><sup><small>AUR</small></sup></span> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ubports-installer-git/">ubports-installer-git</a></span><sup><small>AUR</small></sup></span>
+</p><p><a href="https://www.electron.build/configuration/configuration">electron-builder configuration</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2024-10-12 ⓘ]</sup>
+</p><p>Alternatively you can use the CLI to change/add these settings like this:
+</p>
+<pre>./node_modules/.bin/electron-builder --linux --x64 --dir $dist -c.electronDist=$electronDist -c.electronVersion=$electronVer
+</pre>
+<p>Note that you have to specify all these options or it will not work.
+</p>
+
+<p><br/>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg30216a466efc_Architecture" id="Architecture">Architecture</h2></div>
+<p>See <a href="#pgf9d748a7b27b">PKGBUILD#arch</a>.
+</p><p>An Electron package that contains compiled native extensions is architecture-dependent. Otherwise it is most likely architecture-independent.
+</p><p>If the package contains a prebuilt copy of electron, it is always architecture-dependent.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg30216a466efc_Directory_structure" id="Directory_structure">Directory structure</h2></div>
+<p>If the package is architecture-dependent, install the <code>resources/app/</code> directory to <code>/usr/lib/<i>appname</i>/</code>. Otherwise use <code>/usr/share/<i>appname</i>/</code>.
+</p><p>If the package contains a prebuilt copy of electron, copy the final distribution in its entirety to <code>/opt/<i>appname</i></code>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg30216a466efc_Getting_version_of_Electron" id="Getting_version_of_Electron">Getting version of Electron</h2></div>
+<p>Version of Electron could be given by <code>npm pkg get devDependencies.electron</code> in the directory containing <code>package.json</code> or <code>package-lock.json</code>.
+</p><p>Prebuild or <a href="#pge8e96600d1a5">Nonfree</a> application hides version of electron from <code>package.json</code>, <code>package-lock.json</code>, and <code>version</code> files. In such case, you may get version by replacing <code>app</code> or <code>app.asar</code> with <code>/usr/lib/electron/resources/default_app.asar</code> and running <code><i>pathto/electron-binary</i> --version</code>.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Avoid doing it at PKGBUILD. This should be last resort to make packages with system-wide electron.</div>
+<!-- 
+NewPP limit report
+Cached time: 20260808035616
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.143 seconds
+Real time usage: 0.149 seconds
+Preprocessor visited node count: 520/1000000
+Revision size: 5812/2097152 bytes
+Post‐expand include size: 9477/2097152 bytes
+Template argument size: 2531/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 4/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   43.588      1 -total
+ 13.03%    5.681     40 Template:Ic
+ 12.74%    5.553      2 Template:Accuracy
+  7.68%    3.348      2 Template:Dead_link
+  7.61%    3.317      1 Template:需要翻译
+  7.21%    3.142      1 Template:翻译状态
+  6.77%    2.950      2 Template:Note
+  6.69%    2.916      3 Template:META_Message
+  5.88%    2.562      2 Template:Pkg
+  2.86%    1.245      2 Template:AUR
+-->
+<!-- Render ID 1ac8fc0e-92dd-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8355:|#|:idhash:canonical!zh-cn and timestamp 20260808035616 and revision id 33609. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

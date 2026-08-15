@@ -1,0 +1,45 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg645723d2dfcc">联想 IdeaPad 720s</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><a href="https://www3.lenovo.com/de/de/laptops/ideapad/700-series/Ideapad-720S-13-Intel/p/88IP70S0893#tab-techspec">Lenovo IdeaPad 720s</a>笔记本有一块13.3"的屏幕, 7代或者8代的 Intel i5/i7 处理器, 摄像头, 麦克风, 音频I/O, 带有蓝牙4.1的802.11ac无线网卡, 一个USB Type-C接口 (支持DP,PD和雷电), 一个USB Type-C接口(PD+USB 3.0), 两个USB3接口和指纹识别器。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg645723d2dfcc_.E7.A1.AC.E4.BB.B6.E6.94.AF.E6.8C.81" id="硬件支持"><span id=".E7.A1.AC.E4.BB.B6.E6.94.AF.E6.8C.81"></span>硬件支持</h2></div>
+<p>唯一不支持的硬件是指纹识别器(see remarks for USB ID 06cb:0081 at <a href="https://github.com/nmikhailov/Validity90">Validity90 on GitHub</a>)。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg645723d2dfcc_UEFI_Bios" id="UEFI_Bios">UEFI Bios</h3></div>
+<p>在安装前，在BIO中关闭安全启动。可以通过按右手边的一键恢复按钮或者是在启动过程中按<code>F2</code>来进入BIOS。可以按<code>F12</code>进入BOOT 菜单。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg645723d2dfcc_.E7.94.B5.E6.B1.A0.E4.BF.9D.E6.8A.A4.E6.A8.A1.E5.BC.8F" id="电池保护模式"><span id=".E7.94.B5.E6.B1.A0.E4.BF.9D.E6.8A.A4.E6.A8.A1.E5.BC.8F"></span>电池保护模式</h3></div>
+<p>联想笔记本电脑配备了一个名为“电池保护模式”的电池控制器设置，将通常的负载阈值从95/100%切换到55/60%，以减少电池损耗。要启用此功能，请安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=acpi_call">acpi_call</a></span><sup><small>包</small></sup></span>包。该模式通过以下方式启用：
+</p>
+<pre># echo '\_SB.PCI0.LPCB.EC0.VPC0.SBMC 3' | tee /proc/acpi/call
+</pre>
+<p>通过以下方式禁用：
+</p>
+<pre># echo '\_SB.PCI0.LPCB.EC0.VPC0.SBMC 5' | tee /proc/acpi/call
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260808041346
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.123 seconds
+Real time usage: 0.125 seconds
+Preprocessor visited node count: 33/1000000
+Revision size: 1292/2097152 bytes
+Post‐expand include size: 218/2097152 bytes
+Template argument size: 23/2097152 bytes
+Highest expansion depth: 4/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%    4.821      1 -total
+ 48.12%    2.320      1 Template:Pkg
+ 35.57%    1.715      2 Template:Ic
+-->
+<!-- Render ID 8ca2450e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3386:|#|:idhash:canonical!zh-cn and timestamp 20260808041346 and revision id 33843. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

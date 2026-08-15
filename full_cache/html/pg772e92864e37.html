@@ -1,0 +1,327 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg772e92864e37">多显示器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Multihead">Multihead</a>，最近一次同步于 2020-03-05，若英文版本有所<a href="https://wiki.archlinux.org/title/Multihead?diff=0&amp;oldid=598430">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Multihead_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pga36c0aff60be">Xorg</a></li>
+<li><a href="#pgaa98d1ed067b">xrandr</a></li>
+<li><a href="#pge12579b7d4ac">NVIDIA#Multiple monitors</a></li>
+<li><a href="#pg172970a5f8dd">Nouveau#Dual head</a></li>
+<li><a href="#pgedfe18626036">ATI#Multihead setup</a></li>
+<li><a href="#pgb658a119bdbf">Extreme Multihead</a></li>
+</ul></div>
+<p><b>多头（Multi-head）</b>、<b>多屏（multi-screen）</b>、<b>多显（multi-display）</b>或<b>多监视器（multi-monitor）</b>是指同一台计算机上连接了多个显示设备的配置场景。本文提供多种多头的配置方式，并给出若干设置实例。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>为避免混淆，下列名词在本文中有各自专属的含义：
+<ul><li>监视器（Monitor）:物理显示设备，如液晶平板显示器。</li>
+<li>屏幕（Screen）:窗口屏幕，是已经连接到一个<b>显示区（display）</b>的 <b>监视器（monitor）</b>。</li>
+<li>显示区（Display）: 一组<b>屏幕（screens）</b>，各自同时展示同一桌面的某一部分。用户可以在同一个<b>显示区（display）</b>的所有<b>屏幕（screens）</b>之间拖动窗口。</li></ul>
+</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg772e92864e37_.E5.8E.86.E5.8F.B2.E8.83.8C.E6.99.AF" id="历史背景"><span id=".E5.8E.86.E5.8F.B2.E8.83.8C.E6.99.AF"></span>历史背景</h2></div>
+<p>大多数（甚至是全部）提供图形用户界面的Unix/Linux电脑都使用X窗口系统作为底层图形界面。X窗口系统1984年在麻省理工学院被开发出来。历经35年的开发、调校与新功能、新理念的加入，它的强大得到了公认。应该记得，在开发它的那个时代，常见的配置是一个运行着的X为一个<a href="https://zh.wikipedia.org/wiki/%E5%88%86%E6%99%82%E7%B3%BB%E7%B5%B1">分时系统</a>中的X终端（Xterminal）们提供各自独立的视图。如今的标准情形是X为一台台式机或笔记本提供单一一块屏幕。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>现在仍然有一种罕见的配置，经常被称作<a href="#pg43597bf9b039">Zaphod display</a>。它允许单台电脑的多个用户每人拥有独立的一组显示、鼠标和键盘，就好像每个人使用的电脑是分开的一样，但每个人的平均成本更低。</div>
+<p>以上这些都意味着，要实现同一件事或者满足同一目标，互相之间略有差异的许多件事，有着很多方法。在现代的X版本中，有时候只需要很少量的配置或者不需要配置。最近几年的趋势是X是“自配置”（self configuring）的。当然最好的经验法则是配置越少越好，也就是“只配置出问题的地方”。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg772e92864e37_.E7.8B.AC.E7.AB.8B.E5.B1.8F.E5.B9.95" id="独立屏幕"><span id=".E7.8B.AC.E7.AB.8B.E5.B1.8F.E5.B9.95"></span>独立屏幕</h2></div>
+<p>这是为X配置多监视器的原始方法，已经存在了几十年。每个物理监视器都被指派为一块X屏幕，尽管你可以在它们之间移动鼠标，但它们或多或少都是独立的。
+</p><p>一般来说X显示区有一个类似于<code>:0</code>的标识符，在<code>DISPLAY</code>环境变量中设置。但在这个配置中，每块屏幕都有不同的<code>$DISPLAY</code>值。第一块屏幕是<code>:0.0</code>，第二块是<code>:0.1</code>，依此类推。
+</p><p>这种配置无法实现在屏幕之间移动窗口，除了一些具有多屏幕支持的特殊程序，如GIMP和Emacs。对于大多数程序，需要在启动它们时更改<code>DISPLAY</code>环境变量，使程序出现在另一块屏幕上：
+</p>
+<pre># Launch a terminal on the second screen
+$ DISPLAY=:0.1 urxvt &amp;
+</pre>
+<p>或者如果在每块屏幕上都有一个终端，启动的程序会继承<code>DISPLAY</code>值从而出现在启动它的那块屏幕。但是在屏幕之间移动程序需要关闭它，然后在另一块屏幕上重新打开。
+</p><p>这种工作方式确实有其优点，比如如果你在一块屏幕上工作，另一块屏幕上弹出的窗口不会抢走焦点——每块屏幕都是相当独立的。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg772e92864e37_RandR" id="RandR">RandR</h2></div>
+<p><a href="https://en.wikipedia.org/wiki/RandR">RandR</a>（<b>R</b>otate <b>and</b> <b>R</b>esize，旋转与缩放）是一个<a href="https://zh.wikipedia.org/wiki/X%E8%A6%96%E7%AA%97%E7%B3%BB%E7%B5%B1">X窗口系统</a>扩展，允许客户端动态调整（即缩放、旋转、翻转）屏幕。多数情况下，它可以完全替代旧的Xinerama配置。<a href="https://i3wm.org/docs/multi-monitor.html#_the_explanation">这篇文章</a>说明了为什么RandR优于Xinerama。
+</p><p>RandR可以通过<a href="#pgaa98d1ed067b">xrandr</a>工具为当前会话配置，或者通过<a href="#pga36c0aff60be">xorg.conf</a>文件进行持久设置。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>同一配置有多种方法实现，可能需要进行一些实验才能找到最佳配置。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg772e92864e37_.E7.94.A8_arandr_.E9.85.8D.E7.BD.AE" id="用_arandr_配置"><span id=".E7.94.A8_arandr_.E9.85.8D.E7.BD.AE"></span>用 arandr 配置</h3></div>
+<p>arandr 能够图形化地排列监视器、改变分辨率并保存脚本以存储设置。默认状态下点击“另存为”（Save As）会把脚本保存到 <code>~/.screenlayout/</code>，之后你就可以把这些文件加入到你的 <code>~/.profile</code>。有时候登录之后过早运行 arandr 脚本会引起问题。
+</p><p>编辑 <code>~/.profile</code>
+</p>
+<pre>$ sleep 3
+$ /home/&lt;user&gt;/.screenlayout/myLayout.sh
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg772e92864e37_.E7.94.A8xrandr.E9.85.8D.E7.BD.AE" id="用xrandr配置"><span id=".E7.94.A8xrandr.E9.85.8D.E7.BD.AE"></span>用xrandr配置</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>本节内容假定读者已经阅读过<a href="#pgaa98d1ed067b">xrandr</a>页面，了解了关于<i>xrandr</i>的基本信息。</div>
+<p>你既可以对各块屏幕进行相对排列（使用<code>--right-of</code>, <code>--left-of</code>, <code>--above</code>, <code>--below</code>选项），也可以使用绝对坐标（使用<code>--pos</code>选项； 注意这种情况下你通常需要知道监视器们的分辨率）。详情请参阅<span class="plainlinks archwiki-template-man" title="$ man 1 xrandr"><a href="https://man.archlinux.org/man/xrandr.1">xrandr(1)</a></span>。以下对一些常用设置加以说明。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg772e92864e37_VGA1.E4.BD.8D.E4.BA.8EHDMI1.E5.B7.A6.E4.BE.A7.EF.BC.8C.E5.9D.87.E4.BD.BF.E7.94.A8.E6.9C.80.E4.BD.B3.E5.88.86.E8.BE.A8.E7.8E.87" id="VGA1位于HDMI1左侧，均使用最佳分辨率"><span id="VGA1.E4.BD.8D.E4.BA.8EHDMI1.E5.B7.A6.E4.BE.A7.EF.BC.8C.E5.9D.87.E4.BD.BF.E7.94.A8.E6.9C.80.E4.BD.B3.E5.88.86.E8.BE.A8.E7.8E.87"></span>VGA1位于HDMI1左侧，均使用最佳分辨率</h4></div>
+<pre>$ xrandr --output VGA1 --auto --output HDMI1 --auto --right-of VGA1
+</pre>
+<p><code>--right-of</code>把它前面那块屏幕（<code>HDMI1</code>）置于指定屏幕（<code>VGA1</code>）的右侧。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg772e92864e37_VGA1.E4.BD.8D.E4.BA.8EHDMI1.E5.8F.B3.E4.BE.A7.EF.BC.8C.E5.9D.87.E4.BD.BF.E7.94.A8.E5.9B.BA.E5.AE.9A.E5.88.86.E8.BE.A8.E7.8E.87" id="VGA1位于HDMI1右侧，均使用固定分辨率"><span id="VGA1.E4.BD.8D.E4.BA.8EHDMI1.E5.8F.B3.E4.BE.A7.EF.BC.8C.E5.9D.87.E4.BD.BF.E7.94.A8.E5.9B.BA.E5.AE.9A.E5.88.86.E8.BE.A8.E7.8E.87"></span>VGA1位于HDMI1右侧，均使用固定分辨率</h4></div>
+<pre>$ xrandr --output VGA1 --mode 1024x768 --pos 1920x0 --output HDMI1 --mode 1920x1080 --pos 0x0
+</pre>
+<p>或者
+</p>
+<pre>$ xrandr --output VGA1 --mode 1024x768 --output HDMI1 --mode 1920x1080 --left-of VGA1
+</pre>
+<p><code>--left-of</code>把它前面那块屏幕（<code>HDMI1</code>）置于指定屏幕（<code>VGA1</code>）的右侧。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg772e92864e37_.E5.B0.86.E5.A4.9A.E5.9D.97.E5.B1.8F.E5.B9.95.E7.BB.84.E5.90.88.E4.B8.BA.E4.B8.80.E5.9D.97.E8.99.9A.E6.8B.9F.E6.98.BE.E7.A4.BA.E5.8C.BA" id="将多块屏幕组合为一块虚拟显示区"><span id=".E5.B0.86.E5.A4.9A.E5.9D.97.E5.B1.8F.E5.B9.95.E7.BB.84.E5.90.88.E4.B8.BA.E4.B8.80.E5.9D.97.E8.99.9A.E6.8B.9F.E6.98.BE.E7.A4.BA.E5.8C.BA"></span>将多块屏幕组合为一块虚拟显示区</h4></div>
+<p>从randr 1.5版本开始，将多个监视器组合为一块虚拟显示区成为可能。这是Xinerama相应功能的升级版，能够用于开源驱动且不需要重启Xorg。有些桌面环境尚不支持此功能。<a href="#pg8bc45a0eb197">Openbox</a>经过测试可以支持。
+</p><p>执行<code>xrandr --listmonitors</code>获取监视器列表
+</p>
+<pre>0: +*DisplayPort-4 1920/518x1200/324+1920+0  DisplayPort-4
+1: +DisplayPort-3 1920/518x1200/324+0+0  DisplayPort-3
+2: +HDMI-A-0 1920/518x1200/324+3840+0  HDMI-A-0
+</pre>
+<p>创建虚拟显示区<code>xrandr --setmonitor SomeName auto DisplayPort-4,DisplayPort-3,HDMI-A-0</code>。<code>auto</code>指定了虚拟显示区的尺寸，设定为auto会自动建立显示阵列的正确尺寸。该命令中监视器的顺序不起作用，在执行该命令之前或之后需要重新正确排列监视器。 
+</p><p>更详细的解释见<a href="http://www.straightrunning.com/tools/xrandr.html#sect3">此页</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg772e92864e37_.E7.94.A8xorg.conf.E9.85.8D.E7.BD.AE" id="用xorg.conf配置"><span id=".E7.94.A8xorg.conf.E9.85.8D.E7.BD.AE"></span>用xorg.conf配置</h3></div>
+<p>此方法与使用<i>xrandr</i>类似，每块屏幕都需要各自独立的<code>Monitor</code>节。标识符（<code>Identifier</code>）使用的值与<code>xrandr -q</code>所报告的相同（例如，使用<code>Identifier "VGA1"</code>而不是<code>--output VGA1</code>）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg772e92864e37_.E4.BE.8B.EF.BC.9A.E4.BD.BF.E7.94.A8.E7.9B.B8.E5.AF.B9.E5.9D.90.E6.A0.87.E7.9A.84.E5.8F.8C.E5.B1.8F.E9.85.8D.E7.BD.AE" id="例：使用相对坐标的双屏配置"><span id=".E4.BE.8B.EF.BC.9A.E4.BD.BF.E7.94.A8.E7.9B.B8.E5.AF.B9.E5.9D.90.E6.A0.87.E7.9A.84.E5.8F.8C.E5.B1.8F.E9.85.8D.E7.BD.AE"></span>例：使用相对坐标的双屏配置</h4></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/10-monitor.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Monitor"
+    Identifier  "VGA1"
+    Option      "Primary" "true"
+EndSection
+
+Section "Monitor"
+    Identifier  "HDMI1"
+    Option      "LeftOf" "VGA1"
+EndSection
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg772e92864e37_.E4.BE.8B.EF.BC.9A.E4.BD.BF.E7.94.A8.E7.9B.B8.E5.AF.B9.E5.9D.90.E6.A0.87.E4.BB.A5.E5.8F.8A.E8.87.AA.E5.AE.9A.E4.B9.89.E5.88.86.E8.BE.A8.E7.8E.87.E7.9A.84.E5.8F.8C.E5.B1.8F.E9.85.8D.E7.BD.AE" id="例：使用相对坐标以及自定义分辨率的双屏配置"><span id=".E4.BE.8B.EF.BC.9A.E4.BD.BF.E7.94.A8.E7.9B.B8.E5.AF.B9.E5.9D.90.E6.A0.87.E4.BB.A5.E5.8F.8A.E8.87.AA.E5.AE.9A.E4.B9.89.E5.88.86.E8.BE.A8.E7.8E.87.E7.9A.84.E5.8F.8C.E5.B1.8F.E9.85.8D.E7.BD.AE"></span>例：使用相对坐标以及自定义分辨率的双屏配置</h4></div>
+<p>可以通过运行<code>$ xrandr -q</code>命令查询到各个监视器的ID。应当在<code>Device</code>中按照<code>Monitor-&lt;ID&gt;</code>的格式指明监视器的ID。
+</p><p>见<a href="#pgaa98d1ed067b">Xrandr#添加未检测到的分辨率</a>。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/10-monitor.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Monitor"
+  Identifier "DVI"
+  Modeline "1680x1050_60.00"  146.25  1680 1784 1960 2240  1050 1053 1059 1089 -hsync +vsync
+  Option "PreferredMode" "1680x1050_60.00"
+  Option "LeftOf" "DP"
+  Option "DPMS" "true"
+EndSection
+
+Section "Monitor"
+  Identifier "DP"
+  Modeline "1920x1080_60.00"  173.00  1920 2048 2248 2576  1080 1083 1088 1120 -hsync +vsync
+  Option "PreferredMode" "1920x1080_60.00"
+  Option "RightOf" "DVI"
+  Option "DPMS" "true"
+EndSection
+
+Section "Screen"
+  Identifier "Screen0"
+  Device "Radeon" # e.g. Radeon, Intel, nvidia
+  Monitor "DP"
+  DefaultDepth 24
+  SubSection "Display"
+    Depth 24
+    Virtual 3600 2130 # 1920 + 1680 (3600), 1080 + 1050 (2130)
+  EndSubSection
+EndSection
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-radeon.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Device"
+  Identifier "Radeon"
+  Driver "radeon"
+  Option "Monitor-DVI-0" "DVI" # use DVI-0 as DVI
+  Option "Monitor-DisplayPort-0" "DP"
+EndSection
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg772e92864e37_.E4.BE.8B.EF.BC.9A.E4.BD.BF.E7.94.A8.E7.BB.9D.E5.AF.B9.E5.9D.90.E6.A0.87.E7.9A.84.E5.8F.8C.E5.B1.8F.E9.85.8D.E7.BD.AE" id="例：使用绝对坐标的双屏配置"><span id=".E4.BE.8B.EF.BC.9A.E4.BD.BF.E7.94.A8.E7.BB.9D.E5.AF.B9.E5.9D.90.E6.A0.87.E7.9A.84.E5.8F.8C.E5.B1.8F.E9.85.8D.E7.BD.AE"></span>例：使用绝对坐标的双屏配置</h4></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/10-monitor.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Monitor"
+    Identifier  "VGA1"
+    Option      "PreferredMode" "1024x768"
+    Option      "Position" "1920 312"
+EndSection
+
+Section "Monitor"
+    Identifier  "HDMI1"
+    Option      "PreferredMode" "1920x1080"
+    Option      "Position" "0 0"
+EndSection
+</pre>
+<p>此例中不使用相对坐标，整个设置中能够被定位到的最左上角在0,0点。
+</p>
+<pre>(0,0)-----------------+ 
+|                     |(1920,312)---+
+|     1920 x 1080     ||            |
+|        HDMI1        || 1024 x 768 |
+|                     ||    VGA1    |
++---------------------++------------+
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg772e92864e37_TwinView" id="TwinView">TwinView</h2></div>
+<p>TwinView是nVidia的扩展，可以让系统把一块显卡上连接的两台监视器看做单块屏幕。TwinView提供Xinerama扩展，这样应用程序会知道连接了两台监视器，因此它与Xinerama不兼容。不过如果你有两台连接到同一块nVidia显卡的监视器，TwinView和Xinerama几乎没有差别（尽管这种情况下TwinView可能会提供稍好一些的性能。）
+</p><p>对于两台以上监视器或者监视器接在不同显卡上的情况，需要使用Xinerama而不是TwinView。同样，截至2012年4月，两台监视器的方向必须相同，不能一台水平显示，另一台垂直显示。
+</p><p>以前，要想在能够在屏幕之间拖动窗口的同时获得nVidia显卡的OpenGL加速，TwinView是唯一的办法。不过现在新版本的nVidia闭源驱动即使在使用Xinerama的情况下也能够提供OpenGL加速。
+</p><p>配置示例见<a href="#pge12579b7d4ac">NVIDIA#TwinView</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg772e92864e37_Xinerama" id="Xinerama">Xinerama</h2></div>
+<p><a href="https://en.wikipedia.org/wiki/Xinerama">Xinerama</a>是实现真正多屏X的旧方式。Xinerama将所有监视器组合为单块屏幕（<code>:0</code>），从而可以做到在屏幕之间拖动窗口。
+</p><p>Xinerama通过自定义的<a href="#pga36c0aff60be">X配置文件</a>进行配置。也有一款叫<a href="https://openapplibrary.org/project/wideguy">WideGuy</a>的图形化工具可以使得切换Xinerama更容易。注意，要使用WideGuy，你仍然需要包含一个ServerLayout节的Xorg配置。
+</p><p>以下是一些例子：
+</p><p>这是ServerLayout节，用于控制各监视器相互之间的位置关系：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/90-serverlayout.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "ServerLayout"
+  Identifier   "Main"
+  Screen       0 "Primary"
+  Screen       1 "DellPortraitLeft" RightOf "Primary"
+  Screen       2 "Wacom" RightOf "DellPortraitLeft"
+  Screen       3 "U2412" LeftOf "Primary"
+  Option         "Xinerama" "1"  # enable XINERAMA extension.  Default is disabled.
+EndSection
+</pre>
+<p>上面这一节中的每块屏幕都在一个单独的文件里定义，比如下面这个：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/30-screen-dell2001.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Define the monitor's physical specs
+Section "Monitor"
+  Identifier   "Dell 2001FP"
+  VertRefresh  60
+  Option  "dpms"  "on"
+
+  # Modelines are probably unnecessary these days, but it does give you fine grained control
+
+  # 1600x1200 @ 60.00 Hz (GTF) hsync: 74.52 kHz; pclk: 160.96 MHz
+  Modeline "1600x1200"  160.96  1600 1704 1880 2160  1200 1201 1204 1242  -HSync +Vsync
+EndSection
+
+# Define a screen that uses the above monitor.  Note the Monitor value matches the above
+# Identifier value, and the Device value matches one of the video cards defined below
+# (the card and connector this monitor is actually plugged in to.)
+Section "Screen"
+  Identifier   "DellPortraitLeft"
+  Device       "GeForce 8600GTb"
+  Monitor      "Dell 2001FP"
+  DefaultDepth 24
+  SubSection "Display"
+    Depth     24
+    Modes     "1600x1200"
+    ViewPort  0 0
+    Virtual   1600 1200
+  EndSubsection
+
+  # This screen is in portrait mode
+  Option "Rotate" "left"
+EndSection
+</pre>
+<p>对于每个<b>监视器</b>都需要创建一个<code>Device</code>节，如一块接了两台监视器的显卡应当有两个Device节。下面的例子展示了两块显卡，每块两路输出，总共四台监视器的情况该如何配置。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-nvidia.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># First head of first video card in the system
+Section "Device"
+  Identifier  "GeForce 8600GT"
+  Driver      "nvidia"
+
+  # If you have multiple video cards, the BusID controls which one this definition refers
+  # to.  You can omit it if you only have one card.
+  BusID       "PCI:1:0:0"
+
+  # Need to flag this as only referring to one output on the card
+  Screen      0
+
+  # For nVidia devices, this controls which connector the monitor is connected to.
+  Option      "UseDisplayDevice"   "DFP-0"
+
+  # We want control!
+  Option      "DynamicTwinView"    "FALSE"
+
+  # Various performance and configuration options
+  Option      "AddARGBGLXVisuals"  "true"
+  Option      "UseEDIDDpi"         "false"
+  Option      "DPI"                "96 x 96"
+  Option      "Coolbits"           "1"
+EndSection
+
+# Second head of same video card (note different Identifier but same BusID.)  We can omit
+# the UseDisplayDevice option this time as it will pick whichever one is remaining.
+Section "Device"
+  Identifier  "GeForce 8600GTb"
+  Driver      "nvidia"
+  BusID       "PCI:1:0:0"
+  # This is the second output on this card
+  Screen      1
+
+  # Same config options for all cards
+  Option      "AddARGBGLXVisuals"  "true"
+  Option      "UseEDIDDpi"         "false"
+  Option      "DPI"                "96 x 96"
+  Option      "Coolbits"           "1"
+  Option      "DynamicTwinView"    "FALSE"
+EndSection
+
+# First head of second video card, note different BusID.
+Section "Device"
+  Identifier  "G210"
+  Driver      "nvidia"
+  BusID       "PCI:2:0:0"
+  Screen      0
+
+  # Same config options for all cards
+  Option      "AddARGBGLXVisuals"  "true"
+  Option      "UseEDIDDpi"         "false"
+  Option      "DPI"                "96 x 96"
+  Option      "Coolbits"           "1"
+  Option      "DynamicTwinView"    "FALSE"
+EndSection
+
+# Second head of second video card.  Output connector is set here, which means the previous
+# Device will use the other connector, whatever it may be.
+Section "Device"
+  Identifier  "G210b"
+  Driver      "nvidia"
+  BusID       "PCI:2:0:0"
+  Screen      1
+  Option      "UseDisplayDevice"   "DFP-1"
+
+  # Same config options for all cards
+  Option      "AddARGBGLXVisuals"  "true"
+  Option      "UseEDIDDpi"         "false"
+  Option      "DPI"                "96 x 96"
+  Option      "Coolbits"           "1"
+  Option      "DynamicTwinView"    "FALSE"
+EndSection
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg772e92864e37_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://bbs.archlinux.org/viewtopic.php?pid=652861">论坛帖子：如何使用Nouveau驱动实现双监视器</a></li>
+<li><a href="https://linuxgazette.net/124/smith.html">六显示器，六用户Linux系统</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807115812
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.130 seconds
+Real time usage: 0.135 seconds
+Preprocessor visited node count: 495/1000000
+Revision size: 15009/2097152 bytes
+Post‐expand include size: 9995/2097152 bytes
+Template argument size: 6712/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 216/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   34.861      1 -total
+ 14.04%    4.894     34 Template:Ic
+ 10.38%    3.618      1 Template:翻译状态
+  7.15%    2.492      6 Template:Related
+  6.25%    2.178      7 Template:Hc
+  6.09%    2.124      1 Template:相关文章开始
+  5.07%    1.769      1 Template:Man
+  3.59%    1.253      4 Template:注意
+  3.00%    1.047      1 Template:Bc
+  2.59%    0.902      1 Template:相关文章结束
+-->
+<!-- Render ID 43a6ae0e-9257-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3538:|#|:idhash:canonical!zh-cn and timestamp 20260807115812 and revision id 33743. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

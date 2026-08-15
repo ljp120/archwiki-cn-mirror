@@ -1,0 +1,162 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg712e4adaddad">桌面环境</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Desktop_environment">Desktop environment</a>，最近一次同步于 2023-10-25，若英文版本有所<a href="https://wiki.archlinux.org/title/Desktop_environment?diff=0&amp;oldid=788837">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Desktop_environment_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg64b90dac30d4">桌面环境比较</a></li>
+<li><a href="#pgd59c5ac63c4e">Category:Freedesktop.org</a></li>
+</ul></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E6%A1%8C%E9%9D%A2%E7%8E%AF%E5%A2%83">桌面环境</a>（DE）是<a href="https://zh.wikipedia.org/wiki/%E6%A1%8C%E9%9D%A2%E6%AF%94%E6%93%AC">桌面比拟</a>的一个实现，由一捆程序组成，它们共享一个共同的图形用户界面（GUI）。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg712e4adaddad_.E6.A6.82.E5.86.B5" id="概况"><span id=".E6.A6.82.E5.86.B5"></span>概况</h2></div>
+<p>桌面环境将各种组件捆绑在一起，以提供常见的图形用户界面元素，如图标、工具栏、壁纸和桌面小部件。此外，大多数桌面环境包括一套集成的应用程序和实用程序。最重要的是，桌面环境提供了他们自己的<a href="#pg3d6d7c1e6c7c">窗口管理器</a>，然而通常可以用另一个兼容的窗口管理器来代替。
+</p><p>用户可以自由地以任何方式配置他们的GUI环境。桌面环境只是提供了一个完成这一任务的完整而方便的手段。请注意，用户可以自由地混合和匹配来自多个桌面环境的应用程序。例如，一个 <a href="#pg5b70e23b1711">KDE</a> 用户可以安装和运行 <a href="#pg1e095fe2c2a6">GNOME</a> 应用程序，如 <a href="#pg74bd30a6e35b">Epiphany</a> 网络浏览器，如果他们喜欢它而不是 KDE 的 Konqueror 网络浏览器。这种方法的一个缺点是，许多由桌面环境项目提供的应用程序在很大程度上依赖于各自桌面环境的基础库。因此，从一系列的桌面环境中安装应用程序将需要安装更多的依赖项。寻求节约磁盘空间的用户通常会避免这种混合环境，或者选择只依赖少数外部库的替代品。
+</p><p>此外，由桌面环境提供的应用程序往往能更好地与他们的本地环境整合。从表面上看，使用不同部件工具包的混合环境会导致视觉上的差异（也就是说，界面会使用不同的图标和部件样式）。在可用性方面，混合环境的行为可能并不相似（例如，单击与双击图标；拖放功能），因此可能会造成混乱或意外的行为。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg712e4adaddad_.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83.E5.88.97.E8.A1.A8" id="桌面环境列表"><span id=".E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83.E5.88.97.E8.A1.A8"></span>桌面环境列表</h2></div>
+
+<div class="mw-heading mw-heading3"><h3 data-bm="pg712e4adaddad_.E5.AE.98.E6.96.B9.E6.94.AF.E6.8C.81" id="官方支持"><span id=".E5.AE.98.E6.96.B9.E6.94.AF.E6.8C.81"></span>官方支持</h3></div>
+<ul><li><b><a href="#pgba22a39bd184">Budgie</a></b> — Budgie 是一款专为现代用户设计的桌面环境，它专注于简单和优雅。</li></ul>
+<dl><dd><a href="https://blog.buddiesofbudgie.org">https://blog.buddiesofbudgie.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/budgie/">budgie</a></span><sup><small>包组</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pg657a71018213"><img class="mw-file-element" decoding="async" height="502" src="https://wiki.archlinuxcn.org/wzh/images/thumb/1/1d/Budgie-Preview.webp/800px-Budgie-Preview.webp.png" srcset="/wzh/images/1/1d/Budgie-Preview.webp 2x" width="800"/></a><figcaption>Budgie桌面环境预览，版本10.9.2</figcaption></figure>
+<ul><li><b><a href="#pgab6cec04e250">Cinnamon</a></b> — Cinnamon 致力于提供传统的用户体验。Cinnamon 是一个 fork GNOME 3 的项目。</li></ul>
+<dl><dd><a href="https://github.com/linuxmint/Cinnamon">https://github.com/linuxmint/Cinnamon</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cinnamon">cinnamon</a></span><sup><small>包</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pg61161c458d62"><img class="mw-file-element" decoding="async" height="502" src="https://wiki.archlinuxcn.org/wzh/images/thumb/5/5b/Cinnamon-Preview.webp/800px-Cinnamon-Preview.webp.png" srcset="/wzh/images/5/5b/Cinnamon-Preview.webp 2x" width="800"/></a><figcaption>Cinnamon桌面环境预览，版本6.2.2</figcaption></figure>
+<ul><li><b><a href="#pg4acce7882bf2">Cutefish</a></b> — Cutefish 是一个全新的现代桌面环境。</li></ul>
+<dl><dd><a href="https://cutefish-ubuntu.github.io">https://cutefish-ubuntu.github.io</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/cutefish/">cutefish</a></span><sup><small>包组</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pga0476ee842d8"><img class="mw-file-element" decoding="async" height="492" src="https://wiki.archlinuxcn.org/wzh/images/thumb/7/7d/Cutefish-Preview.webp/800px-Cutefish-Preview.webp.png" srcset="/wzh/images/7/7d/Cutefish-Preview.webp 2x" width="800"/></a><figcaption>Cutefish桌面环境预览，版本0.8</figcaption></figure>
+<ul><li><b><a href="#pgf5b636120775">COSMIC</a></b> — COSMIC 是由 System76 使用 <a href="#pg802f2550cda0">Rust</a> 为 Pop! OS 开发的桌面环境，灵感来自于定制版的 GNOME。仍处于 beta 状态。</li></ul>
+<dl><dd><a href="https://github.com/pop-os/cosmic-epoch">https://github.com/pop-os/cosmic-epoch</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/cosmic/">cosmic</a></span><sup><small>包组</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg550eb4ccbb57">Deepin</a></b> — Deepin 桌面界面和应用程序功能的设计直观且优雅。四处移动、共享和搜索等成为简单、愉悦的体验。</li></ul>
+<dl><dd><a href="https://www.deepin.org/">https://www.deepin.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/deepin/">deepin</a></span><sup><small>包组</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pgf004810e058a"><img class="mw-file-element" decoding="async" height="504" src="https://wiki.archlinuxcn.org/wzh/images/thumb/4/42/Deepin-Preview.webp/800px-Deepin-Preview.webp.png" srcset="/wzh/images/4/42/Deepin-Preview.webp 2x" width="800"/></a><figcaption>Deepin桌面环境预览，版本未知</figcaption></figure>
+<ul><li><b><a href="#pg6a5c0b105f61">Enlightenment</a></b> — Enlightenment desktop shell 基于 Enlightenment Foundation Libraries提供了高效的窗口管理器以及其他基本桌面组件，如文件管理器、桌面图标和小部件。它支持主题，并能够在较旧的硬件和嵌入式设备上运行。</li></ul>
+<dl><dd><a href="https://www.enlightenment.org/">https://www.enlightenment.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=enlightenment">enlightenment</a></span><sup><small>包</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pgac215b0466b0"><img class="mw-file-element" decoding="async" height="506" src="https://wiki.archlinuxcn.org/wzh/images/thumb/a/a7/Enlightenment-Preview.webp/800px-Enlightenment-Preview.webp.png" srcset="/wzh/images/a/a7/Enlightenment-Preview.webp 2x" width="800"/></a><figcaption>Enlightenment桌面环境预览，版本未知</figcaption></figure>
+<ul><li><b><a href="#pg1e095fe2c2a6">GNOME</a></b> — GNOME 桌面环境是一个具有现代（“GNOME”）和经典（“GNOME Classic”）会话的迷人而直观的桌面。</li></ul>
+<dl><dd><a href="https://www.gnome.org/">https://www.gnome.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/gnome/">gnome</a></span><sup><small>包组</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pgc1a2c4c311c0"><img class="mw-file-element" decoding="async" height="501" src="https://wiki.archlinuxcn.org/wzh/images/thumb/b/b8/GNOME-Preview.webp/800px-GNOME-Preview.webp.png" srcset="/wzh/images/b/b8/GNOME-Preview.webp 2x" width="800"/></a><figcaption>GNOME桌面环境预览，版本46</figcaption></figure>
+<ul><li><b><a href="#pgd52bac244772">GNOME Flashback</a></b> — GNOME Flashback 是 GNOME 3 的一个 shell，最初称为 GNOME 后备模式。桌面布局和底层技术与 GNOME 2 类似。</li></ul>
+<dl><dd><a href="https://wiki.gnome.org/Projects/GnomeFlashback">https://wiki.gnome.org/Projects/GnomeFlashback</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-flashback">gnome-flashback</a></span><sup><small>包</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pg83130893464e"><img class="mw-file-element" decoding="async" height="500" src="https://wiki.archlinuxcn.org/wzh/images/thumb/e/e3/GNOME-Flashback-Preview.webp/800px-GNOME-Flashback-Preview.webp.png" srcset="/wzh/images/e/e3/GNOME-Flashback-Preview.webp 2x" width="800"/></a><figcaption>GNOME-Flashback桌面环境预览，版本未知</figcaption></figure>
+<ul><li><b><a href="#pg5b70e23b1711">KDE Plasma</a></b> — KDE Plasma 桌面环境是一个熟悉的工作环境。Plasma 提供了现代桌面计算体验所需的所有工具，因此可以从一开始就提高生产力。</li></ul>
+<dl><dd><a href="https://www.kde.org/plasma-desktop">https://www.kde.org/plasma-desktop</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/plasma/">plasma</a></span><sup><small>包组</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pgbb2df20d247b"><img class="mw-file-element" decoding="async" height="502" src="https://wiki.archlinuxcn.org/wzh/images/thumb/b/b4/KDE-Preview.webp/800px-KDE-Preview.webp.png" srcset="/wzh/images/b/b4/KDE-Preview.webp 2x" width="800"/></a><figcaption>KDE桌面环境预览，版本6.1.2</figcaption></figure>
+<ul><li><b><a href="#pg9ecdb3d7e45b">LXDE</a></b> — 轻量级 X11 桌面环境是一个快速且节能的桌面环境。它配备了现代界面、多语言支持、标准键盘快捷键和附加功能，如标签式文件浏览。以轻量级为基本设计，其努力比其他环境更少地占用 CPU 和内存。</li></ul>
+<dl><dd><a href="https://lxde.org/">https://lxde.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/lxde/">lxde</a></span><sup><small>包组</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pg858c2ea8b6b2"><img class="mw-file-element" decoding="async" height="502" src="https://wiki.archlinuxcn.org/wzh/images/thumb/5/56/LXDE%E6%A1%8C%E9%9D%A2%E7%8E%AF%E5%A2%83%E9%A2%84%E8%A7%88.webp/800px-LXDE%E6%A1%8C%E9%9D%A2%E7%8E%AF%E5%A2%83%E9%A2%84%E8%A7%88.webp.png" srcset="/wzh/images/5/56/LXDE%E6%A1%8C%E9%9D%A2%E7%8E%AF%E5%A2%83%E9%A2%84%E8%A7%88.webp 2x" width="800"/></a><figcaption>LXDE桌面环境预览，版本未知。GTK3版本界面与该图片类似</figcaption></figure>
+<ul><li><b><a href="#pge82b8c855868">LXQt</a></b> — LXQt 是轻量级桌面环境 LXDE 的 Qt 移植，也是其下一代产品。它是 LXDE-Qt 和 Razor-qt 项目之间合并的产品：一个轻量级、模块化、速度极快且用户友好的桌面环境。</li></ul>
+<dl><dd><a href="https://lxqt.github.io/">https://lxqt.github.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/lxqt/">lxqt</a></span><sup><small>包组</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pg387b3d0180dd"><img class="mw-file-element" decoding="async" height="502" src="https://wiki.archlinuxcn.org/wzh/images/thumb/a/a6/LXQt-Preview.webp/800px-LXQt-Preview.webp.png" srcset="/wzh/images/a/a6/LXQt-Preview.webp 2x" width="800"/></a><figcaption>LXQt桌面环境预览，版本2.0</figcaption></figure>
+<ul><li><b><a href="#pg374a7df9dfd3">MATE</a></b> — Mate 为使用传统隐喻的 Linux 用户提供了一个直观而有吸引力的桌面。MATE 最初是一个 fork GNOME 2 的项目，但现在使用 GTK 3。</li></ul>
+<dl><dd><a href="https://mate-desktop.org/">https://mate-desktop.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/mate/">mate</a></span><sup><small>包组</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pg99f023c5eddb"><img class="mw-file-element" decoding="async" height="450" src="https://wiki.archlinuxcn.org/wzh/images/thumb/b/b6/Mate-Preview.webp/800px-Mate-Preview.webp.png" srcset="/wzh/images/thumb/b/b6/Mate-Preview.webp/1600px-Mate-Preview.webp.png 2x" width="800"/></a><figcaption>Mate桌面环境预览，版本1.28.2</figcaption></figure>
+<ul><li><b><a href="#pgac28063645e3">Pantheon</a></b> — Pantheon 是为 elementary OS 开发的默认桌面环境。 它使用 Vala 和 GTK3 工具开发。在可用性和外观方面，该桌面环境与 GNOME Shell 和 macOS 有诸多相似之处</li></ul>
+<dl><dd><a href="https://elementary.io/">https://elementary.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/pantheon/">pantheon</a></span><sup><small>包组</small></sup></span></dd></dl>
+<ul><li><b>Phosh</b> — Phosh 是一个基于 GNOME 的 <a href="#pga21a6be8b605">Wayland</a> shell 的用户界面，适用于移动设备。</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/World/Phosh/phosh">https://gitlab.gnome.org/World/Phosh/phosh</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=phosh">phosh</a></span><sup><small>包</small></sup></span></dd></dl>
+<figure class="mw-default-size mw-halign-center" typeof="mw:File/Thumb"><a href="#pgf0e9a12735ab"><img class="mw-file-element" decoding="async" height="487" src="https://wiki.archlinuxcn.org/wzh/images/thumb/4/43/Phosh-Preview.webp/250px-Phosh-Preview.webp.png" srcset="/wzh/images/thumb/4/43/Phosh-Preview.webp/500px-Phosh-Preview.webp.png 2x" width="250"/></a><figcaption>Phosh桌面环境预览，版本未知</figcaption></figure>
+<ul><li><b><a href="#pgbc1b31338079">Sugar</a></b> — Sugar 学习平台是一个由活动组成的计算机环境，旨在帮助 5 至 12 岁的儿童通过富媒体表达方式共同学习。Sugar 是全球努力为每个儿童提供优质教育机会的核心组成部分——目前全世界有近 100 万儿童在使用它，他们分布在 40 多个国家，使用 25 种语言。Sugar 提供了帮助人们通过获得素质教育过上充实生活的手段，而目前有很多人错过了这种教育。</li></ul>
+<dl><dd><a href="https://sugarlabs.org/">https://sugarlabs.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sugar">sugar</a></span><sup><small>包</small></sup></span> + <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/sugar-fructose/">sugar-fructose</a></span><sup><small>包组</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pg4eff8276245e"><img class="mw-file-element" decoding="async" height="499" src="https://wiki.archlinuxcn.org/wzh/images/thumb/c/cb/Sugar-Preview.png/800px-Sugar-Preview.png" srcset="/wzh/images/c/cb/Sugar-Preview.png 2x" width="800"/></a><figcaption>Sugar桌面环境预览，版本未知</figcaption></figure>
+<ul><li><b>UKUI</b> — UKUI 是一款轻量级的 Linux 桌面环境，基于 GTK 和 Qt 进行开发。UKUI 是优麒麟默认的桌面环境。</li></ul>
+<dl><dd><a href="https://www.ukui.org/">https://www.ukui.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/ukui/">ukui</a></span><sup><small>包组</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pg6a7de26e8cfa"><img class="mw-file-element" decoding="async" height="499" src="https://wiki.archlinuxcn.org/wzh/images/thumb/7/77/UKUI-Preview.webp/800px-UKUI-Preview.webp.png" srcset="/wzh/images/7/77/UKUI-Preview.webp 2x" width="800"/></a><figcaption>UKUI桌面环境预览，版本10</figcaption></figure>
+<ul><li><b><a href="#pg361394ab1daf">Xfce</a></b> — Xfce 体现了传统的 <a href="https://zh.wikipedia.org/wiki/Unix%E5%93%B2%E5%AD%A6">UNIX 哲学</a>的模块化和可重复使用性。它由一些组件组成，提供了人们对现代桌面环境所期望的全部功能，同时保持了相对的轻便。它们被分别打包，可以在可用的包中挑选，以创建最佳的个人工作环境。</li></ul>
+<dl><dd><a href="https://xfce.org/">https://xfce.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/xfce4/">xfce4</a></span><sup><small>包组</small></sup></span></dd></dl>
+<figure class="mw-halign-center" typeof="mw:File/Thumb"><a href="#pg75b615662b41"><img class="mw-file-element" decoding="async" height="500" src="https://wiki.archlinuxcn.org/wzh/images/thumb/1/10/Xfce-Preview.webp/800px-Xfce-Preview.webp.png" srcset="/wzh/images/1/10/Xfce-Preview.webp 2x" width="800"/></a><figcaption>Xfce桌面环境预览，版本4.18</figcaption></figure>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg712e4adaddad_.E9.9D.9E.E5.AE.98.E6.96.B9.E6.94.AF.E6.8C.81" id="非官方支持"><span id=".E9.9D.9E.E5.AE.98.E6.96.B9.E6.94.AF.E6.8C.81"></span>非官方支持</h3></div>
+<ul><li><b><a href="#pg4cf657672c25">CDE</a></b> — CDE是 Unix 和 OpenVMS 的桌面环境，基于 Motif 小部件工具包。它是 UNIX98 工作站产品标准的一部分，长期以来一直是与商业 Unix 工作站相关的“经典”Unix 桌面。尽管它是一个遗留环境，但它仍然通过对 Linux 系统的支持而保持活力。</li></ul>
+<dl><dd><a href="https://sourceforge.net/projects/cdesktopenv/">https://sourceforge.net/projects/cdesktopenv/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cdesktopenv/">cdesktopenv</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgf5b636120775">COSMIC</a></b> — COSMIC 是由 System76 为 Pop! OS 创建的基于 <a href="#pg802f2550cda0">Rust</a> 桌面环境，它受到高度定制的 GNOME 的启发。还未正式发布，可能体验不佳。</li></ul>
+<dl><dd><a href="https://github.com/pop-os/cosmic-epoch">https://github.com/pop-os/cosmic-epoch</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cosmic-epoch-git/">cosmic-epoch-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg13ba69a37faf">EDE</a></b> — “ Equinox 桌面环境”是一个设计简单、重量极轻、速度极快的桌面环境。</li></ul>
+<dl><dd><a href="https://edeproject.org/">https://edeproject.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ede/">ede</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>KDE 1</b> — “前向移植”以在现代系统上工作，主要是为了怀旧，现在移植工作确实有效，可以用作日常桌面使用。在 AUR 中也有越来越多的 KDE1 应用程序。</li></ul>
+<dl><dd><a href="https://invent.kde.org/historical/kde1-kdebase">https://invent.kde.org/historical/kde1-kdebase</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/kde1-kdebase-git/">kde1-kdebase-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg45eb5b18d181">Liri</a></b> — Liri 是一个具有现代设计和功能的桌面环境， Liri是基于 <a href="https://github.com/hawaii-desktop">Hawaii</a>, <a href="https://github.com/papyros">Papyros</a> 和 <a href="https://github.com/liri-project">Liri Project</a>功能的合并，具备高度的实验性.</li></ul>
+<dl><dd><a href="https://liri.io/">https://liri.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/liri-shell-git/">liri-shell-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Lumina</b> — Lumina 是一个用 Qt 5 为FreeBSD编写的轻量级桌面环境，使用 Fluxbox 作为窗口管理器。</li></ul>
+<dl><dd><a href="https://lumina-desktop.org/">https://lumina-desktop.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lumina-desktop/">lumina-desktop</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Maui Shell</b> — Maui Shell是一个融合桌面、平板和移动设备的shell环境。</li></ul>
+<dl><dd><a href="https://github.com/Nitrux/maui-shell">https://github.com/Nitrux/maui-shell</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/maui-shell-git/">maui-shell-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pga67fcdafddcc">Moksha</a></b> — Enlightenment的桌面分支，目前用作基于 Ubuntu 的 Bodhi Linux 的默认桌面环境。</li></ul>
+<dl><dd><a href="https://www.bodhilinux.com/moksha-desktop/">https://www.bodhilinux.com/moksha-desktop/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/moksha-git/">moksha-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgac28063645e3">Pantheon</a></b> — Pantheon 最初为基本操作系统发行版创建的默认桌面环境，它是使用 Vala 和 GTK3 工具包从头开始编写的，就可用性和外观而言，Pantheon与 GNOME Shell 和 macOS 有一些相似之处。</li></ul>
+<dl><dd><a href="https://elementary.io/">https://elementary.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pantheon-session-git/">pantheon-session-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>PaperDE</b> — PaperDE 桌面环境基于 Qt/Wayland 和 wayfire构建.</li></ul>
+<dl><dd><a href="https://gitlab.com/cubocore/paper/paperde">https://gitlab.com/cubocore/paper/paperde</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/paperde/">paperde</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>plainDE</b> — 一个用 Qt 编写的轻量级 GNU/Linux 桌面环境。目前包含面板和控制中心。</li></ul>
+<dl><dd><a href="https://plainDE.github.io/">https://plainDE.github.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/plainde-meta/">plainde-meta</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Plasma Mobile</b> — Plasma Mobile 是一个基于 KDE Plasma 堆栈和 <a href="#pga21a6be8b605">Wayland</a> 的移动桌面环境.</li></ul>
+<dl><dd><a href="https://invent.kde.org/plasma/plasma-mobile">https://invent.kde.org/plasma/plasma-mobile</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/plasma-mobile/">plasma-mobile</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>theDesk</b> — theDesk一种尽可能透明的桌面环境，它使用 Qt5 作为其小部件工具包，使用 KWin 作为其窗口管理器。</li></ul>
+<dl><dd><a href="https://github.com/vicr123/thedesk">https://github.com/vicr123/thedesk</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/thedesk/">thedesk</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgcf3d215315ed">Trinity</a></b> — Trinity Desktop Environment（TDE）项目是一个适用于类 Unix 操作系统的计算机桌面环境，其主要目标是保留整个 KDE 3.5 计算风格。</li></ul>
+<dl><dd><a href="https://www.trinitydesktop.org/">https://www.trinitydesktop.org/</a> || See <a href="#pgcf3d215315ed">Trinity</a></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg712e4adaddad_.E8.87.AA.E5.B7.B1.E6.89.93.E9.80.A0.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83" id="自己打造桌面环境"><span id=".E8.87.AA.E5.B7.B1.E6.89.93.E9.80.A0.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83"></span>自己打造桌面环境</h2></div>
+<p>桌面环境代表了安装<i>完整</i>图形环境的最简单方法。然而，如果主流桌面环境都不能满足用户的要求，那么用户也可以自由地构建和定制自己的图形环境。一般来说，构建一个自定义环境需要选择一个合适的<a href="#pg3d6d7c1e6c7c">窗口管理器</a>或<a href="#pga21a6be8b605">混成器</a>，一个<a href="#pge780319168a8">任务栏</a>和一些应用程序（一个最小的方案通常包括<a href="#pga96df2a9d88c">终端模拟器</a>，<a href="#pga96df2a9d88c">文件管理器</a>和<a href="#pg599416668e92">文本编辑器</a>）。
+</p><p>通常由桌面环境提供的其它应用程序有：
+</p>
+<ul><li><a href="#pga36c0aff60be">桌面合成器（Xorg）</a></li>
+<li><a href="#pg5150d083aea5">桌面通知程序</a></li>
+<li><a href="#pg30e2075251d0">显示管理器</a></li>
+<li><a href="#pgaacadd2abcc8">屏幕锁定器</a></li>
+<li><a href="#pga80e8ab0934e">应用程序启动器</a></li>
+<li><a href="#pga59ba9915999">音频控制</a></li>
+<li><a href="#pga0bdbde91ee9">背光控制</a></li>
+<li><a href="#pg0a9b2cc841d1">媒体控制</a></li>
+<li><a href="#pg74611dd9d3c8">Polkit 身份认证组件</a></li>
+<li><a href="#pga6e29fecd7a5">电源管理</a></li>
+<li><a href="#pgf706a2a21e2d">屏幕捕获</a></li>
+<li><a href="#pga0bdbde91ee9">色温</a></li>
+<li><a href="#pga80e8ab0934e">壁纸设置工具</a></li>
+<li><a href="#pga80e8ab0934e">登出对话框</a></li>
+<li><a href="#pg0e9d4f6c4371">默认应用程序</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg712e4adaddad_.E4.BD.BF.E7.94.A8.E5.85.B6.E5.AE.83.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8" id="使用其它窗口管理器"><span id=".E4.BD.BF.E7.94.A8.E5.85.B6.E5.AE.83.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8"></span>使用其它窗口管理器</h3></div>
+<p>如果桌面环境有对应的文章，请查看其<i>使用不同的窗口管理器</i>一节，否则请查阅官方文档。
+</p>
+<ul><li><a href="#pgba22a39bd184">Budgie#使用不同的窗口管理器</a></li>
+<li><a href="#pgab6cec04e250">Cinnamon#使用不同的窗口管理器</a></li>
+<li><a href="#pg1e095fe2c2a6">GNOME#使用不同的窗口管理器</a></li>
+<li><a href="#pg5b70e23b1711">KDE#使用不同的窗口管理器</a></li>
+<li><a href="#pg9ecdb3d7e45b">LXDE#使用不同的窗口管理器</a></li>
+<li><a href="#pge82b8c855868">LXQt#使用不同的窗口管理器</a></li>
+<li><a href="#pg374a7df9dfd3">MATE#使用不同的窗口管理器</a></li>
+<li><a href="#pg361394ab1daf">Xfce#使用不同的窗口管理器</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807024730
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.241 seconds
+Real time usage: 0.274 seconds
+Preprocessor visited node count: 693/1000000
+Revision size: 12942/2097152 bytes
+Post‐expand include size: 20080/2097152 bytes
+Template argument size: 12780/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   46.958      1 -total
+ 53.61%   25.173     31 Template:App
+  9.24%    4.340     13 Template:Grp
+  7.60%    3.569      1 Template:翻译状态
+  6.97%    3.275      1 Template:风格
+  6.33%    2.972     13 Template:AUR
+  6.25%    2.936      5 Template:Pkg
+  4.80%    2.256      1 Template:相关文章开始
+  4.67%    2.194      2 Template:Related
+  3.91%    1.834      1 Template:META_Message
+-->
+<!-- Render ID 5515990e-920a-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2999:|#|:idhash:canonical!zh-cn and timestamp 20260807024730 and revision id 35418. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

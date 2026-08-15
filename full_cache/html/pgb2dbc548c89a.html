@@ -1,0 +1,145 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgb2dbc548c89a">浏览器插件</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg5f763b6c10d1">Browser extensions</a></li>
+</ul></div>
+<p>浏览器插件因使用的 API 不同而分为两个不同的类型：
+</p>
+<ul><li>Netscape plugin API (<a href="https://en.wikipedia.org/wiki/NPAPI">NPAPI</a>): 一些小众浏览器支持（<a href="#pg9b5d7fec8088">Firefox</a> 和 <a href="#pgad69d7c7a814">Chromium</a> <b>不再</b>支持）。</li>
+<li>Pepper plugin API (<b>PPAPI</b>): 一些小众浏览器支持（<a href="#pgad69d7c7a814">Chromium</a> <b>不再</b>支持，<a href="#pg9b5d7fec8088">Firefox</a> 从未支持过）。</li></ul>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2dbc548c89a_Flash_.E6.92.AD.E6.94.BE.E5.99.A8" id="Flash_播放器"><span id="Flash_.E6.92.AD.E6.94.BE.E5.99.A8"></span>Flash 播放器</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2dbc548c89a_Adobe_Flash_Player" id="Adobe_Flash_Player">Adobe Flash Player</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>Adobe Flash Player支持已经在 2020.12.31 结束。已经没有浏览器支持它。另外，这个项目不再收到任何 Bug 修复或安全升级。见 <a href="https://www.adobe.com/products/flashplayer/end-of-life.html">[1]</a></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/flashplayer-standalone/">flashplayer-standalone</a></span><sup><small>AUR</small></sup></span> 包是一个旧的可用版本。在硬 EOL 插入在 Flash Player 前，它就被推送了，所以这个版本可继续工作。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2dbc548c89a_Gnash" id="Gnash">Gnash</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>Gnash并未积极维护。<a href="https://git.savannah.gnu.org/cgit/gnash.git/tree/README">[2]</a> 最后的版本发布在 2012 年。</div>
+<p><a href="https://en.wikipedia.org/wiki/Gnash_(software)">Gnash</a> 是一个 Adobe Flash Player 的自由替代。它可作为一个电脑或嵌入式设备的播放器。作为一个浏览器插件，它支持到版本 7 的 SWF 格式（包括一些版本 8 和 9 的特性）以及80%的ActionScript2.0。
+</p><p>Gnash 可以用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gnash-git/">gnash-git</a></span><sup><small>AUR</small></sup></span> 包安装。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2dbc548c89a_Lightspark" id="Lightspark">Lightspark</h3></div>
+<p><a href="https://lightspark.github.io/">Lightspark</a>是另一个 Adobe Flash Player 的自由替代。它是针对新 Flash 格式自由替代的尝试。Lightspark 可使用 Gnash 的旧内容，只要用户同时安装它们。另外它一直活跃开发，它支持一些<a href="https://github.com/lightspark/lightspark/wiki/Status-of-Lightspark-support#support-for-various-websites-using-flash">流行网页</a>。
+</p><p>Lightspark 可用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lightspark/">lightspark</a></span><sup><small>AUR</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lightspark-git/">lightspark-git</a></span><sup><small>AUR</small></sup></span> 包安装。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2dbc548c89a_Ruffle" id="Ruffle">Ruffle</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Ruffle 是作为浏览器扩展来运行，而不是浏览器插件。</div>
+<p><a href="https://ruffle.rs/">Ruffle</a>是一个用 <a href="#pg802f2550cda0">Rust</a> 写成的 Flash Player 模拟器。它可作为一个独立的程序在本地运行，同时也可在所有的现代浏览器使用 <a href="https://en.wikipedia.org/wiki/WebAssembly">WebAssembly</a> 运行。项目仍然在活跃的开发中，正式的ActionScript1.0/2.0 支持已经完成和改善，而 ActionScript 3.0 支援将要到来。
+</p><p>独立的Ruffle本地程序可用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ruffle-git/">ruffle-git</a></span><sup><small>AUR</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ruffle-nightly-bin/">ruffle-nightly-bin</a></span><sup><small>AUR</small></sup></span>包安装，或直接安装<a href="https://addons.mozilla.org/en-US/firefox/addon/ruffle_rs/">这个火狐扩展</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2dbc548c89a_Java_.28IcedTea.29" id="Java_(IcedTea)"><span id="Java_.28IcedTea.29"></span>Java (IcedTea)</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>所有 Java 插件都是仅支持 NPAPI</div>
+<p>要在你的浏览器启用 <a href="#pgf5cd65505569">Java</a> 支持，你有两个选项:开源的<a href="https://en.wikipedia.org/wiki/OpenJDK">OpenJDK</a> (推荐) 或甲骨文的专有软件。关于为何 OpenJDK 被推荐的更详细的解释，请见 <a href="https://lists.archlinux.org/archives/list/arch-general@lists.archlinux.org/thread/HDP44IALPZYBOSJERSXIAHAORDVRNLWB/">[3]</a>。
+</p><p>若使用 OpenJDK ,你需要安装 <a href="https://en.wikipedia.org/wiki/IcedTea">IcedTea</a> 浏览器插件，包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=icedtea-web">icedtea-web</a></span><sup><small>包</small></sup></span>提供它。
+</p><p>如果你想要使用甲骨文的 JRE，安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/jre/">jre</a></span><sup><small>AUR</small></sup></span> 包.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2dbc548c89a_.E5.A4.9A.E5.AA.92.E4.BD.93.E5.90.8E.E7.AB.AF" id="多媒体后端"><span id=".E5.A4.9A.E5.AA.92.E4.BD.93.E5.90.8E.E7.AB.AF"></span>多媒体后端</h2></div>
+<p>许多浏览器使用 <a href="#pgdc8e7a283f0c">GStreamer</a> 框架来播放 HTML5 中的多媒体 <code>&lt;audio&gt;</code> 和 <code>&lt;video&gt;</code> 元素。检查你的浏览器包的可选依赖（或web引擎，如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=webkit2gtk">webkit2gtk</a></span><sup><small>包</small></sup></span>或<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=qt5-webkit">qt5-webkit</a></span><sup><small>包</small></sup></span>）来确定它是否支持 GStreamer。见<a href="#pgdc8e7a283f0c">GStreamer#Installation</a> 对各种插件的描述。
+</p><p>对于你的浏览器无法适配的媒体格式（如多数浏览器不播放 <code>.mkv</code> 文件），这个插件可用：
+</p>
+<ul><li><b>VLC Plugin</b> — NPAPI plugin that uses VLC as backend.</li></ul>
+<dl><dd><a href="https://code.videolan.org/videolan/npapi-vlc">https://code.videolan.org/videolan/npapi-vlc</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/npapi-vlc/">npapi-vlc</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2dbc548c89a_MozPlugger" id="MozPlugger">MozPlugger</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>MozPlugger 已不维护。最后的版本更新于2014。</div>
+<p><a href="https://web.archive.org/web/20190405220309/http://mozplugger.mozdev.org/">MozPlugger</a> 是一个可在你浏览器展示多种多媒体格式的 NPAPI 插件。为了实现这些，它需要使用许多程序，如 MPlayer, xine, Evince, OpenOffice, TiMidity等。
+</p><p>MozPlugger可用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mozplugger/">mozplugger</a></span><sup><small>AUR</small></sup></span> 包安装。
+</p><p>为了修改或增加 MozPlugger 使用的程序，只需要修改 <code>/etc/mozpluggerrc</code> 文件。更详细的 MozPlugger 选项列表，请见：<span class="plainlinks archwiki-template-man" title="$ man 7 mozplugger"><a href="https://www.freebsd.org/cgi/man.cgi?query=mozplugger">mozplugger(7)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2dbc548c89a_PDF.E6.9F.A5.E7.9C.8B.E5.99.A8" id="PDF查看器"><span id="PDF.E6.9F.A5.E7.9C.8B.E5.99.A8"></span>PDF查看器</h3></div>
+<p>如果你想要通过 MozPlugger 使用 Evince，你需要在 <code>/etc/mozpluggerrc</code> 中寻找包含了 <code>pdf</code> 的行，并修改 <code>GV()</code> 后的相似行：
+</p>
+<pre>repeat noisy swallow(<i>pdf_reader</i>) fill: <i>pdf_reader</i> "$file"
+</pre>
+<p>之后，你需要改变{ {ic|about:config}} 中的两个值:
+</p>
+<ul><li>改变 <code>pdfjs.disabled</code>的值为<i>true</i>;</li>
+<li>改变 <code>plugin.disable_full_page_plugin_for_types</code> 的值为空.</li></ul>
+<p>然后重启Firefox以使用插件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2dbc548c89a_.E4.BD.BF.E7.94.A8_LibreOffice_.E6.9B.BF.E4.BB.A3_OpenOffice" id="使用_LibreOffice_替代_OpenOffice"><span id=".E4.BD.BF.E7.94.A8_LibreOffice_.E6.9B.BF.E4.BB.A3_OpenOffice"></span>使用 LibreOffice 替代 OpenOffice</h3></div>
+<p>MozPlugger 默认使用 OpenOffice 打开 <code>doc</code> 文件。为了换成 Libreoffice，请见这个 OpenOffice 部分：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mozpluggerrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+### OpenOffice
+define([OO],[swallow(VCLSalFrame) fill: ooffice2.0 -nologo -norestore -view $1 "$file"
+    swallow(VCLSalFrame) fill: ooffice -nologo -norestore -view $1 "$file"
+    swallow(VCLSalFrame) fill: soffice -nologo $1 "$file"])
+...
+</pre>
+<p>后在列表的开始处增加 LibreOffice：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mozpluggerrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+### LibreOffice/OpenOffice
+define([OO],[swallow(VCLSalFrame) fill: libreoffice --nologo --norestore --view $1 "$file"
+    swallow(VCLSalFrame) fill: ooffice2.0 -nologo -norestore -view $1 "$file"
+    swallow(VCLSalFrame) fill: ooffice -nologo -norestore -view $1 "$file"
+    swallow(VCLSalFrame) fill: soffice -nologo $1 "$file"])
+...
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2dbc548c89a_.E7.94.A8_Kate_.E6.89.93.E5.BC.80_cpp_.E6.96.87.E4.BB.B6" id="用_Kate_打开_cpp_文件"><span id=".E7.94.A8_Kate_.E6.89.93.E5.BC.80_cpp_.E6.96.87.E4.BB.B6"></span>用 Kate 打开 cpp 文件</h3></div>
+<p>另一个简单地例子，如果你想用你喜欢的文本编辑器（例中使用了 Kate），来在打开 <code>cpp</code> 文件的时候有语法高亮。只用增加新的片段到 <code>mozpluggerrc</code> 文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mozpluggerrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">text/x-c++:cpp:C++ Source File
+text/x-c++:hpp:C++ Header File
+    repeat noisy swallow(kate) fill: kate -b "$file"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2dbc548c89a_.E4.BD.BF.E7.94.A8mpv.E6.9B.BF.E4.BB.A3MPlayer" id="使用mpv替代MPlayer"><span id=".E4.BD.BF.E7.94.A8mpv.E6.9B.BF.E4.BB.A3MPlayer"></span>使用mpv替代MPlayer</h3></div>
+<p>要让 MozPlugger 使用 <a href="#pg110f55dc83f2">mpv</a> 播放器来代替默认的 MPlayer，你需要修改一些必要的地方，如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mozpluggerrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+### MPlayer
+
+#define(MP_CMD,[mplayer -really-quiet -nojoystick -nofs -zoom -vo xv,x11 -ao esd,alsa,oss,arts,null -osdlevel 0 $1 &lt;/dev/null])
+define(MP_CMD,[mpv -really-quiet $1 &lt;/dev/null])
+
+#define(MP_EMBED,[embed noisy ignore_errors: MP_CMD(-xy $width -wid $window $1)])
+define(MP_EMBED,[embed noisy ignore_errors: MP_CMD(--autofit=$width -wid $window $1)])
+
+#define(MP_NOEMBED,[noembed noisy ignore_errors maxaspect swallow(MPlayer): MP_CMD($1)])
+define(MP_NOEMBED,[noembed noisy ignore_errors maxaspect swallow(mpv): MP_CMD($1)])
+
+...
+
+#define(MP_AUDIO,[mplayer -quiet -nojoystick $1 &lt;/dev/null])
+define(MP_AUDIO,[mpv -really-quiet $1 &lt;/dev/null])
+
+#define(MP_AUDIO_STREAM,[controls stream noisy ignore_errors: mplayer -quiet -nojoystick $1 "$file" &lt;/dev/null])
+define(MP_AUDIO_STREAM,[controls stream noisy ignore_errors: mpv -really-quiet $1 "$file" &lt;/dev/null])
+...</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807061203
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.112 seconds
+Real time usage: 0.120 seconds
+Preprocessor visited node count: 350/1000000
+Revision size: 7183/2097152 bytes
+Post‐expand include size: 6563/2097152 bytes
+Template argument size: 2973/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   35.140      1 -total
+ 10.26%    3.605      3 Template:Warning
+  7.27%    2.553      3 Template:Pkg
+  7.11%    2.499      9 Template:AUR
+  7.11%    2.499      1 Template:相关文章开始
+  6.94%    2.438      1 Template:App
+  6.78%    2.381     12 Template:Ic
+  5.51%    1.936      1 Template:Related
+  5.28%    1.855      1 Template:Note
+  5.11%    1.796      4 Template:Hc
+-->
+<!-- Render ID e85cc78e-9226-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2874:|#|:idhash:canonical!zh-cn and timestamp 20260807061203 and revision id 33799. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

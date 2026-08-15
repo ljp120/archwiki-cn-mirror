@@ -1,0 +1,201 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg575dea0b2198">内核模块</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Kernel_module">Kernel module</a>，最近一次同步于 2024-05-21，若英文版本有所<a href="https://wiki.archlinux.org/title/Kernel_module?diff=0&amp;oldid=803682">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Kernel_module_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg317e9d9fa596">Boot Debugging</a></li>
+<li><a href="#pg3473491e6a48">内核</a></li>
+<li><a href="#pgec0856954f1c">内核参数</a></li>
+</ul></div>
+<p><a href="https://en.wikipedia.org/wiki/Loadable_kernel_module">内核模块</a>是可以按需加载或卸载的内核代码，可以不重启系统就扩充内核的功能。
+</p><p>要创建内核模块，请阅读<a href="https://tldp.org/LDP/lkmpg/2.6/html/index.html">此指南</a>。模块可以设置成内置或者可加载，要动态加载或删除模块，必须在内核配置中将其配置为可加载模块（因此与模块相关的行将显示字母 <code>M</code>）。
+</p><p>如果您想在新内核安装后自动重建模块，参见  <a href="#pg1c7185826129">Dynamic Kernel Module Support</a>(DKMS)。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg575dea0b2198_.E8.8E.B7.E5.8F.96.E4.BF.A1.E6.81.AF" id="获取信息"><span id=".E8.8E.B7.E5.8F.96.E4.BF.A1.E6.81.AF"></span>获取信息</h2></div>
+<p>模块保存在 <code>/lib/modules/<i>kernel_release</i></code> (使用 <code>uname -r</code> 命令显示当前内核版本)。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>模块名通常使用 (<code>_</code>) 或 <code>-</code> 连接，但是这些符号在 <code>modprobe</code> 命令和 <code>/etc/modprobe.d/</code> 配置文件中都是可以相互替换的。</div>
+<p>显示当前装入的内核模块：
+</p>
+<pre>$ lsmod
+</pre>
+<p>显示模块信息：
+</p>
+<pre>$ modinfo <i>module_name</i>
+</pre>
+<p>显示所有模块的配置信息：
+</p>
+<pre>$ modprobe -c | less
+</pre>
+<p>显示某个模块的配置信息：
+</p>
+<pre>$ modprobe -c | grep <i>module_name</i>
+</pre>
+<p>显示一个装入模块使用的选项，可以使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sysfsutils">sysfsutils</a></span><sup><small>包</small></sup></span>中的<span class="plainlinks archwiki-template-man" title="$ man 1 systool"><a href="https://man.archlinux.org/man/systool.1">systool(1)</a></span>：
+</p>
+<pre>$ systool -v -m <i>module_name</i>
+</pre>
+<p>显示模块的依赖关系：
+</p>
+<pre>$ modprobe --show-depends <i>module_name</i>
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg575dea0b2198_.E8.87.AA.E5.8A.A8.E5.8A.A0.E8.BD.BD.E6.A8.A1.E5.9D.97" id="自动加载模块"><span id=".E8.87.AA.E5.8A.A8.E5.8A.A0.E8.BD.BD.E6.A8.A1.E5.9D.97"></span>自动加载模块</h2></div>
+<p>目前，所有必要模块的加载均由 <a href="#pge009209061ac">udev</a> 自动完成。所以，如果不需要使用任何额外的模块，就没有必要在任何配置文件中添加启动时加载的模块。但是，有些情况下可能需要在系统启动时加载某个额外的模块，或者将某个模块列入黑名单以便使系统正常运行。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg575dea0b2198_systemd" id="systemd">systemd</h3></div>
+<p>内核模块可以在<code>/etc/modules-load.d/</code> 下的文件中明确列出，以便 systemd 在引导过程中加载它们。 每个配置文件都以 <code>/etc/modules-load.d/<i>program</i>.conf</code>的样式命名。 配置文件仅包含要加载的内核模块名称列表，以换行符分隔。 空行和第一个非空白字符为<code>#</code>或<code>;</code>的行被忽略。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modules-load.d/virtio-net.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Load virtio_net.ko at boot
+virtio_net
+</pre>
+<p>另见<span class="plainlinks archwiki-template-man" title="$ man 5 modules-load.d"><a href="https://man.archlinux.org/man/modules-load.d.5">modules-load.d(5)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg575dea0b2198_.E6.97.A9.E6.9C.9F.E6.A8.A1.E5.9D.97.E5.8A.A0.E8.BD.BD" id="早期模块加载"><span id=".E6.97.A9.E6.9C.9F.E6.A8.A1.E5.9D.97.E5.8A.A0.E8.BD.BD"></span>早期模块加载</h3></div>
+<p><a href="#pg5409190f7704">initramfs</a> 映像可能不包含 <code>/etc/modules-load.d/</code> 中要求的内核模块，它也可能缺少在该文件夹中设置的文件。早期模块加载取决于使用的 initramfs 生成器：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio">mkinitcpio</a></span><sup><small>包</small></sup></span>: 参见 <a href="#pgbd0f46fbac92">Mkinitcpio#MODULES</a></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dracut">dracut</a></span><sup><small>包</small></sup></span>: 参见 <a href="#pgb185d4cf00ac">Dracut#Early kernel module loading</a></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=booster">booster</a></span><sup><small>包</small></sup></span>: 参见 <a href="#pg375fc9bbcc64">Booster#Early module loading</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg575dea0b2198_.E6.89.8B.E5.8A.A8.E5.8A.A0.E8.BD.BD.E6.A8.A1.E5.9D.97" id="手动加载模块"><span id=".E6.89.8B.E5.8A.A8.E5.8A.A0.E8.BD.BD.E6.A8.A1.E5.9D.97"></span>手动加载模块</h2></div>
+<p>内核模块由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kmod">kmod</a></span><sup><small>包</small></sup></span> 包提供的工具处理。您可以手动使用这些工具。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果你已经升级了你的内核但还没有重新启动，<i>modprobe</i> 将失败并且没有错误消息并以代码 1 退出，因为路径 <code>/usr/lib/modules/$(uname -r)/</code> 不再存在。当 <i>modprobe</i> 无法确定是否存在这种情况时，请手动检查此路径是否存在。</div>
+<p>要手动装入模块的话，执行:
+</p>
+<pre># modprobe <i>module_name</i>
+</pre>
+<p>按文件名加载模块:
+</p>
+<pre># insmod filename [args]
+</pre>
+<p>如果要移除一个模块：
+</p>
+<pre># modprobe -r <i>module_name</i>
+</pre>
+<p>或者:
+</p>
+<pre># rmmod <i>module_name</i>
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg575dea0b2198_.E9.85.8D.E7.BD.AE.E6.A8.A1.E5.9D.97.E5.8F.82.E6.95.B0" id="配置模块参数"><span id=".E9.85.8D.E7.BD.AE.E6.A8.A1.E5.9D.97.E5.8F.82.E6.95.B0"></span>配置模块参数</h2></div>
+<p>要将参数传递给内核模块，您可以使用 modprobe 手动传递它们，或者使用 modprobe 配置文件或使用内核命令行确保始终应用某些参数。如果该模块内置于内核中，则必须使用内核命令行，其他方法将不起作用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg575dea0b2198_.E6.89.8B.E5.8A.A8.E5.8A.A0.E8.BD.BD.E6.97.B6.E8.AE.BE.E7.BD.AE" id="手动加载时设置"><span id=".E6.89.8B.E5.8A.A8.E5.8A.A0.E8.BD.BD.E6.97.B6.E8.AE.BE.E7.BD.AE"></span>手动加载时设置</h3></div>
+<p>将参数传递给模块的基本方法是使用 <i>modprobe</i> 命令。使用简单的 <code><i>key=value</i></code> 赋值在命令行上指定参数：
+</p>
+<pre># modprobe <i>module_name parameter_name=parameter_value</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg575dea0b2198_.E4.BD.BF.E7.94.A8_.2Fetc.2Fmodprobe.d.2F.E4.B8.AD.E7.9A.84.E6.96.87.E4.BB.B6" id="使用_/etc/modprobe.d/中的文件"><span id=".E4.BD.BF.E7.94.A8_.2Fetc.2Fmodprobe.d.2F.E4.B8.AD.E7.9A.84.E6.96.87.E4.BB.B6"></span>使用 /etc/modprobe.d/中的文件</h3></div>
+<p><code>/etc/modprobe.d/</code> 目录中的文件可用于将模块设置传递给 <a href="#pge009209061ac">udev</a>，它将使用 <code>modprobe</code> 管理系统启动期间的模块加载.此目录中的配置文件可以具有任何名称，只要它们以 <i>.conf</i> 扩展名结尾。语法是：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/myfilename.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options <i>module_name parameter_name=parameter_value</i></pre>
+<p>多个模块参数用空格分隔，而一个参数可以接收一个值列表，列表用逗号分隔：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/myfilename.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options <i>module_name param1=value1 param2=value2a,value2b …</i></pre>
+<p>例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/thinkfan.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># On ThinkPads, this lets the 'thinkfan' daemon control fan speed
+options thinkpad_acpi fan_control=1</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果任何受影响的模块是从 initramfs 加载的，那么您需要将适当的 <i>.conf</i> 文件添加到 <a href="#pg37f6992c45ff">mkinitcpio.conf</a> 中的 <code>FILES</code> 或使用<code>modconf</code> <a href="#pg37f6992c45ff">hook</a>，然后 <a href="#pgbd0f46fbac92">重新生成 initramfs</a> 以包含“.conf”文件。要查看默认 initramfs 的内容，请使用 <a href="#pgbd0f46fbac92">lsinitcpio</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg575dea0b2198_.E4.BD.BF.E7.94.A8.E5.86.85.E6.A0.B8.E5.91.BD.E4.BB.A4.E8.A1.8C" id="使用内核命令行"><span id=".E4.BD.BF.E7.94.A8.E5.86.85.E6.A0.B8.E5.91.BD.E4.BB.A4.E8.A1.8C"></span>使用内核命令行</h3></div>
+<p>还可以使用内核命令行向模块传递选项。这也是向内核内置模块传递选项的唯一途径。对于所有常见的引导加载程序，以下语法是正确的：
+</p>
+<pre>modname.parametername=parametercontents
+</pre>
+<p>例如:
+</p>
+<pre>thinkpad_acpi.fan_control=1
+</pre>
+<p>只需将其添加到引导加载程序的内核行，如<a href="#pgec0856954f1c">内核参数</a>中所述。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg575dea0b2198_.E5.88.AB.E5.90.8D" id="别名"><span id=".E5.88.AB.E5.90.8D"></span>别名</h2></div>
+<p>别名是模块的替代名称。例如：<code>alias my-mod real_long_modulename</code> 表示您可以使用 <code>modprobe my-mod</code> 代替 <code>modprobe real_long_modulename</code>。您也可以使用 shell 风格的通配符，所以 <code>alias my-mod* really_long_modulename</code> 意味着 <code>modprobe my-mod</code> 和 <code>modprobe my-mod-something</code> 有相同的效果。创建别名：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/myalias.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">alias mymod really_long_module_name
+</pre>
+<p>一些模块具有别名，用于在应用程序需要它们时自动加载它们。禁用这些别名可以防止自动加载，但仍允许手动加载模块。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/modprobe.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Prevent Bluetooth autoload
+alias net-pf-31 off
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg575dea0b2198_.E9.BB.91.E5.90.8D.E5.8D.95" id="黑名单"><span id=".E9.BB.91.E5.90.8D.E5.8D.95"></span>黑名单</h2></div>
+<p>在内核模块的上下文中，黑名单是一种防止内核模块加载的机制。如果不需要相关的硬件，或者如果加载该模块会导致问题，这可能很有用：例如，可能有两个内核模块试图控制同一个硬件，将它们一起加载会导致冲突。
+</p><p>一些模块作为 <a href="#pg5409190f7704">initramfs</a> 的一部分加载。 <code>mkinitcpio -M</code> 将打印出所有自动检测到的模块：为了防止 initramfs 加载其中一些模块，请将它们列入黑名单中的 <code>/etc/modprobe.d 下的 <i>.conf</i> 文件</code> 并且它应该在图像生成期间由 <code>modconf</code> 挂钩添加。运行 <code>mkinitcpio -v</code> 将列出由各种挂钩（例如 <code>filesystems</code> 挂钩、<code>block</code> 挂钩等）拉入的所有模块。如果您的文件中没有 <code>modconf</code> 挂钩，请记住将该 <i>.conf</i> 文件添加到 <code>/etc/mkinitcpio.conf</code> 中的 <code>FILES</code> 列表中<code>HOOKS</code> 列表（比如您改变了默认配置），将模块列入黑名单 <a href="#pgea04d1b8515f">regenerate the initramfs</a>，然后重新启动。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg575dea0b2198_.E4.BD.BF.E7.94.A8_.2Fetc.2Fmodprobe.d.2F_.E4.B8.AD.E7.9A.84.E6.96.87.E4.BB.B6" id="使用_/etc/modprobe.d/_中的文件"><span id=".E4.BD.BF.E7.94.A8_.2Fetc.2Fmodprobe.d.2F_.E4.B8.AD.E7.9A.84.E6.96.87.E4.BB.B6"></span>使用 /etc/modprobe.d/ 中的文件</h3></div>
+<p>在 <code>/etc/modprobe.d/</code> 中创建一个 <i>.conf</i> 文件，并使用 <code>blacklist</code> 关键字为要列入黑名单的每个模块附加一行。例如，如果您想阻止 <code>pcspkr</code> 模块加载以避免通过 <a href="#pg562e8d103236">PC 扬声器</a>发出声音：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/nobeep.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Do not load the 'pcspkr' module on boot.
+blacklist pcspkr
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>blacklist</code> 命令将一个模块列入黑名单，这样它就不会自动加载，但如果另一个未列入黑名单的模块依赖于它或者它是手动加载的，则该模块可能会被加载。
+<p>但是，对于该情况有一个解决方法； <code>install</code> 命令指示 modprobe 运行自定义命令，而不是像往常一样将模块插入内核，因此您可以强制使模块加载失败：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/blacklist.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+install <i>module_name</i> /bin/true
+...
+</pre>
+<p>这将有效地将该模块和任何其他依赖于它的模块列入黑名单。
+</p>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg575dea0b2198_.E4.BD.BF.E7.94.A8.E5.86.85.E6.A0.B8.E5.91.BD.E4.BB.A4.E8.A1.8C_2" id="使用内核命令行_2"><span id=".E4.BD.BF.E7.94.A8.E5.86.85.E6.A0.B8.E5.91.BD.E4.BB.A4.E8.A1.8C_2"></span>使用内核命令行</h3></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果模块损坏导致无法引导系统，这将非常有用。</div>
+<p>您也可以从引导加载程序中将模块列入黑名单。
+</p><p>如<a href="#pgec0856954f1c">Kernel参数</a>.中所述，只需将<code>module_blacklist=modname1,modname2,modname3</code> 添加到引导加载程序的内核行中即可。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>将多个模块列入黑名单时，请注意，它们之间仅用逗号分隔。 空格或其他内容可能会破坏语法。</li>
+<li><code>module_blacklist</code> 会让内核完全拒绝加载模块。如果只想阻止隐式加载，可能会在稍后手动加载模块，那么正确的参数是 <code>modprobe.blacklist=modname1,modname2,modname3</code>。这并不能阻止启动过程中的显式加载，例如通过 <a href="#pg575dea0b2198_systemd">systemd</a> 或其他模块。</li></ul>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg575dea0b2198_.E9.97.AE.E9.A2.98.E5.A4.84.E7.90.86" id="问题处理"><span id=".E9.97.AE.E9.A2.98.E5.A4.84.E7.90.86"></span>问题处理</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg575dea0b2198_.E6.A8.A1.E5.9D.97.E6.9C.AA.E5.8A.A0.E8.BD.BD" id="模块未加载"><span id=".E6.A8.A1.E5.9D.97.E6.9C.AA.E5.8A.A0.E8.BD.BD"></span>模块未加载</h3></div>
+<p>如果特定模块未加载并且启动日志（可通过以 root 身份运行 <code>journalctl -b</code> 访问）显示该模块已列入黑名单，但目录 <code>/etc/modprobe.d/</code> 没有显示相应的条目，请检查 <code>/usr/lib/modprobe.d/</code> 的另一个 modprobe 源目录以获取黑名单条目。
+</p><p>如果内核模块中包含的“vermagic”字符串与当前运行的内核的值不匹配，则不会加载模块。如果已知模块与当前运行的内核兼容，则可以使用 <code>modprobe --force-vermagic</code> 忽略“vermagic”检查。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>忽略内核模块的版本检查可能会导致内核崩溃或系统由于不兼容而表现出未定义的错误。请谨慎使用 <code>--force-vermagic</code>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg575dea0b2198_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="#pg562e8d103236">禁用 PC 喇叭</a></li>
+<li><a href="https://lwn.net/Articles/391230/">编写 WMI 驱动程序</a> - 一个 LWM 介绍</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807053925
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.155 seconds
+Real time usage: 0.161 seconds
+Preprocessor visited node count: 639/1000000
+Revision size: 10147/2097152 bytes
+Post‐expand include size: 8998/2097152 bytes
+Template argument size: 4099/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   46.165      1 -total
+ 14.02%    6.471     47 Template:Ic
+ 12.01%    5.543      5 Template:注意
+  8.03%    3.708      1 Template:翻译状态
+  6.39%    2.948      5 Template:Pkg
+  5.25%    2.424      8 Template:Hc
+  5.00%    2.310      3 Template:Related
+  4.88%    2.255      1 Template:相关文章开始
+  4.86%    2.243      2 Template:Man
+  3.04%    1.404      1 Template:警告
+-->
+<!-- Render ID 594db08e-9222-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3353:|#|:idhash:canonical!zh-cn and timestamp 20260807053925 and revision id 33713. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

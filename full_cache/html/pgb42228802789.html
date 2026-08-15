@@ -1,0 +1,104 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgb42228802789">USB 存储设备</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgaacf649200cb">挂载</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/USB_storage_devices">USB storage devices</a>，最近一次同步于 2024-08-22，若英文版本有所<a href="https://wiki.archlinux.org/title/USB_storage_devices?diff=0&amp;oldid=814959">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/USB_storage_devices_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文介绍了如何在 Linux 下使用流行的 USB 闪存盘。不过，它也适用于其他设备，如数码相机，这些设备就像 USB 存储设备一样。
+</p><p>如果你的系统是最新的 Arch 内核，并使用现代<a href="#pg712e4adaddad">桌面环境</a>，你的设备就会直接显示在桌面上，无需打开控制台。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb42228802789_.E4.BD.BF.E7.94.A8_udisks_.E8.87.AA.E5.8A.A8.E5.AE.89.E8.A3.85" id="使用_udisks_自动安装"><span id=".E4.BD.BF.E7.94.A8_udisks_.E8.87.AA.E5.8A.A8.E5.AE.89.E8.A3.85"></span>使用 udisks 自动安装</h2></div>
+<p>这是最简单、最常用的方法。许多<a href="#pg712e4adaddad">桌面环境</a>都使用这种方法，但也可以单独使用。
+</p><p>详细信息，包括挂载助手列表，请参阅 <a href="#pgfb208edb391c">Udisks</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb42228802789_.E6.89.8B.E5.8A.A8.E6.8C.82.E8.BD.BD" id="手动挂载"><span id=".E6.89.8B.E5.8A.A8.E6.8C.82.E8.BD.BD"></span>手动挂载</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在确定 Arch Linux 无法挂载  USB 设备之前，请务必检查所有可用端口。有些端口可能不共享同一个控制器，从而导致无法挂载设备。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb42228802789_.E8.8E.B7.E5.8F.96.E6.94.AF.E6.8C.81_usb_storage_.E7.9A.84.E5.86.85.E6.A0.B8" id="获取支持_usb_storage_的内核"><span id=".E8.8E.B7.E5.8F.96.E6.94.AF.E6.8C.81_usb_storage_.E7.9A.84.E5.86.85.E6.A0.B8"></span>获取支持 usb_storage 的内核</h3></div>
+<p>如果不使用定制的内核，就可以使用，因为所有 Arch Linux 内核都已正确配置。如果使用定制内核，请确保其编译了 SCSI-Support、SCSI-Disk-Support 和 usb_storage。如果使用最新的 <a href="#pge009209061ac">udev</a>，只需插入设备，系统就会自动加载所有必要的内核模块。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb42228802789_.E8.AF.86.E5.88.AB.E8.AE.BE.E5.A4.87" id="识别设备"><span id=".E8.AF.86.E5.88.AB.E8.AE.BE.E5.A4.87"></span>识别设备</h3></div>
+<p>访问存储设备首先需要内核分配的标识符。详见<a href="#pg6c70b7fdfa57">文件系统#查看现有文件系统</a>。
+</p><p>新插入的设备通常会显示在 <a href="#pg47c5e1af4d24">Journal</a> 中。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb42228802789_.E6.8C.82.E8.BD.BD_USB_.E5.AD.98.E5.82.A8.E5.99.A8" id="挂载_USB_存储器"><span id=".E6.8C.82.E8.BD.BD_USB_.E5.AD.98.E5.82.A8.E5.99.A8"></span>挂载 USB 存储器</h3></div>
+<p>请参阅<a href="#pg6c70b7fdfa57">文件系统#挂载文件系统</a>。
+</p><p>如果 <code>mount</code> 无法识别设备的<a href="#pg6c70b7fdfa57">文件系统</a>，可以尝试使用 <code>-t</code> 参数，详情请参见 <span class="plainlinks archwiki-template-man" title="$ man 8 mount"><a href="https://man.archlinux.org/man/mount.8">mount(8)</a></span> 。如果挂载失败，可以尝试<a href="#pg6c70b7fdfa57">重新创建文件系统</a>，甚至<a href="#pg8edad8d1135b">重新分区磁盘</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>有关使用 <a href="#pg023562413be7">sudo</a> 的挂载/卸载脚本示例，请参阅 <a href="https://gist.github.com/anonymous/a69093a51f83b53d9fc5">[1]</a>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb42228802789_.E5.85.81.E8.AE.B8.E6.99.AE.E9.80.9A.E7.94.A8.E6.88.B7.E5.86.99.E5.85.A5" id="允许普通用户写入"><span id=".E5.85.81.E8.AE.B8.E6.99.AE.E9.80.9A.E7.94.A8.E6.88.B7.E5.86.99.E5.85.A5"></span>允许普通用户写入</h4></div>
+<p>如果想让非 root 用户写入 U 盘，可以发出以下命令：
+</p>
+<pre># mount -o gid=<i>users</i>,fmask=113,dmask=002 /dev/sda1 /mnt/usbstick
+</pre>
+<p>如果不起作用，请确保<a href="#pg6c70b7fdfa57">文件系统</a>可以以根用户身份挂载和写入，详见上一节。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb42228802789_.E4.BD.BF.E7.94.A8_fstab_.E4.BB.A5.E4.BD.9C.E4.B8.BA.E6.99.AE.E9.80.9A.E7.94.A8.E6.88.B7.E6.93.8D.E4.BD.9C" id="使用_fstab_以作为普通用户操作"><span id=".E4.BD.BF.E7.94.A8_fstab_.E4.BB.A5.E4.BD.9C.E4.B8.BA.E6.99.AE.E9.80.9A.E7.94.A8.E6.88.B7.E6.93.8D.E4.BD.9C"></span>使用 fstab 以作为普通用户操作</h4></div>
+<p>如果想让普通用户执行挂载/卸载操作，请参阅 <a href="#pg30cebfcdd710">FAT#以普通用户身份写入 FAT32</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb42228802789_.E6.8C.82.E8.BD.BD.E5.B7.A5.E5.85.B7" id="挂载工具"><span id=".E6.8C.82.E8.BD.BD.E5.B7.A5.E5.85.B7"></span>挂载工具</h4></div>
+<p>多个<a href="#pga96df2a9d88c">挂载工具</a>便于以普通用户身份挂载。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb42228802789_.E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3" id="问题解决"><span id=".E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3"></span>问题解决</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb42228802789_.E6.9C.AA.E6.A3.80.E6.B5.8B.E5.88.B0_USB_.E5.AD.98.E5.82.A8.E8.AE.BE.E5.A4.87" id="未检测到_USB_存储设备"><span id=".E6.9C.AA.E6.A3.80.E6.B5.8B.E5.88.B0_USB_.E5.AD.98.E5.82.A8.E8.AE.BE.E5.A4.87"></span>未检测到 USB 存储设备</h3></div>
+<p>如果您已连接 USB 存储设备，但它未被  <a href="#pge173af99a32b">lsblk</a> 列出，而是出现在  <a href="#pg47c5e1af4d24">journal</a> 中，但未被分配块设备，请参阅<a href="#pga57cd4863e73">常规故障排除#内核升级后部分外设无法使用</a>。
+</p><p>此外，请确保您的 BIOS 已启用 XHCI Handoff 和 EHCI Handoff，但对于大多数现代设备来说，这通常不是问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb42228802789_.E5.8D.B8.E8.BD.BD.E6.89.80.E6.9C.89.E5.88.86.E5.8C.BA.E5.90.8E.E8.AE.BE.E5.A4.87.E6.9C.AA.E5.85.B3.E9.97.AD" id="卸载所有分区后设备未关闭"><span id=".E5.8D.B8.E8.BD.BD.E6.89.80.E6.9C.89.E5.88.86.E5.8C.BA.E5.90.8E.E8.AE.BE.E5.A4.87.E6.9C.AA.E5.85.B3.E9.97.AD"></span>卸载所有分区后设备未关闭</h3></div>
+
+<p>如果不关闭设备电源，可能会导致：
+</p>
+<ul><li>硬盘驱动器没有停放磁头，在旋转时发出微弱的刮擦声并降低设备性能 <a href="http://linuxfocus.org/~guido/scripts/spin-down-usb-hard-drive-linux.html">[2]</a>，或者</li>
+<li>固态硬盘（尤其是老式固态硬盘）不刷新缓存缓冲区或更新映射表，导致数据丢失 <a href="https://www.kingston.com/us/solutions/servers-data-centers/ssd-power-loss-protection">[3]</a>。</li></ul>
+<p>卸载分区时，设备仍处于开机状态。为了安全地卸载，您应该要求系统先将其关闭： <a href="https://unix.stackexchange.com/a/43450">[4]</a>
+</p>
+<pre># echo 1 &gt; /sys/block/<i>disk_name</i>/device/delete
+</pre>
+<p>如果使用 <a href="#pgfb208edb391c">udisks</a>，则可以使用这些命令： <a href="https://unix.stackexchange.com/a/178648">[5]</a>
+</p>
+<pre>$ udisksctl unmount -b /dev/sd<i>XY</i>
+$ udisksctl power-off -b /dev/sd<i>X</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb42228802789_.E8.AE.BE.E5.A4.87.E5.B7.B2.E6.A3.80.E6.B5.8B.E5.88.B0.EF.BC.8C.E4.BD.86.E6.9C.AA.E6.B3.A8.E5.86.8C.E4.B8.BA.E5.8F.AF.E5.AE.89.E8.A3.85.E8.AE.BE.E5.A4.87" id="设备已检测到，但未注册为可安装设备"><span id=".E8.AE.BE.E5.A4.87.E5.B7.B2.E6.A3.80.E6.B5.8B.E5.88.B0.EF.BC.8C.E4.BD.86.E6.9C.AA.E6.B3.A8.E5.86.8C.E4.B8.BA.E5.8F.AF.E5.AE.89.E8.A3.85.E8.AE.BE.E5.A4.87"></span>设备已检测到，但未注册为可安装设备</h3></div>
+<p>有<a href="#pge009209061ac">一套 udev 规则</a>，其中包括一条出于各种原因忽略某些特定设备的规则。某些硬件设备，如数码相机、便携式录音机等，可能会以某种方式格式化 usb 存储，从而触发忽略规则。你可以使用以下命令检查是否应用了这些规则，然后在默认设置中找到相应的条件：
+</p>
+<pre>$ udevadm info --attribute-walk --name=<i>device_name</i> | grep UDISKS_IGNORE
+</pre>
+<p>如果是这种情况您的设备已将此属性设置为 <i>1</i>，您可以按照。<a href="#pge009209061ac">udev</a> 页面使用自定义规则来覆盖它。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807053651
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.087 seconds
+Real time usage: 0.091 seconds
+Preprocessor visited node count: 173/1000000
+Revision size: 4537/2097152 bytes
+Post‐expand include size: 2661/2097152 bytes
+Template argument size: 736/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   21.104      1 -total
+ 20.44%    4.313      1 Template:Related_articles_start
+ 17.72%    3.740      1 Template:Expansion
+  9.63%    2.033      2 Template:Note
+  8.28%    1.747      1 Template:翻译状态
+  8.12%    1.713      1 Template:Man
+  7.91%    1.669      1 Template:Related
+  7.50%    1.582      1 Template:Related_articles_end
+  7.24%    1.527      1 Template:META_Message
+  4.84%    1.021      2 Template:Ic
+-->
+<!-- Render ID fd83278e-9221-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7905:|#|:idhash:canonical!zh-cn and timestamp 20260807053651 and revision id 34489. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

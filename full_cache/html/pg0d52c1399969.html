@@ -1,0 +1,210 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg0d52c1399969">Dolphin 模拟器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Dolphin_emulator">Dolphin emulator</a>，最近一次同步于 2024-5-24，若英文版本有所<a href="https://wiki.archlinux.org/title/Dolphin_emulator?diff=0&amp;oldid=814796">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Dolphin_emulator_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p><a href="https://dolphin-emu.org/">Dolphin</a> 是任天堂 GameCube 和 Wii 模拟器，目前支持 x86_64 和 AArch64 架构。Dolphin 适用于 Linux、macOS、Windows 和 Android。这是一个自由开源的社区开发项目。Dolphin 是第一个 GameCube 和 Wii 模拟器，也是目前唯一能够玩商业游戏的模拟器。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0d52c1399969_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p><a href="#pg811194d6beaa">安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dolphin-emu">dolphin-emu</a></span><sup><small>包</small></sup></span>软件包。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0d52c1399969_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>运行 <code>dolphin-emu -h</code> 查找 Dolphin 的帮助选项。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Dolphin 可能会根据每个游戏覆盖这些设置，例如当已知某个设置会破坏某个游戏时。如果绝对确定特定设置不会使游戏崩溃，则可以通过右键单击游戏并选择<i>属性</i>来禁用或更改这些覆盖。同样，您可以使用此方法设置每个游戏的设置。</div>
+<p>虽然模拟器运行不需要其他配置（它已预配置了默认设置），但更改设置可以提高性能和图形。设置分为三个主要部分：<i>配置</i>、<i>图形</i>和 <i>DSP</i>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0d52c1399969_.E9.85.8D.E7.BD.AE.E9.83.A8.E5.88.86" id="配置部分"><span id=".E9.85.8D.E7.BD.AE.E9.83.A8.E5.88.86"></span>配置部分</h3></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>最新版本的 Dolphin 删除了<i>音频</i>跳帧选项，因此现在建议使用<i>自动</i>。</div>
+<p>在常规选项卡上，选中<i>启用双核</i>和<i>启用空闲跳过</i>。帧限制应设置为<i>自动</i>，以便它适用于所有地区的游戏。CPU 仿真引擎应保留为 JIT Recompiler。如果打算播放导入的日本光盘，请仅选中“强制控制台为 NTSC-J”。
+</p><p><i>界面</i>选项卡上的所有选项都是个人选择。
+</p><p>音频选项卡是 DSP 部分的屏幕;现在设置它意味着以后无需进行设置。请参阅下面的 DSP 设置段落。
+</p><p>接下来的两个选项卡不是很重要;Gamecube 选项卡具有有关连接配件（例如存储卡）的设置，唯一值得注意的 Wii 选项卡选项是“纵横比”下拉列表。将其设置为 16：9 或 4：3，具体取决于显示器的<a href="https://en.wikipedia.org/wiki/Aspect_ratio">纵横比</a>。
+</p><p>在最后一个选项卡“路径”上，可以设置 ISO 目录。游戏 ISO 的目录也可以通过单击主屏幕上的浏览来设置，但这里有更多选项可用，例如<i>搜索子文件夹</i>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0d52c1399969_.E5.9B.BE.E5.BD.A2.E9.83.A8.E5.88.86" id="图形部分"><span id=".E5.9B.BE.E5.BD.A2.E9.83.A8.E5.88.86"></span>图形部分</h3></div>
+
+<p>在“常规”选项卡上，从当前最兼容的渲染器的后端下拉列表中选择 OpenGL。将“显示”和“其他”设置设置为所需的配置。垂直同步很有用，但它可能会导致速度变慢。“渲染到主窗口”选项在美学上改善了体验。
+</p><p>如果您的显卡支持 <a href="#pg813471eccd07">Vulkan</a>，则使用 Vulkan 后端可能会为您提供比 OpenGL 更高的性能。请注意，Vulkan 后端可能与某些游戏不兼容，因此如果您在游戏中遇到问题，请尝试在放弃之前切换回 OpenGL。官方<a href="https://dolphin-emu.org/compat/">兼容性列表</a>通常包含有关每个渲染器如何处理标题的提示。
+</p><p>在“增强功能”选项卡上是可以改进图形的选项。虽然它们会产生出色的输出，但它们可能会减慢仿真速度，使游戏无法玩。选择最佳设置，只要速度保持 100%。
+下表翻译质量不高，请参考英文原文。
+</p>
+<table class="wikitable">
+<caption>选项比较
+</caption>
+<tbody><tr>
+<th>选项</th>
+<th>性能</th>
+<th>质量
+</th></tr>
+<tr>
+<td><b>内部分辨率</b></td>
+<td>1x Native</td>
+<td>自动 (窗口大小)
+</td></tr>
+<tr>
+<td><b>反锯齿</b></td>
+<td>无</td>
+<td>至少 2x
+</td></tr>
+<tr>
+<td><b>各向异性滤波</b></td>
+<td>1x</td>
+<td>至少 2x
+</td></tr>
+<tr>
+<td><b>后处理效果</b></td>
+<td>(关)</td>
+<td>你的选择<br/>(参见下面的提示)
+</td></tr>
+<tr>
+<td><b>缩放的 EFB 副本</b></td>
+<td>取消选中</td>
+<td>选中
+</td></tr>
+<tr>
+<td><b>单独像素光源</b></td>
+<td>取消选中</td>
+<td>选中
+</td></tr>
+<tr>
+<td><b>强制纹理过滤,<br/>宽屏黑客,<br/>禁用雾</b></td>
+<td>关</td>
+<td>你的选项<br/>(推荐: 关)
+</td></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>Dolphin 能够在立体 3D 中渲染为 2D 开发的游戏。要启用此功能，请将<i>后处理效果</i>设置为<i>立体</i>（默认，对于红青色模式）或<i>立体 2</i>（蓝黄色）。还<i>必须</i>取消选中<i>黑客</i>选项卡上的<i>快速深度计算</i>（<i>见下文</i>）。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>使用滤镜和其他方法来改进图形可能会破坏一些游戏或导致任何级别的图形故障。</div>
+<p>除非确定，否则最好保持<i>黑客</i>选项卡不变。
+</p>
+<table class="wikitable">
+<caption>默认
+</caption>
+<tbody><tr>
+<th>选项</th>
+<th>值
+</th></tr>
+<tr>
+<td>跳过从 CPU 访问 EFB</td>
+<td>取消选中
+</td></tr>
+<tr>
+<td>忽略格式更改</td>
+<td>选中
+</td></tr>
+<tr>
+<td>EFB 副本</td>
+<td>纹理
+</td></tr>
+<tr>
+<td>纹理缓存/精度</td>
+<td>快
+</td></tr>
+<tr>
+<td>外部帧缓冲器</td>
+<td>不启用
+</td></tr>
+<tr>
+<td>缓存显示列表</td>
+<td>取消选中
+</td></tr>
+<tr>
+<td>禁用目标 Alpha</td>
+<td>取消选中
+</td></tr>
+<tr>
+<td>OpenCL 纹理解码器</td>
+<td>取消选中
+</td></tr>
+<tr>
+<td>OpenMP 纹理解码器</td>
+<td>取消选中
+</td></tr>
+<tr>
+<td>快速深度计算</td>
+<td>选中<br/>(应取消选中浮雕 3D)
+</td></tr>
+<tr>
+<td>Vertex streaming hack</td>
+<td>unchecked
+</td></tr></tbody></table>
+<p>同样，除非确定，否则请取消选中<i>高级</i>选项卡中的<i>所有内容</i>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0d52c1399969_DSP_.E9.83.A8.E5.88.86" id="DSP_部分"><span id="DSP_.E9.83.A8.E5.88.86"></span>DSP 部分</h3></div>
+<p>将 DSP 仿真引擎设置为
+</p>
+<ul><li>DSP HLE用于速度胜于精度，</li>
+<li>DSP LLE 重新编译器以一定的速度为代价获得更好的准确性，</li>
+<li>DSP LLE解释器;准确，但使<i>一切</i>都无法播放。太慢了。</li></ul>
+<p><i>单独线程上的 DSP LLE</i>可提高具有多核 CPU 的计算机的速度，但可能会导致音频故障，并且已知会破坏<a href="https://wiki.dolphin-emu.org/index.php?title=Category:Zelda_ucode_games">塞尔达 ucode games</a>。音频后端最好设置为 <a href="#pgb16dfd48462f">ALSA</a>。对于 <code>pulseaudio</code> ，需要安装 Dolphin 的可选依赖项 <a href="#pga942ba974b3d">PulseAudio</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果您从配置部分的链接来到这里，您现在应该返回。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0d52c1399969_.E6.B8.B8.E7.8E.A9" id="游玩"><span id=".E6.B8.B8.E7.8E.A9"></span>游玩</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Dolphin 是一个资源密集型应用程序，因此并非所有游戏都能正常运行。请在<a href="https://dolphin-emu.org/docs/faq/#why-do-i-need-such-powerful-computer-emulate-old-c">此处</a>查看原因。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>确保您<i>仅</i>将 Dolphin 用于合法购买的游戏的合法获得的自制光盘转储。Dolphin 不是为非法使用而开发的。按照适用法律的规定合法行事。您应对您对模拟器的任何使用负责。本维基上不会提供获取非法内容的链接、说明或提示。无意侵犯版权。</div>
+<p>单击“浏览”以设置 ISO 目录，以便它们在 Dolphin 的默认屏幕上显示为库。否则，只需单击<i>打开</i>并选择文件即可。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0d52c1399969_Dolphin.E7.9A.84_Wiki" id="Dolphin的_Wiki"><span id="Dolphin.E7.9A.84_Wiki"></span>Dolphin的 Wiki</h3></div>
+<p>每当游戏无法正常工作时，请尝试阅读 <a href="https://wiki.dolphin-emu.org">Dolphin的wiki</a>上的页面。列出了有关为每个游戏设置模拟器的提示、版本兼容性图表、测试条目、故障排除和视频预览。欢迎贡献，例如测试条目和解决方法，并帮助其他用户。 
+</p><p>下面是一个 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xfce4-whiskermenu-plugin">xfce4-whiskermenu-plugin</a></span><sup><small>包</small></sup></span> 搜索操作命令，用于在 Dolphin 的 wiki 上进行搜索：
+</p>
+<pre>exo-open --launch WebBrowser <a href="https://wiki.dolphin-emu.org/index.php?search=%u">https://wiki.dolphin-emu.org/index.php?search=%u</a>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>建议设置键盘映射。更喜欢具有模拟功能的游戏手柄，而不是键盘和鼠标。请参阅<a href="https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/GCController_Layout.svg/1000px-GCController_Layout.svg.png">GameCube游戏手柄的地图</a>。还建议在玩耍时玩得开心。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0d52c1399969_.E4.B8.BB.E9.A2.98" id="主题"><span id=".E4.B8.BB.E9.A2.98"></span>主题</h2></div>
+<p>要更改 Dolphin 的主题，请在目录中 <code>~/.local/share/dolphin-emu/Styles</code> 放置一个 css 文件。然后转到<i>选项</i>中的<i>界面</i>选项卡并选中 使用<i>自定义用户样式</i>框。单击<i>用户样式</i>选项卡以更改主题。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0d52c1399969_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0d52c1399969_.E4.B8.8E_Wayland_.E4.B8.8D.E5.85.BC.E5.AE.B9" id="与_Wayland_不兼容"><span id=".E4.B8.8E_Wayland_.E4.B8.8D.E5.85.BC.E5.AE.B9"></span>与 Wayland 不兼容</h3></div>
+<p>Dolphin 5.0 与 Wayland 不兼容。通过以下命令强制它作为 X11 应用程序运行：
+</p>
+<pre>QT_QPA_PLATFORM=xcb dolphin-emu
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0d52c1399969_.E6.B8.B8.E6.88.8F.E5.A4.AA.E5.BF.AB" id="游戏太快"><span id=".E6.B8.B8.E6.88.8F.E5.A4.AA.E5.BF.AB"></span>游戏太快</h3></div>
+<p>确保将帧限制设置为游戏区域的正确值;NTSC 游戏为 60 个，PAL 游戏为 50 个。建议使用<i>自动</i>。避免使用 Dolphin 同时播放其他媒体。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0d52c1399969_.E6.A8.A1.E6.8B.9F.E5.99.A8.E5.A4.AA.E6.85.A2.E4.BA.86" id="模拟器太慢了"><span id=".E6.A8.A1.E6.8B.9F.E5.99.A8.E5.A4.AA.E6.85.A2.E4.BA.86"></span>模拟器太慢了</h3></div>
+<p>仔细检查 <a href="#pg170b536fb37a">CPU调速器</a>。如果使用 NVidia 显卡，则在 nvidia-settings 上将 powermizer 设置更改为“首选最高性能”;不过，请检查其温度以确保卡不会过热。更改 Dolphin 的优先级使用 <i>nice</i>。终止不必要的进程和禁用合成也有帮助。如上所述，正确配置 Dolphin 是最重要的部分。
+</p><p>许多系统都有多个 GPU，例如英特尔的集成低性能 GPU 和专用显卡。请参阅 <a href="#pgb7ad5a571901">PRIME</a>，了解如何在专用 GPU 上执行 Dolphin。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0d52c1399969_.E6.B8.B8.E6.88.8F.E5.9C.A8.E7.AC.AC.E4.B8.80.E6.AC.A1.E9.80.9A.E5.85.B3.E6.97.B6.E7.BB.8F.E5.B8.B8.E5.8D.A1.E9.A1.BF.EF.BC.8C.E4.BD.86.E5.90.8E.E7.BB.AD.E8.BF.90.E8.A1.8C.E5.BE.88.E6.B5.81.E7.95.85" id="游戏在第一次通关时经常卡顿，但后续运行很流畅"><span id=".E6.B8.B8.E6.88.8F.E5.9C.A8.E7.AC.AC.E4.B8.80.E6.AC.A1.E9.80.9A.E5.85.B3.E6.97.B6.E7.BB.8F.E5.B8.B8.E5.8D.A1.E9.A1.BF.EF.BC.8C.E4.BD.86.E5.90.8E.E7.BB.AD.E8.BF.90.E8.A1.8C.E5.BE.88.E6.B5.81.E7.95.85"></span>游戏在第一次通关时经常卡顿，但后续运行很流畅</h3></div>
+<p>这种卡顿可能是因为着色器编译导致图形渲染必须暂停。Dolphin 已经获得了将这种口吃降至最低的先进技术，称为 Ubershaders。它们需要强大的 GPU 才能发挥最佳作用，因此默认情况下不启用。在图形配置对话框的<i>着色器编译</i>下，尝试<i>同步（Ubershaders）</i>或<i>异步（Ubershaders）</i>选项之一。将鼠标悬停在单选按钮上可查看对话框中更详细的说明文本。使用<i>在开始之前编译着色器</i>选项也可以减少卡顿，但代价是游戏开始前的延迟时间更长。
+</p><p>参见: <a href="#pg5f7223c277dc">性能优化</a>——大多数建议应该会有帮助。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0d52c1399969_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://en.wikipedia.org/wiki/Dolphin_(emulator)">Wikipedia:Dolphin (emulator)</a></li>
+<li><a href="https://dolphin-emu.org/docs/guides/performance-guide/">Dolphin的性能指南。</a></li>
+<li><a href="https://dolphin-emu.org/docs/faq/">Dolphin的 FAQ</a></li>
+<li><a href="https://wiki.dolphin-emu.org/index.php?title=Ripping_Game_Discs">Dolphin 的 wiki 条目，用于合法获取游戏转储</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807034614
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.119 seconds
+Real time usage: 0.123 seconds
+Preprocessor visited node count: 191/1000000
+Revision size: 9361/2097152 bytes
+Post‐expand include size: 4835/2097152 bytes
+Template argument size: 2252/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   24.261      1 -total
+ 18.93%    4.592      1 Template:TranslationStatus
+ 16.78%    4.071      1 Template:Expansion
+ 15.68%    3.804      4 Template:Tip
+ 10.10%    2.451      2 Template:Pkg
+  9.91%    2.403      4 Template:Note
+  7.77%    1.885      1 Template:Warning
+  6.94%    1.684      1 Template:META_Message
+  5.22%    1.266      3 Template:Ic
+-->
+<!-- Render ID 898d530e-9212-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7727:|#|:idhash:canonical!zh-cn and timestamp 20260807034614 and revision id 33606. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,392 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg4e165f93ce98">LDAP 认证</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/LDAP_authentication">LDAP_authentication</a>，最近一次同步于 2024-05-30，若英文版本有所<a href="https://wiki.archlinux.org/title/LDAP_authentication?diff=0&amp;oldid=791431">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/LDAP_authentication_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pge1dda5cfbff6">OpenLDAP</a></li>
+<li><a href="#pg755e5f753866">认证管理</a></li>
+</ul></div>
+<p>这是关于如何配置 Arch Linux 安装以针对 LDAP 目录进行身份验证的指南。LDAP 目录服务可以是本地的（安装在同一台计算机上）或网络中的（例如，在需要集中身份验证的实验环境中）。
+</p><p>本指南分为两部分。第一部分介绍如何安装和配置 <a href="#pge1dda5cfbff6">OpenLDAP</a> 服务端。第二部分是如何在客户端上配置所需的 NSS 和 PAM 模块。如果您只想将 Arch 加入到已存在的 LDAP 服务器进行身份验证，可以跳到第二部分。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4e165f93ce98_.E6.9C.8D.E5.8A.A1.E7.AB.AF.E9.85.8D.E7.BD.AE" id="服务端配置"><span id=".E6.9C.8D.E5.8A.A1.E7.AB.AF.E9.85.8D.E7.BD.AE"></span>服务端配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4e165f93ce98_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h3></div>
+<p>服务端实现软件如下：
+</p>
+<ul><li><b>389 Directory Server</b> — 这是一个高性能的开源企业级LDAP服务器，用于存储和管理身份认证、用户、群组、组织结构等信息。</li></ul>
+<dl><dd><a href="https://www.port389.org/">https://www.port389.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=389-ds-base">389-ds-base</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pge1dda5cfbff6">OpenLDAP</a></b> — 这是一个开源的轻量级LDAP服务器，用于存储和管理身份验证、用户、组、服务配置等信息。</li></ul>
+<dl><dd><a href="https://www.openldap.org/">https://www.openldap.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openldap">openldap</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li>ApacheDS——这是Apache软件基金会下的一个开源项目，提供LADP服务，用于存储、管理和组织分布式信息如用户、群组、权限的呢个，支持高度安全性和可扩展性。<br/><a href="https://directory.apache.org/apacheds/">https://directory.apache.org/apacheds/</a></li></ul>
+<p>本文档使用<a href="#pge1dda5cfbff6">OpenLDAP</a>进行演示，请<a href="#pge1dda5cfbff6">安装 OpenLDAP 服务器</a>并配置<a href="#pge1dda5cfbff6">服务器</a>和<a href="#pge1dda5cfbff6">客户端</a>。完成此操作后，请返回此处。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4e165f93ce98_.E8.AE.BF.E9.97.AE.E6.8E.A7.E5.88.B6" id="访问控制"><span id=".E8.AE.BF.E9.97.AE.E6.8E.A7.E5.88.B6"></span>访问控制</h3></div>
+<p>为确保LDAP服务中存储的（已加密）密码不被他人轻易读取，但又允许用户可更改自己的某些属性（例如自己的密码或图片等），需要LDAP配置访问控制策略，请创建临时 LDIF 文件 <code>allowpwchange.ldif</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>请根据实际情况将 <b>exmaple</b> 和 <b>org</b> 修改成对应域名。</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">allowpwchange.ldif</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">dn: olcDatabase={1}mdb,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to attrs=cn,givenName,sn,userPassword,shadowLastChange,mail,loginShell,photo by self write by anonymous auth by dn.base="cn=Manager,dc=<i><b>example</b></i>,dc=<i><b>org</b></i>" write by * none
+olcAccess: {1}to * by self read by dn.base="cn=Manager,dc=<i><b>example</b></i>,dc=<i><b>org</b></i>" write by * read</pre>
+<p>在数据库编号 0 （cn=config） 上导入它：
+</p>
+<pre>$ slapmodify -n 0 -l allowpwchange.ldif</pre>
+<p>然后<a href="#pgde0ed04f703b">重新启动</a> <code>slapd.service</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4e165f93ce98_.E5.AF.BC.E5.85.A5.E5.9F.BA.E6.9C.AC.E7.BB.84.E7.BB.87.E6.9E.B6.E6.9E.84" id="导入基本组织架构"><span id=".E5.AF.BC.E5.85.A5.E5.9F.BA.E6.9C.AC.E7.BB.84.E7.BB.87.E6.9E.B6.E6.9E.84"></span>导入基本组织架构</h3></div>
+<p>创建临时文件<code>base.ldif</code>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">base.ldif</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># 域
+dn: dc=<i><b>example</b></i>,dc=<i><b>org</b></i>
+dc: example
+o: Example Organization
+objectClass: dcObject
+objectClass: organization
+
+# 域管理员账户
+dn: cn=Manager,dc=<i><b>example</b></i>,dc=<i><b>org</b></i>
+cn: Manager
+description: LDAP administrator
+objectClass: organizationalRole
+objectClass: top
+roleOccupant: dc=<i><b>example</b></i>,dc=<i><b>org</b></i>
+
+# 用户
+dn: ou=People,dc=<i><b>example</b></i>,dc=<i><b>org</b></i>
+ou: People
+objectClass: top
+objectClass: organizationalUnit
+
+# 用户组
+dn: ou=Group,dc=<i><b>example</b></i>,dc=<i><b>org</b></i>
+ou: Group
+objectClass: top
+objectClass: organizationalUnit</pre>
+<p>导入到域服务中
+</p>
+<pre>$ ldapadd -D "cn=Manager,dc=example,dc=org" -W -f base.ldif</pre>
+<p>使用下面命令检测是否导入成功
+</p>
+<pre>$ ldapsearch -x -b 'dc=example,dc=org' '(objectclass=*)'</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4e165f93ce98_.E5.AF.BC.E5.85.A5.E7.94.A8.E6.88.B7.E4.BF.A1.E6.81.AF" id="导入用户信息"><span id=".E5.AF.BC.E5.85.A5.E7.94.A8.E6.88.B7.E4.BF.A1.E6.81.AF"></span>导入用户信息</h3></div>
+<p>按照下面模板创建文件<code>user_joe.ldif</code>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">user_joe.ldif</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">dn: uid=johndoe,ou=People,dc=<i><b>example</b></i>,dc=<i><b>org</b></i>
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: johndoe
+cn: John Doe
+sn: Doe
+givenName: John
+title: Guinea Pig
+telephoneNumber: +0 000 000 0000
+mobile: +0 000 000 0000
+postalAddress: AddressLine1$AddressLine2$AddressLine3
+userPassword: {CRYPT}<i><b>xxxxxxxxxx</b></i>
+labeledURI: <a href="https://archlinux.org/">https://archlinux.org/</a>
+loginShell: /bin/bash
+uidNumber: 9999
+gidNumber: 9999
+homeDirectory: /home/johndoe/
+description: This is an example user</pre>
+<p>userPassword 条目中的 <code>xxxxxxxxxx</code> 应替换为 <code>/etc/shadow</code> 中的值或使用 <code>slappasswd</code> 命令。使用下面命令导入用户：
+</p>
+<pre>$ ldapadd -D "cn=Manager,dc=example,dc=org" -W -f user_joe.ldif</pre>
+<p>添加同名的POISX用户组
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">group_joe.ldif</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">dn: cn=joe,ou=Group,dc=<i><b>example</b></i>,dc=<i><b>org</b></i>
+objectClass: top
+objectClass: posixGroup
+cn: joe
+gidNumber: 9999</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>还可以使用 PADL 软件的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/openldap-migrationtools/">openldap-migrationtools</a></span><sup><small>AUR</small></sup></span> 自动将所有本地帐户（和组等）迁移到 LDAP 服务中。
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4e165f93ce98_.E5.AE.A2.E6.88.B7.E7.AB.AF.E9.85.8D.E7.BD.AE" id="客户端配置"><span id=".E5.AE.A2.E6.88.B7.E7.AB.AF.E9.85.8D.E7.BD.AE"></span>客户端配置</h2></div>
+<p>按照 <a href="#pge1dda5cfbff6">OpenLDAP</a> 中所述安装 OpenLDAP 客户端。确保可以使用 ldapsearch 查询服务。
+</p><p>根据需求，选择仅在线身份验证或在线和离线身份验证。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4e165f93ce98_.E5.9C.A8.E7.BA.BF.E8.AE.A4.E8.AF.81" id="在线认证"><span id=".E5.9C.A8.E7.BA.BF.E8.AE.A4.E8.AF.81"></span>在线认证</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4e165f93ce98_NSS_.E9.85.8D.E7.BD.AE" id="NSS_配置"><span id="NSS_.E9.85.8D.E7.BD.AE"></span>NSS 配置</h4></div>
+<p>NSS<sup class="reference" id="cite_ref-1"><span class="cite-bracket">[</span>1<span class="cite-bracket">]</span></sup> 是一种系统工具，它以配置数据库的形式管理不同的源。例如:<code>/etc/passwd</code> 是 <code>passwd</code> 数据库的文件类型源，用于存储用户帐户。
+</p><p><a href="#pg9ef105bf1e3c">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nss-pam-ldapd">nss-pam-ldapd</a></span><sup><small>包</small></sup></span> 软件包。
+</p><p>修改<code>/etc/nsswitch.conf</code>，它是 NSS 的主要配置文件。它定义 NSS 哪些源用于哪些系统数据库。我们需要将<code>ldap</code>指令添加到<code>passwd</code>、<code>group</code>和<code>shadow</code>数据库中，请将配置文件修改至如下所示：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nsswitch.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">passwd: files <b>ldap</b>
+group: files <b>ldap</b>
+shadow: files <b>ldap</b></pre>
+<p>修改<code>/etc/nslcd.conf</code>配置文件，并将<code>base</code>和<code>uri</code>修改为LDAP服务对应的值。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nslcd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+uri <b>ldap://ldap-server.example.org/</b>
+base <b>dc=example,dc=org</b>
+binddn <b>cn=Manager,dc=example,dc=org</b>
+bindpw <b>YourPassword</b>
+...</pre>
+<p><a href="#pgaa5af66d88c3">重启</a>服务<code>nslcd.service</code>。
+</p><p>若配置正确，在客户端上执行命令:<code>getent passwd</code>将会列出LDAP服务上面的用户。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4e165f93ce98_PAM_.E9.85.8D.E7.BD.AE" id="PAM_配置"><span id="PAM_.E9.85.8D.E7.BD.AE"></span>PAM 配置</h4></div>
+<p>简单的PAM配置原则是将<code>pam_ldap.so</code>配置在任何包含<code>pam_unix.so</code>的配置文件中。Arch在使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pambase">pambase</a></span><sup><small>包</small></sup></span>后有效地减少了编辑量，有关于PAM的更多信息，请查阅<a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/managing_smart_cards/pam_configuration_files">RedHat文档</a>，如果需要可查看<a href="https://arthurdejong.org/nss-pam-ldapd/">nss-pam-ldapd</a>官方文档。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若想防止 UID 与系统上的本地用户发生冲突，需要在<code>pam_ldap.so</code>行的末尾配置包含<code>minimum_uid=10000</code> 或类似值。并必须确保 LDAP 服务可返回与限制匹配的<code>uidNumber</code>字段。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>每个阶段（auth、session、password、account）都构成一个独立的链，其顺序至关重要。带有sufficient的行有时会“短路”，会跳过该阶段的其余内容，因此对于<i>auth</i>、<i>password</i>和<i>account</i>阶段来说，需要在<i>required</i>行之前添加<i>sufficient</i>行，而在<i>session</i>阶段则是放在required行之后；<i>optional</i>几乎是放在最后。添加<code>pam_ldap.so</code>行时，请不要无故改变其他行的相对顺序！只需将LDAP插入到现有链中即可。</div>
+<p>首先修改<code>/etc/pam.d/system-auth</code>。此文件包含在<code>pam.d</code>的大多数其他文件中，因此在此处的更改可很好地分发配置。当<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pambase">pambase</a></span><sup><small>包</small></sup></span>更新时可能会更改此文件。
+</p><p>在每个阶段的开始位置添加<code>pam_ldap.so</code>，并将其配置为sufficient，但<i>session</i>阶段需要配置为optional。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/system-auth</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"><b>auth      sufficient pam_ldap.so</b>
+auth      required  pam_unix.so     try_first_pass nullok
+auth      optional  pam_permit.so
+auth      required  pam_env.so
+
+<b>account   sufficient pam_ldap.so</b>
+account   required  pam_unix.so
+account   optional  pam_permit.so
+account   required  pam_time.so
+
+<b>password  sufficient pam_ldap.so</b>
+password  required  pam_unix.so     try_first_pass nullok sha512 shadow
+password  optional  pam_permit.so
+
+session   required  pam_limits.so
+session   required  pam_unix.so
+<b>session   optional  pam_ldap.so</b>
+session   optional  pam_permit.so</pre>
+<p>然后以相同的方式修改文件<code>/etc/pam.d/su</code>和<code>/etc/pam.d/su-l</code>，当用户执行命令:<code>su --login</code>时，会用到<code>su-l</code>文件。
+</p><p>在每个阶段开始位置添加<code>pam_ldap.so</code>,但不要放在<code>pam_rootok</code>的前面，并配置为sufficient，而在auth阶段中的<code>pam_unix.so</code>模块后面则需要添加<code>use_first_pass</code>。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/su</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+auth      sufficient    pam_rootok.so
+<b>auth      sufficient    pam_ldap.so</b>
+# 取消对以下行的注释，以默认信任“wheel”组中的用户。
+#auth     sufficient    pam_wheel.so trust use_uid
+# 取消对以下行的注释，以必须要求用户位于“wheel”组中。
+#auth     required      pam_wheel.so use_uid
+auth      required	pam_unix.so <b>use_first_pass</b>
+<b>account   sufficient    pam_ldap.so</b>
+account   required	pam_unix.so
+<b>session   sufficient    pam_ldap.so</b>
+session   required	pam_unix.so</pre>
+<p>若要使用户能修改自己密码，需要修改文件<code>/etc/pam.d/passwd</code>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/passwd</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+<b>password        sufficient      pam_ldap.so</b>
+password        required        pam_unix.so sha512 shadow nullok</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4e165f93ce98_.E7.99.BB.E5.BD.95.E6.97.B6.E5.88.9B.E5.BB.BA.E4.B8.BB.E6.96.87.E4.BB.B6.E5.A4.B9" id="登录时创建主文件夹"><span id=".E7.99.BB.E5.BD.95.E6.97.B6.E5.88.9B.E5.BB.BA.E4.B8.BB.E6.96.87.E4.BB.B6.E5.A4.B9"></span>登录时创建主文件夹</h5></div>
+<p>若希望在登录时自动创建主文件夹（注：不打算使用<a href="#pg09db98375319">NFS</a>存储主文件夹情况下），请修改文件<code>/etc/pam.d/system-login</code>并将<code>pam_mkhomedir.so</code>添加到任何session阶段的“sufficient”项目上方。若需从 ssh、xdm、sddm、gdm 等或在 tty 登录时会自动创建主文件夹。请以相同的方式修改其他文件，例如当执行命令:<code>su</code>和<code>su --login</code>时会使用文件<code>/etc/pam.d/su</code>和<code>/etc/pam.d/su-l</code>。如果不想在 ssh 登录是执行此操作，请修改文件<code>system-local-login</code>，而不是文件<code>system-login</code>。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/system-login</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...未显示文件头部...
+session    optional   pam_loginuid.so
+session    include    system-auth
+session    optional   pam_motd.so          motd=/etc/motd
+session    optional   pam_mail.so          dir=/var/spool/mail standard quiet
+-session   optional   pam_systemd.so
+session    required   pam_env.so
+<b>session    required   pam_mkhomedir.so skel=/etc/skel umask=0077</b></pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/su-l</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...未显示文件头部...
+<b>session         required        pam_mkhomedir.so skel=/etc/skel umask=0077</b>
+session         sufficient      pam_ldap.so
+session         required        pam_unix.so</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4e165f93ce98_.E5.90.AF.E7.94.A8_sudo" id="启用_sudo"><span id=".E5.90.AF.E7.94.A8_sudo"></span>启用 sudo</h5></div>
+<p>要从 LDAP 用户启用 sudo，请编辑 /etc/pam.d/sudo。并相应地修改 sudoers。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/sudo</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+<b>auth      sufficient    pam_ldap.so</b>
+auth      required      pam_unix.so  <b>try_first_pass</b>
+auth      required      pam_nologin.so</pre>
+<p>还需要在<code>/etc/openldap/ldap.conf</code>中添加以下内容：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openldap/ldap.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+sudoers_base ou=sudoers,dc=example,dc=org</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg4e165f93ce98_.E7.94.A8SSSD.E5.AE.8C.E6.88.90.E5.9C.A8.E7.BA.BF.E5.92.8C.E7.A6.BB.E7.BA.BF.E8.AE.A4.E8.AF.81" id="用SSSD完成在线和离线认证"><span id=".E7.94.A8SSSD.E5.AE.8C.E6.88.90.E5.9C.A8.E7.BA.BF.E5.92.8C.E7.A6.BB.E7.BA.BF.E8.AE.A4.E8.AF.81"></span>用SSSD完成在线和离线认证</h3></div>
+<p>SSSD 是一个系统守护程序。它的主要功能是通过一个通用框架提供对身份和身份验证以及远程资源的访问，该框架可以为系统提供缓存和离线支持。它提供PAM和NSS模块，未来将提供基于D-BUS的接口，用于扩展用户信息。它还提供了一个数据库来存储本地用户以及扩展用户数据。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>必须为 LDAP 服务器配置TLS加密，否则 SSSD 将不起作用。</div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sssd">sssd</a></span><sup><small>包</small></sup></span> 包
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4e165f93ce98_.E9.85.8D.E7.BD.AEsssd" id="配置sssd"><span id=".E9.85.8D.E7.BD.AEsssd"></span>配置sssd</h4></div>
+<p>修改sssd配置文件<code>/etc/sssd/sssd.conf</code>，如果文件不存在请自行创建。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sssd/sssd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[sssd]
+config_file_version = 2
+services = nss, pam
+domains = LDAP
+
+[domain/LDAP]
+cache_credentials = true
+enumerate = true
+
+id_provider = ldap
+auth_provider = ldap
+
+ldap_uri = ldap://server1.example.org, ldap://server2.example.org
+ldap_search_base = dc=example,dc=org
+ldap_id_use_start_tls = true
+ldap_tls_reqcert = demand
+ldap_tls_cacert = /etc/openldap/certs/cacerts.pem
+chpass_provider = ldap
+ldap_chpass_uri = ldap://server1.example.org
+entry_cache_timeout = 600
+ldap_network_timeout = 2
+
+# 若 OpenLDAP 支持 posixGroup，可取消注释以下两行
+# 获取用户组成员身份支持（需要注释下面冲突配置）
+#ldap_schema = rfc2307
+#ldap_group_member = memberUid
+
+# 其他 LDAP 服务可能支持的组成员身份功能
+ldap_schema = rfc2307bis
+ldap_group_member = uniqueMember</pre>
+<p>以上只是一个示例。参见<span class="plainlinks archwiki-template-man" title="$ man 5 sssd.conf"><a href="https://man.archlinux.org/man/sssd.conf.5">sssd.conf(5)</a></span> 了解完整的细节。
+</p><p>最后将文件权限<code>chmod 600 /etc/sssd/sssd.conf</code>，否则 sssd 将无法启动。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4e165f93ce98_.E9.85.8D.E7.BD.AE_NSS" id="配置_NSS"><span id=".E9.85.8D.E7.BD.AE_NSS"></span>配置 NSS</h4></div>
+<p>修改<code>/etc/nsswitch.conf</code>配置文件如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nsswitch.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">passwd: files systemd <b>sss</b>
+group: files [SUCCESS=merge] systemd <b>sss</b>
+shadow: files systemd <b>sss</b>
+gshadow: files systemd 
+<b>sudoers: files sss</b>
+
+publickey: files
+
+hosts: mymachines resolve [!UNAVAIL=return] files myhostname dns
+networks: files
+
+protocols: files
+services: files
+ethers: files
+rpc: files
+
+netgroup: files</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg4e165f93ce98_.E9.85.8D.E7.BD.AE_PAM" id="配置_PAM"><span id=".E9.85.8D.E7.BD.AE_PAM"></span>配置 PAM</h4></div>
+<p>首先配置系统认证<code>/etc/pam.d/system-auth</code>，所有与系统相关的流程都会经过当前文件,每当用户登录时，使用sssd模块进行认证。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/system-auth</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+
+<b>auth      sufficient     pam_sss.so forward_pass</b>
+auth      required         pam_unix.so try_first_pass nullok
+auth      optional         pam_permit.so
+auth      required         pam_env.so
+
+<b>account   [default=bad success=ok user_unknown=ignore authinfo_unavail=ignore] pam_sss.so</b>
+account   required         pam_unix.so
+account   optional         pam_permit.so
+account   required         pam_time.so
+
+<b>password  sufficient     pam_sss.so</b>
+password  required         pam_unix.so try_first_pass nullok sha512 shadow
+password  optional         pam_permit.so
+
+<b>session   required       pam_mkhomedir.so skel=/etc/skel/ umask=0077</b>
+session   required         pam_limits.so
+session   required         pam_unix.so
+session   optional         pam_sss.so
+session   optional         pam_permit.so</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果在用 GNOME/Keyring，当在 PAM 文件的开头添加 'sufficient' 会导致 Gnome Keyring 无法解锁。有关解决方案，请查看高级 PAM 配置。</div>
+<p>若向要使用<code>su</code>命令时通过sssd进行认证，则请按照下面示例修改文件<code>/etc/pam.d/su</code>。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/su</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+auth            sufficient      pam_rootok.so
+<b>auth           sufficient      pam_sss.so      forward_pass</b>
+auth            required        pam_unix.so
+<b>account        [default=bad success=ok user_unknown=ignore authinfo_unavail=ignore] pam_sss.so</b>
+account         required        pam_unix.so
+session         required        pam_unix.so
+<b>session        optional        pam_sss.so</b></pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4e165f93ce98_.E5.90.AF.E7.94.A8_sudo_2" id="启用_sudo_2"><span id=".E5.90.AF.E7.94.A8_sudo_2"></span>启用 sudo</h5></div>
+<p>按照下面示例修改文件<code>/etc/pam.d/sudo</code>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/sudo</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+<b>auth</b>           <b>sufficient</b>     <b>pam_sss.so</b>
+auth           required        pam_unix.so try_first_pass
+auth           required        pam_nologin.so</pre>
+<p>配置<code>/etc/sssd/sssd.conf</code>文件，添加sudo服务和sudo用户搜索路径。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sssd/sssd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[sssd]
+...
+services = nss, pam, <b>sudo</b>
+...
+
+[domain/LDAP]
+...
+ldap_sudo_search_base = <b>ou=sudoers,dc=example,dc=org</b>
+...</pre>
+<p>或者配置 sudo 以允许所需的 LDAP 用户使用 sudo。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg4e165f93ce98_.E5.AF.86.E7.A0.81.E7.AE.A1.E7.90.86" id="密码管理"><span id=".E5.AF.86.E7.A0.81.E7.AE.A1.E7.90.86"></span>密码管理</h5></div>
+<p>若要在使用<code>su</code>登录时能修改用户过期密码，请参照下面示例修改文件<code>/etc/pam.d/su</code>。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/su</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+...
+auth        include     system-auth
+account     include     system-auth
+session     include     system-auth
+<b>password    include    system-auth</b></pre>
+<p>重启<code>sshd.service</code>服务。
+</p><p>若配置正确，使用命令<code>getent passwd <i>LDAP用户名</i></code>或<code>id <i>LDAP用户名</i></code>能查看到用户信息。
+</p><p>使用用户登录后，凭据将被缓存，当 ldap 服务器脱机或不可用时，仍然能够使用缓存的凭据进行登录。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg4e165f93ce98_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+
+<!-- 
+NewPP limit report
+Cached time: 20260807154747
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.185 seconds
+Real time usage: 0.190 seconds
+Preprocessor visited node count: 946/1000000
+Revision size: 16844/2097152 bytes
+Post‐expand include size: 17647/2097152 bytes
+Template argument size: 10372/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 935/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   64.441      1 -total
+ 11.67%    7.523     59 Template:Ic
+  8.44%    5.439      2 Template:App
+  7.80%    5.024     20 Template:Hc
+  6.93%    4.468      2 Template:提示
+  5.30%    3.417      1 Template:翻译状态
+  4.82%    3.109      6 Template:Pkg
+  3.37%    2.173      2 Template:Related
+  3.34%    2.155      1 Template:相关文章开始
+  2.98%    1.919      1 Template:Aur
+-->
+<!-- Render ID 5630df8e-9277-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7754:|#|:idhash:canonical!zh-cn and timestamp 20260807154747 and revision id 33637. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

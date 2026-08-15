@@ -1,0 +1,173 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg15edc6bdaa6b">迁移到新硬件</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Migrate_installation_to_new_hardware">Migrate installation to new hardware</a>，最近一次同步于 2021-03-02，若英文版本有所<a href="https://wiki.archlinux.org/title/Migrate_installation_to_new_hardware?diff=0&amp;oldid=643197">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Migrate_installation_to_new_hardware_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgcfb9b29b194a">架构间迁移</a></li>
+<li><a href="#pg2fb7b809b24d">将现有安装移动到（或移出）虚拟机</a></li>
+</ul></div>
+<p>本文讨论将Arch Linux系统迁移到新硬件所需的步骤。
+我们的目标是实现相同的Arch Linux安装过程，对于硬件无关的软件和配置。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>以下某些操作可能有危险：建议您在继续操作之前，先备份旧系统上的所有重要数据。</div>
+<p>移植已安装的系统有两种不同的方法：
+</p>
+<ol><li>“自下而上”：在新硬件上安装全新的Arch Linux系统，然后恢复已安装的软件包和配置文件，如<a href="#pg5319995350d6">以点为开头的文件</a>中所述。</li>
+<li>“自上而下”：将旧硬盘克隆到新硬盘，或将旧硬盘放入新系统；在需要的地方修改配置文件。</li></ol>
+<p>“自上而下”的方法比“自下而上”的方法更准确地再现了原始系统。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg15edc6bdaa6b_.E9.80.82.E9.85.8D.E6.96.B0.E7.A1.AC.E4.BB.B6" id="适配新硬件"><span id=".E9.80.82.E9.85.8D.E6.96.B0.E7.A1.AC.E4.BB.B6"></span>适配新硬件</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>对于这两种方法，我们必须考虑新旧硬件之间的差异，并相应地修改安装的驱动程序和配置。</div>
+<p>在开始之前，先研究一下新硬件的各个方面，并列出不同之处。一般的区别有
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_.E6.9C.BA.E6.A2.B0.E7.A1.AC.E7.9B.98.E4.B8.8E.E5.9B.BA.E6.80.81.E7.A1.AC.E7.9B.98" id="机械硬盘与固态硬盘"><span id=".E6.9C.BA.E6.A2.B0.E7.A1.AC.E7.9B.98.E4.B8.8E.E5.9B.BA.E6.80.81.E7.A1.AC.E7.9B.98"></span>机械硬盘与固态硬盘</h3></div>
+<p>参见文章<a href="#pg3387eae36994">Solid state drive</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_CPU.E4.BE.9B.E5.BA.94.E5.95.86" id="CPU供应商"><span id="CPU.E4.BE.9B.E5.BA.94.E5.95.86"></span>CPU供应商</h3></div>
+<p>如果将CPU切换到其他供应商的CPU（例如从Intel更换为AMD），请更改<a href="#pgdc6bceef5651">微码</a>配置。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_GPU.E4.BE.9B.E5.BA.94.E5.95.86" id="GPU供应商"><span id="GPU.E4.BE.9B.E5.BA.94.E5.95.86"></span>GPU供应商</h3></div>
+<p>如果您将GPU更换为其他供应商（例如，从<a href="#pgedfe18626036">AMD</a>更换为<a href="#pge12579b7d4ac">NVIDIA</a>），请更换图形驱动程序。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_UEFI.E4.B8.8EMBR.E5.BC.95.E5.AF.BC.E4.BB.A3.E7.A0.81.E5.BC.95.E5.AF.BC" id="UEFI与MBR引导代码引导"><span id="UEFI.E4.B8.8EMBR.E5.BC.95.E5.AF.BC.E4.BB.A3.E7.A0.81.E5.BC.95.E5.AF.BC"></span>UEFI与MBR引导代码引导</h3></div>
+<p>如果您更换到较新的支持UEFI的主板，则可能更可取或需要从“MBR引导代码”引导切换到<a href="#pg46c3147defaf">UEFI</a>引导。在这种情况下，需要一个新的<a href="#pg99a0c4106b90">EFI分区</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg15edc6bdaa6b_.E8.87.AA.E4.B8.8B.E8.80.8C.E4.B8.8A" id="自下而上"><span id=".E8.87.AA.E4.B8.8B.E8.80.8C.E4.B8.8A"></span>自下而上</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_.E5.9C.A8.E6.97.A7.E7.B3.BB.E7.BB.9F.E4.B8.8A" id="在旧系统上"><span id=".E5.9C.A8.E6.97.A7.E7.B3.BB.E7.BB.9F.E4.B8.8A"></span>在旧系统上</h3></div>
+<p>我们在这里定义了从旧系统迁移到新系统的最小配置，这是此方法与安装指南的不同之处。考虑要复制到新系统的<code>/etc</code>中的配置文件和<code>/home</code>中的“.”文件，以及用户数据文件。如果您无法从新系统访问旧系统，则备份要复制的所有文件。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg15edc6bdaa6b_.E5.88.97.E5.87.BA.E5.B7.B2.E5.AE.89.E8.A3.85.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85" id="列出已安装的软件包"><span id=".E5.88.97.E5.87.BA.E5.B7.B2.E5.AE.89.E8.A3.85.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>列出已安装的软件包</h4></div>
+<pre>$ pacman -Qqen &gt; pkglist.txt
+$ pacman -Qqem &gt; pkglist_aur.txt
+</pre>
+<p>为您提供从软件仓库和<a href="#pg89cb7b475cfb">AUR</a>显式安装的软件包的列表。如果您创建了备份，请将其包含在备份中。
+</p><p>您还可以使用以下脚本查找pacman感知不到的二进制文件和库（例如，g. 通过Steam、Desura或使用自己的安装方法安装的软件）：
+</p>
+<pre>find / -regextype posix-extended -regex "/(sys|srv|proc)|.*/\.ccache/.*" -prune -o -type f \
+-exec bash -c 'file "{}" | grep -E "(32|64)-bit"' \; | \
+awk -F: '{print $1}' | \
+while read -r bin; \
+do pacman -Qo "$bin" &amp;&gt;/dev/null || echo "$bin"; \
+done
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg15edc6bdaa6b_pacman_.E7.BC.93.E5.AD.98" id="pacman_缓存"><span id="pacman_.E7.BC.93.E5.AD.98"></span>pacman 缓存</h4></div>
+<p>如果不更改体系结构（例如，从x86更改为x86_64），请考虑备份<code>/var/cache/pacman/pkg/</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_.E5.9C.A8.E6.96.B0.E7.B3.BB.E7.BB.9F.E4.B8.8A" id="在新系统上"><span id=".E5.9C.A8.E6.96.B0.E7.B3.BB.E7.BB.9F.E4.B8.8A"></span>在新系统上</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg15edc6bdaa6b_.E5.AE.89.E8.A3.85.E6.8C.87.E5.8D.97.E7.9A.84.E5.89.8D.E5.8D.8A.E9.83.A8.E5.88.86" id="安装指南的前半部分"><span id=".E5.AE.89.E8.A3.85.E6.8C.87.E5.8D.97.E7.9A.84.E5.89.8D.E5.8D.8A.E9.83.A8.E5.88.86"></span>安装指南的前半部分</h4></div>
+<p>有关安装新系统的基本信息，请参阅<a href="#pg0d85b8367b38">Installation guide</a>。按照安装指南的前半部分操作，但不包括pacstrap命令。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg15edc6bdaa6b_.E5.A4.8D.E5.88.B6pacman.E7.BC.93.E5.AD.98" id="复制pacman缓存"><span id=".E5.A4.8D.E5.88.B6pacman.E7.BC.93.E5.AD.98"></span>复制pacman缓存</h4></div>
+<p>将位于<code>/var/cache/pacman/pkg/</code>的pacman缓存从旧系统复制到新系统，或从备份复制到新系统。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg15edc6bdaa6b_.E5.AE.89.E8.A3.85.E6.8C.87.E5.8D.97.E7.9A.84.E5.90.8E.E5.8D.8A.E9.83.A8.E5.88.86" id="安装指南的后半部分"><span id=".E5.AE.89.E8.A3.85.E6.8C.87.E5.8D.97.E7.9A.84.E5.90.8E.E5.8D.8A.E9.83.A8.E5.88.86"></span>安装指南的后半部分</h4></div>
+<p>继续执行中的安装指南（包括pacstrap命令），直到最后，但不要重新启动。不要跳过pacstrap命令，因为它除了安装软件包之外还会执行其他工作。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg15edc6bdaa6b_.E5.AE.89.E8.A3.85.E4.BB.A5.E5.89.8D.E5.AE.89.E8.A3.85.E7.9A.84.E8.BD.AF.E4.BB.B6" id="安装以前安装的软件"><span id=".E5.AE.89.E8.A3.85.E4.BB.A5.E5.89.8D.E5.AE.89.E8.A3.85.E7.9A.84.E8.BD.AF.E4.BB.B6"></span>安装以前安装的软件</h4></div>
+<p>编辑pkglist.txt(和pkglist_aur.txt)并删除新系统上不需要的驱动程序。然后使用下述命令安装之前安装过的软件
+</p>
+<pre># pacman -S --needed - &lt; pkglist.txt
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg15edc6bdaa6b_.E8.87.AA.E4.B8.8A.E8.80.8C.E4.B8.8B" id="自上而下"><span id=".E8.87.AA.E4.B8.8A.E8.80.8C.E4.B8.8B"></span>自上而下</h2></div>
+<p>自上而下方法有两个选项，您可以保留已安装系统的驱动器并修改其内容，也可以将系统复制到新驱动器。如果保留驱动器并对其进行修改，然后将其放回旧系统中，则修改可能会导致旧系统无法启动。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_.E6.B8.85.E7.90.86.E6.97.A7.E7.B3.BB.E7.BB.9F" id="清理旧系统"><span id=".E6.B8.85.E7.90.86.E6.97.A7.E7.B3.BB.E7.BB.9F"></span>清理旧系统</h3></div>
+<p>在克隆系统之前清理系统也是值得的，如<a href="#pgbb7568ec4406">System maintenance#清理文件系统</a>中所述。在继续之前，请确保旧系统在清理后仍按预期工作。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_.E5.B0.86.E7.B3.BB.E7.BB.9F.E5.A4.8D.E5.88.B6.E5.88.B0.E6.96.B0.E9.A9.B1.E5.8A.A8.E5.99.A8" id="将系统复制到新驱动器"><span id=".E5.B0.86.E7.B3.BB.E7.BB.9F.E5.A4.8D.E5.88.B6.E5.88.B0.E6.96.B0.E9.A9.B1.E5.8A.A8.E5.99.A8"></span>将系统复制到新驱动器</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果您计划保留已安装系统的硬盘，则可以跳过此部分。</div>
+<p>将系统复制到新驱动器有两种基本方法：<a href="#pg0bde4888e89f">硬盘克隆</a>和文件复制。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg15edc6bdaa6b_.E7.A1.AC.E7.9B.98.E5.85.8B.E9.9A.86" id="硬盘克隆"><span id=".E7.A1.AC.E7.9B.98.E5.85.8B.E9.9A.86"></span>硬盘克隆</h4></div>
+<p>需要使用Live系统，而不是旧的Arch Linux系统；例如，您可以使用Arch Linux <a href="#pge7b390d21a8a">U 盘安装介质</a>。将复制旧系统的分区布局和文件系统。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg15edc6bdaa6b_.E6.96.87.E4.BB.B6.E5.A4.8D.E5.88.B6" id="文件复制"><span id=".E6.96.87.E4.BB.B6.E5.A4.8D.E5.88.B6"></span>文件复制</h4></div>
+<ul><li>在新驱动器上创建新的<a href="#pg33ead49dca67">分区</a>和<a href="#pg35e92562adc7">文件系统</a>。您可以利用此机会选择与以前不同的分区布局和/或文件系统。</li>
+<li>对于每种文件系统，使用<a href="#pg4bb0ada72a54">rsync</a>或其他可以保留文件权限、属性等的工具将文件从旧驱动器复制到新驱动器。更多详细信息，参见<a href="#pg4bb0ada72a54">rsync#Full system backup</a>，<a href="#pg4bb0ada72a54">Rsync#作为备份工具</a>。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg15edc6bdaa6b_.E4.BC.A0.E8.BE.93.E6.96.B9.E6.B3.95.E7.9A.84.E9.80.89.E6.8B.A9" id="传输方法的选择"><span id=".E4.BC.A0.E8.BE.93.E6.96.B9.E6.B3.95.E7.9A.84.E9.80.89.E6.8B.A9"></span>传输方法的选择</h4></div>
+<p>如何在两个驱动器之间传输数据有许多不同的方法：
+</p>
+<ul><li>将源硬盘和目标硬盘连接到同一台计算机，无论是旧盘还是新盘。数据链路：旧硬盘-&gt;电脑-&gt;新硬盘。</li>
+<li>使用外部硬盘或云备份等临时存储设备。数据链路：旧硬盘-&gt;旧电脑-&gt;存储-&gt;新电脑-&gt;新硬盘。有关概述，请参阅文章<a href="#pgfa803d5010a4">系统备份</a>。</li>
+<li>通过网络传输数据，例如使用<a href="#pg4bb0ada72a54">rsync</a>。数据链路：旧硬盘-&gt;旧电脑-&gt;网络-&gt;新电脑-&gt;新硬盘。</li></ul>
+<p>对于前两个选项，请考虑您可能需要适配器来连接硬盘（PATA-&gt;SATA转接、USB移动硬盘盒等），并选择足够快的连接。
+</p><p>后两个选项要求您在新计算机上使用Live系统，因为此时尚无法从新硬盘启动。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_.E6.9B.B4.E6.96.B0fstab" id="更新fstab"><span id=".E6.9B.B4.E6.96.B0fstab"></span>更新fstab</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>在执行此步骤之前，请确保您不希望在旧系统中使用此驱动器，因为更改<a href="#pgced0cc449f44">fstab</a>文件可能会导致系统无法在旧配置中启动。</div>
+<p>如果您使用的是Arch Linux安装映像，请将新的根分区挂载到<code>/mnt</code>，并挂载好其他需要的分区，就像您在正常安装中所做的那样(请参阅<a href="#pg0d85b8367b38">挂载分区</a>)。
+</p><p>在<code>/mnt/etc/fstab</code>的末尾插入任意注释，如<code>#end of old fstab</code>。按照<a href="#pg0d85b8367b38">安装指南#Fstab</a>中的说明生成一个新的fstab文件，并将其附加到当前的fstab文件中。一定要检查genfstab创建的fstab文件。在这种情况下，请在注释之前检查较旧的fstab条目，删除过期项和重复项；如果旧条目仍然有用，则保留它们。例如，可以保留网络驱动器的挂载条目。一般推荐使用<a href="#pg2636278c0df5">持久化命名</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_.E9.87.8D.E6.96.B0.E5.AE.89.E8.A3.85.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F" id="重新安装引导加载程序"><span id=".E9.87.8D.E6.96.B0.E5.AE.89.E8.A3.85.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F"></span>重新安装引导加载程序</h3></div>
+<p>出于以下原因，您可能需要重新安装和/或重新配置<a href="#pg2be54bdacb4c">启动加载器</a>：
+</p>
+<ul><li>不同的磁盘、分区布局或文件系统</li>
+<li>将<a href="#pg46c3147defaf">UEFI</a>引导条目添加到新的主板NVRAM</li>
+<li>从“MBR引导代码”引导迁移到UEFI引导</li>
+<li>从USB迁移到SATA/NVMe</li>
+<li>更新内核命令行（commandline）
+<ul><li>如果使用不同的GPU，请更新帧缓冲区模式</li>
+<li>更新<a href="#pgdc6bceef5651">微码</a>和initramfs镜像</li></ul></li></ul>
+<p>如果您使用的是Arch Linux live环境，则在重新安装引导加载程序之前，请<a href="#pg5d8a2c5e3ac5">更改根路径</a>进入新系统：
+</p>
+<pre># arch-chroot /mnt
+</pre>
+<p>有关如何安装/重新安装引导程序的说明，请参阅<a href="#pg2be54bdacb4c">启动加载器</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_.E9.87.8D.E6.96.B0.E7.94.9F.E6.88.90.E5.86.85.E6.A0.B8.E6.98.A0.E5.83.8F" id="重新生成内核映像"><span id=".E9.87.8D.E6.96.B0.E7.94.9F.E6.88.90.E5.86.85.E6.A0.B8.E6.98.A0.E5.83.8F"></span>重新生成内核映像</h3></div>
+<p>建议使用<a href="#pgbd0f46fbac92">mkinitcpio</a>重新生成initramfs映像，尽管最初可以使用备用initramfs映像。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_.E9.87.8D.E6.96.B0.E9.85.8D.E7.BD.AE.E9.9F.B3.E9.A2.91" id="重新配置音频"><span id=".E9.87.8D.E6.96.B0.E9.85.8D.E7.BD.AE.E9.9F.B3.E9.A2.91"></span>重新配置音频</h3></div>
+<ul><li>alsamixer volume
+<ul><li>保存设置</li></ul></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15edc6bdaa6b_.E9.87.8D.E6.96.B0.E9.85.8D.E7.BD.AE.E7.BD.91.E7.BB.9C" id="重新配置网络"><span id=".E9.87.8D.E6.96.B0.E9.85.8D.E7.BD.AE.E7.BD.91.E7.BB.9C"></span>重新配置网络</h3></div>
+<p>如果旧系统和迁移后的系统在同一网络中共存，请使用<a href="#pgf42a74f3af9c">hostnamectl</a>设置新主机名。
+</p><p>另请考虑主机名更改后所需的配置更改：
+</p>
+<ul><li>/etc/hosts</li>
+<li>使用主机名的其他应用程序：synergy，nut（网络 ups 工具）</li>
+<li><code>grep -Ri 'hostname' /etc</code>（以root身份运行）也会对需要更新的文件提供一些提示</li></ul>
+<p>将<a href="#pg0d07347d2df8">dhcpcd</a>配合已命名的网络接口使用时，网络接口名称可能会有变化。
+</p>
+<ul><li>使用命令<code>$ dmesg | grep 'renamed from eth'</code>可帮助查找新接口名称</li>
+<li>删除旧接口：<a href="#pg2fc13cd4c13a">disable</a> <code>dhcpcd@enp<i>X</i>s0.service</code></li>
+<li>激活新接口：<a href="#pg6bfd324d34c9">enable</a> <code>dhcpcd@enp<i>X</i>s0.service</code></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg15edc6bdaa6b_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="http://positon.org/clone-a-linux-system-install-to-another-computer">Howto clone a linux system</a></li>
+<li><a href="https://bbs.archlinux.org/viewtopic.php?id=71038">[1]</a></li>
+<li><a href="https://bbs.archlinux.org/viewtopic.php?pid=543214">[2]</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808041434
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.117 seconds
+Real time usage: 0.125 seconds
+Preprocessor visited node count: 260/1000000
+Revision size: 8997/2097152 bytes
+Post‐expand include size: 2489/2097152 bytes
+Template argument size: 904/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   23.616      1 -total
+ 26.46%    6.248      1 Template:翻译状态
+ 12.93%    3.053      1 Template:相关文章开始
+ 10.73%    2.533     11 Template:Ic
+  6.21%    1.467      1 Template:META_Related_articles_start
+  4.75%    1.122      3 Template:警告
+  4.66%    1.100      2 Template:相关
+  3.79%    0.894      1 Template:注意
+  3.67%    0.867      1 Template:相关文章结束
+-->
+<!-- Render ID a93e7d0e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3518:|#|:idhash:canonical!zh-cn and timestamp 20260808041434 and revision id 33879. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

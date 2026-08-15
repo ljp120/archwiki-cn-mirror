@@ -1,0 +1,136 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgb0e48b0a2dc6">电源管理/唤醒触发器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg2693a40edfb6">Wake-on-LAN</a></li>
+<li><a href="#pge7666ea64560">笔记本电脑</a></li>
+</ul></div>
+<p>唤醒触发器是可以将系统从任何硬件<a href="#pga6e29fecd7a5">节能</a><a href="https://en.wikipedia.org/wiki/Advanced_Configuration_and_Power_Interface#Power_states">状态</a>唤醒的事件源。显而易见的例子是电源或挂起按钮、<span class="ilh-all" data-foreign-title="Wake-on-LAN" data-lang-code="en" data-lang-name="英语" data-orig-title="网络唤醒"><span class="ilh-page"><a href="#pg0cfcb9e943e6">网络唤醒</a></span></span>功能或<a href="#pge7666ea64560">笔记本电脑</a>系统中的盖开关。唤醒触发器可以通过下面列出的各种<a href="#pg3473491e6a48">内核</a>接口进行控制。没有涵盖所有可能的触发器的统一接口。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb0e48b0a2dc6_.E5.94.A4.E9.86.92.E8.A7.A6.E5.8F.91.E5.99.A8.E6.8E.A5.E5.8F.A3" id="唤醒触发器接口"><span id=".E5.94.A4.E9.86.92.E8.A7.A6.E5.8F.91.E5.99.A8.E6.8E.A5.E5.8F.A3"></span>唤醒触发器接口</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb0e48b0a2dc6_.2Fproc.2Facpi.2Fwakeup" id="/proc/acpi/wakeup"><span id=".2Fproc.2Facpi.2Fwakeup"></span>/proc/acpi/wakeup</h3></div>
+<p>读取 <code>/proc/acpi/wakeup</code> 文件将生成 ACPI 注册的唤醒源列表，其中包含相应的 <code>sysfs</code> IDs（如果可用）。将条目从<i>设备</i>列写入文件可切换其状态。例如，要禁用打开笔记本电脑盖时的唤醒功能，请运行：
+</p>
+<pre># echo "LID" &gt; /proc/acpi/wakeup
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb0e48b0a2dc6_.2Fsys.2Fmodule.2Facpi.2Fparameters.2Fec_no_wakeup" id="/sys/module/acpi/parameters/ec_no_wakeup"><span id=".2Fsys.2Fmodule.2Facpi.2Fparameters.2Fec_no_wakeup"></span>/sys/module/acpi/parameters/ec_no_wakeup</h3></div>
+<p>该文件表示 ACPI <a href="#pg6dbfce2ea89d">内核模块</a>选项 <code>ec_no_wakeup</code> 的值，当系统处于挂起到空闲（<code>s2idle</code>）<a href="#pg146ac4b0e523">电源状态</a>时，该选项控制从嵌入式控制器传递唤醒触发器<a href="https://docs.kernel.org/admin-guide/pm/sleep-states.html">[1]</a>。在现代笔记本电脑上，嵌入式控制器唤醒在<span class="ilh-all" data-foreign-title="Lenovo ThinkPad Helix 2nd Gen#Disable embedded-controller wake-ups" data-lang-code="en" data-lang-name="英语" data-orig-title="联想 ThinkPad Helix 2nd Gen#禁用嵌入式控制器唤醒"><span class="ilh-page"><a href="#pg43eb90b4e48f">某些</a></span></span>情况下会导致电池过度消耗。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb0e48b0a2dc6_.2Fsys.2Fdevices.2F" id="/sys/devices/"><span id=".2Fsys.2Fdevices.2F"></span>/sys/devices/</h3></div>
+<p>每个支持唤醒的 <code>sysfs</code> 设备都在设备的 <code>power</code> 子目录中包含文件 <code>wakeup</code>。该文件包含唤醒触发器的状态，也可以写入。总线控制器和端点设备能够唤醒系统。例如，若要禁用第一个 USB 控制器（总线）的唤醒，请运行：
+</p>
+<pre># echo "disabled" &gt; /sys/bus/usb/devices/usb1/power/wakeup
+</pre>
+<p>如果启用了触发器，端点设备应该能够唤醒设备，而不管控制器的设置如何，但这可能与依赖于硬件。
+</p><p>编写 <a href="#pg844c346c2853">PowerTOP</a> 与 <code>sysfs</code> 的接口，但它只通过读取 <code>/sys/class/net/</code> 和 <code>/sys/bus/usb/devices/</code>（包括到 <code>/sys/devices/</code> 的符号链接）来列出网络和 USB 设备的唤醒触发器。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb0e48b0a2dc6_.2Fsys.2Fclass.2Fwakeup.2F.2A" id="/sys/class/wakeup/*"><span id=".2Fsys.2Fclass.2Fwakeup.2F.2A"></span>/sys/class/wakeup/*</h3></div>
+<p>几乎所有的唤醒触发器都可以在 <code>/sys/class/wakeup</code> 目录中找到，该目录包含指向所有相关设备的符号链接。这对于通过子目录查找可能的唤醒触发器非常有用。一些触发器可以对应于虚拟设备，而与硬件相关的唤醒触发器至少包含以下文件之一：
+</p>
+<pre>/sys/class/wakeup/*/device/physical_node/power/wakeup
+/sys/class/wakeup/*/device/power/wakeup
+</pre>
+<p><code>/sys/class/wakeup</code> 中的一些唤醒触发器还提供了一个以下文件指向所在位置隐藏的 <code>/proc/acpi/wakeup</code> 名称的链接：
+</p>
+<pre>/sys/class/wakeup/*/device/path
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb0e48b0a2dc6_.E6.8C.81.E4.B9.85.E8.AE.BE.E7.BD.AE" id="持久设置"><span id=".E6.8C.81.E4.B9.85.E8.AE.BE.E7.BD.AE"></span>持久设置</h2></div>
+<p><i>原先的</i>方法应该足以设置 <code>/proc/acpi/wakeup</code> 状态和 <code>acpi.ec_no_wakeups</code> <a href="#pgec0856954f1c">内核参数</a>，而 <a href="#pge009209061ac">udev</a> 的<i>事件驱动</i>途径是配置 <code>sysfs</code> 设备的可靠方式。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb0e48b0a2dc6_.E4.BD.BF.E7.94.A8_systemd_.E7.9A.84.E5.8E.9F.E5.85.88.E6.96.B9.E6.B3.95" id="使用_systemd_的原先方法"><span id=".E4.BD.BF.E7.94.A8_systemd_.E7.9A.84.E5.8E.9F.E5.85.88.E6.96.B9.E6.B3.95"></span>使用 systemd 的原先方法</h3></div>
+<p><code>ec_no_wakeups</code> ACPI <a href="#pg6dbfce2ea89d">内核模块</a>选项可以在启动时设置，如本文所述。在引导时设置 <code>sysfs</code> 值的标准解决方案是 <a href="#pgac06dd8bfe95">systemd services</a>，例如在<a href="#pga6e29fecd7a5">此</a>故障排除中。<code>/proc/acpi/wakeup</code> 的另一个基于 <a href="#pgac06dd8bfe95">systemd</a> 的管理器是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wakeup-triggers/">wakeup-triggers</a></span><sup><small>AUR</small></sup></span>。
+</p><p>一些系统可以在电源状态转换时覆盖一些 ACPI 唤醒触发器，这更像是一个 bug，而不是一个功能。如果硬件能在可预测的时间覆盖触发器，则仍然可以使用适当构建的 <a href="#pgac06dd8bfe95">systemd units</a> 来解决。<code>sleep.target</code> 是一个通用目标，涵盖所有不同的挂起状态，在这种情况下可能会有所帮助，但没有通用的 <code>wakeup.target</code> <a href="https://github.com/systemd/systemd/issues/6364">[2]</a>。
+</p><p>此方法仅适用于始终连接的 <code>sysfs</code> 设备。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb0e48b0a2dc6_.E4.BD.BF.E7.94.A8_udev_.E7.9A.84.E4.BA.8B.E4.BB.B6.E9.A9.B1.E5.8A.A8" id="使用_udev_的事件驱动"><span id=".E4.BD.BF.E7.94.A8_udev_.E7.9A.84.E4.BA.8B.E4.BB.B6.E9.A9.B1.E5.8A.A8"></span>使用 udev 的事件驱动</h3></div>
+<p>使用 <a href="#pge009209061ac">udev</a> 规则设置唤醒触发器状态是一种事件驱动的方法，在连接具有唤醒触发器的设备时都能可靠地工作。关键是检测规则中是否添加了新设备（ <code>ACTION=="add"</code>），并将唤醒触发器状态设置为 <code>ATTR{power/wakeup}="disabled"</code>。如果硬件正在重置此设置，udev 可以尝试在每次设备更改时重新应用规则来规避此设置（<code>ACTION=="add|change"</code>）。通过 <code>udevadm info -q all -a /sys/devices/...</code> 可以获得一个设备树，其中包含用于匹配 <code>sysfs</code> 中找到的特定设备的可能参数。
+</p><p>这里一个典型的常见例子是罗技统一 USB 接收器。它的唤醒触发器应该在默认情况下启用，如果不需要，解决方案可以是 <a href="#pge009209061ac">udev</a> 规则，如下所示:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/logitech-unifying.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", SUBSYSTEM=="usb", DRIVERS=="usb", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", ATTR{power/wakeup}="disabled"</pre>
+<p>在 <a href="#pge009209061ac">udev</a> 文章中描述了启用必要触发器的相反情况。
+</p><p>udev 触发器在设备枚举中出现得太早，以至于使用上述方法禁用唤醒触发器会导致（某些？）禁用的触发器不在 <code>/sys/class/wakeup</code> 中列出。这可能取决于设备在启动时是否已经存在，需要进一步阐明。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb0e48b0a2dc6_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb0e48b0a2dc6_.E5.88.97.E5.87.BA.E8.AE.BE.E5.A4.87.E5.92.8C.2F.E6.88.96.E6.80.BB.E7.BA.BF.E6.A0.91" id="列出设备和/或总线树"><span id=".E5.88.97.E5.87.BA.E8.AE.BE.E5.A4.87.E5.92.8C.2F.E6.88.96.E6.80.BB.E7.BA.BF.E6.A0.91"></span>列出设备和/或总线树</h3></div>
+<p>当试图理解某个系统的所有唤醒触发器时，这些辅助命令会很有用，有助于编写 <a href="#pge009209061ac">udev</a> 规则或进行常见的唤醒源故障排除：
+</p>
+<pre># lshw -businfo -numeric
+# lspci -DPPnn
+# lsusb -tvv
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb0e48b0a2dc6_.E6.8C.82.E8.B5.B7.E5.90.8E.E8.A2.AB.E7.AB.8B.E5.8D.B3.E5.94.A4.E9.86.92" id="挂起后被立即唤醒"><span id=".E6.8C.82.E8.B5.B7.E5.90.8E.E8.A2.AB.E7.AB.8B.E5.8D.B3.E5.94.A4.E9.86.92"></span>挂起后被立即唤醒</h3></div>
+<p>对于某些带有 LynxPoint 或 LynxPoint-LP 芯片组的 Intel Haswell 系统，有报告称它们会在挂起后就立即被唤醒。这与错误的 BIOS ACPI 实现，以及 <code>xhci_hcd</code> 如何在引导期间如何解释它们都有关。作为一项解决方案，内核会将报告的受影响系统逐个添加到拒绝列表（名为 <code>XHCI_SPURIOUS_WAKEUP</code>）<a href="https://bugzilla.kernel.org/show_bug.cgi?id=66171#c6">[3]</a>。
+</p><p>电脑也有可能在其它情况下发生立即恢复，比如，一个 USB 设备在挂起后插入，且启动了 ACPI 唤醒触发器。对于这样的情况，如果受影响的系统尚未被加入上述拒绝列表，一个可行的方案是禁用相关的唤醒触发器。通过 USB 禁用唤醒的例子见后<a href="https://bbs.archlinux.org/viewtopic.php?pid=1575617">[4]</a>。
+</p><p>要查看当前配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /proc/acpi/wakeup</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Device  S-state   Status   Sysfs node
+...
+EHC1      S3    *enabled  pci:0000:00:1d.0
+EHC2      S3    *enabled  pci:0000:00:1a.0
+XHC       S3    *enabled  pci:0000:00:14.0
+...
+</pre>
+<p>可以看到相关的设备有 <code>EHC1</code>、<code>EHC2</code> 和 <code>XHC</code>（USB 3.0设备）。要切换它们的状态，你需要以 root 权限把设备名写入到文件里。
+</p>
+<pre># echo EHC1 &gt; /proc/acpi/wakeup
+# echo EHC2 &gt; /proc/acpi/wakeup
+# echo XHC &gt; /proc/acpi/wakeup
+</pre>
+<p>这能使挂起重新工作。但是，此设置只是临时的，需要在每次启动时设置。要实现自动化，请参阅 <a href="#pgac06dd8bfe95">Systemd#临时文件</a>或<a href="https://bbs.archlinux.org/viewtopic.php?pid=1575617#p1575617">论坛帖子</a>以了解可能的解决方案。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb0e48b0a2dc6_nouveau_.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F" id="nouveau_驱动程序"><span id="nouveau_.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F"></span>nouveau 驱动程序</h4></div>
+<p>如果使用了 <a href="#pg172970a5f8dd">nouveau</a> 驱动程序，则立即唤醒的原因可能是驱动程序中的错误，这有时会阻止 GPU 挂起。一种可能的解决方法是在休眠前卸载 <code>nouveau</code> 内核模块，并在唤醒后重新加载。为此，请创建以下脚本：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/systemd/system-sleep/10-nouveau.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+
+case $1/$2 in
+  pre/*)
+    # echo "进入 $2 状态..."
+    /usr/bin/echo "0" &gt; /sys/class/vtconsole/vtcon1/bind
+    /usr/bin/rmmod nouveau
+    ;;
+  post/*)
+    # echo "从 $2 状态唤醒..."
+    /usr/bin/modprobe nouveau
+    /usr/bin/echo "1" &gt; /sys/class/vtconsole/vtcon1/bind
+    ;;
+esac</pre>
+<p>第一个 echo 行将 <code>nouveaufb</code> 从帧缓冲控制台驱动程序（<code>fbcon</code>）中解除绑定。通常它是 <code>vtcon1</code>，如本例所示，但也可能是另一个 <code>vtcon*</code>。查看 <code>/sys/class/vtconsole/vtcon*/name</code> 其中哪一个是 <i>frame buffer device</i> <a href="https://nouveau.freedesktop.org/wiki/KernelModeSetting/">[5]</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808041255
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.143 seconds
+Real time usage: 0.148 seconds
+Preprocessor visited node count: 439/1000000
+Revision size: 8597/2097152 bytes
+Post‐expand include size: 4980/2097152 bytes
+Template argument size: 1432/2097152 bytes
+Highest expansion depth: 4/100
+Expensive parser function count: 2/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.012/7.000 seconds
+Lua memory usage: 630207/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   63.592      1 -total
+ 56.13%   35.694      2 Template:Link-en
+  9.31%    5.923     40 Template:Ic
+  3.88%    2.468      1 Template:相关文章开始
+  3.48%    2.215      2 Template:Related
+  2.58%    1.638      3 Template:Hc
+  1.76%    1.121      1 Template:AUR
+  1.40%    0.888      1 Template:META_Related_articles_start
+  1.37%    0.871      1 Template:相关文章结束
+-->
+<!-- Render ID 6e3c498e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7518:|#|:idhash:canonical!zh-cn and timestamp 20260808041255 and revision id 33811. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

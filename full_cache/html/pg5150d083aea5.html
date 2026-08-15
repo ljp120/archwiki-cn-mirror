@@ -1,0 +1,705 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg5150d083aea5">桌面通知程序</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg6438c4cbb62c">GTK</a></li>
+<li><a href="#pg924cf790527b">Libcanberra</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Desktop_notifications">Desktop notifications</a>，最近一次同步于 2024-10-20，若英文版本有所<a href="https://wiki.archlinux.org/title/Desktop_notifications?diff=0&amp;oldid=818755">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Desktop_notifications_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+
+<p>桌面通知是种很小的被动弹出对话框，以异步方式通知用户特定事件。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5150d083aea5_Libnotify" id="Libnotify">Libnotify</h2></div>
+<p>Libnotify 是<a href="https://specifications.freedesktop.org/notification-spec/latest/">桌面通知规范</a>的实现，它为 <a href="#pg6438c4cbb62c">GTK</a> 和 <a href="#pg5016907af879">Qt</a> 应用程序提供支持，并且独立于桌面：它已经被许多开源应用程序（如 <a href="#pg9c11de2cf45c">Evolution</a> 和 <a href="#pgf6ea83407c79">Pidgin</a>）使用。可以通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span> 安装。
+</p><p>要使用 libnotify，您必须安装通知服务器。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5150d083aea5_.E9.80.9A.E7.9F.A5.E6.9C.8D.E5.8A.A1.E5.99.A8" id="通知服务器"><span id=".E9.80.9A.E7.9F.A5.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>通知服务器</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_.E5.86.85.E7.BD.AE.E9.80.9A.E7.9F.A5" id="内置通知"><span id=".E5.86.85.E7.BD.AE.E9.80.9A.E7.9F.A5"></span>内置通知</h3></div>
+<p><a href="#pgab6cec04e250">Cinnamon</a>, <a href="#pg550eb4ccbb57">Deepin</a>, <a href="#pg6a5c0b105f61">Enlightenment</a>, <a href="#pg1e095fe2c2a6">GNOME</a>, <a href="#pg7679fde72ba7">GNOME Flashback</a> 和 <a href="#pg778f2bb029c6">KDE Plasma</a> 使用自己的实现来显示通知，并且无法替换。他们的通知服务器在登录时自动启动，以通过 DBus 接收来自应用程序的通知。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_.E7.8B.AC.E7.AB.8B.E9.80.9A.E7.9F.A5" id="独立通知"><span id=".E7.8B.AC.E7.AB.8B.E9.80.9A.E7.9F.A5"></span>独立通知</h3></div>
+<p>在其他桌面环境中，需要使用<a href="#pg9604da0ac74d">自动启动</a>选项启动通知服务器。
+或者，通过将通知服务器作为 <a href="#pg05349798cdb5">D-Bus</a>的服务，通知服务器可以在第一次调用时自动启动。大多数通知服务器已经在<code>/usr/share/dbus-1/services</code>目录中。对于某些实现，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=notification-daemon">notification-daemon</a></span><sup><small>包</small></sup></span>包，需要在用户 D-Bus 服务目录 （<code>$XDG_DATA_HOME/dbus-1/services</code>） 中手动创建一个服务：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">org.freedesktop.Notifications.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[D-BUS Service]
+Name=org.freedesktop.Notifications
+Exec=/usr/lib/notification-daemon-1.0/notification-daemon</pre>
+<p>每当应用程序通过向 <code>org.freedesktop.Notifications</code>发送信号来发送通知时，如果他尚未激活，则 D-Bus 将激活<code>/usr/lib/notification-daemon-1.0/notification-daemon</code>。
+</p><p>您还可以选择以下实现之一：
+</p>
+<ul><li><b>Deadd Notification Center</b> — 通知中心受Dunst启发的一个通知守护进程。</li></ul>
+<dl><dd><a href="https://github.com/phuhl/linux_notification_center">https://github.com/phuhl/linux_notification_center</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/deadd-notification-center/">deadd-notification-center</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgbe0de731ce30">Dunst</a></b> — 适用于 Linux 的极简通知守护进程，旨在很好地适应 <a href="#pgd927e4187724">dwm</a>等极简窗口管理器。自 1.6 n版本起包括对 Wayland 的支持。</li></ul>
+<dl><dd><a href="https://dunst-project.org/">https://dunst-project.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dunst">dunst</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>fnott</b> — 键盘驱动的轻量级 Wayland 通知守护程序，适用于基于 wlroots 的合成器。</li></ul>
+<dl><dd><a href="https://codeberg.org/dnkl/fnott">https://codeberg.org/dnkl/fnott</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fnott">fnott</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>LXQt Notification Daemon</b> — <a href="#pge82b8c855868">LXQt</a>的通知服务。</li></ul>
+<dl><dd><a href="https://github.com/lxde/lxqt-notificationd">https://github.com/lxde/lxqt-notificationd</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lxqt-notificationd">lxqt-notificationd</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>mako</b> — 适用于<a href="#pga21a6be8b605">Wayland</a>的轻量级通知守护程序;它目前在<a href="#pg7c25baec4c3f">Sway</a>和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=river">river</a></span><sup><small>包</small></sup></span>上运行。</li></ul>
+<dl><dd><a href="https://github.com/emersion/mako">https://github.com/emersion/mako</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mako">mako</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>MATE Notification Daemon</b> — <a href="#pg374a7df9dfd3">MATE</a>的通知服务。</li></ul>
+<dl><dd><a href="https://github.com/mate-desktop/mate-notification-daemon/">https://github.com/mate-desktop/mate-notification-daemon/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mate-notification-daemon">mate-notification-daemon</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>Notification Daemon</b> — 最初的通知服务。</li></ul>
+<dl><dd><a href="https://gitlab.gnome.org/Archive/notification-daemon">https://gitlab.gnome.org/Archive/notification-daemon</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=notification-daemon">notification-daemon</a></span><sup><small>包</small></sup></span></dd>
+<dd>你可以通过<code>/usr/lib/notification-daemon-1.0/notification-daemon</code>手动运行它</dd></dl>
+<ul><li><b>Notify OSD</b> — Unity的通知服务.</li></ul>
+<dl><dd><a href="https://launchpad.net/notify-osd">https://launchpad.net/notify-osd</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=notify-osd">notify-osd</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>sandsmark-notificationd</b> — 可以静音的最小化通知守护程序</li></ul>
+<dl><dd><a href="https://github.com/sandsmark/sandsmark-notificationd">https://github.com/sandsmark/sandsmark-notificationd</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sandsmark-notificationd-git/">sandsmark-notificationd-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup></dd></dl>
+<ul><li><b>statnot</b> — 小巧轻便的通知守护进程，可以将通知输出到根窗口的标题、stdout 或 FIFO 管道，使其与平铺窗口管理器完美集成。</li></ul>
+<dl><dd><a href="https://github.com/halhen/statnot">https://github.com/halhen/statnot</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/statnot/">statnot</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>swaync</b> — 用于<a href="#pg7c25baec4c3f">Sway</a>的简单基于 GTK 的通知守护程序。</li></ul>
+<dl><dd><a href="https://github.com/ErikReider/SwayNotificationCenter">https://github.com/ErikReider/SwayNotificationCenter</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=swaync">swaync</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>twmn</b> — 用于平铺窗口管理器的通知系统。</li></ul>
+<dl><dd><a href="https://github.com/sboli/twmn">https://github.com/sboli/twmn</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/twmn-git/">twmn-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>wired</b> — 轻量级通知守护进程，具有高度可定制的布局块，用 Rust 编写。</li></ul>
+<dl><dd><a href="https://github.com/Toqozz/wired-notify">https://github.com/Toqozz/wired-notify</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wired/">wired</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>Xfce Notification Daemon</b> — <a href="#pg361394ab1daf">Xfce</a>的通知服务</li></ul>
+<dl><dd><a href="https://docs.xfce.org/apps/notifyd/start">https://docs.xfce.org/apps/notifyd/start</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xfce4-notifyd">xfce4-notifyd</a></span><sup><small>包</small></sup></span></dd>
+<dd>你可以通过{<code>/usr/lib/xfce4/notifyd/xfce4-notifyd</code>手动运行它</dd>
+<dd><div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>要配置 xfce4-notifyd，请运行以下命令：<code>xfce4-notifyd-config</code>.</div></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5150d083aea5_.E5.9C.A8.E7.BC.96.E7.A8.8B.E4.B8.AD.E7.9A.84.E4.BD.BF.E7.94.A8" id="在编程中的使用"><span id=".E5.9C.A8.E7.BC.96.E7.A8.8B.E4.B8.AD.E7.9A.84.E4.BD.BF.E7.94.A8"></span>在编程中的使用</h2></div>
+
+<p><br/>
+您可以通过GObject-Introspection或绑定方式，轻松地使用多种编程语言来编写自己的 libnotify 显示消息，或者您可以简单地使用 bash。
+</p><p>以下示例显示一个简单的 “Hello world” 通知。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Bash" id="Bash">Bash</h3></div>
+<ul><li>依赖: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span>包</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+notify-send 'Hello world!' 'This is an example notification.' --icon=dialog-information</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>An overview on the available icons can be found in the <a href="https://specifications.freedesktop.org/icon-naming-spec/latest/">specification</a>.</li>
+<li>To send desktop notification to another user, e.g. from a background script running as root: <pre># systemd-run --machine=<i>user</i>@.host --user notify-send 'Hello world!' 'This is an example notification.'</pre></li></ul>
+</div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glib2">glib2</a></span><sup><small>包</small></sup></span></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+gdbus call --session \
+    --dest=org.freedesktop.Notifications \
+    --object-path=/org/freedesktop/Notifications \
+    --method=org.freedesktop.Notifications.Notify \
+    "" 0 "" 'Hello world!' 'This is an example notification.' \
+    '[]' '{"urgency": &lt;1&gt;}' 5000</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>See <a href="https://specifications.freedesktop.org/notification-spec/latest/protocol.html">org.freedesktop.Notifications.Notify</a> for more details about the D-Bus interface.</li>
+<li><code>dbus-send</code>, though being similar to <code>gdbus</code>, does not work because one of the arguments in the method <code>org.freedesktop.Notifications.Notify</code> requires data type <code>variant</code>, which is not supported by <code>dbus-send</code>.</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_C" id="C">C</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glib2">glib2</a></span><sup><small>包</small></sup></span></li>
+<li>Build with: <code>gcc -o hello_world `pkg-config --cflags --libs gio-2.0` hello_world.c</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.c</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#include &lt;gio/gio.h&gt;
+int main() {
+	GApplication *application = g_application_new ("hello.world", G_APPLICATION_FLAGS_NONE);
+	g_application_register (application, NULL, NULL);
+	GNotification *notification = g_notification_new ("Hello world!");
+	g_notification_set_body (notification, "This is an example notification.");
+	GIcon *icon = g_themed_icon_new ("dialog-information");
+	g_notification_set_icon (notification, icon);
+	g_application_send_notification (application, NULL, notification);
+	g_object_unref (icon);
+	g_object_unref (notification);
+	g_object_unref (application);
+	return 0;
+}</pre>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span></li>
+<li>Build with: <code>gcc -o hello_world `pkg-config --cflags --libs libnotify` hello_world.c</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.c</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#include &lt;libnotify/notify.h&gt;
+int main() {
+	notify_init ("Hello world!");
+	NotifyNotification * Hello = notify_notification_new ("Hello world", "This is an example notification.", "dialog-information");
+	notify_notification_show (Hello, NULL);
+	g_object_unref(G_OBJECT(Hello));
+	notify_uninit();
+	return 0;
+}</pre>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dbus">dbus</a></span><sup><small>包</small></sup></span></li>
+<li>Build with: <code>gcc -o hello_world $(pkg-config --cflags --libs dbus-1) hello_world.c</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.c</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#include &lt;dbus-1.0/dbus/dbus.h&gt;
+int main()
+{
+	DBusConnection *connection = dbus_bus_get(DBUS_BUS_SESSION, 0);
+	DBusMessage *message = dbus_message_new_method_call(
+		"org.freedesktop.Notifications",
+		"/org/freedesktop/Notifications",
+		"org.freedesktop.Notifications",
+		"Notify");
+	DBusMessageIter iter[4];
+	dbus_message_iter_init_append(message, iter);
+	char *application = "hello.world";
+	dbus_message_iter_append_basic(iter, 's', &amp;application);
+	unsigned id = 0;
+	dbus_message_iter_append_basic(iter, 'u', &amp;id);
+	char *icon = "dialog-information";
+	dbus_message_iter_append_basic(iter, 's', &amp;icon);
+	char *summary = "Hello world!";
+	dbus_message_iter_append_basic(iter, 's', &amp;summary);
+	char *body = "This is an example notification.";
+	dbus_message_iter_append_basic(iter, 's', &amp;body);
+	dbus_message_iter_open_container(iter, 'a', "s", iter + 1);
+	dbus_message_iter_close_container(iter, iter + 1);
+	dbus_message_iter_open_container(iter, 'a', "{sv}", iter + 1);
+	dbus_message_iter_open_container(iter + 1, 'e', 0, iter + 2);
+	char *urgency = "urgency";
+	dbus_message_iter_append_basic(iter + 2, 's', &amp;urgency);
+	dbus_message_iter_open_container(iter + 2, 'v', "y", iter + 3);
+	enum {LOW, NORMAL, CRITICAL};
+	unsigned char level = LOW;
+	dbus_message_iter_append_basic(iter + 3, 'y', &amp;level);
+	dbus_message_iter_close_container(iter + 2, iter + 3);
+	dbus_message_iter_close_container(iter + 1, iter + 2);
+	dbus_message_iter_close_container(iter, iter + 1);
+	int timeout = 5 * 1000;
+	dbus_message_iter_append_basic(iter, 'i', &amp;timeout);
+	dbus_connection_send(connection, message, 0);
+	dbus_connection_flush(connection);
+	dbus_message_unref(message);
+	dbus_connection_unref(connection);
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_C.2B.2B" id="C++"><span id="C.2B.2B"></span>C++</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glibmm">glibmm</a></span><sup><small>包</small></sup></span></li>
+<li>Build with: <code>g++ -o hello_world `pkg-config --cflags --libs giomm-2.4` hello_world.cc</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.cc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#include &lt;giomm-2.4/giomm.h&gt;
+int main(int argc, char *argv[]) {
+	auto Application = Gio::Application::create("hello.world", Gio::APPLICATION_FLAGS_NONE);
+	Application-&gt;register_application();
+	auto Notification = Gio::Notification::create("Hello world");
+	Notification-&gt;set_body("This is an example notification.");
+	auto Icon = Gio::ThemedIcon::create("dialog-information");
+	Notification-&gt;set_icon (Icon);
+	Application-&gt;send_notification(Notification);
+	return 0;
+}</pre>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/libnotifymm/">libnotifymm</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup></li>
+<li>Build with: <code>g++ -o hello_world `pkg-config --cflags --libs libnotifymm-1.0` hello_world.cc</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.cc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#include &lt;libnotifymm.h&gt;
+int main(int argc, char *argv[]) {
+	Notify::init("Hello world!");
+	Notify::Notification Hello("Hello world", "This is an example notification.", "dialog-information");
+	Hello.show();
+	return 0;
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_C.23" id="C#"><span id="C.23"></span>C#</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/notify-sharp-3/">notify-sharp-3</a></span><sup><small>AUR</small></sup></span></li>
+<li>Build with: <code>mcs -pkg:notify-sharp-3.0 hello_world.cs</code></li>
+<li>Run with: <code>mono hello_world.exe</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.cs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">using Notifications;
+public class HelloWorld {
+	static void Main() {
+		var Hello = new Notification();
+		Hello.Summary  = "Hello world!";
+		Hello.Body     = "This is an example notification.";
+		Hello.IconName = "dialog-information";
+		Hello.Show();
+	}
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Common_Lisp" id="Common_Lisp">Common Lisp</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dbus">dbus</a></span><sup><small>包</small></sup></span>, death/dbus (from quicklisp)</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.lisp</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">(defun hello ()
+  "send notification with dbus"
+  (let ((app_name "hello.world")
+        (replaces_id 0)
+        (app_icon "dialog-information")
+        (summary "hello.world")
+        (body "Hello world!")
+        (expire_timeout -1))
+    (dbus:with-open-bus (bus (dbus:session-server-addresses))
+      (dbus:with-introspected-object
+          (notif bus "/org/freedesktop/Notifications" "org.freedesktop.Notifications")
+        (notif "org.freedesktop.Notifications" "Notify"
+               app_name replaces_id app_icon summary body '() '() expire_timeout)))))
+
+(hello)</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Crystal" id="Crystal">Crystal</h3></div>
+<ul><li>Dependency: woodruffw/notify.cr (from shards)</li>
+<li>Build with: shards build</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.fs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">require "notify"
+notifier = Notify.new
+notifier.notify "Hello", body: "<b>World!</b>"</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_F.23" id="F#"><span id="F.23"></span>F#</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/notify-sharp-3/">notify-sharp-3</a></span><sup><small>AUR</small></sup></span></li>
+<li>Makedependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dotnet-sdk">dotnet-sdk</a></span><sup><small>包</small></sup></span></li>
+<li>Build with: <code>fsharpc -r:notify-sharp.dll -I:/usr/lib/mono/notify-sharp-3.0/ -I:/usr/lib/mono/gtk-sharp-3.0/ hello_world.fs</code></li>
+<li>Run with: <code>mono hello_world.exe</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.fs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">open Notifications
+let Hello = new Notification()
+Hello.Summary  &lt;- "Hello world!"
+Hello.Body     &lt;- "This is an example notification."
+Hello.IconName &lt;- "dialog-information"
+Hello.Show()</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Genie" id="Genie">Genie</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glib2">glib2</a></span><sup><small>包</small></sup></span></li>
+<li>Makedependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vala">vala</a></span><sup><small>包</small></sup></span></li>
+<li>Build with: <code>valac --pkg gio-2.0 hello_world.gs</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.gs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">uses 
+	GLib
+
+init
+	var Application = new GLib.Application ("hello.world", GLib.ApplicationFlags.FLAGS_NONE);
+	Application.register ();
+	var Notification = new GLib.Notification ("Hello world");
+	Notification.set_body ("This is an example notification.");
+	var Icon = new GLib.ThemedIcon ("dialog-information");
+	Notification.set_icon (Icon);
+	Application.send_notification (null, Notification);</pre>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span></li>
+<li>Makedependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vala">vala</a></span><sup><small>包</small></sup></span></li>
+<li>Build with: <code>valac --pkg libnotify hello_world.gs</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.gs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">uses 
+	Notify
+
+init
+	Notify.init ("Hello world")
+	var Hello=new Notify.Notification ("Hello world!","This is an example notification.","dialog-information")
+	Hello.show ()</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Go" id="Go">Go</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span></li>
+<li>Makedependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/go-notify-git/">go-notify-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup></li>
+<li>Build with: <code>go build hello_world.go</code></li>
+<li>(Or run with: <code>go run hello_world.go</code>)</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.go</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">package main
+import ("github.com/mqu/go-notify")
+
+func main() {
+	notify.Init("Hello world")
+	hello := notify.NotificationNew("Hello World!", "This is an example notification.","dialog-information")
+	hello.Show()
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Groovy" id="Groovy">Groovy</h3></div>
+<ul><li>Dependencies: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=groovy">groovy</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/java-gnome/">java-gnome</a></span><sup><small>AUR</small></sup></span></li>
+<li>Build with: <code>groovyc -cp /usr/share/java/gtk.jar HelloWorld.groovy &amp;&amp; jar cfe HelloWorld.jar HelloWorld HelloWorld.class</code></li>
+<li>Run with: <code>java -cp /usr/share/groovy/embeddable/groovy-all.jar:/usr/share/java/gtk.jar:HelloWorld.jar HelloWorld</code> or <code>groovy -cp /usr/share/java/gtk.jar HelloWorld.groovy</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">HelloWorld.groovy</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">import org.gnome.gtk.*
+import org.gnome.notify.*
+
+Gtk.init()
+Notify.init("Hello world")
+def Hello = new Notification("Hello world!", "This is an example notification.", "dialog-information")
+Hello.show()</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Haskell" id="Haskell">Haskell</h3></div>
+<ul><li>Makedependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=haskell-fdo-notify">haskell-fdo-notify</a></span><sup><small>包</small></sup></span></li>
+<li>Build with: <code>ghc -dynamic hello_world</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.hs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">import DBus.Notify
+main = do
+         client &lt;- connectSession
+         let hello = blankNote { summary="Hello world!",
+                                 body=(Just $ Text "This is an example notification."),
+                                 appImage=(Just $ Icon "dialog-information") }
+         notification &lt;- notify client hello
+         return 0</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_IronPython" id="IronPython">IronPython</h3></div>
+<ul><li>Dependencies: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/notify-sharp-3/">notify-sharp-3</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ironpython/">ironpython</a></span><sup><small>AUR</small></sup></span></li>
+<li>Run with: <code>ipy hello_world.py</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">import clr
+clr.AddReference('notify-sharp')
+import Notifications
+Hello = Notifications.Notification()
+Hello.Summary  = "Hello world!"
+Hello.Body     = "This is an example notification."
+Hello.IconName = "dialog-information"
+Hello.Show()</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Java" id="Java">Java</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/java-gnome/">java-gnome</a></span><sup><small>AUR</small></sup></span></li>
+<li>Makedependency: java-environment</li>
+<li>Build with: <code>javac -cp /usr/share/java/gtk.jar HelloWorld.java &amp;&amp; jar cfe HelloWorld.jar HelloWorld HelloWorld.class</code></li>
+<li>Run with: <code>java -cp /usr/share/java/gtk.jar:HelloWorld.jar HelloWorld</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">HelloWorld.java</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">import org.gnome.gtk.Gtk;
+import org.gnome.notify.Notify;
+import org.gnome.notify.Notification;
+
+public class HelloWorld
+{
+    public static void main(String[] args) {
+        Gtk.init(args);
+        Notify.init("Hello world");
+        Notification Hello = new Notification("Hello world!", "This is an example notification.", "dialog-information");
+        Hello.show();
+    }
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_JavaScript" id="JavaScript">JavaScript</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gjs">gjs</a></span><sup><small>包</small></sup></span></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.js</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/gjs
+const Gio = imports.gi.Gio;
+var Application = new Gio.Application ({application_id: "hello.world"});
+Application.register (null);
+var Notification = new Gio.Notification ();
+Notification.set_title ("Hello world");
+Notification.set_body ("This is an example notification.");
+var Icon = new Gio.ThemedIcon ({name: "dialog-information"});
+Notification.set_icon (Icon);
+Application.send_notification (null, Notification);</pre>
+<ul><li>Dependencies: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gjs">gjs</a></span><sup><small>包</small></sup></span></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.js</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/gjs
+const Notify = imports.gi.Notify;
+Notify.init ("Hello world");
+var Hello=new Notify.Notification ({summary: "Hello world!",
+                                    body: "This is an example notification.",
+                                    "icon-name": "dialog-information"});
+Hello.show ();</pre>
+<ul><li>Dependencies: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nodejs">nodejs</a></span><sup><small>包</small></sup></span>, <a href="https://github.com/Hill-98/node-dbus-notifier">node-dbus-notifier</a></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.js</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/env node
+const notifier = require("node-dbus-notifier");
+
+const notify = new notifier.Notify({
+  appName: "JavaScript",
+  appIcon: "archlinux-logo",
+  summary: "Hello world!",
+  hints: {
+    urgency: 2,
+  },
+  body: "This is an example notification.",
+  timeout: 5000,
+});
+
+notify.addAction("Click Me", () =&gt; {
+  console.log("Click Click");
+});
+
+notify.show()
+  .then(() =&gt; {
+    console.log("notify is closed");
+  });</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_JRuby" id="JRuby">JRuby</h3></div>
+<ul><li>Dependencies: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/java-gnome/">java-gnome</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=jruby">jruby</a></span><sup><small>包</small></sup></span></li>
+<li>Build with: <code>jrubyc hello_world.rb &amp;&amp; jar cfe hello_world.jar hello_world hello_world.class</code></li>
+<li>Run with: <code>java -cp /opt/jruby/lib/jruby.jar:hello_world.jar hello_world</code> or <code>jruby hello_world.rb</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.rb</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">require '/usr/share/java/gtk.jar'
+import Java::OrgGnomeGtk::Gtk
+import Java::OrgGnomeNotify::Notify
+import Java::OrgGnomeNotify::Notification
+
+Gtk.init(nil)
+Notify.init("Hello world")
+Hello = Notification.new("Hello world!", "This is an example notification.", "dialog-information")
+Hello.show</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Jython" id="Jython">Jython</h3></div>
+<ul><li>Dependencies: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/java-gnome/">java-gnome</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=jython">jython</a></span><sup><small>包</small></sup></span></li>
+<li>Run with: <code>jython -Dpython.path=/usr/share/java/gtk.jar hello_world.py</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">from org.gnome.gtk import Gtk
+from org.gnome.notify import Notify, Notification
+Gtk.init(None)
+Notify.init("Hello world")
+Hello=Notification("Hello world!", "This is an example notification.", "dialog-information")
+Hello.show()</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Lua" id="Lua">Lua</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lua-lgi-git/">lua-lgi-git</a></span><sup><small>AUR</small></sup></span></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.lua</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/lua
+lgi = require 'lgi'
+Gio = lgi.require('Gio')
+Application = Gio.Application.new("hello.world",Gio.ApplicationFlags.FLAGS_NONE);
+Application:register();
+Notification = Gio.Notification.new("Hello world");
+Notification:set_body("This is an example notification.");
+Icon = Gio.ThemedIcon.new("dialog-information");
+Notification:set_icon(Icon);
+Application:send_notification(nil, Notification);</pre>
+<ul><li>Dependencies: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lua-lgi-git/">lua-lgi-git</a></span><sup><small>AUR</small></sup></span></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.lua</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/lua
+lgi = require 'lgi'
+Notify = lgi.require('Notify')
+Notify.init("Hello world")
+Hello=Notify.Notification.new("Hello world","This is an example notification.","dialog-information")
+Hello:show()</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Nemerle" id="Nemerle">Nemerle</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/notify-sharp-3/">notify-sharp-3</a></span><sup><small>AUR</small></sup></span></li>
+<li>Makedependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nemerle/">nemerle</a></span><sup><small>AUR</small></sup></span></li>
+<li>Build with: <code>ncc -pkg:notify-sharp-3.0 -out:hello_world.exe hello_world.n</code></li>
+<li>Run with: <code>mono hello_world.exe</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.n</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">using Notifications;
+public class HelloWorld {
+	static Main() : void {
+		def Hello = Notification();
+		Hello.Summary  = "Hello world!";
+		Hello.Body     = "This is an example notification.";
+		Hello.IconName = "dialog-information";
+		Hello.Show();
+	}
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Pascal" id="Pascal">Pascal</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span></li>
+<li>Makedependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fpc">fpc</a></span><sup><small>包</small></sup></span>, <a href="https://github.com/ik5/libnotify-fpc">libnotify binding</a></li>
+<li>Build with: <code>fpc hello_world</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.pas</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">program	hello_world;
+uses	libnotify;
+var	hello : PNotifyNotification;
+begin
+	notify_init(argv[0]);
+	hello := notify_notification_new ('Hello world', 'This is an example notification.', 'dialog-information');
+	notify_notification_show (hello, nil);
+end.</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Perl" id="Perl">Perl</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5150d083aea5_Using_libnotify" id="Using_libnotify">Using libnotify</h4></div>
+<ul><li>Dependencies: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perl-glib-object-introspection">perl-glib-object-introspection</a></span><sup><small>包</small></sup></span></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.pl</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/perl
+use Glib::Object::Introspection;
+Glib::Object::Introspection-&gt;setup(basename =&gt; 'Notify',
+                                   version =&gt; '0.7',
+                                   package =&gt; 'Notify');
+Notify-&gt;init;
+my $hello = Notify::Notification-&gt;new('Hello world!',
+                                      'This is an example notification.',
+                                      'dialog-information');
+$hello-&gt;show;</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg5150d083aea5_Using_direct_D_Bus_calls" id="Using_direct_D-Bus_calls">Using direct D-Bus calls</h4></div>
+<ul><li>Dependencies: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perl-net-dbus">perl-net-dbus</a></span><sup><small>包</small></sup></span></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.pl</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/perl
+use Net::DBus;
+my $bus = Net::DBus-&gt;session;
+my $svc = $bus-&gt;get_service('org.freedesktop.Notifications');
+my $obj = $svc-&gt;get_object('/org/freedesktop/Notifications');
+my $id = $obj-&gt;Notify('myapp', 0,
+                      'dialog-information',
+                      'Hello world!',
+                      'This is an example notification.',
+                      [], {}, 0);</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Python" id="Python">Python</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-gobject">python-gobject</a></span><sup><small>包</small></sup></span></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/python3
+import gi
+gi.require_version('Gio', '2.0')
+from gi.repository import Gio
+Application = Gio.Application.new("hello.world", Gio.ApplicationFlags.FLAGS_NONE)
+Application.register()
+Notification = Gio.Notification.new("Hello world")
+Notification.set_body("This is an example notification.")
+Icon = Gio.ThemedIcon.new("dialog-information")
+Notification.set_icon(Icon)
+Application.send_notification(None, Notification)</pre>
+<ul><li>Dependencies: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-gobject">python-gobject</a></span><sup><small>包</small></sup></span></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/python3
+import gi
+gi.require_version('Notify', '0.7')
+from gi.repository import Notify
+Notify.init("Hello world")
+Hello = Notify.Notification.new("Hello world", "This is an example notification.", "dialog-information")
+Hello.show()</pre>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-dbus">python-dbus</a></span><sup><small>包</small></sup></span></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/env python3
+import dbus
+
+obj = dbus.SessionBus().get_object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")
+obj = dbus.Interface(obj, "org.freedesktop.Notifications")
+obj.Notify("", 0, "", "Hello world", "This is an example notification.", [], {"urgency": 1}, 10000)</pre>
+<p>For the arguments in the method <code>Notify</code>, please refer to the section of <a href="https://specifications.freedesktop.org/notification-spec/latest/protocol.html#command-notify">org.freedesktop.Notifications.Notify</a> at <a href="https://specifications.freedesktop.org/notification-spec/latest/">Desktop Notifications Specification</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Ruby" id="Ruby">Ruby</h3></div>
+<ul><li>Dependencies: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ruby-gir_ffi/">ruby-gir_ffi</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.rb</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/ruby
+require 'gir_ffi'
+GirFFI.setup :Notify
+Notify.init("Hello world")
+Hello = Notify::Notification.new("Hello world!", "This is an example notification.", "dialog-information")
+Hello.show</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Rust" id="Rust">Rust</h3></div>
+<p>Using <a href="https://crates.io/crates/notify-rust">notify-rust</a>.
+</p>
+<ul><li>Makedependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rust">rust</a></span><sup><small>包</small></sup></span></li>
+<li>Build with: <code>cargo build</code></li>
+<li>Run with: <code>target/debug/hello_world</code> or <code>cargo run</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">Cargo.toml</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[package]
+name = "hello_world"
+version = "0.1.0"
+
+[dependencies]
+notify-rust = "^3"</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">src/main.rs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">extern crate notify_rust;
+use notify_rust::Notification;
+fn main(){
+    Notification::new()
+        .summary("Hello world")
+        .body("This is an example notification.")
+        .icon("dialog-information")
+        .show().unwrap();
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Scala" id="Scala">Scala</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/java-gnome/">java-gnome</a></span><sup><small>AUR</small></sup></span> (and <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/scala/">scala</a></span><sup><small>AUR</small></sup></span>)</li>
+<li>Makedependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/scala/">scala</a></span><sup><small>AUR</small></sup></span></li>
+<li>Build with: <code>scalac -cp /usr/share/java/gtk.jar -d HelloWorld.jar HelloWorld.scala</code></li>
+<li>Run with: <code>java -cp /usr/share/java/gtk.jar:HelloWorld.jar HelloWorld</code> (or <code>scala -cp /usr/share/java/gtk.jar HelloWorld.scala</code>)</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">HelloWorld.scala</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">import org.gnome.gtk._
+import org.gnome.notify._
+
+object HelloWorld {
+  def main(args: Array[String]) {
+    Gtk.init(args)
+    Notify.init("Hello world")
+    var Hello = new Notification("Hello world!", "This is an example notification.", "dialog-information")
+    Hello.show()
+  }
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Vala" id="Vala">Vala</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glib2">glib2</a></span><sup><small>包</small></sup></span></li>
+<li>Makedependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vala">vala</a></span><sup><small>包</small></sup></span></li>
+<li>Build with: <code>valac --pkg gio-2.0 hello_world.vala</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.vala</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">using GLib;
+public class HelloWorld {
+	static void main () {
+		var Application = new GLib.Application ("hello.world", GLib.ApplicationFlags.FLAGS_NONE);
+		Application.register ();
+		var Notification = new GLib.Notification ("Hello world");
+		Notification.set_body ("This is an example notification.");
+		var Icon = new GLib.ThemedIcon ("dialog-information");
+		Notification.set_icon (Icon);
+		Application.send_notification (null, Notification);
+	}
+}</pre>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libnotify">libnotify</a></span><sup><small>包</small></sup></span></li>
+<li>Makedependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vala">vala</a></span><sup><small>包</small></sup></span></li>
+<li>Build with: <code>valac --pkg libnotify hello_world.vala</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.vala</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">using Notify;
+public class HelloWorld {
+	static void main () {
+		Notify.init ("Hello world");
+		var Hello = new Notify.Notification("Hello world!", "This is an example notification.", "dialog-information");
+		Hello.show ();
+	}
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Visual_Basic__NET" id="Visual_Basic_.NET">Visual Basic .NET</h3></div>
+<ul><li>Dependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/notify-sharp-3/">notify-sharp-3</a></span><sup><small>AUR</small></sup></span></li>
+<li>Makedependency: <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mono-basic/">mono-basic</a></span><sup><small>AUR</small></sup></span></li>
+<li>Build with: <code>vbnc -r:/usr/lib/mono/notify-sharp-3.0/notify-sharp.dll hello_world.vb</code></li>
+<li>Run with: <code>mono hello_world.exe</code></li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello_world.vb</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Imports Notifications
+Public Class Hello
+	Public Shared Sub Main
+		Dim Hello As New Notification
+		Hello.Summary  = "Hello world!"
+		Hello.Body     = "This is an example notification."
+		Hello.IconName = "dialog-information"
+		Hello.Show
+	End Sub
+End Class</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5150d083aea5_.E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7" id="提示和技巧"><span id=".E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7"></span>提示和技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_.E6.9B.BF.E6.8D.A2.E4.B9.8B.E5.89.8D.E7.9A.84.E9.80.9A.E7.9F.A5" id="替换之前的通知"><span id=".E6.9B.BF.E6.8D.A2.E4.B9.8B.E5.89.8D.E7.9A.84.E9.80.9A.E7.9F.A5"></span>替换之前的通知</h3></div>
+<p>如果通知的ID已知，则可以替换通知；如果新的通知请求指定了相同的 ID，它将始终替换旧通知。(上面显示的 libnotify 绑定会自动处理此问题。)遗憾的是，notify-send 不会报告此 ID，因此需要替代工具才能在 CLI 上执行此操作。一个功能强大的 CLI 工具是 <a href="https://github.com/phuhl/notify-send.py">notify-send.py</a>脚本，它提供 notify-send 语法以及额外的 ID 报告和替换功能。
+</p><p>但是，对于某些通知服务器（例如 Notify-OSD），您可以把<code>string:x-canonical-private-synchronous:</code>的提示与 notify-send结合使用，以达到相同的结果。
+</p><p>例如，要获取通知的显示时间：
+</p>
+<pre>while true; do
+  date=$(date)
+  notify-send "$date" -h string:x-canonical-private-synchronous:my-notification
+  sleep 1
+done</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_.E5.8C.85.E5.90.AB.E6.8C.89.E9.92.AE.E6.88.96.E4.BE.A6.E5.90.AC.E9.80.9A.E7.9F.A5.E7.9A.84.E5.85.B3.E9.97.AD.2F.E5.8D.95.E5.87.BB.E4.BA.8B.E4.BB.B6" id="包含按钮或侦听通知的关闭/单击事件"><span id=".E5.8C.85.E5.90.AB.E6.8C.89.E9.92.AE.E6.88.96.E4.BE.A6.E5.90.AC.E9.80.9A.E7.9F.A5.E7.9A.84.E5.85.B3.E9.97.AD.2F.E5.8D.95.E5.87.BB.E4.BA.8B.E4.BB.B6"></span>包含按钮或侦听通知的关闭/单击事件</h3></div>
+<p>使用<a href="https://github.com/phuhl/notify-send.py">notify-send.py</a>脚本，有显示按钮操作或监听通知的默认操作（通常是在用户单击通知时）和关闭操作。当 action-icons 提示设置为 true 并且通知守护程序支持此功能时，按钮将显示图标而不是文本。当相应的事件发生时，脚本会打印操作标识符或命令行的 “close”要监听默认操作 （on-click），必须使用 action-identfier “default”。
+</p><p>按钮上有图标的示例：
+</p>
+<pre>notify-send.py "Buttons" "Do you like em?" --hint boolean:action-icons:true --action yes:face-cool no:face-sick</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_.E5.85.B7.E6.9C.89D-Bus.E6.9C.8D.E5.8A.A1.E7.9A.84.E5.A4.9A.E4.B8.AA.E9.80.9A.E7.9F.A5.E6.9C.8D.E5.8A.A1.E5.99.A8" id="具有D-Bus服务的多个通知服务器"><span id=".E5.85.B7.E6.9C.89D-Bus.E6.9C.8D.E5.8A.A1.E7.9A.84.E5.A4.9A.E4.B8.AA.E9.80.9A.E7.9F.A5.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>具有D-Bus服务的多个通知服务器</h3></div>
+<p>如#独立通知部分所述，用户可以创建D-Bus服务，以便可以自动启动一个通知服务器。一些实现已经包含D-Bus服务文件。但是，当安装了多个通知服务器并且其中一些附带了D-Bus服务文件时，会导致问题。例如，同时安装了<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dunst">dunst</a></span><sup><small>包</small></sup></span>和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mako">mako</a></span><sup><small>包</small></sup></span>，在没有明确指定服务器时，D-Bus会为用户选择一个，此选择不受用户控制。为避免这种情况，您可以通过创建<code>org.freedesktop.Notifications.service</code>文件来覆盖服务 （请参阅 #独立通知）并指向要使用的服务，然后重新启动会话。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_Systemd_services.E5.A4.B1.E8.B4.A5.E7.9A.84.E9.80.9A.E7.9F.A5" id="Systemd_services失败的通知"><span id="Systemd_services.E5.A4.B1.E8.B4.A5.E7.9A.84.E9.80.9A.E7.9F.A5"></span>Systemd services失败的通知</h3></div>
+<p>要获得失败服务的通知，请在目标用户上安装并运行 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=systembus-notify">systembus-notify</a></span><sup><small>包</small></sup></span>，并按照 <a href="#pgac06dd8bfe95">systemd#通知失败的单元</a>中给出的说明进行操作，但将<code>failure-notification@</code>模板单元替换为下面的这个：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/failure-notification@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Send a notification about a failed systemd unit
+After=Graphical.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/dbus-send --system / net.nuetzlich.SystemNotifications.Notify 'string:%i' 'string:Unit failed'</pre>
+<p>遗憾的是，此解决方案尚不支持设置通知的紧急性或超时，请参阅<a href="https://github.com/rfjakob/systembus-notify/issues/6">此问题</a>。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5150d083aea5_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5150d083aea5_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E6.8C.82.E8.B5.B7.E6.95.B4.E6.95.B4.E4.B8.80.E5.88.86.E9.92.9F" id="应用程序挂起整整一分钟"><span id=".E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E6.8C.82.E8.B5.B7.E6.95.B4.E6.95.B4.E4.B8.80.E5.88.86.E9.92.9F"></span>应用程序挂起整整一分钟</h3></div>
+<p>如果应用程序在尝试显示通知时挂起，可能是因为D-Bus服务错误地发布了通知服务的其可用性。
+例如，假设一个用户最近安装了一个需要<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=plasma-workspace">plasma-workspace</a></span><sup><small>包</small></sup></span>的 KDE组件，但该用户仍在运行XFCE。在这种情况下，KDE通知器将被优先考虑，但用户没有运行它。应用程序将在等待服务时挂起，只有在超时后才会回退到<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xfce4-notifyd">xfce4-notifyd</a></span><sup><small>包</small></sup></span>。
+</p><p>最明显的挂起可能是来自音量指示器滚动调整。
+</p><p>如果您处于这种情况，您应该有两个通知处理程序：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ find /usr/share/dbus-1/services/ -name '*Notif*'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">org.kde.plasma.Notifications.service
+org.xfce.xfce4-notifyd.Notifications.service
+</pre>
+<p>在这两个应用程序中，一个在 1 分钟超时后经常失败，如<a href="#pg47c5e1af4d24">journal</a>日志中所示：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># journalctl -g notif</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Jul 01 09:40:49 laptop dbus-daemon[866]: [session uid=1000 pid=866] Activating service name='org.freedesktop.Notifications' requested by ':1.193' (uid=1000 pid=5432 comm="/usr/lib/xfce4/panel/wrapper-2.0 /usr/lib/xfce4/pa")
+Jul 01 09:41:49 laptop plasma_waitforname[6093]: org.kde.knotifications: WaitForName: Service was not registered within timeout
+Jul 01 09:41:49 laptop dbus-daemon[866]: [session uid=1000 pid=866] Activated service 'org.freedesktop.Notifications' failed: Process org.freedesktop.Notifications exited with status 1</pre>
+<p>按照 #具有D-Bus服务的多个通知服务器中所述选择要使用的服务来解决问题。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5150d083aea5_.E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85" id="另请参阅"><span id=".E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85"></span>另请参阅</h2></div>
+<ul><li><a href="https://developer-old.gnome.org/libnotify/">Libnotify Reference Manual</a><sup title="最后检查状态：domain name not resolved">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2024-07-30 ⓘ]</sup></li>
+<li><a href="https://web.archive.org/web/20160313162757/http://milky.manishsinha.net/2009/03/29/working-with-libnotify/">C example</a> (archived version)</li>
+<li><a href="https://www.devdungeon.com/content/desktop-notifications-linux-python">Python notification examples</a></li>
+<li><a href="https://hashbang.fr/tutoriel-notify.html">Python notify example</a> (french article)</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807050720
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.468 seconds
+Real time usage: 0.484 seconds
+Preprocessor visited node count: 2011/1000000
+Revision size: 30504/2097152 bytes
+Post‐expand include size: 51375/2097152 bytes
+Template argument size: 25694/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 10/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  222.890      1 -total
+ 43.30%   96.516      1 Template:Related_articles_start
+  6.99%   15.569     14 Template:App
+  5.49%   12.230     54 Template:Pkg
+  4.63%   10.315     43 Template:Hc
+  3.51%    7.824     53 Template:Ic
+  2.84%    6.320     25 Template:AUR
+  2.78%    6.201      3 Template:Tip
+  1.76%    3.912      4 Template:Broken_package_link
+  1.66%    3.705      1 Template:Remove
+-->
+<!-- Render ID ddea000e-921d-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7960:|#|:idhash:canonical!zh-cn and timestamp 20260807050720 and revision id 33795. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

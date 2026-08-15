@@ -1,0 +1,204 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgf054312e26a1">创建软件包</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Creating_packages">Creating packages</a>，最近一次同步于 2026-01-19，若英文版本有所<a href="https://wiki.archlinux.org/title/Creating_packages?diff=0&amp;oldid=858913">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Creating_packages_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg3a962ff19783">Creating packages for other distributions</a></li>
+<li><a href="#pg66d85d5f8d1e">软件包补丁</a></li>
+<li><a href="#pg3a7878c081d8">.SRCINFO</a></li>
+</ul></div>
+<p>本文旨在帮助用户利用类似于 <a href="https://zh.wikipedia.org/wiki/Ports">ports</a> 的 <a href="#pg8d559a1b1a4f">Arch 构建系统</a>来创建自己的软件包，以及如何提交到 <a href="#pg5a197ea84860">Arch 用户软件仓库</a>。本文讲述了如何创建 <span class="plainlinks archwiki-template-man" title="$ man 5 PKGBUILD"><a href="https://man.archlinux.org/man/PKGBUILD.5">PKGBUILD(5)</a></span>，这是一个描述如何构建软件包的文件，<a href="#pg7edcce763396">makepkg</a> 会使用它来从源代码创建二进制软件包。
+</p><p>关于构建规则和提高软件包质量的方法，请参考 <a href="#pg604525fe585e">Arch 打包准则</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf054312e26a1_.E6.A6.82.E8.BF.B0" id="概述"><span id=".E6.A6.82.E8.BF.B0"></span>概述</h2></div>
+<p>Arch Linux 中的软件包是通过 <i>makepkg</i> 工具以及存储在 <code>PKGBUILD</code> 文件中的信息编译的。运行 <i>makepkg</i> 时，它会自动在当前目录下搜索 <code>PKGBUILD</code> 文件，然后根据其中的信息下载文件，按需把软件源码重新编译打包为一个  <code><i><a href="#pgf9d748a7b27b">pkgname</a></i>.pkg.tar.zst</code> 软件包文件。软件包文件中包含了 <a href="#pg9ef105bf1e3c">pacman</a> 安装需要的二进制文件和安装指令。
+</p><p>一个 Arch 软件包就是一个使用 <span class="plainlinks archwiki-template-man" title="$ man 1 zstd"><a href="https://man.archlinux.org/man/zstd.1">zstd(1)</a></span> 压缩的 <span class="plainlinks archwiki-template-man" title="$ man 1 tar"><a href="https://man.archlinux.org/man/tar.1">tar(1)</a></span> 压缩包，或者叫 <a href="#pg24be1d21a7ac">tarball</a>。它包含了以下由 <i>makepkg</i> 生成的文件：
+</p>
+<ul><li>要安装的二进制文件；</li></ul>
+<ul><li><code>.PKGINFO</code>: 包含所有 pacman 处理软件包所需的元数据、依赖等等；</li></ul>
+<ul><li><code>.BUILDINFO</code>: 包含可复现编译需要的信息，参阅 <span class="plainlinks archwiki-template-man" title="$ man 5 BUILDINFO"><a href="https://man.archlinux.org/man/BUILDINFO.5">BUILDINFO(5)</a></span> ；</li></ul>
+<ul><li><code>.MTREE</code>: 包含了文件的哈希值与时间戳，pacman 能够根据这些储存在本地数据库的信息校验软件包的完整性；</li></ul>
+<ul><li><code>.INSTALL</code>: 可选的文件，可以用来在安装/升级/删除操作之后运行命令。(本文件只有在 <code>PKGBUILD</code> 中制定才会存在)；</li></ul>
+<ul><li><code>.Changelog</code>: 一个可选的文件，保存了包管理员描述软件变更的日志。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf054312e26a1_.E5.87.86.E5.A4.87.E5.B7.A5.E4.BD.9C" id="准备工作"><span id=".E5.87.86.E5.A4.87.E5.B7.A5.E4.BD.9C"></span>准备工作</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf054312e26a1_.E5.BF.85.E9.9C.80.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85" id="必需的软件包"><span id=".E5.BF.85.E9.9C.80.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>必需的软件包</h3></div>
+<p>首先，确定你已<a href="#pg811194d6beaa">安装</a>必须的工具包。安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base-devel">base-devel</a></span><sup><small>包</small></sup></span> <a href="#pga70081e114f4">元软件包</a>应当足够；它会引入 <span class="plainlinks archwiki-template-man" title="$ man 1 make"><a href="https://man.archlinux.org/man/make.1">make(1)</a></span> 和其它一些编译源码时需要的工具。
+</p><p>创建包的一个关键工具是 <i>makepkg</i>（由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pacman">pacman</a></span><sup><small>包</small></sup></span> 提供），它的功能请参阅 <a href="#pg604525fe585e">Arch 打包准则#Makepkg 的任务</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf054312e26a1_.E4.B8.8B.E8.BD.BD.E5.B9.B6.E6.B5.8B.E8.AF.95.E5.AE.89.E8.A3.85" id="下载并测试安装"><span id=".E4.B8.8B.E8.BD.BD.E5.B9.B6.E6.B5.8B.E8.AF.95.E5.AE.89.E8.A3.85"></span>下载并测试安装</h3></div>
+<p>下载你想打包的软件的源代码压缩包，解压，按照作者所说的步骤安装它。记录下在编译和安装软件过程中需要的所有命令或步骤。你将要在 <code>PKGBUILD</code> 文件中重复这些命令和步骤。
+</p><p>大多数软件作者遵循三步走的安装惯例：
+</p>
+<pre>$ ./configure
+$ make
+# make install
+</pre>
+<p>建议在这时测试软件的功能是否正常。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf054312e26a1_.E5.88.9B.E5.BB.BA.E4.B8.80.E4.B8.AA.E5.B9.B2.E5.87.80.E7.9A.84_chroot" id="创建一个干净的_chroot"><span id=".E5.88.9B.E5.BB.BA.E4.B8.80.E4.B8.AA.E5.B9.B2.E5.87.80.E7.9A.84_chroot"></span>创建一个干净的 chroot</h3></div>
+<p>建议参考<a href="#pg2dea2f176fb9">创建一个干净的 chroot</a> 来保证你的系统中的其它软件包和配置不会影响 <code>PKGBUILD</code>。这个方法容错性更强，是一个更加恰当的构建软件包的方法，通常能够发现那些你未曾意识到需要的依赖项，因为它们已经在你的系统中存在。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf054312e26a1_.E5.88.9B.E5.BB.BA_PKGBUILD" id="创建_PKGBUILD"><span id=".E5.88.9B.E5.BB.BA_PKGBUILD"></span>创建 PKGBUILD</h2></div>
+<p>当你运行 <code>makepkg</code> 时，它会在当前工作目录寻找一个 <code>PKGBUILD</code> 文件。如果找到 <code>PKGBUILD</code> 文件，它会下载该软件的源代码，根据 <code>PKGBUILD</code> 文件中的指令编译它。PKGBUILD 中的指令必须能完全被 <a href="#pg1ca1e15827ff">Bash</a> 解释。
+</p><p>编译成功后，最后的二进制文件和包的元信息（即包的版本、依赖）被一起打包在 <code><i>pkgname</i>.pkg.tar.zst</code> 软件包文件中，这个文件包可以通过 <code>makepkg --install</code> 调用 pacman 或直接使用 <code>pacman -U <i>&lt;package file&gt;</i></code> 来安装。
+</p><p>要开始制作一个包，你应该先创建一个空工作目录，进入该目录，创建一个 <code>PKGBUILD</code> 文件。你可以复制 <code>PKGBUILD</code> 模板（位于 /usr/share/pacman/）到工作目录，或者复制一个类似包的 <code>PKGBUILD</code> 也可以。如果你只想在别人的基础上更改一些选项的话，后一种方法比较方便。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf054312e26a1_PKGBUILD_.E5.8F.98.E9.87.8F" id="PKGBUILD_变量"><span id="PKGBUILD_.E5.8F.98.E9.87.8F"></span>PKGBUILD 变量</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>主页面为 <a href="#pgf9d748a7b27b">PKGBUILD</a>，另外也请参考 <span class="plainlinks archwiki-template-man" title="$ man 5 PKGBUILD"><a href="https://man.archlinux.org/man/PKGBUILD.5#OPTIONS_AND_DIRECTIVES">PKGBUILD(5) § OPTIONS AND DIRECTIVES</a></span>。</div>
+<p><i>makepkg</i> 预定义了以下变量，打包者需使用它们指代构建过程的临时路径：
+</p>
+<dl><dt><code>srcdir</code></dt>
+<dd><i>makepkg</i>将会把源文件解压到此文件夹，或在此文件夹中生成指向 source 数组中文件的软连接。</dd>
+<dt><code>pkgdir</code></dt>
+<dd><i>makepkg</i>会把该文件夹当成系统根目录，并将软件安装在此文件夹下。</dd></dl>
+<p>这些变量都是<i>绝对路径</i>，即意味着只要你合适地使用这些变量，就不用担心当前工作目录的影响.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><i>makepkg</i> 及延伸到 <code>build()</code> 和 <code>package()</code> 函数在运行过程中都应当是非交互的。在这些函数中调用交互工具或脚本可能会中断 <i>makepkg</i> 的运行，特别是启用了构建日志的时候（<code>--log</code>）。具体信息请参考 <a href="https://bugs.archlinux.org/task/13214">FS#13214</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf054312e26a1_PKGBUILD_.E5.87.BD.E6.95.B0" id="PKGBUILD_函数"><span id="PKGBUILD_.E5.87.BD.E6.95.B0"></span>PKGBUILD 函数</h3></div>
+<p>在构建软件包时，<code>makepkg</code> 会在 <code>PKGBUILD</code> 中有定义的情况下调用以下五个函数。<code>PKGBUILD</code> 中必须包含 <code>package()</code> 函数并总会被调用。对于其它函数，如果其未被定义，那么 <code>makepkg</code> 会将其略过。
+</p><p>在构建时，函数将按下文列出的顺序执行。
+</p><p>另请参考 <span class="plainlinks archwiki-template-man" title="$ man 5 PKGBUILD"><a href="https://man.archlinux.org/man/PKGBUILD.5#PACKAGING_FUNCTIONS">PKGBUILD(5) § PACKAGING FUNCTIONS</a></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf054312e26a1_prepare.28.29" id="prepare()"><span id="prepare.28.29"></span>prepare()</h4></div>
+<p>此函数会执行用于预处理源文件以进行构建的命令，例如 <a href="#pg58573c967f9c">patching</a>。此函数执行在 pkgver() 之前，软件包解压之后。如果解压过程被跳过（<code>makepkg --noextract</code>），那么 <code>prepare()</code> 函数就不会被执行。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong> (从 <span class="plainlinks archwiki-template-man" title="$ man 5 PKGBUILD"><a href="https://man.archlinux.org/man/PKGBUILD.5">PKGBUILD(5)</a></span>) 中可以知道，该函数运行在 <code>bash -e</code> 模式下，意味着任何以非零状态退出的命令都会造成该函数中止.</div>
+<p>如果不清楚应该将操作放到 <code>prepare()</code> 还是 <code>build()</code>，只需要记得 <code>prepare()</code> 中的步骤应在解压后仅执行一次，而 <code>build()</code> 中的步骤应在解压后文件被修改时都执行一次。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf054312e26a1_pkgver.28.29" id="pkgver()"><span id="pkgver.28.29"></span>pkgver()</h4></div>
+<p><code>pkgver()</code> 会在抓取并解压源文件，执行 prepare() 后执行此函数，可用于在 makepkg 阶段中更新 pkgver 变量。
+</p><p><a href="#pg2e95a0584036">为使用 git/svn/hg 等工具的项目打包</a>时，由于它们的构建过程相同，但源文件可能每天甚至每小时更新一次，这一特性将会十分有用。过去的方法是把日期写入到 pkgver 变量中，但这样一来 makepkg 会在即使软件没有更新的情况下依然重新构建软件包，因为它会认为软件包的版本改变了。其他与此有关的命令有 <code>git describe</code>，<code>hg identify -ni</code> 等等。请在提交 PKGBUILD 前做好测试，因为如果 <code>pkgver()</code> 执行失败，整个构建过程都会终止。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>pkgver 不能含有空格或连接符 (<code>-</code>)，通常可以用 sed 来进行修正。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf054312e26a1_build.28.29" id="build()"><span id="build.28.29"></span>build()</h4></div>
+<p>现在你需要编写 <code>PKGBUILD</code> 文件中的 <code>build()</code> 函数。这个函数使用 <a href="https://en.wikipedia.org/wiki/Bash_(Unix_shell)">Bash</a> 语法的通用 shell 命令来自动编译软件，并创建名为 <code>pkg</code> 的软件安装目录。这允许 <i>makepkg</i> 无需详查你的文件系统就可以打包你的软件。
+</p><p>在 <code>build()</code> 函数中第一步就是进入由解压源码包所生成的目录。<i>makepkg</i> 会在执行 <code>build()</code> 函数之前将当前活动目录设为为 <code>$srcdir</code>；因此，大多数情况下第一条命令是这样的：(参考示例文件 <code>/usr/share/pacman/PKGBUILD.proto</code>）：
+</p>
+<pre>cd "$pkgname-$pkgver"
+</pre>
+<p>现在，你需要把你当时手动编译软件时用到的命令一一列上。<code>build()</code> 基本上会自动运行你当时手动输入的命令，并在伪 root 环境下编译该软件。如果要打包的软件使用了一个配置脚本，最好在配置中加上 <code>--prefix=/usr</code>。许多软件都将自己安装到 <code>/usr/local</code> 下，但你只应在手动从源码安装时这么做。所有的 Arch Linux 软件包都应当使用 <code>/usr</code> 目录。文件中接下来的两行应当如下（参考 <code>/usr/share/pacman/PKGBUILD.proto</code>）：
+</p>
+<pre>./configure --prefix=/usr
+make
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果你的软件不需要构建任何东西，请不要使用 <code>build()</code> 函数，但 <code>package()</code> 函数依然是必须的。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf054312e26a1_check.28.29" id="check()"><span id="check.28.29"></span>check()</h4></div>
+<p>用于执行 <code>make check</code> 和其它一些例行测试。强烈建议使用 <code>check()</code> 确保软件正常构建，并能搭配依赖正常使用。
+</p><p>如果不需要或是维护者无法使软件包通过测试，可以给 <code>makepkg</code> 传入 <code>--nocheck</code> 参数来禁用它。
+</p><p>如果要测试的是 GUI 图形化应用，可以<a href="#pg9fc1e9437ae5">在虚拟 xserver 中运行测试</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf054312e26a1_package.28.29" id="package()"><span id="package.28.29"></span>package()</h4></div>
+<p>最后一步是将编译好的文件放到一个目录下，让 <i>makepkg</i> 可以获取并打包为软件包。默认情况下该目录为 <code>pkg</code>——一个简单的伪 root 环境。<code>pkg</code> 目录复制了根目录下软件安装路径的继承关系，如果你需要手动把文件放到根目录下，那么需要把文件放在 <code>pkg</code> 下相同的文件层级结构中。比如，你想把一个文件安装到 <code>/usr/bin</code>，那么在伪 root 环境中对应的路径为 <code>$pkgdir/usr/bin</code>。安装步骤通常不需要用户手动复制大量文件到某个地方，而只需调用 <code>make install</code> 即可。为了将软件正确地安装到 <code>pkg</code> 路径下，最后一行一般应该这样写：
+</p>
+<pre>make DESTDIR="$pkgdir" install
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>有时候在 <code>Makefile</code> 里没有使用<code>DESTDIR</code>；你可能需要使用 <code>prefix</code> 来替代。如果软件包是用 <i>autoconf</i>/<i>automake</i> 来构建的，那就需根据<a href="https://www.gnu.org/software/automake/manual/automake.html#Install">文档</a>使用 <code>DESTDIR</code>；如果 <code>DESTDIR</code> 不起作用，可以试试 <code>make prefix="$pkgdir/usr" install</code>。如果这还不起作用的话，你就需要深入检查 <code>make &lt;...&gt; install</code> 具体执行的安装命令了。</div>
+<p><code>makepkg --repackage</code> 命令只运行 <code>package()</code> 函数,它只是将文件打包成软件包，并不运行编译过程。如果你只是更改了 <code>depends</code> 依赖变量，用这个命令来打包可以节省很多时间。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>使用类似 <code>mv</code> 的命令从 <code>$srcdir</code> 移动由 <code>build()</code> 生成的文件到 <code>$pkgdir</code> 会破坏 <i>makepkg</i> 的 <code>--repackage</code> 选项。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf054312e26a1_.E6.B5.8B.E8.AF.95_PKGBUILD_.E6.96.87.E4.BB.B6.E5.92.8C.E8.BD.AF.E4.BB.B6.E5.8C.85" id="测试_PKGBUILD_文件和软件包"><span id=".E6.B5.8B.E8.AF.95_PKGBUILD_.E6.96.87.E4.BB.B6.E5.92.8C.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>测试 PKGBUILD 文件和软件包</h2></div>
+<p>在编写 <code>build()</code> 函数时，需要频繁测试更改以确保没有 bug。你可以在包含 <code>PKGBUILD</code> 的目录下运行 <code>makepkg</code> 命令来确保没有问题。如果 <code>PKGBUILD</code> 没有错误，将会生成一个软件包；但是如果 <code>PKGBUILD</code> 有问题或未完成，它将抛出一个错误。
+</p><p>如果运行 <code>makepkg</code> 成功，在你的工作目录下将会生成一个名为 <code><i>pkgname-pkgver</i>.pkg.tar.zst</code> 的新文件，可以使用 <code>pacman -U</code> 进行安装。注意，成功生成了软件包不代表软件能正常运行，它有可能仅包含有空目录，也可能包含如不正确的前缀等问题。你可以使用 pacman 的 <code>pacman -Qlp <i>pkgname</i></code> 查询软件包的文件清单，以及通过 <code>pacman -Qip <i>pkgname</i></code> 检查依赖项是否正确。
+</p><p>如果包看起来是正确的，那你的工作就完成了。但是如果你打算发布这个 <code>PKGBUILD</code> 文件，你就需要确认确认再确认 <code>depends</code> 数组中的依赖是否正确。
+</p><p>另外也要确保包二进制文件完全正常地<i>运行</i>！如果发布出去的软件包已涵盖所有必要文件，但仅因某些选项与其他系统不兼容而崩溃会非常令人讨厌。如果你只是为自己的系统编译这个软件，就不必做这个质量保证了，因为只有你一个人需要忍受这些错误。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf054312e26a1_.E6.A3.80.E6.9F.A5.E5.8C.85.E7.9A.84.E9.80.BB.E8.BE.91.E6.80.A7" id="检查包的逻辑性"><span id=".E6.A3.80.E6.9F.A5.E5.8C.85.E7.9A.84.E9.80.BB.E8.BE.91.E6.80.A7"></span>检查包的逻辑性</h3></div>
+<p>确定包可以正常使用后，再使用<a href="#pg00c132d82a07">namcap</a>来检查错误：
+</p>
+<pre>$ namcap PKGBUILD
+$ namcap <i>pkgname</i>.pkg.tar.zst
+</pre>
+<p><i>Namcap</i> 将会做以下工作：
+</p>
+<ul><li>检查 <code>PKGBUILD</code> 里的一些常见错误，以及包文件结构是否有不必要或错位的文件</li>
+<li>用 <code>ldd</code> 扫描包中所有的 <a href="https://en.wikipedia.org/wiki/Executable_and_Linkable_Format">ELF</a> 文件，自动报告 <code>depends</code> 中缺失或可去除的依赖</li>
+<li>启发式搜寻缺失或冗余的依赖</li></ul>
+<p>等等。
+</p><p>要养成用 <i>namcap</i> 检查包的习惯，以避免提交包后再做修复的麻烦。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf054312e26a1_.E4.BD.BF.E7.94.A8_pkgctl_.E5.9C.A8.E5.B9.B2.E5.87.80.E7.9A.84_chroot_.E7.8E.AF.E5.A2.83.E4.B8.AD.E8.BF.9B.E8.A1.8C.E6.9E.84.E5.BB.BA" id="使用_pkgctl_在干净的_chroot_环境中进行构建"><span id=".E4.BD.BF.E7.94.A8_pkgctl_.E5.9C.A8.E5.B9.B2.E5.87.80.E7.9A.84_chroot_.E7.8E.AF.E5.A2.83.E4.B8.AD.E8.BF.9B.E8.A1.8C.E6.9E.84.E5.BB.BA"></span>使用 pkgctl 在干净的 chroot 环境中进行构建</h3></div>
+
+<p>可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=devtools">devtools</a></span><sup><small>包</small></sup></span> 的 <code>pkgctl</code> 来检查软件包是否可以在无其它包的环境中正常构建。在包含 PKGBUILD 的目录下执行：
+</p>
+<pre>$ pkgctl build
+</pre>
+<p>然后检查输出是否包含错误或警告。如果软件包依赖于 AUR 包，则需要事先构建并带入 chroot jail 中：
+</p>
+<pre>$ pkgctl build -I path/to/somepkg.tar.gz -I ...
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果包之前是通过 AUR 助手安装的，那很可能缓存目录中已经有其 tarball 了。</div>
+<p>更多选项请参考 <span class="plainlinks archwiki-template-man" title="$ man 1 pkgctl-build"><a href="https://man.archlinux.org/man/pkgctl-build.1">pkgctl-build(1)</a></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf054312e26a1_.E6.8A.8A.E5.8C.85.E6.8F.90.E4.BA.A4.E7.BB.99_AUR" id="把包提交给_AUR"><span id=".E6.8A.8A.E5.8C.85.E6.8F.90.E4.BA.A4.E7.BB.99_AUR"></span>把包提交给 AUR</h2></div>
+<p>请参考 <a href="#pge327f4597f76">AUR 提交准则</a>，里面详细介绍了提交流程。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf054312e26a1_.E6.80.BB.E7.BB.93" id="总结"><span id=".E6.80.BB.E7.BB.93"></span>总结</h2></div>
+<ul><li>下载你希望打包的软件源代码</li>
+<li>试着编译安装包到任意目录</li>
+<li>复制文件模板 <code>/usr/share/pacman/PKGBUILD.proto</code> 到一个临时目录，并重命名为 <code>PKGBUILD</code></li>
+<li>根据需要修改 <code>PKGBUILD</code> 文件</li>
+<li>运行 <code>makepkg</code> 看看输出的打包结果是否正确</li>
+<li>如果不正确，重复前两个步骤</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf054312e26a1_.E6.B3.A8.E6.84.8F.E4.BA.8B.E9.A1.B9" id="注意事项"><span id=".E6.B3.A8.E6.84.8F.E4.BA.8B.E9.A1.B9"></span>注意事项</h3></div>
+<ul><li>除非你“很清楚”你正在做什么，否则在开始自动打包<i>之前</i>，需确保你至少已成功手动打包一次。不幸的是，虽然大多数软件作者遵循了三步走的安装惯例：<code>./configure</code>; <code>make</code>; <code>make install</code>，但事情并不都是这样的，有时候你不得不自己打补丁才能安装成功。经验是：如果你手动无法编译成功或者无法将软件安装到指定子目录下，那你就不必费心打包了。<code>makepkg</code>没有任何魔力能消除源代码的问题让你编译成功。</li></ul>
+<ul><li>在少数情况下，软件包不提供源码，而只能使用类似 <code>sh installer.run</code> 的命令进行安装，这时就需要你自己做很多工作了（比如查看 README，安装指导，手册，或者 Gentoo 或其它软件包安装器的 ebuild 等等）。在一些很变态的情况下，你需要自己编辑源码才能正常安装。但是，<code>makepkg</code> 需要完全自主运行，不能有用户的干预。因此，如果你想修改 makefiles，需要随 <code>PKGBUILD</code> 附上一个定制的补丁，然后在 <code>prepare()</code> 函数里安装这个补丁；或者你可以在 <code>prepare()</code> 函数里通过 <code>sed</code> 来修改。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf054312e26a1_.E8.87.AA.E5.8A.A8.E5.8C.96" id="自动化"><span id=".E8.87.AA.E5.8A.A8.E5.8C.96"></span>自动化</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf054312e26a1_.E6.A0.A1.E9.AA.8C.E5.92.8C" id="校验和"><span id=".E6.A0.A1.E9.AA.8C.E5.92.8C"></span>校验和</h3></div>
+<p>可以使用 <code>updpkgsums</code> 工具简化为新版本软件更新校验和的工作，具体信息请参考 <a href="#pg7edcce763396">Makepkg#生成新校验和</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf054312e26a1_PKGBUILD_.E7.94.9F.E6.88.90.E5.99.A8" id="PKGBUILD_生成器"><span id="PKGBUILD_.E7.94.9F.E6.88.90.E5.99.A8"></span>PKGBUILD 生成器</h3></div>
+<p>某些软件包的 <code>PKGBUILD</code> 可以通过工具自动生成。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>用户需要在提交文件到 <a href="#pg89cb7b475cfb">AUR</a> 前确保软件包满足高质量标准。</div>
+<ul><li><a href="#pgccd29da0297b">Haskell</a>：<a href="https://github.com/magthe/cblrepo">cblrepo</a>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=arch-hs">arch-hs</a></span><sup><small>包</small></sup></span></li>
+<li><a href="#pg666c71b26604">Node.js</a>：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nodejs-npm2arch/">nodejs-npm2arch</a></span><sup><small>AUR</small></sup></span></li>
+<li><a href="#pg81319c47b698">Perl</a>：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perl-cpanplus-dist-arch">perl-cpanplus-dist-arch</a></span><sup><small>包</small></sup></span></li>
+<li><a href="#pgf6d3de5ccfac">Python</a>：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pipman-git/">pipman-git</a></span><sup><small>AUR</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pip2arch-git/">pip2arch-git</a></span><sup><small>AUR</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/python-pypi2pkgbuild/">python-pypi2pkgbuild</a></span><sup><small>AUR</small></sup></span></li>
+<li><a href="#pg3be4e2138bda">Ruby</a>：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gem2arch/">gem2arch</a></span><sup><small>AUR</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pacgem/">pacgem</a></span><sup><small>AUR</small></sup></span></li>
+<li><a href="#pg802f2550cda0">Rust</a>：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cargo-pkgbuild/">cargo-pkgbuild</a></span><sup><small>AUR</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cargo-aur-bin/">cargo-aur-bin</a></span><sup><small>AUR</small></sup></span></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf054312e26a1_.E6.96.B0.E7.9A.84.E4.B8.8A.E6.B8.B8.E7.89.88.E6.9C.AC.E5.8F.91.E5.B8.83" id="新的上游版本发布"><span id=".E6.96.B0.E7.9A.84.E4.B8.8A.E6.B8.B8.E7.89.88.E6.9C.AC.E5.8F.91.E5.B8.83"></span>新的上游版本发布</h3></div>
+<p>来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=devtools">devtools</a></span><sup><small>包</small></sup></span> 的 <i>pkgctl</i> 以 <code>.nvchecker.toml</code> 配置文件的形式支持 <a href="https://github.com/lilydjwg/nvchecker">nvchecker</a> 集成，该文件需与 <code>PKGBUILD</code> 位于同一目录下。具体示例请参考 pacman 包的 <a href="https://gitlab.archlinux.org/archlinux/packaging/packages/pacman/-/blob/main/.nvchecker.toml?ref_type=heads">.nvchecker.toml</a> 配置文件。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><code>pkgctl version setup</code> 会通过分析 PKGBUILD 的 source 数组尝试自动创建 <code>.nvchecker.toml</code> 配置文件。</div>
+<p>完成配置后，可以使用 <code>pkgctl version check</code> 比较 <code>PKGBUILD</code> 中的 <code>pkgver</code> 来检查上游是否发布了新版本，之后可以使用 <code>pkgctl version upgrade</code> 更新 <code>PKGBUILD</code>。详细信息请参考 <span class="plainlinks archwiki-template-man" title="$ man 1 pkgctl-version"><a href="https://man.archlinux.org/man/pkgctl-version.1">pkgctl-version(1)</a></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf054312e26a1_.E5.8F.82.E8.80.83" id="参考"><span id=".E5.8F.82.E8.80.83"></span>参考</h2></div>
+<ul><li><a href="https://bbs.archlinux.org/viewtopic.php?id=91408">如何正确创建补丁文件</a></li>
+<li><a href="https://github.com/archwomen/classroom-media/tree/master/classlogs">Arch Linux Classroom IRC 上关于如何创建 PKGBUILD 的教学日志</a></li>
+<li><a href="https://www.linuxfromscratch.org/hints/downloads/files/fakeroot.txt">使用 fakeroot 方式安装软件包</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807031222
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.254 seconds
+Real time usage: 0.262 seconds
+Preprocessor visited node count: 1470/1000000
+Revision size: 17121/2097152 bytes
+Post‐expand include size: 14293/2097152 bytes
+Template argument size: 5001/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 41/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   86.866      1 -total
+ 16.81%   14.604    124 Template:Ic
+  8.68%    7.544      6 Template:注意
+  8.57%    7.447     10 Template:Man
+  5.63%    4.888      3 Template:Note
+  5.55%    4.817      1 Template:Merge
+  4.06%    3.531      1 Template:翻译状态
+  3.58%    3.113      6 Template:Pkg
+  3.04%    2.642      1 Template:Tip
+  2.60%    2.261      3 Template:Related
+-->
+<!-- Render ID ce62bb0e-920d-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2966:|#|:idhash:canonical!zh-cn and timestamp 20260807031222 and revision id 34733. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

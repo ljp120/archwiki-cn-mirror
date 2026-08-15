@@ -1,0 +1,103 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgb3c92f6cea50">输入重映射工具</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Input_remap_utilities">Input remap utilities</a>，最近一次同步于 2025-02-02，若英文版本有所<a href="https://wiki.archlinux.org/title/Input_remap_utilities?diff=0&amp;oldid=826259">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Input_remap_utilities_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<p><br/>
+在 X 或 Wayland 环境中，多数重映射任务可通过本地 XKB 配置完成，参见 <a href="#pg0c28e14d0a1f">X keyboard extension#Local XKB folder</a>。对于 Linux 控制台的键位重映射，请参阅 <a href="#pg0c4d7f41106e">Linux 控制台/键盘配置</a>。若键盘设备报告了错误的键码，参见<a href="#pg1bd150838556">扫描码映射至键位码</a>。
+</p><p>某些特殊配置需通过软件守护进程转换输入事件。本页列出了可用于重映射键盘、鼠标等硬件输入事件的工具。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3c92f6cea50_.E5.B7.A5.E5.85.B7" id="工具"><span id=".E5.B7.A5.E5.85.B7"></span>工具</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3c92f6cea50_evremap" id="evremap">evremap</h3></div>
+<p><a href="https://github.com/wez/evremap">evremap</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/evremap-git/">evremap-git</a></span><sup><small>AUR</small></sup></span>）⸺Linux 中 Wayland 下的键盘输入重映射工具。支持以下重映射方式：
+</p>
+<ul><li>将 <code>CapsLock</code> 键映射为组合功能：按住时输出 <code>Ctrl</code>，轻按时输出 <code>Esc</code>。</li>
+<li>实现从 n 个键到 m 个键的映射（如 <code>F3</code> → <code>Ctrl+c</code>，<code>Alt+Left</code> → <code>Home</code>）。</li></ul>
+<p>安装后需创建配置文件 <code>/etc/evremap.toml</code>（仓库<a href="https://github.com/wez/evremap/blob/master/pixelbookgo.toml">示例</a>），或<a href="#pgac06dd8bfe95">修改</a> <code>evremap.service</code> 指定配置文件路径。最后<a href="#pg6ec215b93a06">启动</a>该服务。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3c92f6cea50_evdevremapkeys" id="evdevremapkeys">evdevremapkeys</h3></div>
+<p><a href="https://github.com/philipl/evdevremapkeys">evdevremapkeys</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/evdevremapkeys-git/">evdevremapkeys-git</a></span><sup><small>AUR</small></sup></span>）⸺Linux 输入设备按键事件重映射守护进程。支持以下功能：
+</p>
+<ul><li>重映射键盘与鼠标事件。</li>
+<li>实现重复动作映射（如模拟双击操作）。</li>
+<li>按键持续触发（如按住返回（Back）侧键时持续生成滚轮上滑事件）。</li></ul>
+<p>组合键到组合键的映射功能目前尚未合并至主分支，需使用 pronobis 的分叉版本实现，详见<a href="https://github.com/philipl/evdevremapkeys/issues/4#issuecomment-407684344">此处</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3c92f6cea50_evsieve" id="evsieve">evsieve</h3></div>
+<p><a href="https://github.com/KarsMulder/evsieve">evsieve</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/evsieve/">evsieve</a></span><sup><small>AUR</small></sup></span>）⸺能够读取 Linux 事件设备（evdev）的输入事件，并将其写入虚拟事件设备（uinput），在传递过程中对事件进行简单处理的底层工具。兼容 Wayland 环境。该工具尤其适合与 Qemu 的 <code>evdev-passthrough</code> 功能结合使用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3c92f6cea50_kbct" id="kbct">kbct</h3></div>
+<p><a href="https://github.com/samvel1024/kbct">kbct</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/kbct-git/">kbct-git</a></span><sup><small>AUR</small></sup></span>）⸺<b>K</b>ey<b>b</b>oard <b>C</b>ustomization <b>T</b>ool for Linux，Linux 键盘自定义工具。尽管名称如此，亦支持鼠标事件。支持以下功能：
+</p>
+<ul><li>实现键盘或鼠标按键事件到其他事件的映射。</li>
+<li>可定义多组映射层⸺根据输入时按下的修饰键切换不同映射列表。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>目前暂不支持生成复合按键事件，详见<a href="https://github.com/samvel1024/kbct/issues/13">该 issue</a>。</div>
+<p>安装后按需编辑 <code>/etc/kbct/config.yml</code> 配置文件，随后<a href="#pg6ec215b93a06">启动</a> <code>kbct.service</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3c92f6cea50_keyd" id="keyd">keyd</h3></div>
+<p><a href="https://github.com/rvaiya/keyd">keyd</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=keyd">keyd</a></span><sup><small>包</small></sup></span>）⸺基于内核级输入原语（evdev、uinput）的 Linux 系统级键位重映射守护进程。支持特性包括：
+</p>
+<ul><li>跨环境兼容：适用于 X11、Wayland 图形环境及 Linux 虚拟控制台。</li>
+<li>多层映射：通过修饰键实现动态键位配置切换。</li>
+<li>低延迟：直接操作内核事件流，无需用户空间转发。</li></ul>
+<p>建议阅读项目 README 了解与其他重映射工具的详细对比分析。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3c92f6cea50_Input_Remapper" id="Input_Remapper">Input Remapper</h3></div>
+<p><a href="https://github.com/sezanzeb/input-remapper/">Input Remapper</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/input-remapper-git/">input-remapper-git</a></span><sup><small>AUR</small></sup></span>）⸺同时提供图形界面和命令行界面的输入设备重映射配置工具，同时兼容 X 与 Wayland 环境。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3c92f6cea50_wtype" id="wtype">wtype</h3></div>
+<p><a href="https://github.com/atx/wtype">wtype</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wtype">wtype</a></span><sup><small>包</small></sup></span>）⸺<a href="#pga21a6be8b605">Wayland</a> 环境下的 xdotool 输入模拟工具（需混成器支持<a href="https://github.com/atx/wtype/issues/45">虚拟键盘协议</a>）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb3c92f6cea50_.E5.85.B6.E4.BB.96.E5.B7.A5.E5.85.B7" id="其他工具"><span id=".E5.85.B6.E4.BB.96.E5.B7.A5.E5.85.B7"></span>其他工具</h3></div>
+<ul><li><a href="https://github.com/snyball/Hawck">Hawck</a>⸺底层按键重绑定守护进程</li>
+<li><span class="ilh-all" data-foreign-title="IMWheel" data-lang-code="en" data-lang-name="英语" data-orig-title="IMWheel"><span class="ilh-page"><a href="#pg9be0b278b0b1">IMWheel</a></span></span>⸺X11 环境下可根据修饰键状态及应用程序单独重映射鼠标滚轮事件的工具</li>
+<li><span class="ilh-all" data-foreign-title="Interception-tools" data-lang-code="en" data-lang-name="英语" data-orig-title="Interception-tools"><span class="ilh-page"><a href="#pg3f4583eaa652">Interception-tools</a></span></span>⸺多功能输入处理工具套件，支持多种插件扩展</li>
+<li><a href="#pg2cb882e82d41">鼠标按键#用户工具</a>⸺硬件相关的鼠标按键配置工具列表</li>
+<li><a href="https://github.com/mathportillo/wayland-mouse-mapper">wayland-mouse-mapper</a>⸺Wayland 环境下将鼠标按键映射为按键操作的小型脚本</li>
+<li><a href="https://github.com/kempniu/evmapy">evmapy</a>⸺基于 Python 的 evdev 事件映射工具（尚未加入 AUR）</li>
+<li><a href="https://python-evdev.readthedocs.io/en/latest/">python-evdev</a>⸺Linux 输入事件读写工具库，支持处理按键、鼠标移动及触屏点击等事件</li>
+<li><a href="https://gitlab.com/S410/noinputs">noinputs</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/noinputs-git/">noinputs-git</a></span><sup><small>AUR</small></sup></span>）⸺输入设备管理工具，支持列出及<a href="https://git.kernel.org/pub/scm/linux/kernel/git/dtor/input.git/commit/?h=next&amp;id=6d59224fdcc532dd7292e3657d796b3728ec1e8e">禁用</a>设备</li>
+<li><a href="https://github.com/xremap/xremap">xremap</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xremap/">xremap</a></span><sup><small>AUR</small></sup></span>）⸺基于 evdev 和 uinput 的 X11/Wayland 键位重映射工具</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb3c92f6cea50_.E6.B5.8B.E8.AF.95" id="测试"><span id=".E6.B5.8B.E8.AF.95"></span>测试</h2></div>
+<ul><li><a href="https://gitlab.freedesktop.org/libevdev/evtest">evtest</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=evtest">evtest</a></span><sup><small>包</small></sup></span>）⸺实时显示按键名称的调试工具，有助于配置重映射工具时识别输入事件</li>
+<li><a href="https://git.sr.ht/~sircmpwn/wev">wev</a>（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wev">wev</a></span><sup><small>包</small></sup></span>）⸺<a href="#pga21a6be8b605">Wayland</a> 输入事件查看器，功能类似 <a href="#pg3b7521844e7c">xev</a></li></ul>
+<p>通过 <code>evsieve --input /dev/input/event* --print</code> 命令可实时查看计算机发出的所有输入事件流。
+</p><p>另一种测试方案是使用在线键盘检测网站。需注意多数此类工具无法区分左右修饰键，推荐支持左右键检测的示例站点，例如 <a href="https://stendec.io/">https://stendec.io/</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807121636
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.141 seconds
+Real time usage: 0.147 seconds
+Preprocessor visited node count: 325/1000000
+Revision size: 5916/2097152 bytes
+Post‐expand include size: 6235/2097152 bytes
+Template argument size: 1114/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 2/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.012/7.000 seconds
+Lua memory usage: 629218/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   57.039      1 -total
+ 58.45%   33.339      2 Template:Link-en
+  6.45%    3.681      1 Template:准确性
+  6.12%    3.490      1 Template:翻译状态
+  4.91%    2.801      4 Template:Pkg
+  4.22%    2.407     13 Template:Ic
+  3.62%    2.066      7 Template:AUR
+  2.16%    1.232      1 Template:META_Message
+  1.57%    0.893      1 Template:注意
+-->
+<!-- Render ID d5afb60e-9259-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8144:|#|:idhash:canonical!zh-cn and timestamp 20260807121636 and revision id 33878. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

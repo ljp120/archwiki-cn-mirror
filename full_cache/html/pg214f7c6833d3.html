@@ -1,0 +1,141 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg214f7c6833d3">联想 ThinkPad T14P Gen 2</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p>本文涵盖了在 Lenovo ThinkPad T14P Gen2 (2024) 笔记本（仅中国大陆特供）上安装和配置 Arch Linux 的信息。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg214f7c6833d3_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>使用最新的 <a href="https://archlinux.org/download/">Archiso</a> 完成基本的系统安装。
+</p><p>其余安装过程请参考<a href="#pgbdbcbed611fc">安装指南</a>。
+</p><p>常用笔记本设置可参考：<a href="#pge7666ea64560">笔记本电脑</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg214f7c6833d3_.E7.A1.AC.E4.BB.B6" id="硬件"><span id=".E7.A1.AC.E4.BB.B6"></span>硬件</h2></div>
+<p>需要额外安装的硬件驱动有：
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg214f7c6833d3_.E8.A7.86.E9.A2.91.E9.A9.B1.E5.8A.A8" id="视频驱动"><span id=".E8.A7.86.E9.A2.91.E9.A9.B1.E5.8A.A8"></span>视频驱动</h3></div>
+<p>安装以下几个包：
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-mesa">lib32-mesa</a></span><sup><small>包</small></sup></span> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vulkan-intel">vulkan-intel</a></span><sup><small>包</small></sup></span> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-vulkan-intel">lib32-vulkan-intel</a></span><sup><small>包</small></sup></span>
+</p><p>请勿安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span><sup><small>包</small></sup></span>，该包是为了旧显卡准备的，本型号设备安装后 SDDM 显示管理器会出现黑屏现象。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg214f7c6833d3_.E6.8C.87.E7.BA.B9.E6.89.AB.E6.8F.8F.E5.99.A8" id="指纹扫描器"><span id=".E6.8C.87.E7.BA.B9.E6.89.AB.E6.8F.8F.E5.99.A8"></span>指纹扫描器</h3></div>
+<p>指纹扫描器可以在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=fprintd">fprintd</a></span><sup><small>包</small></sup></span> 和 PAM 配合下完美工作，如果是在非 Gnome / KDE 桌面环境下使用，建议安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fingerprint-gui/">fingerprint-gui</a></span><sup><small>AUR</small></sup></span>。
+</p><p>可以参阅 <a href="#pgb8b247e2c1dc">Fprint</a> 进一步设置指纹登录解锁和 sudo 解锁等（注意：目前 指纹解锁并不支持自动解锁密钥环，故指纹登录目前并不实用）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg214f7c6833d3_.E6.8C.87.E7.BA.B9.E8.A7.A3.E9.94.81_sudo" id="指纹解锁_sudo"><span id=".E6.8C.87.E7.BA.B9.E8.A7.A3.E9.94.81_sudo"></span>指纹解锁 sudo</h4></div>
+<p>编辑 <code>/etc/pam.d/sudo</code>，在最顶部增加一行 <code>auth      sufficient pam_fprintd.so</code> 即可。
+</p><p>解释：该行表示使用 frprintd 进行 pam 认证解锁，并且如果失败继续下面的认证方式。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg214f7c6833d3_.E6.8C.87.E7.BA.B9.E8.A7.A3.E9.94.81_polkit" id="指纹解锁_polkit"><span id=".E6.8C.87.E7.BA.B9.E8.A7.A3.E9.94.81_polkit"></span>指纹解锁 polkit</h4></div>
+<p>polkit 用于给某些程序提权。
+</p><p>复制文件 <code>/usr/lib/pam.d/polkit-1</code> 到 <code>/etc/pam.d/polkit-1</code>，然后在最顶部增加一行 <code>auth      sufficient pam_fprintd.so</code> 即可。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg214f7c6833d3_NPU_.E9.A9.B1.E5.8A.A8" id="NPU_驱动"><span id="NPU_.E9.A9.B1.E5.8A.A8"></span>NPU 驱动</h3></div>
+<p>目前 Intel 已经开源其 NPU 驱动，并且 AUR 已有打包：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/intel-npu-driver-bin/">intel-npu-driver-bin</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg214f7c6833d3_.E7.AC.94.E8.AE.B0.E6.9C.AC.E8.AE.BE.E7.BD.AE" id="笔记本设置"><span id=".E7.AC.94.E8.AE.B0.E6.9C.AC.E8.AE.BE.E7.BD.AE"></span>笔记本设置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg214f7c6833d3_ACPI" id="ACPI">ACPI</h3></div>
+<p><a href="#pgf56e30f48810">ACPI</a> 支持完善，没有明显问题。
+</p><p>注意：电源按钮在 linux 下行为和在 windows 下行为不同，如果需要触发电源按钮的 ACPI 事件，需要按住按钮约 1 秒时间等待生效！
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg214f7c6833d3_.E9.A3.8E.E6.89.87.E8.B0.83.E8.8A.82" id="风扇调节"><span id=".E9.A3.8E.E6.89.87.E8.B0.83.E8.8A.82"></span>风扇调节</h3></div>
+<p>无需额外设置，开箱即用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg214f7c6833d3_.E9.94.AE.E7.9B.98" id="键盘"><span id=".E9.94.AE.E7.9B.98"></span>键盘</h3></div>
+<p>键盘开箱即用，默认支持 windows下的所有快捷键，但 Copilot 按键需要额外配置。
+</p><p>Fn + 快捷键正常（包括背光支持）
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg214f7c6833d3_.E6.8C.87.E7.82.B9.E6.9D.86" id="指点杆"><span id=".E6.8C.87.E7.82.B9.E6.9D.86"></span>指点杆</h3></div>
+<p>请使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-libinput">xf86-input-libinput</a></span><sup><small>包</small></sup></span> ，默认开箱即用（但默认不支持指点杆的双击功能）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg214f7c6833d3_.E8.A7.86.E9.A2.91.E7.A1.AC.E4.BB.B6.E8.A7.A3.E7.A0.81" id="视频硬件解码"><span id=".E8.A7.86.E9.A2.91.E7.A1.AC.E4.BB.B6.E8.A7.A3.E7.A0.81"></span>视频硬件解码</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-media-driver">intel-media-driver</a></span><sup><small>包</small></sup></span> 即可，firefox 可自动识别，chromium 系需要做额外设置，传递参数：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/chromium-flags.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">--enable-features=VaapiVideoDecodeLinuxGL</pre>
+<p>chrome 则需要编辑文件 <code>~/.config/chrome-flags.conf</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg214f7c6833d3_.E7.9C.81.E7.94.B5.E4.BC.98.E5.8C.96.E6.96.B9.E6.A1.88" id="省电优化方案"><span id=".E7.9C.81.E7.94.B5.E4.BC.98.E5.8C.96.E6.96.B9.E6.A1.88"></span>省电优化方案</h2></div>
+<p>建议以下两款工具均安装
+</p>
+<ol><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=thermald">thermald</a></span><sup><small>包</small></sup></span> 可以防止 Intel 平台过热，但目前并不完全支持所有的 CPU 型号，可以通过 <code>sudo systemctl status thermald</code> 来查看thermald 是否支持当前 CPU。</li></ol>
+<ol><li><a href="#pg10f1d5521407">TLP</a> 是一款专业的省电优化工具，可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tlp">tlp</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tlpui">tlpui</a></span><sup><small>包</small></sup></span>，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tlp-rdw">tlp-rdw</a></span><sup><small>包</small></sup></span>。</li></ol>
+<p>安装并开启 TLP：
+</p>
+<pre> sudo pacman -S tlp tlp-rdw
+</pre>
+<p>建议额外安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tlpui/">tlpui</a></span><sup><small>AUR</small></sup></span>，作为 GUI 控制。
+</p>
+<pre> sudo systemctl enable tlp.service
+ # 无线电设备向导需要额外的服务支持
+ sudo systemctl enable NetworkManager-dispatcher.service
+ # 屏蔽以下服务以避免冲突
+ sudo systemctl mask systemd-rfkill.service systemd-rfkill.socket
+</pre>
+<p>TLP 默认已经配置了绝大多数功能保证可以开箱即用，但并不保证实现更好的省电策略，故需要手动进行调节：
+</p><p>注意：以下设置是为了让电脑在流畅的情况下尽可能的低功耗，如果想要满血运行，可以参考 TLP 的官方文档，调整 CPU 为主动模式。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg214f7c6833d3_.E5.A4.84.E7.90.86.E5.99.A8.E8.AE.BE.E7.BD.AE" id="处理器设置"><span id=".E5.A4.84.E7.90.86.E5.99.A8.E8.AE.BE.E7.BD.AE"></span>处理器设置</h3></div>
+<ul><li><code>CPU_DRIVER_OPMODE_ON_AC</code> 设置为 <code>passive</code></li>
+<li><code>CPU_DRIVER_OPMODE_ON_BAT</code> 设置为 <code>passive</code></li></ul>
+<p>这会指示 CPU 启动被动模式，允许我们选择更加智能的调度模式。
+</p>
+<ul><li><code>CPU_SCALING_GOVERNOR_ON_AC</code> 设置为 <code>schedutil</code></li>
+<li><code>CPU_SCALING_GOVERNOR_ON_BAT</code> 设置为 <code>schedutil</code></li></ul>
+<p>设置 CPU 自动调频策略，<code>schedutil</code> 策略由较新内核支持，可以提供更好的调频策略。
+</p>
+<ul><li><code>CPU_ENERGY_PERF_POLICY_ON_AC</code> 设置为 <code>balance_performance</code></li>
+<li><code>CPU_ENERGY_PERF_POLICY_ON_BAT</code> 设置为 <code>balance_power</code></li></ul>
+<p>设置 CPU 能耗策略为平衡模式。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg214f7c6833d3_.E5.85.85.E7.94.B5.E9.98.88.E5.80.BC.E8.AE.BE.E7.BD.AE" id="充电阈值设置"><span id=".E5.85.85.E7.94.B5.E9.98.88.E5.80.BC.E8.AE.BE.E7.BD.AE"></span>充电阈值设置</h3></div>
+<p>充电阈值旨在通过减少持续运行导致的磨损和容量损失来延长电池的使用寿命。
+</p><p>设置主电池：
+</p>
+<pre>START_CHARGE_THRESH_BAT0=75
+STOP_CHARGE_THRESH_BAT0=80
+</pre>
+<p>设置辅电池：
+</p>
+<pre>START_CHARGE_THRESH_BAT1=75
+STOP_CHARGE_THRESH_BAT1=80
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg214f7c6833d3_.E9.9F.B3.E9.A2.91.E7.9C.81.E7.94.B5.E8.B6.85.E6.97.B6" id="音频省电超时"><span id=".E9.9F.B3.E9.A2.91.E7.9C.81.E7.94.B5.E8.B6.85.E6.97.B6"></span>音频省电超时</h3></div>
+<p>TLP 默认开启音频省电超时，当前会导致出现噪音干扰，可选择禁用省电或者延长超时时间：
+</p>
+<pre># 禁用
+SOUND_POWER_SAVE_ON_BAT=0
+# 延长至10
+SOUND_POWER_SAVE_ON_BAT=10
+</pre>
+<p>注意：目前的 TLP 开启音频相关设置后会导致 pipewire 的开机自动切换失效（表现为耳机播放无声音，手动在 DE 中切换设备到扬声器后再切换回来后正常工作），可以考虑关闭音频省电的相关设置。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg214f7c6833d3_WIFI_.E7.9C.81.E7.94.B5" id="WIFI_省电"><span id="WIFI_.E7.9C.81.E7.94.B5"></span>WIFI 省电</h3></div>
+<p>默认 TLP 在使用电池时开启省电策略，但会略微影响 WIFI 的连接稳定性，可考虑是否关闭来获得更好的网络连接！
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807153659
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.090 seconds
+Real time usage: 0.093 seconds
+Preprocessor visited node count: 331/1000000
+Revision size: 5353/2097152 bytes
+Post‐expand include size: 3769/2097152 bytes
+Template argument size: 818/2097152 bytes
+Highest expansion depth: 4/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   19.923      1 -total
+ 22.14%    4.410     12 Template:Pkg
+ 15.03%    2.995     20 Template:Ic
+ 12.68%    2.526      3 Template:Aur
+  5.95%    1.186      1 Template:Hc
+-->
+<!-- Render ID d3f3eb8e-9275-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7778:|#|:idhash:canonical!zh-cn and timestamp 20260807153659 and revision id 34721. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

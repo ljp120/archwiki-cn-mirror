@@ -1,0 +1,150 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg35309cb600db">DKMS 软件包打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – DKMS – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/DKMS_package_guidelines">DKMS package guidelines</a>，最近一次同步于 2024-06-01，若英文版本有所<a href="https://wiki.archlinux.org/title/DKMS_package_guidelines?diff=0&amp;oldid=757390">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/DKMS_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>创建一个新的 <a href="#pgeae7d2a5f976">DKMS</a> 包时，可以参考下面的指导方针。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg35309cb600db_.E5.8C.85.E5.90.8D" id="包名"><span id=".E5.8C.85.E5.90.8D"></span>包名</h2></div>
+<p>DKMS 包的命名方式是：原始包名加"<i>-dkms</i>"后缀。
+</p><p>通常在  <code>$pkgname</code> 后面使用 <code>$_pkgname</code> 记录不包含 "<i>-dkms</i>" 后缀的软件包名 (例如 <code>_pkgname=${pkgname%-*}</code>). 这样可以在原始的软件包 PKGBUILD 和 DKMS 编译文件之间保持相似性。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg35309cb600db_.E4.BE.9D.E8.B5.96" id="依赖"><span id=".E4.BE.9D.E8.B5.96"></span>依赖</h2></div>
+<p>依赖的包应该是原来软件包的基础上，加上 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dkms">dkms</a></span><sup><small>包</small></sup></span>。这一点很重要，因为它将提供工具和 Hook 文件，在内核更新时重建由 <i>-dkms</i>  软件包提供的内核驱动程序。
+</p><p>不要在  <a href="#pgf9d748a7b27b">PKGBUILD</a> 包含 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-headers">linux-headers</a></span><sup><small>包</small></sup></span> 或任何其他的Linux头文件包。这些头文件已经作为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dkms">dkms</a></span><sup><small>包</small></sup></span> 的可选依赖，同时每个内核包都有自己的头文件包，因此在 <i>-dkms</i>  软件包包含这些头文件包是不必要的重复和限制的。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg35309cb600db_.E6.BA.90.E4.BB.A3.E7.A0.81.E6.9E.84.E5.BB.BA.E4.BD.8D.E7.BD.AE" id="源代码构建位置"><span id=".E6.BA.90.E4.BB.A3.E7.A0.81.E6.9E.84.E5.BB.BA.E4.BD.8D.E7.BD.AE"></span>源代码构建位置</h2></div>
+<p>构建模块所需源代码需要放在（这是DKMS构建模块时使用的默认目录）：
+</p>
+<pre>/usr/src/<i>PACKAGE_NAME</i>-<i>PACKAGE_VERSION</i>
+</pre>
+<p>在软件包目录，要包含一个 <code>dkms.conf</code> 配置文件，告诉 DKMS 如何编译。这个配置文件需要包含：
+</p>
+<ul><li><code>PACKAGE_NAME</code> - 实际的项目名称，通常使用 <code>$_pkgname</code> （见#包名）或 <code>$_pkgbase</code>.</li>
+<li><code>PACKAGE_VERSION</code> - 通常使用 <code>$pkgver</code>.</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>不需要编译内核模块的源文件，也不需要安装它们；由于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dkms">dkms</a></span><sup><small>包</small></sup></span> 中的 <a href="#pg9ef105bf1e3c">pacman#钩子</a>，每当 Linux 内核更新时，这些工作都会自动完成。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg35309cb600db_.E6.89.93.E8.A1.A5.E4.B8.81" id="打补丁"><span id=".E6.89.93.E8.A1.A5.E4.B8.81"></span>打补丁</h2></div>
+<p>为内核模块源代码打补丁既可以直接在 PKGBUILD 中进行，也可以通过<code>dkms.conf</code>来进行。
+</p><p>若通过 <code>dkms.conf</code> 打补丁，请确保将补丁安装在 <code>/usr/src/<i>PACKAGE_NAME</i>-<i>PACKAGE_VERSION</i>/patches/</code> 目录下，并为每个补丁添加 <code>PATCH[<i>number</i>]=<i>patch_filename</i></code> 条目，记得将 <code><i>number</i></code> 替换为以0起始的数字。查阅 <span class="plainlinks archwiki-template-man" title="$ man 8 dkms"><a href="https://man.archlinux.org/man/dkms.8#DKMS.CONF">dkms(8) § DKMS.CONF</a></span> 以获取相关信息
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg35309cb600db_.install_.E4.B8.AD.E6.A8.A1.E5.9D.97.E7.9A.84.E8.87.AA.E5.8A.A8.E5.8A.A0.E8.BD.BD" id=".install_中模块的自动加载"><span id=".install_.E4.B8.AD.E6.A8.A1.E5.9D.97.E7.9A.84.E8.87.AA.E5.8A.A8.E5.8A.A0.E8.BD.BD"></span>.install 中模块的自动加载</h2></div>
+<p>模块的加载和卸载必须由用户自己来执行，设想一下，某个模块可能在加载的时候崩溃。
+</p><p>另外，<b>不要在 .install 中调用 dkms</b> ，该操作会由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dkms">dkms</a></span><sup><small>包</small></sup></span> 提供的 <a href="#pg9ef105bf1e3c">Pacman 钩子</a> 自动完成。Pacman 会自动执行 <code>dkms install</code> 和 <code>dkms remove</code> 钩子。
+</p><p><code>dkms install</code> 会确保过程结束时执行 <code>depmod</code>。<code>dkms install</code> 依赖 <code>dkms build</code> (针对当前内核编译源码)，build 依赖 <code>dkms add</code> (添加从 <code>/var/lib/dkms/&lt;package&gt;/&lt;version&gt;/source</code> 到 <code>/usr/src/&lt;package&gt;</code> 的链接)。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg35309cb600db_.E4.BE.8B.E5.AD.90" id="例子"><span id=".E4.BE.8B.E5.AD.90"></span>例子</h2></div>
+<p>这儿有个根据包名字和版本来对<code>dkms.conf</code>进行编辑，并安装模块黑名单配置文件的例子。
+</p><p>其它示例请参考<a href="https://archlinux.org/packages/?q=-dkms">官方软件仓库中的 -dkms 软件包</a>和 <a href="https://aur.archlinux.org/packages?K=-dkms">AUR 中的 -dkms 包</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg35309cb600db_PKGBUILD" id="PKGBUILD">PKGBUILD</h3></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PKGBUILD</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Maintainer: foo &lt;foo(at)example(dot)org&gt;
+# Contributor: bar &lt;bar(at)example(dot)org&gt;
+
+_pkgbase=example
+pkgname=example-dkms
+pkgver=1
+pkgrel=1
+pkgdesc="The Example kernel modules (DKMS)"
+arch=('x86_64')
+url="https://www.example.org/"
+license=('GPL2')
+depends=('dkms')
+conflicts=("${_pkgbase}")
+install=${pkgname}.install
+source=("${url}/files/tarball.tar.gz"
+        'dkms.conf'
+        "${pkgname}.conf"
+        'linux-3.14.patch')
+md5sums=(<i>use 'updpkgsums'</i>)
+
+prepare() {
+  cd ${_pkgbase}-${pkgver}
+
+  # Patch
+  patch -p1 -i "${srcdir}"/linux-3.14.patch
+}
+
+package() {
+  # Copy dkms.conf
+  install -Dm644 dkms.conf "${pkgdir}"/usr/src/${_pkgbase}-${pkgver}/dkms.conf
+
+  # Set name and version
+  sed -e "s/@_PKGBASE@/${_pkgbase}/" \
+      -e "s/@PKGVER@/${pkgver}/" \
+      -i "${pkgdir}"/usr/src/${_pkgbase}-${pkgver}/dkms.conf
+
+  # Copy sources (including Makefile)
+  cp -r ${_pkgbase}/* "${pkgdir}"/usr/src/${_pkgbase}-${pkgver}/
+
+  # Blacklists conflicting module
+  install -Dm644 ${pkgname}.conf "${srcdir}/usr/lib/modprobe.d/${pkgname}.conf"
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg35309cb600db_dkms_conf" id="dkms.conf">dkms.conf</h3></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">dkms.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">PACKAGE_NAME="@_PKGBASE@"
+PACKAGE_VERSION="@PKGVER@"
+MAKE[0]="make --uname_r=$kernelver"
+CLEAN="make clean"
+BUILT_MODULE_NAME[0]="@_PKGBASE@"
+DEST_MODULE_LOCATION[0]="/kernel/drivers/misc"
+AUTOINSTALL="yes"</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg35309cb600db__install" id=".install">.install</h3></div><p>
+该示例会在安装或升级后显示一条信息，建议用户在不想立即重启系统时，卸载冲突模块（<code>example-conflicting-module</code>）并加载该包提供的模块（<code>example</code>）。</p><pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">example.install</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">post_install() {
+  cat&lt;&lt;EOF
+
+Unload and load kernel modules:
+
+  rmmod example-conflicting-module
+  modprobe example
+
+EOF
+}
+
+post_upgrade() {
+  post_install
+}
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg35309cb600db_Module_blacklist_conf" id="Module_blacklist_conf">Module blacklist conf</h3></div><p>
+已知模块 <code>example-conflicting-module</code> 会与模块 <code>example</code> 冲突时，应将其加入模块黑名单：</p><pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">example-dkms.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">blacklist example-conflicting-module
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807132132
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.111 seconds
+Real time usage: 0.116 seconds
+Preprocessor visited node count: 383/1000000
+Revision size: 5253/2097152 bytes
+Post‐expand include size: 7109/2097152 bytes
+Template argument size: 2561/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 57/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   30.101      1 -total
+ 14.51%    4.367     28 Template:Ic
+ 11.52%    3.467      1 Template:Package_guidelines
+ 10.34%    3.112      5 Template:Pkg
+  7.81%    2.351      1 Template:Note
+  7.37%    2.218      1 Template:Man
+  6.88%    2.070      1 Template:翻译状态
+  5.80%    1.747      4 Template:Hc
+-->
+<!-- Render ID e7e2220e-9262-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2976:|#|:idhash:canonical!zh-cn and timestamp 20260807132132 and revision id 35089. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

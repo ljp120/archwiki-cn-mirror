@@ -1,0 +1,176 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg15a57ebf5e5b">安全地擦除磁盘/提示和技巧</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><br/>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Securely_wipe_disk/Tips_and_tricks">Securely wipe disk/Tips and tricks</a>，最近一次同步于 2025-08-08，若英文版本有所<a href="https://wiki.archlinux.org/title/Securely_wipe_disk/Tips_and_tricks?diff=0&amp;oldid=843126">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Securely_wipe_disk_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Tips_and_tricks_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>主文章请见<a href="#pg8e3f3779e38c">安全地擦除磁盘</a>。
+</p><p>本文额外介绍了一些擦除工具，可替代专用擦除工具，并加快擦除速度。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong><a href="#pgb5dd09f37b3e">某些文件系统的保留块</a>不能通过创建文件的方式擦除，但可以使用工具 <code>tune2fs</code> 禁用。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg15a57ebf5e5b_.E6.93.A6.E9.99.A4.E5.8D.95.E4.B8.AA.E6.96.87.E4.BB.B6" id="擦除单个文件"><span id=".E6.93.A6.E9.99.A4.E5.8D.95.E4.B8.AA.E6.96.87.E4.BB.B6"></span>擦除单个文件</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>如果曾对存储文件的分区进行了 <a href="https://en.wikipedia.org/wiki/File_system_fragmentation">碎片整理</a>、调整大小或移动操作，或者文件曾在同一设备上被<a href="https://en.wikipedia.org/wiki/Temporary_folder">复制</a>过，那么擦除效果将受到影响。若数据存储在加密容器上，并擦除整个<a href="#pg812206bba43d">加密容器</a>，则文件恢复将变得困难得多，但加密可能会大幅降低 <a href="https://en.wikipedia.org/wiki/Disk_encryption#Implementations">磁盘性能</a>（除非使用<a href="https://en.wikipedia.org/wiki/Disk_encryption_hardware">硬件加密</a>）。另见 <a href="#pg8e3f3779e38c">安全地擦除磁盘#数据残留</a>。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>要在擦除时保留文件的访问和修改时间不变，在修改文件前先使用<span class="plainlinks archwiki-template-man" title="$ man 1 stat"><a href="https://man.archlinux.org/man/stat.1">stat(1)</a></span>获取文件当前的时间信息，之后可使用<span class="plainlinks archwiki-template-man" title="$ man 1 touch"><a href="https://man.archlinux.org/man/touch.1">touch(1)</a></span>手动修改文件时间。另请参阅<a href="https://en.wikipedia.org/wiki/Comparison_of_file_systems#Metadata">不同文件系统对元数据和时间戳的支持情况</a>。</div>
+<p>本节将介绍擦除单个文件的两种基本方法。此外，还有一种专门用于反取证的高级方法，其非常耗时，并且只能通过专用工具完成，本文不作介绍。
+</p>
+<ul><li>在删除前用随机数据覆写，或在不改变文件大小的情况下用其他内容替换原内容。</li>
+<li>使用专用工具擦除文件和文件系统存储的元数据
+<ul><li>搜索整个磁盘，找到并清除已删除文件的残留部分，同时不对其它文件造成影响。</li></ul></li></ul>
+<p>可以使用常见的 Linux 工具在不改变文件大小的情况下覆写文件：
+</p>
+<ul><li>使用 <code>shred -x &lt;目标文件&gt;</code>， <code>-x</code>选项会用伪随机数据替换文件的内容，且不改变文件大小。<code>-u</code> 选项会在覆写后删除文件。</li>
+<li>使用 <code>mkfs</code> 可以将文件格式化为文件系统，挂载该文件系统后，任何对文件系统的修改都将反映到文件上，在文件系统上存储其它内容，可达到覆盖原始文件内容的目的。</li>
+<li><code>dd</code> 可创建指定大小、内容的文件，若目标文件已存在，则直接会覆写。通过组合 <code>skip</code> 和 <code>seek</code> 选项，可以将整个文件或文件的一部分替换为其他内容。在操作前，需要知道文件大小，以避免意外扩容文件。文件大小可以使用 <code>du -b &lt;文件名&gt; | cut -f1</code> 或 <code>stat -c "%s" &lt;文件名&gt;</code>获取。注意使用<code>dd</code>时，必须指定 <code>iflag=fullblock</code> 选项，详见 <a href="#pge09a1da9829f">Dd#部分读取：复制的数据量小于要求的大小</a>。</li>
+<li>使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perl">perl</a></span><sup><small>包</small></sup></span> 工具可以用单个符号（symbol）替换文件内容，同时避免文件大小发生变化。</li></ul>
+<p>要擦除文件的元数据，可以不断创建新文件，直到填满分区，这将迫使文件系统覆盖旧的文件元数据条目，以存储新创建文件的条目。此外，也可以使用专用工具。详见#擦除可用空间。
+</p><p>组合使用提到的文件创建和转换工具擦除文件内容，可达到避免文件被恢复、误导恢复工具及其使用者（可通过覆写随机数据或预先定义好的其它内容实现）的目的。具体的组合方式可依情况和需求而定。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>若存储文件的文件系统还有可用空间，则简单的覆写操作可能无法清除文件的某些部分。</li>
+<li>若要覆写特定文件的内容，同时确保该文件在硬盘上的逻辑位置不变，可以先创建一个或多个文件将文件所在分区填满，再使用合适的工具重写或替换目标文件的内容。不过，如果分区的可用空间很多，而要覆盖的文件很少，这会消耗大量时间。</li></ul>
+</div>
+<p>例如：
+</p><p>使用<a href="#pg81319c47b698">Perl</a>，用 <code>.</code> 替换文件中所有内容的：
+</p>
+<pre>$ perl -p -i -e 's\[^*]\.\g' &lt;文件名&gt;
+</pre>
+<p>使用<a href="#pge09a1da9829f">dd</a>：
+</p>
+<pre>$ &lt;覆盖内容&gt; | dd bs=&lt;目标文件大小（字节）&gt; count=1 iflag=fullblock of=&lt;目标文件&gt; seek=0
+</pre>
+<p>或者，也可使用stdout重定向。这种方式在创建文件时速度更快，但无法使用 <code>seek</code> 选项来跳过目标文件中的某些部分：
+</p>
+<pre>$ &lt;覆盖内容&gt; | dd bs=&lt;目标文件大小（字节）&gt; count=1 iflag=fullblock &gt; &lt;目标文件&gt;
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果覆盖内容长度小于目标文件，需将其与下文介绍的 <code>while</code> 循环结合使用。</div>
+<p>另见：
+</p>
+<ul><li><a href="https://stackoverflow.com/questions/64860/best-way-to-convert-text-files-between-character-sets">转换文本文件的字符集</a></li>
+<li><a href="https://tldp.org/LDP/abs/html/here-docs.html">Advanced Bash-Scripting Guide</a> - 描述使用 bash 脚本创建文件的高级方法</li>
+<li><a href="https://web.archive.org/web/20120516180924/http://www.computing.net/answers/unix/alternative-for-sed-i/7800.html">sed alternatives</a> - 一个 perl 示例，在替换文件内容方面比 sed 效果更好</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg15a57ebf5e5b_.E8.A6.86.E5.86.99.E7.9B.AE.E6.A0.87" id="覆写目标"><span id=".E8.A6.86.E5.86.99.E7.9B.AE.E6.A0.87"></span>覆写目标</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15a57ebf5e5b_.E9.98.B2.E6.AD.A2.E6.93.A6.E9.99.A4.E5.B7.B2.E6.8C.82.E8.BD.BD.E7.9A.84.E5.88.86.E5.8C.BA" id="防止擦除已挂载的分区"><span id=".E9.98.B2.E6.AD.A2.E6.93.A6.E9.99.A4.E5.B7.B2.E6.8C.82.E8.BD.BD.E7.9A.84.E5.88.86.E5.8C.BA"></span>防止擦除已挂载的分区</h3></div>
+<p>选择要擦除的设备时需要格外小心，简单的拼写错误就可能导致错误的目标被擦除，从而损坏系统。为了降低风险，可以使用脚本来包装选定的擦除工具。例如：
+</p>
+<pre>if [[ -e "$1" &amp;&amp; -b "$1" ]];then
+NOT_safe="$(lsblk -o "NAME,MOUNTPOINT" ${1//[0-9]/} | grep -e / -e '\]')";
+ if [[ -z "$NOT_safe" ]];then
+# 在这里你可以使用任何擦除工具擦除目标
+# 擦除目标由命令行传入，并存储在变量“$1”中
+#
+  else
+  echo 'Not allowed to destroy if any of the partitions is mounted: '"$NOT_safe"
+ fi
+fi </pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15a57ebf5e5b_.E4.BD.BF.E7.94.A8dd.E8.BF.9B.E8.A1.8C.E9.AB.98.E7.BA.A7.E6.93.A6.E9.99.A4" id="使用dd进行高级擦除"><span id=".E4.BD.BF.E7.94.A8dd.E8.BF.9B.E8.A1.8C.E9.AB.98.E7.BA.A7.E6.93.A6.E9.99.A4"></span>使用dd进行高级擦除</h3></div>
+<p>在使用<code>dd</code>时，可以利用<a href="#pgb4be337c4999">OpenSSL</a>，使用随机密码进行AES加密，并将密文用于擦除目标，以实现随机擦除：
+</p>
+<pre># DEVICE="/dev/sdX"
+# PASS=$(tr -cd '[:alnum:]' &lt; /dev/urandom | head -c128)
+# openssl enc -aes-256-ctr -pass pass:"$PASS" -nosalt &lt; /dev/zero | dd obs=64K ibs=4K of=$DEVICE oflag=direct status=progress
+</pre>
+<p>上述命令使用<code>/dev/urandom</code>生成128字节的加密密钥，并使用 CTR 模式的 AES-256 算法来加密 <code>/dev/zero</code> 的输出。相比直接使用伪随机源，使用加密算法可能可以获得更快的写入速度。最终设备将被 AES 密文填充。
+</p><p>上述命令将块大小设置为 64K，通常比默认的 512 字节更快。还可以尝试更大的块大小，以找到适合硬件的最佳传输速率。参考
+<a href="https://superuser.com/questions/234199/good-block-size-for-disk-cloning-with-diskdump-dd">[1]</a>及其中的参考文献。
+</p><p>类似的方法还可参见 <a href="#pg7159ef654a5d">Dm-crypt/准备磁盘#dm-crypt_擦除空设备或分区</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15a57ebf5e5b_.E4.BD.BF.E7.94.A8.E6.A8.A1.E6.9D.BF.E6.96.87.E4.BB.B6" id="使用模板文件"><span id=".E4.BD.BF.E7.94.A8.E6.A8.A1.E6.9D.BF.E6.96.87.E4.BB.B6"></span>使用模板文件</h3></div>
+<p>除了用零填充，还可以使用内容无关紧要的文件进行填充。若使用<code>mkfs</code>格式化了目标文件，需要挂载该文件系统，并使用特定内容填满该文件系统（可以使用无关紧要的文件，或相关工具生成的重复输出）。
+</p><p>一种方法是反复使用模板文件进行擦除，直到设备末尾。若使用此方法，当出现到达设备末尾的错误时，必须手动使用<a href="https://en.wikipedia.org/wiki/Unix_signal">停止键</a>来中断 <code>while</code> 循环，因而不推荐使用：
+</p>
+<pre>$ while [ 1 -lt 2 ];do cat file1-to-use.as-template file2-to-use.as-template /tmp/templatefiles/* ;done &gt; /dev/sd"XY"
+</pre>
+<p>若使用<code>dd</code>，如果通过选项正确设置了要擦除的大小，就可以安全地进行重复擦除，而不会出现空间不足的错误。这可通过将while循环产生的模板文件输出作为<code>dd</code>的输入实现。此外，通过设置<code>skip</code> 和 <code>seek</code> 选项的值，还能确定要擦除的范围。除了例子中使用的<code>cat</code>外，还可以使用<span class="plainlinks archwiki-template-man" title="$ man 1 head"><a href="https://man.archlinux.org/man/head.1">head(1)</a></span>、<span class="plainlinks archwiki-template-man" title="$ man 1 tail"><a href="https://man.archlinux.org/man/tail.1">tail(1)</a></span>将模板文件的部分内容输出到标准输出。
+</p>
+<pre>while [ 2 -gt 1 ]; do
+ if [ -z "$(pidof dd)"  ];then
+  break ;
+ fi;
+cat file1-to-use.as-template file2-to-use.as-template /tmp/templatefiles/* ;
+done | dd of=/dev/sd"XY" seek=&lt;起始扇区&gt; bs=&lt;扇区大小&gt; count=&lt;擦除扇区数量&gt;</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若要重复覆写同一区域，可以在 <code>while ... done | dd ...</code> 外层新增一个循环，使用新增循环的循环变量，在每次循环中使用不同的模板文件进行覆写。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果用于覆写的预定义模板文件数量很多，可以利用 <a href="https://tldp.org/HOWTO/SquashFS-HOWTO/creatingandusing.html">SquashFS</a> 来压缩文件和文件夹，并存放到挂载的 <a href="https://www.linuxscrew.com/fastest-way-to-create-ramdisk-in-ubuntulinux">内存盘</a> 中。这样能最大限度地减少磁盘读取次数，但同时会增加 CPU 使用率。此外，也可以为模板文件创建压缩包，将压缩包复制到内存盘中，并使用能够将解压后的内容输出到标准输出的解压缩工具。使用压缩包的缺点是，难以在每次覆写时只是用压缩包中的部分模板文件。不过，使用压缩包也存在优点：若在创建压缩包时使用了分卷压缩，可以直接将某一分卷作为覆写内容覆写文件</div>
+<p>另见：
+</p>
+<ul><li><a href="https://flashdba.com/4k-sector-size/">sector size</a> - 文件创建和扇区大小</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg15a57ebf5e5b_.E6.93.A6.E9.99.A4.E5.8F.AF.E7.94.A8.E7.A9.BA.E9.97.B4" id="擦除可用空间"><span id=".E6.93.A6.E9.99.A4.E5.8F.AF.E7.94.A8.E7.A9.BA.E9.97.B4"></span>擦除可用空间</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>若正在为<a href="#pg8e3f3779e38c">块设备加密</a>准备可用空间，不适合使用此方法。</div>
+<p>可以通过以下几种方式擦除可用空间：
+</p>
+<ul><li>将<a href="#pg8e3f3779e38c">输出重定向</a>到一个文件，而不是分区或设备。</li>
+<li>在循环中，使用随机文件名或目录名创建多个文件副本（例如，使用<code>cp</code>），直到占满所有可用空间。</li>
+<li>使用带有文件加密功能的工具，并使用随机密码、随机文件名进行加密。某些文件压缩工具支持加密功能，且可以通过选项设置压缩方法、文件类型等，有的还支持分卷压缩。通过使用循环，在循环中随机设置压缩选项，可以用加密数据填满可用空间，以覆写以前的数据。</li>
+<li>使用专门用于擦除可用空间的程序，例如：</li></ul>
+<p><b>wipefreespace</b> — 安全地擦除文件系统上的可用空间，以防止已删除的敏感数据被恢复。
+</p>
+<dl><dd><a href="https://sourceforge.net/projects/wipefreespace/">https://sourceforge.net/projects/wipefreespace/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wipefreespace/">wipefreespace</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<p><b>zerofree</b> — 扫描并以零填充文件系统中的非零空闲块
+</p>
+<dl><dd><a href="https://frippery.org/uml/">https://frippery.org/uml/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zerofree/">zerofree</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15a57ebf5e5b_.E4.BD.BF.E7.94.A8_dd" id="使用_dd"><span id=".E4.BD.BF.E7.94.A8_dd"></span>使用 dd</h3></div>
+<p>可以使用 <a href="#pge09a1da9829f">dd</a> 创建一个文件来填满可用空间：
+</p>
+<pre>dd if=&lt;填充数据源&gt; of=junk
+sync
+rm junk
+</pre>
+<p><code>&lt;填充数据源&gt;</code> 可以是 <code>/dev/urandom</code> 随机流或 <code>/dev/zero</code> 全零流。
+</p><p>注意需要确保数据已同步到磁盘后，再删除该文件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15a57ebf5e5b_.E4.BD.BF.E7.94.A8_7-Zip" id="使用_7-Zip"><span id=".E4.BD.BF.E7.94.A8_7-Zip"></span>使用 7-Zip</h3></div>
+<pre>Password="$(dd if=/dev/random bs=128 count=1 iflag=fullblock)"
+DestinationFile="$((${RANDOM/0/1}$(date "+%s")/${RANDOM/0/1}))"
+7z a -t7z -mhe=on -p"${Password}" -mx=0 -v1m <i>${DestinationFile} source</i></pre>
+<p>所用选项的详细说明参见 <code>7z --help</code>。
+</p><p><code>source</code> 可以是一个包含随机数据的文件，也可以是一个设备（例如 <code>/dev/urandom</code>），或者另一个块设备或其上的分区（例如 <code>/dev/sd"XY"</code>）。注意当使用块设备时，该块设备中不应含有敏感数据，并且，块设备中已在文件系统层面删除的数据也可能会被读取并压缩，以填充目标位置。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>不必设置压缩级别，只需将数据存储到压缩文件中即可，以最大限度地减少 CPU 使用率并更快地填满可用空间。</li>
+<li>如果使用单个文件作为源，可以将其放入 <a href="https://web.archive.org/web/20191222145936/http://www.vanemery.com/Linux/Ramdisk/ramdisk.html">内存盘</a> 或 <code>/tmp</code> 文件夹。<code>/tmp</code>文件夹使用<a href="#pg96f7efa88158">tmpfs</a>，用于将文件存储到内存中，可加快读取速度。</li></ul></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg15a57ebf5e5b_.E5.80.9F.E5.8A.A9_timeout_.E5.91.BD.E4.BB.A4.E5.88.9B.E5.BB.BA.E5.A4.9A.E4.B8.AA.E6.96.87.E4.BB.B6" id="借助_timeout_命令创建多个文件"><span id=".E5.80.9F.E5.8A.A9_timeout_.E5.91.BD.E4.BB.A4.E5.88.9B.E5.BB.BA.E5.A4.9A.E4.B8.AA.E6.96.87.E4.BB.B6"></span>借助 timeout 命令创建多个文件</h3></div>
+<p>若在<a href="https://tldp.org/HOWTO/Bash-Prog-Intro-HOWTO-7.html">循环</a>中使用<code>timeout</code>命令，并设置随机的等待时间。则<code>timeout</code>将在随机时间后中断文件的创建，从而使得创建的文件大小随机化。不过该方法速度较慢。
+</p><p>在<a href="https://tldp.org/HOWTO/Bash-Prog-Intro-HOWTO-7.html">循环</a>中使用带有随机等待时间的 <code>timeout</code> 命令会中断命令，从而留下一个随机大小的文件。这是一种很慢的方法，但也是一种可行的替代方案。此外，对于文件名，可以在随机部分之前附加特定的预定义前缀。
+</p>
+<pre>AA=${RANDOM/0/1};
+timeout $((AA/100)) cat /dev/urandom &gt; filename${RANDOM}.tmp;
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg15a57ebf5e5b_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits">limits</a> for the file creation on the different file systems.</li>
+<li><a href="https://www.r-tt.com/Articles/File_Recovery_Basics/">meta-data</a> in the filesystem may keep information about file after it was deleted.</li>
+<li><a href="https://security.stackexchange.com/questions/58515/how-does-forensic-software-detect-deleted-files">forensic software</a> uses meta-data to recovery and what need to do for wiping of the meta-data.</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808041125
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.148 seconds
+Real time usage: 0.152 seconds
+Preprocessor visited node count: 577/1000000
+Revision size: 13323/2097152 bytes
+Post‐expand include size: 8634/2097152 bytes
+Template argument size: 5000/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 641/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   44.031      1 -total
+ 13.16%    5.795     39 Template:Ic
+ 12.59%    5.544      4 Template:注意
+ 10.50%    4.624      2 Template:App
+  9.72%    4.282      3 Template:警告
+  8.46%    3.725      1 Template:翻译状态
+  8.39%    3.693      4 Template:Man
+  4.65%    2.048      2 Template:提示
+  4.50%    1.980      1 Template:Pkg
+  3.85%    1.695      4 Template:Bc
+-->
+<!-- Render ID 3897608e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8394:|#|:idhash:canonical!zh-cn and timestamp 20260808041125 and revision id 34231. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

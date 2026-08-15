@@ -1,0 +1,286 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pga57cd4863e73">常规故障排除</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/General_troubleshooting">General troubleshooting</a>，最近一次同步于 2023-11-21，若英文版本有所<a href="https://wiki.archlinux.org/title/General_troubleshooting?diff=0&amp;oldid=792587">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/General_troubleshooting_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgbd58e8d9d126">漏洞报告准则</a></li>
+<li><a href="#pg4c80f16db5ba">逐步调试指南</a></li>
+<li><a href="#pgd3ea58bac98d">调试/获取跟踪数据</a></li>
+</ul></div>
+<p>本文介绍了一些常规的故障排除方法。有关特定应用程序的问题，请参阅该特定程序的 wiki 页面。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga57cd4863e73_.E5.B8.B8.E7.94.A8.E6.89.8B.E6.AE.B5" id="常用手段"><span id=".E5.B8.B8.E7.94.A8.E6.89.8B.E6.AE.B5"></span>常用手段</h2></div>
+
+<p>出现的错误消息请<i>务必</i>阅读，这一点很重要。有时可能很难获得正确的错误消息（比如出错的是图形应用程序）。
+</p>
+<ol><li>在终端中运行应用程序，这样可以查看输出。
+<ol><li>如果仍然没有足够的信息进行调试，请增加输出的详细度（通常加上参数 <code>--verbose</code>/<code>-v</code>/<code>-V</code> 或 <code>--debug</code>/<code>-d</code>）。</li>
+<li>如果没有这样的参数，可能是要在应用程序的配置文件中指定调试模式。</li>
+<li>应用程序可能会有日志文件，日志文件通常位于 <code>/var/log</code>、<code>$HOME/.cache</code> 或 <code>$HOME/.local</code>。</li>
+<li>如果没有办法增加输出的详细度，那么运行 <a href="https://wiki.archlinux.org/title/Debugging">strace</a> 和类似的命令总是可行的。</li></ol></li>
+<li>检查<a href="#pgeb782ecab4fb">日志</a>。错误也可能在日志中留下痕迹，特别是当这个程序依赖于其他程序时。
+<ol><li><i>dmesg</i> 从内核环形缓冲区读取日志。当磁盘由于某种原因无法访问时这很有用，但这也可能导致日志不完整，因为内核环形缓冲区的大小是有限的。如果可以的话尽量使用 <i>journalctl</i>。</li>
+<li><i>journalctl</i> 比 <i>dmesg</i> 有着更多的过滤选项，且默认使用人类可读的时间戳。</li></ol></li>
+<li>建议检查相关应用的问题跟踪列表，看看这是不是已知问题，以及是否存在解决方案。
+<ol><li>应用通常是有问题跟踪列表的，具体取决于上游的选择，有时应用还有论坛，甚至有 IRC 频道。</li>
+<li><a href="https://bugs.archlinux.org">Arch Linux bugtracker</a> 主要用于打包 bug。</li></ol></li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga57cd4863e73_.E9.A2.9D.E5.A4.96.E6.94.AF.E6.8F.B4" id="额外支援"><span id=".E9.A2.9D.E5.A4.96.E6.94.AF.E6.8F.B4"></span>额外支援</h3></div>
+<p>如果需要额外支援，你可以在 <a href="https://bbs.archlinux.org">the forums</a> 或 <a href="#pg03c80a260fbd">IRC</a> 上提问。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><a href="https://wiki.archlinux.org/title/Code_of_conduct#arch-linux-distribution-support-only">技术支持 <i>仅限于</i> Arch Linux</a> 而非 <a href="#pg27ce52e069fe">基于 Arch 的发行版</a>。</div>
+<p>当要求贴出<b>完整</b>的 输出 / 日志 时，不能仅仅贴出你认为的重要部分。信息来源应该包括：
+</p>
+<ul><li>所有涉及到的命令的完整输出，不要只选择你认为相关的东西。</li>
+<li>systemd 的<a href="#pgeb782ecab4fb">日志</a>。
+<ul><li>要获得更广泛的输出，请使用 <code>systemd.log_level=debug</code> 引导参数，但这会产生大量的输出，因此仅在确实需要时才启用它。</li>
+<li>不要使用 <code>-x</code> 参数，因为这会使输出混乱，让它难以阅读。</li>
+<li>除非需要上次启动的日志，否则请使用 <code>-b</code> 参数。不指定这个参数可能会导致日志很大，甚至超过在线剪贴板的允许大小。</li></ul></li>
+<li>相关的配置文件</li>
+<li>相关的驱动程序</li>
+<li>相关软件包的版本</li>
+<li>内核日志：<code>journalctl -k</code> 或 <code>dmesg</code>（都需要 root 权限）。</li>
+<li><a href="#pga36c0aff60be">Xorg</a>：所用的<a href="#pg30e2075251d0">显示管理器</a>的设置也决定了 Xorg 的日志位置。
+<ul><li><code>Xorg.log</code> 可能在以下位置之一：系统日志、<code>/var/log/</code> 或 <code>$HOME/.local/share/xorg/</code>。</li>
+<li>一些显示管理器，如 <a href="#pg145f4ecf55dc">LightDM</a>，可能会在它自己的日志目录里面也放一份 <code>Xorg.log</code>。</li></ul></li>
+<li><a href="#pg9ef105bf1e3c">Pacman</a>：如果最近一次更新导致了问题，可以查看 <code>/var/log/pacman.log</code>。
+<ul><li>使用 <i>pacman</i>的 <code>--debug</code> 参数也很有效。</li></ul></li></ul>
+<p>最好将上述收集到的信息放到一个<a href="#pg03c80a260fbd">在线剪贴板</a>里。
+</p><p>在线剪贴板将返回一个链接，你可以把它贴到论坛或 IRC。
+</p><p>此外，在提问前最好复习一下<a href="http://jdebp.info/FGA/problem-report-standard-litany.html">如何正确报告问题</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga57cd4863e73_.E7.B3.BB.E7.BB.9F.E5.90.AF.E5.8A.A8.E9.97.AE.E9.A2.98" id="系统启动问题"><span id=".E7.B3.BB.E7.BB.9F.E5.90.AF.E5.8A.A8.E9.97.AE.E9.A2.98"></span>系统启动问题</h2></div>
+
+<p>诊断系统启动问题时，了解问题出在启动的哪一阶段很重要。
+</p>
+<ol><li>固件（UEFI 或 BIOS）
+<ol><li>往往只有非常基础的调试工具。</li>
+<li>确保<a href="#pg4b4af9f551f6">安全启动</a>已关闭。</li></ol></li>
+<li><a href="#pg7e866ec617d4">引导加载器</a>
+<ol><li>此处最容易引发故障的因素是修改了内核参数。</li></ol></li>
+<li><a href="#pg7e866ec617d4">initramfs</a>
+<ol><li>通常能提供一个 emergency shell。</li>
+<li>在 shell 中可以用 dmesg 或 journal，取决于构建时选择的钩子。</li></ol></li>
+<li>实际系统
+<ol><li>根据故障的严重程度，可能只需要调用调试控制台就行了。</li></ol></li></ol>
+<p>如果某一阶段的调试工具无法修复损坏的组件，请尝试使用<a href="#pg849f37ba57e2">包含最新 Arch Linux ISO 的U盘</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga57cd4863e73_.E6.8E.A7.E5.88.B6.E5.8F.B0.E7.9A.84.E8.BE.93.E5.87.BA.E4.BF.A1.E6.81.AF" id="控制台的输出信息"><span id=".E6.8E.A7.E5.88.B6.E5.8F.B0.E7.9A.84.E8.BE.93.E5.87.BA.E4.BF.A1.E6.81.AF"></span>控制台的输出信息</h3></div>
+<p>在启动过程完成以后，屏幕会被清空并显示登录提示符，这使得用户无法看到初始化过程中的输出和其中的错误信息。这一默认特性可以使用接下来几节中的方法进行修改。
+</p><p>请注意，无论选择下面哪个方法，在启动后通过 <code>journalctl -k</code> 或 <code>dmesg</code> 都可以显示内核消息，用于检查错误。要显示本次启动的所有日志，请使用 <code>journalctl -b</code>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga57cd4863e73_.E8.BE.93.E5.87.BA.E6.B5.81.E6.8E.A7.E5.88.B6" id="输出流控制"><span id=".E8.BE.93.E5.87.BA.E6.B5.81.E6.8E.A7.E5.88.B6"></span>输出流控制</h4></div>
+<p>以下是适用于大多数终端模拟器的基本操作，包括虚拟终端 (VC)：
+</p>
+<ul><li>按 <code>Ctrl+s</code> 暂停输出。</li>
+<li>按 <code>Ctrl+q</code> 继续输出。</li></ul>
+<p>这样不仅会暂停输出，而且会暂停尝试打印到终端的程序，即暂停输出时会阻塞 <code>write()</code> 调用。 如果你的 <i>init</i> 进程出现冻结，请确保系统控制台没有暂停。
+</p><p>要查看已经显示过的错误信息，参见 <a href="#pg9683b73bd6d3">Getty#将引导消息保留在 tty1 上</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga57cd4863e73_.E6.89.93.E5.8D.B0.E6.9B.B4.E5.A4.9A.E5.86.85.E6.A0.B8.E6.B6.88.E6.81.AF" id="打印更多内核消息"><span id=".E6.89.93.E5.8D.B0.E6.9B.B4.E5.A4.9A.E5.86.85.E6.A0.B8.E6.B6.88.E6.81.AF"></span>打印更多内核消息</h4></div>
+<p>在启动时大部分内核消息是隐藏的，添加不同的内核参数即可打印出更多消息，最简单的有这些参数：
+</p>
+<ul><li><code>debug</code>，有如下效果：
+<ul><li>内核会提高它的控制台<a href="https://docs.kernel.org/core-api/printk-basics.html">日志级别</a>，这样内核日志缓冲区中的所有消息都将打印到控制台。<a href="https://docs.kernel.org/admin-guide/kernel-parameters.html">[1]</a></li>
+<li><a href="#pgac06dd8bfe95">systemd</a> 会提高它的日志级别，这会记录下调试信息，这些信息在其他地方是不会生成的。<a href="https://github.com/systemd/systemd/blob/v251/src/basic/log.c#L1125-L1126">[2]</a></li></ul></li>
+<li><code>ignore_loglevel</code>，对于内核来说它和 <code>debug</code> 或 <code>loglevel=8</code> （debug 对应的级别是 <code>7</code>）有相同的效果，但在启动后期日志级别不会提高。</li></ul>
+<p>在特定情况下可以添加的参数还有这些：
+</p>
+<ul><li><code>earlyprintk=vga,keep</code> 打印启动过程中最早期的内核消息，用在还没显示输出就崩溃的情况下。在 <a href="#pg46c3147defaf">UEFI</a> 系统上需要把 <code>vga</code> 改成 <code>efi</code>。</li>
+<li><code>log_buf_len=16M</code> 将分配一个更大的 (16 MiB) 内核日志缓冲区，确保调试输出不会被覆盖。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga57cd4863e73_.E7.94.9F.E6.88.90.E6.9B.B4.E5.A4.9A.E5.86.85.E6.A0.B8.E8.B0.83.E8.AF.95.E4.BF.A1.E6.81.AF" id="生成更多内核调试信息"><span id=".E7.94.9F.E6.88.90.E6.9B.B4.E5.A4.9A.E5.86.85.E6.A0.B8.E8.B0.83.E8.AF.95.E4.BF.A1.E6.81.AF"></span>生成更多内核调试信息</h4></div>
+<p>#打印更多内核消息描述了如何将内核日志缓冲区中的内容打印到控制台，但内核日志缓冲区也不是所有消息都有（除了 systemd 的 debug 输出）。本节讨论如何获取比内核日志更详细的信息。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pga57cd4863e73_.E5.8A.A8.E6.80.81.E8.B0.83.E8.AF.95" id="动态调试"><span id=".E5.8A.A8.E6.80.81.E8.B0.83.E8.AF.95"></span>动态调试</h5></div>
+<p>由函数 <a href="https://docs.kernel.org/core-api/printk-basics.html#c.pr_debug">pr_debug</a> 或类似函数 <code>dev_dbg()</code>, <code>drm_dbg()</code> 和 <code>bt_dev_dbg()</code> 生成的消息不在内核日志里，除非：
+</p>
+<ul><li>修改内核源代码，在需要的地方定义 <code>DEBUG</code>。</li>
+<li>利用内核的<a href="https://docs.kernel.org/admin-guide/dynamic-debug-howto.html">动态调试</a>功能来启用调试消息。</li></ul>
+<p>本节讨论动态调试的用法，当你已经查看了所有内核日志，甚至是 information 级别的日志，但还是想从特定位置获取更多调试信息，那么动态调试很有用。
+</p><p>首先，你用的内核必须是用 <code>CONFIG_DYNAMIC_DEBUG</code> 内核配置选项编译出来的，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 包的内核已经满足了要求，如果用这个内核就无需执行任何操作。
+</p><p>然后需要确定所需调试信息在哪，有几种选择：
+</p>
+<ul><li>如果问题与特定模块有关，就找到内核模块的名称。比如要排除 <a href="#pg9800307f9050">Intel 图形处理器</a>的故障，就需要关注 <code>i915</code> DRM <a href="#pg6dbfce2ea89d">内核模块</a>.</li>
+<li>找到内核中相关功能对应的目录，这需要查看（或在线导航）<a href="#pg3473491e6a48">内核</a>源代码以了解其结构。例如，要查看所有 DRM 内核模块的调试消息，可以使用路径 <a href="https://github.com/torvalds/linux/tree/v5.19/drivers/gpu/drm">drivers/gpu/drm</a>。</li></ul>
+<p>要使用该消息“源”，就必须发起一次动态调试查询，指明要启用哪些调试消息，格式如下：
+</p>
+<pre><i>match_type</i> <i>match_parameter</i> <i>flags</i>
+</pre>
+<p>其中：
+</p>
+<ul><li><i>match_type</i> 是匹配类型，与上述 2 种选择相对应，可取值为 <code>module</code> 或 <code>file</code>。</li>
+<li><i>match_parameter</i> 是要监控的模块或文件路径，后一种情况允许使用星号作为通配符。</li>
+<li><i>flags</i> 表示如何处理匹配结果，可以取 <code>+p</code> 来开始打印其消息，或者 <code>-p</code> 来撤消打印。</li></ul>
+<p>一些查询示例：
+</p>
+<ul><li><code>module i915 +p</code> 打印来自 <code>i915</code> 内核模块的调试信息。</li>
+<li><code>file drivers/gpu/drm/* +p</code> 打印来自 DRM 驱动的调试信息。</li>
+<li><code>file * +p</code> 打印调试信息。</li></ul>
+<p>最后，要实际执行上述查询，可以这样：
+</p>
+<ul><li>在运行时执行查询，运行命令：</li></ul>
+<pre># echo "<i>查询</i>" &gt; /sys/kernel/debug/dynamic_debug/control
+</pre>
+<dl><dd>上述命令假设 <a href="https://en.wikipedia.org/wiki/debugfs">debugfs</a> 挂载到了 <code>/sys/kernel/debug/</code>，你可以用 <code>mount </code> 来确认。 <a href="https://stackoverflow.com/a/63682160">[3]</a></dd></dl>
+<ul><li>在系统启动时执行查询，添加 <code>dyndbg="<i>query</i>"</code> <a href="#pgec0856954f1c">内核参数</a>。</li></ul>
+<p>以上是对动态调试功能非常简略的概述，更多详细信息请参阅<a href="https://docs.kernel.org/admin-guide/dynamic-debug-howto.html#command-language-reference">文档</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pga57cd4863e73_.E7.89.B9.E5.AE.9A.E5.AD.90.E7.B3.BB.E7.BB.9F.E7.9A.84.E8.B0.83.E8.AF.95" id="特定子系统的调试"><span id=".E7.89.B9.E5.AE.9A.E5.AD.90.E7.B3.BB.E7.BB.9F.E7.9A.84.E8.B0.83.E8.AF.95"></span>特定子系统的调试</h5></div>
+<p>在特定的子系统中，还有许多单独的参数可用于调试，例如 <code>bootmem_debug</code>、<code>sched_debug</code>。此外 <code>initcall_debug</code> 用来检查启动卡死很有用（找到那些没有返回的调用）。特定的信息请查询<a href="https://docs.kernel.org/admin-guide/kernel-parameters.html">内核参数文档</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga57cd4863e73_netconsole" id="netconsole">netconsole</h4></div>
+<p><a href="https://docs.kernel.org/networking/netconsole.html">netconsole</a> 是一个内核模块，它将所有内核日志消息（即 dmesg）通过网络发送到另一台计算机，不涉及到用户空间（如 syslogd）。 "netconsole" 这个名称不是很准确，因为它并不是真正的控制台，更像是远程日志记录服务。
+</p><p>它可以内置使用或作为模块使用。内置使用的 <i>netconsole</i> 在网卡之后就被初始化，并马上启动特定的接口。作为模块使用，主要用于捕获无显示器的计算机的内核崩溃输出，或者另一种情况就是用户空间有故障。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga57cd4863e73_.E6.95.85.E9.9A.9C.E6.81.A2.E5.A4.8D.E6.8E.A7.E5.88.B6.E5.8F.B0" id="故障恢复控制台"><span id=".E6.95.85.E9.9A.9C.E6.81.A2.E5.A4.8D.E6.8E.A7.E5.88.B6.E5.8F.B0"></span>故障恢复控制台</h3></div>
+<p>在启动过程中的某个阶段获取一个交互式 shell 可以帮助你准确找出问题出在哪里，以及为何失败。有几个内核参数可以做到这一点，但它们都启动了一个正常的shell，可以随时 <code>exit</code> 让内核恢复正在执行的操作：
+</p>
+<ul><li><code>rescue</code> 在根文件系统刚刚被挂载为读写模式的时候启动一个 shell</li>
+<li><code>emergency</code> 可以在更早的时候启动 shell，早于大部分文件系统挂载之前</li>
+<li><code>init=/bin/sh</code>（作为最后的选择）把 init 程序改成 root shell。因为 <code>rescue</code> 和 <code>emergency</code> 都依赖于 <a href="#pgac06dd8bfe95">systemd</a>，而这可以在 <i>systemd</i> 坏掉的时候工作</li></ul>
+<p>还有一个选择，那就是 systemd 的 debug-shell，它在 <code>tty9</code> 上新增了一个 root shell，可以按 Ctrl+Alt+F9 来使用。这个功能可以通过在<a href="#pgec0856954f1c">内核参数</a>中添加 <code>systemd.debug-shell</code>，或者是<a href="#pg39cfcbf5721d">启用</a> <code>debug-shell.service</code> 来打开。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>使用完后要记得禁用该服务，避免在每次启动时都打开 root shell 而带来安全风险。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga57cd4863e73_.E8.B0.83.E8.AF.95.E5.86.85.E6.A0.B8.E6.A8.A1.E5.9D.97" id="调试内核模块"><span id=".E8.B0.83.E8.AF.95.E5.86.85.E6.A0.B8.E6.A8.A1.E5.9D.97"></span>调试内核模块</h3></div>
+<p>参阅<a href="#pg6dbfce2ea89d">内核模块#获取信息</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga57cd4863e73_.E8.B0.83.E8.AF.95.E7.A1.AC.E4.BB.B6.E9.97.AE.E9.A2.98" id="调试硬件问题"><span id=".E8.B0.83.E8.AF.95.E7.A1.AC.E4.BB.B6.E9.97.AE.E9.A2.98"></span>调试硬件问题</h3></div>
+<ul><li>按照 <a href="#pge009209061ac">udev#Debug output</a> 的说明可以显示额外硬件调试信息。</li>
+<li>确保你的系统已经安装了<a href="#pgdc6bceef5651">微码</a>更新。</li>
+<li>要测试内存请参阅 <a href="https://wiki.archlinux.org/title/Stress_testing#MemTest86.2B">MemTest86+</a>。</li>
+<li>要排查系统是否超温请使用 <a href="#pg6cbfe9b10306">lm_sensors</a>。</li>
+<li>要检查存储器的健康状况，请参阅 <a href="https://wiki.archlinux.org/title/S.M.A.R.T.">S.M.A.R.T.</a>。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga57cd4863e73_.E8.B0.83.E8.AF.95.E7.B3.BB.E7.BB.9F.E5.8D.A1.E6.AD.BB.E9.97.AE.E9.A2.98" id="调试系统卡死问题"><span id=".E8.B0.83.E8.AF.95.E7.B3.BB.E7.BB.9F.E5.8D.A1.E6.AD.BB.E9.97.AE.E9.A2.98"></span>调试系统卡死问题</h2></div>
+<p>不幸的是，系统卡死通常很难调试，并且有些需要很长时间才能复现。有些类型的卡死调试起来相对容易一点：
+</p>
+<ul><li>声音还在播放？这种情况可能只是显示卡死了，显卡驱动可能有问题。</li>
+<li>系统还有响应吗？如果切换到其他 <a href="#pg7dfeabbd827f">TTY</a> 不行的话就试试 <a href="#pg81569eb76dc7">SSH</a>。</li>
+<li>硬盘活动指示灯（如果有的话）是否在指示有大量数据在读写？大量的内存交换也会暂时卡死系统。关于大量写入硬盘时卡死的情况请参阅<a href="https://unix.stackexchange.com/a/340567">这个 StackExchange 回答</a>。</li></ul>
+<p>如果上述都不行，尝试一次<b>完整</b>的关机。按<i>一次</i>电源键或许可以使系统有反应，并显示“关机画面”，关机画面包含了所有正在停止的单元。或者使用神奇的 <a href="https://wiki.archlinux.org/title/SysRq">SysRq</a> 键也可以进行完整关机。完整关机很重要，因为<a href="#pgeb782ecab4fb">日志</a>可能提示了系统卡死的原因。在非正常关闭时日志可能不会写入磁盘。系统毫无反应的情况更难调试，因为日志无法及时写入磁盘。
+</p><p>如果卡死以后没法将任何内容写入磁盘，可以尝试远程日志。以下是一个粗略的远程日志方案，需要从另一个设备发起，可用于基本调试：
+</p>
+<pre>$ ssh <i>freezing_host</i> journalctl -f
+</pre>
+<p>许多致命卡死（整个系统无响应只能强制关机）可能与固件、驱动程序或硬件存在缺陷有关。尝试不同的内核（请参阅<a href="#pg3473491e6a48">内核#调试回退</a>），甚至换个 Linux 发行版或操作系统，还有更新固件并运行硬件诊断可能有助于发现问题。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>建议尝试更新设备的固件，因为这些更新可能会修复奇怪的问题。</div>
+<p>如果卡死以后无法收集用来调试的日志或信息，请尝试在 live 环境中重现卡死。如果需要图形环境来重现，或者如果在 archiso 上成功重现了卡死，请更换不同发行版的 live 环境，最好不是基于 Arch Linux 的发行版，以排除卡死与版本或内核补丁相关的可能性。如果在 live 环境中仍然卡死，则<i>很可能</i>与硬件有关。如果不再发生卡死，那就需要了解两个系统的差异。配置、版本和内核参数的不同，以及其他类似的更改可能已经解决了卡死问题。
+</p><p>但是，大写锁定指示灯闪烁可能表示<a href="#pg3473491e6a48">内核崩溃</a>。当发生内核崩溃时，因为某些设置，TTY 可能不会显示，导致内核崩溃被误以为是另一种卡死。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga57cd4863e73_.E5.A4.84.E7.90.86.E8.BD.AF.E4.BB.B6.E5.80.92.E9.80.80.E9.97.AE.E9.A2.98" id="处理软件倒退问题"><span id=".E5.A4.84.E7.90.86.E8.BD.AF.E4.BB.B6.E5.80.92.E9.80.80.E9.97.AE.E9.A2.98"></span>处理软件倒退问题</h2></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>这样做往往会导致 <a href="#pg9a1cc6af125e">部分升级</a>，在特殊情况下这是不可避免的。请谨慎操作并准备好 <a href="#pgbdbcbed611fc">恢复系统的方法</a>，以防部分升级导致无法启动。</div>
+<p>如果是更新导致的问题，且<a href="#pg003e475392dc">降级</a>特定包可以解决问题，则可能是<a href="https://en.wikipedia.org/wiki/Software_regression">软件倒退</a>。 如果在正常的完整系统升级后发生这种情况，请检查 <code>pacman.log</code> 来确定哪个软件包可能导致了该问题。处理软件倒退最重要的是检查新版本是否已解决问题，这样可以节省大量时间。为此，首先确保应用程序已完全更新（确保程序与<a href="#pg15c7e809c461">官方仓库</a>中的版本相同）。如果已经最新或者更新不能解决问题，请尝试使用实际的最新版本，通常是 <a href="#pg6a9e963f286f">-git</a> 版本，它可能已经打包在 <a href="#pg89cb7b475cfb">AUR</a> 中。如果这样能解决问题，并且已修复的版本还不在官方仓库中，请等待新版本打包，然后切换回官方仓库的版本。
+</p><p>如果问题仍然存在，请调试程序或<a href="https://wiki.archlinux.org/title/bisect">二分查找</a>程序的代码提交历史，并在上游的问题跟踪系统里报告错误，以便修复问题。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>处理内核的倒退问题需要 <a href="#pg3473491e6a48">稍微不同的方法</a>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga57cd4863e73_.E5.86.85.E6.A0.B8.E5.8D.87.E7.BA.A7.E5.90.8E.E9.83.A8.E5.88.86.E5.A4.96.E8.AE.BE.E6.97.A0.E6.B3.95.E4.BD.BF.E7.94.A8" id="内核升级后部分外设无法使用"><span id=".E5.86.85.E6.A0.B8.E5.8D.87.E7.BA.A7.E5.90.8E.E9.83.A8.E5.88.86.E5.A4.96.E8.AE.BE.E6.97.A0.E6.B3.95.E4.BD.BF.E7.94.A8"></span>内核升级后部分外设无法使用</h2></div>
+<p>通常（但可能不仅仅）表现为：
+</p>
+<ul><li>新插入的 USB 设备显示在 <i>dmesg</i> 中，但不在 <code>/dev/</code> 中，</li>
+<li>如果文件系统在内核更新前没有在使用，就无法挂载，</li>
+<li>如果笔记本上的有线/无线连接在内核更新前没有在使用，就无法使用，</li>
+<li>用 <i>modprobe</i> 加载一个内核更新前没有加载的模块时提示 <code>FATAL: Module <i>module</i> not found in directory /lib/module/<i>kernelversion</i></code>。</li></ul>
+<p>正如<a href="#pg9a1cc6af125e">系统维护#在更新后重启程序和系统</a>所述，更新软件包时不会更新内核，内核在重新启动时才会更新。同时，安装新内核时，位于 <code>/usr/lib/modules/<i>kernelversion</i>/</code> 中的内核模块会被 pacman 删除。 根据 <a href="https://bugs.archlinux.org/task/16702">FS#16702</a> 中的解释，这种方法可以避免在系统上留下包管理器管理范围外的文件，但会导致上述症状。要修复这类问题，请在更新内核后重新启动系统。远期目标（尚未实现）是使用版本化内核包：主要障碍是如何删除无用的老版本内核。
+</p><p>另一种解决方案是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kernel-modules-hook">kernel-modules-hook</a></span><sup><small>包</small></sup></span>，其中包含两个 pacman 钩子，在内核更新后使用 rsync 将内核模块保留在文件系统上，并<a href="#pg3ef6532bc644">启用</a> <code>linux-modules-cleanup.service</code> 在四周后删除旧模块。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga57cd4863e73_.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.AE.A1.E7.90.86" id="软件包管理"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E7.AE.A1.E7.90.86"></span>软件包管理</h2></div>
+<p>参阅适用于一般主题的 <a href="#pg9ef105bf1e3c">Pacman#疑难解答</a>，以及适用于 PGP 密钥问题的 <a href="#pge293c5f6dad1">pacman/软件包签名#问题解决</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga57cd4863e73_.E4.BF.AE.E5.A4.8D.E5.8F.97.E6.8D.9F.E7.9A.84.E7.B3.BB.E7.BB.9F" id="修复受损的系统"><span id=".E4.BF.AE.E5.A4.8D.E5.8F.97.E6.8D.9F.E7.9A.84.E7.B3.BB.E7.BB.9F"></span>修复受损的系统</h3></div>
+<p>如果进行了<a href="#pg9a1cc6af125e">部分升级</a>，请尝试升级整个系统，可能还需要重启一次。
+</p>
+<pre># pacman -Syu
+</pre>
+<p>如果以往是启动到图形界面，但这次失败了，可以尝试按 <code>Ctrl+Alt+F1</code> 到 <code>Ctrl+Alt+F6</code> 来获得一个能运行 <i>pacman</i> 的控制台。
+</p><p>如果系统损坏严重无法运行 <i>pacman</i>，<a href="#pgbdbcbed611fc">使用U盘、光盘或带 PXE 的网络上的 Arch ISO 来启动电脑</a>。（不要执行安装指南里的其余操作）
+</p><p>挂载根文件系统：
+</p>
+<pre>[ISO] # mount /dev/<i>rootFileSystemDevice</i> /mnt
+</pre>
+<p>挂载其余的独立分区，在它们前面加上前缀 <code>/mnt</code>，例如：
+</p>
+<pre>[ISO] # mount /dev/<i>bootDevice</i> /mnt/boot
+</pre>
+<p>尝试使用原系统的 <i>pacman</i>：
+</p>
+<pre>[ISO] # arch-chroot /mnt
+[chroot] # pacman -Syu
+</pre>
+<p>如果失败了，退出 <i>chroot</i> 并尝试：
+</p>
+<pre>[ISO] # pacman -Syu --sysroot /mnt
+</pre>
+<p>如果也失败了，尝试：
+</p>
+<pre>[ISO] # pacman -Syu --root /mnt --cachedir /mnt/var/cache/pacman/pkg
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga57cd4863e73_fuser" id="fuser">fuser</h2></div>
+
+<p><i>fuser</i> 是一个用于识别进程占用的资源（如打开的文件、文件系统和 TCP/UDP 端口）的命令行工具。
+</p><p><i>fuser</i> 由软件包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=psmisc">psmisc</a></span><sup><small>包</small></sup></span> 提供，已经作为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base">base</a></span><sup><small>包</small></sup></span> <a href="#pgba29d486f3a8">元包</a>的依赖安装。更多信息请查看 <span class="plainlinks archwiki-template-man" title="$ man 1 fuser"><a href="https://man.archlinux.org/man/fuser.1">fuser(1)</a></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga57cd4863e73_.E4.BC.9A.E8.AF.9D.E6.9D.83.E9.99.90" id="会话权限"><span id=".E4.BC.9A.E8.AF.9D.E6.9D.83.E9.99.90"></span>会话权限</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>你必须使用 <a href="#pgac06dd8bfe95">systemd</a> 作为你的 init 进程，本地会话才能正常工作。<a href="https://archlinux.org/news/d-bus-now-launches-user-buses/">[4]</a> 它是各种设备的 polkit 权限和 ACL 所必需的 （参见 <code>/usr/lib/udev/rules.d/70-uaccess.rules</code> 和  <a href="https://enotty.pipebreaker.pl/2012/05/23/linux-automatic-user-acl-management/">[5]</a>）</div>
+<p>首先，确保你有一个带 X 的可用本地会话：
+</p>
+<pre>$ loginctl show-session $XDG_SESSION_ID
+</pre>
+<p>在输出中需要带有 <code>Remote=no</code> and <code>Active=yes</code> 字样。如果没有，确保 X 运行在和登录时一样的 tty 里面。这是保留登录会话所必须的。
+</p><p>基本 <a href="#pg74611dd9d3c8">polkit</a> 操作不需要额外的配置。但有一些 polkit 操作需要请求额外的身份认证，即使是本地会话也是如此。为了达成这项工作，必须运行一个 polkit 身份认证组件。更多信息可参见 <a href="#pg74611dd9d3c8">polkit#身份认证组件</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga57cd4863e73_.E9.94.99.E8.AF.AF.E4.BF.A1.E6.81.AF.EF.BC.9A_.22error_while_loading_shared_libraries.22" id='错误信息：_"error_while_loading_shared_libraries"'><span id=".E9.94.99.E8.AF.AF.E4.BF.A1.E6.81.AF.EF.BC.9A_.22error_while_loading_shared_libraries.22"></span>错误信息： "error while loading shared libraries"</h2></div>
+<p>如果在运行程序时遇到类似于这样的错误：
+</p>
+<pre>error while loading shared libraries: libusb-0.1.so.4: cannot open shared object file: No such file or directory
+</pre>
+<p>使用 <a href="#pg9ef105bf1e3c">pacman</a> 或 <a href="#pgca6ca9243a91">pkgfile</a> 来查找包含丢失共享库的软件包：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ pacman -F libusb-0.1.so.4</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">extra/libusb-compat 0.1.5-1
+    usr/lib/libusb-0.1.so.4
+</pre>
+<p>在上述例子中，需要<a href="#pg811194d6beaa">安装</a>软件包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libusb-compat">libusb-compat</a></span><sup><small>包</small></sup></span>。也可能是依赖于该共享库的程序需要按照 <a href="#pg9a1cc6af125e">soname 增加</a>后的库重新编译。
+</p><p>这个错误也有可能意味着你用来安装这个软件的 <a href="#pgf9d748a7b27b">PKGBUILD</a> 里没有将这个共享库作为它的依赖库：如果来自官方源，请<a href="#pg7817680d64e1">报告一个 bug</a>；如果来自 <a href="#pg89cb7b475cfb">AUR</a>，请在 AUR 网站相关页面上把它报告给维护者。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga57cd4863e73_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><a href="https://www.reddit.com/r/archlinux/comments/tjjwr/archlinux_a_howto_in_troubleshooting_for_newcomers/">A how-to in troubleshooting for newcomers</a></li>
+<li><a href="https://wiki.ultimatebootcd.com/index.php?title=Tools">List of Tools for UBCD</a> - Memtest-like tools to add to grub.cfg on UltimateBootCD.com</li>
+<li><a href="https://en.wikipedia.org/wiki/BIOS_Boot_partition">Wikipedia:BIOS Boot partition</a></li>
+<li><a href="https://wiki.archlinux.org/title/REISUB">Arch:REISUB</a></li>
+<li><a href="https://freedesktop.org/wiki/Software/systemd/Debugging/#Debug_Logging_to_a_Serial_Console">Debug Logging to a Serial Console</a> on Freedesktop.org</li>
+<li><a href="https://web.archive.org/web/20120217124742/http://www.lesswatts.org/projects/acpi/debug.php">How to Isolate Linux ACPI Issues</a> on Archive.org</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807025938
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.217 seconds
+Real time usage: 0.223 seconds
+Preprocessor visited node count: 913/1000000
+Revision size: 22458/2097152 bytes
+Post‐expand include size: 9558/2097152 bytes
+Template argument size: 3618/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   59.811      1 -total
+ 15.82%    9.459     75 Template:Ic
+  8.45%    5.055      3 Template:扩充
+  5.72%    3.422      1 Template:翻译状态
+  5.23%    3.130      3 Template:META_Message
+  5.11%    3.058      5 Template:Pkg
+  3.58%    2.143      1 Template:相关文章开始
+  3.52%    2.106      2 Template:Related
+  3.17%    1.897      1 Template:Related2
+  2.95%    1.762      1 Template:Man
+-->
+<!-- Render ID 0701950e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3187:|#|:idhash:canonical!zh-cn and timestamp 20260807025938 and revision id 33762. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

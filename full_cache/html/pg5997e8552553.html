@@ -1,0 +1,72 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg5997e8552553">使用无障碍功能安装 Arch Linux</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"> <aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Install_Arch_Linux_with_accessibility_options">Install Arch Linux with accessibility options</a>，最近一次同步于 2021-02-21，若英文版本有所<a href="https://wiki.archlinux.org/title/Install_Arch_Linux_with_accessibility_options?diff=0&amp;oldid=653039">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Install_Arch_Linux_with_accessibility_options_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>Arch Linux的官方安装媒介提供了多种辅助功能（ <a href="#pgf18ea7fa7c5a">Accessibility</a> ）：
+</p>
+<ul><li>朗读功能由<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=espeakup">espeakup</a></span><sup><small>包</small></sup></span>提供</li>
+<li><a href="https://en.wikipedia.org/wiki/Refreshable_braille_display">盲文终端</a>支持由<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=brltty">brltty</a></span><sup><small>包</small></sup></span>提供</li></ul>
+<p>本文档用于说明如何使用上述辅助功能安装<a href="#pg83506eae4ba0">Arch Linux</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>本页面仅说明与官方<a href="#pg0d85b8367b38">Installation guide</a>不同的步骤。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5997e8552553_.E5.AE.89.E8.A3.85.E5.89.8D" id="安装前"><span id=".E5.AE.89.E8.A3.85.E5.89.8D"></span>安装前</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5997e8552553_.E5.90.AF.E5.8A.A8.E5.AE.89.E8.A3.85.E7.8E.AF.E5.A2.83" id="启动安装环境"><span id=".E5.90.AF.E5.8A.A8.E5.AE.89.E8.A3.85.E7.8E.AF.E5.A2.83"></span>启动安装环境</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>安装媒介的引导加载程序在启动默认菜单项前有15秒的等待时间。</div>
+<p>当安装媒介启动后，按<code>下</code>，然后按<code>回车</code>以使用朗读功能。
+</p><p>USB盲文显示设备会通过<a href="#pge009209061ac">udev</a>被自动检测到。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5997e8552553_.E5.A4.9A.E4.B8.AA.E9.9F.B3.E9.A2.91.E8.BE.93.E5.87.BA.E8.AE.BE.E5.A4.87" id="多个音频输出设备"><span id=".E5.A4.9A.E4.B8.AA.E9.9F.B3.E9.A2.91.E8.BE.93.E5.87.BA.E8.AE.BE.E5.A4.87"></span>多个音频输出设备</h3></div>
+<p>如果电脑拥有多个音频输出设备，将会听到如下信息：<i>Please select your sound card for speech output</i>（请选择朗读功能使用的音频输出设备）。
+</p><p>在希望使用的音频输出设备听到“嘀”声时，按<code>回车</code>选择该音频输出设备。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5997e8552553_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5997e8552553_.E5.AE.89.E8.A3.85.E5.BF.85.E8.A6.81.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85" id="安装必要的软件包"><span id=".E5.AE.89.E8.A3.85.E5.BF.85.E8.A6.81.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>安装必要的软件包</h3></div>
+<p>在新安装的系统使用朗读功能，需<a href="#pg811194d6beaa">安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=espeakup">espeakup</a></span><sup><small>包</small></sup></span>和<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=alsa-utils">alsa-utils</a></span><sup><small>包</small></sup></span>。如果使用盲文显示设备，需要安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=brltty">brltty</a></span><sup><small>包</small></sup></span>。
+</p><p>在使用<span class="plainlinks archwiki-template-man" title="$ man 8 pacstrap"><a href="https://man.archlinux.org/man/pacstrap.8">pacstrap(8)</a></span>安装系统时，使用以下命令添加所需的软件包：
+</p>
+<pre># pacstrap /mnt base linux linux-firmware espeakup alsa-utils
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5997e8552553_.E9.85.8D.E7.BD.AE.E7.B3.BB.E7.BB.9F" id="配置系统"><span id=".E9.85.8D.E7.BD.AE.E7.B3.BB.E7.BB.9F"></span>配置系统</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5997e8552553_.E9.9F.B3.E9.A2.91.E8.BE.93.E5.87.BA.E8.AE.BE.E5.A4.87" id="音频输出设备"><span id=".E9.9F.B3.E9.A2.91.E8.BE.93.E5.87.BA.E8.AE.BE.E5.A4.87"></span>音频输出设备</h3></div>
+<p>如果检测到 #多个音频输出设备，需要使用以下命令将安装媒介生成的<code>/etc/asound.conf</code>复制到新安装的系统：
+</p>
+<pre># cp /etc/asound.conf /mnt/etc/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg5997e8552553_.E6.BF.80.E6.B4.BB.E5.BC.80.E6.9C.BA.E5.90.AF.E5.8A.A8" id="激活开机启动"><span id=".E6.BF.80.E6.B4.BB.E5.BC.80.E6.9C.BA.E5.90.AF.E5.8A.A8"></span>激活开机启动</h3></div>
+<p>为了在进入新安装的系统时使用朗读功能，需要将<code>espeakup.service</code>设置为开机自动启动（方法参照<a href="#pgac06dd8bfe95">systemd#使用单元</a>）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg5997e8552553_.E9.87.8D.E6.96.B0.E5.90.AF.E5.8A.A8" id="重新启动"><span id=".E9.87.8D.E6.96.B0.E5.90.AF.E5.8A.A8"></span>重新启动</h2></div>
+<p>在启动至新安装的系统后，朗读功能应该会自动开始工作。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807082108
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.081 seconds
+Real time usage: 0.086 seconds
+Preprocessor visited node count: 172/1000000
+Revision size: 2129/2097152 bytes
+Post‐expand include size: 2588/2097152 bytes
+Template argument size: 499/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   15.200      1 -total
+ 23.62%    3.590      1 Template:翻译状态
+ 20.41%    3.103      5 Template:Pkg
+ 11.70%    1.778      1 Template:Man
+ 10.26%    1.560      5 Template:Ic
+  6.68%    1.016      2 Template:注意
+-->
+<!-- Render ID f0bdfe0e-9238-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3283:|#|:idhash:canonical!zh-cn and timestamp 20260807082108 and revision id 33704. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,482 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg2d5af776f6fd">dm-crypt/特殊应用</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/dm-crypt/Specialties">dm-crypt/Specialties</a>，最近一次同步于 2025-07-13，若英文版本有所<a href="https://wiki.archlinux.org/title/dm-crypt/Specialties?diff=0&amp;oldid=840657">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/dm-crypt_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Specialties_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2d5af776f6fd_.E4.BF.9D.E6.8A.A4.E6.9C.AA.E5.8A.A0.E5.AF.86.E7.9A.84boot.E5.88.86.E5.8C.BA" id="保护未加密的boot分区"><span id=".E4.BF.9D.E6.8A.A4.E6.9C.AA.E5.8A.A0.E5.AF.86.E7.9A.84boot.E5.88.86.E5.8C.BA"></span>保护未加密的boot分区</h2></div>
+<p>即使在<a href="#pg29ec7c5af952">加密了根分区</a>的情况下，磁盘上仍存在两处未加密的区域：<code>/boot</code>和<a href="#pg8aa171ccea0e">主引导记录</a>（MBR）。通常情况下，<a href="#pgee8f2050088a">引导加载程序</a>需要读取<code>/boot</code>，BIOS需要读取<a href="#pg8aa171ccea0e">主引导记录</a>，若两者被加密，则无法解密dm-crypt容器，进而完成启动过程。不过，<a href="#pgca9c4017f7ad">GRUB</a>支持解密经过加密的<code>/boot</code>，详见<a href="#pg29ec7c5af952">dm-crypt/加密整个系统#加密的boot分区(GRUB)</a>。
+</p><p>本节介绍了可提高启动过程安全性的方法。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>虽然对<code>/boot</code>分区和主引导记录进行额外保护可避免许多针对启动过程的攻击方法。但系统仍可能面临其它威胁，例如BIOS/UEFI/固件被篡改，键盘记录器，冷启动攻击等。这些攻击方式不在本文的讨论范围中。有关全盘加密的系统信任问题，参见<a href="https://www.youtube.com/watch?v=pKeiKYA03eE">[1]</a>。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>对于<a href="#pg46c3147defaf">UEFI</a>启动的系统，在配置得当时（例如，使用<a href="#pgd819314d422c">统一内核映像</a>），只有<a href="#pg635d4bd93303">EFI 系统分区</a>是未加密的。配合<a href="#pg0e14304dd697">安全启动</a>，可确保启动链的安全性。该方式的安全性与本节中介绍的其它方法相同，且配置简单。详见<a href="#pg29ec7c5af952">dm-crypt/加密整个系统#使用TPM2和安全启动在单一分区上配置</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_.E4.BB.8E.E5.8F.AF.E7.A7.BB.E5.8A.A8.E8.AE.BE.E5.A4.87.E5.BC.95.E5.AF.BC" id="从可移动设备引导"><span id=".E4.BB.8E.E5.8F.AF.E7.A7.BB.E5.8A.A8.E8.AE.BE.E5.A4.87.E5.BC.95.E5.AF.BC"></span>从可移动设备引导</h3></div>
+<p>使用单独的引导设备启动系统非常直接，并能极大提高系统在面临特定类型攻击时的安全性。在<a href="#pg29ec7c5af952">加密了根分区</a>的系统中，易受到攻击的部分为：
+</p>
+<ul><li><a href="#pg8aa171ccea0e">主引导记录</a></li>
+<li><code>/boot</code>分区</li></ul>
+<p>要成功启动系统，上述部分必须保持未加密状态。要避免上述未加密区域被篡改，建议将它们存储到可移动介质（例如，USB设备）中，并从可移动介质中引导，而不是直接从硬盘引导。只要保证相应的可移动介质的安全，就可确保相关区域不被篡改，提高解密系统时的安全性。
+</p><p>如下内容假定已完成系统配置，并使用单独boot分区，挂载到<code>/boot</code>。若未还未完成系统配置，参见<a href="#pg52b00790fb44">Dm-crypt/系统配置#内核参数</a>，注意在配置过程中，用可移动设备替换硬盘。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>必须确保系统支持从选择的可移动介质（USB设备、移动硬盘、SD卡等）启动。</div>
+<p>准备可移动设备（<code>/dev/sdx</code>）：
+</p>
+<pre># gdisk /dev/sdx # 按需格式化。也可以使用cgdisk、fdisk、cfdisk、gparted等分区工具
+# mkfs.ext2 /dev/sdx1 # BIOS启动的系统
+# mkfs.fat -F 32 /dev/sdx1 # UEFI启动的系统
+# mount /dev/sdx1 /mnt
+</pre>
+<p>将已有<code>/boot</code>分区内容复制到可移动设备中：
+</p>
+<pre># cp -ai /boot/* /mnt/
+</pre>
+<p>将可移动设备挂载到<code>/boot</code>，并更新<a href="#pgced0cc449f44">fstab</a>：
+</p>
+<pre># umount /boot
+# umount /mnt
+# mount /dev/sdx1 /boot
+# genfstab -p -U / &gt; /etc/fstab
+</pre>
+<p>更新<a href="#pgca9c4017f7ad">GRUB</a>配置。<code>grub-mkconfig</code>应当能自动检测新分区的UUID。但若配置了自定义启动选项，可能需要手动更新相应条目。
+</p>
+<pre># grub-mkconfig -o /boot/grub/grub.cfg
+# grub-install /dev/sdx # 安装到可移动设备，而不是硬盘中。用于BIOS启动的系统
+# grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=grub # 用于UEFI启动的系统
+</pre>
+<p>重启以测试新的配置。注意在BIOS/<a href="#pg46c3147defaf">UEFI</a>中选择正确的启动设备。若系统启动失败，仍可以从硬盘启动以修复存在的问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_chkboot" id="chkboot">chkboot</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>chkboot可<b>发现并提示</b><code>/boot</code>遭到篡改（<b>tamper-evident</b>），但<b>不能防止</b>篡改（<b>tamper-proof</b>）。chkboot脚本运行前，输入的密码可能已经被篡改过的引导加载程序、 内核、initrd读取。因此，当chkboot完整性检查失败时，数据安全性已经无法保证。</div>
+<p>根据ct-magazine中一篇文章（Issue 3/12, page 146, 01.16.2012, <a href="https://www.heise.de/ct/inhalt/2012/03/6/">[2]</a>）的内容，下述脚本将检查<code>/boot</code>中文件的SHA-1散列值是否改变、<code>/boot</code>分区的inode、占用的磁盘块信息，以及<a href="#pg8aa171ccea0e">主引导记录</a>。该脚本不能完全阻止特定类型的攻击，但极大提升了攻击难度。脚本自身的配置文件不存储在未加密的<code>/boot</code>中。因此，对于攻击者，在系统锁定/关机的情况下，难以发现系统将在启动时检查<code>/boot</code>分区的内容。然而，对于有备而来的攻击者，可修改固件以在系统内核之上执行代码，劫持对<code>boot</code>分区的访问，呈现出文件未被篡改的假象。通常来讲，在固件以上的层级的安全措施都不能确保启动链可信，也不能确保发现并提示篡改迹象。
+</p><p>下述脚本可在<a href="https://ftp.heise.de/pub/ct/listings/1203-146.zip">此处</a>获取（作者：Juergen Schmidt, ju at heisec.de；许可：GPLv2）。此外，也可通过<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/chkboot/">chkboot</a></span><sup><small>AUR</small></sup></span><a href="#pg811194d6beaa">安装</a>。建议使用AUR包，其提供了额外的辅助脚本。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2d5af776f6fd_Juergen_Schmidt.E7.9A.84.E5.8E.9F.E5.A7.8B.E8.84.9A.E6.9C.AC" id="Juergen_Schmidt的原始脚本"><span id="Juergen_Schmidt.E7.9A.84.E5.8E.9F.E5.A7.8B.E8.84.9A.E6.9C.AC"></span>Juergen Schmidt的原始脚本</h4></div>
+<p><code>/usr/local/bin/chkboot_user.sh</code>需要在登录后立即执行，故需要加入<a href="#pg9604da0ac74d">自动启动</a>中。（例如，对于KDE：系统设置 -&gt; 系统 -&gt; 自动启动；对于GNOME 3，使用gnome-session-properties）。
+</p><p>由于在Arch Linux中，<code>/boot</code>的内容经常改变（例如，更新内核），建议使用如下脚本进行系统更新，以在系统更新时同时更新chkboot设置：
+</p>
+<pre>#!/bin/sh
+#
+# 注意：将<i>&lt;user&gt;</i> 替换为你的用户名，并使用sudo执行该脚本，以确保pacman、chkboot有所需的权限
+#
+echo "Pacman update [1] Quickcheck before updating" &amp;
+sudo -u <i>&lt;user&gt;</i> /usr/local/bin/chkboot_user.sh
+/usr/local/bin/chkboot.sh
+sudo -u <i>&lt;user&gt;</i> /usr/local/bin/chkboot_user.sh
+echo "Pacman update [2] Syncing repos for pacman"
+pacman -Syu
+/usr/local/bin/chkboot.sh
+sudo -u <i>&lt;user&gt;</i> /usr/local/bin/chkboot_user.sh
+echo "Pacman update [3] All done, let us roll on ..."
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2d5af776f6fd_AUR.E5.8C.85" id="AUR包"><span id="AUR.E5.8C.85"></span>AUR包</h4></div>
+<p>在安装对应AUR包后，<a href="#pg6ec215b93a06">启动</a><code>chkboot.service</code>。
+</p><p>可能需要在<a href="#pgbd0f46fbac92">mkinitcpio钩子列表</a>的最后添加<code>chkboot</code>，以便每次mkinitcpio重新生成initramfs时更新chkboot记录的哈希值。可通过修改<code>/etc/mkinitcpio.conf</code>，在<code>HOOKS</code>列表的最后添加<code>chkboot</code>实现。
+</p><p>AUR包中还附带了<code>chkboot-desktopalert</code>脚本，在检测到意料之外的<code>/boot</code>修改时以图形化窗口的形式弹出警告。可将该脚本加入桌面环境的启动项中。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_mkinitcpio_chkcryptoboot" id="mkinitcpio-chkcryptoboot">mkinitcpio-chkcryptoboot</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>本钩子<b>不会</b>加密<a href="#pgca9c4017f7ad">GRUB</a>的核心代码（MBR部分）、EFI stub。若攻击者通过修改引导加载程序，在运行时篡改内核或initramfs，本钩子不能保证安全性。</div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-chkcryptoboot/">mkinitcpio-chkcryptoboot</a></span><sup><small>AUR</small></sup></span>是一个<a href="#pgbd0f46fbac92">mkinitcpio</a>钩子，将在早期用户空间中检查完整性，并在发现系统可能被篡改的痕迹时建议用户不要输入密码。本方案的安全性来自<a href="#pg29ec7c5af952">加密的boot分区</a>和加密的根分区。并要求boot分区的密码和根分区的不同。加密的boot分区将由<a href="#pgca9c4017f7ad">GRUB</a>的<code>cryptodisk.mod</code>模块解密。这样，可保护<a href="#pg5409190f7704">initramfs</a>和<a href="#pg3473491e6a48">内核</a>不受到离线攻击。并且，即使在受到篡改的机器上输入了<code>/boot</code>分区的密码，在chkcryptoboot钩子的提示下，也能确保根分区的安全性。（假设chkcryptoboot检测到了篡改，并且钩子本身没有在运行时被篡改）
+</p><p>本钩子需要&gt;=2.00版本的<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=grub">grub</a></span><sup><small>包</small></sup></span>。要保证安全性，需要使用专用的、有独立密码的加密<code>/boot</code>分区。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2d5af776f6fd_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h4></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-chkcryptoboot/">mkinitcpio-chkcryptoboot</a></span><sup><small>AUR</small></sup></span>。编辑<code>/etc/default/chkcryptoboot.conf</code>以进行配置。若要检测攻击者是否用自制的boot分区替换了原本的boot分区，设置<code>CMDLINE_NAME</code>、<code>CMDLINE_VALUE</code>为某一秘密值。例如，可以按照安装过程中显示的建议使用两个哈希值。此外，还需要在<code>/etc/default/grub</code>中修改<a href="#pgec0856954f1c">内核参数</a>，传递相应的<code>CMDLINE_NAME</code>、<code>CMDLINE_VALUE</code>。之后，修改<code>/etc/mkinitcpio.conf</code>的<code>HOOKS=</code>行，在<code>encrypt</code><b>之前</b>插入<code>chkcryptoboot</code>。最后<a href="#pg82461695094b">重新生成 initramfs</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2d5af776f6fd_.E6.8A.80.E6.9C.AF.E6.A6.82.E8.BF.B0" id="技术概述"><span id=".E6.8A.80.E6.9C.AF.E6.A6.82.E8.BF.B0"></span>技术概述</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-chkcryptoboot/">mkinitcpio-chkcryptoboot</a></span><sup><small>AUR</small></sup></span>同时包含了安装、运行时mkinitcpio钩子。安装钩子将在每次重新生成initramfs时运行。对于<a href="#pg46c3147defaf">UEFI</a>启动的系统，将计算<a href="#pg0838c14f471f">EFI</a> stub（<code>$esp/EFI/grub_uefi/grubx64.efi</code>）的哈希值；对于BIOS启动的系统，将计算GRUB安装到的磁盘的首446字节的哈希值，并将哈希值保存到initramfs中（initramfs保存在加密的<code>/boot</code>分区中）。当系统启动时，在GRUB中输入<code>/boot</code>分区的密码后，运行时钩子将重新计算对应的哈希值，将计算出的值与保存的值比对，若匹配，才提示输入根分区密码解密根分区。若不匹配，将显示类似如下的错误：
+</p>
+<pre>CHKCRYPTOBOOT ALERT!
+CHANGES HAVE BEEN DETECTED IN YOUR BOOT LOADER EFISTUB!
+YOU ARE STRONGLY ADVISED NOT TO ENTER YOUR ROOT CONTAINER PASSWORD!
+Please type uppercase yes to continue:
+</pre>
+<p>除了计算引导加载程序的哈希值之外，钩子还将在运行时以及启动过程完成后，根据<code>/etc/default/chkcryptoboot.conf</code>中的配置检查当前运行内核的内核参数，以确认GRUB配置文件、boot分区未被非法替换。
+</p><p>注意，对于BIOS启动的系统，本钩子计算并检查的是GRUB第一阶段引导加载程序（安装在引导设备的前446字节）的哈希值，并未检查第二阶段引导加载程序（<code>core.img</code>）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_AIDE" id="AIDE">AIDE</h3></div>
+<p>除了上述脚本外，也可以使用<a href="#pgede2c14a2293">AIDE</a>进行哈希值检查。<a href="#pgede2c14a2293">AIDE</a>的配置文件非常灵活，可进行高度自定义配置。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_STARK" id="STARK">STARK</h3></div>
+<p>上述介绍的其它方法虽然可以满足大部分用户的需求，但并未解决所有与未加密的<code>/boot</code>分区有关的安全问题。为了构建经过完全验证的启动链，学术界提出了一种名为POTTS的实现，旨在实施 <a href="https://www1.informatik.uni-erlangen.de/stark">STARK</a> 认证框架。
+</p><p>POTTS 概念验证（proof-of-concept）使用 Arch Linux 作为基础发行版，并实现了一个包含以下组件的系统启动链：
+</p>
+<ul><li>POTTS - 用于展示一次性验证消息的启动菜单。</li>
+<li>TrustedGrub - <a href="#pg9fa60bf874d4">GRUB Legacy</a>实现，通过<a href="#pgfa09891e6e89">TPM芯片</a>的PCR寄存器验证内核和initramfs。</li>
+<li>TRESOR - 内核补丁，实现了AES加密，并在启动过程中，将主密钥保存在CPU寄存器中，而非内存中。</li></ul>
+<p>基于Arch Linux （2013-01及之后版本的ISO镜像）的<a href="https://13.tc/p/potts/manual.html">安装配置方法</a>已作为研究的一部分发布。注意，在尝试之前，应当了解软件仓库中并没有相关实现工具，并且该方法的日常维护非常繁琐。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2d5af776f6fd_.E4.BD.BF.E7.94.A8GPG.E3.80.81LUKS.E3.80.81OpenSSL.E5.8A.A0.E5.AF.86.E7.9A.84.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6" id="使用GPG、LUKS、OpenSSL加密的密钥文件"><span id=".E4.BD.BF.E7.94.A8GPG.E3.80.81LUKS.E3.80.81OpenSSL.E5.8A.A0.E5.AF.86.E7.9A.84.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6"></span>使用GPG、LUKS、OpenSSL加密的密钥文件</h2></div>
+<p>如下论坛帖子讨论了使用了双因素身份验证、GPG或OpenSSL加密的密钥文件，而不是明文密钥文件。拓展了<a href="https://bbs.archlinux.org/viewtopic.php?id=120243">System Encryption using LUKS with GPG encrypted keys</a>中的讨论：
+</p>
+<ul><li>GnuPG: <a href="https://bbs.archlinux.org/viewtopic.php?pid=943338#p943338">有关GPG加密的密钥文件的帖子</a>该帖子介绍了通用指令。</li>
+<li>OpenSSL: <a href="https://bbs.archlinux.org/viewtopic.php?pid=947805#p947805">有关OpenSSL加密的密钥文件的帖子</a>该帖子只介绍了<code>ssldec</code>钩子。</li>
+<li>OpenSSL: <a href="https://bbs.archlinux.org/viewtopic.php?id=155393">有关OpenSSL加盐的bf-cbc加密的密钥文件的帖子</a>该帖子介绍了<code>bfkf</code>钩子，安装过程，生成加密密钥文件的脚本。</li>
+<li>LUKS: <a href="https://bbs.archlinux.org/viewtopic.php?pid=1502651#p1502651">有关LUKS加密的密钥文件的帖子</a>使用<code>lukskey</code>钩子。</li></ul>
+<p>注意：
+</p>
+<ul><li>以上方法只适用于只有两个主分区的情况：在配置加密时必要的boot分区以及主LVM分区。在LVM中，可以按需求任意创建逻辑卷（至少应当有根逻辑卷、swap逻辑卷、home逻辑卷）。只使用两个主分区的好处是只需要一个密钥文件，并且可以使用休眠功能（休眠到加密的swap分区）。若要使用休眠功能，<code>/etc/mkinitcpio.conf</code>中的钩子配置应类似：<pre>HOOKS=( ... usb usbinput &lt;etwo或者ssldec&gt; encrypt（若使用openssl） lvm2 resume ... )</pre>，并在<a href="#pgec0856954f1c">内核参数</a>中加入<pre>resume=/dev/&lt;VolumeGroupName&gt;/&lt;LVNameOfSwap&gt;</pre>。</li>
+<li>若需要临时在某处保存解密后的密钥文件，不要保存到未加密的磁盘中。最好确保只保存到内存中（例如，<code>/dev/shm</code>）。</li>
+<li>若要使用GPG加密的密钥文件，需要静态编译1.4版本的GnuPG。或者，使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gnupg1/">gnupg1</a></span><sup><small>AUR</small></sup></span>并相应修改钩子实现。</li>
+<li>对于上述第二个帖子（OpenSSL加密密钥文件），更新OpenSSL可能破坏自定义的<code>ssldec</code>钩子。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2d5af776f6fd_.E8.BF.9C.E7.A8.8B.E8.A7.A3.E9.94.81.E5.88.86.E5.8C.BA" id="远程解锁分区"><span id=".E8.BF.9C.E7.A8.8B.E8.A7.A3.E9.94.81.E5.88.86.E5.8C.BA"></span>远程解锁分区</h2></div>
+<p>对于需要远程登录启动中的系统，在启动早期阶段远程提供解密LUKS加密的分区（例如，根分区及其它分区）的密码的情况，可以使用<a href="#pgbd0f46fbac92">mkinitcpio</a>钩子配置网络接口并启动SSH服务器。下文中介绍的某些包提供了<a href="#pgbd0f46fbac92">mkinitcpio 编译钩子</a>，以简化配置。下面将介绍了在本机控制台输入密码的基础上，增加远程解密的方法。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>需要确保使用内核对网络设备的命名（例如，<code>eth0</code>），而不是<a href="#pge009209061ac">udev</a>的命名（例如，<code>enp1s0</code>）。</li>
+<li>默认情况下，可预测网络接口名（Predictable Network Interface Names）在启动过程后期才激活并修改网络设备的命名。可使用<a href="#pgcfe31b67199d">dmesg</a>检查有关网络的内核模块的日志以确定网络设备的原始命名（例如，<code>eth0</code>）。</li>
+<li>可能需要将<a href="#pg42eb048174ab">以太网卡</a>或<a href="#pgf9c69fac770d">无线网卡</a>所需的模块添加到<a href="#pgbd0f46fbac92">MODULES</a>列表中。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_.E5.9F.BA.E4.BA.8EBusyBox.E7.9A.84initramfs.EF.BC.88.E4.BD.BF.E7.94.A8mkinitcpio.EF.BC.89.E6.9E.84.E5.BB.BA" id="基于BusyBox的initramfs（使用mkinitcpio）构建"><span id=".E5.9F.BA.E4.BA.8EBusyBox.E7.9A.84initramfs.EF.BC.88.E4.BD.BF.E7.94.A8mkinitcpio.EF.BC.89.E6.9E.84.E5.BB.BA"></span>基于BusyBox的initramfs（使用mkinitcpio）构建</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-netconf">mkinitcpio-netconf</a></span><sup><small>包</small></sup></span>和/或<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-ppp/">mkinitcpio-ppp</a></span><sup><small>AUR</small></sup></span>为基于BusyBox的initramfs提供了网络支持。对于SSH服务器，则可使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-dropbear">mkinitcpio-dropbear</a></span><sup><small>包</small></sup></span>或<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-tinyssh">mkinitcpio-tinyssh</a></span><sup><small>包</small></sup></span>。注意，上述钩子不会安装shell，故可能按需<a href="#pg811194d6beaa">安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-utils">mkinitcpio-utils</a></span><sup><small>包</small></sup></span>。对于上述包的任何组合方式，下述操作步骤都适用，些许不同之处将单独指出。
+</p>
+<ol><li>若没有已有的SSH密钥对，在客户端系统上<a href="#pg0f0d45f60e57">生成密钥对</a>。生成的密钥对将用于登录远程主机。 <div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li><code>tinyssh</code>只支持不设置密码的<a href="#pg0f0d45f60e57">Ed25519</a>、<a href="#pg0f0d45f60e57">ECDSA</a>密钥。若使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-tinyssh">mkinitcpio-tinyssh</a></span><sup><small>包</small></sup></span>，只能选择这两种密钥类型之一。</li>
+<li>0.0.3-5版本的<code>mkinitcpio-dropbear</code>与现有的移除了dss的dropbear实现不兼容。详情及修复方法参见<a href="https://github.com/grazzolini/mkinitcpio-dropbear/issues/8">Github</a>。</li></ul></div></li>
+
+<li>根据选择的SSH服务器，将SSH公钥插入到远程主机的<code>/etc/dropbear/root_key</code>/<code>/etc/tinyssh/root_key</code>文件中（对于刚刚生成的密钥对，SSH公钥存储在<b>.pub</b>结尾的文件中，公钥一般被复制到远程主机以实现无密码登录）。<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>可依照此方法添加其它所需的SSH公钥。也可以直接复制远程主机的<code>~/.ssh/authorized_keys</code>文件，但需要检查文件内容以仅包含需要执行远程解锁操作的公钥。添加公钥后，需要使用<code>mkinitcpio</code>重新生成initrd。另见<a href="#pg4df2d7b1a305">OpenSSH#保护</a></div></li>
+<li>修改<code>/etc/mkinitcpio.conf</code>的"HOOKS"列表，在<code>filesystems</code>文件系统钩子前添加<code>&lt;netconf 和/或 ppp&gt; &lt;dropbear 或 tinyssh&gt; encryptssh</code>三个钩子（<code>encryptssh</code>钩子代替了<code>encrypt</code>钩子）。并<a href="#pg82461695094b">重新生成 initramfs</a>。<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><b>不需要</b><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-nfs-utils">mkinitcpio-nfs-utils</a></span><sup><small>包</small></sup></span>提供的<code>net</code>钩子。</div></li>
+<li>配置所需的<code>cryptdevice=</code><a href="#pg52b00790fb44">内核参数</a>，并在引导加载程序配置中添加恰当的<code>ip=</code><a href="#pgec0856954f1c">内核参数</a>。例如，若要使用DHCP分配IP地址，可设置<pre>ip=dhcp</pre>，这一般要求DHCP服务器始终为需要远程解密的主机分配相同的IP地址，否则进行SSH连接较为繁琐。也可以使用静态IP地址：<pre>ip=192.168.1.1:::::eth0:none</pre>。此外，还可指定子网掩码和网关：<pre>ip=192.168.1.1::192.168.1.254:255.255.255.0::eth0:none</pre>。<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>若使用0.0.4及更新版本的<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-netconf">mkinitcpio-netconf</a></span><sup><small>包</small></sup></span>，还可通过在<code>ip=</code>中设置多个参数，分别配置多个网络接口。但是，不能同时设置“全局配置”和针对某一网络接口的配置（例如，不能与<code>ip=dhcp</code>混用）。必须显式地指定网络接口：<pre>ip=ip=192.168.1.1:::::eth0:none:ip=172.16.1.1:::::eth1:none</pre> </div> 若使用DHCP，可能需要添加<code>netconf_timeout=</code>内核参数，避免在DHCP服务不可用时，netconf无限期地尝试通过DHCP获取IP地址。<code>ip=</code>参数的详细介绍可参见<a href="#pgbd0f46fbac92">Mkinitcpio#使用_net</a>。设置完成后，更新<a href="#pgee8f2050088a">引导加载程序</a>配置。</li>
+<li>最后，重启远程主机并尝试<a href="#pg4df2d7b1a305">使用SSH连接</a>, <b>显式地指定使用root用户连接</b>（即使远程主机的系统配置中关闭了root账户，也可在initrd中使用，以解锁远程主机）。若远程主机在启动后使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openssh">openssh</a></span><sup><small>包</small></sup></span>提供远程SSH连接，并且使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-dropbear">mkinitcpio-dropbear</a></span><sup><small>包</small></sup></span>提供initramfs中的SSH服务端支持，则在连接到initramfs中的SSH服务端时，不会显示SSH主机密钥变更的警告，因为<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-dropbear">mkinitcpio-dropbear</a></span><sup><small>包</small></sup></span>将使用和OpenSSH相同的SSH密钥（注意，dropbear不支持Ed25519密钥，若openssh使用了Ed25519密钥，连接时仍会显示密钥不匹配警告） 。对于<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-tinyssh">mkinitcpio-tinyssh</a></span><sup><small>包</small></sup></span>，其附带了<code>tinyssh-convert</code>脚本，以使用与<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openssh">openssh</a></span><sup><small>包</small></sup></span>相同的密钥（当前仅支持使用Ed25519密钥）。有时，可能需要手动使用<code>tinyssh-convert</code>将密钥复制到<code>/etc/tinyssh/sshkeydir</code>。注意，无论使用何种方式复制ssh密钥，都需要确保密钥已由<a href="#pg4df2d7b1a305">ssh守护进程</a>生成，即，至少通过systemd单元启动过一次OpenSSH。配置完成后，重启远程主机并通过SSH连接，应当能看到输入密码以解锁设备的提示符；输入密码并等待系统启动完成后，可以使用普通用户进行正常的<a href="#pg4df2d7b1a305">SSH连接</a>。</li></ol>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2d5af776f6fd_.E4.BD.BF.E7.94.A8Wi-Fi" id="使用Wi-Fi"><span id=".E4.BD.BF.E7.94.A8Wi-Fi"></span>使用Wi-Fi</h4></div>
+<p><code>netconf</code>钩子一般用于以太网连接。若远程主机只连接无线网络，并且要通过Wi-Fi进行远程连接以解锁设备，需要在<code>netconf</code>钩子前运行相关配置无线网络的钩子，可以使用预定义的钩子，也可以创建自定义钩子。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg2d5af776f6fd_.E9.A2.84.E5.AE.9A.E4.B9.89.E9.92.A9.E5.AD.90" id="预定义钩子"><span id=".E9.A2.84.E5.AE.9A.E4.B9.89.E9.92.A9.E5.AD.90"></span>预定义钩子</h5></div>
+<p>可以安装预定义钩子：
+</p>
+<ol><li>安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-wifi/">mkinitcpio-wifi</a></span><sup><small>AUR</small></sup></span>。</li>
+<li>根据网络属性创建<i>wpa_supplicant</i>配置，以设置Wi-Fi连接：<pre>wpa_passphrase "ESSID" "passphrase" &gt; /etc/wpa_supplicant/initcpio.conf</pre></li>
+<li>修改<code>/etc/mkinitcpio.conf</code>，在<code>netconf</code>钩子前添加<code>wifi</code>钩子。应当能自动检测到与Wi-Fi相关的模块。若没有自动检测到，手动将需要的模块加入<code>MODULES</code>中。</li>
+<li>添加<code>ip=:::::wlan0:dhcp</code><a href="#pgec0856954f1c">内核参数</a>。</li>
+<li><a href="#pg82461695094b">重新生成 initramfs</a>。</li>
+<li>更新<a href="#pgee8f2050088a">引导加载程序</a>配置。</li></ol>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg2d5af776f6fd_.E8.87.AA.E5.AE.9A.E4.B9.89.E9.92.A9.E5.AD.90" id="自定义钩子"><span id=".E8.87.AA.E5.AE.9A.E4.B9.89.E9.92.A9.E5.AD.90"></span>自定义钩子</h5></div>
+<p>下例展示了使用USB Wi-Fi适配器，连接到WPA2-PSK保护的Wi-Fi网络的方法。对于其它配置（例如，连接到WEP网络、使用其它initramfs生成工具），可能需要相应调整某些步骤。
+</p>
+<ol><li>修改<code>/etc/mkinitcpio.conf</code>：
+<ul><li>添加Wi-Fi适配器所需的内核模块。</li>
+<li>包含<code>wpa_passphrase</code>、<code>wpa_supplicant</code>二进制文件。</li>
+<li>在<code>net</code>钩子前添加<code>wifi</code>钩子（该钩子即是需要创建的自定义钩子，也可以使用其它名称。<pre>MODULES=(<i>module</i>)<br/>BINARIES=(wpa_passphrase wpa_supplicant)<br/>HOOKS=(base udev autodetect ... <b>wifi</b> net ... dropbear encryptssh ...)</pre></li></ul></li>
+<li>在<code>/etc/initcpio/hooks/wifi</code>中创建<code>wifi</code>钩子：<pre>run_hook ()<br/>{<br/>	# Sleep a couple of seconds so wlan0 is setup by kernel<br/>	sleep 5<br/><br/>	# Set wlan0 to up<br/>	ip link set wlan0 up<br/><br/>	# Associate with Wi-Fi network<br/>	# 1. Save temp config file<br/>	wpa_passphrase "<i>network ESSID</i>" "<i>pass phrase</i>" &gt; /tmp/wifi<br/><br/>	# 2. Associate<br/>	wpa_supplicant -B -D nl80211,wext -i wlan0 -c /tmp/wifi<br/><br/>	# Sleep a couple of seconds so that wpa_supplicant finishes connecting<br/>	sleep 5<br/><br/>	# wlan0 should now be connected and ready to be assigned an ip by the net hook<br/>}<br/><br/>run_cleanuphook ()<br/>{<br/>	# Kill wpa_supplicant running in the background<br/>	killall wpa_supplicant<br/><br/>	# Set wlan0 link down<br/>	ip link set wlan0 down<br/><br/>	# wlan0 should now be fully disconnected from the Wi-Fi network<br/>}</pre></li>
+<li>在<code>/etc/initcpio/install/wifi</code>中创建钩子安装文件：<pre>build ()<br/>{<br/>	add_runscript<br/>}<br/>help ()<br/>{<br/>cat&lt;&lt;HELPEOF<br/>	Enables Wi-Fi on boot, for dropbear ssh unlocking of disk.<br/>HELPEOF<br/>}</pre></li>
+<li>添加<code>ip=:::::wlan0:dhcp</code><a href="#pgec0856954f1c">内核参数</a>。注意移除<code>ip=:::::eth0:dhcp</code>，以避免冲突。</li>
+<li>（可选）可额外添加使用<code>ip=:::::eth0:dhcp</code><a href="#pgec0856954f1c">内核参数</a>以进行以太网连接的启动加载项。</li>
+<li><a href="#pg82461695094b">重新生成 initramfs</a>。</li>
+<li>更新<a href="#pgee8f2050088a">引导加载程序</a>配置。</li></ol>
+<p>注意检查系统的<a href="#pgf9c69fac770d">Wi-Fi配置</a>，避免系统启动完成后无法远程连接。
+</p><p>若在initramfs中无法连接到Wi-Fi网络，可尝试增加脚本中的sleep时间。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_.E5.9F.BA.E4.BA.8Esystemd.E7.9A.84initramfs.EF.BC.88.E4.BD.BF.E7.94.A8mkinitcpio.EF.BC.89.E6.9E.84.E5.BB.BA" id="基于systemd的initramfs（使用mkinitcpio）构建"><span id=".E5.9F.BA.E4.BA.8Esystemd.E7.9A.84initramfs.EF.BC.88.E4.BD.BF.E7.94.A8mkinitcpio.EF.BC.89.E6.9E.84.E5.BB.BA"></span>基于systemd的initramfs（使用mkinitcpio）构建</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-systemd-extras/">mkinitcpio-systemd-extras</a></span><sup><small>AUR</small></sup></span>为基于systemd的initramfs提供了一整套用于网络配置、远程SSH连接的构建钩子。对于远程会话，可进行配置以使用busybox的dash完全访问initramfs环境，也可只显示密码输入提示符。
+</p><p>最小配置如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole <b>sd-network</b> block <b>sd-tinyssh</b> sd-encrypt filesystems fsck)
+<b>SD_TINYSSH_COMMAND="systemd-tty-ask-password-agent --query --watch"</b></pre>
+<p>对于上述配置，当使用<code>mkinitcpio</code>构建initramfs时，将复制<a href="#pg30593d9cf652">systemd-networkd</a>配置文件，并尝试从已有的TinySSH、OpenSSH配置中复制/转换SSH密钥。系统需要安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tinyssh">tinyssh</a></span><sup><small>包</small></sup></span>（但不需要启用）。若系统不使用<a href="#pg30593d9cf652">systemd-networkd</a>，需要额外配置参数，详见<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-systemd-extras/">mkinitcpio-systemd-extras</a></span><sup><small>AUR</small></sup></span>的<a href="https://github.com/wolegis/mkinitcpio-systemd-extras/wiki">文档</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>在默认情况下，<b>可预测网络接口名</b>（例如，<code>enp2s0</code>）在initramfs阶段不可用。故直接复制的<a href="#pg30593d9cf652">systemd-networkd</a>配置文件很可能无法正常工作。解决方法可参见<a href="https://github.com/wolegis/mkinitcpio-systemd-extras/wiki/Networking#predictable-network-interface-names">mkinitcpio-systemd-extras wiki</a>。</li>
+<li>还可使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mkinitcpio-systemd-tool">mkinitcpio-systemd-tool</a></span><sup><small>包</small></sup></span>实现在启动早期远程连接，并解密LUKS卷。该方式与上述介绍完全不同，需要额外添加<code>systemd-tool</code>钩子，并且在相应systemd单元的<code>[X-SystemdTool]</code>节中进行配置。有关该方式实现以及配置的文档非常有限。</li></ul></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_.E5.9F.BA.E4.BA.8Esystemd.E7.9A.84initramfs.EF.BC.88.E4.BD.BF.E7.94.A8dracut.EF.BC.89.E6.9E.84.E5.BB.BA" id="基于systemd的initramfs（使用dracut）构建"><span id=".E5.9F.BA.E4.BA.8Esystemd.E7.9A.84initramfs.EF.BC.88.E4.BD.BF.E7.94.A8dracut.EF.BC.89.E6.9E.84.E5.BB.BA"></span>基于systemd的initramfs（使用dracut）构建</h3></div>
+<p>若使用<a href="#pgb185d4cf00ac">dracut</a>而不是<a href="#pgbd0f46fbac92">mkinitcpio</a>构建initramfs，可能需要使用<a href="https://github.com/gsauthof/dracut-sshd">dracut-sshd</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2d5af776f6fd_.E8.AE.BE.E7.BD.AE.E7.94.A8.E4.BA.8E.E9.87.8D.E5.90.AF.E7.9A.84.E4.B8.80.E6.AC.A1.E6.80.A7.E5.AF.86.E9.92.A5" id="设置用于重启的一次性密钥"><span id=".E8.AE.BE.E7.BD.AE.E7.94.A8.E4.BA.8E.E9.87.8D.E5.90.AF.E7.9A.84.E4.B8.80.E6.AC.A1.E6.80.A7.E5.AF.86.E9.92.A5"></span>设置用于重启的一次性密钥</h2></div>
+<p>还可以通过设置临时<a href="#pg52b00790fb44">密钥文件</a>，以在无需手动终端交互输入密码的情况下实现远程设备的重启。密钥文件需要放置在能在启动时被内核访问的位置，并设置<a href="#pg52b00790fb44">cryptkey</a>启动参数，同时，还需要通过"cryptsetup luksAddKey"命令添加密钥文件。
+</p><p>使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/passless-boot/">passless-boot</a></span><sup><small>AUR</small></sup></span>可方便地完成上述操作。若想要自行实现，也可参照<a href="https://gitlab.com/Marcool04/passless-boot">该工具的的README</a>。注意，在使用前，请阅读<a href="https://gitlab.com/Marcool04/passless-boot#security-considerations-and-threat-model">Security considerations</a>中的讨论。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2d5af776f6fd_.E5.9B.BA.E6.80.81.E7.A1.AC.E7.9B.98.E7.9A.84Discard.2FTRIM.E6.94.AF.E6.8C.81" id="固态硬盘的Discard/TRIM支持"><span id=".E5.9B.BA.E6.80.81.E7.A1.AC.E7.9B.98.E7.9A.84Discard.2FTRIM.E6.94.AF.E6.8C.81"></span>固态硬盘的Discard/TRIM支持</h2></div>
+<p><a href="#pgcb28ba980ed7">固态硬盘</a>用户应当注意，在默认情况下，除非指定<code>discard</code>选项，否则dm-crypt的device mapper不会启用TRIM命令支持。
+</p><p>由于可能的安全问题，device mapper维护者表示永远不会在dm-crypt设备上默认启用TRIM支持。<a href="http://www.saout.de/pipermail/dm-crypt/2011-September/002019.html">[3]</a><a href="http://www.saout.de/pipermail/dm-crypt/2012-April/002420.html">[4]</a> 在启用TRIM的设备上，通过释放的磁盘块信息，有可能推断出加密设备上层使用的文件系统。cryptsetup开发者在<a href="https://asalor.blogspot.de/2011/08/trim-dm-crypt-problems.html">该博客</a>中介绍了启用TRIM可能导致的问题。还需注意，相关风险可能叠加。例如，若设备仍使用之前的加密方式（cryptsetup &lt; 1.6.0）加密（<code>--cipher aes-cbc-essiv</code>），相比现在的<a href="#pg88d6e7a842ae">默认选项</a>，释放的磁盘块信息可能泄露更多配置信息。
+</p><p>依据配置方式，可分情况详细讨论：
+</p>
+<ul><li>若设备使用默认的dm-crypt LUKS模式加密：
+<ul><li>在默认情况下，LUKS头存储在设备头部，启用TRIM支持有利于保护对LUKS头的修改。例如，在撤销了一个可能泄露的LUKS密码后，在未启用TRIM支持的情况下，仍可能从设备上读取旧的LUKS头，直到其被另一操作覆盖。若设备在此情况下失窃，则理论上，攻击者可能能够使用某种方法找到旧的LUKS头，并使用泄露的LUKS密码获得主密钥解密设备。详见<a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#5-security-aspects">cryptsetup FAQ, section 5.19 What about SSDs, Flash and Hybrid Drives?</a>、<a href="https://www.reddit.com/r/archlinux/comments/2f370s/full_disk_encryption_on_an_ssd/ck5p5c5">Full disk encryption on an ssd</a>。</li>
+<li>若认为启用TRIM可能造成的信息泄露比上述LUKS头有关问题更加严重，则应当保持TRIM关闭的状态。另见<a href="#pg8e3f3779e38c">安全地擦除磁盘#闪存</a>。</li></ul></li>
+<li>若设备使用dm-crypt plain模式加密，或者单独存储LUKS头：
+<ul><li>若需要可抵赖性，则根据本节开头提到的内容，<b>永远不应</b>启用TRIM支持。否则，TRIM可能造成的信息泄露会使得plain模式加密没有意义。</li>
+<li>若无需可抵赖性，则在可接受本节开头提到的安全风险的情况下，可以为了性能启用TRIM支持。</li></ul></li></ul>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>在启用TRIM前，需确保相应设备完全支持TRIM指令，否则可能造成数据丢失。详见<a href="#pgcb28ba980ed7">固态硬盘#TRIM</a>。</div>
+<p>除了启用dm-crypt的discard支持外，还应定期执行<span class="plainlinks archwiki-template-man" title="$ man 8 fstrim"><a href="https://man.archlinux.org/man/fstrim.8">fstrim(8)</a></span>；或者，在<code>/etc/fstab</code>中指定<code>discard</code>挂载选项。详见<a href="#pgcb28ba980ed7">固态硬盘#TRIM</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_LUKS2" id="LUKS2">LUKS2</h3></div>
+<p>对于LUKS2加密的设备，可通过打开设备时使用<code>--allow-discards --persistent</code>挂载选项启用TRIM支持。使用该命令后，<code>allow-discards</code>将写入LUKS2头中，之后打开设备时无需再手动指定。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>通过<code>cryptsetup --persistent</code>设置新的持久性标志时，将替代所有已设置的持久性标志，而不是在原有基础上新增一个标志。故若还设置了其它标志，需要一同指定。</li>
+<li>若使用不经过dm-crypt的OPAL加密（详见<span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup-luksFormat"><a href="https://man.archlinux.org/man/cryptsetup-luksFormat.8">cryptsetup-luksFormat(8)</a></span>的<code>--hw-opal-only</code>选项），则文件系统和底层磁盘间没有dm-crypt层，discard请求将直接传递到底层磁盘，无需手动启用discard支持。</li></ul>
+</div>
+<pre># cryptsetup --allow-discards --persistent open /dev/sdaX root
+</pre>
+<p>若设备已经打开，上述<code>open</code>操作将会报错。此时，应当使用<span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup-refresh"><a href="https://man.archlinux.org/man/cryptsetup-refresh.8">cryptsetup-refresh(8)</a></span>命令：
+</p>
+<pre># cryptsetup --allow-discards --persistent refresh root
+</pre>
+<p>可通过<code>cryptsetup luksDump</code>输出的LUKS2头信息确保标志已经持久性设置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup luksDump /dev/sdaX | grep Flags</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Flags:          allow-discards
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_LUKS1.E5.8F.8Aplain.E6.A8.A1.E5.BC.8F" id="LUKS1及plain模式"><span id="LUKS1.E5.8F.8Aplain.E6.A8.A1.E5.BC.8F"></span>LUKS1及plain模式</h3></div>
+<p>对于LUKS1或者plain模式加密的设备，需要在每次打开设备时手动指定选项启用TRIM支持。
+</p><p>要在启动时启用TRIM支持，设置如下<a href="#pgec0856954f1c">内核参数</a>。
+</p><p>若使用<a href="#pg52b00790fb44">encrypt</a>钩子：
+</p>
+<pre>cryptdevice=/dev/sdaX:root:allow-discards
+</pre>
+<p>若使用<a href="#pg778e3d3578b8">sd-encrypt</a>钩子（基于systemd的initramfs）：
+</p>
+<pre>rd.luks.options=discard
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>对于在initramfs镜像<code>/etc/crypttab</code>（对应<code>/etc/crypttab.initramfs</code>）中挂载的文件系统，设置<code>rd.luks.options=discard</code>内核选项没有作用。必须在<code>/etc/crypttab.initramfs</code>中设置<code>discard</code>选项。</div>
+<p>对于通过<code>/etc/crypttab</code>解密的设备，指定<code>discard</code>选项，例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">luks-123abcdef-etc UUID=123abcdef-etc none discard</pre>
+<p>若手动使用命令解锁设备，使用<code>--allow-discards</code>。
+</p><p>例如，可使用<code>--allow-discards</code>手动打开设备，并手动执行fstrim命令：
+</p>
+<pre># cryptsetup --allow-discards open /dev/sdaX root
+</pre>
+<p>总是可以通过<code>dmsetup table</code>的输出判断设备是否通过discard选项打开：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmsetup table</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">luks-123abcdef-etc: 0 1234567 crypt aes-xts-plain64 000etc000 0 8:2 4096 1 allow_discards
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2d5af776f6fd_.E5.85.B3.E9.97.AD.E5.B7.A5.E4.BD.9C.E9.98.9F.E5.88.97.E4.BB.A5.E6.8F.90.E9.AB.98SSD.E6.80.A7.E8.83.BD" id="关闭工作队列以提高SSD性能"><span id=".E5.85.B3.E9.97.AD.E5.B7.A5.E4.BD.9C.E9.98.9F.E5.88.97.E4.BB.A5.E6.8F.90.E9.AB.98SSD.E6.80.A7.E8.83.BD"></span>关闭工作队列以提高SSD性能</h2></div>
+<p><a href="#pgcb28ba980ed7">固态硬盘</a>用户应当注意，在默认情况下，device mapper并未启用关闭内部读取、写入工作队列的功能。即，块设备将不使用<code>no_read_workqueue</code>、<code>no_write_workqueue</code>选项挂载。
+</p><p>在Cloudflare内部进行的关于总体磁盘加密性能的研究（<a href="https://blog.cloudflare.com/speeding-up-linux-disk-encryption/">Speeding up Linux disk encryption</a>）中，提出了<code>no_read_workqueue</code>、<code>no_write_workqueue</code>标志。研究显示，dm-crypt内部的读取和写入队列降低了SSD的性能。尽管磁盘操作队列对于机械硬盘适用，但对于SSD，禁用操作队列，直接同步写入数据可使吞吐量翻倍，并将IO操作等待延迟降低一半。相关补丁已经被上游接受，并在5.9及更新版本的<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span>中可用<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/drivers/md/dm-crypt.c?id=39d42fa96ba1b7d2544db3f8ed5da8fb0d5cb877">[5]</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-zen">linux-zen</a></span><sup><small>包</small></sup></span> <a href="https://github.com/zen-kernel/zen-kernel/issues/282">默认关闭了</a>dm-crypt工作队列。</div>
+<p>对于使用<a href="#pg1340a4be8b92">crypttab</a>解密的LUKS设备，要关闭工作队列，按需指定相应的<code>no-read-workqueue</code>、<code>no-write-workqueue</code>选项。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">luks-123abcdef-etc UUID=123abcdef-etc none no-read-workqueue</pre>
+<p>要同时关闭读取和写入工作队列，同时指定两个标志：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">luks-123abcdef-etc UUID=123abcdef-etc none no-read-workqueue,no-write-workqueue</pre>
+<p>对于LUKS2加密的设备，可以使用<code>--persistent</code>选项，将<code>--perf-no_read_workqueue</code>、<code>--perf-no_write_workqueue</code>设置为打开设备时的默认值。例如：
+</p>
+<pre># cryptsetup --perf-no_read_workqueue --perf-no_write_workqueue --persistent open /dev/<i>sdaX</i> root
+</pre>
+<p>若设备已经打开，上述<code>open</code>操作将会报错。此时，应当使用<span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup-refresh"><a href="https://man.archlinux.org/man/cryptsetup-refresh.8">cryptsetup-refresh(8)</a></span>命令。例如：
+</p>
+<pre># cryptsetup --perf-no_read_workqueue --perf-no_write_workqueue --persistent refresh root
+</pre>
+<p>可通过<code>cryptsetup luksDump</code>输出的LUKS2头信息确保标志已经持久性设置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup luksDump /dev/sdaX | grep Flags</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Flags:          no-read-workqueue
+</pre>
+<p>总是可以通过<code>dmsetup table</code>的输出判断为设备指定的选项：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmsetup table</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">luks-123abcdef-etc: 0 1234567 crypt aes-xts-plain64 000etc000 0 8:2 4096 1 no_read_workqueue
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>通过<code>cryptsetup --persistent</code>设置新的持久性标志时，将替代所有已设置的持久性标志，而不是在原有基础上新增一个标志。故若还设置了其它标志，需要一同指定。 
+</div>
+<p>例如，通过<code>cryptsetup</code>同时指定<code>no_read_workqueue</code>、<code>no_write_workqueue</code>：
+</p>
+<pre># cryptsetup --perf-no_read_workqueue --perf-no_write_workqueue --persistent refresh root
+</pre>
+<p>可以通过<code>dmsetup table</code>的输出判断为设备指定的选项：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cryptsetup luksDump /dev/sdaX | grep Flags</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Flags:          no-read-workqueue no-write-workqueue
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2d5af776f6fd_.E4.BD.BF.E7.94.A8encrypt.E9.92.A9.E5.AD.90.E8.A7.A3.E5.AF.86.E5.A4.9A.E4.B8.AA.E8.AE.BE.E5.A4.87" id="使用encrypt钩子解密多个设备"><span id=".E4.BD.BF.E7.94.A8encrypt.E9.92.A9.E5.AD.90.E8.A7.A3.E5.AF.86.E5.A4.9A.E4.B8.AA.E8.AE.BE.E5.A4.87"></span>使用encrypt钩子解密多个设备</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>本节仅关注在早期用户空间（initramfs阶段）解密多个设备。对于后期用户空间（在切换root后）解密的配置，参见<a href="#pg52b00790fb44">Dm-crypt/系统配置#在后期用户空间中解密</a>。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><code>sd-encrypt</code>钩子支持解密多个设备。可通过内核命令行或<code>/etc/crypttab.initramfs</code>指定需要解密的设备。详见<a href="#pg52b00790fb44">Dm-crypt/系统配置#使用systemd-cryptsetup-generator</a>。</div>
+<p><code>encrypt</code>钩子仅支持<b>单个</b><code>cryptdevice=</code>条目（<a href="https://gitlab.archlinux.org/archlinux/mkinitcpio/mkinitcpio/-/issues/231">archlinux/mkinitcpio/mkinitcpio#231</a>）。在有多硬盘的系统中，由于dm-crypt自身不能跨越物理设备，需要配置多个加密物理分区，此时<code>encrypt</code>将造成限制。例如，对于“在LUKS上配置LVM”方案，整个LVM都存在于LUKS映射器之上。对于仅有单个硬盘的系统，只需解密一个设备，不会出现问题。但是，若之后想通过添加设备，增加LVM的大小呢？在不修改<code>encrypt</code>钩子的情况下，无法实现这一目的。
+</p><p>之后的小节介绍了克服这一限制的替代方案。第一小节介绍了如何将<a href="#pg29ec7c5af952">“在LVM上配置LUKS”</a>方案拓展到新增的硬盘上。第二小节介绍了，在不使用LVM的配置中，如何修改<code>encrypt</code>钩子以解密多个磁盘。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_.E5.B0.86LVM.E6.8B.93.E5.B1.95.E5.88.B0.E5.A4.9A.E4.B8.AA.E7.A3.81.E7.9B.98.E4.B8.8A" id="将LVM拓展到多个磁盘上"><span id=".E5.B0.86LVM.E6.8B.93.E5.B1.95.E5.88.B0.E5.A4.9A.E4.B8.AA.E7.A3.81.E7.9B.98.E4.B8.8A"></span>将LVM拓展到多个磁盘上</h3></div>
+<p>管理多个磁盘，并以此提供分区灵活性，是<a href="#pg02cd87050dfd">LVM</a>的特色功能。若将LVM作为dm-crypt的第一个映射器（first mapper），则LVM也可与dm-crypt共同使用（<a href="#pg29ec7c5af952">“在LVM上配置LUKS”</a>）。在此配置中，加密设备在逻辑卷中创建（可能分别对每个加密卷使用不同的密钥）。下面将介绍如何将本配置拓展到另一磁盘。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>请注意，虽然改变文件系统大小似乎是常规操作，操作过程中仍<b>可能出现问题</b>，同时，下面介绍的方式也可能不适用于某些特定配置。通常来讲，扩容文件系统可能遇到的问题比收缩文件系统小，尤其是在类似本例的多层映射配置中。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2d5af776f6fd_.E6.B7.BB.E5.8A.A0.E6.96.B0.E8.AE.BE.E5.A4.87" id="添加新设备"><span id=".E6.B7.BB.E5.8A.A0.E6.96.B0.E8.AE.BE.E5.A4.87"></span>添加新设备</h4></div>
+<p>首先，可能需要按照<a href="#pg7159ef654a5d">dm-crypt/准备磁盘</a>中的步骤准备磁盘。
+然后，创建用于拓展LVM的分区（例如，将设备所有空间分配到<code>/dev/sdY1</code>中，并设置分区类型为<code>8E00</code> （Linux LVM））。
+之后，将新磁盘/分区添加到已有的LVM卷组中，例如：
+</p>
+<pre># pvcreate /dev/sdY1
+# vgextend MyStorage /dev/sdY1
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2d5af776f6fd_.E6.8B.93.E5.B1.95.E9.80.BB.E8.BE.91.E5.8D.B7" id="拓展逻辑卷"><span id=".E6.8B.93.E5.B1.95.E9.80.BB.E8.BE.91.E5.8D.B7"></span>拓展逻辑卷</h4></div>
+<p>接下来，将最终分配新的磁盘空间到逻辑卷中。注意需要首先卸载要扩容的逻辑卷。如果需要扩容<code>cryptdevice</code>设定的根分区，需要在Arch安装ISO中执行下述操作。
+</p><p>在本例中，假定需要拓展用于<code>/home</code>（逻辑卷名称为<code>homevol</code>）的逻辑卷：
+</p>
+<pre># umount /home
+# fsck /dev/mapper/home
+# cryptsetup close /dev/mapper/home
+# lvextend -l +100%FREE MyStorage/homevol
+</pre>
+<p>在拓展逻辑卷后，拓展LUKS容器：
+</p>
+<pre># cryptsetup open /dev/MyStorage/homevol home
+# umount /home      # 在/home可能被自动挂载的情况下，作为安全措施
+# cryptsetup --verbose resize home
+</pre>
+<p>最后，修改文件系统大小：
+</p>
+<pre># e2fsck -f /dev/mapper/home
+# resize2fs /dev/mapper/home
+</pre>
+<p>若需要，可重新挂载<code>/home</code>，其容量已被拓展：
+</p>
+<pre># mount /dev/mapper/home /home
+</pre>
+<p>注意，<code>cryptsetup resize</code>操作不会影响密钥。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_.E4.BF.AE.E6.94.B9encrypt.E9.92.A9.E5.AD.90.E4.BB.A5.E7.94.A8.E4.BA.8E.E5.A4.9A.E4.B8.AA.E5.88.86.E5.8C.BA" id="修改encrypt钩子以用于多个分区"><span id=".E4.BF.AE.E6.94.B9encrypt.E9.92.A9.E5.AD.90.E4.BB.A5.E7.94.A8.E4.BA.8E.E5.A4.9A.E4.B8.AA.E5.88.86.E5.8C.BA"></span>修改encrypt钩子以用于多个分区</h3></div>
+<p>注意，<a href="#pg778e3d3578b8">sd-encrypt</a>原生支持解密多个分区。此外，若通过该方式解密的多个分区密码相同，sd-encrypt还将自动尝试输入的密码，而无需多次输入。因此，使用sd-encrypt可能比下面介绍的方式更加方便。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2d5af776f6fd_.E8.B7.A8.E8.B6.8A.E5.A4.9A.E4.B8.AA.E5.88.86.E5.8C.BA.E7.9A.84.E6.A0.B9.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="跨越多个分区的根文件系统"><span id=".E8.B7.A8.E8.B6.8A.E5.A4.9A.E4.B8.AA.E5.88.86.E5.8C.BA.E7.9A.84.E6.A0.B9.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>跨越多个分区的根文件系统</h4></div>
+<p>可以通过修改encrypt钩子以在启动时解密跨越多个分区的根文件系统。一种方式如下：
+</p>
+<pre># cp /usr/lib/initcpio/install/encrypt /etc/initcpio/install/encrypt2
+# cp /usr/lib/initcpio/hooks/encrypt  /etc/initcpio/hooks/encrypt2
+# sed -i "s/cryptdevice/cryptdevice2/" /etc/initcpio/hooks/encrypt2
+# sed -i "s/cryptkey/cryptkey2/" /etc/initcpio/hooks/encrypt2
+</pre>
+<p>添加<code>cryptdevice2=</code>启动选项（可能还需添加<code>cryptkey2=</code>选项），在<a href="#pg37f6992c45ff">mkinitcpio.conf</a>中添加<code>encrypt2</code>钩子，并重新生成initramfs。详见<a href="#pg52b00790fb44">Dm-crypt/系统配置</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2d5af776f6fd_.E9.9D.9E.E6.A0.B9.E5.88.86.E5.8C.BA" id="非根分区"><span id=".E9.9D.9E.E6.A0.B9.E5.88.86.E5.8C.BA"></span>非根分区</h4></div>
+<p>可能还有使用<code>encrypt</code>钩子解密非根分区的需求。Arch并不原生支持这一功能，但可通过修改<code>/lib/initcpio/hooks/encrypt</code>中的cryptdev、cryptname值方便地实现。（cryptdev对应要解密的分区，例如<code>/dev/sd*</code>；cryptname对应解密后的映射名称）。
+</p><p>使用<code>encrypt</code>钩子的优势在于其自动化了非根分区的解密。虽然可通过<code>/etc/crypttab</code>文件达到相同目的，但若使用外部密钥文件（即，密钥文件不存储在系统硬盘中，而在可移动设备上），需要确保USB、火线（FireWire）等外部设备在尝试挂载加密分区前被挂载，这至少需要修改<code>/etc/fstab</code>中的挂载顺序，相关配置较为麻烦。
+</p><p>当然，若<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cryptsetup">cryptsetup</a></span><sup><small>包</small></sup></span>包更新，则需要重新修改上述脚本。此外，与<code>/etc/crypttab</code>不同，默认情况下仅能通过<code>encrypt</code>钩子解密一个分区，但通过进一步修改，应当能实现解密多个分区的功能。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2d5af776f6fd_.E5.9C.A8.E5.8A.A0.E5.AF.86.E7.B3.BB.E7.BB.9F.E6.97.B6.E4.BD.BF.E7.94.A8.E5.88.86.E7.A6.BB.E7.9A.84LUKS.E5.A4.B4" id="在加密系统时使用分离的LUKS头"><span id=".E5.9C.A8.E5.8A.A0.E5.AF.86.E7.B3.BB.E7.BB.9F.E6.97.B6.E4.BD.BF.E7.94.A8.E5.88.86.E7.A6.BB.E7.9A.84LUKS.E5.A4.B4"></span>在加密系统时使用分离的LUKS头</h2></div>
+<p>本例使用了与<a href="#pg29ec7c5af952">dm-crypt/加密整个系统#Plain_dm-crypt</a>类似的设置，应当先阅读其中的内容。
+</p><p>若使用分离的LUKS头，则加密的块设备自身将只含有加密数据，而不含LUKS头信息。若攻击者不知道分离的LUKS头的存在，则可实现<a href="https://en.wikipedia.org/wiki/Deniable_encryption">可抵赖加密</a>。这与使用<a href="#pg29ec7c5af952">plain dm-crypt</a>类似，但优势在于仍可使用多密码、密钥派生等LUKS高级功能。此外，使用分离的LUKS头还提供了某种程度上的双重因素认证，并且相比使用GPG、OpenSSL加密密钥文件更加简单，同时可以使用内建的密码提示符进行多次尝试。详见<a href="#pg812206bba43d">静态数据加密#加密的元数据</a>。
+</p><p>在继续之前，参见可用的<a href="#pg88d6e7a842ae">加密选项</a>。使用如下命令创建加密的系统分区和LUKS头文件：
+</p>
+<pre># dd if=/dev/zero of=header.img bs=16M count=1
+# cryptsetup luksFormat --offset 32768 --header header.img /dev/sdX
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><code>--offset</code>选项指定了加密数据在设备上的起始位置。在设备开头预留一定空间可便于之后<a href="#pg88d6e7a842ae">将分离的LUKS头重新附加到设备上</a>。该选项的单位是512字节的扇区，详见<span class="plainlinks archwiki-template-man" title="$ man 8 cryptsetup-luksFormat"><a href="https://man.archlinux.org/man/cryptsetup-luksFormat.8">cryptsetup-luksFormat(8)</a></span>。</div>
+<p>打开加密容器：
+</p>
+<pre># cryptsetup open --header header.img /dev/sdX enc
+</pre>
+<p>接下来，按照<a href="#pg29ec7c5af952">“在LUKS上配置LVM”</a>中的步骤进行。之后，在可移动设备上<a href="#pg29ec7c5af952">配置boot分区</a>（若不将boot分区放置在可移动设备上，使用分离的LUKS头没有意义）。
+</p><p>将<code>header.img</code>移动到boot分区：
+</p>
+<pre># mv header.img /mnt/boot
+</pre>
+<p>按照安装指南中的步骤继续安装，直到配置mkinitcpio步骤前（此时应当已经<code>arch-chroot</code>到加密的系统中）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>由于整个系统硬盘都只含有看似随机的加密数据，没有分区表、分区，因而没有<code>UUID</code>、<code>LABEL</code>。但仍可<a href="#pgd2fddf50b50f">通过id、路径</a>进行持久化命名。例如，可以使用硬盘id（可在<code>/dev/disk/by-id/</code>中查看）。</div>
+<p>有两种方法使得initramfs支持分离的LUKS头。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_.E4.BD.BF.E7.94.A8systemd.E9.92.A9.E5.AD.90" id="使用systemd钩子"><span id=".E4.BD.BF.E7.94.A8systemd.E9.92.A9.E5.AD.90"></span>使用systemd钩子</h3></div>
+<p>设置如下<a href="#pgec0856954f1c">内核参数</a>：
+</p>
+<pre>rd.luks.name=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>=enc rd.luks.options=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>=header=/header.img:<i>UUID=ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ</i> rd.luks.data=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i>=/dev/disk/by-id/<i>your-disk_id</i>
+</pre>
+<ul><li>将<code><i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i></code>替换为LUKS超级块的UUID。该UUID可通过<code>cryptsetup luksDump header.img</code>或者<code>blkid -s UUID -o value header.img</code>获得。</li>
+<li>将<code><i>UUID=ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ</i></code>修改为存放分离的LUKS头文件的块设备的UUID。</li></ul>
+<p>除了指定<code>rd.luks</code>内核参数以外，还可通过<code>/etc/crypttab.initramfs</code>文件指定：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab.initramfs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">enc	/dev/disk/by-id/<i>your-disk_id</i>	none	header=/header.img:<i>UUID=ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ</i></pre>
+<p>接下来，修改<code>/etc/mkinitcpio.conf</code>以<a href="#pgbd0f46fbac92">使用systemd</a>，并添加用于读取分离的LUKS头文件存储的<a href="#pg6c70b7fdfa57">文件系统</a>的模块。例如，若存储在<a href="#pg30cebfcdd710">FAT</a>卷中：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+MODULES=(<b>vfat</b>)
+...
+HOOKS=(base <b>systemd</b> autodetect microcode modconf kms <b>keyboard</b> <b>sd-vconsole</b> block <b>sd-encrypt</b> lvm2 filesystems fsck)
+...</pre>
+<p><a href="#pg82461695094b">重新生成 initramfs</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>若使用了<code>/etc/crypttab.initramfs</code>进行配置，则无需添加上述内核参数。<code>/etc/crypttab.initramfs</code>将被复制到initramfs中的<code>/etc/crypttab</code>。</li>
+<li>避免同时使用<code>rd.luks</code>内核参数和<code>/etc/crypttab.initramfs</code>文件，否则可能导致冲突。详见<a href="#pg52b00790fb44">Dm-crypt/系统配置#使用systemd-cryptsetup-generator</a>。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2d5af776f6fd_.E4.BF.AE.E6.94.B9encrypt.E9.92.A9.E5.AD.90" id="修改encrypt钩子"><span id=".E4.BF.AE.E6.94.B9encrypt.E9.92.A9.E5.AD.90"></span>修改encrypt钩子</h3></div>
+<p>下文介绍了如何修改<code>encrypt</code>钩子，以便使用分离的LUKS头。
+</p><p>目前，需要修改<code>encrypt</code>钩子以使得<code>cryptsetup</code>使用分离的LUKS头（<a href="https://gitlab.archlinux.org/archlinux/mkinitcpio/mkinitcpio/-/issues/234">archlinux/mkinitcpio/mkinitcpio#234</a>；本方法的基本思路和框架来自<a href="https://bbs.archlinux.org/viewtopic.php?pid=1076346#p1076346">该BBS帖子</a>）。将修改钩子的副本，以免<a href="#pgbd0f46fbac92">mkinitcpio</a>的更新覆盖所做的改动。
+</p>
+<pre># cp /usr/lib/initcpio/hooks/encrypt /etc/initcpio/hooks/encrypt2
+# cp /usr/lib/initcpio/install/encrypt /etc/initcpio/install/encrypt2
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/initcpio/hooks/encrypt2 (around line 52)</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">warn_deprecated() {
+    echo "The syntax 'root=${root}' where '${root}' is an encrypted volume is deprecated"
+    echo "Use 'cryptdevice=${root}:root root=/dev/mapper/root' instead."
+}
+
+<b>local headerFlag=false</b>
+for cryptopt in ${cryptoptions//,/ }; do
+    case ${cryptopt} in
+        allow-discards)
+            cryptargs="${cryptargs} --allow-discards"
+            ;;
+        <b>header)
+            cryptargs="${cryptargs} --header /boot/header.img"
+            headerFlag=true
+            ;;</b>
+        *)
+            echo "Encryption option '${cryptopt}' not known, ignoring." &gt;&amp;2
+            ;;
+    esac
+done
+
+if resolved=$(resolve_device "${cryptdev}" ${rootdelay}); then
+    if <b>$headerFlag || </b>cryptsetup isLuks ${resolved} &gt;/dev/null 2&gt;&amp;1; then
+        [ ${DEPRECATED_CRYPT} -eq 1 ] &amp;&amp; warn_deprecated
+        dopassphrase=1</pre>
+<p>之后，修改<a href="#pg37f6992c45ff">mkinitcpio.conf</a>，添加<code>encrypt2</code>、<code>lvm2</code>钩子。同时还需在<code>FILES</code>中添加<code>header.img</code>；在<code>MODULES</code>中添加<code>loop</code>。并按需添加其它所需内容：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+MODULES=(<b>loop</b>)
+...
+FILES=(<b>/boot/header.img</b>)
+...
+HOOKS=(base udev autodetect microcode modconf kms <b>keyboard</b> <b>keymap</b> consolefont block <b>encrypt2</b> <b>lvm2</b> filesystems fsck)
+...</pre>
+<p>上述配置通过将LUKS头文件复制到initramfs中，使得LUKS头在启动过程中可用，以便解密系统，而无需再挂载另一个USB设备以获取LUKS头文件，降低了配置的复杂性。配置完成后，重新生成initramfs。
+</p><p>接下来，<a href="#pg29ec7c5af952">配置引导加载程序</a>，指定<code>cryptdevice=</code>，并传递新增的<code>header</code>选项：
+</p>
+<pre>cryptdevice=/dev/disk/by-id/<i>your-disk_id</i>:enc:header
+</pre>
+<p>对于在USB存储介质上配置的<code>/boot</code>分区，可参见<a href="#pg29ec7c5af952">dm-crypt/加密整个系统#安装完成后的操作</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807030316
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.341 seconds
+Real time usage: 0.350 seconds
+Preprocessor visited node count: 2161/1000000
+Revision size: 45356/2097152 bytes
+Post‐expand include size: 29997/2097152 bytes
+Template argument size: 15737/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  111.305      1 -total
+ 18.91%   21.044    188 Template:Ic
+ 11.04%   12.293     12 Template:注意
+  4.32%    4.804      5 Template:提示
+  4.25%    4.733     18 Template:Pkg
+  3.33%    3.712      5 Template:Man
+  3.17%    3.531      1 Template:Lowercase_title
+  2.91%    3.235     13 Template:Hc
+  2.80%    3.119      1 Template:翻译状态
+  1.91%    2.126      2 Template:Issue
+-->
+<!-- Render ID 88f1be0f-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8352:|#|:idhash:canonical!zh-cn and timestamp 20260807030316 and revision id 34156. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,92 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg608e3a14075c">Java 打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Java_package_guidelines">Java package guidelines</a>，最近一次同步于 2024-07-08，若英文版本有所<a href="https://wiki.archlinux.org/title/Java_package_guidelines?diff=0&amp;oldid=812127">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Java_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – Java – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+
+<p>本文档定义了 Arch Linux 下打包 <a href="#pgf5cd65505569">Java</a> 程序的建议标准。Java 程序是出了名的难以在没有重叠的依赖关系的情况下干净利落地打包。本文档描述了一种处理这种情况的方法。这些指南十分灵活，以涵盖处理 Java 程序时遇到的许多不同情况。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg608e3a14075c_.E4.BB.8B.E7.BB.8D" id="介绍"><span id=".E4.BB.8B.E7.BB.8D"></span>介绍</h2></div>
+<p>Arch Linux 的打包人员似乎无法就如何处理 Java 包达成一致。官方和非官方软件库以及 <a href="#pg89cb7b475cfb">AUR</a> 的 <a href="#pgf9d748a7b27b">PKGBUILD</a> 中使用了各种方法。这包括把所有东西扔到 <code>/opt</code> 里，把 Shell 脚本放在 <code>/usr/bin</code> 或把配置文件放在 <code>/etc/profile</code> 中。其他的则是放在 <code>/usr/share</code> 目录中，脚本放在 <code>/usr/bin</code> 中。许多做法在系统 <code>CLASSPATH</code> 和 <code>PATH</code> 中添加了不必要的文件。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg608e3a14075c_.E5.85.B8.E5.9E.8B_Java_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E7.9A.84.E7.BB.93.E6.9E.84" id="典型_Java_应用程序的结构"><span id=".E5.85.B8.E5.9E.8B_Java_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E7.9A.84.E7.BB.93.E6.9E.84"></span>典型 Java 应用程序的结构</h2></div>
+<p>大多数桌面 Java 应用程序结构类似。它们是由一个不依赖系统（但依赖软件包！）的安装程序安装的。这通常会把所有东西都安装在包含 <code>bin</code>、<code>lib</code>、<code>jar</code>、<code>conf</code>等子目录的目录下。一般会有一个包含主要可执行类的主 jar 文件。通常还会提供一个 Shell 脚本来运行主类，这样用户就不必直接调用 Java 解释器。这个 Shell 脚本通常相当复杂，因为它需要在不同的发行版中通用，而且经常包括不同系统的特殊情况（例如 Cygwin）。
+</p><p><code>lib</code> 目录通常包含捆绑的 jar 文件来满足 Java 程序的依赖。这使用户安装程序变得简单（其中包含了所有依赖），但却是软件包开发者的噩梦。几个软件包捆绑相同的依赖会浪费空间。这在过去并不是一个大问题，当时桌面 Java 应用程序和库较少，而那些存在的应用程序和库本身往往也非常大。但现在情况不同了……
+</p><p>运行程序所需的其他文件通常与主 jar 文件存放在同一目录或其子目录下。由于 Java 程序不知道它们的类是从哪里加载的，所以通常需要在这个目录中运行（即 Shell 脚本应 <code>cd</code> 进入该目录），或者设置一个环境变量来指示这个目录的位置。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg608e3a14075c_.E5.9C.A8_Arch_Linux_.E4.B8.AD.E6.89.93_Java_.E5.8C.85" id="在_Arch_Linux_中打_Java_包"><span id=".E5.9C.A8_Arch_Linux_.E4.B8.AD.E6.89.93_Java_.E5.8C.85"></span>在 Arch Linux 中打 Java 包</h2></div>
+<p>在 Arch 中打包 Java 应用程序将会比现在更费劲。然而，这是值得的，它可以使文件系统更干净，捆绑的依赖更少（随着越来越多的Java 库被重构为单独的包，打包会变得更容易）。在创建 Arch Linux Java 包时，应遵循以下准则：
+</p>
+<ul><li>如果 Java 库有一个通用的名字，那么包的名字应该在前面加上 <code>java-</code> 以与其他库区分。对于命名独特的包（如 JUnit）、终端用户程序（如 Eclipse）或可以用其他前缀唯一描述的库（如 jakarta-commons-collections 或 apache-ant），则不需要这样做。</li></ul>
+<ul><li>将所有随程序分发的 jar 文件（而不是其他文件）放在 <code>/usr/share/java/<i>程序</i></code>目录下。这包括随程序分发的所有依赖 jar 文件。然而，应该努力将常见的或大型的依赖放到单独的包中。这只有在程序不依赖某个特定版本的库时才能实现。</li></ul>
+<dl><dd>这个规则使得迭代重构依赖关系成为可能。也就是说，软件包和它的所有依赖可以先放在一个目录中。经过测试后，主要的依赖可以一个一个地被重构出来。请注意，有些应用程序在主 jar 文件中包括捆绑的依赖。也就是说，他们将捆绑的依赖解包，并将其包含在主 jar 中。这样的依赖通常非常小，重构它们没有什么意义。</dd></dl>
+<ul><li>如果程序是要由用户运行的，编写一个自定义的 Shell 脚本运行主 jar 文件。这个脚本应该放在 <code>/usr/bin</code> 中。库一般不需要 Shell 脚本。从头开始编写 Shell 脚本，不要使用程序捆绑的脚本。删除检查自定义环境（如 Cygwin）的代码，以及试图确定 <code>JAVA_HOME</code> 是否已经设置的代码（Arch <a href="#pgf5cd65505569">不使用</a> <code>JAVA_HOME</code>，而是使用 <code>archlinux-java</code> 来设置 <code>/usr/bin/java</code> 符号连接）。</li></ul>
+<dl><dd>寻找 jar 文件的脚本应该类似这样：</dd>
+<dd><pre>#!/bin/sh
+exec /usr/bin/java -jar '/usr/share/java/<i>程序</i>/<i>程序</i>.jar' "$@"</pre></dd></dl>
+<dl><dd>寻找单个类文件的应该类似这样：</dd>
+<dd><pre>#!/bin/sh
+exec /usr/bin/java '/usr/share/java/<i>程序</i>/<i>程序类名'</i> "$@"</pre></dd></dl>
+<ul><li>使用 <code>-cp</code> 选项为 Java 解释器设置 <code>CLASSPATH</code>，除非有明确的理由不这样做（即：<code>CLASSPATH</code> 用于插件机制）。<code>CLASSPATH</code> 应该包括 <code>/usr/share/java/<i>程序</i></code>目录下的所有 jar 文件，以及已被重构到其他目录中的依赖库的 jar 文件。可以使用类似以下代码：</li></ul>
+<dl><dd><pre>for name in /usr/share/java/<i>程序</i>/*.jar ; do
+  CP=$CP:$name
+done
+CP=$CP:/usr/share/java/dep1/dep1.jar
+java -cp $CP <i>程序</i>.java.MainClass</pre></dd></dl>
+<ul><li>确保 Shell 脚本可执行！</li></ul>
+<ul><li>随软件包一起分发的其他文件应存放在 <code>/usr/share</code> 下以该软件包命名的目录中。你可能需要在 Shell 脚本中的 <code>项目_HOME</code> 等变量中设置该目录的位置。本准则假设程序希望所有文件都在同一目录下（这是 Java 软件包的标准做法）。如果配置文件更适合放在其他地方（例如，把日志放在 <code>/var/log</code> 中），则可以这样做。</li></ul>
+<dl><dd>请记住，在某些系统上 <code>/usr</code> 可能被挂载为只读。如果应用程序需要写入共享目录中的文件，它们可能需要被重新定位到<code>/etc</code>、<code>/var</code> 或用户的主目录。</dd></dl>
+<ul><li>与其他 Arch Linux 软件包的标准一样，如果遵守上述标准需要做大量的工作，则应以其偏好的方式安装软件包，并将生成的目录放在 <code>/opt</code> 中。这对于捆绑 JRE、包含自定义版本的依赖或做其他奇怪和痛苦的事情的程序很有用。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg608e3a14075c_.E5.A4.9A.E4.B8.AAAPI.E5.AE.9E.E7.8E.B0" id="多个API实现"><span id=".E5.A4.9A.E4.B8.AAAPI.E5.AE.9E.E7.8E.B0"></span>多个API实现</h3></div>
+<p>如果软件包分发了常用的 API 实现（比如 jdbc 驱动），则应该把库放在 <code>/usr/share/java/<i>API_名称</i></code> 下。这样，允许用户选择实现的应用程序会知道在哪里寻找它们。这个位置只用于库包本身。如果这样的实现是应用程序分发的一部分，<b>不要</b>将这个 jar 文件放在公共位置，而是使用普通的包结构。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg608e3a14075c_.E7.9B.AE.E5.BD.95.E7.BB.93.E6.9E.84.E7.A4.BA.E4.BE.8B" id="目录结构示例"><span id=".E7.9B.AE.E5.BD.95.E7.BB.93.E6.9E.84.E7.A4.BA.E4.BE.8B"></span>目录结构示例</h3></div>
+<p>为了说明问题，下面是一个假想的名为 <code>foo</code> 程序的目录结构示例。由于 <code>foo</code> 是一个常见的名字，所以软件包被命名为 <code>java-foo</code>，但注意目录结构中并没有体现：
+</p>
+<ul><li><code>/usr/share/java/foo/</code></li>
+<li><code>/usr/share/java/foo/foo.jar</code></li>
+<li><code>/usr/share/java/foo/bar.jar</code>（<code>java-foo</code> 包含的依赖）</li>
+<li><code>/usr/share/foo/</code></li>
+<li><code>/usr/share/foo/*.*</code>（<code>java-foo</code> 需要的一些文件）</li>
+<li><code>/usr/bin/foo</code>（可执行的 Shell 脚本）</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg608e3a14075c_.E4.BE.9D.E8.B5.96" id="依赖"><span id=".E4.BE.9D.E8.B5.96"></span>依赖</h3></div>
+<p>Java packages might specify <code>java-runtime</code> or <code>java-environment</code> as dependency, based on what they need. For most packages, <code>java-runtime</code> (<i>Java Runtime Environment</i>) is what is needed to simply run software written in <i>Java</i>. <code>java-environment</code> (<i>Java Development Toolkit</i>) is needed by packages that will need to compile <i>Java</i> source code into bytecode. 
+</p><p>更多信息参见 <a href="#pgf5cd65505569">Java</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808035933
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.115 seconds
+Real time usage: 0.120 seconds
+Preprocessor visited node count: 435/1000000
+Revision size: 7615/2097152 bytes
+Post‐expand include size: 5067/2097152 bytes
+Template argument size: 1408/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 78/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   29.207      1 -total
+ 22.45%    6.558     48 Template:Ic
+ 11.55%    3.374      1 Template:翻译状态
+ 10.65%    3.112      1 Template:糟糕的翻译
+  5.87%    1.713      1 Template:META_Message
+  5.42%    1.582      3 Template:Bc
+  3.24%    0.945      1 Template:打包准则
+-->
+<!-- Render ID 9034cc8e-92dd-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6565:|#|:idhash:canonical!zh-cn and timestamp 20260808035933 and revision id 33634. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

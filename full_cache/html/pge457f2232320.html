@@ -1,0 +1,828 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pge457f2232320">硬件视频加速</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Hardware_video_acceleration">Hardware video acceleration</a>，最近一次同步于 2023-12-30，若英文版本有所<a href="https://wiki.archlinux.org/title/Hardware_video_acceleration?diff=0&amp;oldid=794187">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Hardware_video_acceleration_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p><a href="https://en.wikipedia.org/wiki/Graphics_processing_unit#GPU_accelerated_video_decoding_and_encoding">硬件视频加速</a>让显卡进行视频的解码和编码，以减少CPU的负载并节省电力。
+</p><p>Linux 中有多种方式可以实现视频加速:
+</p>
+<ul><li><a href="https://en.wikipedia.org/wiki/Video_Acceleration_API"> 视频加速API (Video Acceleration API, 缩写为VA-API)</a> 是一套 Intel 提供的视频硬件编解码的开源库和标准。</li>
+<li><a href="https://en.wikipedia.org/wiki/VDPAU"> Unix视频解码及演示 API （Video Decode and Presentation API for Unix，缩写为VDPAU）</a> (VDPAU) 是一套 Nvidia 提供的把部分视频解码和后期处理工作转移到显卡的开源库和 API。</li>
+<li><a href="https://gpuopen.com/advanced-media-framework/">Advanced Media Framework SDK</a> (AMF) 是 AMD 开发的 GPU 开源框架，可以用 <a href="#pgc272bacea0c2">AMDGPU PRO</a> 技术栈实现最优的处理。</li>
+<li><a href="https://en.wikipedia.org/wiki/Nvidia_NVDEC">NVDEC</a>/<a href="https://en.wikipedia.org/wiki/Nvidia_NVENC">NVENC</a> NVIDIA 的 费米、开普勒、Maxwell 和 Pascal 系列显卡所使用的专有 API。</li>
+<li><a href="https://www.khronos.org/blog/an-introduction-to-vulkan-video">Vulkan Video</a> is an extension of the <a href="#pg813471eccd07">Vulkan</a> graphics API designed to support hardware-accelerated video encoding and decoding.</li></ul>
+<p>大致的总览对比和应用程序支持，参见页面下方的对照表。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge457f2232320_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_Intel" id="Intel">Intel</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge457f2232320_VA_API" id="VA-API">VA-API</h4></div>
+<p><a href="#pgcf92ea97092d">Intel graphics</a> 开源驱动支持 VA-API:
+</p>
+<ul><li><a href="https://github.com/intel/media-driver/#supported-platforms">Broadwell</a> <a href="https://en.wikipedia.org/wiki/Template:Intel_processor_roadmap">(~2014)</a> 及之后的 HD Graphics 系列（例如英特尔 Arc 系列显卡），请使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-media-driver">intel-media-driver</a></span><sup><small>包</small></sup></span> 。</li>
+<li>GMA 4500 (2008) 到 <a href="https://en.wikipedia.org/wiki/Coffee_Lake">Coffee Lake</a> (2017) 的 GPU, 请使用  <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva-intel-driver">libva-intel-driver</a></span><sup><small>包</small></sup></span> 。</li>
+<li><a href="https://en.wikipedia.org/wiki/Haswell_(microarchitecture)#Haswell_Refresh">Haswell Refresh</a> 到 Skylake 的 VP9 解码，以及 Broadwell 到 Skylake 的混合 VP8 编码，请使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/intel-hybrid-codec-driver-git/">intel-hybrid-codec-driver-git</a></span><sup><small>AUR</small></sup></span>.</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Skylake 及之后的硬件还需要 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span>.</div>
+<p>参阅 <a href="https://www.intel.com/content/www/us/en/developer/articles/technical/linuxmedia-vaapi.html">VAAPI 支持的硬件和功能</a>。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge457f2232320_Vulkan" id="Vulkan">Vulkan</h4></div>
+<p>ANV 开源 <a href="#pg813471eccd07">vulkan</a> 驱动通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vulkan-intel">vulkan-intel</a></span><sup><small>包</small></sup></span> 提供 Vulkan 视频支持。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>启用 Vulkan 视频支持需要额外配置，参见 <a href="#pge457f2232320_Configuring_Vulkan_Video">#Configuring Vulkan Video</a></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge457f2232320_Intel_.E8.A7.86.E9.A2.91.E5.A4.84.E7.90.86.E5.BA.93_.28Intel_VPL.29" id="Intel_视频处理库_(Intel_VPL)"><span id="Intel_.E8.A7.86.E9.A2.91.E5.A4.84.E7.90.86.E5.BA.93_.28Intel_VPL.29"></span>Intel 视频处理库 (Intel VPL)</h4></div>
+<p>对于 <a href="https://github.com/intel/libvpl">Intel VPL</a> ，请<a href="#pg811194d6beaa">安装</a>基础库 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libvpl">libvpl</a></span><sup><small>包</small></sup></span> ，并确保安装下列之一的运行时环境：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vpl-gpu-rt">vpl-gpu-rt</a></span><sup><small>包</small></sup></span> ：为 Tiger Lake 和更新的GPU提供支持</li></ul>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-media-sdk">intel-media-sdk</a></span><sup><small>包</small></sup></span> (已终止后续支持)：为旧 Intel GPU 提供支持</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_NVIDIA" id="NVIDIA">NVIDIA</h3></div>
+<p><a href="#pg172970a5f8dd">Nouveau</a> 开源驱动支持 VA-API 和 VDPAU:
+</p>
+<ul><li>GeForce 8 到 GeForce GTX 750 的硬件，请使用  <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span></li>
+<li><a href="https://nouveau.freedesktop.org/wiki/VideoAcceleration/#firmware">还需要</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nouveau-fw/">nouveau-fw</a></span><sup><small>AUR</small></sup></span> 固件包（目前是从NVIDIA二进制驱动解压出来的）</li></ul>
+<p><a href="#pge12579b7d4ac">NVIDIA</a> 专有驱动通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span><sup><small>包</small></sup></span> 支持以下硬件:
+</p>
+<ul><li><a href="https://en.wikipedia.org/wiki/GeForce_8_series">GeForce 8 系列</a>和新 GPU 上的 VDPAU；</li></ul>
+<ul><li><a href="https://en.wikipedia.org/wiki/Fermi_(microarchitecture)">Fermi</a> 和更新的GPU <a href="https://developer.download.nvidia.com/assets/cuda/files/NVIDIA_Video_Decoder.pdf">[1]</a> 上的NVDEC;</li></ul>
+<ul><li><a href="https://en.wikipedia.org/wiki/Kepler_(microarchitecture)">Kepler</a> 和更新的GPU上的 NVENC ；</li></ul>
+<ul><li><a href="https://en.wikipedia.org/wiki/Pascal_(microarchitecture)">Pascal</a> 和更新的GPU <a href="https://developer.nvidia.com/vulkan/video/get-started">[2]</a> 上的 Vulkan 视频。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_AMD.2FATI" id="AMD/ATI"><span id="AMD.2FATI"></span>AMD/ATI</h3></div>
+<p><a href="#pg4a4bc5e5df24">AMDGPU</a> 和 <a href="#pgedfe18626036">ATI</a> 开源驱动通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span> 支持 VA-API 和 VDPAU:
+</p>
+<ul><li>VA-API on Radeon HD 2000 and newer GPUs.</li></ul>
+<ul><li>VDPAU on Radeon R600 and newer GPUs.</li></ul>
+<p>RADV 开源 <a href="#pg813471eccd07">vulkan</a> 驱动通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vulkan-radeon">vulkan-radeon</a></span><sup><small>包</small></sup></span> 提供支持。
+</p><p><a href="#pgc272bacea0c2">AMDGPU PRO</a> 专有驱动是基于 AMDGPU 驱动的，所以支持 VA-API、VDPAU 和 AMF。
+</p>
+<ul><li><a href="https://en.wikipedia.org/wiki/Radeon_Rx_300_series">Fiji</a> 和更新的 GPUs 通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/amf-amdgpu-pro/">amf-amdgpu-pro</a></span><sup><small>AUR</small></sup></span> 支持 AMF。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>你也许需要强制你的应用程序使用 <a href="#pgc272bacea0c2">AMDGPU PRO</a> <a href="#pg813471eccd07">Vulkan</a> 驱动。</li>
+<li><a href="https://en.wikipedia.org/wiki/High_Efficiency_Video_Coding">HEVC</a> 可能在 <a href="https://en.wikipedia.org/wiki/Radeon_RX_5000_series">Navi</a> 之前的 GPU 上无法使用。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_.E7.BF.BB.E8.AF.91.E5.B1.82" id="翻译层"><span id=".E7.BF.BB.E8.AF.91.E5.B1.82"></span>翻译层</h3></div>
+<ul><li><b>libvdpau-va-gl</b> —  OpenGL/VAAPI  做后端的 VDPAU 驱动，仅支持 H.264.</li></ul>
+<dl><dd><a href="https://github.com/i-rinat/libvdpau-va-gl">https://github.com/i-rinat/libvdpau-va-gl</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libvdpau-va-gl">libvdpau-va-gl</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>nvidia-vaapi-driver</b> — <a href="#pg13a857b63b1d">CUDA</a> NVDEC 作为后端的 VA-API.</li></ul>
+<dl><dd><a href="https://github.com/elFarto/nvidia-vaapi-driver/">https://github.com/elFarto/nvidia-vaapi-driver/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva-nvidia-driver">libva-nvidia-driver</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>尽管 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva-nvidia-driver">libva-nvidia-driver</a></span><sup><small>包</small></sup></span> 的实现确实启用了硬件视频解码，但由于当前 NVIDIA 的电源管理限制，它实际上 <a href="https://github.com/elFarto/nvidia-vaapi-driver/issues/74">比使用 CPU 进行视频解码消耗更多的电力</a> 。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge457f2232320_.E9.AA.8C.E8.AF.81" id="验证"><span id=".E9.AA.8C.E8.AF.81"></span>验证</h2></div>
+<p>你的系统也许不需要任何配置就可以完美地开箱即用。因此，建议阅读本节，以确认是否确实如此。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>有命令行支持的 <a href="#pg110f55dc83f2">mpv</a> 是测试硬件加速的绝佳工具。查看 <code>mpv --hwdec=auto <i>video_filename</i></code> 的日志并参见 <a href="https://mpv.io/manual/stable/#options-hwdec">hwdec</a> 以获得更多信息。</li>
+<li>对于 Intel GPU ，例如使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-gpu-tools">intel-gpu-tools</a></span><sup><small>包</small></sup></span> 并以 root 运行 <code>intel_gpu_top</code> 以监控视频播放期间的 GPU 活动。若 “Video” 栏超过 0%，则表示正在使用 GPU 进行视频解码/编码。（如果你使用的是 <a href="#pg3cbdfef0b3d0">新的 Xe 驱动</a> 来运行 <code>intel_gpu_top</code> <a href="https://gitlab.freedesktop.org/drm/igt-gpu-tools/-/issues/174">会抛出错误</a>，所以检查并运行 <code>gputop</code>，若 <a href="https://dri.freedesktop.org/docs/drm/gpu/i915.html#intel-gpu-basics">vcs 字段</a> 超过 0%，则表示正在使用 GPU 进行视频解码/编码。）</li>
+<li>对于 AMD，Intel 和 Nvidia ，在播放视频时使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvtop">nvtop</a></span><sup><small>包</small></sup></span> 来查看(在顶部几行) "DEC"（解码器）的利用率。</li>
+<li>对于 AMD GPU ，使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=radeontop">radeontop</a></span><sup><small>包</small></sup></span> 查看 GPU 利用率。不同于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-gpu-tools">intel-gpu-tools</a></span><sup><small>包</small></sup></span> ，当前没有任何方法在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=radeontop">radeontop</a></span><sup><small>包</small></sup></span> <a href="https://github.com/clbr/radeontop/issues/29">[3]</a> 上查看编码器/解码器的利用率。</li>
+<li>无论是哪种 GPU，你都可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=htop">htop</a></span><sup><small>包</small></sup></span> 等工具对比 CPU 使用率。特别是对于更高分辨率(4k+)的视频，如果启用了并正常使用 VA-API，CPU 占用应显著降低，尤其是在笔记本等低功耗设备上。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_.E9.AA.8C.E8.AF.81_VA-API" id="验证_VA-API"><span id=".E9.AA.8C.E8.AF.81_VA-API"></span>验证 VA-API</h3></div>
+<p>运行 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva-utils">libva-utils</a></span><sup><small>包</small></sup></span> 包提供的 <code>vainfo</code> 来检查 VA-API 的设置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ vainfo</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">libva info: VA-API version 0.39.4
+libva info: va_getDriverName() returns 0
+libva info: Trying to open /usr/lib/dri/i965_drv_video.so
+libva info: Found init function __vaDriverInit_0_39
+libva info: va_openDriver() returns 0
+vainfo: VA-API version: 0.39 (libva 1.7.3)
+vainfo: Driver version: Intel i965 driver for Intel(R) Skylake - 1.7.3
+vainfo: Supported profile and entrypoints
+      VAProfileMPEG2Simple            :	VAEntrypointVLD
+      VAProfileMPEG2Simple            :	VAEntrypointEncSlice
+      VAProfileMPEG2Main              :	VAEntrypointVLD
+      VAProfileMPEG2Main              :	VAEntrypointEncSlice
+      VAProfileH264ConstrainedBaseline:	VAEntrypointVLD
+      VAProfileH264ConstrainedBaseline:	VAEntrypointEncSlice
+      VAProfileH264ConstrainedBaseline:	VAEntrypointEncSliceLP
+      VAProfileH264Main               :	VAEntrypointVLD
+      VAProfileH264Main               :	VAEntrypointEncSlice
+      VAProfileH264Main               :	VAEntrypointEncSliceLP
+      VAProfileH264High               :	VAEntrypointVLD
+      VAProfileH264High               :	VAEntrypointEncSlice
+      VAProfileH264High               :	VAEntrypointEncSliceLP
+      VAProfileH264MultiviewHigh      :	VAEntrypointVLD
+      VAProfileH264MultiviewHigh      :	VAEntrypointEncSlice
+      VAProfileH264StereoHigh         :	VAEntrypointVLD
+      VAProfileH264StereoHigh         :	VAEntrypointEncSlice
+      VAProfileVC1Simple              :	VAEntrypointVLD
+      VAProfileVC1Main                :	VAEntrypointVLD
+      VAProfileVC1Advanced            :	VAEntrypointVLD
+      VAProfileNone                   :	VAEntrypointVideoProc
+      VAProfileJPEGBaseline           :	VAEntrypointVLD
+      VAProfileJPEGBaseline           :	VAEntrypointEncPicture
+      VAProfileVP8Version0_3          :	VAEntrypointVLD
+      VAProfileVP8Version0_3          :	VAEntrypointEncSlice
+      VAProfileHEVCMain               :	VAEntrypointVLD
+      VAProfileHEVCMain               :	VAEntrypointEncSlice
+</pre>
+<p><code>VAEntrypointVLD</code> 指的是你的显卡能够解码这个格式，<code>VAEntrypointEncSlice</code> 指的是你的显卡可以编码这个格式。
+</p><p>上面的例子里，<code>i965</code> 驱动正在运行，所以你可以看见这一行：
+</p>
+<pre>libva info: Trying to open /usr/lib/dri/<b>i965</b>_drv_video.so
+</pre>
+<p>如果运行 <code>vainfo</code> 的时候出现了下面的错误提示：
+</p>
+<pre>libva info: va_openDriver() returns -1
+vaInitialize failed with error code -1 (unknown libva error),exit
+</pre>
+<p>你要重新配置正确的驱动，详见<a href="#pge1e061b4fab9">Hardware video acceleration#Configuring VA-API</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_.E9.AA.8C.E8.AF.81_VDPAU" id="验证_VDPAU"><span id=".E9.AA.8C.E8.AF.81_VDPAU"></span>验证 VDPAU</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vdpauinfo">vdpauinfo</a></span><sup><small>包</small></sup></span> 以验证 VDPAU 驱动是否正确加载，并获取完整的配置信息报告：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ vdpauinfo</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">display: :0   screen: 0
+API version: 1
+Information string: G3DVL VDPAU Driver Shared Library version 1.0
+
+Video surface:
+
+name   width height types
+-------------------------------------------
+420    16384 16384  NV12 YV12 
+422    16384 16384  UYVY YUYV 
+444    16384 16384  Y8U8V8A8 V8U8Y8A8 
+
+Decoder capabilities:
+
+name                        level macbs width height
+----------------------------------------------------
+MPEG1                          --- not supported ---
+MPEG2_SIMPLE                    3  9216  2048  1152
+MPEG2_MAIN                      3  9216  2048  1152
+H264_BASELINE                  41  9216  2048  1152
+H264_MAIN                      41  9216  2048  1152
+H264_HIGH                      41  9216  2048  1152
+VC1_SIMPLE                      1  9216  2048  1152
+VC1_MAIN                        2  9216  2048  1152
+VC1_ADVANCED                    4  9216  2048  1152
+...
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_Verifying_Vulkan_Video" id="Verifying_Vulkan_Video">Verifying Vulkan Video</h3></div>
+<p>Install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vulkan-tools">vulkan-tools</a></span><sup><small>包</small></sup></span> and use <i>vulkaninfo</i> to verify if the video processing extensions are available:
+</p><p><br/>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ vulkaninfo | grep VK_KHR_video_</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">	
+	VK_KHR_video_decode_av1                       : extension revision 1
+	
+	VK_KHR_video_decode_h264                      : extension revision 9
+	
+	VK_KHR_video_decode_h265                      : extension revision 8
+	
+	VK_KHR_video_decode_queue                     : extension revision 8
+	
+	VK_KHR_video_encode_h264                      : extension revision 14
+	
+	VK_KHR_video_encode_h265                      : extension revision 14
+	
+	VK_KHR_video_encode_queue                     : extension revision 12
+	
+	VK_KHR_video_maintenance1                     : extension revision 1
+	
+	VK_KHR_video_queue                            : extension revision 8
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge457f2232320_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<p>Although the video driver should automatically enable hardware video acceleration support for both VA-API and VDPAU, it may be needed to configure VA-API/VDPAU manually. Only continue to this section if you went through #Verification.
+</p><p>The default driver names, used if there is no other configuration present, are guessed by the system. However, they are often hacked together and may not work. The guessed value will be printed in the <a href="#pga36c0aff60be">Xorg</a> log file, which is <code>~/.local/share/xorg/Xorg.0.log</code> if rootless, or <code>/var/log/Xorg.0.log</code> if Xorg is running as root. To search the log file for the values of interest:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ grep -iE 'vdpau | dri driver' <i>xorg_log_file</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">(II) RADEON(0): [DRI2] DRI driver: radeonsi
+(II) RADEON(0): [DRI2] VDPAU driver: radeonsi
+</pre>
+<p>In this case <code>radeonsi</code> is the default for both VA-API and VDPAU.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果你使用 <a href="#pg89573e816846">GDM</a>, 请以 root 权限运行 <code>journalctl -b --grep='vdpau | dri driver'</code> 。</div>
+<p>This does not represent the <i>configuration</i> however. The values above will not change even if you override them.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_.E9.85.8D.E7.BD.AE_VA-API" id="配置_VA-API"><span id=".E9.85.8D.E7.BD.AE_VA-API"></span>配置 VA-API</h3></div>
+<p>You can override the driver for VA-API by using the <code>LIBVA_DRIVER_NAME</code> <a href="#pg18ad99d88887">environment variable</a>:
+</p>
+<ul><li><a href="#pgcf92ea97092d">Intel graphics</a>:
+<ul><li>For <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva-intel-driver">libva-intel-driver</a></span><sup><small>包</small></sup></span> use <code>i965</code>.</li>
+<li>For <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-media-driver">intel-media-driver</a></span><sup><small>包</small></sup></span> use <code>iHD</code>.</li></ul></li>
+<li>NVIDIA:
+<ul><li>For <a href="#pg172970a5f8dd">Nouveau</a> use <code>nouveau</code>.</li>
+<li>For <a href="#pge12579b7d4ac">NVIDIA</a> NVDEC use <code>nvidia</code>.</li></ul></li>
+<li>AMD:
+<ul><li>For <a href="#pg4a4bc5e5df24">AMDGPU</a> driver use <code>radeonsi</code>.</li></ul></li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>You can find the installed drivers in <code>/usr/lib/dri/</code>. They are used as <code>/usr/lib/dri/<b>${LIBVA_DRIVER_NAME}</b>_drv_video.so</code>.</li>
+<li>Some drivers are installed several times under different names for compatibility reasons. You can see which by running <code>sha1sum /usr/lib/dri/* | sort</code>.</li>
+<li><code>LIBVA_DRIVERS_PATH</code> can be used to overrule the VA-API drivers location.</li>
+<li>Since version 12.0.1 Mesa provides <code>radeonsi</code> instead of <code>gallium</code>.</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_.E9.85.8D.E7.BD.AE_VDPAU" id="配置_VDPAU"><span id=".E9.85.8D.E7.BD.AE_VDPAU"></span>配置 VDPAU</h3></div>
+<p>You can override the driver for VDPAU by using the <code>VDPAU_DRIVER</code> <a href="#pg18ad99d88887">environment variable</a>.
+</p><p>The correct driver name depends on your setup:
+</p>
+<ul><li>For Intel graphics you need to set it to <code>va_gl</code>.</li>
+<li>For the open source AMD driver set it to <code>radeonsi</code>.</li>
+<li>For the open source Nouveau driver set it to <code>nouveau</code>.</li>
+<li>For NVIDIA's proprietary version set it to <code>nvidia</code>.</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>You can find the installed drivers in <code>/usr/lib/vdpau/</code>. They are used as <code>/usr/lib/vdpau/libvdpau_<b>${VDPAU_DRIVER}</b>.so</code>.</li>
+<li>Some drivers are installed several times under different names for compatibility reasons. You can see which by running <code>sha1sum /usr/lib/vdpau/*</code>.</li>
+<li>For hybrid setups (both NVIDIA and AMD), it may be necessary to set the <code>DRI_PRIME</code> <a href="#pg18ad99d88887">environment variable</a>. For more information see <a href="#pgb7ad5a571901">PRIME</a>.</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_Configuring_Vulkan_Video" id="Configuring_Vulkan_Video">Configuring Vulkan Video</h3></div>
+<ul><li><a href="#pgcf92ea97092d">Intel graphics</a>: Vulkan Video support in <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vulkan-intel">vulkan-intel</a></span><sup><small>包</small></sup></span> can be enabled with the <code>ANV_DEBUG=video-decode,video-encode</code> <a href="#pg18ad99d88887">environment variable</a>.</li></ul>
+<ul><li><a href="#pg98df29633c50">AMD</a>: Vulkan Video support in <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vulkan-radeon">vulkan-radeon</a></span><sup><small>包</small></sup></span> is enabled by default for VCN 2, 3, and 4+ since Mesa 25. To force-enable support on older cards, set the <code>RADV_PERFTEST</code> <a href="#pg18ad99d88887">environment variable</a> to <code>video_decode,video_encode</code>.</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_.E9.85.8D.E7.BD.AE.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="配置应用程序"><span id=".E9.85.8D.E7.BD.AE.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>配置应用程序</h3></div>
+<p>多媒体框架：
+</p>
+<ul><li><a href="#pgd5cab245336d">FFmpeg#Hardware video acceleration</a></li>
+<li><a href="#pgdc8e7a283f0c">GStreamer#Hardware video acceleration</a></li></ul>
+<p>视频播放器：
+</p>
+<ul><li><a href="#pg559d0d1281b7">Kodi#Hardware video acceleration</a></li>
+<li><a href="#pgb6ea2b1dfebb">MPlayer#Hardware video acceleration</a></li>
+<li><a href="#pg110f55dc83f2">mpv#Hardware video acceleration</a></li>
+<li><a href="#pgfa36dd3bbb35">VLC media player#Hardware video acceleration</a></li></ul>
+<p>网页浏览器：
+</p>
+<ul><li><a href="#pgad69d7c7a814">Chromium#Hardware video acceleration</a></li>
+<li><a href="#pg9b5d7fec8088">Firefox#Hardware video acceleration</a></li>
+<li><a href="#pg74bd30a6e35b">GNOME/Web#Video</a></li></ul>
+<p>多媒体录制/串流：
+</p>
+<ul><li><a href="#pgd16b19330c0a">Open Broadcaster Software#Hardware video acceleration</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge457f2232320_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_.E6.89.93.E5.BC.80_VDPAU_.E5.90.8E.E7.AB.AF.E5.A4.B1.E8.B4.A5" id="打开_VDPAU_后端失败"><span id=".E6.89.93.E5.BC.80_VDPAU_.E5.90.8E.E7.AB.AF.E5.A4.B1.E8.B4.A5"></span>打开 VDPAU 后端失败</h3></div>
+<p>You need to set <code>VDPAU_DRIVER</code> variable to point to correct driver. See #配置 VDPAU.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_VA-API_.E5.88.9D.E5.A7.8B.E5.8C.96.E5.A4.B1.E8.B4.A5" id="VA-API_初始化失败"><span id="VA-API_.E5.88.9D.E5.A7.8B.E5.8C.96.E5.A4.B1.E8.B4.A5"></span>VA-API 初始化失败</h3></div>
+<p>An error along the lines of <code>libva: /usr/lib/dri/i965_drv_video.so init failed</code> is encountered. This can happen because of improper detection of Wayland. One solution is to unset <code>$DISPLAY</code> so that mpv, MPlayer, VLC, etc. do not assume it is X11. Another mpv-specific solution is to add the parameter <code>--gpu-context=wayland</code>.
+</p><p>This error can also occur if you installed the wrong VA-API driver for your hardware.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_.E4.BD.BF.E7.94.A8_AMDGPU_.E9.A9.B1.E5.8A.A8.E6.97.B6.E8.A7.86.E9.A2.91.E8.A7.A3.E7.A0.81.E6.8D.9F.E5.9D.8F.E6.88.96.E5.A4.B1.E7.9C.9F" id="使用_AMDGPU_驱动时视频解码损坏或失真"><span id=".E4.BD.BF.E7.94.A8_AMDGPU_.E9.A9.B1.E5.8A.A8.E6.97.B6.E8.A7.86.E9.A2.91.E8.A7.A3.E7.A0.81.E6.8D.9F.E5.9D.8F.E6.88.96.E5.A4.B1.E7.9C.9F"></span>使用 AMDGPU 驱动时视频解码损坏或失真</h3></div>
+<p>When experiencing video decoding corruption or distortion with <a href="#pg4a4bc5e5df24">AMDGPU</a> driver, set <code>allow_rgb10_configs=false</code> as an <a href="#pg18ad99d88887">environment variable</a>. <a href="https://bugs.freedesktop.org/show_bug.cgi?id=106490">[4]</a>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge457f2232320_.E5.AF.B9.E7.85.A7.E8.A1.A8" id="对照表"><span id=".E5.AF.B9.E7.85.A7.E8.A1.A8"></span>对照表</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_VA-API_.E9.A9.B1.E5.8A.A8" id="VA-API_驱动"><span id="VA-API_.E9.A9.B1.E5.8A.A8"></span>VA-API 驱动</h3></div>
+<table class="wikitable" style="text-align:center;">
+<tbody><tr>
+<th>Codec
+</th>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva-intel-driver">libva-intel-driver</a></span><sup><small>包</small></sup></span> <a href="https://github.com/01org/intel-vaapi-driver/blob/master/README">[5]</a>
+</th>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-media-driver">intel-media-driver</a></span><sup><small>包</small></sup></span> <a href="https://github.com/intel/media-driver/blob/master/README.md">[6]</a>
+</th>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span> <a href="https://www.x.org/wiki/RadeonFeature/">[7]</a> <a href="https://nouveau.freedesktop.org/wiki/VideoAcceleration/">[8]</a>
+</th>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libva-nvidia-driver">libva-nvidia-driver</a></span><sup><small>包</small></sup></span><br/> (NVDEC adapter)
+</th></tr>
+<tr>
+<th colspan="5">Decoding
+</th></tr>
+<tr>
+<th>MPEG-2
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">GMA 4500 and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Broadwell and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon HD 6000 and newer<br/>GeForce 8 and newer<sup>1</sup>
+</td>
+<td rowspan="10">See <a href="#pge457f2232320_NVIDIA_driver_only">#NVIDIA driver only</a>
+</td></tr>
+<tr>
+<th>H.263/MPEG-4 Visual<sup>3</sup>
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon HD 6000 and newer
+</td></tr>
+<tr>
+<th>VC-1
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Sandy Bridge and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" rowspan="2" style="vertical-align: middle; text-align: center;">Broadwell and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon HD 2000 and newer<br/>GeForce 9300 and newer<sup>1</sup>
+</td></tr>
+<tr>
+<th>H.264/MPEG-4 AVC
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Ironlake and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon HD 2000 and newer<br/>GeForce 8 and newer<sup>1</sup>
+</td></tr>
+<tr>
+<th>H.265/HEVC 8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Cherryview/Braswell and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Skylake and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon R9 Fury and newer
+</td></tr>
+<tr>
+<th>H.265/HEVC 10bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Broxton and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Broxton/Apollo Lake and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon 400 and newer
+</td></tr>
+<tr>
+<th>VP8
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Broadwell and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Broadwell and newer
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th>VP9 8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Broxton and newer <br/> Hybrid: Haswell refresh to Skylake<sup>2</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Broxton/Apollo Lake and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" rowspan="2" style="vertical-align: middle; text-align: center;">Raven Ridge + Radeon RX 5000 and newer
+</td></tr>
+<tr>
+<th>VP9 10bit &amp; 12bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Kaby Lake and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Kaby Lake and newer
+</td></tr>
+<tr>
+<th>AV1 8bit &amp; 10bit
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Tiger Lake and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon RX 6600 and higher/newer
+</td></tr>
+<tr>
+<th colspan="5">Encoding
+</th></tr>
+<tr>
+<th>MPEG-2
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Ivy Bridge and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Broadwell and newer<br/>except Broxton/Apollo Lake
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" rowspan="8" style="vertical-align: middle; text-align: center;">否<sup>4</sup>
+</td></tr>
+<tr>
+<th>H.264/MPEG-4 AVC
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Sandy Bridge and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Broadwell and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon HD 7000 and newer
+</td></tr>
+<tr>
+<th>H.265/HEVC 8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Skylake and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Skylake and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon 400 and newer
+</td></tr>
+<tr>
+<th>H.265/HEVC 10bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Kaby Lake and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" rowspan="2" style="vertical-align: middle; text-align: center;">Kaby Lake and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Raven Ridge + Radeon RX 5000 and newer
+</td></tr>
+<tr>
+<th>VP8
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Cherryview/Braswell and newer <br/> Hybrid: Haswell to Skylake<sup>2</sup>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" rowspan="3" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th>VP9 8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Kaby Lake and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" rowspan="2" style="vertical-align: middle; text-align: center;">Ice Lake and newer
+</td></tr>
+<tr>
+<th>VP9 10bit &amp; 12bit
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" rowspan="2" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th>AV1 8bit &amp; 10bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Alchemist and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon RX 7900 and higher/newer
+</td></tr></tbody></table>
+<ol><li>Up until GeForce GTX 750.</li>
+<li>Hybrid VP8 encoder and VP9 decoder supported by <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/intel-hybrid-codec-driver-git/">intel-hybrid-codec-driver-git</a></span><sup><small>AUR</small></sup></span>.</li>
+<li>MPEG-4 Part 2 is disabled by default due to VAAPI limitations. Set the <a href="#pg18ad99d88887">environment variable</a> <code>VAAPI_MPEG4_ENABLED=true</code> to try to use it anyway.</li>
+<li>NVIDIA CUDA adapter codec support is in active development and susceptible to change <a href="https://github.com/elFarto/nvidia-vaapi-driver/issues/116">[9]</a>.</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_VDPAU_.E9.A9.B1.E5.8A.A8" id="VDPAU_驱动"><span id="VDPAU_.E9.A9.B1.E5.8A.A8"></span>VDPAU 驱动</h3></div>
+<table class="wikitable" style="text-align:center;">
+<tbody><tr>
+<th>Codec
+</th>
+<th>Color<br/>depth
+</th>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span> <a href="https://www.x.org/wiki/RadeonFeature/">[10]</a> <a href="https://nouveau.freedesktop.org/wiki/VideoAcceleration/">[11]</a>
+</th>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span><sup><small>包</small></sup></span>
+</th>
+<th><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libvdpau-va-gl">libvdpau-va-gl</a></span><sup><small>包</small></sup></span><br/>(VA-API adapter)
+</th></tr>
+<tr>
+<th colspan="5">Decoding
+</th></tr>
+<tr>
+<th>MPEG-2
+</th>
+<th>8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon R600 and newer <br/> GeForce 8 and newer<sup>1</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">GeForce 8 and newer
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" rowspan="3" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th>H.263/MPEG-4 Visual
+</th>
+<th>8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon HD 6000 and newer <br/> GeForce 200 and newer<sup>1</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">GeForce 200 and newer
+</td></tr>
+<tr>
+<th>VC-1
+</th>
+<th>8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon HD 2000 and newer <br/> GeForce 9300 and newer<sup>1</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">GeForce 8 and newer<sup>2</sup>
+</td></tr>
+<tr>
+<th>H.264/MPEG-4 AVC
+</th>
+<th>8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon HD 2000 and newer <br/> GeForce 8 and newer<sup>1</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">GeForce 8 and newer
+</td>
+<td>See #VA-API drivers
+</td></tr>
+<tr>
+<th rowspan="2">H.265/HEVC
+</th>
+<th>8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon R9 Fury and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">GeForce 900 and newer<sup>3</sup>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" rowspan="6" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th>10bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Radeon 400 and newer
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否<sup>4</sup>
+</td></tr>
+<tr>
+<th rowspan="2">VP9
+</th>
+<th>8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" rowspan="2" style="vertical-align: middle; text-align: center;">Raven Ridge + Radeon RX 5000 and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">GeForce 900 and newer<sup>3</sup>
+</td></tr>
+<tr>
+<th>10bit/12bit
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否<sup>4</sup>
+</td></tr>
+<tr>
+<th rowspan="2">AV1
+</th>
+<th>8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" rowspan="2" style="vertical-align: middle; text-align: center;">Radeon RX 6600 and higher/newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">GeForce 30 and newer<sup>5</sup>
+</td></tr>
+<tr>
+<th>10bit
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否<sup>4</sup>
+</td></tr></tbody></table>
+<ol><li>Up until GeForce GTX 750.</li>
+<li><a href="https://en.wikipedia.org/wiki/Nvidia_PureVideo">Except</a> GeForce 8800 Ultra, 8800 GTX, 8800 GTS (320/640 MB).</li>
+<li>Except GeForce GTX 970 and GTX 980.</li>
+<li>NVIDIA implementation is limited to 8bit streams <a href="https://forums.developer.nvidia.com/t/vdpau-expose-hevc-main10-support-where-available-on-die/43163">[12]</a> <a href="https://us.download.nvidia.com/XFree86/Linux-x86_64/410.57/README/vdpausupport.html#vdpau-implementation-limits">[13]</a>.</li>
+<li>Starting with driver version 510.<a href="https://www.phoronix.com/scan.php?page=news_item&amp;px=NVIDIA-510-Linux-Beta">[14]</a></li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_NVIDIA_driver_only" id="NVIDIA_driver_only">NVIDIA driver only</h3></div>
+<table class="wikitable" style="text-align:center;">
+<tbody><tr>
+<th rowspan="2">Codec
+</th>
+<th colspan="2"><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span><sup><small>包</small></sup></span> <a href="https://developer.nvidia.com/nvidia-video-codec-sdk">[15]</a>
+</th></tr>
+<tr>
+<th>NVDEC
+</th>
+<th>NVENC
+</th></tr>
+<tr>
+<th>MPEG-2
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" rowspan="3" style="vertical-align: middle; text-align: center;">Fermi and newer<sup>1</sup>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" rowspan="2" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th>VC-1
+</th></tr>
+<tr>
+<th>H.264/MPEG-4 AVC
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Kepler and newer<sup>2</sup>
+</td></tr>
+<tr>
+<th>H.265/HEVC 8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" rowspan="2" style="vertical-align: middle; text-align: center;">Maxwell (GM206) and newer
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Maxwell (2nd Gen) and newer
+</td></tr>
+<tr>
+<th>H.265/HEVC 10bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Pascal and newer
+</td></tr>
+<tr>
+<th>VP8
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Maxwell (2nd Gen) and newer
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" rowspan="3" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<th>VP9 8bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Maxwell (GM206) and newer
+</td></tr>
+<tr>
+<th>VP9 10bit &amp; 12bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Pascal and newer
+</td></tr>
+<tr>
+<th>AV1 8bit &amp; 10bit
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Ampere and newer<sup>3</sup>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">Ada Lovelace and newer
+</td></tr></tbody></table>
+<ol><li>Except GM108 (not supported)</li>
+<li>Except GM108 and GP108 (not supported)</li>
+<li>Except A100 (not supported)</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge457f2232320_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E6.94.AF.E6.8C.81" id="应用程序支持"><span id=".E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E6.94.AF.E6.8C.81"></span>应用程序支持</h3></div>
+<table class="wikitable">
+<tbody><tr>
+<th rowspan="2">应用程序
+</th>
+<th colspan="4">解码
+</th>
+<th colspan="3">编码
+</th>
+<th rowspan="2">文档
+</th></tr>
+<tr>
+<th>VA-API
+</th>
+<th>VDPAU
+</th>
+<th>NVDEC
+</th>
+<th>Vulkan
+</th>
+<th>VA-API
+</th>
+<th>NVENC
+</th>
+<th>Vulkan
+</th></tr>
+<tr>
+<th><a href="#pgd5cab245336d">FFmpeg</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><a href="#pgd5cab245336d">FFmpeg#Hardware video acceleration</a>
+</td></tr>
+<tr>
+<th><a href="#pgdc8e7a283f0c">GStreamer</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/7197">否</a>
+</td>
+<td><a href="#pgdc8e7a283f0c">GStreamer#Hardware video acceleration</a>
+</td></tr>
+<tr>
+<th><a href="#pg559d0d1281b7">Kodi</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><a href="#pg559d0d1281b7">Kodi#Hardware video acceleration</a>
+</td></tr>
+<tr>
+<th><a href="#pg110f55dc83f2">mpv</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><a href="#pg110f55dc83f2">mpv#Hardware video acceleration</a>
+</td></tr>
+<tr>
+<th><a href="#pgf08ba452154b">VLC media player</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><a href="#pgfa36dd3bbb35">VLC media player#Hardware video acceleration</a>
+</td></tr>
+<tr>
+<th><a href="#pgb6ea2b1dfebb">MPlayer</a>
+</th>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td>
+<td><a href="#pgb6ea2b1dfebb">MPlayer#Hardware video acceleration</a>
+</td></tr>
+<tr>
+<th><a href="#pgad69d7c7a814">Chromium</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td><a href="#pgad69d7c7a814">Chromium#Hardware video acceleration</a>
+</td></tr>
+<tr>
+<th><a href="#pg9b5d7fec8088">Firefox</a>
+</th>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1753129">否</a>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;"><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1658900">否</a>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td><a href="#pg9b5d7fec8088">Firefox#Hardware video acceleration</a>
+</td></tr>
+<tr>
+<th><a href="#pg74bd30a6e35b">GNOME/Web</a>
+</th>
+<td colspan="4" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">GStreamer
+</td>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">?
+</td>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">?
+</td>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">?
+</td>
+<td><a href="#pg74bd30a6e35b">GNOME/Web#Video</a>
+</td></tr></tbody></table>
+<!-- 
+NewPP limit report
+Cached time: 20260807023003
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.371 seconds
+Real time usage: 0.386 seconds
+Preprocessor visited node count: 2601/1000000
+Revision size: 23157/2097152 bytes
+Post‐expand include size: 48509/2097152 bytes
+Template argument size: 19404/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 3520/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  159.849      1 -total
+ 30.61%   48.925     66 Template:G
+ 17.38%   27.786     75 Template:META_Table_cell
+  6.03%    9.633     33 Template:No
+  5.66%    9.045      4 Template:C
+  5.08%    8.116     35 Template:Pkg
+  4.22%    6.744      1 Template:Tip
+  3.63%    5.806     43 Template:Ic
+  3.09%    4.945      4 Template:R
+  2.68%    4.281     24 Template:Yes
+-->
+<!-- Render ID e506138e-9207-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3229:|#|:idhash:canonical!zh-cn and timestamp 20260807023003 and revision id 34531. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

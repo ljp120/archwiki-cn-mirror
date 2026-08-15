@@ -1,0 +1,213 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pge7666ea64560">笔记本电脑</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Laptop">Laptop</a>，最近一次同步于 2025-7-7，若英文版本有所<a href="https://wiki.archlinux.org/title/Laptop?diff=0&amp;oldid=830172">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Laptop_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文是<b>笔记本索引页面</b>，包括很多到其它页面的链接，以帮助用户将笔记本电脑配置为最佳体验。配置笔记本电脑大体上和配置台式机相同，但仍然存在一些关键的区别。Arch Linux 提供了完成这些配置所需的软件工具。下文重点讲述这些软件，并附以适当的提示和教程。
+</p><p>下面的厂商专页包含具体笔记本型号需要注意的地方。
+</p>
+<div class="archwiki-template-box archwiki-template-box-navigation" style="text-align: center;"><a href="#pgd87c0e8f487f">宏碁</a> – <a href="#pg723f7ed62e98">苹果</a> – <a href="#pgc3714be81017">华硕</a> – <a href="#pga56ab09876a6">戴尔</a> – <a href="#pg78274c483daa">富士通</a> – <a href="#pg0ce6708e6b11">惠普</a> – <a href="#pgfe5aa3ca089d">IBM/联想</a> – <a href="#pg3a6d1c9c2b35">微星</a> – <a href="#pg5c7afd7e8ea9">三星</a> – <a href="#pg9e6cc7a70cfb">索尼</a> – <a href="#pg2aab1b5456aa">东芝</a> – <a href="#pge2b0642d65e4">其他</a></div>
+<p>如果某个笔记本需要特殊的操作，会在厂商页面提供链接，如果找不到您的型号，可以参考 <a href="#pg38762d81b822">Category:Laptops</a> 中的相似型号。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge7666ea64560_.E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86" id="电源管理"><span id=".E7.94.B5.E6.BA.90.E7.AE.A1.E7.90.86"></span>电源管理</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>阅读本节前，应首先阅读 <a href="#pg3bfeacfb89ba">Power management</a> 和 <a href="#pg863f270f94d0">CPU frequency scaling</a>，本节介绍的是笔记本特有的功能设置。</div>
+<p>如果想充分利用电池容量，电源管理是非常重要的。下列工具能帮助延长电池寿命，并保持笔记本电脑的低温和静音。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7666ea64560_.E7.94.B5.E6.B1.A0.E7.8A.B6.E6.80.81" id="电池状态"><span id=".E7.94.B5.E6.B1.A0.E7.8A.B6.E6.80.81"></span>电池状态</h3></div>
+<p>有多种方式可以读取电池状态，传统方法是用 ACPI 接口周期查询。在某些系统中，电池会在每消耗 1% 电量的时候发送 <a href="#pge009209061ac">udev</a> 事件，可以用 udev 规则执行需要的操作。
+</p><p>可以使用以下方式直接从内核检查电池状态：
+</p>
+<pre>$ cat /sys/class/power_supply/<i>BAT0</i>/capacity
+</pre>
+<p><br/>
+<code><i>BAT0</i></code> 可以提供一个名字。例如 <code>wacom_battery_0</code> 为 Wacom 的触控笔设备。
+</p><p>此外，可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=upower">upower</a></span><sup><small>包</small></sup></span> 工具：
+</p>
+<pre>$ for BAT_PATH in $(upower -e | grep BAT); do upower -i "$BAT_PATH"; done
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7666ea64560_ACPI" id="ACPI">ACPI</h4></div>
+<p>电池状态可以从终端用 ACPI 工具读取。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=acpi">acpi</a></span><sup><small>包</small></sup></span> 软件包提供了 ACPI 命令行工具，详情请参见 <a href="#pgf56e30f48810">ACPI modules</a>。
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cbatticon">cbatticon</a></span><sup><small>包</small></sup></span> 是常驻系统托盘的电池图标。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/batify/">batify</a></span><sup><small>AUR</small></sup></span> 是一个通过充放电和电量变化 udev 规则文件触发的通知程序（支持 multi-x 会话）。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=batsignal">batsignal</a></span><sup><small>包</small></sup></span> 是一个使用 libnotify 来通知低电量警告的轻量化电池监控守护程序。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7666ea64560_.E4.BD.8E.E7.94.B5.E9.87.8F.E6.97.B6.E8.87.AA.E5.8A.A8.E4.BC.91.E7.9C.A0" id="低电量时自动休眠"><span id=".E4.BD.8E.E7.94.B5.E9.87.8F.E6.97.B6.E8.87.AA.E5.8A.A8.E4.BC.91.E7.9C.A0"></span>低电量时自动休眠</h4></div>
+<p>如果你的电池在每充放电1%时都会向 <a href="#pge009209061ac">udev</a> 发送事件，你可以使用这个 udev 规则在电池电量达到临界值时自动使系统休眠，从而防止所有未保存的工作丢失。
+另外，如果已<a href="#pg3ef6532bc644">启用</a> <code>upower.service</code> 的话，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=upower">upower</a></span><sup><small>包</small></sup></span> 也可以在电池电量达到可配置的临界值时采取措施。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pge7666ea64560_udev" id="udev">udev</h5></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>并非所有电池都会报告充放电事件，您可以在使用电池供电时运行 <code>udevadm monitor --property</code> 来查看您的电池是否支持该功能，可能至少要掉 1% 的电它才会被触发。如果它不报告充放电事件，而且 <code>/sys/class/power_supply/BAT0/alarm</code> 为非零值，那么电池可能会在 <code>BAT0/energy_now</code> 低于警报阈值的时候才会触发事件。只要能算出剩余电量百分比，UDEV 规则将起作用。默认情况下，一些笔记本电脑的 BIOS 中默认禁用了此功能。</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-lowbat.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># 当电量少于5%后系统睡眠
+SUBSYSTEM=="power_supply", ATTR{status}=="Discharging", ATTR{capacity}=="[0-5]", RUN+="/usr/bin/systemctl hibernate"
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>In the example, <code>[0-5]</code> is a shell-like pattern matching expression that matches one character in the range 0 to 5. It does not mean "when capacity is in the range from 0 to 5", and using something like <code>[20-25]</code> will not match a capacity in the range 20 to 25. See <a href="https://docs.oracle.com/en/operating-systems/oracle-linux/6/admin/about-udev-rules.html">here</a> for available pattern matching with udev rules.</li></ul>
+<ul><li>Test the command to be run beforehand to make sure it would work. For instance, <code>/usr/bin/systemctl hibernate</code> may return the error: "Call to Hibernate failed: Not enough swap space for hibernation"</li></ul>
+</div>
+<p>只要设置了条件，就会重复此规则。因此，当电池电量不足时从休眠状态恢复时，计算机将直接休眠。有些笔记本电脑在超过一定电池电量的情况下无法启动，因此该规则可以作相应的调整。
+</p><p>如果您有多个电池或者使用电池供电的外围设备（比如无线鼠标），该规则可能会被另一个电池的充放电事件所触发。; this can be fixed by obtaining another attribute/value pair to add to your udev rule that specifically match the main battery, for example <code><i>model_name</i></code>. Such new attribute/value pair can be obtained for example by checking <code>/sys/class/power_supply/<i>nameOfMainBattery</i>/<i>attributesAndOtherDirectories</i></code>, or by running <code>udevadm monitor --property</code> and waiting for battery events.
+</p><p>剩余电量百分比可能会一下子减少得比较多，而不是每次掉 1%，所以规则中使用了 <code>[0-5]</code> 来匹配。
+</p><p>To shutdown the system instead of hibernating, use <code>/usr/bin/systemctl poweroff</code>. The <code>-i</code> flag can be used to ignore shutdown inhibitors, see <span class="plainlinks archwiki-template-man" title="$ man 1 systemctl"><a href="https://man.archlinux.org/man/systemctl.1#OPTIONS">systemctl(1) § OPTIONS</a></span>. Other rules can be added to perform different actions depending on power supply status and/or capacity.
+</p><p>如果您的系统不支持 ACPI 事件，请<a href="#pg19029f6f5dd9">定时运行</a>这个脚本，它通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=acpi">acpi</a></span><sup><small>包</small></sup></span> 主动获取电池状态并判断是否进入休眠：
+</p>
+<pre>#!/bin/sh
+acpi -b | awk -F'[,:%]' '{print $2, $3}' | {
+	read -r status capacity
+
+	if [ "$status" = Discharging -a "$capacity" -lt 5 ]; then
+		logger "Critical battery threshold"
+		systemctl hibernate
+	fi
+}</pre>
+<p>如果您有多个电池或者使用电池供电的外围设备，请修改脚本的第二行，添加 <code>grep</code> 来监视正确的电池，例如： <code>acpi -b | grep "Battery 0" | awk -F'[,:%]' '{print $2, $3}' | {</code>。把 <code>Battery 0</code> 替换成 <code>acpi -b</code> 所列出的正确的电池名称。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>拔掉电池或外围设备的插头可能会导致脚本无法正常工作，因为它会导致剩余的电池被重命名，比如当 <code>Battery 0</code> 被拔掉的时候， <code>Battery 1</code> 就会自动变成 <code>Battery 0</code> ，诸如此类</div>
+<div class="mw-heading mw-heading6"><h6 data-bm="pge7666ea64560_.E6.B5.8B.E8.AF.95.E4.BA.8B.E4.BB.B6" id="测试事件"><span id=".E6.B5.8B.E8.AF.95.E4.BA.8B.E4.BB.B6"></span>测试事件</h6></div>
+<p>测试 udev 规则的一种方法是让它们在运行时创建一个文件，比如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/98-discharging.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SUBSYSTEM=="power_supply", ATTR{status}=="Discharging", RUN+="/usr/bin/touch /home/archie/discharging"</pre>
+<p>This creates a file at <code>/home/archie/discharging</code> when the laptop charger is unplugged. You can test whether the rule worked by unplugging your laptop and looking for this file. For more advanced udev rule testing, see <a href="#pge009209061ac">Udev#Testing rules before loading</a>.
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pge7666ea64560_UPower" id="UPower">UPower</h5></div>
+<p>Configure UPower, for example:
+</p><p><br/>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/UPower/UPower.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">UsePercentageForPolicy=true
+	
+ 
+	
+PercentageLow=20.0
+	
+PercentageCritical=10.0
+	
+PercentageAction=5.0</pre>
+<p>之后<a href="#pg3ef6532bc644">启用</a>并<a href="#pg459b716a79b4">运行</a> <code>upower.service</code> 。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7666ea64560_.E6.8C.82.E8.B5.B7.E5.92.8C.E4.BC.91.E7.9C.A0" id="挂起和休眠"><span id=".E6.8C.82.E8.B5.B7.E5.92.8C.E4.BC.91.E7.9C.A0"></span>挂起和休眠</h3></div>
+<p>根据笔记本的使用模式，手动将系统挂起到内存或磁盘是提高电池使用时间的最有效方法。请参阅 <a href="#pg90c3e564a9ed">Suspend and hibernate</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7666ea64560_.E7.A1.AC.E7.9B.98.E5.81.9C.E8.BD.AC.E9.97.AE.E9.A2.98" id="硬盘停转问题"><span id=".E7.A1.AC.E7.9B.98.E5.81.9C.E8.BD.AC.E9.97.AE.E9.A2.98"></span>硬盘停转问题</h3></div>
+<p>请参考<a href="https://bugs.launchpad.net/ubuntu/+source/acpi-support/+bug/59695">该文档</a>.
+</p><p>为了防止笔记本机械硬盘过于频繁地停转，请参考<a href="#pg62a34c92338a">hdparm#Power management configuration</a> 设置较为温和的电源管理策略，即使是其默认值也可能太过激进了。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7666ea64560_.E5.94.A4.E9.86.92.E8.A7.A6.E5.8F.91.E5.99.A8" id="唤醒触发器"><span id=".E5.94.A4.E9.86.92.E8.A7.A6.E5.8F.91.E5.99.A8"></span>唤醒触发器</h3></div>
+<p>唤醒触发器（比如开盖、电源按钮等）能够把系统从各类<a href="https://en.wikipedia.org/wiki/Advanced_Configuration_and_Power_Interface#Power_states">睡眠状态</a>中唤醒，请参考 <a href="#pgdad8ecea8837">wakeup triggers</a> 来配置它们。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge7666ea64560_.E7.A1.AC.E4.BB.B6.E6.94.AF.E6.8C.81" id="硬件支持"><span id=".E7.A1.AC.E4.BB.B6.E6.94.AF.E6.8C.81"></span>硬件支持</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7666ea64560_.E5.B1.8F.E5.B9.95.E4.BA.AE.E5.BA.A6" id="屏幕亮度"><span id=".E5.B1.8F.E5.B9.95.E4.BA.AE.E5.BA.A6"></span>屏幕亮度</h3></div>
+<p>请参见 <a href="#pg1be8a95c5cf0">Backlight</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7666ea64560_.E8.A7.A6.E6.91.B8.E6.9D.BF" id="触摸板"><span id=".E8.A7.A6.E6.91.B8.E6.9D.BF"></span>触摸板</h3></div>
+<p>要使触摸板正常工作，可参见 <a href="#pg6b314e43c2a8">libinput</a> 页面。<a href="#pg7e24b7b56bea">Touchpad Synaptics</a> 是较旧的输入驱动程序，目前处于维护状态且不再更新。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pge7666ea64560_.E5.AE.8C.E5.85.A8.E6.A3.80.E6.B5.8B.E4.B8.8D.E5.88.B0.E8.A7.A6.E6.91.B8.E6.9D.BF" id="完全检测不到触摸板"><span id=".E5.AE.8C.E5.85.A8.E6.A3.80.E6.B5.8B.E4.B8.8D.E5.88.B0.E8.A7.A6.E6.91.B8.E6.9D.BF"></span>完全检测不到触摸板</h4></div>
+<p>如果系统完全未检测到触摸板并将其显示为设备，使用一个或多个下列的内核参数是一种可行的解决方法。
+</p>
+<pre>i8042.noloop i8042.nomux i8042.nopnp i8042.reset
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pge7666ea64560_Elantech" id="Elantech">Elantech</h5></div>
+<p>如果系统检测不到 Elantech 触摸板，并且能在 <code>journalctl -k</code> 中看到下列行内容：
+</p>
+<pre>elan_i2c 5-0015: 5-0015 supply vcc not found, using dummy regulator
+</pre>
+<p>这与 <code>psmouse</code> 模块尝试为触摸板设备使用辅助总线时出现的一个问题有关，因为 <code>elan_i2c</code> 无法那样做。解决方法是强制模块使用主总线。只需创建下面这样一个文件并重新加载 <code>psmouse</code> 模块或者重启系统：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/psmouse.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options psmouse elantech_smbus=0</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7666ea64560_.E6.8C.87.E7.BA.B9.E4.BC.A0.E6.84.9F.E5.99.A8" id="指纹传感器"><span id=".E6.8C.87.E7.BA.B9.E4.BC.A0.E6.84.9F.E5.99.A8"></span>指纹传感器</h3></div>
+<p>请参阅 <a href="#pg75ce5b69fcb3">Fingerprint-gui</a>, <a href="#pgb8b247e2c1dc">fprint</a> 和 <a href="#pg5e8be28edf5f">ThinkFinger</a> (适用于 ThinkPads)。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7666ea64560_.E7.BD.91.E7.BB.9C.E6.91.84.E5.83.8F.E5.A4.B4" id="网络摄像头"><span id=".E7.BD.91.E7.BB.9C.E6.91.84.E5.83.8F.E5.A4.B4"></span>网络摄像头</h3></div>
+<p>请参阅<a href="#pg12ddde75c439">网络摄像机配置</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7666ea64560_.E7.A1.AC.E7.9B.98.E5.86.B2.E5.87.BB.E4.BF.9D.E6.8A.A4" id="硬盘冲击保护"><span id=".E7.A1.AC.E7.9B.98.E5.86.B2.E5.87.BB.E4.BF.9D.E6.8A.A4"></span>硬盘冲击保护</h3></div>
+<p>不同厂家的多款笔记本都有硬盘冲击保护的功能。目前，由于制造商不愿支持所需软件组件的开源开发，Linux 对于冲击保护的支持在不同的硬件设施之间有很大的差异。
+</p><p>当前，有两个分别叫做 <a href="#pg04fb3ca50871">HDAPS</a> 和 <a href="#pg40ba748efa57">Hpfall</a>（<a href="#pg89cb7b475cfb">AUR</a> 中可用）的项目支持硬盘保护功能。前者适用于 IBM/联想 Thinkpads，而后者适用于惠普/康柏笔记本。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7666ea64560_.E6.B7.B7.E5.90.88.E5.9B.BE.E5.BD.A2.E6.98.BE.E7.A4.BA" id="混合图形显示"><span id=".E6.B7.B7.E5.90.88.E5.9B.BE.E5.BD.A2.E6.98.BE.E7.A4.BA"></span>混合图形显示</h3></div>
+<p>笔记本制造商已经开发了新技术，可以将两个显卡融入一台计算机中，使得高性能和低耗电的兼顾成为可能。这些笔记本通常默认情况下使用英特尔显卡用于显示，所以首先需要安装<a href="#pgcf92ea97092d">英特尔显卡</a>驱动。然后可以从<a href="#pg236e07734567">这里选择方法</a>来利用第二张显卡。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7666ea64560_.E8.A7.86.E9.A2.91.E7.A1.AC.E8.A7.A3" id="视频硬解"><span id=".E8.A7.86.E9.A2.91.E7.A1.AC.E8.A7.A3"></span>视频硬解</h3></div>
+<p>使用硬件解码视频有助于提升电池续航，参见<a href="#pge457f2232320">硬件视频加速</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge7666ea64560_.E9.9F.B3.E9.A2.91.E9.9D.99.E9.9F.B3_LED" id="音频静音_LED"><span id=".E9.9F.B3.E9.A2.91.E9.9D.99.E9.9F.B3_LED"></span>音频静音 LED</h3></div>
+<p>使用英特尔高清音频技术（Intel HD Audio）的笔记本，可能需要用户手动指定编解码器型号才能使音频静音 LED 指示灯正常工作。首先，检查笔记本是否使用了英特尔高清音频技术：
+</p>
+<pre>$ lsmod | grep snd_hda_intel
+</pre>
+<p>如果有任意形式的输出，说明这台笔记本确实使用了英特尔高清音频技术。下一步，需要找到对应的音频编解码器型号，运行：
+</p>
+<pre>$ grep Codec /proc/asound/card*/codec*
+</pre>
+<p>现在，需要在<a href="https://docs.kernel.org/sound/hd-audio/models.html">可用模块名称列表中</a>找到相应的编解码器。如果找不到特定型号的编解码器，则可以通过反复试验找到适合的编解码器。
+</p><p>为告知内核要加载哪个型号的选项，请指定 <code>model=</code> <a href="#pg52b20d9b2847">kernel module parameter</a>。 例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/mute-led.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options snd_hda_intel model=<i>model_name</i></pre>
+<p>要测试其是否可用，内核模块必须要重新加载。也可以通过重启来完成。
+</p><p>如果您需要测试大量的编解码器，但是不停的重启又太浪费时间。为了提高效率，那么可以先退出所有使用了内核模块的进程，然后再用新参数重新加载模块。这可以通过注销所有图形和控制台会话来完成，如果使用显示管理器，则停止显示管理器。重新登录到控制台会话后，运行以下命令：
+</p>
+<pre># modprobe -r snd_hda_intel
+# modprobe snd_hda_intel model=model_name
+</pre>
+<p>这时内核模块将会使用 <i>model_name</i> 中指定的新编解码器。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge7666ea64560_.E7.BD.91.E7.BB.9C.E6.97.B6.E9.97.B4.E5.90.8C.E6.AD.A5" id="网络时间同步"><span id=".E7.BD.91.E7.BB.9C.E6.97.B6.E9.97.B4.E5.90.8C.E6.AD.A5"></span>网络时间同步</h2></div>
+<p>对于笔记本电脑，为了通过网络同步时钟，<a href="#pg3ad0a5639384">Chrony</a>相较于<a href="#pg695044e70cb1">NTPd</a>，<a href="#pg4d30bfb86c19">OpenNTPD</a>或<a href="#pgcadc7fbbdd6c">systemd-timesyncd</a> 更好. Chrony 被设计为：即使在没有永久网络连接的系统（如笔记本电脑）上也能很好地工作；而且相较于标准ntp，能更快地进行时间同步。当在虚拟机中的系统使用时，Chrony 有如下优点：更大的频率校正范围，能校正快速漂移的时钟；更好地响应时钟频率的快速变化。它的内存占用较小，且非必要不唤醒进程，提高了电量的使用效率。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge7666ea64560_.E7.BC.96.E5.86.99.E5.8D.95.E7.8B.AC.E7.9A.84.E7.AC.94.E8.AE.B0.E6.9C.AC.E9.A1.B5.E9.9D.A2" id="编写单独的笔记本页面"><span id=".E7.BC.96.E5.86.99.E5.8D.95.E7.8B.AC.E7.9A.84.E7.AC.94.E8.AE.B0.E6.9C.AC.E9.A1.B5.E9.9D.A2"></span>编写单独的笔记本页面</h2></div>
+<p>如需新建或者修改单独的笔记本页面，请参考 <a href="#pgb4fbdfe8535b">Help:Laptop page guidelines</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge7666ea64560_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<dl><dt>通用页面</dt></dl>
+<ul><li><a href="#pg863f270f94d0">CPU 调频</a>是一种主要在笔记本电脑上使用的技术，它使操作系统能够根据当前系统负载和/或电源提高或降低 CPU 频率。</li>
+<li><a href="#pg48e1c701563b">显示电源管理信号</a>介绍了如何在指定的不活动时间间隔后自动关闭笔记本电脑屏幕（不是显示屏保而是熄屏）。</li>
+<li><a href="#pgf204aa4045fd">无线网络配置</a>提供了关于如何配置无线网络的信息。</li>
+<li><a href="#pg13e1ce916a56">Keyboard input</a>|键盘输入]] 提供了关于笔记本上的功能键的配置说明。</li>
+<li><a href="#pg2b172a4074ba">acpid</a> 是一个用于提供 ACPI 事件的灵活且可扩展的守护程序。</li></ul>
+<dl><dt>型号相关页面</dt></dl>
+<ul><li>参考 <a href="#pg38762d81b822">Category:Laptops</a> 和它的子分类来获得有关特定型号或厂商笔记本的指南。</li>
+<li>ThinkPad 笔记本的电池调校，请参考 <a href="#pg10f1d5521407">TLP</a> 和 <a href="#pg7c46d848d55d">tp_smapi</a></li>
+<li><a href="#pg5c2190a16103">ASUS Linux</a> for a set of tools designed for recent ROG and TUF laptops.</li></ul>
+<dl><dt>外部资源</dt></dl>
+<ul><li><a href="http://www.linux-on-laptops.com/">http://www.linux-on-laptops.com/</a></li>
+<li><a href="https://www.linlap.com/">http://www.linlap.com/</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807034030
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.167 seconds
+Real time usage: 0.173 seconds
+Preprocessor visited node count: 501/1000000
+Revision size: 13295/2097152 bytes
+Post‐expand include size: 7500/2097152 bytes
+Template argument size: 3003/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 160/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   35.178      1 -total
+ 12.60%    4.433     29 Template:Ic
+ 11.52%    4.054      1 Template:翻译状态
+  9.10%    3.201      6 Template:Pkg
+  8.85%    3.113      3 Template:注意
+  6.67%    2.348      1 Template:Note
+  6.14%    2.162      5 Template:Hc
+  6.10%    2.147      1 Template:Man
+  3.32%    1.168      1 Template:Bc
+  3.18%    1.119      1 Template:笔记本电脑导航
+-->
+<!-- Render ID bc83170e-9211-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3378:|#|:idhash:canonical!zh-cn and timestamp 20260807034030 and revision id 34425. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

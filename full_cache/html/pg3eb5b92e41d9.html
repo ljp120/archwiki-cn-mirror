@@ -1,0 +1,70 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg3eb5b92e41d9">专业音频/示例</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgb3b4b5c595bd">专业音频</a></li>
+<li><a href="#pgc72d2bd25455">专业音频/开发</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Professional_audio/Examples">Professional audio/Examples</a>，最近一次同步于 2025-07-17，若英文版本有所<a href="https://wiki.archlinux.org/title/Professional_audio/Examples?diff=0&amp;oldid=823235">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Professional_audio_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Examples_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<p>本文专门介绍<a href="#pgb3b4b5c595bd">专业音频</a>环境的高级设置，如<a href="#pg3f746ac9b0b0">音频服务器</a>的组合或复杂的启动程序，以考虑特殊使用情况和混合系统（如一台设备被同时用于专业音频和虚拟化主机）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg3eb5b92e41d9_.E9.AB.98.E7.BA.A7.E9.9F.B3.E9.A2.91.E6.9C.8D.E5.8A.A1.E5.99.A8.E9.85.8D.E7.BD.AE" id="高级音频服务器配置"><span id=".E9.AB.98.E7.BA.A7.E9.9F.B3.E9.A2.91.E6.9C.8D.E5.8A.A1.E5.99.A8.E9.85.8D.E7.BD.AE"></span>高级音频服务器配置</h2></div>
+<p>有些<a href="#pgb18b877643ef">多媒体</a>应用（特别是<a href="#pgaf1b27bddf8e">浏览器</a>和<a href="#pgb01ad010631a">游戏</a>）并不提供 JACK 客户端，因此需要安装其它音频服务器包才能支持工作，不然它们在 JACK 运行时是无法发声的。尽管你可能想让专业音频系统保持精简，但上面提到的有些应用是必须的。因此，你可能会需要搭配数个音频服务器，并（自动）在它们之间进行切换。
+</p><p>该图表展示了下面要描述的几种高级音频服务器配置的分层模型：
+</p>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;">     #PulseAudio+JACK
+┌───────────────────────┐
+│      Applications     │
+├──────────────┬────────┤
+│  PulseAudio  │  JACK  │
+├──────────────┴────────┤
+│         ALSA          │
+└───────────────────────┘
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg3eb5b92e41d9_PulseAudio_.2B_JACK" id="PulseAudio_+_JACK"><span id="PulseAudio_.2B_JACK"></span>PulseAudio + JACK</h3></div>
+<p>由于其易用性，<a href="#pga942ba974b3d">PulseAudio</a> 已经成为了常见音频服务器之一，与 JACK 相比被大多数桌面应用采用。因此，你通常需要在桌面系统上<a href="#pga942ba974b3d">安装</a>该软件。另一方面，如果你想在混合系统上为专业音频应用<a href="#pg9fd97b0c6a8a">按需使用 JACK</a>，PulseAudio 会显得非常繁复。
+</p><p>为了保持桌面音频环境的兼容性，需要通过配置来<a href="#pgd6c7f7004d9d">将 PulseAudio 路由到 JACK</a>。最方便的是 <a href="#pgd6c7f7004d9d">KXStudio 方法</a>，通过安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pulseaudio-jack">pulseaudio-jack</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=jack2-dbus">jack2-dbus</a></span><sup><small>包</small></sup></span> 来运行 <a href="#pg9fd97b0c6a8a">Jack2</a>。PulseAudio 和 JACK 之间的桥接可通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cadence/">cadence</a></span><sup><small>AUR</small></sup></span> 进行图形化管理。
+</p><p>如果你在使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=qjackctl">qjackctl</a></span><sup><small>包</small></sup></span>，默认源和输出必须通过以下脚本在 JACK 启动后进行设定：
+</p>
+<pre>#!/bin/bash
+pacmd set-default-sink jack_out
+pacmd set-default-source jack_in
+exit 0</pre>
+<p>关于如何使用该脚本的信息可参考 <a href="#pgd6c7f7004d9d">PulseAudio/Examples#The shell script method</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808040955
+Cache expiry: 864000
+Reduced expiry: false
+Complications: []
+CPU time usage: 0.088 seconds
+Real time usage: 0.093 seconds
+Preprocessor visited node count: 137/1000000
+Revision size: 2950/2097152 bytes
+Post‐expand include size: 3994/2097152 bytes
+Template argument size: 1211/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 397/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   27.666      1 -total
+ 17.61%    4.871      1 Template:Merge
+ 17.08%    4.725      1 Template:Related_articles_start
+  9.43%    2.608      3 Template:Pkg
+  8.52%    2.358      1 Template:Text_art
+  7.62%    2.107      2 Template:Related
+  6.93%    1.916      1 Template:翻译状态
+  6.46%    1.786      1 Template:META_Message
+  6.20%    1.716      1 Template:Related_articles_end
+  3.67%    1.014      1 Template:AUR
+-->
+<!-- Render ID 02f2778e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7938:|#|:idhash:canonical!zh-cn and timestamp 20260808040955 and revision id 33693. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

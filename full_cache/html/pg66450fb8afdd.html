@@ -1,0 +1,310 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg66450fb8afdd">Emacs/使用</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg9de7470c4ea9">Emacs</a></li>
+<li><a href="#pg76e1df3354eb">Emacs/概念</a></li>
+<li><a href="#pgafc953581baa">Emacs/运行</a></li>
+<li><a href="#pgaa59341f7e53">Emacs/提示与技巧</a></li>
+<li><a href="#pgdff090deed5f">Emacs/疑难解答</a></li>
+<li><a href="#pg14c40a837223">Emacs/软件包</a></li>
+<li><a href="#pg581be9986cc0">文本编辑器</a></li>
+<li><a href="#pg74a2a3e4814c">Vim</a></li>
+</ul></div>
+<p>本文介绍 Emacs 的基础使用。
+</p><p>阅读本文前，请先阅读 <a href="#pg76e1df3354eb">Emacs/概念</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg66450fb8afdd_.E8.BF.9B.E5.85.A5_Emacs" id="进入_Emacs"><span id=".E8.BF.9B.E5.85.A5_Emacs"></span>进入 Emacs</h2></div>
+
+<p>调用 Emacs 的通常方法是使用 <a href="#pgd53258e68888">shell</a> 命令 <code>emacs</code>。在 GUI 终端上运行 Unix shell 的终端窗口中，可以使用 <code>emacs &amp;</code> 在后台运行 Emacs；这样，Emacs 就不会占用终端窗口，因此你可以用它来运行其他 <a href="#pgd53258e68888">shell</a> 命令。
+</p><p>Emacs 启动时，初始帧会显示一个名为 <i>*GNU Emacs*</i> 的特殊缓冲区。这个启动界面包含 Emacs 的相关信息，以及对初学者有用的常用任务链接。例如，激活 <i>Emacs Tutorial</i> 链接可打开 Emacs 教程；其作用与 <code>C-h t</code>（<code>help-with-tutorial</code>）命令相同。要激活链接，可以将点移动到该链接上并键入 <code>RET</code>，或者用 <code>mouse-1</code>（鼠标左键）单击该链接。
+</p><p>使用命令行参数，可以让 Emacs 在启动时立即访问一个或多个文件。例如，<code>emacs 文本.txt</code> 启动 <a href="#pg9de7470c4ea9">Emacs</a> 时，缓冲区会显示文件<i>文本.txt</i> 的内容。这一功能主要是为了与其他<a href="#pg581be9986cc0">文本编辑器</a>兼容，因为其他编辑器是为了从 <a href="#pgd53258e68888">shell</a> 启动进行短时间编辑而设计的。如果以这种方式调用 Emacs，初始帧会被分成两个窗口，一个显示指定文件，另一个显示启动屏幕。
+</p><p>一般来说，每次编辑文件都重新启动 Emacs 既<b>不必要又浪费</b>。建议使用 Emacs 的方法是在登录后只启动<b>一次</b>，并在同一个 Emacs 会话中完成所有编辑工作。如果这样使用 Emacs，Emacs 会话就会积累一些有价值的上下文，如 <i>kill ring</i>、<i>寄存器</i>、<i>撤销历史</i>和<i>标记环数据</i>，这些都会使编辑更加方便。本文稍后将介绍这些功能。
+</p><p>要在 Emacs 运行时从其他程序编辑文件，可以使用 emacsclient 辅助程序在现有的 Emacs 会话中打开文件。
+</p><p>Emacs 还接受其他命令行参数，这些参数会告诉它加载某些 Lisp 文件、在何处放置初始框架等。参见 Emacs 调用的命令行参数。
+</p><p>如果变量 <code>inhibit-startup-screen</code> 不为零，则 Emacs <b>不显示</b>启动屏幕。在这种情况下，如果在命令行中指定了一个或多个文件，Emacs 会简单地显示这些文件；否则，它会显示一个名为 <code>*scratch*</code> 的缓冲区，该缓冲区可用于交互式地评估 Emacs Lisp 表达式。你可以使用自定义工具或编辑初始化文件来设置变量 <code>inhibit-startup-screen</code>。
+</p><p>通过将变量 <code>initial-buffer-choice</code> 设置为命名文件或目录的字符串，也可以强制 Emacs 在启动时显示文件或目录。<code>initial-buffer-choice</code> 的值也可以是一个函数（无参数），它应该返回一个缓冲区，然后显示出来。如果 <code>initial-buffer-choice</code> 的值<b>不是零</b>，那么如果你在命令行中指定了任何文件，Emacs 仍会访问它们，但最初不会显示它们。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg66450fb8afdd_.E9.80.80.E5.87.BA_Emacs" id="退出_Emacs"><span id=".E9.80.80.E5.87.BA_Emacs"></span>退出 Emacs</h2></div>
+<p>同 <a href="#pg74a2a3e4814c">Vim</a>/<a href="#pgb11b7c104bf6">Neovim</a>、<a href="#pg241ad90affe8">Helix</a> 等编辑器一样，初学者可能不知如何退出。
+</p>
+<dl><dt>C-x C-c</dt>
+<dd>杀死 Emacs（save-buffers-kill-terminal）。</dd>
+<dt>C-z</dt>
+<dd>在文本终端上，挂起 Emacs；在图形显示屏上，图标化（或<i>最小化</i>）所选帧（挂起帧）。</dd>
+<dt>系统 <a href="#pgd53258e68888">shell</a> 内运行 <code>killall emacs</code></dt>
+<dd>强制终止 Emacs 进程，可以在 Emacs 卡死时使用。</dd></dl>
+<p>杀死 Emacs 意味着终止 Emacs 程序。为此，请键入 <code>C-x C-c</code>（<code>save-buffers-kill-terminal</code>）。使用两个字符的键序是为了<b>防止意外键入</b>。如果输入 <code>C-x C-c</code> 时有任何修改过的文件访问缓冲区，Emacs 会首先保存这些缓冲区。如果没有全部保存，则会再次请求确认，因为未保存的更改将丢失。如果有子进程仍在运行，Emacs 也会要求确认，因为杀死 Emacs 也会杀死这些子进程。
+</p><p>如果将 Emacs 用作服务器，<code>C-x C-c</code> 的行为会比较特殊。如果你在客户端框架中输入它，它会关闭客户端连接。请参阅将 Emacs 用作服务器。
+</p><p>Emacs 可以选择在杀死会话时记录某些会话信息，例如当时正在访问的文件。下次启动 Emacs 时就可以使用这些信息。请参阅保存 Emacs 会话。
+</p><p>如果变量 <code>confirm-kill-emacs</code> 的值不是零，<code>C-x C-c</code> 会假定其值是一个谓词函数，并调用该函数。如果函数调用的结果不是零，会话就会被杀死，否则 Emacs 会继续运行。用来作为 <code>confirm-kill-emacs</code> 值的一个方便的函数是 <code>yes-or-no-p</code> 函数。<code>confirm-kill-emacs</code> 的默认值为 <b>nil</b>。
+</p><p>如果变量 <code>confirm-kill-processes</code> 的值为 nil，则 <code>C-x C-c</code> 在杀死 Emacs 启动的子进程之前不会请求确认。默认值为 <b>t</b>。
+</p><p>要进一步自定义 Emacs 退出时发生的情况，请参阅《GNU Emacs Lisp 参考手册》中的杀死 Emacs。
+</p><p>要在不提示保存的情况下杀死 Emacs，请键入 <code>M-x kill-emacs</code>。
+</p><p><code>C-z</code> 运行命令 <code>suspend-frame</code>。在图形显示屏上，该命令会最小化（或图标化）所选的 Emacs 框架，使其隐藏起来，以便稍后恢复（具体如何隐藏取决于窗口系统）。在文本终端上，<code>C-z</code> 命令会暂停 Emacs，暂时停止程序并将控制权交还给父进程（通常是 <a href="#pgd53258e68888">shell</a>）；在大多数 shell 中，暂停 Emacs 后可以使用 shell 命令 <code>%emacs</code> 恢复 Emacs。
+</p><p>文本终端通常会侦听某些特殊字符，其含义是杀死或暂停正在运行的程序。在 Emacs 中，这种终端功能是关闭的。在 Emacs 中，<code>C-z</code> 和 <code>C-x C-c</code> 作为按键的含义是受多个操作系统中使用 <code>C-z</code> 和 <code>C-c</code> 作为停止或杀死程序的字符的启发，但这是它们与操作系统的唯一关系。你可以自定义这些键来运行你选择的任何命令。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg66450fb8afdd_.E5.9F.BA.E6.9C.AC.E7.BC.96.E8.BE.91.E5.91.BD.E4.BB.A4" id="基本编辑命令"><span id=".E5.9F.BA.E6.9C.AC.E7.BC.96.E8.BE.91.E5.91.BD.E4.BB.A4"></span>基本编辑命令</h2></div>
+<p>在此，我们将讲解如何输入文本、进行修改并将文本保存到文件中的基础知识。如果您对这些内容不熟悉，建议您首先运行 Emacs 边做边学教程，键入 <code>C-h t</code>（<code>help-with-tutorial</code>）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg66450fb8afdd_.E6.8F.92.E5.85.A5.E6.96.87.E6.9C.AC" id="插入文本"><span id=".E6.8F.92.E5.85.A5.E6.96.87.E6.9C.AC"></span>插入文本</h3></div>
+<p>您可以通过键入相关键来插入普通图形字符（如 "a"、"B"、"3" 和 "="）。这样就可以将字符添加到点的缓冲区中。插入后，点将向前移动，因此点将保持在插入文本之后。参见点。
+</p><p>要结束一行并开始新一行，键入 <code>RET</code>（换行）。(<code>RET</code> 键在键盘上可能标有 Return、Enter 或有趣的向左箭头，但在本手册中我们将其称为 <code>RET</code>，中国人常称其<b>回车</b>）。该命令在缓冲区中插入一个换行符，然后根据主要模式缩进。如果点位于行尾，效果是在其后创建一个新的空行并缩进新行；如果点位于行中间，则在该位置分行。要关闭自动缩进功能，可以禁用 "Electric Indent" 模式（请参阅 "缩进的便利功能"），或者键入 C-j，只插入新行，而不进行任何自动缩进。
+</p><p>正如我们在本手册后面所解释的，你可以通过开启次要模式来改变 Emacs 处理文本插入的方式。例如，名为 "Auto Fill" 的次要模式会在行太长时自动分行。名为 "Overwrite" 模式的次要模式会使插入的字符替换（覆盖）现有文本，而不是将其推到右边。请参阅次要模式。
+</p><p>只有图形字符可以通过键入相关的按键来插入；其他按键作为编辑命令，不会自行插入。例如，默认情况下 DEL 运行 delete-backward-char 命令（某些模式将其绑定到不同的命令）；但它不会插入字面意义上的 "DEL "字符（ASCII 字符代码 127）。
+</p><p>要插入一个非图形字符或键盘不支持的字符，首先要输入 C-q（quoted-insert）来引用该字符。使用 C-q 有两种方法： 
+</p>
+<ul><li>C-q 后接任何非图形字符（甚至是 C-g）都会插入该字符。例如，C-q DEL 插入一个字面意义上的 "DEL" 字符。</li>
+<li>C-q 后跟一串八进制数字，插入指定八进制字符代码的字符。您可以使用任意八进制数字；任何非数字都会终止序列。如果终止字符是 RET，则 RET 仅用于终止序列。任何其他非数字都会终止序列，然后作为正常输入，如 C-q 1 0 1 B 插入 "AB"。</li></ul>
+<dl><dd>在普通的非二进制覆写模式下，八进制序列的使用是禁用的，这样可以方便地插入一个数字，而不是用它来覆写。</dd></dl>
+<p>要使用十进制或十六进制代替八进制，可将变量 read-quoted-char-radix 设置为 10 或 16。如果弧度为 16，字母 a 至 f 就会像数字一样作为字符代码的一部分。大小写将被忽略。
+</p><p>通过以 C-x 8 开头的命令，可以插入一些常见的 Unicode 字符。例如，C-x 8 [ 插入"'"，它是 Unicode 代码点 U+2018 左单引号标记，有时也称为左单引号 "弯引号 "或 "卷曲引号"。同样，C-x 8 ]、C-x 8 { 和 C-x 8 } 分别插入"'"、""和""。此外，Alt 键的作用类似于 C-x 8（除非后面有 RET）；例如，A-[ 的作用类似于 C-x 8 [ 并插入<i>。要查看哪些字符具有 C-x 8 速记功能，请键入 C-x 8 C-h。</i>
+</p><p>或者，也可以使用 C-x 8 RET（插入-字符）命令。该命令使用微型缓冲区提示输入字符的 Unicode 名称或码位。如果输入的是名称，命令将提供补全（参见补全）。如果输入码位，应为十六进制数（Unicode 的约定），或具有指定弧度的数字，例如 #o23072（八进制）；参见《Emacs Lisp 参考手册》中的整数基础知识。然后，命令将相应的字符插入缓冲区。
+</p><p>例如，以下命令都插入了相同的字符： 
+</p>
+<pre>C-x 8 RET left single quotation mark RET
+C-x 8 RET left sin TAB RET
+C-x 8 RET 2018 RET
+C-x 8 [
+A-[  (if the Alt key works)
+`    (in Electric Quote mode)</pre>
+<p>C-q 或 C-x 8 ...的数字参数指定插入字符的份数（参见数字参数）。
+</p><p>作为 C-x 8 的替代方法，可以通过键入 C-u C-x \ iso-transl RET 选择相应的暂存输入法，然后通过键入 C-x \ [ 临时激活该暂存输入法，将插入相同的字符 ' （参见暂存输入法）。
+</p><p>此外，在某些情况下，如果输入使用重音符号和撇号的引号 "like this"，即使没有 C-x 8 命令，也会转换为使用单引号的 "like this "形式。同样，使用双重音符号和撇号键入引号 "like this"，也会转换为使用双引号的 "like this "形式。参见引号。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg66450fb8afdd_.E6.9B.B4.E6.94.B9.E7.82.B9.E7.9A.84.E4.BD.8D.E7.BD.AE" id="更改点的位置"><span id=".E6.9B.B4.E6.94.B9.E7.82.B9.E7.9A.84.E4.BD.8D.E7.BD.AE"></span>更改点的位置</h3></div>
+<p>除了插入字符外，还必须知道如何移动点（请参阅 "点"）。键盘命令 C-f、C-b、C-n 和 C-p 可分别向右、向左、向下和向上移动点。您也可以使用大多数键盘上的方向键移动点： 不过，许多 Emacs 用户发现，使用方向键比使用控制键要慢，因为你需要将手移到键盘上这些键所在的区域。
+</p><p>你也可以点击鼠标左键，将点移动到所点击的位置。Emacs 还提供了多种额外的键盘命令，可以以更复杂的方式移动点。
+</p>
+<dl><dt>C-f</dt>
+<dd>Move forward one character (forward-char).</dd>
+<dt>RIGHT</dt>
+<dd>This command (right-char) behaves like C-f, except when point is in a right-to-left paragraph (see Bidirectional Editing).</dd>
+<dt>C-b</dt>
+<dd>Move backward one character (backward-char).</dd>
+<dt>LEFT</dt>
+<dd>This command (left-char) behaves like C-b, except if the current paragraph is right-to-left (see Bidirectional Editing).</dd>
+<dt>C-n</dt>
+<dt>DOWN</dt>
+<dd>Move down one screen line (next-line). This command attempts to keep the horizontal position unchanged, so if you start in the middle of one line, you move to the middle of the next.</dd>
+<dt>C-p</dt>
+<dt>UP</dt>
+<dd>Move up one screen line (previous-line). This command preserves position within the line, like C-n.</dd>
+<dt>C-a</dt>
+<dt>Home</dt>
+<dd>Move to the beginning of the line (move-beginning-of-line).</dd>
+<dt>C-e</dt>
+<dt>End</dt>
+<dd>Move to the end of the line (move-end-of-line).</dd>
+<dt>M-f</dt>
+<dd>Move forward one word (forward-word). See Words.</dd>
+<dt>C-RIGHT</dt>
+<dt>M-RIGHT</dt>
+<dd>This command (right-word) behaves like M-f, except it moves backward by one word if the current paragraph is right-to-left. See Bidirectional Editing.</dd>
+<dt>M-b</dt>
+<dd>Move backward one word (backward-word). See Words.</dd>
+<dt>C-LEFT</dt>
+<dt>M-LEFT</dt>
+<dd>This command (left-word) behaves like M-b, except it moves forward by one word if the current paragraph is right-to-left. See Bidirectional Editing.</dd>
+<dt>M-r</dt>
+<dd>Without moving the text on the screen, reposition point on the left margin of the center-most text line of the window; on subsequent consecutive invocations, move point to the left margin of the top-most line, the bottom-most line, and so forth, in cyclic order (move-to-window-line-top-bottom).</dd>
+<dd>A numeric argument says which screen line to place point on, counting downward from the top of the window (zero means the top line). A negative argument counts lines up from the bottom (−1 means the bottom line). See Numeric Arguments, for more information on numeric arguments.</dd>
+<dt>M-&lt;</dt>
+<dd>Move to the top of the buffer (beginning-of-buffer). With numeric argument n, move to n/10 of the way from the top. On graphical displays, C-HOME does the same.</dd>
+<dt>M-&gt;</dt>
+<dd>Move to the end of the buffer (end-of-buffer). On graphical displays, C-END does the same.</dd>
+<dt>C-v</dt>
+<dt>PageDown</dt>
+<dt>next</dt>
+<dd>Scroll the display one screen forward, and move point onscreen if necessary (scroll-up-command). See Scrolling.</dd>
+<dt>M-v</dt>
+<dt>PageUp</dt>
+<dt>prior</dt>
+<dd>Scroll one screen backward, and move point onscreen if necessary (scroll-down-command). See Scrolling.</dd>
+<dt>M-g c</dt>
+<dd>Read a number n and move point to buffer position n. Position 1 is the beginning of the buffer. If point is on or just after a number in the buffer, that is the default for n. Just type RET in the minibuffer to use it. You can also specify n by giving M-g c a numeric prefix argument.</dd>
+<dt>M-g M-g</dt>
+<dt>M-g g</dt>
+<dd>Read a number n and move point to the beginning of line number n (goto-line). Line 1 is the beginning of the buffer. If point is on or just after a number in the buffer, that is the default for n. Just type RET in the minibuffer to use it. You can also specify n by giving M-g M-g a numeric prefix argument. See Creating and Selecting Buffers, for the behavior of M-g M-g when you give it a plain prefix argument. Alternatively, you can use the command goto-line-relative to move point to the line relative to the accessible portion of the narrowed buffer.</dd>
+<dd>goto-line has its own history list (see Minibuffer History). You can have either a single list shared between all buffers (the default) or a separate list for each buffer, by customizing the user option goto-line-history-local.</dd>
+<dt>M-g TAB</dt>
+<dd>Read a number n and move to column n in the current line. Column 0 is the leftmost column. If called with a prefix argument, move to the column number specified by the argument’s numeric value.</dd>
+<dt>C-x C-n</dt>
+<dd>Use the current column of point as the semipermanent goal column (set-goal-column) in the current buffer. When a semipermanent goal column is in effect, C-n, C-p, &lt;prior&gt; and &lt;next&gt; always try to move to this column, or as close as possible to it, after moving vertically. The goal column remains in effect until canceled.</dd>
+<dt>C-u C-x C-n</dt>
+<dd>Cancel the goal column. Henceforth, C-n and C-p try to preserve the horizontal position, as usual.</dd></dl>
+<p>When a line of text in the buffer is longer than the width of the window, Emacs usually displays it on two or more screen lines, a.k.a. visual lines. For convenience, C-n and C-p move point by screen lines, as do the equivalent keys down and up. You can force these commands to move according to logical lines (i.e., according to the text lines in the buffer) by setting the variable line-move-visual to nil; if a logical line occupies multiple screen lines, the cursor then skips over the additional screen lines. For details, see Continuation Lines. See Variables, for how to set variables such as line-move-visual.
+</p><p>Unlike C-n and C-p, most of the Emacs commands that work on lines work on logical lines. For instance, C-a (move-beginning-of-line) and C-e (move-end-of-line) respectively move to the beginning and end of the logical line. Whenever we encounter commands that work on screen lines, such as C-n and C-p, we will point these out.
+</p><p>When line-move-visual is nil, you can also set the variable track-eol to a non-nil value. Then C-n and C-p, when starting at the end of the logical line, move to the end of the next logical line. Normally, track-eol is nil.
+</p><p>C-n normally stops at the end of the buffer when you use it on the last line in the buffer. However, if you set the variable next-line-add-newlines to a non-nil value, C-n on the last line of a buffer creates an additional line at the end and moves down into it.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg66450fb8afdd_.E6.93.A6.E9.99.A4.E6.96.87.E6.9C.AC" id="擦除文本"><span id=".E6.93.A6.E9.99.A4.E6.96.87.E6.9C.AC"></span>擦除文本</h3></div>
+<dl><dt>DEL</dt>
+<dt>BACKSPACE</dt>
+<dd>Delete the character before point, or the region if it is active (delete-backward-char).</dd>
+<dt>Delete</dt>
+<dd>Delete the character or grapheme cluster after point, or the region if it is active (delete-forward-char).</dd>
+<dt>C-d</dt>
+<dd>Delete the character after point (delete-char).</dd>
+<dt>C-k</dt>
+<dd>Kill to the end of the line (kill-line).</dd>
+<dt>M-d</dt>
+<dd>Kill forward to the end of the next word (kill-word).</dd>
+<dt>M-DEL</dt>
+<dt>M-BACKSPACE</dt>
+<dd>Kill back to the beginning of the previous word (backward-kill-word).</dd></dl>
+<p>The DEL (delete-backward-char) command removes the character before point, moving the cursor and the characters after it backwards. If point was at the beginning of a line, this deletes the preceding newline, joining this line to the previous one.
+</p><p>If, however, the region is active, DEL instead deletes the text in the region. See The Mark and the Region, for a description of the region.
+</p><p>On most keyboards, DEL is labeled BACKSPACE, but we refer to it as DEL in this manual. (Do not confuse DEL with the Delete key; we will discuss Delete momentarily.) On some text terminals, Emacs may not recognize the DEL key properly. See If DEL Fails to Delete, if you encounter this problem.
+</p><p>The Delete (delete-forward-char) command deletes in the opposite direction: it deletes the character after point, i.e., the character under the cursor. If point was at the end of a line, this joins the following line onto this one. Like DEL, it deletes the text in the region if the region is active (see The Mark and the Region). If the character after point is composed with following characters and displayed as a single display unit, a so-called grapheme cluster representing the entire sequence, Delete deletes the entire sequence in one go. This is in contrast to DEL which always deletes a single character, even if the character is composed.
+</p><p>C-d (delete-char) deletes the character after point, similar to Delete, but regardless of whether the region is active.
+</p><p>See Deletion, for more detailed information about the above deletion commands.
+</p><p>C-k (kill-line) erases (kills) a line at a time. If you type C-k at the beginning or middle of a line, it kills all the text up to the end of the line. If you type C-k at the end of a line, it joins that line with the following line.
+</p><p>See Killing and Moving Text, for more information about C-k and related commands.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg66450fb8afdd_.E6.92.A4.E9.94.80.E6.9B.B4.E6.94.B9" id="撤销更改"><span id=".E6.92.A4.E9.94.80.E6.9B.B4.E6.94.B9"></span>撤销更改</h3></div>
+<dl><dt>C-/</dt>
+<dt>C-x u</dt>
+<dt>C-_</dt>
+<dd>Undo one entry of the undo records—usually, one command worth (undo). (The first key might be unavailable on text-mode displays.)</dd></dl>
+<p>Emacs records a list of changes made in the buffer text, so you can undo recent changes. This is done using the undo command, which is bound to C-/ (as well as C-x u and C-_). Normally, this command undoes the last change, moving point back to where it was before the change. The undo command applies only to changes in the buffer; you can’t use it to undo cursor motion.
+</p><p>On a terminal that supports the Control modifier on all other keys, the easiest way to invoke undo is with C-/, since that doesn’t need the Shift modifier. On terminals which allow only the ASCII control characters, C-/ does not exist, but for many of them C-/ still works because it actually sends C-_ to Emacs, while many others allow you to omit the Shift modifier when you type C-_ (in effect pressing C--), making that the most convenient way to invoke undo.
+</p><p>Although each editing command usually makes a separate entry in the undo records, very simple commands may be grouped together. Sometimes, an entry may cover just part of a complex command.
+</p><p>If you repeat C-/ (or its aliases), each repetition undoes another, earlier change, back to the limit of the undo information available. If all recorded changes have already been undone, the undo command displays an error message and does nothing.
+</p><p>To learn more about the undo command, see Undo.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg66450fb8afdd_.E6.96.87.E4.BB.B6" id="文件"><span id=".E6.96.87.E4.BB.B6"></span>文件</h3></div>
+<p>Text that you insert in an Emacs buffer lasts only as long as the Emacs session. To keep any text permanently, you must put it in a file.
+</p><p>Suppose there is a file named test.emacs in your home directory. To begin editing this file in Emacs, type
+</p>
+<pre>C-x C-f test.emacs RET
+</pre>
+<p>Here the file name is given as an argument to the command C-x C-f (find-file). That command uses the minibuffer to read the argument, and you type RET to terminate the argument (see The Minibuffer).
+</p><p>Emacs obeys this command by visiting the file: it creates a buffer, copies the contents of the file into the buffer, and then displays the buffer for editing. If you alter the text, you can save the new text in the file by typing C-x C-s (save-buffer). This copies the altered buffer contents back into the file test.emacs, making them permanent. Until you save, the changed text exists only inside Emacs, and the file test.emacs is unaltered.
+</p><p>To create a file, just visit it with C-x C-f as if it already existed. This creates an empty buffer, in which you can insert the text you want to put in the file. Emacs actually creates the file the first time you save this buffer with C-x C-s.
+</p><p>To learn more about using files in Emacs, see File Handling.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg66450fb8afdd_.E5.B8.AE.E5.8A.A9" id="帮助"><span id=".E5.B8.AE.E5.8A.A9"></span>帮助</h3></div>
+<p>If you forget what a key does, you can find out by typing C-h k (describe-key), followed by the key of interest; for example, C-h k C-n tells you what C-n does.
+</p><p>The prefix key C-h stands for “help”. The key F1 serves as an alias for C-h. Apart from C-h k, there are many other help commands providing different kinds of help.
+</p><p>See Help, for details. 
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg66450fb8afdd_.E7.A9.BA.E7.99.BD.E8.A1.8C" id="空白行"><span id=".E7.A9.BA.E7.99.BD.E8.A1.8C"></span>空白行</h3></div>
+<p>Here are special commands and techniques for inserting and deleting blank lines.
+</p>
+<dl><dt>C-o</dt>
+<dd>Insert a blank line after the cursor (open-line).</dd>
+<dt>C-x C-o</dt>
+<dd>Delete all but one of many consecutive blank lines (delete-blank-lines).</dd></dl>
+<p>We have seen how RET (newline) starts a new line of text. However, it may be easier to see what you are doing if you first make a blank line and then insert the desired text into it. This is easy to do using the key C-o (open-line), which inserts a newline after point but leaves point in front of the newline. After C-o, type the text for the new line.
+</p><p>You can make several blank lines by typing C-o several times, or by giving it a numeric argument specifying how many blank lines to make. See Numeric Arguments, for how. If you have a fill prefix, the C-o command inserts the fill prefix on the new line, if typed at the beginning of a line. See The Fill Prefix.
+</p><p>The easy way to get rid of extra blank lines is with the command C-x C-o (delete-blank-lines). If point lies within a run of several blank lines, C-x C-o deletes all but one of them. If point is on a single blank line, C-x C-o deletes it. If point is on a nonblank line, C-x C-o deletes all following blank lines, if any exists. 
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg66450fb8afdd_.E5.BB.B6.E7.BB.AD.E7.BA.BF" id="延续线"><span id=".E5.BB.B6.E7.BB.AD.E7.BA.BF"></span>延续线</h3></div>
+<p>Sometimes, a line of text in the buffer—a logical line—is too long to fit in the window, and Emacs displays it as two or more screen lines, or visual lines. This is called line wrapping or continuation, and the long logical line is called a continued line. On a graphical display, Emacs indicates line wrapping with small bent arrows in the left and right window fringes. On a text terminal, Emacs indicates line wrapping by displaying a ‘\’ character at the right margin.
+</p><p>Most commands that act on lines act on logical lines, not screen lines. For instance, C-k kills a logical line. As described earlier, C-n (next-line) and C-p (previous-line) are special exceptions: they move point down and up, respectively, by one screen line (see Changing the Location of Point).
+</p><p>Emacs can optionally truncate long logical lines instead of continuing them. This means that every logical line occupies a single screen line; if it is longer than the width of the window, the rest of the line is not displayed. On a graphical display, a truncated line is indicated by a small straight arrow in the right fringe; on a text terminal, it is indicated by a ‘$’ character in the right margin. See Line Truncation.
+</p><p>By default, continued lines are wrapped at the right window edge. Since the wrapping may occur in the middle of a word, continued lines can be difficult to read. The usual solution is to break your lines before they get too long, by inserting newlines. If you prefer, you can make Emacs insert a newline automatically when a line gets too long, by using Auto Fill mode. See Filling Text.
+</p><p>Sometimes, you may need to edit files containing many long logical lines, and it may not be practical to break them all up by adding newlines. In that case, you can use Visual Line mode, which enables word wrapping: instead of wrapping long lines exactly at the right window edge, Emacs wraps them at the word boundaries (i.e., space or tab characters) nearest to the right window edge. Visual Line mode also redefines editing commands such as C-a, C-n, and C-k to operate on screen lines rather than logical lines. See Visual Line Mode. 
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg66450fb8afdd_.E5.85.89.E6.A0.87.E4.BD.8D.E7.BD.AE.E4.BF.A1.E6.81.AF" id="光标位置信息"><span id=".E5.85.89.E6.A0.87.E4.BD.8D.E7.BD.AE.E4.BF.A1.E6.81.AF"></span>光标位置信息</h3></div>
+<p>Here are commands to get information about the size and position of parts of the buffer, and to count words and lines.
+</p>
+<dl><dt>M-x what-line</dt>
+<dd>Display the line number of point.</dd>
+<dt>M-x line-number-mode</dt>
+<dt>M-x column-number-mode</dt>
+<dd>Toggle automatic display of the current line number or column number. See Optional Mode Line Features. If you want to have a line number displayed before each line, see Customization of Display.</dd>
+<dt>M-=</dt>
+<dd>Display the number of lines, sentences, words, and characters that are present in the region (count-words-region). See The Mark and the Region, for information about the region.</dd>
+<dt>M-x count-words</dt>
+<dd>Display the number of lines, sentences, words, and characters that are present in the buffer. If the region is active (see The Mark and the Region), display the numbers for the region instead.</dd>
+<dt>C-x =</dt>
+<dd>Display the character code of character after point, character position of point, and column of point (what-cursor-position).</dd>
+<dt>M-x hl-line-mode</dt>
+<dd>Enable or disable highlighting of the current line. See Displaying the Cursor.</dd>
+<dt>M-x size-indication-mode</dt>
+<dd>Toggle automatic display of the size of the buffer. See Optional Mode Line Features.</dd></dl>
+<p>M-x what-line displays the current line number in the echo area. This command is usually redundant because the current line number is shown in the mode line (see The Mode Line). However, if you narrow the buffer, the mode line shows the line number relative to the accessible portion (see Narrowing). By contrast, what-line displays both the line number relative to the narrowed region and the line number relative to the whole buffer.
+</p><p>M-= (count-words-region) displays a message reporting the number of lines, sentences, words, and characters in the region (see The Mark and the Region, for an explanation of the region). With a prefix argument, C-u M-=, the command displays a count for the entire buffer.
+</p><p>The command M-x count-words does the same job, but with a different calling convention. It displays a count for the region if the region is active, and for the buffer otherwise.
+</p><p>The command C-x = (what-cursor-position) shows information about the current cursor position and the buffer contents at that position. It displays a line in the echo area that looks like this:
+</p>
+<pre>Char: c (99, #o143, #x63) point=28062 of 36168 (78%) column=53
+</pre>
+<p>After ‘Char:’, this shows the character in the buffer at point. The text inside the parenthesis shows the corresponding decimal, octal and hex character codes; for more information about how C-x = displays character information, see Introduction to International Character Sets. After ‘point=’ is the position of point as a character count (the first character in the buffer is position 1, the second character is position 2, and so on). The number after that is the total number of characters in the buffer, and the number in parenthesis expresses the position as a percentage of the total. After ‘column=’ is the horizontal position of point, in columns counting from the left edge of the window.
+</p><p>If the user option what-cursor-show-names is non-nil, the name of the character, as defined by the Unicode Character Database, is shown as well. The part in parentheses would then become:
+</p>
+<pre>(99, #o143, #x63, LATIN SMALL LETTER C)
+</pre>
+<p>If the buffer has been narrowed, making some of the text at the beginning and the end temporarily inaccessible, C-x = displays additional text describing the currently accessible range. For example, it might display this:
+</p>
+<pre>Char: C (67, #o103, #x43) point=252 of 889 (28%) &lt;231-599&gt; column=0
+</pre>
+<p>where the two extra numbers give the smallest and largest character position that point is allowed to assume. The characters between those two positions are the accessible ones. See Narrowing.
+</p><p>Related, but different feature is display-line-numbers-mode (see Customization of Display). 
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg66450fb8afdd_.E6.95.B0.E5.80.BC.E5.8F.82.E6.95.B0" id="数值参数"><span id=".E6.95.B0.E5.80.BC.E5.8F.82.E6.95.B0"></span>数值参数</h3></div>
+<p>In the terminology of mathematics and computing, argument means “data provided to a function or operation”. You can give any Emacs command a numeric argument (also called a prefix argument). Some commands interpret the argument as a repetition count. For example, giving C-f an argument of ten causes it to move point forward by ten characters instead of one. With these commands, no argument is equivalent to an argument of one, and negative arguments cause them to move or act in the opposite direction.
+</p><p>The easiest way to specify a numeric argument is to type a digit and/or a minus sign while holding down the Meta key. For example,
+</p>
+<pre>M-5 C-n
+</pre>
+<p>moves down five lines. The keys M-1, M-2, and so on, as well as M--, are bound to commands (digit-argument and negative-argument) that set up an argument for the next command. M-- without digits normally means −1.
+</p><p>If you enter more than one digit, you need not hold down the Meta key for the second and subsequent digits. Thus, to move down fifty lines, type
+</p>
+<pre>M-5 0 C-n
+</pre>
+<p>Note that this does not insert five copies of ‘0’ and move down one line, as you might expect—the ‘0’ is treated as part of the prefix argument.
+</p><p>(What if you do want to insert five copies of ‘0’? Type M-5 C-u 0. Here, C-u terminates the prefix argument, so that the next keystroke begins the command that you want to execute. Note that this meaning of C-u applies only to this case. For the usual role of C-u, see below.)
+</p><p>Instead of typing M-1, M-2, and so on, another way to specify a numeric argument is to type C-u (universal-argument) followed by some digits, or (for a negative argument) a minus sign followed by digits. A minus sign without digits normally means −1.
+</p><p>C-u alone has the special meaning of “four times”: it multiplies the argument for the next command by four. C-u C-u multiplies it by sixteen. Thus, C-u C-u C-f moves forward sixteen characters. Other useful combinations are C-u C-n, C-u C-u C-n (move down a good fraction of a screen), C-u C-u C-o (make sixteen blank lines), and C-u C-k (kill four lines).
+</p><p>You can use a numeric argument before a self-inserting character to insert multiple copies of it. This is straightforward when the character is not a digit; for example, C-u 6 4 a inserts 64 copies of the character ‘a’. But this does not work for inserting digits; C-u 6 4 1 specifies an argument of 641. You can separate the argument from the digit to insert with another C-u; for example, C-u 6 4 C-u 1 does insert 64 copies of the character ‘1’.
+</p><p>Some commands care whether there is an argument, but ignore its value. For example, the command M-q (fill-paragraph) fills text; with an argument, it justifies the text as well. (See Filling Text, for more information on M-q.) For these commands, it is enough to specify the argument with a single C-u.
+</p><p>Some commands use the value of the argument as a repeat count but do something special when there is no argument. For example, the command C-k (kill-line) with argument n kills n lines, including their terminating newlines. But C-k with no argument is special: it kills the text up to the next newline, or, if point is right at the end of the line, it kills the newline itself. Thus, two C-k commands with no arguments can kill a nonblank line, just like C-k with an argument of one. (See Killing and Moving Text, for more information on C-k.)
+</p><p>A few commands treat a plain C-u differently from an ordinary argument. A few others may treat an argument of just a minus sign differently from an argument of −1. These unusual cases are described when they come up; they exist to make an individual command more convenient, and they are documented in that command’s documentation string.
+</p><p>We use the term prefix argument to emphasize that you type such arguments before the command, and to distinguish them from minibuffer arguments (see The Minibuffer), which are entered after invoking the command.
+</p><p>On graphical displays, C-0, C-1, etc. act the same as M-0, M-1, etc. 
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg66450fb8afdd_.E9.87.8D.E5.A4.8D.E5.91.BD.E4.BB.A4" id="重复命令"><span id=".E9.87.8D.E5.A4.8D.E5.91.BD.E4.BB.A4"></span>重复命令</h3></div>
+<p>Many simple commands, such as those invoked with a single key or with M-x command-name RET, can be repeated by invoking them with a numeric argument that serves as a repeat count (see Numeric Arguments). However, if the command you want to repeat prompts for input, or uses a numeric argument in another way, that method won’t work.
+</p><p>The command C-x z (repeat) provides another way to repeat an Emacs command many times. This command repeats the previous Emacs command, whatever that was. Repeating a command uses the same arguments that were used before; it does not read new arguments each time.
+</p><p>To repeat the command more than once, type additional z’s: each z repeats the command one more time. Repetition ends when you type a character other than z or press a mouse button.
+</p><p>For example, suppose you type C-u 2 0 C-d to delete 20 characters. You can repeat that command (including its argument) three additional times, to delete a total of 80 characters, by typing C-x z z z. The first C-x z repeats the command once, and each subsequent z repeats it once again.
+</p><p>You can also activate repeat-mode which allows repeating commands bound to sequences of two or more keys by typing a single character. For example, after typing C-x u (undo, see Undo) to undo the most recent edits, you can undo many more edits by typing u u u…. Similarly, type C-x o o o… instead of C-x o C-x o C-x o… to switch to the window several windows away. This works by entering a transient repeating mode after you type the full key sequence that invokes the command; the single-key shortcuts are shown in the echo area.
+</p><p>Only some commands support repetition in repeat-mode; type M-x describe-repeat-maps RET to see which ones.
+</p><p>The single-character shortcuts enabled by the transient repeating mode do not need to be identical: for example, after typing C-x {, either { or } or ^ or v, or any series that mixes these characters in any order, will resize the selected window in respective ways. Similarly, after M-g n or M-g p, typing any sequence of n and/or p in any mix will repeat next-error and previous-error to navigate in a *compilation* or *grep* buffer (see Compilation Mode).
+</p><p>Typing any key other than those defined to repeat the previous command exits the transient repeating mode, and then the key you typed is executed normally. You can also define a key which will exit the transient repeating mode without executing the key which caused the exit. To this end, customize the user option repeat-exit-key to name a key; one natural value is RET. Finally, it’s possible to break the repetition chain automatically after some amount of idle time: customize the user option repeat-exit-timeout to specify the idle time in seconds after which this transient repetition mode will be turned off automatically.
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808035618
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.124 seconds
+Real time usage: 0.128 seconds
+Preprocessor visited node count: 436/1000000
+Revision size: 36524/2097152 bytes
+Post‐expand include size: 2676/2097152 bytes
+Template argument size: 944/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   26.149      1 -total
+ 19.30%    5.047     39 Template:Ic
+ 14.68%    3.839      1 Template:合并
+  8.99%    2.351      1 Template:相关文章开始
+  6.08%    1.589      1 Template:META_Message
+  5.77%    1.510      8 Template:相关
+  3.76%    0.983      1 Template:Bc
+  3.35%    0.877      1 Template:META_Related_articles_start
+  2.85%    0.746      1 Template:相关文章结束
+-->
+<!-- Render ID 1bfa290e-92dd-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8150:|#|:idhash:canonical!zh-cn and timestamp 20260808035618 and revision id 34161. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

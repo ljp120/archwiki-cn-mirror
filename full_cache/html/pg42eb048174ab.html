@@ -1,0 +1,172 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg42eb048174ab">网络配置/以太网</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Network_configuration/Ethernet">Network configuration/Ethernet</a>，最近一次同步于 2022-12-01，若英文版本有所<a href="https://wiki.archlinux.org/title/Network_configuration/Ethernet?diff=0&amp;oldid=758391">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Network_configuration_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Ethernet_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本页描述了<a href="https://zh.wikipedia.org/wiki/%E4%BB%A5%E5%A4%AA%E7%BD%91">以太网</a>的详细信息，一般的网络配置则为<a href="#pgf42a74f3af9c">网络配置</a>所涵盖。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg42eb048174ab_.E8.AE.BE.E5.A4.87.E9.A9.B1.E5.8A.A8" id="设备驱动"><span id=".E8.AE.BE.E5.A4.87.E9.A9.B1.E5.8A.A8"></span>设备驱动</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg42eb048174ab_.E6.A3.80.E6.B5.8B.E9.A9.B1.E5.8A.A8.E7.8A.B6.E6.80.81" id="检测驱动状态"><span id=".E6.A3.80.E6.B5.8B.E9.A9.B1.E5.8A.A8.E7.8A.B6.E6.80.81"></span>检测驱动状态</h3></div>
+<p><a href="#pge009209061ac">udev</a> 会探测你的网卡（<a href="https://zh.wikipedia.org/wiki/%E7%BD%91%E5%8D%A1">网络接口控制器</a>）并在启动时自动载入必要的<a href="#pga016157dc9e9">内核模块</a>。通过 <code>lspci -v</code> 输出中的“Ethernet controller”(或类似条目)可以确认网络设备所使用的内核驱动和内核模块。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lspci -v</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">02:00.0 Ethernet controller: Attansic Technology Corp. L1 Gigabit Ethernet Adapter (rev b0)
+ 	...
+ 	Kernel driver in use: atl1
+ 	Kernel modules: atl1
+</pre>
+<p><code>dmesg | grep <i>module_name</i></code> 命令可以检查是否已经加载了驱动。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg | grep atl1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+atl1 0000:02:00.0: eth0 link is up 100 Mbps full duplex
+</pre>
+<p>如果驱动加载成功，就跳过下一节，否则，需要知道特定型号的网络设备需要哪一个模块。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg42eb048174ab_.E5.8A.A0.E8.BD.BD.E8.AE.BE.E5.A4.87.E6.A8.A1.E5.9D.97" id="加载设备模块"><span id=".E5.8A.A0.E8.BD.BD.E8.AE.BE.E5.A4.87.E6.A8.A1.E5.9D.97"></span>加载设备模块</h3></div>
+<p>在互联网上搜索芯片组需要的模块/驱动。常见的驱动模块有用于 Realtek 芯片组网卡的 <code>8139too</code>，或者用于 Sis 芯片组网卡的 <code>sis900</code>。确定模块后，请尝试<a href="#pga016157dc9e9">手动加载它</a>。如果碰到了未找到模块的错误，可能是驱动没有包括在 Arch 的内核中。可以在 <a href="#pg89cb7b475cfb">AUR</a> 中搜索模块名称进行安装。
+</p><p>如果 udev 在引导时不能自动侦测和加载适当的模块，请查阅 <a href="#pga016157dc9e9">Kernel module#自动加载模块</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg42eb048174ab_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg42eb048174ab_.E7.94.A8.E4.BA.8E.E7.AC.94.E8.AE.B0.E6.9C.AC.E7.9A.84_ifplugd" id="用于笔记本的_ifplugd"><span id=".E7.94.A8.E4.BA.8E.E7.AC.94.E8.AE.B0.E6.9C.AC.E7.9A.84_ifplugd"></span>用于笔记本的 ifplugd</h3></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><a href="#pg0d07347d2df8">dhcpcd</a> 也提供了同样的功能。</div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ifplugd">ifplugd</a></span><sup><small>包</small></sup></span> 是一个守护进程，在网络适配器插入的时候自动配置网络，当网络断开的时候自动取消配置。因为这个程序只会在网络实际接入的时候才会配置网络接口，所以非常适用于笔记本电脑这样的使用移动式的网络，还可以用于不重启电脑、不使用命令行就自动重启网络。
+</p><p>在默认情况下，它会工作于 <code>eth0</code> 设备。要更改这个设置（以及更改其他设置，比如等待时间），可以编辑 <code>/etc/ifplugd/ifplugd.conf</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><a href="#pgab24d2b1ec71">netctl</a> 软件包包含了 <code>netctl-ifplugd@.service</code>，否则你可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ifplugd">ifplugd</a></span><sup><small>包</small></sup></span> 软件包中的 <code>ifplugd@.service</code>。例如<a href="#pg3ef6532bc644">启用</a> <code>ifplugd@eth0.service</code>。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg42eb048174ab_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg42eb048174ab_.E6.9B.B4.E6.8D.A2.E4.BA.86.E8.BF.9E.E6.8E.A5.E6.9C.89.E7.BA.BF.E8.B0.83.E5.88.B6.E8.A7.A3.E8.B0.83.E5.99.A8.E7.9A.84.E8.AE.A1.E7.AE.97.E6.9C.BA" id="更换了连接有线调制解调器的计算机"><span id=".E6.9B.B4.E6.8D.A2.E4.BA.86.E8.BF.9E.E6.8E.A5.E6.9C.89.E7.BA.BF.E8.B0.83.E5.88.B6.E8.A7.A3.E8.B0.83.E5.99.A8.E7.9A.84.E8.AE.A1.E7.AE.97.E6.9C.BA"></span>更换了连接有线调制解调器的计算机</h3></div>
+<p>许多有线网络运营商（例如加拿大最大的有线电视公司 Vidéotron，还有中国大陆的有线电视宽带公司）都使用记录网卡 MAC 地址的方法将有线调制解调器配置为只能一台计算机使用。一旦调制解调器获得第一台连接它的设备的 MAC 地址，就不会响应任何其它 MAC 地址。这样如果你换了台计算机（或者路由器），由于新计算机（或者路由器）的 MAC 地址和旧的不同，就没法连接调制解调器了。这时候必须复位调制解调器以使它重新进行识别。 你得关闭调制解调器电源，然后重新打开。一旦调制解调器重启并再次登录完毕（指示灯熄灭），重启新连接的设备以使它发起一个 DHCP 请求，或者手动发起 DHCP 请求。
+</p><p>如果这个方法不能奏效，你需要克隆原来机器上的 MAC 地址。参见 <a href="#pg00f62a8aafd0">MAC 地址伪装</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg42eb048174ab_.E6.98.BE.E5.BC.8F.E6.8B.A5.E5.A1.9E.E9.80.9A.E7.9F.A5" id="显式拥塞通知"><span id=".E6.98.BE.E5.BC.8F.E6.8B.A5.E5.A1.9E.E9.80.9A.E7.9F.A5"></span>显式拥塞通知</h3></div>
+<p><a href="https://zh.wikipedia.org/wiki/%E6%98%BE%E5%BC%8F%E6%8B%A5%E5%A1%9E%E9%80%9A%E7%9F%A5">显式拥塞通知</a>(Explicit Congestion Notification, ECN) 可能在老旧/劣质的路由器上造成网络拥堵问题<a href="https://bbs.archlinux.org/viewtopic.php?id=239892">[1]</a>。从 <a href="https://github.com/systemd/systemd/issues/9748">systemd 239</a> 开始，它同时为入站流量和出站流量启用。
+</p><p>设置仅当传入连接请求时才启用 ECN（内核默认设置，相当安全）：
+</p>
+<pre># sysctl net.ipv4.tcp_ecn=2
+</pre>
+<p>设置完全禁用 ECN（例如，测试 ECN 是否引起问题）：
+</p>
+<pre># sysctl net.ipv4.tcp_ecn=0
+</pre>
+<p>参见<a href="https://docs.kernel.org/networking/ip-sysctl.html">内核文档</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg42eb048174ab_Realtek_.E6.B2.A1.E6.9C.89.E8.BF.9E.E6.8E.A5.2F.E7.BD.91.E7.BB.9C.E5.94.A4.E9.86.92.E6.95.85.E9.9A.9C" id="Realtek_没有连接/网络唤醒故障"><span id="Realtek_.E6.B2.A1.E6.9C.89.E8.BF.9E.E6.8E.A5.2F.E7.BD.91.E7.BB.9C.E5.94.A4.E9.86.92.E6.95.85.E9.9A.9C"></span>Realtek 没有连接/网络唤醒故障</h3></div>
+<p>使用基于 Realtek 8168 8169 8101 8111(C) 芯片网卡（独立网卡和板载）的用户也许会发现这个故障，启动时网卡不可用，网卡上的连接指示灯不亮。这通常会发生在安装了 Windows 的双启动系统上。在 Windows 下使用 Realtek 官方驱动（2007 年 5 月后的版本）会引发故障。新驱动通过在 Windows 关机时禁止网卡来关闭网络唤醒功能，直到下一次 Windows 启动前网卡都会一直不可用。如果是这个原因影响的你，你会观察到连接指示灯在 Windows 启动前一直熄灭，在 Windows 关机过程中也会熄灭。正常情况应该是只要计算机一直开着，即使在 POST 加电过程中，连接指示灯也应该一直亮着。这个故障也会影响其它没有安装新驱动的操作系统（例如各种 Live CD）。这里给出几种解决方案：
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg42eb048174ab_.E5.9C.A8_Linux_.E4.B8.AD.E5.90.AF.E7.94.A8.E7.BD.91.E5.8D.A1" id="在_Linux_中启用网卡"><span id=".E5.9C.A8_Linux_.E4.B8.AD.E5.90.AF.E7.94.A8.E7.BD.91.E5.8D.A1"></span>在 Linux 中启用网卡</h4></div>
+<p>参考<a href="#pgf42a74f3af9c">网络配置#启用和禁用网络接口</a>来启用网卡。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg42eb048174ab_.E8.BF.98.E5.8E.9F.2F.E5.8F.98.E6.9B.B4_Windows_.E9.A9.B1.E5.8A.A8" id="还原/变更_Windows_驱动"><span id=".E8.BF.98.E5.8E.9F.2F.E5.8F.98.E6.9B.B4_Windows_.E9.A9.B1.E5.8A.A8"></span>还原/变更 Windows 驱动</h4></div>
+<p>你可以将你的 Windows 网卡驱动还原回微软自带的驱动（如果有的话），或者安装 2007 年 5 月份以前的 Realtek 官方驱动（也许在网卡附带的 CD 上）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg42eb048174ab_.E5.90.AF.E5.8A.A8_Windows_.E9.A9.B1.E5.8A.A8.E9.87.8C.E7.9A.84.E7.BD.91.E7.BB.9C.E5.94.A4.E9.86.92.E5.8A.9F.E8.83.BD" id="启动_Windows_驱动里的网络唤醒功能"><span id=".E5.90.AF.E5.8A.A8_Windows_.E9.A9.B1.E5.8A.A8.E9.87.8C.E7.9A.84.E7.BD.91.E7.BB.9C.E5.94.A4.E9.86.92.E5.8A.9F.E8.83.BD"></span>启动 Windows 驱动里的网络唤醒功能</h4></div>
+<p>也许最好最快的修复方法就是改变 Windows 驱动里的这个设置。这个方法可以解决很多其它操作系统而不仅仅是 Arch 的麻烦。在 Windows 的设备管理器里，找到你的 Realtek 网卡，双击它。在“高级”标签页中，开启“wake-on-lan after shutdown”选项。
+</p><p>例如在 Windows XP 里
+</p>
+<pre> 右键点击我的电脑
+ --&gt;管理
+   --&gt;设备管理器
+     --&gt;网络适配器
+       --&gt;双击 Realtek ...
+         --&gt; 高级标签页
+           --&gt; Wake-On-Lan After Shutdown
+             --&gt; 启用。
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>新的 Realtek Windows 驱动程序中（已测试了 2009/01/22 GIGABYTE 上的 <i>Realtek 8111/8169 LAN Driver v5.708.1030.2008</i>）可能与这里的选项稍微有点不同，像 <i>Shutdown Wake-On-LAN &gt; Enable</i>。似乎把它切换成 <code>Disable</code> 没有效果（你仍然可以在Windows关闭时看到连接指示灯熄灭）。一个比较不好的解决方法是引导 Windows，然后立即重启系统（执行非正常重启/关机），不给予 Windows 驱动程序关闭 LAN 的机会。连接指示灯将会保持亮着，网卡也会在 POST 之后保持可用——直到你再次进入 Windows 并正常关机。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg42eb048174ab_.E5.9C.A8_BIOS.2FCMOS_.E4.B8.AD.E5.90.AF.E7.94.A8_LAN_Boot_ROM" id="在_BIOS/CMOS_中启用_LAN_Boot_ROM"><span id=".E5.9C.A8_BIOS.2FCMOS_.E4.B8.AD.E5.90.AF.E7.94.A8_LAN_Boot_ROM"></span>在 BIOS/CMOS 中启用 LAN Boot ROM</h4></div>
+<p>尽管 Windows 驱动程序在系统关闭时禁用了它，但在 BIOS/CMOS 中设置 <i>Integrated Peripherals --&gt; Onboard LAN Boot ROM --&gt; Enabled</i>，系统启动时会重新激活 Realtek LAN 芯片。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这个方法多次在 GIGABYTE GA-G31M-ES2L 主板，2009/02/05 发布的 BIOS 版本 F8 上测试成功。你的情况可能不同。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg42eb048174ab_.E7.A6.81.E7.94.A8_USB_.E8.87.AA.E5.8A.A8.E6.8C.82.E8.B5.B7.E5.8A.9F.E8.83.BD" id="禁用_USB_自动挂起功能"><span id=".E7.A6.81.E7.94.A8_USB_.E8.87.AA.E5.8A.A8.E6.8C.82.E8.B5.B7.E5.8A.9F.E8.83.BD"></span>禁用 USB 自动挂起功能</h4></div>
+
+<p>当使用省电功能时，特别是带 TLP 的 USB自动挂起，设备可能无法正确加载，导致<i>NO-CARRIER</i>状态(用RT8156B测试)，也不能建立网络连接。
+</p><p>解决办法是将设备 ID 添加到 TLP 配置的 USB 黑名单（denylist）中，并重新连接设备。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg42eb048174ab_Atheros_.E8.8A.AF.E7.89.87.E7.BB.84.E6.89.BE.E4.B8.8D.E5.88.B0.E7.BD.91.E5.8D.A1" id="Atheros_芯片组找不到网卡"><span id="Atheros_.E8.8A.AF.E7.89.87.E7.BB.84.E6.89.BE.E4.B8.8D.E5.88.B0.E7.BD.91.E5.8D.A1"></span>Atheros 芯片组找不到网卡</h3></div>
+<p>有些用户的 Atheros 芯片无法正常工作 (至少在 2014 年 2 月的安装镜像中)。可以通过安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/backports-patched/">backports-patched</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> 解决。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg42eb048174ab_Broadcom_BCM57780" id="Broadcom_BCM57780">Broadcom BCM57780</h3></div>
+<p>这个 Broadcom 芯片只有你指定模块的加载顺序后才能正常工作。这些模块是 <code>broadcom</code> 和 <code>tg3</code>，前者需要首先加载。
+</p><p>如果你的电脑有这个芯片，这些步骤应该有用：
+</p>
+<ul><li>从 <code>lspci</code> 的输出中找到你的网卡：</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lspci | grep Ethernet</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">02:00.0 Ethernet controller: Broadcom Corporation NetLink BCM57780 Gigabit Ethernet PCIe (rev 01)
+</pre>
+<ul><li>如果你的有线网络不能工作，尝试断开网线，然后以 root 权限实施以下步骤：</li></ul>
+<pre># modprobe -r tg3
+# modprobe broadcom
+# modprobe tg3
+</pre>
+<ul><li>插回网线，检查模块是否成功：</li></ul>
+<pre># dmesg | grep tg3
+</pre>
+<ul><li>如果现在你的故障解决了，你可以把 <code>broadcom</code> 和 <code>tg3</code> （以此顺序）加入到 <code>/etc/mkinitcpio.conf</code> 的 <code>MODULES</code> 一行，使得更改持久化：</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">MODULES=(.. broadcom tg3 ..)</pre>
+<ul><li><a href="#pgbd0f46fbac92">重新生成 initramfs</a></li>
+<li>还有一种方法是创建 <code>/etc/modprobe.d/broadcom.conf</code>：</li></ul>
+<pre>softdep tg3 pre: broadcom
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这些方法可能也适用于其它芯片，例如 BCM57760。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg42eb048174ab_Realtek_RTL8111.2F8168B" id="Realtek_RTL8111/8168B"><span id="Realtek_RTL8111.2F8168B"></span>Realtek RTL8111/8168B</h3></div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># lspci | grep Ethernet</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">03:00.0 Ethernet controller: Realtek Semiconductor Co., Ltd. RTL8111/8168B PCI Express Gigabit Ethernet controller (rev 02)
+</pre>
+<p>这个网络适配器应被内核的<code>r8169</code>模块识别。 但是，对于某些芯片版本，网络连接可能一直是断开状态。 可以在 <a href="#pg0a3e16d13281">official repositories</a>中找到<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=r8168">r8168</a></span><sup><small>包</small></sup></span> 作为<code>r8169</code>的替代品，在这种情况下，其应该可以实现稳定可靠的连接。 将<code>r8169</code>列入黑名单<a href="#pg446fdafcb30b">Blacklist</a>，如果 <a href="#pge009209061ac">udev</a>没有自动加载<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=r8168">r8168</a></span><sup><small>包</small></sup></span> ，请参见内核模块 <a href="#pga016157dc9e9">Kernel module#自动加载模块</a>
+</p>
+
+<p><br/>
+对于此网络适配器的某些修订版，驱动程序中的另一个故障是IPv6支持不佳。 如果遇到诸如网页挂起和速度慢之类的问题，禁用IPv6功能 <a href="#pg8f9147d5b2cb">IPv6#Disable functionality</a>可能会有所帮助。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg42eb048174ab_.E9.85.8D.E6.9C.89_Realtek_8111.2F8168.2F8411_.E7.9A.84_Gigabyte_.E4.B8.BB.E6.9D.BF" id="配有_Realtek_8111/8168/8411_的_Gigabyte_主板"><span id=".E9.85.8D.E6.9C.89_Realtek_8111.2F8168.2F8411_.E7.9A.84_Gigabyte_.E4.B8.BB.E6.9D.BF"></span>配有 Realtek 8111/8168/8411 的 Gigabyte 主板</h3></div>
+<p>使用诸如 Gigabyte GA-990FXA-UD3 这样的主板，在关闭 <a href="#pgb2549c283c5e">IOMMU</a> 的配置下启动（可能是默认设置）将会使网络连接出问题，通常是无法连接或连接上了但没有流量。这适用于板载网卡和小节标题中的任何其他 pci-NIC，因为 IOMMU 设置会影响主板上的整个网络接口。启用 IOMMU 并使用安装介质引导会在一秒钟内引发 AMD I-10/xhci 页面错误，但随后会正常启动，板载网卡完全正常运行（即使使用 r8169 模块）。在配置安装引导过程时，添加 <code>iommu=soft</code> 作为<a href="#pgec0856954f1c">内核参数</a>，以消除引导时的错误信息，并恢复 USB3.0 功能。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg42eb048174ab_.E9.85.8D.E6.9C.89_Realtek_8111.2F8168.2F8411_.E7.9A.84_.E5.BE.AE.E6.98.9F.E4.B8.BB.E6.9D.BF" id="配有_Realtek_8111/8168/8411_的_微星主板"><span id=".E9.85.8D.E6.9C.89_Realtek_8111.2F8168.2F8411_.E7.9A.84_.E5.BE.AE.E6.98.9F.E4.B8.BB.E6.9D.BF"></span>配有 Realtek 8111/8168/8411 的 微星主板</h3></div>
+<p>使用诸如 "MicroStar B450M MORTAR TITANIUM" 这样的主板, 拔插网线或者重启路由器的 DHCP 服务可能会导致 <code>r8169</code> 进入降档状态, 从千兆带宽（1000Mbit/s）降低到百兆（100 Mbit/s）。内核 log 会打印（可以通过 dmesg 命令查看）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg | grep r8169</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Generic FE-GE Realtek PHY r8169-2200:00: Downshift occurred from negotiated speed 1Gbps to actual speed 100Mbps, check cabling!
+r8169 0000:22:00.0 enp34s0: Link is Up - 100Mbps/Full (downshifted) - flow control rx/tx
+</pre>
+<p>这种情况下，可以通过重启网络接口进行恢复。例如执行下面的命令：
+</p>
+<pre># ip link set dev enp34s0 down
+# ip link set dev enp34s0 up
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807111942
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.163 seconds
+Real time usage: 0.172 seconds
+Preprocessor visited node count: 467/1000000
+Revision size: 11496/2097152 bytes
+Post‐expand include size: 9007/2097152 bytes
+Template argument size: 3384/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 26/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   38.796      1 -total
+ 11.62%    4.508      1 Template:翻译状态
+ 10.16%    3.942      1 Template:Style
+  9.63%    3.735     23 Template:Ic
+  9.22%    3.578      1 Template:Accuracy
+  8.87%    3.441      4 Template:注意
+  7.19%    2.791      4 Template:Pkg
+  6.08%    2.357      1 Template:Broken_package_link
+  5.91%    2.292      6 Template:Hc
+  5.42%    2.103      2 Template:META_Message
+-->
+<!-- Render ID e2c8a70e-9251-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3579:|#|:idhash:canonical!zh-cn and timestamp 20260807111942 and revision id 33840. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

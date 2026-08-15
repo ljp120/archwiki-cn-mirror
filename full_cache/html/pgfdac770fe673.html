@@ -1,0 +1,268 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgfdac770fe673">建议阅读/服务器部署建议</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgfefbd690c49d">安全</a></li>
+<li><a href="#pge5099fd95a3f">常见问题</a></li>
+<li><a href="#pgbdbcbed611fc">安装指南</a></li>
+<li><a href="#pg35ee6d3d486f">软件列表</a></li>
+<li><a href="#pg9a1cc6af125e">系统维护</a></li>
+</ul></div>
+<p>将 <a href="#pg83506eae4ba0">Arch Linux</a> 用作<a href="#pgc07bb0ad05fd">服务器</a>系统是一个不错的选择，因为它提供了高度的灵活性和<a href="#pg9ef105bf1e3c">最新的软件包</a>。不过，由于它主要面向桌面用户发行且是<a href="#pgd4f869e4ef4f">滚动更新的发行版</a>，因此在配置为服务器时需要一些额外的步骤和考虑，以增强系统稳定性等。
+</p><p>本文是<a href="#pgb2db5e40b019">建议阅读</a>一文在配置<a href="#pgc07bb0ad05fd">服务器</a>软件方面的延续，以帮助你在 Arch Linux 上运行各种服务器软件（本地或网络）。
+</p><p>本文主要是各种服务器软件 Wiki 页面的索引及介绍。
+</p><p>参见<a href="#pgc07bb0ad05fd">服务器</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E7.BD.91.E9.A1.B5.2F.E7.BD.91.E7.BB.9C.E6.9C.8D.E5.8A.A1.E5.99.A8" id="网页/网络服务器"><span id=".E7.BD.91.E9.A1.B5.2F.E7.BD.91.E7.BB.9C.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>网页/网络服务器</h2></div>
+<p>在互联网中存放各种网站的服务器，主要用于企业或个人网站在互联网上的发布和运用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Apache_HTTP_.E6.9C.8D.E5.8A.A1.E5.99.A8" id="Apache_HTTP_服务器"><span id="Apache_HTTP_.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>Apache HTTP 服务器</h3></div>
+<p><a href="https://www.apache.org/">Apache HTTP 服务器</a>，简称 <b>Apache</b>，是非常流行的<a href="#pg8a86e00f2cae">网络服务器</a>软件。通常和脚本语言比如 <a href="#pgaf0c0feca250">PHP</a>、数据库 <a href="#pge0b41effcbc7">MySQL</a> 一起工作，合称为 LAMP 栈(Linux、Apache、MySQL、PHP)。
+</p><p><a href="#pg9e2fcd944f95">Apache HTTP 服务器</a>一文介绍了在 Arch Linux 上安装/设置 Apache 网页服务器，以及选择安装 <a href="#pgaf0c0feca250">PHP</a> 和 <a href="#pge0b41effcbc7">MySQL</a> 并集成到 Apache 服务器中的方法。 
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_GNU_Artanis" id="GNU_Artanis">GNU Artanis</h3></div>
+<p><a href="https://artanis.dev/">GNU Artanis</a>  是 <a href="#pg18c90fc994fb">Scheme</a> 编程语言的第一个产品级现代网络框架。它的设计和维护都以稳健、快速和易于使用为目标，适用于专业的网络开发。
+</p><p>它支持的数据库（通过 guile-dbi）有 <a href="#pge0b41effcbc7">MySQL</a>、<a href="#pgf7f0895678ae">SQLite</a>、<a href="#pg1e7f709598ee">PostgreSQL</a>。 
+</p><p>GNU Artanis 主要与 <a href="https://www.gnu.org/software/guile/">Guile</a> 一起使用。
+</p><p>参见 <a href="#pg87a1cd3a8d33">Artanis</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Caddy" id="Caddy">Caddy</h3></div>
+<p><a href="https://caddyserver.com/">Caddy</a> 是具有 HTTP/2 功能的<a href="#pg8a86e00f2cae">网页服务器</a>，具有自动 HTTPS 配置功能。 
+</p><p>有关 Caddy 在 Arch Linux 上的安装、配置、用法等，参见 <a href="#pg6c0e02f6ceed">Caddy</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Lighttpd" id="Lighttpd">Lighttpd</h3></div>
+<p><a href="https://www.lighttpd.net/">Lighttpd</a> 是一个安全、快速、标准且非常灵活的<a href="#pg8a86e00f2cae">网页服务器</a>，并对高性能环境做了最佳化。
+</p><p>参见 <a href="#pg5dd041d9dcf5">Lighttpd</a> 了解有关信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Nginx" id="Nginx">Nginx</h3></div>
+<p>Nginx（读作 "Engine X"）是一个免费、开源、高性能的 HTTP <a href="#pg8a86e00f2cae">网络服务器</a>和反向代理，也是一个 IMAP/POP3 代理服务器，由 Igor Sysoev 于 2005 年编写。
+</p><p><a href="#pg84a88ef9597c">Nginx</a> 一文描述了如何设置 nginx 并且如何通过 <a href="#pg84a88ef9597c">FastCGI</a> 集成 <a href="#pgaf0c0feca250">PHP</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_DNS_.E6.9C.8D.E5.8A.A1.E5.99.A8" id="DNS_服务器"><span id="DNS_.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>DNS 服务器</h2></div>
+<p>参见<a href="#pg5622270e5836">域名解析#DNS 服务器</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_BIND" id="BIND">BIND</h3></div>
+<p>伯克利互联网名称服务 (Berkeley Internet Name Daemon，简称 <a href="https://www.isc.org/downloads/bind/">BIND</a>) 是 DNS 协议的一个参考实现。
+</p><p>参见 <a href="#pg3a18c7c41942">BIND</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Cloudflared" id="Cloudflared">Cloudflared</h3></div>
+<p><a href="https://developers.cloudflare.com/1.1.1.1/dns-over-https/cloudflared-proxy/">Cloudflared</a> 可被用于运行本地 <a href="#pg2c54ea6077bc">DNS over HTTPS</a>（DoH）服务器，也就是存根解析器。
+</p><p>参见 <a href="#pg82e6c28aa666">Cloudflared</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_DNS_over_HTTPS" id="DNS-over-HTTPS">DNS-over-HTTPS</h3></div>
+<p><a href="https://github.com/m13253/dns-over-https">DNS-over-HTTPS</a>是 <a href="#pg2c54ea6077bc">DNS over HTTPS</a> 的一个实现。它可以作为一个本地解析器。
+</p><p>参见 <a href="#pg0bd0dffbf2ff">DNS-over-HTTPS</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Dnscrypt_proxy" id="Dnscrypt-proxy">Dnscrypt-proxy</h3></div>
+<p><a href="https://github.com/jedisct1/dnscrypt-proxy">dnscrypt-proxy</a> 可以加密和认证用户和 DNS 解析服务器之间的数据传输，支持 <a href="https://en.wikipedia.org/wiki/DNS_over_HTTPS">DNS over HTTPS</a> 和 <a href="https://dnscrypt.info/">DNSCrypt</a>，可以避免中间人攻击和窃听。<i>dnscrypt-proxy</i> 兼容 <a href="#pge1e95b2c1d6a">DNSSEC</a>。
+</p><p>参见 <a href="#pg08fa1d547840">Dnscrypt-proxy</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_dnsmasq" id="dnsmasq">dnsmasq</h3></div>
+<p><a href="https://www.thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> 提供 <a href="https://en.wikipedia.org/wiki/Name_server">DNS 服务器</a>、支持 <a href="https://en.wikipedia.org/wiki/DHCPv6">DHCPv6</a> 和 <a href="https://en.wikipedia.org/wiki/Preboot_Execution_Environment">PXE</a> 的 <a href="https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol">DHCP 服务器</a>、<a href="https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol">TFTP 服务器</a>。它设计为轻量且占用空间小，适用于资源受限的路由器和防火墙。还可以将 dnsmasq 配置为 DNS 缓存查询，以提高对以前访问过站点的 DNS 查找速度。
+</p><p>参见 <a href="#pg72acb6a2ac2c">dnsmasq</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_systemd_resolved" id="systemd-resolved">systemd-resolved</h3></div>
+<p><i>systemd-resolved</i> 是一个通过 <a href="#pg05349798cdb5">D-Bus</a> 接口、<a href="#pg056db7937ec3">NSS</a> (<span class="plainlinks archwiki-template-man" title="$ man 8 nss-resolve"><a href="https://man.archlinux.org/man/nss-resolve.8">nss-resolve(8)</a></span>)解析服务和一个监听 <code>127.0.0.53</code> 的本地DNS解析器为本地应用提供网络名称解析的 <a href="#pgac06dd8bfe95">systemd</a> 服务。
+</p><p>参见 <a href="#pg2aac0c15b133">systemd-resolved</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Unbound" id="Unbound">Unbound</h3></div>
+<p><a href="https://unbound.net/">Unbound</a> 是一个具有验证，递归和缓存等功能的 DNS 解析器。
+</p><p>参见 <a href="#pg8323da89a762">Unbound</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_FTP_.E6.9C.8D.E5.8A.A1.E5.99.A8" id="FTP_服务器"><span id="FTP_.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>FTP 服务器</h2></div>
+<p>参见 <a href="#pg0c098415b914">分类:FTP 服务器</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Very_Secure_FTP_Daemon" id="Very_Secure_FTP_Daemon">Very Secure FTP Daemon</h3></div>
+<p><a href="https://security.appspot.com/vsftpd.html">vsftpd</a> (“Very Secure FTP Daemon“) 是一个为 UNIX 类系统开发的轻量，稳定和安全的 FTP 服务器端。
+</p><p>参见 <a href="#pg1b04420e55cc">Very Secure FTP Daemon</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_NTP_.E6.9C.8D.E5.8A.A1.E5.99.A8" id="NTP_服务器"><span id="NTP_.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>NTP 服务器</h2></div>
+<p>参见<a href="#pgca917c48f50d">分类:NTP</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_chrony" id="chrony">chrony</h3></div>
+<p><a href="https://chrony-project.org/">chrony</a> 是一个对漫游友好的 <a href="#pg9dcc5acb2bd6">NTP</a> 客户端和服务端实现，专为不常在线的系统环境设计。
+</p><p><a href="#pg3ad0a5639384">chrony</a> 一文描述了如何配置并运行 chrony。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Network_Time_Protocol_daemon" id="Network_Time_Protocol_daemon">Network Time Protocol daemon</h3></div>
+<p><a href="https://support.ntp.org/bin/view/Main/WebHome#The_NTP_Project">NTP 项目</a>提供了一个名为简单 NTP 的参考实现。
+</p><p><a href="#pgacfb0b28272f">Network Time Protocol daemon</a> 一文介绍了如何设置和运行服务器和客户端 NTP 进程。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E5.AA.92.E4.BD.93.E6.9C.8D.E5.8A.A1.E5.99.A8" id="媒体服务器"><span id=".E5.AA.92.E4.BD.93.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>媒体服务器</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Emby" id="Emby">Emby</h3></div>
+<p><a href="https://emby.media/">Emby</a> 是一个个人媒体服务器，它具有许多平台的客户端。它用于组织个人家庭媒体，以及在其他设备上播放。社区支持大量的频道，甚至可以与PVR和Tuner卡一起使用以远程提供电视流。
+</p><p>参见 <a href="#pg9571201b0b21">Emby</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_SSH_.E6.9C.8D.E5.8A.A1.E5.99.A8" id="SSH_服务器"><span id="SSH_.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>SSH 服务器</h2></div>
+<p>参见<a href="#pg6038166cdf0d">安全外壳协议</a>。
+</p>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Dropbear_(software)">Dropbear</a></b> — 轻型 SSH 服务器。命令行 ssh 客户端名为 <span class="plainlinks archwiki-template-man" title="$ man 1 dbclient"><a href="https://man.archlinux.org/man/dbclient.1">dbclient(1)</a></span>。</li></ul>
+<dl><dd><a href="https://matt.ucc.asn.au/dropbear/dropbear.html">https://matt.ucc.asn.au/dropbear/dropbear.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dropbear">dropbear</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg4df2d7b1a305">OpenSSH</a></b> — 用于通过 SSH 协议远程登录的高级连接工具</li></ul>
+<dl><dd><a href="https://www.openssh.com/portable.html">https://www.openssh.com/portable.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=openssh">openssh</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_.E4.BB.85.E6.9C.8D.E5.8A.A1.E7.AB.AF" id="仅服务端"><span id=".E4.BB.85.E6.9C.8D.E5.8A.A1.E7.AB.AF"></span>仅服务端</h3></div>
+<ul><li><b>TinySSH</b> — 一种简约的 SSH 服务器，仅实现 SSHv2 功能的一部分；只依赖 glibc。</li></ul>
+<dl><dd><a href="https://tinyssh.org/">https://tinyssh.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tinyssh">tinyssh</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_Samba_.E6.9C.8D.E5.8A.A1.E5.99.A8" id="Samba_服务器"><span id="Samba_.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>Samba 服务器</h2></div>
+<p><a href="https://www.samba.org/">Samba</a> 是用于 Linux 和 Unix的标准 Windows 互操作性程序套件。自 1992 年以来，Samba 为所有使用 <a href="https://en.wikipedia.org/wiki/Server_Message_Block">SMB/CIFS</a> 协议的客户端提供了安全、稳定和快速的文件和打印服务，例如所有版本的 DOS 和 Windows、OS/2、Linux 和许多其他系统。
+</p><p>参见 <a href="#pg3a2ac70f3f85">Samba#服务器</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E8.BF.9C.E7.A8.8B.E6.9C.8D.E5.8A.A1.E5.99.A8" id="远程服务器"><span id=".E8.BF.9C.E7.A8.8B.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>远程服务器</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_TigerVNC" id="TigerVNC">TigerVNC</h3></div>
+<p><a href="https://tigervnc.org/">TigerVNC</a> 是 <a href="https://en.wikipedia.org/wiki/Virtual_Network_Computing">Virtual Network Computing</a> (VNC) 协议的一种实现。
+</p><p><a href="#pg71876d092cb8">TigerVNC</a> 一文着重介绍服务端的功能。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_X11vnc" id="X11vnc">X11vnc</h3></div>
+<p><a href="https://en.wikipedia.org/wiki/x11vnc">x11vnc</a>是一个 VNC 服务器，它允许人们使用任何 VNC viewer 远程查看并控制真实的X显示器（即与物理显示器、键盘和鼠标相对应的显示器）。虽然它已不再由原作者 Karl Runge 开发，但 LibVNC 和 GitHub 社区已经接管了开发工作。
+</p><p>参见 <a href="#pg8dc1b29cdcf9">X11vnc</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_X2Go" id="X2Go">X2Go</h3></div>
+<p><a href="https://wiki.x2go.org">X2Go</a> 使你可以通过网络访问一台计算机的图形化桌面。访问时的网络传输使用了 <a href="#pgf572ecc9f480">Secure Shell</a> 协议，因而传输是加密的。
+</p><p>参见 <a href="#pg4a6e639d9f0a">X2Go#服务器端配置</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Xrdp" id="Xrdp">Xrdp</h3></div>
+<p><b>xrdp</b> 是一个守护程序，支持 Microsoft 的 <a href="https://en.wikipedia.org/wiki/Remote_Desktop_Protocol">Remote Desktop Protocol</a> (RDP)。
+它使用 Xvnc 或 xorgxrdp 作为其后端。
+</p><p>参见 <a href="#pg0791f7b65f3f">Xrdp</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_WebDAV_.E6.9C.8D.E5.8A.A1.E5.99.A8" id="WebDAV_服务器"><span id="WebDAV_.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>WebDAV 服务器</h2></div>
+<p>参见 <a href="#pge0b92766527e">WebDAV#服务器</a>
+</p><p>对于 <a href="https://agendav.org/">AgenDAV</a>，参见 <a href="#pgd96aa8ae9d6e">AgenDAV</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E6.89.93.E5.8D.B0.E6.9C.8D.E5.8A.A1.E5.99.A8" id="打印服务器"><span id=".E6.89.93.E5.8D.B0.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>打印服务器</h2></div>
+<p>参见 <a href="#pg9c40a97c403d">CUPS</a> 与 <a href="#pg3a2ac70f3f85">Samba</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E6.B8.B8.E6.88.8F.E6.9C.8D.E5.8A.A1.E5.99.A8" id="游戏服务器"><span id=".E6.B8.B8.E6.88.8F.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>游戏服务器</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Minecraft" id="Minecraft">Minecraft</h3></div>
+<p><a href="https://www.minecraft.net/zh-hans">Minecraft</a> 是一个关于破坏和放置方块的游戏。
+</p><p>对于基岩版 <a href="#pg17859bfc4f4c">Minecraft</a> 服务器，参见 <a href="#pg17859bfc4f4c">Minecraft#基岩版服务器</a>。
+</p><p>对于 Java 版 <a href="#pg17859bfc4f4c">Minecraft</a> 服务器，参见 <a href="#pgbfbb00f9dc42">Minecraft/Java 版服务端</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_OpenTTD" id="OpenTTD">OpenTTD</h3></div>
+<p>对于 <a href="#pgdc340e4069cf">OpenTTD</a> 服务器，参见 <a href="#pgdc340e4069cf">OpenTTD#服务器</a>。
+</p><p>参见 <a href="https://ottdzh.readthedocs.io/projects/jgrpp/latest/Features/Network-server-administration.html#id1">OpenTTD JGRPP 中文百科</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Mindustry" id="Mindustry">Mindustry</h3></div>
+<p>对于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mindustry/">mindustry</a></span><sup><small>AUR</small></sup></span> 服务器，有 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mindustry-server/">mindustry-server</a></span><sup><small>AUR</small></sup></span> 等软件包。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_NFS_.E6.9C.8D.E5.8A.A1.E5.99.A8" id="NFS_服务器"><span id="NFS_.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>NFS 服务器</h2></div>
+<p>NFS 网络文件系统（Network File System）是由 Sun 公司 1984 年发布的分布式文件系统协议。它允许客户端上的用户像访问本地文件一样地访问网络上的文件。
+</p><p>参见 <a href="#pg09db98375319">NFS#服务端配置</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E5.A4.9A.E7.94.A8.E6.88.B7_Jupyter_.E7.AC.94.E8.AE.B0.E6.9C.AC.E6.9C.8D.E5.8A.A1.E5.99.A8" id="多用户_Jupyter_笔记本服务器"><span id=".E5.A4.9A.E7.94.A8.E6.88.B7_Jupyter_.E7.AC.94.E8.AE.B0.E6.9C.AC.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>多用户 Jupyter 笔记本服务器</h2></div>
+<p><a href="https://jupyterhub.readthedocs.io/">JupyterHub</a> 是用于 <a href="#pg7bbf72144351">Jupyter</a> 笔记本的多用户 Web 服务器。
+</p><p>参见 <a href="#pg0e3e2c4fd72b">JupyterHub</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E7.89.88.E6.9C.AC.E6.8E.A7.E5.88.B6.E7.B3.BB.E7.BB.9F.E6.9C.8D.E5.8A.A1.E5.99.A8" id="版本控制系统服务器"><span id=".E7.89.88.E6.9C.AC.E6.8E.A7.E5.88.B6.E7.B3.BB.E7.BB.9F.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>版本控制系统服务器</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Git_.E6.9C.8D.E5.8A.A1.E5.99.A8" id="Git_服务器"><span id="Git_.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>Git 服务器</h3></div>
+<p><a href="https://zh.wikipedia.org/wiki/Git">Git</a> 是由 Linux 内核作者 Linus Torvalds 设计并开发的版本控制系统（VCS），现在被用来维护 <a href="#pg89cb7b475cfb">AUR</a> 软件包以及数以千计的其他项目，其中包括 Linux 内核。
+</p><p><a href="#pg38816c0e74cd">Git 服务器</a>一文概述了如何托管 <a href="#pg0d34da84b694">Git</a> 服务器。有关更多信息，请参阅 Pro Git 书籍的 <a href="https://git-scm.com/book/en/v2/Git-on-the-Server-The-Protocols">Git on the Server 一章</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfdac770fe673_.E7.BD.91.E7.BB.9C.E7.95.8C.E9.9D.A2" id="网络界面"><span id=".E7.BD.91.E7.BB.9C.E7.95.8C.E9.9D.A2"></span>网络界面</h4></div>
+<p>参见 <a href="#pg38816c0e74cd">Git 服务器#Web 界面</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Subversion_.E6.9C.8D.E5.8A.A1.E5.99.A8" id="Subversion_服务器"><span id="Subversion_.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>Subversion 服务器</h3></div>
+<p><a href="https://subversion.apache.org/features.html">Apache Subversion</a> 是一套功能全面的版本控制系统，最初被设计为 <a href="#pg9d7e65bc0077">CVS</a> 的改进版本。其后 Subversion 的发展大大超出了取代 CVS 的原始目标，但它的基本模型、设计和接口仍然受到了这一目标的深刻影响。
+</p><p><a href="#pge346e896f77e">Subversion</a> 一文主要介绍架设 svn 服务器的方法。有两种流行的 svn 服务器，内建的 <code>svnserve</code> 以及更高级的选择——结合了 svn 插件的 <a href="#pg9e2fcd944f95">Apache HTTP 服务器</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E6.95.B0.E6.8D.AE.E5.BA.93.E7.B3.BB.E7.BB.9F" id="数据库系统"><span id=".E6.95.B0.E6.8D.AE.E5.BA.93.E7.B3.BB.E7.BB.9F"></span>数据库系统</h2></div>
+<p>参见<a href="#pg801f03584492">分类:数据库管理系统</a>、<a href="#pgbb637e050d13">分类:关系型数据库管理系统</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_MySQL" id="MySQL">MySQL</h3></div>
+<p><a href="https://en.wikipedia.org/wiki/MySQL">MySQL</a> 是 Oracle 开发的，分布广泛的多线程，多用户 SQL 数据库。
+</p><p>Arch Linux 支持 <a href="#pg48d774249feb">MariaDB</a>，这是 MySQL 的社区开发分支，旨在实现嵌入式兼容性。Oracle 的 MySQL <a href="https://archlinux.org/news/mariadb-replaces-mysql-in-repositories/">降到</a>了 <a href="#pg89cb7b475cfb">AUR</a>：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mysql/">mysql</a></span><sup><small>AUR</small></sup></span>。另一个旨在完全兼容的分支是 <a href="https://en.wikipedia.org/wiki/Percona_Server_for_MySQL">Percona Server</a>，可从 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=percona-server">percona-server</a></span><sup><small>包</small></sup></span> 获得。
+</p><p>Percona 也有 Oracle 的 <a href="https://en.wikipedia.org/wiki/InnoDB">InnoDB</a> 存储引擎的分支，称为 <a href="https://en.wikipedia.org/wiki/XtraDB">XtraDB</a>。<a href="#pg48d774249feb">MariaDB</a> 和 Percona Server 都使用此分支。
+</p><p>参见 <a href="#pge0b41effcbc7">MySQL</a>、<a href="#pg48d774249feb">MariaDB</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfdac770fe673_phpMyAdmin" id="phpMyAdmin">phpMyAdmin</h4></div>
+<p><a href="https://www.phpmyadmin.net/">phpMyAdmin</a>是一个基于网页的，帮助管理MySQL数据库的Apache/PHP前端。
+</p><p>参见 <a href="#pg64920a6a0fe2">phpMyAdmin</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_PostgreSQL" id="PostgreSQL">PostgreSQL</h3></div>
+<p><a href="https://www.postgresql.org/">PostgreSQL</a> 是一个开源的，社区驱动的，符合标准的对象-关系型数据库系统。
+</p><p>参见 <a href="#pg1e7f709598ee">PostgreSQL</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfdac770fe673_phpPgAdmin" id="phpPgAdmin">phpPgAdmin</h4></div>
+<p><a href="https://github.com/phppgadmin/phppgadmin">phpPgAdmin</a> 是一个基于网络的工具，可帮助使用 PHP 前端管理 PostgreSQL 数据库。
+</p><p>参见 <a href="#pg9ab74ad920ec">phpPgAdmin</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_SQLite" id="SQLite">SQLite</h3></div>
+<p><a href="https://www.sqlite.org/">SQLite</a> 是一个实现自包含、无服务器、零配置、事务性 SQL 数据库引擎的软件库。SQLite 是世界上部署最广泛的 SQL 数据库引擎。SQLite 的源代码在公共领域。
+</p><p>参见 <a href="#pgf7f0895678ae">SQLite</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Adminer" id="Adminer">Adminer</h3></div>
+<p><a href="https://www.adminer.org/">Adminer</a> 是一个用 PHP 编写的基于网络的数据库管理工具。它可以管理 <a href="#pge0b41effcbc7">MySQL</a>、<a href="#pg1e7f709598ee">PostgreSQL</a>、<a href="#pgf56c3adfd94b">Sqlite3</a>、MS SQL、Oracle 数据库和 <a href="#pg3b4ce8af77da">Elasticsearch</a>。
+</p><p>参见 <a href="#pg88a84bb32847">Adminer</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Elasticsearch" id="Elasticsearch">Elasticsearch</h3></div>
+<p><a href="https://www.elastic.co/products/elasticsearch">Elasticsearch</a> 是基于 <a href="https://lucene.apache.org/">Lucene</a> 的搜索引擎。它提供了一个分布式、支持多租户的全文搜索引擎，具有 HTTP 网络接口和无模式 JSON 文档。Elasticsearch 采用 Java 开发，根据 Apache License 条款开源发布。
+</p><p>参见 <a href="#pg3b4ce8af77da">Elasticsearch</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E9.82.AE.E4.BB.B6.E6.9C.8D.E5.8A.A1.E5.99.A8" id="邮件服务器"><span id=".E9.82.AE.E4.BB.B6.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>邮件服务器</h2></div>
+<p>参见<a href="#pg1d8a5b5ced51">邮件服务器</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Postfix" id="Postfix">Postfix</h3></div>
+<p><a href="https://en.wikipedia.org/wiki/Postfix_(software)">Postfix</a> 是<a href="#pg24fb3628bff8">邮件传送代理软件</a>。据官方说，它快速、管理简单、安全，同时足够兼容 <a href="#pga5713eb23fcf">Sendmail</a>，从而不会影响现有用户。 因此，从外面看是 sendmail-ish 风格，但内部是完全不同的。
+</p><p>参见 <a href="#pg3a5d9c944c85">Postfix</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_UW_IMAP" id="UW_IMAP">UW IMAP</h3></div>
+<p><b>UW IMAP</b> 是 University of Washington 开发的 IMAP 协议的参考服务器实现。
+</p><p>参见 <a href="#pg04ee98577cd5">UW IMAP</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Sendmail" id="Sendmail">Sendmail</h3></div>
+<p>Sendmail 是来自 UNIX 世界的经典 SMTP 服务器。Arch Linux 还提供了 <a href="#pg3a5d9c944c85">Postfix</a>。
+</p><p>参见 <a href="#pga5713eb23fcf">Sendmail</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E9.82.AE.E4.BB.B6.E5.88.97.E8.A1.A8.E7.AE.A1.E7.90.86.E7.B3.BB.E7.BB.9F" id="邮件列表管理系统"><span id=".E9.82.AE.E4.BB.B6.E5.88.97.E8.A1.A8.E7.AE.A1.E7.90.86.E7.B3.BB.E7.BB.9F"></span>邮件列表管理系统</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Mailman" id="Mailman">Mailman</h3></div>
+<p><a href="https://gitlab.com/mailman/mailman">Mailman</a> 是一个邮件列表管理系统。它与<a href="#pg1d8a5b5ced51">邮件服务器</a>结合使用。
+</p><p>参见 <a href="#pg7073cd290e50">Mailman</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E5.8D.B3.E6.97.B6.E9.80.9A.E8.AE.AF.E6.9C.8D.E5.8A.A1.E5.99.A8" id="即时通讯服务器"><span id=".E5.8D.B3.E6.97.B6.E9.80.9A.E8.AE.AF.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>即时通讯服务器</h2></div>
+<p>参见<a href="#pgaf1b27bddf8e">应用程序列表/互联网#即时通讯服务器</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_XMPP" id="XMPP">XMPP</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgfdac770fe673_Jabberd2" id="Jabberd2">Jabberd2</h4></div>
+<p><a href="https://jabberd2.org/">jabberd2</a> 是一个 <a href="https://en.wikipedia.org/wiki/XMPP">XMPP</a> 服务器，用 C 语言编写，并根据 GNU 通用公共许可作为自由软件许可。它的灵感来自 jabberd14。
+</p><p>参见 <a href="#pg0129e92f73f6">Jabberd2</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgfdac770fe673_Matrix" id="Matrix">Matrix</h3></div>
+<p>Matrix 的服务端软件有 Synapse 和 Dendrite，目前 ArchWiki 和本维基上仅有关于 Synapse 的内容。关于使用 Synapse 建立 Matrix 服务器，请参阅 <a href="#pgbf3d59600df2">Matrix</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E5.BA.94.E7.94.A8.E6.9C.8D.E5.8A.A1.E5.99.A8" id="应用服务器"><span id=".E5.BA.94.E7.94.A8.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>应用服务器</h2></div>
+
+<div class="mw-heading mw-heading2"><h2 data-bm="pgfdac770fe673_.E4.BB.A3.E7.90.86.E6.9C.8D.E5.8A.A1.E5.99.A8" id="代理服务器"><span id=".E4.BB.A3.E7.90.86.E6.9C.8D.E5.8A.A1.E5.99.A8"></span>代理服务器</h2></div>
+<p>参见<a href="#pgfe00e8ac3b34">代理服务器</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807022700
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.290 seconds
+Real time usage: 0.301 seconds
+Preprocessor visited node count: 525/1000000
+Revision size: 13965/2097152 bytes
+Post‐expand include size: 4247/2097152 bytes
+Template argument size: 1602/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   25.496      1 -total
+ 27.19%    6.933      3 Template:App
+ 11.97%    3.052      1 Template:扩充
+ 10.74%    2.739      4 Template:Pkg
+ 10.16%    2.590      1 Template:相关文章开始
+  9.04%    2.304      2 Template:Man
+  6.67%    1.700      1 Template:META_Message
+  5.26%    1.341      5 Template:相关
+  5.23%    1.334      3 Template:AUR
+  4.28%    1.092      2 Template:Ic
+-->
+<!-- Render ID 77f27e0e-9207-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8119:|#|:idhash:canonical!zh-cn and timestamp 20260807022700 and revision id 34236. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

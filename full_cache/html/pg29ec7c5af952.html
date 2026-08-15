@@ -1,0 +1,981 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg29ec7c5af952">dm-crypt/加密整个系统</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/dm-crypt/Encrypting_an_entire_system">dm-crypt/Encrypting an entire system</a>，最近一次同步于 2025-07-10，若英文版本有所<a href="https://wiki.archlinux.org/title/dm-crypt/Encrypting_an_entire_system?diff=0&amp;oldid=838643">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/dm-crypt_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Encrypting_an_entire_system_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文介绍了几种常见的使用“dm-crypt”加密整个系统的方式，以及相比<a href="#pg0d85b8367b38">正常安装过程</a>所需的改动。<a href="https://archlinux.org/download/">官方安装镜像</a>已经包含了加密所需的工具。
+</p><p>若要加密的是已有的未加密的文件系统，见 <a href="#pg88d6e7a842ae">dm-crypt/设备加密#加密现有的未加密文件系统</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg29ec7c5af952_.E6.A6.82.E8.A7.88" id="概览"><span id=".E6.A6.82.E8.A7.88"></span>概览</h2></div>
+<p>“dm-crypt”能为为根文件系统提供安全保护，且相比其它方案具更优的性能。相比仅仅加密部分非根文件系统，加密根文件系统可以隐藏许多敏感信息（如已安装应用列表、用户名等），并能避免通过<a href="#pge74e7aaf6571">locate</a>、<code>/var/log/</code>等常见方式泄露数据。此外，由于除了<a href="#pg7e866ec617d4">引导加载程序</a>和内核（通常情况下），所有数据都被加密，更难对系统进行未授权的改动。
+</p><p>除了上面提到的共同优点以外，各种加密方案还有如下特有的优缺点：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>方案
+</th>
+<th>优点
+</th>
+<th>缺点
+</th></tr>
+<tr>
+<td>#在单一分区上配置LUKS 展示了使用LUKS完全加密的根文件系统的基本方式，最直接。
+</td>
+<td>
+<ul><li>分区与配置简单。</li>
+<li>在使用GPT的磁盘上，<a href="#pgac06dd8bfe95">systemd可自动挂载</a>根分区。</li></ul>
+</td>
+<td>
+<ul><li>不灵活；用于加密的整个磁盘空间需要预先分配。</li></ul>
+</td></tr>
+<tr>
+<td>#使用TPM2和安全启动在单一分区上配置
+<p>与上例相似，并通过使用安全启动、TPM2提高了安全性。
+</p>
+</td>
+<td>
+<p>相比上例，本方法还有如下优点：
+</p>
+<ul><li>安全启动可抵御<a href="https://en.wikipedia.org/wiki/Evil_maid_attack">邪恶女佣攻击</a>。</li>
+<li>在安全启动被关闭或配置被修改时，TPM2将阻止解密。</li></ul>
+</td>
+<td>
+<ul><li>与上例缺点相似。</li></ul>
+</td></tr>
+<tr>
+<td>#在LUKS上配置LVM
+<p>在LUKS加密的单一分区上配置LVM，实现了分区灵活性。
+</p>
+</td>
+<td>
+<ul><li>通过LVM，可简单地在加密设备上配置多个分区。</li>
+<li>只需单一密码即可解密所有分区。</li>
+<li>在未解密时系统的分区结构不可见。</li>
+<li>若要使用<a href="#pg766573d7bb8e">休眠</a>功能，这是最简单的方式。</li></ul>
+</td>
+<td>
+<ul><li>LVM增加了系统设备映射结构的复杂性，且需要单独添加钩子。</li>
+<li>难以对某个分区单独指定密码。</li>
+<li>若需要配置的LVM卷组包含多个物理卷，则所有物理卷必须分别进行LUKS加密。在系统启动时，必须分别解锁所有物理卷后，才能激活并使用卷组。</li></ul>
+</td></tr>
+<tr>
+<td>#在LVM上配置LUKS
+<p>在LVM上层使用LUKS。
+</p>
+</td>
+<td>
+<ul><li>可通过LVM将（单个）加密分区拓展到多个磁盘上。</li>
+<li>可方便地同时配置加密与未加密分区。</li></ul>
+</td>
+<td>
+<ul><li>若更改了LVM逻辑卷的结构，需要同时更改加密设备与逻辑卷的对应关系，配置复杂。</li>
+<li>每个逻辑卷需要单独设置密码。</li>
+<li>LVM中逻辑卷的结构在未解密时也是可见的。</li>
+<li>由于每个加密的逻辑卷都需要单独解密，系统启动较慢。</li></ul>
+</td></tr>
+<tr>
+<td>#在软RAID上配置LUKS
+<p>在软RAID上层使用LUKS。
+</p>
+</td>
+<td>
+<ul><li>与在LVM上配置LUKS相似。</li></ul>
+</td>
+<td>
+<ul><li>与在LVM上配置LUKS，并使用加密引导分区类似。</li></ul>
+</td></tr>
+<tr>
+<td>#Plain dm-crypt
+<p>使用dm-crypt的plain模式（不使用LUKS头及LUKS的多密钥选项）。<br/>此方案还将<code>/boot</code>配置到USB设备上，并通过USB设备储存密钥。该思路也适用于其它方案。
+</p>
+</td>
+<td>
+<ul><li>在面临可能损坏LUKS头的意外情况时，仍能保证数据完整性。</li>
+<li>能够实现<a href="https://en.wikipedia.org/wiki/Deniable_encryption">可抵赖加密</a>。</li>
+<li>有助于解决在SSD上应用加密的<a href="#pg2d5af776f6fd">一些问题</a>。</li></ul>
+</td>
+<td>
+<ul><li>需要尤其关注所有使用的加密参数。</li>
+<li>只能使用单个密码且不能更换密码。</li>
+<li>即使对于常规系统，配置也非常复杂。</li></ul>
+</td></tr>
+<tr>
+<td>#加密boot分区（GRUB）
+<p>展示了如何在使用GRUB时加密boot分区。<br/> 该方案还使用了EFI系统分区，这也适用于其它方案。
+</p>
+</td>
+<td>
+<ul><li>与选择的加密配置方式相同的优点。（在本例中采用在LUKS上配置LVM）</li>
+<li>未加密的数据更少，只有引导加载程序和EFI系统分区（若有）未加密。</li></ul>
+</td>
+<td>
+<ul><li>与选择的加密配置方式相同的缺点。（在本例中采用在LUKS上配置LVM）</li>
+<li>配置更复杂。</li>
+<li>其它引导加载程序不支持此方案。</li>
+<li><a href="#pgc9828c7a368e">GRUB解密LUKS卷所需的时间较长</a>，将减慢启动速度。</li></ul>
+</td></tr>
+<tr>
+<td><a href="#pg29ec7c5af952_Root_on_ZFS">#Root on ZFS</a>
+</td>
+<td>
+<ul><li>若将<code>zpool</code>加密，则其中的所有数据集（dataset）都将使用相同的ZFS加密设置加密。同时，由于加密在ZFS层面进行，支持ZFS的系统都可解密，便于配置双系统或在不同系统间共享数据。</li>
+<li>可将加密的文件系统安全地备份到未加密的ZFS中。产生的文件系统快照将<a href="https://freebsdfoundation.org/our-work/journal/browser-based-edition/storage-and-filesystems/protecting-data-with-zfs-native-encryption/#:~:text=As%20you%20have%20seen%2C%20ZFS,able%20to%20mount%20the%20dataset.">保持原生加密状态</a>。</li></ul>
+</td>
+<td>
+<ul><li><a href="https://openzfs.github.io/openzfs-docs/man/v2.2/8/zfs-load-key.8.html">ZFS 不会加密</a>有关存储池结构的文件系统元数据（例如，数据集/快照名称，数据集结构/属性/文件大小/文件空洞，deduplication tables(though the deduplicated data itself is encrypted)）。</li>
+<li>若要追求最佳性能，需要根据磁盘物理属性创建存储池时（甚至需要考虑物理块大小<code>ashift</code>）。</li>
+<li>ZFS的<code>aes</code>实现存在一些问题；此外，某些加密算法的实现<a href="https://github.com/openzfs/zfs/issues/15276">可能存在性能问题</a>。</li>
+<li>使用<code>zvol</code>作为交换分区或者使用数据集中的文件作为交换文件<a href="https://github.com/openzfs/zfs/issues/7734">存在问题</a>。只能通过关闭休眠并设置交换分区到其它分区（详见下）解决。</li></ul>
+</td></tr></tbody></table>
+<p>虽然对于外界威胁，相比文件系统层面的加密，上述方案提供了好得多的保护。但也有一个共同的缺点：任何拥有密码的用户都能解密整个设备，进而访问其它用户的数据。若要防范上述风险，可以结合使用块设备加密和文件系统加密。可参见<a href="#pg812206bba43d">静态数据加密</a>进行提前规划。
+</p><p>对于本文中所有方案的分区策略的概述，参见<a href="#pg7159ef654a5d">dm-crypt/准备磁盘#分区</a>。
+</p><p>此外，还需考虑是否设置加密的swap分区及设置方式。详见<a href="#pg766573d7bb8e">Dm-crypt/交换分区加密</a>。
+</p><p>加密整个系统可在设备失窃时保护数据，但不能抵御逻辑层面的非法修改（例如，系统上运行的恶意软件修改未加密的boot分区）。若有相关需求，还应参见<a href="#pg2d5af776f6fd">dm-crypt/特殊应用#保护未加密的boot分区</a>。
+</p><p>在使用<a href="#pgcb28ba980ed7">固态硬盘</a>时，可能需要启用TRIM支持。但这可能影响安全性，详见<a href="#pg2d5af776f6fd">dm-crypt/特殊应用#固态硬盘的Discard/TRIM支持</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>在任何情况下都不要直接在加密卷上运行文件系统修复工具（例如，<a href="#pg7545319bee41">fsck</a>），否则，加密密钥将永久丢失，使得所有加密内容无法被解密。只应当在解密后的设备上运行文件系统修复工具。</li>
+<li>Argon2 密钥派生函数的设计方式使得其在运行时将占用大量内存（在默认设置下，每个加密卷将占用1GiB内存）。在设备内存较少或启动时并行解密多个LUKS2分区的情况下，可能导致错误。可使用<code>--pbkdf-memory</code>选项控制内存使用。<a href="https://gitlab.com/cryptsetup/cryptsetup/issues/372">[1]</a></li>
+<li>GRUB对LUKS2的支持并不完善，详见<a href="#pgca9c4017f7ad">GRUB#加密的/boot</a>。对于需要由GRUB解密的分区，建议使用PBKDF2密钥派生函数（<code>cryptsetup luksFormat --pbkdf pbkdf2</code>）。</li>
+<li>对于ZFS，即使交换分区并没有放置在zvol上，从休眠中唤醒时也有可能损坏存储池。因此在配置休眠时需要额外注意。<a href="https://github.com/openzfs/zfs/issues/260#issuecomment-991912492">参考</a></li></ul>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg29ec7c5af952_.E5.9C.A8.E5.8D.95.E4.B8.80.E5.88.86.E5.8C.BA.E4.B8.8A.E9.85.8D.E7.BD.AELUKS" id="在单一分区上配置LUKS"><span id=".E5.9C.A8.E5.8D.95.E4.B8.80.E5.88.86.E5.8C.BA.E4.B8.8A.E9.85.8D.E7.BD.AELUKS"></span>在单一分区上配置LUKS</h2></div>
+<p>本例说明了如何通过“dm-crypt”与LUKS，将安装在单一分区上的系统进行加密。
+</p>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;">+-----------------------+------------------------+-----------------------+
+| boot分区              | LUKS加密的根分区      | 可选的用于其它分区的  |
+|                       | partition              | 空闲空间              |
+|                       |                        |                       | 
+| /boot                 | /                      |                       |
+|                       |                        |                       |
+|                       | /dev/mapper/root       |                       |
+|                       |------------------------|                       |
+| /dev/sda1             | /dev/sda2              |                       |
++-----------------------+------------------------+-----------------------+
+</pre>
+<p>本例的前几步可在启动到Arch Linux安装镜像后直接进行。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98" id="准备磁盘"><span id=".E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98"></span>准备磁盘</h3></div>
+<p>在创建分区前，应先查看<a href="#pg7159ef654a5d">dm-crypt/准备磁盘</a>，了解安全地擦除整个磁盘的重要性，并掌握相关方法。
+</p><p>接下来，创建本例中的分区（至少需要<code>/</code>（<code>/dev/sda2</code>）和<code>/boot</code>（<code>/dev/sda1</code>），详见<a href="#pg8edad8d1135b">分区</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E9.9D.9Eboot.E5.88.86.E5.8C.BA" id="准备非boot分区"><span id=".E5.87.86.E5.A4.87.E9.9D.9Eboot.E5.88.86.E5.8C.BA"></span>准备非boot分区</h3></div>
+<p>在格式化分区时，不要使用<a href="#pgbdbcbed611fc">安装指南</a>中的步骤，而是使用本节及下一节的步骤。
+</p><p>使用如下命令创建并挂载加密的根分区，<a href="#pg88d6e7a842ae">dm-crypt/设备加密#使用 LUKS 模式加密设备</a>中详细介绍了进行的操作。若要使用非默认的加密选项（例如，修改加密算法，密钥长度，扇区大小），在执行如下第一条指令前参见相关<a href="#pg88d6e7a842ae">加密选项</a>。
+</p>
+<pre># cryptsetup -v luksFormat /dev/sda2
+# cryptsetup open /dev/sda2 root
+</pre>
+<p>在解密的LUKS设备上<a href="#pgd736d91d6937">创建文件系统</a>。例如，要创建<a href="#pgb5dd09f37b3e">Ext4</a>文件系统，执行：
+</p>
+<pre># mkfs.ext4 /dev/mapper/root
+</pre>
+<p>将根分区挂载到<code>/mnt</code>：
+</p>
+<pre># mount /dev/mapper/root /mnt
+</pre>
+<p>确保设备映射正常：
+</p>
+<pre># umount /mnt
+# cryptsetup close root
+# cryptsetup open /dev/sda2 root
+# mount /dev/mapper/root /mnt
+</pre>
+<p>若还创建了其它分区（例如，<code>/home</code>），则对于<b>除了</b><code>/boot</code>的其它分区，执行类似操作。在启动时解密其它分区的方法可参见<a href="#pgdef7564e1e82">dm-crypt/加密非root文件系统#自动解锁并挂载</a>。
+</p><p>注意，对于每个要加密并挂载的块设备，都需要单独设置密钥，这将导致在启动时需要多次输入密钥，造成不便。可通过在根分区中存储密钥文件，并通过修改<code>crypttab</code>设置，自动使用密钥文件解锁其它设备。详见<a href="#pg88d6e7a842ae">dm-crypt/设备加密#使用LUKS来格式化带有密钥文件的分区</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87boot.E5.88.86.E5.8C.BA" id="准备boot分区"><span id=".E5.87.86.E5.A4.87boot.E5.88.86.E5.8C.BA"></span>准备boot分区</h3></div>
+<p>对于加密根分区的配置，需要设置非加密的<code>/boot</code>分区。
+</p><p>对于UEFI启动的系统，使用如下命令格式化新创建的<a href="#pg635d4bd93303">EFI 系统分区</a>：
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>只有在EFI系统分区是在安装Arch Linux的分区步骤中创建的情况下，才应当格式化该分区。否则，若EFI系统分区是由其它系统创建的，则重新格式化将导致其它系统的引导程序丢失。</div>
+<pre># mkfs.fat -F32 /dev/sda1
+</pre>
+<p>对于传统BIOS启动的系统：
+</p>
+<pre># mkfs.ext4 /dev/sda1
+</pre>
+<p>之后，创建boot分区的挂载点并挂载分区：
+</p>
+<pre># mount --mkdir /dev/sda1 /mnt/boot
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E6.8C.82.E8.BD.BD.E5.88.86.E5.8C.BA" id="挂载分区"><span id=".E6.8C.82.E8.BD.BD.E5.88.86.E5.8C.BA"></span>挂载分区</h3></div>
+<p>在<a href="#pgbdbcbed611fc">安装指南#挂载分区</a>步骤时，应当挂载<code>/dev/mapper/*</code>中的相应设备（包含LUKS加密的设备的解密后的版本），而不是LUKS加密的设备自身对应的分区。不过，对于未加密的<code>/boot</code>分区，仍应当直接挂载到<code>/mnt/boot</code>（假设在安装过程中，根分区被挂载到<code>/mnt</code>）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AEmkinitcpio" id="配置mkinitcpio"><span id=".E9.85.8D.E7.BD.AEmkinitcpio"></span>配置mkinitcpio</h3></div>
+<p>在<a href="#pgbdbcbed611fc">安装指南#关于_initramfs</a>步骤前，需要在新安装的系统中完成如下操作：
+</p><p>若使用基于busybox的initramfs，在<a href="#pg37f6992c45ff">mkinitcpio.conf</a>中添加<code>keyboard</code>和<code>encrypt</code>钩子。此外，若要使用非标准键盘布局，添加<code>keymap</code>钩子；若要自定义控制台字体，添加<code>consolefont</code>钩子。
+</p>
+<pre>HOOKS=(base <b>udev</b> autodetect microcode modconf kms <b>keyboard</b> <b>keymap</b> <b>consolefont</b> block <b>encrypt</b> filesystems fsck)
+</pre>
+<p>若使用基于systemd的initramfs，在<a href="#pg37f6992c45ff">mkinitcpio.conf</a>中添加<code>keyboard</code>和<code>sd-encrypt</code>钩子。此外，若要使用非标准键盘布局，或要自定义控制台字体，添加<code>sd-vconsole</code>钩子。
+</p>
+<pre>HOOKS=(base <b>systemd</b> autodetect microcode modconf kms <b>keyboard</b> <b>sd-vconsole</b> block <b>sd-encrypt</b> filesystems fsck)
+</pre>
+<p>保存上述修改后，<a href="#pgea04d1b8515f">重新生成initramfs</a>。其它可能需要用到的钩子以及配置细节参见<a href="#pg52b00790fb44">Dm-crypt/系统配置#mkinitcpio</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AE.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F" id="配置引导加载程序"><span id=".E9.85.8D.E7.BD.AE.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F"></span>配置引导加载程序</h3></div>
+<p>要在启动时解密已加密的根分区，需配置引导加载程序，设置如下<a href="#pgec0856954f1c">内核参数</a>：
+</p>
+<pre>cryptdevice=UUID=<i>device-UUID</i>:root root=/dev/mapper/root
+</pre>
+<p>若使用的是<a href="#pg778e3d3578b8">sd-encrypt</a>，则应该添加如下内核参数：
+</p>
+<pre>rd.luks.name=<i>device-UUID</i>=root root=/dev/mapper/root
+</pre>
+<p><code><i>device-UUID</i></code>指的是LUKS超级块的UUID，在本例中为<code>/dev/sda2</code>对应的UUID。详见<a href="#pgd2fddf50b50f">块设备持久化命名</a>。
+</p><p>另见<a href="#pg52b00790fb44">Dm-crypt/系统配置#内核参数</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若根分区与boot分区在同一硬盘上，并且使用的引导加载程序支持<a href="#pgac06dd8bfe95">GPT分区自动挂载</a>，则可以修改根分区的<a href="https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs">分区类型GUID</a>为“Root partition”并通过<span class="plainlinks archwiki-template-man" title="$ man 8 systemd-gpt-auto-generator"><a href="https://man.archlinux.org/man/systemd-gpt-auto-generator.8">systemd-gpt-auto-generator(8)</a></span>自动挂载，而不必设置上述内核参数。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg29ec7c5af952_.E4.BD.BF.E7.94.A8TPM2.E5.92.8C.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8.E5.9C.A8.E5.8D.95.E4.B8.80.E5.88.86.E5.8C.BA.E4.B8.8A.E9.85.8D.E7.BD.AE" id="使用TPM2和安全启动在单一分区上配置"><span id=".E4.BD.BF.E7.94.A8TPM2.E5.92.8C.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8.E5.9C.A8.E5.8D.95.E4.B8.80.E5.88.86.E5.8C.BA.E4.B8.8A.E9.85.8D.E7.BD.AE"></span>使用TPM2和安全启动在单一分区上配置</h2></div>
+<p>本例与#在单一分区上配置LUKS相似，但通过使用<a href="#pg0e14304dd697">安全启动</a>和<a href="#pg3760f6882d85">可信平台模块</a>，使启动过程更安全。
+</p><p>在本配置方案中，只有<a href="#pg635d4bd93303">EFI 系统分区</a>是未加密的，存储经过签名以用于安全启动的<a href="#pgd819314d422c">统一内核映像</a>和<a href="#pg171755f7b428">systemd-boot</a>。在本配置中，若安全启动功能被关闭，或者安全启动的密钥数据库被修改，则TPM将不会释放用于解密分区的密钥。此时，仍可以使用配置过程中创建的恢复密钥解密数据。此外，还可要求在解密数据前必须输入设置的TPM PIN码。本配置方案类似Windows中的BitLocker和macOS中的FileVault。
+</p><p>在继续之前，确保已经详细阅读了<a href="#pg3760f6882d85">可信平台模块#LUKS_数据加密</a>，并着重留意其中的警告。
+</p><p>本例中的分区按照符合<a href="#pgac06dd8bfe95">Systemd#GPT分区自动挂载</a>的方式创建，因此无需fstab、crypttab文件。
+</p>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;">+-----------------------+---------------------------------+
+| EFI系统分区             | LUKS加密的根分区                  |
+|                       |                                 |
+|                       |                                 |
+| /boot                 | /                               |
+|                       |                                 |
+|                       | /dev/mapper/root                |
+|                       |---------------------------------|
+| /dev/sda1             | /dev/sda2                       |
++-----------------------+---------------------------------+
+</pre>
+<p>按照<a href="#pgbdbcbed611fc">安装指南#创建硬盘分区</a>前的步骤进行基本配置。之后，按本文下一节的内容进行磁盘分区。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98_2" id="准备磁盘_2"><span id=".E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98_2"></span>准备磁盘</h3></div>
+<p>在创建分区前，应先查看<a href="#pg7159ef654a5d">dm-crypt/准备磁盘</a>，了解安全地擦除整个磁盘的重要性，并掌握相关方法。
+</p><p>使用<a href="#pg9ddc0f3abd13">GUID分区表</a> (GPT)，并创建需要的分区。
+</p><p>创建大小合适的<a href="#pg635d4bd93303">EFI 系统分区</a>（在本例中，使用<code>/dev/sda1</code>）。该分区将被挂载到<code>/boot</code>。
+</p><p>在磁盘的剩余空间上创建根分区（在本例中，使用<code>/dev/sda2</code>）。根分区将被加密，并挂载到<code>/</code>。将根分区的分区类型GUID设置为<code>4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709</code>（在<a href="#pgc1328f332dd1">fdisk</a>中，设置为"Linux root (x86-64)"类型；在<a href="#pgba80dd5ffb4c">gdisk</a>中，设置为<code>8304</code>类型）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E6.A0.B9.E5.88.86.E5.8C.BA" id="准备根分区"><span id=".E5.87.86.E5.A4.87.E6.A0.B9.E5.88.86.E5.8C.BA"></span>准备根分区</h3></div>
+<p>使用如下命令创建并挂载加密的根分区，<a href="#pg88d6e7a842ae">dm-crypt/设备加密#使用 LUKS 模式加密设备</a>中详细介绍了进行的操作。
+</p><p>若要使用非默认的加密选项（例如，修改加密算法，密钥长度，扇区大小），或者不想使用TPM解密，在执行如下第一条指令前参见相关<a href="#pg88d6e7a842ae">加密选项</a>。
+</p><p>创建并挂载LUKS卷（由于在配置完成后将擦除密码槽位，可以直接使用空密码）：
+</p>
+<pre># cryptsetup luksFormat /dev/sda2
+# cryptsetup open /dev/sda2 root
+</pre>
+<p>在解密的LUKS设备上<a href="#pgd736d91d6937">创建文件系统</a>。例如，要创建<a href="#pgb5dd09f37b3e">Ext4</a>文件系统，执行：
+</p>
+<pre># mkfs.ext4 /dev/mapper/root
+</pre>
+<p>将根分区挂载到 <code>/mnt</code>:
+</p>
+<pre># mount /dev/mapper/root /mnt
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87EFI.E7.B3.BB.E7.BB.9F.E5.88.86.E5.8C.BA" id="准备EFI系统分区"><span id=".E5.87.86.E5.A4.87EFI.E7.B3.BB.E7.BB.9F.E5.88.86.E5.8C.BA"></span>准备EFI系统分区</h3></div>
+<p><a href="#pg635d4bd93303">格式化</a>新创建的EFI系统分区，并挂载：
+</p>
+<pre># mount --mkdir /dev/sda1 /mnt/boot
+</pre>
+<p>继续执行<a href="#pgbdbcbed611fc">安装指南#关于_initramfs</a>前的步骤。注意无需执行<a href="#pgbdbcbed611fc">安装指南#生成_fstab_文件</a>步骤。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AEmkinitcpio_2" id="配置mkinitcpio_2"><span id=".E9.85.8D.E7.BD.AEmkinitcpio_2"></span>配置mkinitcpio</h3></div>
+<p>修改<a href="#pg37f6992c45ff">mkinitcpio.conf</a>中的<code>HOOKS=</code>为如下内容，以构建可用的基于systemd的initramfs：
+</p>
+<pre>HOOKS=(base <b>systemd</b> autodetect microcode modconf kms <b>keyboard</b> <b>sd-vconsole</b> block <b>sd-encrypt</b> filesystems fsck)
+</pre>
+<p>按照<a href="#pgd819314d422c">统一内核映像#mkinitcpio</a>中的步骤配置<a href="#pgd819314d422c">统一内核映像</a>。
+</p><p>由于<code>/boot/EFI/Linux</code>目录暂未由启动加载程序创建，暂时<b>不要</b>重新生成initramfs。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AE.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F_2" id="配置引导加载程序_2"><span id=".E9.85.8D.E7.BD.AE.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F_2"></span>配置引导加载程序</h3></div>
+<p>可以直接<a href="#pgd819314d422c">通过UEFI启动内核</a>，而无需引导加载程序。
+</p><p>若仍需使用引导加载程序，可以安装<a href="#pg171755f7b428">systemd-boot</a>：
+</p>
+<pre># bootctl install
+</pre>
+<p>systemd-boot可自动识别mkinitcpio生成的<a href="#pgd819314d422c">统一内核映像</a>，无需在<code>/boot/loader/entries/</code>手动添加条目。
+</p><p>其它配置参见<a href="#pg171755f7b428">systemd-boot#更新 EFI 启动管理器</a>、<a href="#pg171755f7b428">Systemd-boot#配置</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.AE.8C.E6.88.90.E5.AE.89.E8.A3.85" id="完成安装"><span id=".E5.AE.8C.E6.88.90.E5.AE.89.E8.A3.85"></span>完成安装</h3></div>
+<p><a href="#pgea04d1b8515f">重新生成initramfs</a>，并确保相关镜像成功生成。
+</p><p>不要忘记<a href="#pg0d85b8367b38">设置 root 密码</a>，<a href="#pgbdbcbed611fc">重启</a>以完成安装。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8" id="安全启动"><span id=".E5.AE.89.E5.85.A8.E5.90.AF.E5.8A.A8"></span>安全启动</h3></div>
+<p>为了启用<a href="#pg0e14304dd697">安全启动</a>，需要为引导加载程序、EFI镜像签名。可<a href="#pg4b4af9f551f6">使用sbctl</a>简单、快速地实现。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E6.B3.A8.E5.86.8CTPM" id="注册TPM"><span id=".E6.B3.A8.E5.86.8CTPM"></span>注册TPM</h3></div>
+<p>在签名引导加载程序并启用安全启动后，可以向TPM注册密钥用以解锁LUKS卷。如下命令将移创建LUKS卷时设置的空密码，创建绑定到TPM <a href="#pg3760f6882d85">PCR 7</a>（<a href="#pg0e14304dd697">安全启动</a>状态和已注册证书）寄存器的密钥，并创建恢复密钥，用于在TPM出现问题时解密卷。若安全启动链完好，TPM将自动释放密钥。详见<a href="#pgac5cf0d2e02d">systemd-cryptenroll#Trusted Platform Module</a>、<span class="plainlinks archwiki-template-man" title="$ man 1 systemd-cryptenroll"><a href="https://man.archlinux.org/man/systemd-cryptenroll.1">systemd-cryptenroll(1)</a></span>。
+</p>
+<pre># systemd-cryptenroll /dev/sda2 --recovery-key
+# systemd-cryptenroll /dev/sda2 --wipe-slot=empty --tpm2-device=auto --tpm2-pcrs=7
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若要求在启动时需要输入PIN码解密卷，可添加<code>--tpm2-with-pin=yes</code>参数。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>在绑定密钥到PCR7寄存器时，需要确保<a href="#pg0e14304dd697">安全启动</a>已启用且处于用户模式。否则，未授权的启动设备也可能解锁加密卷。</li>
+<li>若固件证书状态改变，则PCR7寄存器状态也可能改变，导致解锁失败。例如，使用<a href="#pg8f5df3654778">fwupd</a><a href="https://raw.githubusercontent.com/systemd/systemd/ed272a9ff59a26beedaab508dd3c9d631de67165/TODO">[2]</a>可能在不经意间改变固件证书状态；此外，轮转安全启动密钥也将改变固件证书状态。</li></ul>
+</div>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg29ec7c5af952_.E5.9C.A8LUKS.E4.B8.8A.E9.85.8D.E7.BD.AELVM" id="在LUKS上配置LVM"><span id=".E5.9C.A8LUKS.E4.B8.8A.E9.85.8D.E7.BD.AELVM"></span>在LUKS上配置LVM</h2></div>
+<p>在加密的单个分区上配置<a href="#pg02cd87050dfd">LVM</a>是一种较为直接的方案。该方案将LVM设置在一个大的加密块设备中，LVM结构只在块设备解密，扫描并挂载LVM物理卷后才可见。
+</p><p>示例磁盘结构如下：
+</p>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;">+-----------------------------------------------------------------------+ +----------------+
+| 逻辑卷 1              | 逻辑卷 2              | 逻辑卷 3              | | boot分区       |
+|                       |                       |                       | |                |
+| [SWAP]                | /                     | /home                 | | /boot          |
+|                       |                       |                       | |                |
+| /dev/MyVolGroup/swap  | /dev/MyVolGroup/root  | /dev/MyVolGroup/home  | |                |
+|_ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _| | (可能在其他    |
+|                                                                       | | 设备上)        |
+|                         使用LUKS加密的分区                           | |                |
+|                           /dev/sda1                                   | | /dev/sdb1      |
++-----------------------------------------------------------------------+ +----------------+
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>使用默认的<code>encrypt</code>钩子时，不能将逻辑卷分配到多个磁盘上。可使用<a href="#pg778e3d3578b8">sd-encrypt</a>钩子或参见<a href="#pg2d5af776f6fd">dm-crypt/特殊应用#修改encrypt钩子以用于多个分区</a>。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>该配置方案有两种变形：
+<ul><li><a href="#pg2d5af776f6fd">dm-crypt/特殊应用#在加密系统时使用分离的LUKS头</a>介绍了如何将LUKS头单独存放于USB设备上，实现两步验证。</li>
+<li><a href="#pgf43a940f95b2">dm-crypt/Specialties#Encrypted /boot and a detached LUKS header on USB</a>则将LUKS头、加密的boot分区、加密的密钥文件都存放在USB设备上。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98_3" id="准备磁盘_3"><span id=".E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98_3"></span>准备磁盘</h3></div>
+<p>在创建分区前，应先查看<a href="#pg7159ef654a5d">dm-crypt/准备磁盘</a>，了解安全地擦除整个磁盘的重要性，并掌握相关方法。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若要在BIOS启动的设备上使用<a href="#pg69f558531e59">GPT</a>磁盘，且使用<a href="#pgca9c4017f7ad">GRUB</a>引导加载程序，需创建<a href="#pgca9c4017f7ad">BIOS boot partition</a>。</div>
+<p><a href="#pgbdbcbed611fc">创建</a>一个大于1GiB的分区用于<code>/boot</code>。 
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>对于UEFI启动的设备，可将<a href="#pg635d4bd93303">EFI 系统分区</a>用于<code>/boot</code>。</div>
+<p>创建一个分区，用于存储整个加密的LVM。
+</p><p>在上述创建的分区上配置LUKS作为LVM的容器（若要修改加密选项，参见<a href="#pg88d6e7a842ae">dm-crypt/设备加密#LUKS 模式的加密选项</a>）：
+</p>
+<pre># cryptsetup luksFormat /dev/sda1
+</pre>
+<p>打开创建的容器：
+</p>
+<pre># cryptsetup open /dev/sda1 cryptlvm
+</pre>
+<p>现在可通过<code>/dev/mapper/cryptlvm</code>访问解密的容器。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E9.80.BB.E8.BE.91.E5.8D.B7" id="准备逻辑卷"><span id=".E5.87.86.E5.A4.87.E9.80.BB.E8.BE.91.E5.8D.B7"></span>准备逻辑卷</h3></div>
+<p>在解密的LUKS容器上创建物理卷：
+</p>
+<pre># pvcreate /dev/mapper/cryptlvm
+</pre>
+<p>创建卷组（本例中使用<code>MyVolGroup</code>，也可使用其它名称），并加入先前创建的物理卷：
+</p>
+<pre># vgcreate MyVolGroup /dev/mapper/cryptlvm
+</pre>
+<p>在卷组中创建逻辑卷：
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若需要使用<a href="#pgb5dd09f37b3e">ext4</a>格式的逻辑卷，应在卷组中预留至少256MiB的空闲空间，以便能正常使用<span class="plainlinks archwiki-template-man" title="$ man 8 e2scrub"><a href="https://man.archlinux.org/man/e2scrub.8">e2scrub(8)</a></span>。可以在使用<code>-l 100%FREE</code>创建占满所有剩余空间的最后一个逻辑卷后，使用类似<code>lvreduce -L -256M MyVolGroup/home</code>的命令减少该逻辑卷的大小。</div>
+<pre># lvcreate -L 4G -n swap MyVolGroup
+# lvcreate -L 32G -n root MyVolGroup
+# lvcreate -l 100%FREE -n home MyVolGroup
+</pre>
+<p>在每个逻辑卷上<a href="#pg6c70b7fdfa57">创建文件系统</a>。例如，若根分区和home分区使用<a href="#pgb5dd09f37b3e">Ext4</a>文件系统：
+</p>
+<pre># mkfs.ext4 /dev/MyVolGroup/root
+# mkfs.ext4 /dev/MyVolGroup/home
+# mkswap /dev/MyVolGroup/swap
+</pre>
+<p>挂载文件系统：
+</p>
+<pre># mount /dev/MyVolGroup/root /mnt
+# mount --mkdir /dev/MyVolGroup/home /mnt/home
+# swapon /dev/MyVolGroup/swap
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87boot.E5.88.86.E5.8C.BA_2" id="准备boot分区_2"><span id=".E5.87.86.E5.A4.87boot.E5.88.86.E5.8C.BA_2"></span>准备boot分区</h3></div>
+<p>引导加载程序从<code>/boot</code>目录加载内核、<a href="#pg5409190f7704">initramfs</a>和自身的配置文件。可使用任何引导加载程序支持的文件系统。
+</p><p>为<code>/boot</code>分区创建<a href="#pg6c70b7fdfa57">文件系统</a>。对于UEFI启动的系统，使用如下命令格式化新创建的<a href="#pg635d4bd93303">EFI 系统分区</a>：
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>只有在EFI系统分区是在安装Arch Linux的分区步骤中创建的情况下，才应当格式化该分区。否则，若EFI系统分区是由其它系统创建的，则重新格式化将导致其它系统的引导程序丢失。</div>
+<pre># mkfs.fat -F32 /dev/sdb1
+</pre>
+<p>对于传统BIOS启动的系统：
+</p>
+<pre># mkfs.ext4 /dev/sdb1
+</pre>
+<p>将上述分区挂载到<code>/mnt/boot</code>：
+</p>
+<pre># mount --mkdir /dev/sdb1 /mnt/boot
+</pre>
+<p>继续执行<a href="#pgbdbcbed611fc">安装指南#开始安装系统</a>中的步骤。之后回到本页，执行修改后的<a href="#pgbdbcbed611fc">关于 initramfs</a>、<a href="#pgbdbcbed611fc">安装引导程序</a>步骤。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AEmkinitcpio_3" id="配置mkinitcpio_3"><span id=".E9.85.8D.E7.BD.AEmkinitcpio_3"></span>配置mkinitcpio</h3></div>
+<p>确保<a href="#pg54c3351b3e3b">已安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lvm2">lvm2</a></span><sup><small>包</small></sup></span>。
+</p><p>若使用基于busybox的initramfs，在<a href="#pg37f6992c45ff">mkinitcpio.conf</a>中添加<code>keyboard</code>、<code>encrypt</code>、<code>lvm2</code>钩子。此外，若要使用非标准键盘布局，添加<code>keymap</code>钩子；若要自定义控制台字体，添加<code>consolefont</code>钩子。 
+</p>
+<pre>HOOKS=(base <b>udev</b> autodetect microcode modconf kms <b>keyboard</b> <b>keymap</b> <b>consolefont</b> block <b>encrypt</b> <b>lvm2</b> filesystems fsck)
+</pre>
+<p>若使用基于systemd的initramfs，在<a href="#pg37f6992c45ff">mkinitcpio.conf</a>中添加<code>keyboard</code>、<code>sd-encrypt</code>、<code>lvm2</code>钩子。此外，若要使用非标准键盘布局，或要自定义控制台字体，添加<code>sd-vconsole</code>钩子。
+</p>
+<pre>HOOKS=(base <b>systemd</b> autodetect microcode modconf kms <b>keyboard</b> <b>sd-vconsole</b> block <b>sd-encrypt</b> <b>lvm2</b> filesystems fsck)
+</pre>
+<p>保存上述修改后，<a href="#pgea04d1b8515f">重新生成initramfs</a>。其它可能需要用到的钩子以及配置细节参见<a href="#pg52b00790fb44">Dm-crypt/系统配置#mkinitcpio</a>。
+</p><p>注意：若使用<a href="#pgb185d4cf00ac">dracut</a>生成mkinitcpio，则其已经包含必要的模块，无需额外配置。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AE.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F_3" id="配置引导加载程序_3"><span id=".E9.85.8D.E7.BD.AE.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F_3"></span>配置引导加载程序</h3></div>
+<p>要在启动时解密已加密的根分区，需配置引导加载程序设置如下<a href="#pgec0856954f1c">内核参数</a>：
+</p>
+<pre>cryptdevice=UUID=<i>device-UUID</i>:cryptlvm root=/dev/MyVolGroup/root
+</pre>
+<p>若使用的是<a href="#pg778e3d3578b8">sd-encrypt</a>，则应该添加如下内核参数：
+</p>
+<pre>rd.luks.name=<i>device-UUID</i>=cryptlvm root=/dev/MyVolGroup/root
+</pre>
+<p><code><i>device-UUID</i></code>指的是LUKS超级块的UUID，在本例中为<code>/dev/sda1</code>对应的UUID。详见<a href="#pgd2fddf50b50f">块设备持久化命名</a>。
+</p><p>若使用<a href="#pgb185d4cf00ac">dracut</a>，一般可使用如下参数：
+</p>
+<pre>rd.luks.uuid=<i>device-UUID</i> root=/dev/MyVolGroup/root
+</pre>
+<p>有时，需要设置更多参数：
+</p>
+<pre>rd.luks.uuid=luks-<i>deviceUUID</i> rd.lvm.lv=<i>MyVolGroup</i>/root  rd.lvm.lv=<i>MyVolGroup</i>/swap  root=/dev/mapper/<i>MyVolGroup</i>-root rootfstype=ext4 rootflags=rw,relatime
+</pre>
+<p>详见<a href="#pg52b00790fb44">Dm-crypt/系统配置#内核参数</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg29ec7c5af952_.E5.9C.A8LVM.E4.B8.8A.E9.85.8D.E7.BD.AELUKS" id="在LVM上配置LUKS"><span id=".E5.9C.A8LVM.E4.B8.8A.E9.85.8D.E7.BD.AELUKS"></span>在LVM上配置LUKS</h2></div>
+<p>为了在<a href="#pg02cd87050dfd">LVM</a>上层设置加密，首先要设置LVM卷，用作加密分区的基础。在本方案中，可同时创建加密及未加密的分区。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>与#在LUKS上配置LVM不同，可以使用常规方式将逻辑卷分配到多个磁盘上。</div>
+<p>下例展示了在LVM上配置LUKS加密卷，并使用密钥文件解锁home分区。对于swap分区，使用临时加密卷，以确保在每次重启后，都重新配置swap分区的加密，防止敏感信息泄露，提升安全性。若熟悉LVM配置，可自行修改LVM分区方案。
+</p><p>若要创建横跨多个磁盘的逻辑卷，或要将已有逻辑卷扩展到其它已配置好的磁盘上，详见<a href="#pg2d5af776f6fd">dm-crypt/特殊应用#将LVM拓展到多个磁盘上</a>。注意调整逻辑卷的大小后，LUKS加密容器的大小也需要调整。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98_4" id="准备磁盘_4"><span id=".E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98_4"></span>准备磁盘</h3></div>
+<p>分区方案如下：
+</p>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;">+----------------+-------------------------------------------------------------------------------------------------+
+| boot分区       | dm-crypt plain加密的分区        | LUKS加密的分区               | LUKS加密的分区               |
+|                |                                 |                               |                               |
+| /boot          | [SWAP]                          | /                             | /home                         |
+|                |                                 |                               |                               |
+|                | /dev/mapper/swap                | /dev/mapper/root              | /dev/mapper/home              |
+|                |_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|
+|                | 逻辑卷 1                        | 逻辑卷 2                      | 逻辑卷 3                      |
+|                | /dev/MyVolGroup/cryptswap       | /dev/MyVolGroup/cryptroot     | /dev/MyVolGroup/crypthome     |
+|                |_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|
+|                |                                                                                                 |
+|   /dev/sda1    |                                   /dev/sda2                                                     |
++----------------+-------------------------------------------------------------------------------------------------+
+</pre>
+<p>按照<a href="#pg7159ef654a5d">dm-crypt/准备磁盘#dm-crypt 擦除空设备或分区</a>随机擦除<code>/dev/sda2</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E9.80.BB.E8.BE.91.E5.8D.B7_2" id="准备逻辑卷_2"><span id=".E5.87.86.E5.A4.87.E9.80.BB.E8.BE.91.E5.8D.B7_2"></span>准备逻辑卷</h3></div>
+<pre># pvcreate /dev/sda2
+# vgcreate MyVolGroup /dev/sda2
+# lvcreate -L 4G -n cryptswap MyVolGroup
+# lvcreate -L 32G -n cryptroot MyVolGroup
+# lvcreate -l 100%FREE -n crypthome MyVolGroup
+</pre>
+<pre># cryptsetup luksFormat /dev/MyVolGroup/cryptroot
+# cryptsetup open /dev/MyVolGroup/cryptroot root
+</pre>
+<p>在解密后的设备上<a href="#pgd736d91d6937">创建文件系统</a>，并挂载到对应挂载点。例如，要创建<a href="#pgb5dd09f37b3e">Ext4</a>文件系统：
+</p>
+<pre># mkfs.ext4 /dev/mapper/root
+# mount /dev/mapper/root /mnt
+</pre>
+<p>关于加密选项的更多信息，详见<a href="#pg88d6e7a842ae">dm-crypt/设备加密#LUKS 模式的加密选项</a>。
+</p><p>注意<code>/home</code>的加密会在#加密/home逻辑卷步骤中进行。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若要在Arch ISO中访问加密的根文件系统，可在<a href="#pg02cd87050dfd">LVM逻辑卷出现后</a>执行上述<code>open</code>操作。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87boot.E5.88.86.E5.8C.BA_3" id="准备boot分区_3"><span id=".E5.87.86.E5.A4.87boot.E5.88.86.E5.8C.BA_3"></span>准备boot分区</h3></div>
+<p>为<code>/boot</code>分区创建<a href="#pg6c70b7fdfa57">文件系统</a>。对于UEFI启动的系统，使用如下命令格式化新创建的<a href="#pg635d4bd93303">EFI 系统分区</a>：
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>只有在EFI系统分区是在安装Arch Linux的分区步骤中创建的情况下，才应当格式化该分区。否则，若EFI系统分区是由其它系统创建的，则重新格式化将导致其它系统的引导程序丢失。</div>
+<pre># mkfs.fat -F32 /dev/sda1
+</pre>
+<p>对于传统BIOS启动的系统：
+</p>
+<pre># mkfs.ext4 /dev/sda1
+</pre>
+<p>之后，创建boot分区的挂载点并挂在分区：
+</p>
+<pre># mount --mkdir /dev/sda1 /mnt/boot
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AEmkinitcpio_4" id="配置mkinitcpio_4"><span id=".E9.85.8D.E7.BD.AEmkinitcpio_4"></span>配置mkinitcpio</h3></div>
+<p>确保<a href="#pg54c3351b3e3b">已安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lvm2">lvm2</a></span><sup><small>包</small></sup></span>。
+</p><p>若使用基于busybox的initramfs，在<a href="#pg37f6992c45ff">mkinitcpio.conf</a>中添加<code>keyboard</code>、<code>encrypt</code>、<code>lvm2</code>钩子。此外，若要使用非标准键盘布局，添加<code>keymap</code>钩子；若要自定义控制台字体，添加<code>consolefont</code>钩子。 
+</p>
+<pre>HOOKS=(base <b>udev</b> autodetect microcode modconf kms <b>keyboard</b> <b>keymap</b> <b>consolefont</b> block <b>lvm2</b> <b>encrypt</b> filesystems fsck)
+</pre>
+<p>若使用基于systemd的initramfs，在<a href="#pg37f6992c45ff">mkinitcpio.conf</a>中添加<code>keyboard</code>、<code>sd-encrypt</code>、<code>lvm2</code>钩子。此外，若要使用非标准键盘布局，或要自定义控制台字体，添加<code>sd-vconsole</code>钩子。
+</p>
+<pre>HOOKS=(base <b>systemd</b> autodetect microcode modconf kms <b>keyboard</b> <b>sd-vconsole</b> block <b>sd-encrypt</b> <b>lvm2</b> filesystems fsck)
+</pre>
+<p>保存上述修改后，<a href="#pgea04d1b8515f">重新生成initramfs</a>。其它可能需要用到的钩子以及配置细节参见<a href="#pg52b00790fb44">Dm-crypt/系统配置#mkinitcpio</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AE.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F_4" id="配置引导加载程序_4"><span id=".E9.85.8D.E7.BD.AE.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F_4"></span>配置引导加载程序</h3></div>
+<p>要在启动时解密已加密的根分区，需配置引导加载程序设置如下<a href="#pgec0856954f1c">内核参数</a>：
+</p>
+<pre>cryptdevice=UUID=<i>device-UUID</i>:root root=/dev/mapper/root
+</pre>
+<p>若使用的是<a href="#pg778e3d3578b8">sd-encrypt</a>，则应该添加如下内核参数：
+</p>
+<pre>rd.luks.name=<i>device-UUID</i>=root root=/dev/mapper/root
+</pre>
+<p><code><i>device-UUID</i></code>指的是LUKS超级块的UUID，在本例中为<code>/dev/MyVolGroup/cryptroot</code>对应的UUID。详见<a href="#pgd2fddf50b50f">块设备持久化命名</a>。
+</p><p>若使用的是<a href="#pgb185d4cf00ac">dracut</a>，需要一系列更复杂的参数：
+</p>
+<pre>kernel_cmdline="rd.luks.uuid=luks-<i>deviceUUID</i> rd.lvm.lv=<i>MyVolGroup</i>/root  rd.lvm.lv=<i>MyVolGroup</i>/swap  root=/dev/mapper/<i>MyVolGroup</i>-root rootfstype=ext4 rootflags=rw,relatime"
+</pre>
+<p>详见<a href="#pg52b00790fb44">Dm-crypt/系统配置#内核参数</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AEfstab.E5.92.8Ccrypttab" id="配置fstab和crypttab"><span id=".E9.85.8D.E7.BD.AEfstab.E5.92.8Ccrypttab"></span>配置fstab和crypttab</h3></div>
+<p><a href="#pg1340a4be8b92">crypttab</a>用于解密设备，<a href="#pgced0cc449f44">fstab</a>用于挂载文件系统。如下配置将在每次重启时用不同的密钥重新加密swap分区：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">swap	/dev/MyVolGroup/cryptswap	/dev/urandom	swap,cipher=aes-xts-plain64,size=256,sector-size=4096</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/mapper/root                          /     ext4   defaults  0 1
+UUID=<i>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</i> /boot ext4   defaults  0 2
+/dev/mapper/swap                          none  swap   defaults  0 0</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.8A.A0.E5.AF.86.2Fhome.E9.80.BB.E8.BE.91.E5.8D.B7" id="加密/home逻辑卷"><span id=".E5.8A.A0.E5.AF.86.2Fhome.E9.80.BB.E8.BE.91.E5.8D.B7"></span>加密/home逻辑卷</h3></div>
+<p>由于本方案使用LVM作为第一层，dm-crypt作为第二层，每个加密逻辑卷都需要单独进行加密解密配置。此外，显然，和临时文件系统可采用临时随机密钥加密不同，<code>/home</code>对应的逻辑卷应该采用持久不变的密钥。下列命令假定你已经重启进入了安装好的系统。否则，需要调整相应路径。
+</p><p>为了避免在系统启动时输入两次密码，创建<a href="#pg8ad7aef74953">密钥文件</a>：
+</p>
+<pre># dd bs=512 count=4 if=/dev/random iflag=fullblock | install -m 0600 /dev/stdin /etc/cryptsetup-keys.d/home.key
+</pre>
+<p>/home逻辑卷将采用上述密钥文件加密：
+</p>
+<pre># cryptsetup luksFormat -v /dev/MyVolGroup/crypthome /etc/cryptsetup-keys.d/home.key
+# cryptsetup -d /etc/cryptsetup-keys.d/home.key open /dev/MyVolGroup/crypthome home
+</pre>
+<p>在解密后的设备上<a href="#pgd736d91d6937">创建文件系统</a>，并挂载到对应挂载点。例如，要创建<a href="#pgb5dd09f37b3e">Ext4</a>文件系统：
+</p>
+<pre># mkfs.ext4 /dev/mapper/home
+# mount /dev/mapper/home /home
+</pre>
+<p>解密并挂载该文件系统需要配置<a href="#pg1340a4be8b92">crypttab</a>和<a href="#pgced0cc449f44">fstab</a>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">home	/dev/MyVolGroup/crypthome   none
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/mapper/home        /home   ext4        defaults        0       2
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg29ec7c5af952_.E5.9C.A8.E8.BD.AFRAID.E4.B8.8A.E9.85.8D.E7.BD.AELUKS" id="在软RAID上配置LUKS"><span id=".E5.9C.A8.E8.BD.AFRAID.E4.B8.8A.E9.85.8D.E7.BD.AELUKS"></span>在软RAID上配置LUKS</h2></div>
+<p>下例基于真实的工作站笔记本设置，该工作站有两块大小相同的SSD及一块大容量机械硬盘。在本配置中，对所有磁盘采用LUKS加密（包括<code>/boot</code>）,并将两块SSD组成了<a href="#pg1b71ce42139c">RAID0</a>阵列。系统启动时，在<a href="#pgca9c4017f7ad">GRUB</a>中输入正确的密码后，将用解密出的密钥文件解密所有分区。
+</p><p>本方案采用的分区配置非常简单，组成的RAID阵列挂载在<code>/</code>（没有单独的<code>/boot</code> 分区），解密后的机械硬盘挂载在<code>/data</code>。
+</p><p>注意对于本方案，定期的<a href="#pgab5c8518328c">备份</a>非常重要。若两块SSD中的任何一块损坏，整个RAID阵列中的数据都将丢失。若要求较高的容错能力，应选择其它<a href="#pg1b71ce42139c">RAID级别</a>。
+</p><p>本配置中的加密方式不是可抵赖加密。
+</p><p>在之后的命令中，假定采用如下块设备设置：
+</p>
+<pre>/dev/sda = 第一块SSD
+/dev/sdb = 第二块SSD
+/dev/sdc = 机械硬盘
+</pre>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;">+---------------------+---------------------------+---------------------------+ +---------------------+---------------------------+---------------------------+ +---------------------------+
+| BIOS boot分区       | EFI系统分区               | LUKS加密的分区           | | BIOS 启动分区       | EFI系统分区               | LUKS加密的分区           | | LUKS加密的分区           |
+|                     |                           |                           | |                     |                           |                           | |                           |
+|                     | /efi                      | /                         | |                     | /efi                      | /                         | | /data                     |
+|                     |                           |                           | |                     |                           |                           | |                           |
+|                     |                           | /dev/mapper/root          | |                     |                           | /dev/mapper/root          | |                           |
+|                     +---------------------------+---------------------------+ |                     +---------------------------+---------------------------+ |                           |
+|                     | RAID1 array (part 1 of 2) | RAID0 array (part 1 of 2) | |                     | RAID1 array (part 2 of 2) | RAID0 array (part 2 of 2) | |                           |
+|                     |                           |                           | |                     |                           |                           | |                           |
+|                     | /dev/md/ESP               | /dev/md/root              | |                     | /dev/md/ESP               | /dev/md/root              | | /dev/mapper/data          |
+|                     +---------------------------+---------------------------+ |                     +---------------------------+---------------------------+ +---------------------------+
+| /dev/sda1           | /dev/sda2                 | /dev/sda3                 | | /dev/sdb1           | /dev/sdb2                 | /dev/sdb3                 | | /dev/sdc1                 |
++---------------------+---------------------------+---------------------------+ +---------------------+---------------------------+---------------------------+ +---------------------------+
+</pre>
+<p>在之后的操作中，需要根据实际情况替换上述配置。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98_5" id="准备磁盘_5"><span id=".E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98_5"></span>准备磁盘</h3></div>
+<p>在创建分区前，应先查看<a href="#pg7159ef654a5d">dm-crypt/准备磁盘</a>，了解安全地擦除整个磁盘的重要性，并掌握相关方法。
+</p><p>对于使用GPT分区表的BIOS启动的系统，需创建一个大小为1MiB的<a href="#pgca9c4017f7ad">BIOS启动分区</a>，GRUB将在此存储第二阶段的BIOS引导加载程序。不要挂载该分区。
+</p><p>对于<a href="#pgca9c4017f7ad">UEFI启动的系统</a>，需创建大小适当的<a href="#pg635d4bd93303">EFI 系统分区</a>，并挂载到<code>/efi</code>。
+</p><p>对于设备上的剩余空间，创建一个用于"Linux RAID"的分区（本例中为<code>/dev/sda3</code>）。对于MBR分区表，选择<code>fd</code>分区类型ID；对于GPT分区表，选择<code>A19D880F-05FC-4D3B-A006-743F0F84911E</code>分区类型GUID。
+</p><p>一旦在<code>/dev/sda</code>上创建好了分区，可使用下列命令将它们的配置克隆到<code>/dev/sdb</code>上：
+</p>
+<pre># sfdisk -d /dev/sda &gt; sda.dump
+# sfdisk /dev/sdb &lt; sda.dump
+</pre>
+<p>对于机械硬盘，创建单个占据整个磁盘的Linux分区（<code>/dev/sdc1</code>）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E6.9E.84.E5.BB.BARAID.E9.98.B5.E5.88.97" id="构建RAID阵列"><span id=".E6.9E.84.E5.BB.BARAID.E9.98.B5.E5.88.97"></span>构建RAID阵列</h3></div>
+<p>创建用于两块SSD的RAID阵列：
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>对于两块SSD，EFI系统分区必须能在每块SSD上单独访问，因此只能存放在RAID1上。</li>
+<li>必须通过<code>--metadata=1.0</code>选项将RAID superblock放置在EFI系统分区的后部，否则固件将不能访问EFI系统分区。</li></ul>
+</div>
+<pre># mdadm --create --verbose --level=1 --metadata=1.0 --raid-devices=2 /dev/md/ESP /dev/sda2 /dev/sdb2
+</pre>
+<p>对于根分区，本例采用了RAID0。可根据实际偏好与需要选择其它RAID级别。
+</p>
+<pre># mdadm --create --verbose --level=0 --metadata=1.2 --raid-devices=2 /dev/md/root /dev/sda3 /dev/sdb3
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E5.9D.97.E8.AE.BE.E5.A4.87" id="准备块设备"><span id=".E5.87.86.E5.A4.87.E5.9D.97.E8.AE.BE.E5.A4.87"></span>准备块设备</h3></div>
+<p><a href="#pg7159ef654a5d">dm-crypt/准备磁盘</a>中介绍了通过使用随机密钥创建加密卷，并向加密卷中写入<code>/dev/zero</code>产生的全零数据来随机擦除设备的方法。此外，也可使用<code>dd</code>与<code>/dev/random</code>或<code>/dev/urandom</code>来擦除，不过速度较慢。
+</p>
+<pre># cryptsetup open --type plain --sector-size 4096 --key-file /dev/urandom /dev/md/root to_be_wiped
+# dd if=/dev/zero of=/dev/mapper/to_be_wiped bs=1M status=progress
+# cryptsetup close to_be_wiped
+</pre>
+<p>对本例中的机械硬盘（<code>/dev/sdc1</code>）也需重复上述操作。
+</p><p>为<code>/dev/md/root</code>设置加密：
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>GRUB对LUKS2的支持并不完善，详见<a href="#pgca9c4017f7ad">GRUB#加密的/boot</a>。对于需要由GRUB解密的分区，建议使用PBKDF2密钥派生函数（<code>cryptsetup luksFormat --pbkdf pbkdf2</code>）。</div>
+<pre># cryptsetup -v luksFormat --pbkdf pbkdf2 /dev/md/root
+# cryptsetup open /dev/md/root root
+</pre>
+<p>在解密后的设备上<a href="#pgd736d91d6937">创建文件系统</a>。例如，要创建<a href="#pgb5dd09f37b3e">Ext4</a>文件系统：
+</p>
+<pre># mkfs.ext4 /dev/mapper/root
+</pre>
+<p>将根分区挂载到<code>/mnt</code>：
+</p>
+<pre># mount /dev/mapper/root /mnt
+</pre>
+<p>对机械硬盘，类似的：
+</p>
+<pre># cryptsetup -v luksFormat /dev/sdc1
+# cryptsetup open /dev/sdc1 data
+# mkfs.ext4 /dev/mapper/data
+# mount --mkdir /dev/mapper/data /mnt/data
+</pre>
+<p>对于UEFI启动的系统，还需设置EFI系统分区：
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>只有在EFI系统分区是在安装Arch Linux的分区步骤中创建的情况下，才应当格式化该分区。否则，若EFI系统分区是由其它系统创建的，则重新格式化将导致其它系统的引导程序丢失。</div>
+<pre># mkfs.fat -F32 /dev/md/ESP
+# mount --mkdir /dev/md/ESP /mnt/efi
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AEGRUB" id="配置GRUB"><span id=".E9.85.8D.E7.BD.AEGRUB"></span>配置GRUB</h3></div>
+<p>对于本例中通过LUKS加密的系统，编辑<code>/etc/default/grub</code>以配置<a href="#pgca9c4017f7ad">GRUB</a>：
+</p>
+<pre>GRUB_CMDLINE_LINUX="cryptdevice=/dev/md/root:root"
+GRUB_ENABLE_CRYPTODISK=y
+</pre>
+<p>对于较新的设备，可能需要使用USB键盘在GRUB中输入密码。这需要启用固件中的”legacy USB support“，或在<code>/etc/default/grub</code>中添加：
+</p>
+<pre>GRUB_TERMINAL_INPUT="usb_keyboard"
+GRUB_PRELOAD_MODULES="usb usb_keyboard ohci uhci ehci"
+</pre>
+<p>否则在提示输入LUKS密码时可能无法使用键盘。详见<a href="#pg52b00790fb44">Dm-crypt/系统配置#内核参数</a>、<a href="#pgca9c4017f7ad">GRUB#加密的/boot</a>。
+</p><p>将GRUB安装到两块SSD上（事实上，仅安装到<code>/dev/sda</code>也是可行的）：
+</p>
+<pre># grub-install --target=i386-pc /dev/sda
+# grub-install --target=i386-pc /dev/sdb
+# grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB
+# grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AE.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6" id="配置密钥文件"><span id=".E9.85.8D.E7.BD.AE.E5.AF.86.E9.92.A5.E6.96.87.E4.BB.B6"></span>配置密钥文件</h3></div>
+<p>进行如下步骤可避免在启动时需输入两次密码（第一次发生在GRUB解密LUKS设备，第二次发生在initramfs接管系统时）。首先要创建<a href="#pg88d6e7a842ae">密钥文件</a>，然后将该密钥文件加入到initramfs镜像中以便encrypt钩子解密根分区。详见<a href="#pg88d6e7a842ae">dm-crypt/设备加密#在_initramfs_中嵌入密钥文件</a>。
+</p>
+<ul><li>创建<a href="#pg88d6e7a842ae">密钥文件</a>并向其中添加<code>/dev/md/root</code>的密码。</li>
+<li>创建另一个密钥文件以便于在启动时解密机械硬盘（<code>/dev/sdc1</code>）。为了便于以后可能的需要恢复的情况，不要移动/删除上述密钥文件。接下来编辑<code>/etc/crypttab</code>以在启动时解密机械硬盘。详见<a href="#pg52b00790fb44">Dm-crypt/系统配置#使用密钥文件解密</a>。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AE.E7.B3.BB.E7.BB.9F" id="配置系统"><span id=".E9.85.8D.E7.BD.AE.E7.B3.BB.E7.BB.9F"></span>配置系统</h3></div>
+<p>配置<a href="#pgced0cc449f44">fstab</a>以挂载根分区、data分区、EFI系统分区：
+</p>
+<pre>/dev/mapper/root  /	  ext4	rw,noatime 	   0 1
+/dev/mapper/data  /data   ext4	defaults           0 2
+/dev/md/ESP       /efi     vfat	rw,relatime,codepage=437,iocharset=iso8859-1,shortname=mixed,utf8,tz=UTC,errors=remount-ro  	0 2
+</pre>
+<p>保存RAID配置：
+</p>
+<pre># mdadm --detail --scan &gt;&gt; /etc/mdadm.conf
+</pre>
+<p>编辑<a href="#pgbd0f46fbac92">mkinitcpio.conf</a>，包含密钥文件，并添加所需的钩子：
+</p>
+<pre>FILES=(/crypto_keyfile.bin)
+HOOKS=(base udev autodetect microcode modconf kms <b>keyboard</b> <b>keymap</b> <b>consolefont</b> block <b>mdadm_udev</b> <b>encrypt</b> filesystems fsck)
+</pre>
+<p>详见<a href="#pg52b00790fb44">Dm-crypt/系统配置#mkinitcpio</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg29ec7c5af952_Plain_dm_crypt" id="Plain_dm-crypt">Plain dm-crypt</h2></div>
+<p>与LUKS不同，dm-crypt的<i>plain</i>模式无需在加密设备前附加LUKS头，本方案利用该特点在未分区的硬盘上设置加密的系统。对于他人，将无法区分用该方式加密的硬盘与与用随机数据填充的硬盘，即所谓<a href="https://en.wikipedia.org/wiki/Deniable_encryption">可抵赖加密</a>。详见<a href="https://en.wikipedia.org/wiki/Disk_encryption#Full_disk_encryption">wikipedia:Disk encryption#Full disk encryption</a>。
+</p><p>注意，除非需要将整个硬盘全部加密，否则，无论是加密整个系统还是部分分区，使用之前小节中介绍的基于LUKS的方法都是更好的选择。因为在<i>plain</i>模式中，无法使用<a href="#pg88d6e7a842ae">LUKS特有的功能</a>，例如支持多个密码、密钥文件的密钥管理，主密钥备份，原位重新加密。
+</p><p>由于不依赖主密钥，可避免主密钥损坏或被销毁导致的单点故障，<i>plain</i>模式对数据损坏的承受能力更强。此外，若尤为在意<a href="#pg2d5af776f6fd">对SSD的TRIM支持</a>，也可以使用<i>plain</i>模式。然而，在<i>plain</i>模式下，要到达与LUKS模式相同的加密强度，需要手动配置加密选项。详见<a href="#pg812206bba43d">静态数据加密#加密的元数据</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若需要使用无LUKS头的加密但仍想使用KDF的相关功能，可尝试如下两种替代方案：
+<ul><li>通过<i>cryptsetup</i>的<code>--header</code>选项<a href="#pg2d5af776f6fd">使用分离的LUKS头</a>。注意若使用该方案则不能使用标准的"encrypt"钩子，不过可对该钩子进行修改。</li>
+<li><a href="#pg9cbfd7f13f85">tcplay</a> 在无LUKS头加密模式下提供了PBKDF2函数。</li></ul>
+</div>
+<p>本方案使用了两个U盘：
+</p>
+<ul><li>一个用于引导设备，同时存储用于解密plain加密设备的配置选项；</li>
+<li>一个用于密钥文件，将按原始比特位存储，故不了解加密方案的攻击者只能看到一串仿佛随机的数据，而非可见的普通文件。详见<a href="https://en.wikipedia.org/wiki/Security_through_obscurity">Wikipedia:Security through obscurity</a>。要准备密钥文件，参见<a href="#pg8ad7aef74953">dm-crypt/Device encryption#Keyfiles</a>。</li></ul>
+<p>磁盘布局如下：
+</p>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;">+----------------------+----------------------+----------------------+ +----------------+ +----------------+
+| 逻辑卷 1     | 逻辑卷 2     | 逻辑卷 3     | | 启动设备    | | 密钥 |
+|                      |                      |                      | |                | | 存储设备   |
+| /                    | [SWAP]               | /home                | | /boot          | | (在本例中 |
+|                      |                      |                      | |                | | 未分区)    |
+| /dev/MyVolGroup/root | /dev/MyVolGroup/swap | /dev/MyVolGroup/home | | /dev/sdb1      | | /dev/sdc       |
+|----------------------+----------------------+----------------------| |----------------| |----------------|
+| /dev/sda 使用plain模式加密并配置LVM             | | U盘 1    | | U盘 2    |
++--------------------------------------------------------------------+ +----------------+ +----------------+
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>也可以只使用一个U盘，如下为两种方式：
+<ul><li>在U盘（/dev/sdb）的另一个分区（/dev/sdb2）上存储密钥。</li>
+<li>直接复制密钥文件到initramfs中。例如，在<code>/etc/mkinitcpio.conf</code>中设置<code>FILES=(/etc/cryptsetup-keys.d/root.key)</code>将复制<code>/etc/cryptsetup-keys.d/root.key</code>密钥文件到initramfs镜像中。要使得<code>encrypt</code>钩子从initramfs镜像中读取密钥文件，在文件名前添加<code>rootfs:</code>前缀，例如，<code>cryptkey=rootfs:/etc/cryptsetup-keys.d/root.key</code>。</li></ul></li>
+<li>此外，也可使用<a href="#pgfefbd690c49d">足够安全的密码</a>解密。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98_6" id="准备磁盘_6"><span id=".E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98_6"></span>准备磁盘</h3></div>
+<p>向解密后的映射设备中填充随机数据是非常重要的。尤其是在本例中。
+</p><p>详见<a href="#pg7159ef654a5d">dm-crypt/准备磁盘</a>、<a href="#pg7159ef654a5d">dm-crypt/准备磁盘#dm-crypt_专用方案</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E5.88.86.E5.8C.BA.EF.BC.88.E9.99.A4boot.EF.BC.89" id="准备分区（除boot）"><span id=".E5.87.86.E5.A4.87.E5.88.86.E5.8C.BA.EF.BC.88.E9.99.A4boot.EF.BC.89"></span>准备分区（除boot）</h3></div>
+<p>详见<a href="#pg88d6e7a842ae">dm-crypt/设备加密#plain模式的加密选项</a>。
+</p><p>在本例中，使用<code>/dev/sda</code>，并使用aes-xts加密算法，密钥长度为512位，并使用密钥文件加密：
+</p>
+<pre> # cryptsetup open --type plain --cipher=aes-xts-plain64 --offset=0 --key-file=/dev/sdc --key-size=512 --sector-size 4096 /dev/sda cryptlvm
+</pre>
+<p>与使用LUKS不同，每次要解密设备时必须使用上述“完整”的命令，故一定要牢记加密算法、密钥文件相关信息。
+</p><p>检查有关<code>/dev/mapper/cryptlvm</code>的映射条目已建立：
+</p>
+<pre># fdisk -l
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>若无需使用LVM提供的功能，cryptsetup FAQ提倡直接在解密后的设备上创建文件系统，而不创建LVM。</li>
+<li>若LVM卷组中包含<a href="#pgb5dd09f37b3e">ext4</a>文件系统的逻辑卷，为了便于使用<span class="plainlinks archwiki-template-man" title="$ man 8 e2scrub"><a href="https://man.archlinux.org/man/e2scrub.8">e2scrub(8)</a></span>工具，至少在卷组中保留256MiB的空闲空间。若使用<code>-l 100%FREE</code>参数创建了最后一个逻辑卷，可以使用<code>lvreduce -L -256M MyVolGroup/home</code>留出256MiB的空闲空间。</li></ul>
+</div>
+<p>接下来，在解密后产生的映射设备上设置<a href="#pg02cd87050dfd">LVM</a>逻辑卷，详见<a href="#pg37e2d3984f24">Install Arch Linux on LVM</a>：
+</p>
+<pre># pvcreate /dev/mapper/cryptlvm
+# vgcreate MyVolGroup /dev/mapper/cryptlvm
+# lvcreate -L 32G MyVolGroup -n root
+# lvcreate -L 4G MyVolGroup -n swap
+# lvcreate -l 100%FREE MyVolGroup -n home
+</pre>
+<p>格式化并挂载上述分区并激活swap，详见<a href="#pg6c70b7fdfa57">文件系统#创建文件系统</a>。
+</p>
+<pre># mkfs.ext4 /dev/MyVolGroup/root
+# mkfs.ext4 /dev/MyVolGroup/home
+# mount /dev/MyVolGroup/root /mnt
+# mount --mkdir /dev/MyVolGroup/home /mnt/home
+# mkswap /dev/MyVolGroup/swap
+# swapon /dev/MyVolGroup/swap
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87boot.E5.88.86.E5.8C.BA_4" id="准备boot分区_4"><span id=".E5.87.86.E5.A4.87boot.E5.88.86.E5.8C.BA_4"></span>准备boot分区</h3></div>
+<p>可直接将单独的U盘（通常使用FAT32文件系统）作为<code>/boot</code>分区。或者，若要手动分区，使用<a href="#pg8edad8d1135b">分区工具</a>创建大小为1GiB的小分区，并建立<a href="#pg6c70b7fdfa57">文件系统</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>只有在EFI系统分区是在安装Arch Linux的分区步骤中创建的情况下，才应当格式化该分区。否则，若EFI系统分区是由其它系统创建的，则重新格式化将导致其它系统的引导程序丢失。</div>
+<pre># mkfs.fat -F32 /dev/sdb1
+# mount --mkdir /dev/sdb1 /mnt/boot
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AEmkinitcpio_5" id="配置mkinitcpio_5"><span id=".E9.85.8D.E7.BD.AEmkinitcpio_5"></span>配置mkinitcpio</h3></div>
+<p>确保<a href="#pg54c3351b3e3b">已安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lvm2">lvm2</a></span><sup><small>包</small></sup></span>。
+</p><p>若使用基于busybox的initramfs，在<a href="#pg37f6992c45ff">mkinitcpio.conf</a>中添加<code>keyboard</code>、<code>encrypt</code>、<code>lvm2</code>钩子。此外，若要使用非标准键盘布局，添加<code>keymap</code>钩子；若要自定义控制台字体，添加<code>consolefont</code>钩子。 
+</p>
+<pre>HOOKS=(base udev autodetect microcode modconf kms <b>keyboard</b> <b>keymap</b> <b>consolefont</b> block <b>encrypt</b> <b>lvm2</b> filesystems fsck)
+</pre>
+<p>保存上述修改后，<a href="#pgea04d1b8515f">重新生成initramfs</a>。其它可能需要用到的钩子以及配置细节参见<a href="#pg52b00790fb44">Dm-crypt/系统配置#mkinitcpio</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AE.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F_5" id="配置引导加载程序_5"><span id=".E9.85.8D.E7.BD.AE.E5.BC.95.E5.AF.BC.E5.8A.A0.E8.BD.BD.E7.A8.8B.E5.BA.8F_5"></span>配置引导加载程序</h3></div>
+<p>要从加密的根分区启动，需通过引导加载程序设置如下<a href="#pgec0856954f1c">内核参数</a>（注意512位对应64字节）：
+</p>
+<pre>cryptdevice=/dev/disk/by-id/<i>disk-ID-of-sda</i>:cryptlvm:sector-size=4096 cryptkey=/dev/disk/by-id/<i>disk-ID-of-sdc</i>:0:64 crypto=:aes-xts-plain64:512:0:
+</pre>
+<p><code><i>disk-ID-of-<b>disk</b></i></code>表示相应磁盘的id，详见<a href="#pgd2fddf50b50f">块设备持久化命名</a>。
+</p><p>对于其它可能需要的内核参数，详见<a href="#pg52b00790fb44">Dm-crypt/系统配置#内核参数</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若使用<a href="#pgca9c4017f7ad">GRUB</a>，可将其安装到<code>/boot</code>分区所在的U盘上。
+<p>对于BIOS启动的系统：
+</p>
+<pre># grub-install --target=i386-pc --recheck /dev/sdb</pre>
+<p>对于UEFI启动的系统：
+</p>
+<pre># grub-install --target=x86_64-efi --efi-directory=/boot --removable</pre>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.AE.89.E8.A3.85.E5.AE.8C.E6.88.90.E5.90.8E.E7.9A.84.E6.93.8D.E4.BD.9C" id="安装完成后的操作"><span id=".E5.AE.89.E8.A3.85.E5.AE.8C.E6.88.90.E5.90.8E.E7.9A.84.E6.93.8D.E4.BD.9C"></span>安装完成后的操作</h3></div>
+<p>或许希望在系统启动后移除启动用的U盘。由于<code>/boot</code>分区并不常用，可在<code>/etc/fstab</code>的相应行中添加<code>noauto</code>选项：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># /dev/sdb1
+UUID=<i>XXXX-XXXX</i> /boot vfat <b>noauto</b>,rw,noatime 0 2</pre>
+<p>然而，若需要更新initramfs、内核、引导加载程序使用的相关文件时，则必须挂载<code>/boot</code>分区。由于<code>fstab</code>中存在相关条目，只需执行如下命令即可挂载：
+</p>
+<pre># mount /boot
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg29ec7c5af952_.E5.8A.A0.E5.AF.86.E7.9A.84boot.E5.88.86.E5.8C.BA.28GRUB.29" id="加密的boot分区(GRUB)"><span id=".E5.8A.A0.E5.AF.86.E7.9A.84boot.E5.88.86.E5.8C.BA.28GRUB.29"></span>加密的boot分区(GRUB)</h2></div>
+<p>本配置使用与#在LUKS上配置LVM相同的分区结构和配置。但使用了<a href="#pgca9c4017f7ad">GRUB</a>引导加载程序，其能从LVM逻辑卷和LUKS加密的<code>/boot</code>上启动系统。详见<a href="#pgca9c4017f7ad">GRUB#加密的/boot</a>
+</p><p>本例中的磁盘结构如下：
+</p>
+<pre style="white-space: pre !important; font-variant-ligatures: no-common-ligatures;">+---------------------+----------------------+----------------------+----------------------+----------------------+
+| BIOS boot分区       | EFI系统分区          | 逻辑卷 1             | 逻辑卷 2             | 逻辑卷 3             |
+|                     |                      |                      |                      |                      |
+|                     | /efi                 | /                    | [SWAP]               | /home                |
+|                     |                      |                      |                      |                      |
+|                     |                      | /dev/MyVolGroup/root | /dev/MyVolGroup/swap | /dev/MyVolGroup/home |
+| /dev/sda1           | /dev/sda2            |----------------------+----------------------+----------------------+
+| 未加密              | 未加密               | /dev/sda3 使用LUKS加密并配置LVM                                   |
++---------------------+----------------------+--------------------------------------------------------------------+
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>所有提供的案例仅用作示例。可按需与其它方案结合使用。此外，可参见#在LUKS上配置LVM中介绍的两种变形。</li>
+<li>可以使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cryptboot/">cryptboot</a></span><sup><small>AUR</small></sup></span>中的<code>cryptboot</code>脚本简化加密boot分区的管理（包括挂载、卸载、软件包更新）。此外，该脚本与<a href="#pg4b4af9f551f6">UEFI安全启动</a>配合还可抵御<a href="https://www.schneier.com/blog/archives/2009/10/evil_maid_attac.html">邪恶女佣</a>攻击。更多信息及存在的问题见<a href="https://github.com/kmille/cryptboot">cryptboot project</a>。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98_7" id="准备磁盘_7"><span id=".E5.87.86.E5.A4.87.E7.A3.81.E7.9B.98_7"></span>准备磁盘</h3></div>
+<p>在创建分区前，应先查看<a href="#pg7159ef654a5d">dm-crypt/准备磁盘</a>，了解安全地擦除整个磁盘的重要性，并掌握相关方法。
+</p><p>对于<a href="#pgca9c4017f7ad">UEFI启动的系统</a>，创建大小合适的<a href="#pg635d4bd93303">EFI 系统分区</a>，将挂载该分区到<code>/efi</code>。
+</p><p>对于<a href="#pgca9c4017f7ad">BIOS + GPT启动的系统</a>，创建大小为1MiB的<a href="#pgca9c4017f7ad">BIOS启动分区</a>，GRUB将在该分区中存储第二阶段引导加载程序，不要手动挂载该分区。
+</p><p>对于BIOS + MBR启动的系统，无需创建BIOS启动分区。
+</p><p>创建一个类型为<code>8309</code>的分区用于加密的LVM。
+</p><p>创建LUKS加密容器：
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>GRUB对LUKS2的支持并不完善，详见<a href="#pgca9c4017f7ad">GRUB#加密的/boot</a>。对于需要由GRUB解密的分区，建议使用PBKDF2密钥派生函数（<code>cryptsetup luksFormat --pbkdf pbkdf2</code>）。</div>
+<pre> # cryptsetup luksFormat --pbkdf pbkdf2 /dev/sda3
+</pre>
+<p>关于加密选项的更多信息，在执行上述命令前参见<a href="#pg88d6e7a842ae">dm-crypt/设备加密#LUKS 模式的加密选项</a>。
+</p><p>分区结构应与下述相似：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># gdisk -l /dev/sda</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1            2048            4095   1024.0 KiB  EF02  BIOS boot partition
+   2            4096         2101247   1024.0 MiB  EF00  EFI system partition
+   3         2101248        69210111   32.0 GiB    8309  Linux LUKS
+</pre>
+<p>打开LUKS加密容器：
+</p>
+<pre># cryptsetup open /dev/sda3 cryptlvm
+</pre>
+<p>解密后的容器将在<code>/dev/mapper/cryptlvm</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E5.87.86.E5.A4.87.E9.80.BB.E8.BE.91.E5.8D.B7_3" id="准备逻辑卷_3"><span id=".E5.87.86.E5.A4.87.E9.80.BB.E8.BE.91.E5.8D.B7_3"></span>准备逻辑卷</h3></div>
+<p>本例中逻辑卷的结构与#在LUKS上配置LVM中的相同。因此，只需遵循#准备逻辑卷中的步骤并按需调整。
+</p><p>对于UEFI启动的系统，将<a href="#pg635d4bd93303">EFI 系统分区</a>挂载到<code>/efi</code>，以与接下来的<code>grub-install</code>指令相匹配。
+</p>
+<pre># mount --mkdir /dev/sda2 /mnt/efi
+</pre>
+<p>现在，在<code>/mnt</code>下应挂载有如下分区与逻辑卷：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME                  MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINT
+sda                   8:0      0   200G  0 disk
+├─sda1                8:1      0     1M  0 part
+├─sda2                8:2      0   550M  0 part  /mnt/efi
+└─sda3                8:3      0   100G  0 part
+  └─cryptlvm          254:0    0   100G  0 crypt
+    ├─MyVolGroup-swap 254:1    0     4G  0 lvm   [SWAP]
+    ├─MyVolGroup-root 254:2    0    32G  0 lvm   /mnt
+    └─MyVolGroup-home 254:3    0    60G  0 lvm   /mnt/home
+</pre>
+<p>继续执行<a href="#pgbdbcbed611fc">安装指南#开始安装系统</a>及之后的步骤。请使用本文中的对应内容替换安装指南的<a href="#pgbdbcbed611fc">Initramfs</a>、<a href="#pgbdbcbed611fc">安装引导加载程序</a>步骤。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AEmkinitcpio_6" id="配置mkinitcpio_6"><span id=".E9.85.8D.E7.BD.AEmkinitcpio_6"></span>配置mkinitcpio</h3></div>
+<p>确保<a href="#pg54c3351b3e3b">已安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lvm2">lvm2</a></span><sup><small>包</small></sup></span>。
+</p><p>若使用基于busybox的initramfs，在<a href="#pg37f6992c45ff">mkinitcpio.conf</a>中添加<code>keyboard</code>、<code>encrypt</code>、<code>lvm2</code>钩子。此外，若要使用非标准键盘布局，添加<code>keymap</code>钩子；若要自定义控制台字体，添加<code>consolefont</code>钩子。 
+</p>
+<pre>HOOKS=(base <b>udev</b> autodetect microcode modconf kms <b>keyboard</b> <b>keymap</b> <b>consolefont</b> block <b>encrypt</b> <b>lvm2</b> filesystems fsck)
+</pre>
+<p>若使用基于systemd的initramfs，在<a href="#pg37f6992c45ff">mkinitcpio.conf</a>中添加<code>keyboard</code>、<code>sd-encrypt</code>、<code>lvm2</code>钩子。此外，若要使用非标准键盘布局，或要自定义控制台字体，添加<code>sd-vconsole</code>钩子。
+</p>
+<pre>HOOKS=(base <b>systemd</b> autodetect microcode modconf kms <b>keyboard</b> <b>sd-vconsole</b> block <b>sd-encrypt</b> <b>lvm2</b> filesystems fsck)
+</pre>
+<p>保存上述修改后，<a href="#pgea04d1b8515f">重新生成initramfs</a>。其它可能需要用到的钩子以及配置细节参见<a href="#pg52b00790fb44">Dm-crypt/系统配置#mkinitcpio</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.85.8D.E7.BD.AEGRUB_2" id="配置GRUB_2"><span id=".E9.85.8D.E7.BD.AEGRUB_2"></span>配置GRUB</h3></div>
+<p>配置GRUB以从LUKS加密的<code>/boot</code>启动：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/grub</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">GRUB_ENABLE_CRYPTODISK=y</pre>
+<p>设置内核参数以便initramfs解密加密的根分区。
+若使用<code>encrypt</code>钩子：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/grub</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">GRUB_CMDLINE_LINUX="... cryptdevice=UUID=<i>device-UUID</i>:cryptlvm ..."</pre>
+<p>若使用<a href="#pg778e3d3578b8">sd-encrypt</a>钩子：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/grub</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">GRUB_CMDLINE_LINUX="... rd.luks.name=<i>device-UUID</i>=cryptlvm ..."</pre>
+<p>详见<a href="#pg52b00790fb44">Dm-crypt/系统配置#内核参数</a>、<a href="#pgca9c4017f7ad">GRUB#加密的/boot</a>。<code><i>device-UUID</i></code>应为LUKS superblock的UUID（在本例中为<code>/dev/sda3</code>，该分区包含了含有根分区的LVM）。详见<a href="#pgd2fddf50b50f">块设备持久化命名</a>。
+</p><p>对于UEFI启动的系统，<a href="#pgca9c4017f7ad">安装GRUB</a>到挂载的EFI系统分区：
+</p>
+<pre># grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB --recheck
+</pre>
+<p>对于BIOS启动的系统，<a href="#pgca9c4017f7ad">安装GRUB</a>：
+</p>
+<pre># grub-install --target=i386-pc --recheck /dev/sda
+</pre>
+<p>生成GRUB<a href="#pgca9c4017f7ad">配置文件</a>：
+</p>
+<pre># grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<p>若上述所有命令都成功执行，在下次重启后GRUB应提示输入密码解锁<code>/dev/sda3</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E9.81.BF.E5.85.8D.E9.9C.80.E8.BE.93.E5.85.A5.E4.B8.A4.E6.AC.A1.E5.AF.86.E7.A0.81" id="避免需输入两次密码"><span id=".E9.81.BF.E5.85.8D.E9.9C.80.E8.BE.93.E5.85.A5.E4.B8.A4.E6.AC.A1.E5.AF.86.E7.A0.81"></span>避免需输入两次密码</h3></div>
+<p>尽管在上述操作后，GRUB会要求输入密码解密LUKS加密的分区，但密码并不会传递到initramfs中。因此，需要在启动时输入两次密码：一次用于GRUB，一次用于initramfs。
+</p><p>可通过<a href="#pg88d6e7a842ae">在initramfs中嵌入密钥文件</a>避免输入两次密码。
+</p><p>首先，创建一个密钥文件，将其添加到LUKS key中：
+</p>
+<pre># dd bs=512 count=4 if=/dev/random iflag=fullblock | install -m 0600 /dev/stdin /etc/cryptsetup-keys.d/cryptlvm.key
+# cryptsetup -v luksAddKey /dev/sda3 /etc/cryptsetup-keys.d/cryptlvm.key
+</pre>
+<p>将密钥文件添加到initramfs镜像：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">FILES=(/etc/cryptsetup-keys.d/cryptlvm.key)</pre>
+<p>重新生成initramfs镜像。
+</p><p>设置如下内核参数以通过密钥文件解密LUKS分区。
+若使用<code>encrypt</code>钩子：
+</p>
+<pre>GRUB_CMDLINE_LINUX="... cryptkey=rootfs:/etc/cryptsetup-keys.d/cryptlvm.key"
+</pre>
+<p>若使用<a href="#pg778e3d3578b8">sd-encrypt</a>钩子，将默认使用<code>/etc/cryptsetup-keys.d/<i>name</i>.key</code>密钥文件，因此无需手动设置内核参数。
+</p><p>若由于某些原因密钥文件解密boot分区失败，systemd会要求手动输入密码。输入正确的密码后，系统启动将正常进行。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若想加密<code>/boot</code>分区以抵御离线攻击<code>/boot</code>分区的威胁，可使用<a href="#pg2d5af776f6fd">dm-crypt/特殊应用#mkinitcpio-chkcryptoboot</a>钩子。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg29ec7c5af952_.E4.BD.BF.E7.94.A8USB.E8.AE.BE.E5.A4.87.E8.A7.A3.E9.94.81_.2Fboot" id="使用USB设备解锁_/boot"><span id=".E4.BD.BF.E7.94.A8USB.E8.AE.BE.E5.A4.87.E8.A7.A3.E9.94.81_.2Fboot"></span>使用USB设备解锁 /boot</h3></div>
+<p>使用存储在单独USB设备上的密钥文件可避免使用密码（若密码太复杂，则难以记忆；若太简单，则容易被猜中）。从安全性角度考虑，在未使用时，存储有密钥文件的USB设备必须与需解密的设备分开保存。
+</p><p>首先，按照#避免需输入两次密码中的步骤创建新的密钥文件。不要复用initramfs中使用的密钥文件，否则，若USB设备丢失或密钥泄露，需要修改嵌入到initramfs中的密钥文件。
+</p><p>将创建的密钥文件复制到USB设备，并创建GRUB配置文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/boot/grub/grub-pre.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">set crypto_uuid=UUID-of-the-luks-volume
+set key_disk=UUID-of-the-volume-with-the-key
+cryptomount -u $crypto_uuid -k ($key_disk)/the-location-of-the-key-on-your-usb
+set root=UUID-of-the-unlocked-volume-as-in-grub.cfg
+set prefix=($root)/boot/grub
+insmod normal
+normal</pre>
+<p>创建并安装GRUB镜像（依文件系统设置而定，可能不需要在镜像中包含某些模块）：
+</p>
+<pre># grub-mkimage -p /boot/grub -O x86_64-efi -c /boot/grub/grub-pre.cfg -o /tmp/grubx64.efi  part_gpt  part_msdos cryptodisk  luks  gcry_rijndael gcry_sha512 lvm ext2 ntfs fat exfat
+# install -v /tmp/grubx64.efi /efi/EFI/GRUB/grubx64.efi
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg29ec7c5af952_Root_on_ZFS" id="Root_on_ZFS">Root on ZFS</h2></div>
+<p>要将dm-crypt与<a href="#pgefb77a75bb9b">ZFS</a>一同使用，参见<a href="#pgefb77a75bb9b">ZFS#Encryption in ZFS using dm-crypt</a>。
+</p><p>此外，ZFS具有<a href="#pgefb77a75bb9b">原生加密</a>支持，可用于加密根分区（不包含引导加载程序和文件系统元数据）。详见：
+</p>
+<ul><li>OpenZFS上的<a href="https://openzfs.github.io/openzfs-docs/Getting%20Started/Arch%20Linux/Root%20on%20ZFS.html">Arch Linux Root on ZFS</a>指南。</li>
+<li><a href="#pg571a0406478c">Install Arch Linux on ZFS#Installation</a>.</li></ul>
+<p>对于UEFI启动的系统，在安装后可通过<a href="#pg4b4af9f551f6">安全启动</a>验证引导加载程序。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807030325
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.418 seconds
+Real time usage: 0.429 seconds
+Preprocessor visited node count: 1938/1000000
+Revision size: 62853/2097152 bytes
+Post‐expand include size: 22857/2097152 bytes
+Template argument size: 12653/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 8490/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   99.497      1 -total
+ 19.66%   19.564    155 Template:Ic
+ 15.22%   15.147     14 Template:提示
+  4.61%    4.591      1 Template:Lowercase_title
+  3.45%    3.434      4 Template:Man
+  3.23%    3.214     12 Template:Hc
+  3.19%    3.174      1 Template:翻译状态
+  3.16%    3.141      9 Template:警告
+  2.80%    2.789      4 Template:Pkg
+  2.16%    2.150      7 Template:Text_art
+-->
+<!-- Render ID 8e4f088e-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7630:|#|:idhash:canonical!zh-cn and timestamp 20260807030325 and revision id 34155. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

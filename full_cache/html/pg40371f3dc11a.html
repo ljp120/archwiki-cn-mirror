@@ -1,0 +1,170 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg40371f3dc11a">微软字体</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Microsoft_fonts">Microsoft fonts</a>，最近一次同步于 2026-03-06，若英文版本有所<a href="https://wiki.archlinux.org/title/Microsoft_fonts?diff=0&amp;oldid=868129">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Microsoft_fonts_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg3e5d1d3436ab">公制兼容字体</a></li>
+<li><a href="#pgb8e819c27b39">字体</a></li>
+<li><a href="#pg3ffaba980b7a">字体配置</a></li>
+<li><a href="#pge1381418960a">Java 运行环境字体配置</a></li>
+</ul></div>
+<p>本文介绍如何安装微软 TrueType 字体并模拟 Windows 的渲染设置。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>参见 <a href="#pg3e5d1d3436ab">公制兼容字体</a> 以获取替代方案。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg40371f3dc11a_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg40371f3dc11a_.E8.87.AA.E5.8A.A8.E5.AE.89.E8.A3.85" id="自动安装"><span id=".E8.87.AA.E5.8A.A8.E5.AE.89.E8.A3.85"></span>自动安装</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这些包将在构建时自动获取 Windows Enterprise 90 天评估版 ISO，并从中提取所需的字体。</div>
+<p>安装字体的最简单方法是安装以下包中的一个：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ms-win11-auto/">ttf-ms-win11-auto</a></span><sup><small>AUR</small></sup></span> — Windows 11 字体</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ms-win10-auto/">ttf-ms-win10-auto</a></span><sup><small>AUR</small></sup></span> — Windows 10 字体</li></ul>
+<p>对于双系统用户，也可使用以下包：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ms-win11-auto-local/">ttf-ms-win11-auto-local</a></span><sup><small>AUR</small></sup></span></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg40371f3dc11a_.E7.8E.B0.E6.9C.89.E8.BD.AF.E4.BB.B6.E5.8C.85" id="现有软件包"><span id=".E7.8E.B0.E6.9C.89.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>现有软件包</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这些包需要用户预先从 Windows 分区或者 Windows 和/或 Office 2007 ISO 中手动提取字体。参阅相关的 <a href="#pgf9d748a7b27b">PKGBUILD</a> 获取更多信息。</div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ms-win11/">ttf-ms-win11</a></span><sup><small>AUR</small></sup></span> / <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ms-win11-auto/">ttf-ms-win11-auto</a></span><sup><small>AUR</small></sup></span> — Windows 11 字体
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ms-win11-fod-auto/">ttf-ms-win11-fod-auto</a></span><sup><small>AUR</small></sup></span> — Windows 11 按需功能（FOD）字体</li></ul></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ms-win10/">ttf-ms-win10</a></span><sup><small>AUR</small></sup></span> / <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ms-win10-auto/">ttf-ms-win10-auto</a></span><sup><small>AUR</small></sup></span> — Windows 10 字体</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ms-win8/">ttf-ms-win8</a></span><sup><small>AUR</small></sup></span> — Windows 8.1 字体</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-win7-fonts/">ttf-win7-fonts</a></span><sup><small>AUR</small></sup></span> — Windows 7 字体</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-office-2007-fonts/">ttf-office-2007-fonts</a></span><sup><small>AUR</small></sup></span> — Office 2007 字体</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg40371f3dc11a_.E4.BD.BF.E7.94.A8_Windows_.E5.88.86.E5.8C.BA.E4.B8.AD.E7.9A.84.E5.AD.97.E4.BD.93" id="使用_Windows_分区中的字体"><span id=".E4.BD.BF.E7.94.A8_Windows_.E5.88.86.E5.8C.BA.E4.B8.AD.E7.9A.84.E5.AD.97.E4.BD.93"></span>使用 Windows 分区中的字体</h3></div>
+<p>如果有一个 Windows 分区已被挂载，可以直接使用其中的字体。有以下几种方法（假设 Windows 的 <code>C:\</code> 盘被挂载在 <code>/windows</code>）：
+</p>
+<ul><li>使用符号链接：</li></ul>
+<pre># ln -s /windows/Windows/Fonts /usr/local/share/fonts/WindowsFonts
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/google-chrome/">google-chrome</a></span><sup><small>AUR</small></sup></span> 的用户不应该选择这种方法，因为链接的字体会导致 Chrome 崩溃。</div>
+<ul><li>将字体文件复制到 <code>/usr/local/share/fonts/</code>：</li></ul>
+<pre># mkdir -p /usr/local/share/fonts/WindowsFonts
+# cp -r /windows/Windows/Fonts/* /usr/local/share/fonts/WindowsFonts/
+# chmod -R 644 /usr/local/share/fonts/WindowsFonts/*
+</pre>
+<ul><li>使用绑定挂载：</li></ul>
+<pre># mount --bind /windows/Windows/Fonts /usr/local/share/fonts/WindowsFonts
+</pre>
+<p>要使其永久生效，像这样修改 <a href="#pgced0cc449f44">fstab</a> 文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/windows/Windows/Fonts    /usr/local/share/fonts/WindowsFonts    none    bind    0    0
+</pre>
+<p>更多详细信息参见 <span class="plainlinks archwiki-template-man" title="$ man 8 mount"><a href="https://man.archlinux.org/man/mount.8#Bind_mount_operation">mount(8) § Bind mount operation</a></span>。
+</p><p>请注意，若不能读取字体文件，可能需要对<a href="#pg50f8f3d23b2e">系统压缩的文件</a>采取权变措施。
+</p><p>在选择以上任一方法后，重新生成字体缓存：
+</p>
+<pre># fc-cache --force
+# fc-cache-32 --force
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg40371f3dc11a_.E4.BB.8E_Windows_ISO_.E4.B8.AD.E6.8F.90.E5.8F.96.E5.AD.97.E4.BD.93" id="从_Windows_ISO_中提取字体"><span id=".E4.BB.8E_Windows_ISO_.E4.B8.AD.E6.8F.90.E5.8F.96.E5.AD.97.E4.BD.93"></span>从 Windows ISO 中提取字体</h3></div>
+<p>在 Windows ISO 文件中也可以找到字体。若 ISO 是在网络上下载的，则包含字体的镜像文件格式为 WIM (<i>Windows Imaging Format</i>)；若是使用 Windows 媒体创建工具创建的，则为 ESD (<i>Windows Electronic Software Download</i>)。从 ISO 文件中提取 <code>sources/install.esd</code> 或 <code>sources/install.wim</code> 文件并从中找到 <code>Windows/Fonts</code> 目录。它可以用 <a href="#pgfd53e9a49a7b">7z</a> 或 <i>wimextract</i> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wimlib">wimlib</a></span><sup><small>包</small></sup></span>) 提取。以下是一个使用 <i>7z</i> 的示例：
+</p>
+<pre>$ 7z e <i>WinXY_YYMM_Chinese_Simplified_x64.iso</i> sources/install.wim
+$ 7z e install.wim 1/Windows/{Fonts/"*".{ttf,ttc},System32/Licenses/neutral/"*"/"*"/license.rtf} -ofonts/
+</pre>
+<p>字体和许可证将放在 <code>fonts</code> 目录。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg40371f3dc11a_.E6.97.A7.E8.BD.AF.E4.BB.B6.E5.8C.85" id="旧软件包"><span id=".E6.97.A7.E8.BD.AF.E4.BB.B6.E5.8C.85"></span>旧软件包</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>由这些包提供的字体已过时，缺少现代微调指令和完整的字符集，但好处是不需要用户提供字体文件。建议使用#现有软件包所述的软件包。</div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-ms-fonts/">ttf-ms-fonts</a></span><sup><small>AUR</small></sup></span> 包含：
+</p>
+<ul><li><a href="https://zh.wikipedia.org/wiki/Andal%C3%A9_Mono">Andalé Mono</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Arial">Arial</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Arial">Arial Black</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Comic_Sans">Comic Sans</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Courier">Courier New</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Georgia_(%E5%AD%97%E5%9E%8B)">Georgia</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Impact">Impact</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Lucida">Lucida Sans</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Lucida">Lucida Console</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Microsoft_Sans_Serif">Microsoft Sans Serif</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Times_New_Roman">Times New Roman</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Trebuchet_MS">Trebuchet</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Verdana">Verdana</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Webdings">Webdings</a></li></ul>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>根据<a href="https://web.archive.org/web/20020227054122/www.microsoft.com/typography/fontpack/eula.htm">原《微软最终用户许可协议》</a>，使用上述字体时存在<i>一些</i>法律限制。</div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-tahoma/">ttf-tahoma</a></span><sup><small>AUR</small></sup></span> 包含 <a href="https://zh.wikipedia.org/wiki/Tahoma_(typeface)">Tahoma</a>。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ttf-vista-fonts/">ttf-vista-fonts</a></span><sup><small>AUR</small></sup></span>包括：
+</p>
+<ul><li><a href="https://zh.wikipedia.org/wiki/Calibri">Calibri</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Cambria">Cambria</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Candara">Candara</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Consolas">Consolas</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Constantia_(typeface)">Constantia</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Corbel_(typeface)">Corbel</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg40371f3dc11a_.E9.80.82.E7.94.A8.E4.BA.8E.E5.BE.AE.E8.BD.AF.E5.AD.97.E4.BD.93.E7.9A.84_Fontconfig_.E8.A7.84.E5.88.99" id="适用于微软字体的_Fontconfig_规则"><span id=".E9.80.82.E7.94.A8.E4.BA.8E.E5.BE.AE.E8.BD.AF.E5.AD.97.E4.BD.93.E7.9A.84_Fontconfig_.E8.A7.84.E5.88.99"></span>适用于微软字体的 Fontconfig 规则</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg40371f3dc11a_.E7.9B.B8.E4.BC.BC.E5.AD.97.E4.BD.93.E7.9A.84.E6.98.A0.E5.B0.84.E8.A7.84.E5.88.99" id="相似字体的映射规则"><span id=".E7.9B.B8.E4.BC.BC.E5.AD.97.E4.BD.93.E7.9A.84.E6.98.A0.E5.B0.84.E8.A7.84.E5.88.99"></span>相似字体的映射规则</h3></div>
+<p>网站通常使用字体的通用名称 (helvetica, courier, times 或 times new roman)，Fontconfig 的一个规则文件 <code>/etc/fonts/conf.d/30-metric-aliases.conf</code> 将其替换为免费字体（Liberation、Google CrOS、GUST TeX Gyre……）。
+</p><p>要使用微软字体，需要将上述通用名称映射到微软的字体：
+</p>
+<pre> &lt;?xml version="1.0"?&gt;
+ &lt;!DOCTYPE fontconfig SYSTEM "fonts.dtd"&gt;
+ &lt;fontconfig&gt;
+ &lt;!-- Map generics to MS specifics --&gt;
+        &lt;!-- PostScript --&gt;
+        &lt;alias binding="same"&gt;
+          &lt;family&gt;Helvetica&lt;/family&gt;
+          &lt;accept&gt;
+          &lt;family&gt;Arial&lt;/family&gt;
+          &lt;/accept&gt;
+        &lt;/alias&gt;
+        &lt;alias binding="same"&gt;
+          &lt;family&gt;Times&lt;/family&gt;
+          &lt;accept&gt;
+          &lt;family&gt;Times New Roman&lt;/family&gt;
+          &lt;/accept&gt;
+        &lt;/alias&gt;
+        &lt;alias binding="same"&gt;
+          &lt;family&gt;Courier&lt;/family&gt;
+          &lt;accept&gt;
+          &lt;family&gt;Courier New&lt;/family&gt;
+          &lt;/accept&gt;
+        &lt;/alias&gt;
+ &lt;/fontconfig&gt;
+</pre>
+<p>建议在浏览器中，将 serif、sans-serif 和 monospace 字体也映射到微软字体。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg40371f3dc11a_.E7.A6.81.E7.94.A8.E5.AD.97.E4.BD.93.E5.86.85.E5.B5.8C.E4.BD.8D.E5.9B.BE" id="禁用字体内嵌位图"><span id=".E7.A6.81.E7.94.A8.E5.AD.97.E4.BD.93.E5.86.85.E5.B5.8C.E4.BD.8D.E5.9B.BE"></span>禁用字体内嵌位图</h3></div>
+<p>一些微软的 TTF 字体，如 Calibri 和 Cambria，包含了特定大小的内嵌位图字体，这些字体不支持抗锯齿。如果启用了字体内嵌位图，在这些特定的尺寸下，字体不会被进行抗锯齿处理。通过字体配置可以<a href="#pg3ffaba980b7a">禁用内嵌位图字体</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg40371f3dc11a_.E5.B7.B2.E7.9F.A5.E9.97.AE.E9.A2.98" id="已知问题"><span id=".E5.B7.B2.E7.9F.A5.E9.97.AE.E9.A2.98"></span>已知问题</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg40371f3dc11a_.E5.9F.BA.E4.BA.8E_Poppler_.E7.9A.84_PDF_.E9.98.85.E8.AF.BB.E5.99.A8.E6.97.A0.E6.B3.95.E6.AD.A3.E7.A1.AE.E6.98.BE.E7.A4.BA.E7.AC.A6.E5.8F.B7" id="基于_Poppler_的_PDF_阅读器无法正确显示符号"><span id=".E5.9F.BA.E4.BA.8E_Poppler_.E7.9A.84_PDF_.E9.98.85.E8.AF.BB.E5.99.A8.E6.97.A0.E6.B3.95.E6.AD.A3.E7.A1.AE.E6.98.BE.E7.A4.BA.E7.AC.A6.E5.8F.B7"></span>基于 Poppler 的 PDF 阅读器无法正确显示符号</h3></div>
+<p>微软的 TrueType 符号字体（<a href="https://zh.wikipedia.org/wiki/Symbol_(typeface)">Symbol</a>）在 Poppler 上有问题，数学符号可能无法在基于 Poppler 的 PDF 阅读器中正确显示。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807035230
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.143 seconds
+Real time usage: 0.149 seconds
+Preprocessor visited node count: 415/1000000
+Revision size: 6603/2097152 bytes
+Post‐expand include size: 7899/2097152 bytes
+Template argument size: 2360/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 843/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   39.897      1 -total
+ 10.30%    4.111      1 Template:Style
+  9.00%    3.592      1 Template:翻译状态
+  8.41%    3.356     15 Template:AUR
+  5.77%    2.303      4 Template:Related
+  5.53%    2.207      1 Template:相关文章开始
+  5.39%    2.150      1 Template:Man
+  4.95%    1.975      1 Template:Pkg
+  4.58%    1.829      8 Template:Ic
+  4.11%    1.639      1 Template:META_Message
+-->
+<!-- Render ID 69aa5f0f-9213-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3517:|#|:idhash:canonical!zh-cn and timestamp 20260807035230 and revision id 35039. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

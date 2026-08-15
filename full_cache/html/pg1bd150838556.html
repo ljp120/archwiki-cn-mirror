@@ -1,0 +1,158 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg1bd150838556">扫描码映射至键位码</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Map_scancodes_to_keycodes">Map scancodes to keycodes</a>，最近一次同步于 2021-02-01，若英文版本有所<a href="https://wiki.archlinux.org/title/Map_scancodes_to_keycodes?diff=0&amp;oldid=650255">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Map_scancodes_to_keycodes_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>该页面假定您已阅读 <a href="#pg5b1197c2a940">Extra keyboard keys</a> ，它提供了更多的内容。
+</p><p>将“扫描码”映射为“键位码”的动作，要比 Xorg 和 Linux 控制台更接近底层，所以对这个映射的更改在两者中均有效。
+</p><p><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/input-event-codes.h#n64">[1]</a><a href="https://elixir.bootlin.com/linux/latest/A/ident/hid_keyboard">[2]</a><a href="https://elixir.bootlin.com/linux/latest/A/ident/atkbd_set2_keycode">[3]</a>
+</p><p>将“扫描码”映射到“键位码”方式有两种：
+</p>
+<ul><li>使用 <a href="#pge009209061ac">udev</a></li>
+<li>Using <span class="plainlinks archwiki-template-man" title="$ man 8 setkeycodes"><a href="https://man.archlinux.org/man/setkeycodes.8">setkeycodes(8)</a></span></li></ul>
+<p>首选方法是使用 “udev”，因为它使用硬件信息（这是一个非常可靠的来源）来选择数据库中的键盘型号。如果能在数据库中找到键盘型号，则可以“开箱即用”地识别您的按键。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1bd150838556_.E7.A1.AE.E5.AE.9A.E6.89.AB.E6.8F.8F.E7.A0.81" id="确定扫描码"><span id=".E7.A1.AE.E5.AE.9A.E6.89.AB.E6.8F.8F.E7.A0.81"></span>确定扫描码</h2></div>
+<p>您需要知道要重新映射的键的“扫描代码”。详情请见<a href="#pg13e1ce916a56">Keyboard input#Identifying scancodes</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1bd150838556_.E4.BD.BF.E7.94.A8_udev" id="使用_udev"><span id=".E4.BD.BF.E7.94.A8_udev"></span>使用 udev</h2></div>
+<p><a href="#pge009209061ac">udev</a>提供了一个称为"hwdb"的内置函数，用于维护 <code>/etc/udev/hwdb.bin</code> 中的硬件数据库索引。 数据库是从位于<code>/usr/lib/udev/hwdb.d/</code>、 <code>/run/udev/hwdb.d/</code> 和 <code>/etc/udev/hwdb.d/</code> 目录中的扩展名为.hwdb的文件编译而成的。 默认的 "扫描码到键码" 映射文件是 <code>/usr/lib/udev/hwdb.d/60-keyboard.hwdb</code> 。 有关详细信息，请参见<span class="plainlinks archwiki-template-man" title="$ man 7 udev"><a href="https://man.archlinux.org/man/udev.7">udev(7)</a></span> 。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>从systemd 220开始，udev ABI进行了更改。 使用自定义udev hwdb规则的用户应根据新的ABI更新它们</div>
+<p><i>.hwdb</i> 文件可以包含不同键盘的多个映射块，也可以将一个块应用于多个键盘。 <code>evdev:</code> 前缀用于将块与硬件进行匹配，支持以下硬件匹配：
+</p>
+<ul><li>USB内核模式标识的通用输入设备（也包括USB键盘）：</li></ul>
+<pre>evdev:input:b<i>&lt;bus_id&gt;</i>v<i>&lt;vendor_id&gt;</i>p<i>&lt;product_id&gt;</i>e<i>&lt;version_id&gt;</i>-<i>&lt;modalias&gt;</i> </pre>
+<p>其中 <code><i>&lt;vendor_id&gt;</i></code>, <code><i>&lt;product_id&gt;</i></code> 和 <code><i>&lt;version_id&gt;</i></code> 是 4位十六进制<b>大写</b>（不够4位在前面补0）的供应商，产品和版本ID ( 你可以通过运行<code>lsusb</code> 命令来得到它们)， <code><i>&lt;modalias&gt;</i></code>  是描述设备功能的任意长度的输入模态 (input-modalias). <code><i>&lt;bus_id&gt;</i></code> 是4位数的十六进制总线ID，对于USB设备，应为0003。<code><i>&lt;bus_id&gt;</i></code> 可能的值在 <code>/usr/include/linux/input.h</code> 中定义 (你可以运行 <code>awk '/BUS_/ {print $2, $3}' /usr/include/linux/input.h</code> 得到一个列表).
+</p><p><code>evtest</code>或者<code> cat /proc/bus/input/devices</code> 可以一次性得到&lt;bus_id&gt;、&lt;vendor_id&gt;、 &lt;product_id&gt; 和 &lt;version_id&gt; 
+</p><p>很多时候可以不用那么精确，就可以用<code> *</code>来作为通配符。 
+</p>
+<ul><li>AT键盘DMI数据匹配：</li></ul>
+<pre>evdev:atkbd:dmi:bvn*:bvr*:bd*:svn<i>&lt;vendor&gt;</i>:pn<i>&lt;product&gt;</i>:pvr*</pre>
+<p>其中 <code><i>&lt;vendor&gt;</i></code> 和 <code><i>&lt;product&gt;</i></code> 是由内核 DMI Modalias 导出的固件提供的字符串。
+</p>
+<ul><li>输入驱动程序设备名称和DMI数据匹配：</li></ul>
+<pre>evdev:name:<i>&lt;input device name&gt;</i>:dmi:bvn*:bvr*:bd*:svn<i>&lt;vendor&gt;</i>:pn*</pre>
+<p>其中 <code><i>&lt;input_device_name&gt;</i></code> 是驱动程序指定的名称设备 ，<code><i>&lt;vendor&gt;</i></code> 是由内核DMI modalias导出的固件提供的字符串。
+</p><p>块主体中每一行的格式为 <code>KEYBOARD_KEY_<i>&lt;scancode&gt;</i>=<i>&lt;keycode&gt;</i></code>. <code><i>&lt;scancode&gt;</i></code> 的值是十六进制的，但是没有前导<code>0x</code>（即，是<code>a0</code>而不是<code>0xa0</code>）, 而 <code><i>&lt;keycode&gt;</i></code> 的值是小写的键名名称字符串，就像在<code>/usr/include/linux/input-event-codes.h</code>中列的一样（请参阅<code>KEY_<i>&lt;KEYCODE&gt;</i></code> 变量），<a href="https://hal.freedesktop.org/quirk/quirk-keymap-list.txt">[4]</a> 处有一个排序列表。注意不能在&lt;keycode&gt;中指定十进制值。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>用root身份运行<code>evemu-describe</code>来获取 这个设备（要自定义<i>hwdb</i> 规则的设备）的标识符， 该实用程序由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=evemu">evemu</a></span><sup><small>包</small></sup></span> 软件包提供。
+通过以root用户身份运行 <code>evtest</code> 这个设备（要自定义<i>hwdb</i> 规则的设备）的标识符以及要使用的按键的扫描码。 该实用程序由<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=evtest">evtest</a></span><sup><small>包</small></sup></span>软件包提供。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd150838556_.E8.87.AA.E5.AE.9A.E4.B9.89hwdb.E7.9A.84.E7.A4.BA.E4.BE.8B" id="自定义hwdb的示例"><span id=".E8.87.AA.E5.AE.9A.E4.B9.89hwdb.E7.9A.84.E7.A4.BA.E4.BE.8B"></span>自定义hwdb的示例</h3></div>
+<p>示例hwdb文件将匹配所有AT键盘：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/hwdb.d/90-custom-keyboard.hwdb</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">evdev:atkbd:dmi:bvn*:bvr*:bd*:svn*:pn*:pvr*
+ KEYBOARD_KEY_10=suspend
+ KEYBOARD_KEY_a0=search
+</pre>
+<p>这是在笔记本电脑和USB键盘上重新绑定修饰符（modifiers）的示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/hwdb.d/10-my-modifiers.hwdb</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">evdev:input:b0003v05AFp8277* # 在Kensington Slim Type USB（使用旧的ABI）上进行了测试
+ KEYBOARD_KEY_70039=leftalt  # 将capslock绑定到leftalt
+ KEYBOARD_KEY_700e2=leftctrl # 将leftalt绑定到leftctrl
+
+evdev:atkbd:dmi:*            # 内置键盘：匹配所有AT键盘
+ KEYBOARD_KEY_3a=leftalt     # 将capslock绑定到leftalt
+ KEYBOARD_KEY_38=leftctrl    # 将leftalt绑定到leftctrl
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>上面的绑定的含义 A绑定到B，是指：在物理上按下A按键，计算机输入B按键</div>
+<p>要阻止<code> Sleep</code>键，请将其绑定到 "reserved" 关键字。 或者，您可以使用 "unknown" 将其映射到<code> NoSymbol</code>键。 例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/hwdb.d/90-block-sleep.hwdb</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">evdev:input:b0003v03F0p020C* # hp 5308 keyboard controller
+ KEYBOARD_KEY_10082=reserved</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd150838556_.E6.9B.B4.E6.96.B0.E7.A1.AC.E4.BB.B6.E6.95.B0.E6.8D.AE.E5.BA.93.E7.B4.A2.E5.BC.95" id="更新硬件数据库索引"><span id=".E6.9B.B4.E6.96.B0.E7.A1.AC.E4.BB.B6.E6.95.B0.E6.8D.AE.E5.BA.93.E7.B4.A2.E5.BC.95"></span>更新硬件数据库索引</h3></div>
+<p>更改配置文件后，需要重建硬件数据库索引 <code>hwdb.bin</code> 。
+</p>
+<ul><li>通过运行一下命令手动更新 <code>hwdb.bin</code></li></ul>
+<pre># systemd-hwdb update
+</pre>
+
+
+<p><br/>
+</p>
+<ul><li>通过注释掉<code>systemd-hwdb-update.service</code> 中的<code>ConditionNeedsUpdate</code>，在每次重新启动时自动更新。</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/systemd/system/systemd-hwdb-update.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#  该文件是systemd的一部分。
+.
+.
+#ConditionNeedsUpdate=/etc
+.
+.
+</pre>
+<p>在<code>systemd-hwdb-update.service</code>完成加载后，<code>systemd-trigger.service</code>将从<code>hwdb.bin</code>重新加载更改。
+</p>
+<ul><li><a href="#pgf8c7f5ca7100">Systemd(简体中文)</a>升级后自动。</li></ul>
+<p>在<a href="#pgac06dd8bfe95">Systemd</a>的每次升级中，安装脚本都通过以root用户身份运行<code>udevadm hwdb --update</code>来重建<code>hwdb.bin</code>，因此我们不需要关心它 。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd150838556_.E9.87.8D.E6.96.B0.E5.8A.A0.E8.BD.BD.E7.A1.AC.E4.BB.B6.E6.95.B0.E6.8D.AE.E5.BA.93.E7.B4.A2.E5.BC.95" id="重新加载硬件数据库索引"><span id=".E9.87.8D.E6.96.B0.E5.8A.A0.E8.BD.BD.E7.A1.AC.E4.BB.B6.E6.95.B0.E6.8D.AE.E5.BA.93.E7.B4.A2.E5.BC.95"></span>重新加载硬件数据库索引</h3></div>
+<p>内核在启动过程中加载<code>hwdb.bin</code>，重新启动系统将保证加载更新后的<code>hwdb.bin</code>。
+</p><p>使用 <code>udevadm</code>，可以通过运行下面命令来从更新后的<code>hwdb.bin</code>加载新的键映射。
+</p>
+<pre># udevadm trigger
+</pre>
+<p>Be aware that with <code>udevadm</code> only added or changed key mapping are loaded so if we delete a mapping from the config file, rebuild <code>hwdb.bin</code> and run <code>udevadm trigger</code> as the root user, then the deleted mapping still kept by the kernel, at least until a reboot.
+请注意，使用 <code>udevadm</code> 仅加载已添加或更改的键映射，因此，如果我们从配置文件中删除映射，重建 <code>hwdb.bin</code> 并以root用户身份运行 <code>udevadm trigger</code> ，那么删除的映射仍将保留在内核中，直到重新启动为止。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg1bd150838556_.E6.9F.A5.E8.AF.A2.E6.95.B0.E6.8D.AE.E5.BA.93" id="查询数据库"><span id=".E6.9F.A5.E8.AF.A2.E6.95.B0.E6.8D.AE.E5.BA.93"></span>查询数据库</h3></div>
+<p>您可以通过按键或运行 <code>udevadm info</code> 来检查配置是否已加载。 对于上面示例中的USB键盘，这将输出我们配置的映射，如下所示：
+</p>
+<pre># udevadm info /dev/input/by-path/*-usb-*-kbd | grep KEYBOARD_KEY
+E: KEYBOARD_KEY_70039=leftalt
+E: KEYBOARD_KEY_700e2=leftctrl
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1bd150838556_.E4.BD.BF.E7.94.A8setkeycodes" id="使用setkeycodes"><span id=".E4.BD.BF.E7.94.A8setkeycodes"></span>使用setkeycodes</h2></div>
+<p><i>setkeycodes</i> 是一个将 <i>scancodes</i>-to-<i>keycodes</i> 映射表加载到Linux内核中的工具。 它的用法是：
+</p>
+<pre># setkeycodes <i>scancode</i> <i>keycode</i> ...
+</pre>
+<p>可以一次指定多个对。<i>扫描码(Scancodes)</i> 以十六进制给出，<i>键位码</i>以十进制给出。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>显然， <i>setkeycodes</i> 不适用于USB键盘（Linux 3.14.44-1-lts）：
+<pre># setkeycodes 45 30     # 将NumLock（0x45）绑定到AT键盘上的KEY_A（30）
+(successful)
+# setkeycodes 70053 30  # 将NumLock（0x70053）绑定到USB键盘上的KEY_A（30）
+KDSETKEYCODE: Invalid argument
+failed to set scancode 620d3 to keycode 31
+</pre>
+</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg1bd150838556_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><a href="https://www.bilibili.com/read/cv5156572">B站 JimMoen：Linux通用键位修改（中）-实际操作</a></li>
+<li><a href="https://blog.lilydjwg.me/2019/10/28/poker-ii.214858.html">依云's Blog：Poker II 键盘调教记</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807172405
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.154 seconds
+Real time usage: 0.160 seconds
+Preprocessor visited node count: 674/1000000
+Revision size: 8689/2097152 bytes
+Post‐expand include size: 9841/2097152 bytes
+Template argument size: 4241/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 571/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   55.135      1 -total
+ 16.67%    9.189     57 Template:Ic
+ 10.57%    5.826      3 Template:注意
+  8.03%    4.427      1 Template:过时
+  7.50%    4.136      1 Template:Accuracy
+  7.05%    3.888      2 Template:META_Message
+  6.47%    3.565      1 Template:翻译状态
+  5.56%    3.065      4 Template:Hc
+  5.21%    2.875      2 Template:Man
+  4.88%    2.692      3 Template:Pkg
+-->
+<!-- Render ID ca25b48e-9284-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3500:|#|:idhash:canonical!zh-cn and timestamp 20260807172405 and revision id 33783. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

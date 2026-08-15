@@ -1,0 +1,325 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg2cb882e82d41">鼠标按键</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg89b0b22607b7">鼠标加速度</a></li>
+<li><a href="#pga878f5660687">鼠标轮询率</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Mouse_buttons">Mouse buttons</a>，最近一次同步于 2024-06-07，若英文版本有所<a href="https://wiki.archlinux.org/title/Mouse_buttons?diff=0&amp;oldid=798310">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Mouse_buttons_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2cb882e82d41_.E6.9C.AC.E6.96.87.E5.AD.98.E5.9C.A8.E7.9A.84.E9.97.AE.E9.A2.98" id="本文存在的问题"><span id=".E6.9C.AC.E6.96.87.E5.AD.98.E5.9C.A8.E7.9A.84.E9.97.AE.E9.A2.98"></span>本文存在的问题</h2></div>
+
+
+
+<p><br/>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2cb882e82d41_.E9.85.8D.E7.BD.AE.E9.BC.A0.E6.A0.87.E5.8A.A0.E9.80.9F.E5.BA.A6" id="配置鼠标加速度"><span id=".E9.85.8D.E7.BD.AE.E9.BC.A0.E6.A0.87.E5.8A.A0.E9.80.9F.E5.BA.A6"></span>配置鼠标加速度</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2cb882e82d41_.E5.9C.A8_Xorg_.E9.85.8D.E7.BD.AE.E4.B8.AD" id="在_Xorg_配置中"><span id=".E5.9C.A8_Xorg_.E9.85.8D.E7.BD.AE.E4.B8.AD"></span>在 Xorg 配置中</h3></div>
+<p>这个页面假设您使用的是 <a href="#pga36c0aff60be">Xorg</a> 而不是 <a href="#pga21a6be8b605">Wayland</a>。
+</p><p>您首先想要检查 X 从您的鼠标中看到的内容。可以通过 <a href="#pg3b7521844e7c">xev</a> 实用程序显示 X 事件。运行以下命令会弹出一个窗口：
+</p>
+<pre>$ xev -event button | grep button
+</pre>
+<p>在该窗口中进行的任何 xevents（如移动、调整大小或点击）将被报告到您启动 <i>xev</i> 的控制台。由于您正在过滤包含 "button" 的行，它将显示鼠标点击和释放事件及其相关的按钮编号。对于大多数鼠标来说，这将是 '1' 表示左键，'2' 表示中键，'3' 表示右键。其他按钮将有所不同（例如，对于 Logitech MX Master 3，滚轮是 4 和 5，拇指轮是 6 和 7，拇指尖按钮是 9，内拇指按钮是 8）。
+</p><p>示例输出：
+</p>
+<pre>state 0x0, button 1, same_screen YES
+state 0x100, button 1, same_screen YES
+state 0x0, button 9, same_screen YES
+state 0x0, button 9, same_screen YES
+</pre>
+<p>这对应于鼠标左键的点击和释放，然后是拇指尖的点击和释放。
+</p><p>您可以使用 <i>xev</i> 来确认您的鼠标按钮编号，并确认 X 是否被通知鼠标点击。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2cb882e82d41_.E9.87.8D.E6.96.B0.E7.BB.91.E5.AE.9A.E9.BC.A0.E6.A0.87.E5.92.8C.E9.94.AE.E7.9B.98.E5.8A.9F.E8.83.BD" id="重新绑定鼠标和键盘功能"><span id=".E9.87.8D.E6.96.B0.E7.BB.91.E5.AE.9A.E9.BC.A0.E6.A0.87.E5.92.8C.E9.94.AE.E7.9B.98.E5.8A.9F.E8.83.BD"></span>重新绑定鼠标和键盘功能</h2></div>
+<p>这一节涵盖了使用各种工具重新排列鼠标和键盘功能的细节。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2cb882e82d41_.E5.B0.86.E9.BC.A0.E6.A0.87.E6.8C.89.E9.92.AE.E7.BB.91.E5.AE.9A.E5.88.B0.E9.94.AE.E7.9B.98.E5.8A.9F.E8.83.BD" id="将鼠标按钮绑定到键盘功能"><span id=".E5.B0.86.E9.BC.A0.E6.A0.87.E6.8C.89.E9.92.AE.E7.BB.91.E5.AE.9A.E5.88.B0.E9.94.AE.E7.9B.98.E5.8A.9F.E8.83.BD"></span>将鼠标按钮绑定到键盘功能</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2cb882e82d41_xte" id="xte">xte</h4></div>
+<p>当我们要将键盘按钮绑定到鼠标时，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xautomation">xautomation</a></span><sup><small>包</small></sup></span>中的<i>xte</i>非常有用。
+</p><p>以下是一个示例 <code>~/.xbindkeysrc</code>，它将 <code>Shift_R</code> 绑定到鼠标按钮 3（"右键点击"）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xbindkeysrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">"xte 'mouseclick 3'"
+  Shift_R
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2cb882e82d41_.E5.B0.86.E9.94.AE.E7.9B.98.E9.94.AE.E7.BB.91.E5.AE.9A.E5.88.B0.E9.BC.A0.E6.A0.87.E6.8C.89.E9.92.AE" id="将键盘键绑定到鼠标按钮"><span id=".E5.B0.86.E9.94.AE.E7.9B.98.E9.94.AE.E7.BB.91.E5.AE.9A.E5.88.B0.E9.BC.A0.E6.A0.87.E6.8C.89.E9.92.AE"></span>将键盘键绑定到鼠标按钮</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2cb882e82d41_xvkbd_.E5.92.8C_xbindkeys" id="xvkbd_和_xbindkeys"><span id="xvkbd_.E5.92.8C_xbindkeys"></span>xvkbd 和 xbindkeys</h4></div>
+<p>假设我们想要将一些鼠标按钮绑定到键盘上。我们将遇到的问题是，我们不知道如何模拟按键。这时 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xvkbd/">xvkbd</a></span><sup><small>AUR</small></sup></span> 就派上用场了。我们可以将其与 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xbindkeys">xbindkeys</a></span><sup><small>包</small></sup></span> 一起使用。
+</p>
+<pre>$ xbindkeys --defaults &gt;&gt; ~/.xbindkeysrc
+$ xbindkeys
+</pre>
+<p>要重启 xbindkeys，请输入：
+</p>
+<pre>$ pkill -f xbindkeys
+$ xbindkeys
+</pre>
+<p>以下是示例 <code>~/.xbindkeysrc</code> 配置：
+</p>
+<pre>"xvkbd  -text \"[F8]\""
+       m:0x0 + b:8
+"xvkbd  -text \"[Shift][Left]\""
+       m:0x0 + b:9
+"xvkbd  -text \"[Shift][Right]\""
+       m:0x0 + b:10
+"xvkbd  -text 2"
+       m:0x0 + b:11
+"xvkbd  -text 3"
+       m:0x0 + b:12
+</pre>
+<p>如果你想检查你的鼠标按钮编号，请使用 xev。不要忘记在 xvkbd -text 使用时输入大写字母，并用 \ 转义开括号，否则你只会得到 [Shift] 这样的输出。
+</p><p>以下是一个 xbindkeys 的示例，用于启用 x 选择粘贴（第三键粘贴），你需要安装 xsel 和 xvkbd。它的功能是在按下鼠标的第 13 个按钮时执行该命令（在 ~/.xbindkeysrc 中）：
+</p>
+<pre>"xvkbd -no-jump-pointer -text \"\D1$(xsel)\" 2&gt;/dev/null"
+       b:13
+</pre>
+<p>这是 Meta+M 的一个按键绑定示例：
+</p>
+<pre>"xvkbd  -text \"{+Super_L}m{-Super_L}\""
+       b:10
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2cb882e82d41_evrouter" id="evrouter">evrouter</h4></div>
+<p>有些程序，特别是游戏，使用不同的输入读取方法，所以需要另一个程序：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/evrouter/">evrouter</a></span><sup><small>AUR</small></sup></span>。
+</p><p>为了让 <code>evrouter</code> 命令能够读取输入设备，它必须在 <code>input</code> 组（或作为 root）中运行。这可以通过将你自己添加到该组来实现：
+</p>
+<pre># gpasswd -a <i>user</i> input
+</pre>
+<p>现在我们可以使用 <code>--dump</code> 选项来显示要更改的按钮叫什么：
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>对于 USB 设备，udev 通常会在 <code>/dev/input/by-id/</code> 中创建符号链接，可以用来引用特定设备。</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ evrouter --dump /dev/input/event*</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">device  0: /dev/input/event0: AT Translated Set 2 keyboard
+device  1: /dev/input/event1: Microsoft Microsoft Trackball Explorer®
+device  2: /dev/input/event2: Sleep Button
+device  3: /dev/input/event3: Power Button
+device  4: /dev/input/event4: Power Button
+device  5: /dev/input/event5: PC Speaker
+Display name: :0.0
+</pre>
+<p>现在按下你想要更改的按钮：
+</p>
+<pre>Window "(null)": # 窗口标题
+# Window "(null)": # 资源名称
+# Window "(null)": # 类名
+"Microsoft Trackball Explorer®" "/dev/input/event1" none key/275 "填写这个！"
+</pre>
+<pre>Window "(null)": # 窗口标题
+# Window "(null)": # 资源名称
+# Window "(null)": # 类名
+"Microsoft Trackball Explorer®" "/dev/input/event1" none key/276 "填写这个！"
+</pre>
+<p>以 "填写这个！" 结尾的行可以复制到配置文件中，配置文件默认是 <code>~/.evrouterrc</code>。例如，使用 evrouter 内置的 X11 键盘事件模拟器：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.evrouterrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">"Microsoft Trackball Explorer®" "/dev/input/event*" any key/275 "XKey/1"
+"Microsoft Trackball Explorer®" "/dev/input/event*" any key/276 "XKey/2"</pre>
+<p>'event1' 被更改为 'event*' 以应对 udev 在启动时给它分配不同的设备编号。'none' 被更改为 'any' 以便在按下按钮时即使按下了任何修饰键规则也能工作。要确定键码（括号中的），可以使用命令
+</p>
+<pre># xmodmap -pk
+</pre>
+<p>查看 <span class="plainlinks archwiki-template-man" title="$ man 1 evrouter">evrouter(1)</span> 获取字段的完整解释。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>规则只能应用于特定窗口，详见 <span class="plainlinks archwiki-template-man" title="$ man 1 evrouter">evrouter(1)</span>。</div>
+<p>配置文件设置完成后，将其作为守护进程运行：
+</p>
+<pre>$ evrouter /dev/input/event*
+</pre>
+<p>要停止守护进程：
+</p>
+<pre>$ evrouter -q
+$ rm -f /tmp/.evrouter*
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果退出时 <code>/tmp/.evrouter:0.0</code> 文件存在但 evrouter 没有删除它，那么你需要自己删除它。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2cb882e82d41_.E7.94.A8.E6.88.B7.E5.B7.A5.E5.85.B7" id="用户工具"><span id=".E7.94.A8.E6.88.B7.E5.B7.A5.E5.85.B7"></span>用户工具</h2></div>
+<p>这一节概述了特定硬件的工具，这些工具对于配置鼠标设置以及特别是它们的按钮非常有用。有关通用重新映射工具，请参阅 <a href="#pg8783f29ac955">Input remap utilities</a>。
+</p>
+<ul><li><a href="https://github.com/libratbag/piper">Piper</a> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=piper">piper</a></span><sup><small>包</small></sup></span>) 是一个图形用户界面，用于配置游戏鼠标，支持 Wayland。为了使它与您的鼠标兼容，鼠标必须是<a href="https://github.com/libratbag/libratbag/tree/master/data/devices">支持设备列表</a>中的一部分。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lomoco/">lomoco</a></span><sup><small>AUR</small></sup></span> 用于 Logitech MX 鼠标，将帮助您设置适当的分辨率，启用或禁用智能滚动（也支持启动时！），等等。一定要查看 <code>/etc/udev/lomoco_mouse.conf</code> 并设置您希望在鼠标被 <a href="#pge009209061ac">udev</a> 加载时自动应用的选项。<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>lomoco 软件包可能已过时。对于更新的 Logitech 鼠标，有一个黑客方案：<a href="http://piie.net/temp/g5_hiddev.c">[1]</a></div></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/logiops/">logiops</a></span><sup><small>AUR</small></sup></span> 是一个用于配置 Logitech 鼠标（Logitech Options for Linux）的工具。它可能重新映射按钮到动作，支持手势，智能偏移等等。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2cb882e82d41_evdev_Xorg.conf_.E8.AE.BE.E7.BD.AE" id="evdev_Xorg.conf_设置"><span id="evdev_Xorg.conf_.E8.AE.BE.E7.BD.AE"></span>evdev Xorg.conf 设置</h2></div>
+<p>这一节解释了如何使用 <code>evdev</code> 设置具有超过 3 个按钮的鼠标。还有其他方法可以实现这一点，但这里描述的一些笔记和工具可能对有其他需求的人有用。有些部分可能有助于使用其他驱动程序让额外的鼠标按钮工作。
+</p><p>我们将为 Xorg 使用 evdev 驱动程序。EVentDEVice 是一个高级的 USB 输入设备驱动程序，提供了比标准 Xorg <code>mouse</code> 驱动程序更大的能力。它也比 <code>mouse</code> 驱动程序更 "直接"，允许更低的延迟和更少的转换问题。
+</p>
+<ul><li>注意 <code>evdev</code> 既是一个内核模块也是一个 Xorg 输入驱动程序。所有的 Arch 内核都带有 <code>evdev</code> 模块。</li></ul>
+<p>使用 Xorg 11R7.0 或更新版本，只需要对 <code>/etc/X11/xorg.conf</code> 进行以下更改。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2cb882e82d41_.E6.9F.A5.E6.89.BE.E9.BC.A0.E6.A0.87.E5.90.8D.E7.A7.B0" id="查找鼠标名称"><span id=".E6.9F.A5.E6.89.BE.E9.BC.A0.E6.A0.87.E5.90.8D.E7.A7.B0"></span>查找鼠标名称</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>有时为了获得准确的信息，可能需要在没有加载 Xorg 或鼠标驱动程序的启动中执行此命令。</div>
+<p>首先，我们需要找到鼠标/鼠标的名称。为此，请执行以下命令：
+</p>
+<pre>$ grep -E "Name|Handlers" /proc/bus/input/devices | grep -E -B1 'Handlers.*mouse'
+</pre>
+<p>这应该会输出类似于这样的内容：
+</p>
+<pre>N: Name="Logitech USB Gaming Mouse"
+H: Handlers=mouse0 event0 ts0
+</pre>
+<p>或者，如果您有多个鼠标：
+</p>
+<pre>N: Name="Kensington Kensington Expert Mouse Wireless"
+H: Handlers=event0 mouse0 
+--
+N: Name="Logitech USB Receiver"
+H: Handlers=kbd event2 mouse1
+</pre>
+<p>鼠标是具有 <code>Handlers=mouse0</code> 的那个，所以设备名称是 <code>Logitech USB Gaming Mouse</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>我的鼠标是 Logitech G5; 您的鼠标可能不同，因此 <code>Name</code> 也会不同。</div>
+<p>复制设备的名称，然后打开 <code>/etc/X11/xorg.conf</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2cb882e82d41_.E9.85.8D.E7.BD.AE_Xorg" id="配置_Xorg"><span id=".E9.85.8D.E7.BD.AE_Xorg"></span>配置 Xorg</h3></div>
+
+<p>现在，我们需要在 <code>xorg.conf</code> 中添加一个条目，告诉 X 如何使用这个鼠标。它应该看起来像这样：
+</p>
+<pre>Section "InputDevice"
+  Identifier      "Evdev Mouse"
+  Driver          "evdev"
+  Option          "Name" "Logitech USB Gaming Mouse"
+  Option          "evBits"  "+1-2"
+  Option          "keyBits" "~272-287"
+  Option          "relBits" "~0-2 ~6 ~8"
+  Option          "Pass"    "3"
+  Option          "CorePointer"
+EndSection
+</pre>
+<p>将 <code>Name</code> 选项替换为您从上面复制的名称。如果您使用多个鼠标或在尝试加载 Xorg 时遇到错误，您也可以省略 <code>CorePointer</code> 选项。其他选项都是 evdev 的基本鼠标配置，应该适用于大多数鼠标。
+</p><p>接下来，我们需要告诉 X 使用鼠标，所以在 <code>xorg.conf</code> 中查找 <code>ServerLayout</code>。
+</p><p>修改 <code>ServerLayout</code> 部分，使用 "Evdev Mouse" 作为设备。完成后，它应该看起来像这样：
+</p>
+<pre>Section "ServerLayout"
+  Identifier     "Default Layout"
+  Screen 0       "Monitor0" 0 0
+  InputDevice    "Keyboard0" "CoreKeyboard"
+  InputDevice    "Evdev Mouse" "CorePointer"
+EndSection
+</pre>
+<p>在布局中，您唯一需要更改的是引用您的鼠标的 <code>InputDevice</code> 行。
+</p><p>这应该是所需的全部内容。
+</p>
+<ul><li>由 xxsashixx 编辑</li></ul>
+<p>这是针对 Logitech G5 鼠标用户的。我没有测试过其他鼠标，但如果你不添加这个，你的鼠标 '可能' 不会工作。
+如果你不需要添加这个，那就不要添加。
+</p><p>在 <code>InputDevice</code> 部分中放入
+Option "Device" "/dev/input/event[#]"
+否则鼠标将不会被检测到。
+</p><p>[#] = 你从以下命令得到的数字：
+</p>
+<pre>grep -E "Name|Handlers" /proc/bus/input/devices
+</pre>
+<ul><li>由 bapman 编辑</li></ul>
+<p>使用上述方法，你的鼠标可能在重启后无法工作（事件编号改变了）。为了解决这个问题，你可以在 <code>/dev/input/by-id</code> 中使用符号链接。例如：
+</p><p>和 Konqueror 一起使用。
+xbindkeys
+</p><p>由于 xvkbd 在官方仓库中不可用，这里有一个使用 <a href="https://www.hoopajoo.net/projects/xautomation.html">xte</a> 的示例，它来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xautomation">xautomation</a></span><sup><small>包</small></sup></span> 包：
+</p>
+<pre># 鼠标按钮
+"xte 'key XF86Back'"
+m:0x0 + b:8
+"xte 'key XF86Forward'"
+m:0x0 + b:9
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2cb882e82d41_xmodmap_.E8.B0.83.E6.95.B4" id="xmodmap_调整"><span id="xmodmap_.E8.B0.83.E6.95.B4"></span>xmodmap 调整</h4></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>对于使用 evdev 的用户来说，以下是不必要的，但这里为非 evdev 用户提供。除非您的鼠标上有些功能不起作用，否则请忽略这一整节。</div>
+<p>对于一些用户来说，更改按钮代码的顺序可能会更舒适，特别是对于左撇子。根据您使用的环境，按钮代码可以通过两种不同的方式进行配置。如果您使用 <code>.xinitrc</code> 来加载 X，那么请将其添加到 <code>.xinitrc</code>（更改为您拥有的按钮数量）：
+</p>
+<pre>xmodmap -e "pointer = 1 2 3 6 7 8 9 10 11 12 4 5" &amp;
+</pre>
+<p>请注意，按钮 4 和 5 <b>必须放在最后</b>，否则您的滚轮将无法工作。
+</p><p>如果您使用 GDM/SDDM/XDM 而不是 <code>.xinitrc</code>，那么请创建文件 <code>~/.Xmodmap</code> 并将其添加到其中（更改为您拥有的按钮数量）：
+</p>
+<pre>pointer = 1 2 3 6 7 8 9 10 11 12 4 5
+</pre>
+<ul><li>GDM/SDDM/XDM 会在存在时读取 <code>~/.Xmodmap</code> 文件，而 <code>startx</code> 不会。另一个解决方案是将其添加到您的 <code>~/.xinitrc</code>：<code>xmodmap ~/.Xmodmap</code>。这将允许您在需要进行更改时只编辑 <code>~/.Xmodmap</code>，同时使用 *DM 和 <code>startx</code>。</li></ul>
+<p>您可能需要稍微调整这些数字以获得所需的行为。有些鼠标使用按钮 6 和 7 作为滚轮，在这种情况下，这些按钮必须是最后几个数字。继续尝试，直到它有效！
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2cb882e82d41_xinput_.E8.B0.83.E6.95.B4" id="xinput_调整"><span id="xinput_.E8.B0.83.E6.95.B4"></span>xinput 调整</h4></div>
+<p>出于调试目的，可以使用 <code>xinput</code>，因为它能够在用户空间即时更改按钮映射。以下行更正了按钮映射（已有报告称 Logitech M505/B605 鼠标和可能其他鼠标存在此问题）：
+</p>
+<pre>$ xinput set-button-map "$(xinput | awk -F'[=]' '/Logitech M505\/B605/ {print $2}' | awk '{print $1}')" 1 2 3 4 5 8 9
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2cb882e82d41_.E8.AE.BE.E5.A4.87.E7.89.B9.E5.AE.9A.E9.85.8D.E7.BD.AE" id="设备特定配置"><span id=".E8.AE.BE.E5.A4.87.E7.89.B9.E5.AE.9A.E9.85.8D.E7.BD.AE"></span>设备特定配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2cb882e82d41_Logitech_G600" id="Logitech_G600">Logitech G600</h3></div>
+<p>众所周知，在 xorg-server 1.18.0-3 中，G600 的侧边按钮不被识别为独立的键盘设备，而是另一个鼠标，这会导致奇怪的行为（当点击主鼠标按钮之一时，鼠标光标移动到屏幕边缘）。
+为了强制 xorg 将它们识别为键盘按钮，需要在 <code>/etc/X11/xorg.conf</code> 中添加以下部分：
+</p>
+<pre>Section "InputClass"
+    Identifier "G600 misconfiguration fix"
+    MatchProduct "G600"
+    # 仅匹配 G600 的键盘部分
+    MatchIsKeyboard "true"
+    # 当 evdev 看到绝对轴时，它假设它是鼠标。阻止这种情况发生。
+    Option "IgnoreAbsoluteAxes" "on"
+EndSection
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2cb882e82d41_Mad_Catz_Mouse" id="Mad_Catz_Mouse">Mad Catz Mouse</h3></div>
+<p><a href="#pg3aa433c14a69">Mad Catz Mouse</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2cb882e82d41_Logitech_M560.2FM545.2FM546" id="Logitech_M560/M545/M546"><span id="Logitech_M560.2FM545.2FM546"></span>Logitech M560/M545/M546</h3></div>
+<p>这些鼠标为 Windows 8 设计，具有非传统行为：鼠标显示为鼠标和键盘，一些按钮不发出标准的鼠标按钮事件，而是键盘和鼠标按钮的组合。这阻止了在 Linux 下 "舒适地" 使用此鼠标。
+</p><p>适当的驱动程序允许鼠标像普通鼠标一样使用：
+</p>
+
+<ul><li><a href="https://github.com/kreijack/logitech-m560">Logitech M560 的内核模块</a>（已合并到内核 v4.2）</li>
+<li><a href="https://github.com/CzBiX/logitech-m560/tree/m545">Logitech M545/M546 的内核模块</a></li></ul>
+<p>另见 <a href="#pg63ab98ba33b7">Xbindkeys</a> 用于鼠标按钮映射。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2cb882e82d41_Logitech_G5_.E9.BC.A0.E6.A0.87.EF.BC.9A.E7.BB.91.E5.AE.9A_.2B_.E5.92.8C_-" id="Logitech_G5_鼠标：绑定_+_和_-"><span id="Logitech_G5_.E9.BC.A0.E6.A0.87.EF.BC.9A.E7.BB.91.E5.AE.9A_.2B_.E5.92.8C_-"></span>Logitech G5 鼠标：绑定 + 和 -</h3></div>
+<p>如果你想要在 G5/7 鼠标中绑定通常用于改变 DPI 的 <code>+</code> 和 <code>-</code> 按钮，你必须使用 lomoco 作者发布的 <code>g5hack</code> <a href="http://piie.net/temp/g5_hiddev.c">[2]</a>。
+</p>
+<pre>wget http://piie.net/temp/g5_hiddev.c
+gcc -o g5hack g5_hiddev.c
+./g5hack /dev/usb/hiddev0 3
+</pre>
+<p>这将把你的 DPI 改为 2000，点亮第 1 个 LED 并禁用即时 DPI 更改，这样你就可以用它和 evrouter 一起使用。如果你经常使用它，我建议你把它复制到 <code>/usr/bin</code> 目录：
+</p>
+<pre># cp g5hack /usr/bin/
+</pre>
+<p>如果你想绑定你的 <code>+</code> 和 <code>-</code> 按钮，你必须把底部的行（注释有 '"-" button does not function anymore' 的那一行）复制到你将使用的模式中，例如，在 "case 3:" 下，你可以把它放在注释有 'turn on third led' 的那一行上面（当然在此之前要删除旧的）。
+</p><p>对于报告为 "product 0xc049" 的最新 G5 鼠标，原始的 hack 不起作用。你必须简单地把 <code>#define MOUSE_G5 0xc041</code> 改为 <code>#define MOUSE_G5 0xc049</code> 然后重新编译。
+</p><p>你可以使用 systemd 单元在系统启动时执行 g5hack 工具。详见 <a href="#pgac06dd8bfe95">Systemd#Writing unit files</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2cb882e82d41_.E5.A6.82.E6.9E.9C_Arch_.E6.98.AF.E4.B8.80.E4.B8.AA.E8.99.9A.E6.8B.9F.E6.9C.BA.E5.AE.A2.E6.88.B7.E6.9C.BA" id="如果_Arch_是一个虚拟机客户机"><span id=".E5.A6.82.E6.9E.9C_Arch_.E6.98.AF.E4.B8.80.E4.B8.AA.E8.99.9A.E6.8B.9F.E6.9C.BA.E5.AE.A2.E6.88.B7.E6.9C.BA"></span>如果 Arch 是一个虚拟机客户机</h2></div>
+<p>如果你想支持超过两三个鼠标按钮，这种能力将取决于你的虚拟机软件。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2cb882e82d41_VMware_workstation" id="VMware_workstation">VMware workstation</h3></div>
+<p>对于基于 Arch 的虚拟机客户机，添加以下行到它的 <i>.vmx</i> 配置文件中：
+</p>
+<pre>mouse.vusb.enable = "TRUE"
+mouse.vusb.useBasicMouse = "FALSE"
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807134549
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.275 seconds
+Real time usage: 0.283 seconds
+Preprocessor visited node count: 786/1000000
+Revision size: 16181/2097152 bytes
+Post‐expand include size: 12874/2097152 bytes
+Template argument size: 5029/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 52/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  149.644      1 -total
+ 59.15%   88.515      1 Template:翻译状态
+  4.54%    6.794     50 Template:Ic
+  4.44%    6.647      5 Template:META_Message
+  3.63%    5.433      3 Template:Style
+  3.50%    5.243      1 Template:Bad_translation_(简体中文)
+  2.98%    4.464      1 Template:准确性
+  2.35%    3.522      5 Template:Note
+  2.14%    3.204      2 Template:Tip
+  1.89%    2.834      4 Template:Pkg
+-->
+<!-- Render ID 4c52b08e-9266-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6803:|#|:idhash:canonical!zh-cn and timestamp 20260807134549 and revision id 33902. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

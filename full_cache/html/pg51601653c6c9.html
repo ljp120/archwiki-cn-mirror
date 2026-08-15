@@ -1,0 +1,406 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg51601653c6c9">XDG 桌面门户</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/XDG_Desktop_Portal">XDG Desktop Portal</a>，最近一次同步于 2025-09-01，若英文版本有所<a href="https://wiki.archlinux.org/title/XDG_Desktop_Portal?diff=0&amp;oldid=841483">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/XDG_Desktop_Portal_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pge822df3d71e0">Flatpak</a></li>
+<li><a href="#pgfd2dc6e44edd">PipeWire#WebRTC 屏幕共享</a></li>
+</ul></div>
+<p>引自 <a href="https://docs.flatpak.org/zh-cn/latest/desktop-integration.html#portals">Flatpak 文档</a>：
+</p>
+<dl><dd>门户是用于安全访问沙箱外资源的框架。沙箱内程序可以使用的特性包括：检测网络状态；使用文件选择器来打开文件；打开 URI；阻止设备睡眠、休眠或关机；打印；发送邮件；显示通知；截取屏幕或录屏［……］</dd></dl>
+<p>门户（portals）系统最初专为 <a href="#pge822df3d71e0">Flatpak</a> 应用程序设计，但任何应用程序均可借助门户访问跨桌面环境和 UI 框架的统一功能。这一功能得到了广泛使用，例如通过 <a href="#pgfd2dc6e44edd">PipeWire</a> 在 <a href="#pga21a6be8b605">Wayland</a> 上实现<a href="#pgfd2dc6e44edd">屏幕共享</a>，或让 <a href="#pg9b5d7fec8088">Firefox</a> 采用与当前桌面环境相同 UI 框架的<a href="#pg9b5d7fec8088">文件打开/保存对话框</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg51601653c6c9_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal">xdg-desktop-portal</a></span><sup><small>包</small></sup></span> 以及至少一个 #后端，该软件包包含一个 <a href="#pg88cdcc283b9b">systemd/用户</a>服务，通过 <a href="#pg05349798cdb5">D-Bus</a> 自动触发启动。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg51601653c6c9_.E5.90.8E.E7.AB.AF" id="后端"><span id=".E5.90.8E.E7.AB.AF"></span>后端</h2></div>
+<p>当一个软件通过 XDG 桌面门户发起请求时，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal">xdg-desktop-portal</a></span><sup><small>包</small></sup></span> 会将这个请求转发至可用的后端实现，由后端实现适合桌面环境的 UI，并访问特定于桌面环境的 API 处理诸如打开 URI、录制屏幕之类的请求。后端可以安装多个，例如使用 <a href="#pg7c25baec4c3f">Sway</a> 可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-wlr">xdg-desktop-portal-wlr</a></span><sup><small>包</small></sup></span> 支持屏幕共享，并同时安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-gtk">xdg-desktop-portal-gtk</a></span><sup><small>包</small></sup></span> 作为后备，处理 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-wlr">xdg-desktop-portal-wlr</a></span><sup><small>包</small></sup></span> 未实现的接口。
+</p><p>门户后端配置储存在 <code>/usr/share/xdg-desktop-portal/portals/*.portal</code> 中。门户后端配置文件包含其支持的接口和桌面环境。 
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg51601653c6c9_.E6.89.80.E6.9C.89.E5.8F.AF.E7.94.A8.E5.90.8E.E7.AB.AF.E5.8F.8A.E5.85.B6.E6.8E.A5.E5.8F.A3.E6.94.AF.E6.8C.81.E6.83.85.E5.86.B5" id="所有可用后端及其接口支持情况"><span id=".E6.89.80.E6.9C.89.E5.8F.AF.E7.94.A8.E5.90.8E.E7.AB.AF.E5.8F.8A.E5.85.B6.E6.8E.A5.E5.8F.A3.E6.94.AF.E6.8C.81.E6.83.85.E5.86.B5"></span>所有可用后端及其接口支持情况</h3></div>
+<table class="wikitable">
+<tbody><tr>
+<th rowspan="2">后端</th>
+<th rowspan="2">支持的桌面环境</th>
+<th rowspan="2">使用的 UI 框架</th>
+<th colspan="19">接口支持情况
+</th></tr>
+<tr>
+<th>对话框</th>
+<th>账户信息</th>
+<th>应用程序选择器</th>
+<th>后台活动</th>
+<th>剪贴板</th>
+<th>桌面启动项</th>
+<th>电子邮件</th>
+<th>文件选择器</th>
+<th>全局快捷键</th>
+<th>用户会话管理</th>
+<th>输入设备捕获</th>
+<th>系统通知</th>
+<th>打印</th>
+<th>远程桌面</th>
+<th>屏幕录制</th>
+<th>截屏</th>
+<th>密钥</th>
+<th>系统设置</th>
+<th>壁纸
+</th></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-cosmic">xdg-desktop-portal-cosmic</a></span><sup><small>包</small></sup></span></td>
+<td><a href="#pgf5b636120775">COSMIC</a></td>
+<td>iced</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-dde">xdg-desktop-portal-dde</a></span><sup><small>包</small></sup></span></td>
+<td><a href="#pg550eb4ccbb57">深度桌面环境</a></td>
+<td><a href="#pg5016907af879">Qt</a> 5</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-gnome">xdg-desktop-portal-gnome</a></span><sup><small>包</small></sup></span></td>
+<td><a href="#pg1e095fe2c2a6">GNOME</a></td>
+<td><a href="#pg6438c4cbb62c">GTK</a> 4</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-gtk">xdg-desktop-portal-gtk</a></span><sup><small>包</small></sup></span></td>
+<td>（通用）</td>
+<td><a href="#pg6438c4cbb62c">GTK</a> 3</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-hyprland">xdg-desktop-portal-hyprland</a></span><sup><small>包</small></sup></span></td>
+<td><a href="#pgc1bca245b144">Hyprland</a><sup>1</sup></td>
+<td><a href="#pg5016907af879">Qt</a> 6</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-kde">xdg-desktop-portal-kde</a></span><sup><small>包</small></sup></span></td>
+<td><a href="#pg778f2bb029c6">KDE Plasma</a></td>
+<td><a href="#pg5016907af879">Qt</a> 6</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xdg-desktop-portal-liri-git/">xdg-desktop-portal-liri-git</a></span><sup><small>AUR</small></sup></span></td>
+<td><a href="#pg45eb5b18d181">Liri</a></td>
+<td><a href="#pg5016907af879">Qt</a> 5</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-lxqt">xdg-desktop-portal-lxqt</a></span><sup><small>包</small></sup></span></td>
+<td><a href="#pge82b8c855868">LXQt</a></td>
+<td><a href="#pg5016907af879">Qt</a> 6</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xdg-desktop-portal-td/">xdg-desktop-portal-td</a></span><sup><small>AUR</small></sup></span></td>
+<td>theDesk</td>
+<td><a href="#pg5016907af879">Qt</a> 6</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-wlr">xdg-desktop-portal-wlr</a></span><sup><small>包</small></sup></span></td>
+<td>wlroots</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-xapp">xdg-desktop-portal-xapp</a></span><sup><small>包</small></sup></span></td>
+<td><a href="#pgab6cec04e250">Cinnamon</a><sup>2</sup></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+</tbody></table>
+<ol><li>适用于所有基于 wlroots 的混成器，但提供针对 <a href="#pgc1bca245b144">Hyprland</a> 的额外功能，例如可在截屏或屏幕录制时共享单个窗口。</li>
+<li>其也为 <a href="#pg374a7df9dfd3">MATE</a> 和 <a href="#pg361394ab1daf">Xfce</a> 提供部分支持。</li></ol>
+<p>除此以外，以下后端跨桌面环境实现了特定接口：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=darkman">darkman</a></span><sup><small>包</small></sup></span> 实现了系统设置接口（仅颜色方案设置）。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-keyring">gnome-keyring</a></span><sup><small>包</small></sup></span> 实现了密钥接口。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kwallet">kwallet</a></span><sup><small>包</small></sup></span> 实现了密钥接口。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pikeru/">pikeru</a></span><sup><small>AUR</small></sup></span> 使用自己的 GUI 实现了文件选择器接口。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xdg-desktop-portal-shana/">xdg-desktop-portal-shana</a></span><sup><small>AUR</small></sup></span> 通过将请求重定向至 GNOME/GTK/KDE/LXQt 后端实现了文件选择器接口。</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xdg-desktop-portal-termfilechooser-git/">xdg-desktop-portal-termfilechooser-git</a></span><sup><small>AUR</small></sup></span> 使用<a href="#pga96df2a9d88c">终端文件选择器</a>实现了文件选择器接口。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg51601653c6c9_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<p>当收到请求时，<code>xdg-desktop-portal</code> 将会使用位于 <code>/usr/share/xdg-desktop-portal/<i>桌面环境</i>-portals.conf</code> 的配置文件，其中<i>桌面环境</i>由<a href="#pg4989d4f46056">环境变量</a> <code>XDG_CURRENT_DESKTOP</code> 决定。配置文件由桌面环境提供，决定应当使用的后端。
+</p><p>如果需要自定义配置，或者使用的桌面环境并没有提供默认配置，可以创建门户配置文件 <code>$XDG_CONFIG_HOME/xdg-desktop-portal/portals.conf</code> 以决定全局或者特定接口使用的后端。如果使用多个桌面环境，也可以创建并配置特定桌面环境的配置文件 <code>$XDG_CONFIG_HOME/xdg-desktop-portal/<i>桌面环境</i>-portals.conf</code>。
+</p><p>例如，如果正在使用的桌面环境没有门户后端，希望使用<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-gtk">xdg-desktop-portal-gtk</a></span><sup><small>包</small></sup></span> 作为通用后备后端，同时通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-lxqt">xdg-desktop-portal-lxqt</a></span><sup><small>包</small></sup></span> 使用 LXQt 文件选择器，可以使用以下配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/xdg-desktop-portal/portals.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[preferred]
+default=gtk
+org.freedesktop.impl.portal.FileChooser=lxqt</pre>
+<p>参见 <span class="plainlinks archwiki-template-man" title="$ man 5 portals.conf"><a href="https://man.archlinux.org/man/portals.conf.5">portals.conf(5)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg51601653c6c9_.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83.E4.BC.AA.E8.A3.85" id="桌面环境伪装"><span id=".E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83.E4.BC.AA.E8.A3.85"></span>桌面环境伪装</h3></div>
+<p>某些情况下（例如独立使用<a href="#pg3d6d7c1e6c7c">窗口管理器</a>时），可能需要让 <code>xdg-desktop-portal</code> 以为正在使用特定的桌面环境。可以在 <code>xdg-desktop-portal.service</code> <a href="#pg983913bfd458">用户单元</a>中使用<a href="#pg8c0a8dbf9b36">附加配置片段</a>添加环境变量 <a href="#pg4042fef2d866">XDG_CURRENT_DESKTOP</a>。例如，可以指定使用 KDE 配置的后端：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/systemd/user/xdg-desktop-portal.service.d/override.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+Environment="XDG_CURRENT_DESKTOP=KDE"</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg51601653c6c9_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg51601653c6c9_.E9.97.A8.E6.88.B7.E6.97.A0.E6.B3.95.E5.90.AF.E5.8A.A8" id="门户无法启动"><span id=".E9.97.A8.E6.88.B7.E6.97.A0.E6.B3.95.E5.90.AF.E5.8A.A8"></span>门户无法启动</h3></div>
+<p>要使 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-wlr">xdg-desktop-portal-wlr</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-hyprland">xdg-desktop-portal-hyprland</a></span><sup><small>包</small></sup></span> 正常工作，必须在 <a href="#pg88cdcc283b9b">systemd 用户会话</a>中设置 <code>XDG_CURRENT_DESKTOP</code> 和 <code>WAYLAND_DISPLAY</code> 环境变量。
+</p><p><code>XDG_CURRENT_DESKTOP</code> 需要设置为混成器名称，例如 <code>XDG_CURRENT_DESKTOP=sway</code>。<code>WAYLAND_DISPLAY</code> 则由混成器自动设置。这两个变量通常会在混成器启动时自动设置，但如果 systemd 用户会话先于混成器启动，混成器启动时需要导入这两个变量。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><a href="#pgc1bca245b144">Hyprland</a> 不会自动设置 <code>XDG_CURRENT_DESKTOP</code> 环境变量，需要手动配置。请参阅 <a href="https://wiki.hyprland.org/Configuring/Environment-variables/#xdg-specifications">Hyprland Wiki</a>。</div>
+<p>使用 <code>systemctl --user show-environment</code> 检查这些变量是否已设置。如果未设置，请在启动混成器时运行以下命令（例如，将其写入混成器的配置文件），将这些环境变量导入到 systemd 用户会话和 <a href="#pg05349798cdb5">D-Bus</a> 中：
+</p>
+<pre>$ systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+$ dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=<i>混成器名称</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这些环境变量需要在混成器启动时设置，通常通过混成器自身的配置完成，请参见混成器的文档说明。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><a href="#pg7c25baec4c3f">Sway</a> 提供了一个可自动完成此操作的插入文件，请参阅 <a href="#pg7c25baec4c3f">Sway#配置</a>。</div>
+<p>更多详情请参阅 <a href="https://github.com/emersion/xdg-desktop-portal-wlr#running">[1]</a> 和 <a href="https://github.com/emersion/xdg-desktop-portal-wlr/wiki">[2]</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg51601653c6c9_.E5.9C.A8.E5.A4.9A.E6.98.BE.E7.A4.BA.E5.99.A8.E7.8E.AF.E5.A2.83.E4.B8.8B.E4.BD.BF.E7.94.A8_xdg-desktop-portal-wlr" id="在多显示器环境下使用_xdg-desktop-portal-wlr"><span id=".E5.9C.A8.E5.A4.9A.E6.98.BE.E7.A4.BA.E5.99.A8.E7.8E.AF.E5.A2.83.E4.B8.8B.E4.BD.BF.E7.94.A8_xdg-desktop-portal-wlr"></span>在多显示器环境下使用 xdg-desktop-portal-wlr</h3></div>
+<p><code>xdg-desktop-portal-wlr</code> 需要一个外部选择器来选择要共享的显示器。默认按顺序查找 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=slurp">slurp</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wofi">wofi</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bemenu">bemenu</a></span><sup><small>包</small></sup></span>。若使用 slurp，收到屏幕共享请求后，鼠标指针会变成十字形，需要点击要共享的屏幕。若使用 wofi 或 bemenu，会出现一个可用显示器的菜单供选择。如果没有任何选择器可用，<code>xdg-desktop-portal-wlr</code> 会回退到找到的第一个显示器。详见 <span class="plainlinks archwiki-template-man" title="$ man 5 xdg-desktop-portal-wlr"><a href="https://man.archlinux.org/man/xdg-desktop-portal-wlr.5#SCREENCAST_OPTIONS">xdg-desktop-portal-wlr(5) § SCREENCAST OPTIONS</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg51601653c6c9_KDE_Plasma_.E4.B8.8B_GTK_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E5.AD.97.E4.BD.93.E6.B8.B2.E6.9F.93.E4.B8.8D.E4.BD.B3" id="KDE_Plasma_下_GTK_应用程序字体渲染不佳"><span id="KDE_Plasma_.E4.B8.8B_GTK_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F.E5.AD.97.E4.BD.93.E6.B8.B2.E6.9F.93.E4.B8.8D.E4.BD.B3"></span>KDE Plasma 下 GTK 应用程序字体渲染不佳</h3></div>
+<p>部分 GTK 应用程序在 Plasma 环境中需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-desktop-portal-gtk">xdg-desktop-portal-gtk</a></span><sup><small>包</small></sup></span> 才能正确渲染字体。请安装该软件包，然后运行：
+</p>
+<pre>$ /usr/lib/xdg-desktop-portal --replace
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg51601653c6c9_GTK.EF.BC.88.E5.8F.AF.E8.83.BD.E8.BF.98.E6.9C.89.E5.85.B6.E5.AE.83.E7.9A.84.EF.BC.89.E6.96.87.E4.BB.B6.E9.80.89.E6.8B.A9.E5.99.A8.E6.97.A0.E6.B3.95.E5.B7.A5.E4.BD.9C" id="GTK（可能还有其它的）文件选择器无法工作"><span id="GTK.EF.BC.88.E5.8F.AF.E8.83.BD.E8.BF.98.E6.9C.89.E5.85.B6.E5.AE.83.E7.9A.84.EF.BC.89.E6.96.87.E4.BB.B6.E9.80.89.E6.8B.A9.E5.99.A8.E6.97.A0.E6.B3.95.E5.B7.A5.E4.BD.9C"></span>GTK（可能还有其它的）文件选择器无法工作</h3></div>
+<p>如果应用程序通过 <a href="#pg3bfae67062a7">Xwayland</a> 运行（最简单的检查方法是运行 <code>xeyes</code>，然后将鼠标指针移至应用程序窗口内，若程序运行在 <a href="#pg3bfae67062a7">Xwayland</a> 下，其中眼睛会看向鼠标指针），那么 <code>xdg-desktop-portal-gtk</code> 会按需启动，但在选择文件后可能没有任何反应。这种情况下，为 <code>xdg-desktop-portal-gtk</code> 的环境添加 <code>DISPLAY=:0</code> 可能会解决问题。要实现此操作，可以按照前文（#门户无法启动）关于 <code>import-environment</code> 的说明进行设置，或者直接编辑 <code>xdg-desktop-portal-gtk</code> 的 systemd 用户单元文件。此外，也可以尝试通过配置开启应用程序的原生 <a href="#pga21a6be8b605">Wayland</a> 支持（例如<a href="#pga21a6be8b605">对于 Electron 程序</a>）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg51601653c6c9_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://flatpak.github.io/xdg-desktop-portal/">项目主页</a></li>
+<li><a href="https://flatpak.github.io/xdg-desktop-portal/docs/">门户文档</a>：列出了应用程序和后端可使用的所有接口。</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807035339
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.262 seconds
+Real time usage: 0.271 seconds
+Preprocessor visited node count: 1322/1000000
+Revision size: 11415/2097152 bytes
+Post‐expand include size: 36158/2097152 bytes
+Template argument size: 2961/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 18/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  111.236      1 -total
+  7.40%    8.237     90 Template:是
+  7.20%    8.004    119 Template:否
+  5.90%    6.561     25 Template:Pkg
+  3.79%    4.214      1 Template:翻译状态
+  3.42%    3.799      1 Template:G
+  3.16%    3.517     23 Template:Ic
+  2.51%    2.790      2 Template:Man
+  2.34%    2.599      1 Template:R
+  2.15%    2.395      3 Template:META_Table_cell
+-->
+<!-- Render ID 92caef8e-9213-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7664:|#|:idhash:canonical!zh-cn and timestamp 20260807035339 and revision id 34337. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

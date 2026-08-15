@@ -1,0 +1,139 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg0a4e2a66a80e">通过 SSH 安装 Arch Linux</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Install_Arch_Linux_via_SSH">Install Arch Linux via SSH</a>，最近一次同步于 2023-05-27，若英文版本有所<a href="https://wiki.archlinux.org/title/Install_Arch_Linux_via_SSH?diff=0&amp;oldid=779657">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Install_Arch_Linux_via_SSH_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>本文介绍如何通过 <a href="#pg81569eb76dc7">SSH</a> 连接远程安装 Arch。如果计算机位于远程位置或者希望在安装 Arch 时使用 SSH 客户端的复制/粘贴功能，则可以考虑这种方法。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0a4e2a66a80e_.E5.9C.A8.E8.BF.9C.E7.A8.8B.EF.BC.88.E7.9B.AE.E6.A0.87.EF.BC.89.E8.AE.A1.E7.AE.97.E6.9C.BA.E4.B8.8A" id="在远程（目标）计算机上"><span id=".E5.9C.A8.E8.BF.9C.E7.A8.8B.EF.BC.88.E7.9B.AE.E6.A0.87.EF.BC.89.E8.AE.A1.E7.AE.97.E6.9C.BA.E4.B8.8A"></span>在远程（目标）计算机上</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这些步骤需要物理访问计算机。如果计算机位于其他位置，则可能需要与其他人协调。</div>
+<p>通过 <a href="#pgbdbcbed611fc">Live CD/USB 镜像</a>启动计算机进入 Live Arch 环境：用户将以 root 用户身份登录。
+</p><p>这时，按照<a href="#pgbdbcbed611fc">安装指南#连接到互联网</a>在目标计算机上设置网络。
+</p><p>为 SSH 连接设置 root 密码，因为 Arch 中 root 的默认密码为空：
+</p>
+<pre># passwd
+</pre>
+<p>确认在 <code>/etc/ssh/sshd_config</code> 中设置了 <code>PermitRootLogin yes</code>。如果没有，请设置并<a href="#pgac06dd8bfe95">重新加载</a>OpenSSH 守护进程 <code>sshd.service</code> 使更改生效。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果目标计算机在 NAT 路由器后面，并且需要从外部访问，
+则需要将 SSH 端口（默认为 22）转发到目标计算机的 LAN IP 地址。也可以设置一个到本地（客户端）机器的反向 SSH 隧道，并通过它连接，请参见 <span class="plainlinks archwiki-template-man" title="$ man 1 ssh"><a href="https://man.archlinux.org/man/ssh.1">ssh(1)</a></span> 的 <code>-R</code> 标志。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0a4e2a66a80e_.E5.9C.A8.E6.9C.AC.E5.9C.B0.E8.AE.A1.E7.AE.97.E6.9C.BA.E4.B8.8A" id="在本地计算机上"><span id=".E5.9C.A8.E6.9C.AC.E5.9C.B0.E8.AE.A1.E7.AE.97.E6.9C.BA.E4.B8.8A"></span>在本地计算机上</h2></div>
+<p>在本地计算机上，使用以下命令通过 SSH 连接到目标计算机：
+</p>
+<pre>$ ssh -o StrictHostKeyChecking=no -o "UserKnownHostsFile /dev/null" root@<i>目标计算机的_IP_地址</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>-o StrictHostKeyChecking=no -o "UserKnownHostsFile /dev/null"</code> 选项将阻止验证 Live 环境的 SSH 主机密钥并将其写入到 <code>~/.ssh/known_hosts</code>。如果您以前连接过这一 IP 地址，这将避免 <code>REMOTE HOST IDENTIFICATION HAS CHANGED</code> 警告。</div>
+<p>从这里可以看到 Live 环境的欢迎信息，并且能够像坐在物理键盘旁一样管理目标计算机。此时，如果只想安装 Arch，请遵循<a href="#pgbdbcbed611fc">安装指南</a>。如果要编辑现有的已损坏的 Linux 安装，参见<a href="#pga90ccf1f6225">从现有 Linux 发行版安装 Arch Linux</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>考虑在目标计算机上使用 <a href="#pg1aae65d0b9f1">GNU Screen</a> 或 <a href="#pgf321cb9cdda1">tmux</a>（在 Live 环境中两者都可用）。这样，如果断开连接，还可以重新连接到多路复用器的会话。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0a4e2a66a80e_.E5.9C.A8.E6.97.A0.E5.A4.B4.E6.9C.8D.E5.8A.A1.E5.99.A8.E4.B8.8A.E5.AE.89.E8.A3.85" id="在无头服务器上安装"><span id=".E5.9C.A8.E6.97.A0.E5.A4.B4.E6.9C.8D.E5.8A.A1.E5.99.A8.E4.B8.8A.E5.AE.89.E8.A3.85"></span>在无头服务器上安装</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这些步骤需要物理访问远程计算机。需要有人插入安装介质并启动服务器。</div>
+<p>本节介绍在没有键盘、鼠标和显示器的无头服务器上安装 Arch Linux。这种方法使用一个带有 <a href="#pg74239a431ba7">cloud-init</a> NoCloud 配置的额外驱动器来自动配置 <a href="#pg4df2d7b1a305">OpenSSH</a> 授权密钥和可选的 <a href="#pg0b514fda2edb">iwd</a> 连接。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0a4e2a66a80e_.E5.87.86.E5.A4.87_cloud-init_.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6" id="准备_cloud-init_配置文件"><span id=".E5.87.86.E5.A4.87_cloud-init_.E9.85.8D.E7.BD.AE.E6.96.87.E4.BB.B6"></span>准备 cloud-init 配置文件</h3></div>
+<p>需要两个 <a href="#pg74239a431ba7">cloud-init</a> 配置文件：<code>meta-data</code> 和 <code>user-data</code>。
+</p><p><code>meta-data</code> 文件可以为空：
+</p>
+<pre>$ printf "" &gt; meta-data
+</pre>
+<p><code>user-data</code> 将包含相关配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">user-data</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#cloud-config
+users:
+  - name: root
+    ssh_authorized_keys:
+      - ssh-ed25519 <i>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</i>
+      - ssh-ed25519 <i>YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY</i></pre>
+<p>将 <code>ssh-ed25519 <i>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</i></code> 替换为 <a href="#pg0f0d45f60e57">SSH 公钥</a>。要添加多个密钥，只需重复上述语句。
+</p><p>要自动连接到 Wi-Fi 网络，请使用 <code>write_files:</code> 语句在正确的目录中创建 <a href="#pg0b514fda2edb">iwd 网络配置文件</a>。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">user-data</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#cloud-config
+users:
+  - name: root
+    ssh_authorized_keys:
+      - ssh-ed25519 <i>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</i>
+      - ssh-ed25519 <i>YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY</i>
+
+write_files:
+- content: |
+    [Security]
+    PreSharedKey=aafb192ce2da24d8c7805c956136f45dd612103f086034c402ed266355297295
+  path: /var/lib/iwd/spaceship.psk
+  
+runcmd:
+- systemctl restart iwd.service</pre>
+<p>创建了这两个文件之后，需要将其放置在一个标签为 <code>CIDATA</code> 的 ISO 9660 或 FAT 卷的驱动器上。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0a4e2a66a80e_.E4.BD.BF.E7.94.A8.E9.A2.9D.E5.A4.96.E7.9A.84_FAT_.E6.A0.BC.E5.BC.8F.E9.A9.B1.E5.8A.A8.E5.99.A8" id="使用额外的_FAT_格式驱动器"><span id=".E4.BD.BF.E7.94.A8.E9.A2.9D.E5.A4.96.E7.9A.84_FAT_.E6.A0.BC.E5.BC.8F.E9.A9.B1.E5.8A.A8.E5.99.A8"></span>使用额外的 FAT 格式驱动器</h3></div>
+<p>使用 <a href="#pg30cebfcdd710">FAT</a> 格式的驱动器。将 <code>meta-data</code> 和 <code>user-data</code> 复制到驱动器并将文件系统的 <a href="#pgd2fddf50b50f">LABEL</a> 更改为 <code>CIDATA</code>。
+</p><p>除了包含官方 ISO 的驱动器外，还需要将这个驱动器连接到无头计算机上。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0a4e2a66a80e_.E4.BD.BF.E7.94.A8.E9.A2.9D.E5.A4.96.E7.9A.84_ISO" id="使用额外的_ISO"><span id=".E4.BD.BF.E7.94.A8.E9.A2.9D.E5.A4.96.E7.9A.84_ISO"></span>使用额外的 ISO</h3></div>
+<p>使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libisoburn">libisoburn</a></span><sup><small>包</small></sup></span> 中的 <i>xorriso</i> 创建一个 <code>cloud-init.iso</code> 文件：
+</p>
+<pre>$ xorrisofs -output cloud-init.iso -volid CIDATA -joliet -rational-rock meta-data user-data
+</pre>
+<p>将 cloud-init 数据介质<a href="#pg00ff68993b08">刻录</a>到光盘，如果部署选项允许的话，按原样使用 ISO。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0a4e2a66a80e_.E4.BD.BF.E7.94.A8.E5.8D.95.E4.B8.AA_U_.E7.9B.98" id="使用单个_U_盘"><span id=".E4.BD.BF.E7.94.A8.E5.8D.95.E4.B8.AA_U_.E7.9B.98"></span>使用单个 U 盘</h3></div>
+<p>如果将安装映像写入到了 U 盘之类的驱动器，并且驱动器上有足够的空间，就可以创建一个额外的分区来存储 cloud-init 数据。
+</p><p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dosfstools">dosfstools</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mtools">mtools</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libisoburn">libisoburn</a></span><sup><small>包</small></sup></span>。
+</p><p>首先创建一个 <a href="#pgd2fddf50b50f">LABEL</a> 设置为 <code>CIDATA</code> 的 <a href="#pg30cebfcdd710">FAT</a> 镜像：
+</p>
+<pre>$ mkfs.fat -C -n CIDATA cloud-init.img 2048
+</pre>
+<p>将 <code>meta-data</code> 和 <code>user-data</code> 文件复制到其根目录：
+</p>
+<pre>$ mcopy -i cloud-init.img meta-data user-data ::
+</pre>
+<p>重新打包官方 ISO，将 FAT 镜像作为第三个分区包括进来：
+</p>
+<pre>$ xorriso -indev archlinux-<i>version</i>-x86_64.iso -outdev archlinux-<i>version</i>-x86_64-with-cidata.iso -append_partition 3 0x0c cloud-init.img -boot_image any replay
+</pre>
+<p>最后按照 <a href="#pg4b5b2989c6d8">USB flash installation medium#Using the ISO as is (BIOS and UEFI)</a> 使用重新打包的 ISO（<code>archlinux-<i>version</i>-x86_64-with-cidata.iso</code>）准备 U 盘安装介质。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0a4e2a66a80e_.E4.BD.BF.E7.94.A8.E5.8D.95.E4.B8.AA.E5.AE.9A.E5.88.B6.E7.9A.84_ISO" id="使用单个定制的_ISO"><span id=".E4.BD.BF.E7.94.A8.E5.8D.95.E4.B8.AA.E5.AE.9A.E5.88.B6.E7.9A.84_ISO"></span>使用单个定制的 ISO</h3></div>
+<p>除了上述方法，也使用 <a href="#pg2da385a25e75">Archiso</a> 创建一个自定义 ISO。这样，无论类型如何，都可以只使用一个驱动器。
+</p><p>以 releng 配置文件作为基础。将 cloud-init 配置文件放在 <code>airootfs/var/lib/cloud/seed/nocloud/</code> 中，然后构建 ISO。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0a4e2a66a80e_.E4.BB.8E.E5.AE.89.E8.A3.85.E4.BB.8B.E8.B4.A8.E5.90.AF.E5.8A.A8" id="从安装介质启动"><span id=".E4.BB.8E.E5.AE.89.E8.A3.85.E4.BB.8B.E8.B4.A8.E5.90.AF.E5.8A.A8"></span>从安装介质启动</h3></div>
+<p>完成后，使用适当的方法将安装介质和 cloud-init 数据介质（如果是单独的）部署到无头计算机。
+</p><p>启动无头计算机，从安装介质启动到 Live Arch 环境。等待一分钟左右来让无头计算机启动并连接到网络。
+</p><p>从您现有的计算机（带键盘和显示器）通过 <a href="#pg81569eb76dc7">SSH</a> 连接到无头服务器上的 Live Arch 环境，并按照<a href="#pgbdbcbed611fc">安装指南</a>完成安装。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>显然，启动镜像中的所有 Wi-Fi 和 SSH 配置都需要在实际的 Arch Linux 安装中再次配置，以便在安装后允许 WiFi SSH 访问无头计算机。</div>
+<!-- 
+NewPP limit report
+Cached time: 20260807135941
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.101 seconds
+Real time usage: 0.106 seconds
+Preprocessor visited node count: 340/1000000
+Revision size: 6893/2097152 bytes
+Post‐expand include size: 5541/2097152 bytes
+Template argument size: 2662/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   24.868      1 -total
+ 19.67%    4.891      5 Template:注意
+ 14.26%    3.545     23 Template:Ic
+ 13.90%    3.456      1 Template:翻译状态
+ 10.42%    2.590      4 Template:Pkg
+  6.90%    1.717      1 Template:Man
+  6.12%    1.521      2 Template:Hc
+  3.78%    0.941      1 Template:提示
+-->
+<!-- Render ID 3c3bd08e-9268-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6645:|#|:idhash:canonical!zh-cn and timestamp 20260807135941 and revision id 33884. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

@@ -1,0 +1,180 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg8614c182546c">CMake 软件打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/CMake_package_guidelines">CMake package guidelines</a>，最近一次同步于 2026-02-20，若英文版本有所<a href="https://wiki.archlinux.org/title/CMake_package_guidelines?diff=0&amp;oldid=823701">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/CMake_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – CMake – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – <a href="#pg0903e095e9c3">Python</a> – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<p>本文描述了为使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cmake">cmake</a></span><sup><small>包</small></sup></span> 的软件编写 <a href="#pgf9d748a7b27b">PKGBUILD</a> 时需遵循的标准与指引。
+</p><p>摘自 <a href="https://cmake.org">CMake 网站</a>：
+</p>
+<dl><dd>CMake is an open-source, cross-platform family of tools designed to build, test and package software. CMake is used to control the software compilation process using simple platform and compiler independent configuration files, and generate native makefiles and workspaces that can be used in the compiler environment of your choice.</dd></dl>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8614c182546c_.E5.85.B8.E5.9E.8B.E7.94.A8.E6.B3.95" id="典型用法"><span id=".E5.85.B8.E5.9E.8B.E7.94.A8.E6.B3.95"></span>典型用法</h2></div>
+<p>典型用法是运行 <code>cmake</code> 命令，然后执行构建命令。<code>cmake</code> 命令通常会设置一些参数，检查所需的依赖关系并创建构建文件，从而使该软件可以通过诸如 <code>make</code> 和 <code>ninja</code> 的其他工具进行构建。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8614c182546c_CMake_.E7.9A.84.E4.B8.8D.E8.89.AF.E8.A1.8C.E4.B8.BA" id="CMake_的不良行为"><span id="CMake_.E7.9A.84.E4.B8.8D.E8.89.AF.E8.A1.8C.E4.B8.BA"></span>CMake 的不良行为</h2></div>
+<p>由于其内部的生成构建文件的特性，有时 CMake 可能会以不良方式运行。因此，在为基于 CMake 的软件编写 <a href="#pgf9d748a7b27b">PKGBUILD</a> 时，应注意一些步骤。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8614c182546c_CMake_.E5.8F.AF.E8.83.BD.E4.BC.9A.E8.87.AA.E5.8A.A8.E8.A6.86.E7.9B.96.E9.BB.98.E8.AE.A4.E7.9A.84.E7.BC.96.E8.AF.91.E5.99.A8.E4.BC.98.E5.8C.96.E6.A0.87.E5.BF.97" id="CMake_可能会自动覆盖默认的编译器优化标志"><span id="CMake_.E5.8F.AF.E8.83.BD.E4.BC.9A.E8.87.AA.E5.8A.A8.E8.A6.86.E7.9B.96.E9.BB.98.E8.AE.A4.E7.9A.84.E7.BC.96.E8.AF.91.E5.99.A8.E4.BC.98.E5.8C.96.E6.A0.87.E5.BF.97"></span>CMake 可能会自动覆盖默认的编译器优化标志</h3></div>
+<p>使用 <code>-DCMAKE_BUILD_TYPE=Release</code> 选项运行 CMake 是很常见的。一些上游项目甚至无意中在其构建指令中包含此选项，但这会产生不希望的行为。
+</p><p>每个构建类型都会导致 CMake 自动将一组标志附加到 <code>CFLAGS</code> 和 <code>CXXFLAGS</code>。当使用通用 <code>Release</code> 构建类型时，它会自动附加 <code>-O3</code><a href="https://github.com/Kitware/CMake/blob/v3.17.0/Modules/Compiler/GNU.cmake#L58">[1]</a> 编译器优化标志，这将覆盖当前为 <code>-O2</code>（在 <a href="#pg7edcce763396">makepkg 配置文件</a>中定义）的默认 Arch Linux 标志。这是不可取的，因为它偏离了 Arch Linux 的目标优化级别。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8614c182546c_.E5.85.B3.E4.BA.8E_-O3_.E7.9A.84.E6.B3.A8.E6.84.8F.E4.BA.8B.E9.A1.B9" id="关于_-O3_的注意事项"><span id=".E5.85.B3.E4.BA.8E_-O3_.E7.9A.84.E6.B3.A8.E6.84.8F.E4.BA.8B.E9.A1.B9"></span>关于 -O3 的注意事项</h4></div>
+<p>使用 <code>-O3</code> 不能保证软件的性能会更好，有时甚至会减慢程序的速度。在某些情况下，它也会破坏软件。Arch Linux 开发者选择 <code>-O2</code> 作为目标优化级别是经斟酌后的结果，不应进行改动。除非你确切知道自己在做什么，或者如果上游明确告诉或暗示需要 <code>-O3</code>，否则应该避免在我们的软件包中使用它。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8614c182546c_.E4.BF.AE.E5.A4.8D.E8.87.AA.E5.8A.A8.E4.BC.98.E5.8C.96.E6.A0.87.E5.BF.97.E8.A6.86.E7.9B.96" id="修复自动优化标志覆盖"><span id=".E4.BF.AE.E5.A4.8D.E8.87.AA.E5.8A.A8.E4.BC.98.E5.8C.96.E6.A0.87.E5.BF.97.E8.A6.86.E7.9B.96"></span>修复自动优化标志覆盖</h4></div>
+<p>由于 CMake 的灵活性，以 100% 完全解决这个问题并不简单。请注意，不存在可适用于所有情况的标准解决方案。本节将讨论可能的解决方案和应遵守的一些要点。
+</p><p>默认的 CMake 构建类型是 <code>None</code>，默认情况下它不会向 <code>CFLAGS</code> 和 <code>CXXFLAGS</code> 附加任何标志，因此只要省略 <code>CMAKE_BUILD_TYPE</code> 就默认使用 <code>None</code> 类型。但请注意，忽略此选项并不能保证解决问题，因为如果命令行中未设置 <code>CMAKE_BUILD_TYPE</code>，许多软件项目会自动将 CMake 文件中的生成类型设置为 <code>Release</code> 或其他类型。另外请注意，由于 <code>None</code> 构建类型中缺少 <code>NDEBUG</code> 定义，软件包结果中可能会有对源文件的引用，并导致 <a href="#pg7edcce763396">makepkg</a> 输出 <code>WARNING: Package contains reference to $srcdir</code> 警告。
+</p><p>由于默认的 <code>None</code> 构建类型在默认情况下不会向 <code>CFLAGS</code> 和 <code>CXXFLAGS</code> 追加任何标志，因此也可以使用 <code>-DCMAKE_BUILD_TYPE=None</code> 选项。一般来说，使用 <code>-DCMAKE_BUILD_TYPE=None</code> 选项比省略 <code>CMAKE_BUILD_TYPE</code> 要好，它默认不会附加任何标志，也很少有软件会为 <code>None</code> 构建类型设置不需要的标志。
+</p><p>不幸的是，该问题不是简单使用 <code>-DCMAKE_BUILD_TYPE=None</code> 就能解决的。当使用 <code>None</code> 构建类型修复 <code>-O3</code> 问题时，可能会遇到另一个问题。很多软件项目会在 CMake 文件中为 <code>Release</code> 构建类型定义一些必需的编译器标志（例如 <code>CMAKE_C_FLAGS_RELEASE</code> 和 <code>CMAKE_CXX_FLAGS_RELEASE</code> CMake 变量）。如果使用 <code>None</code> 构建类型，在没有这些上游定义标志的情况下编译时，此类软件可能会损坏或出现错误行为。为了确定是否缺少某些标志，需要检查 CMake 文件，或者可以比较 <code>make VERBOSE=1</code> 对于 <code>None</code> <code>Release</code> 构建类型的输出。如果 <code>None</code> 构建类型导致某些上游定义的标志丢失，该怎么办？这时存在两种情况：如果你使用了 <code>Release</code> 构建类型，那么就可能会使用到不需要的 <code>-O3</code> 标志；如果使用 <code>None</code> 构建类型，那就会丢失必需的上游定义标志。该问题不存在标准解决方法，需要逐案分析。如果上游为 <code>Release</code> 构建类型定义了 <code>-O2</code>，则可以使用 <code>-DCMAKE_BUILD_TYPE=Release</code> （参见下文）。否则，可以尝试修补 CMake 文件。
+</p><p>一些软件项目在其 CMake 文件中为 <code>Release</code> 构建类型硬编码了 <code>-O2</code>，因此，如果您确定 <code>-O2</code> 是正在使用的优化级别，那么在这种情况下可以安全地设置 <code>-DCMAKE_BUILD_TYPE=Release</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>使用 <code>None</code> 类型时，某些软件可能会崩溃。当使用 <code>None</code> 时请测试软件，检查软件是否损坏或缺少功能。</li>
+<li>某些软件可能只适用于 <code>Release</code> 构建类型。你需要实验和测试软件。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8614c182546c_.E9.AA.8C.E8.AF.81.E4.BF.AE.E5.A4.8D" id="验证修复"><span id=".E9.AA.8C.E8.AF.81.E4.BF.AE.E5.A4.8D"></span>验证修复</h3></div>
+<p>通过启用生成工具的详细模式，可以验证 CMake 是否正确应用了修复。例如，当使用 <code>make</code>（这是 CMake 的默认值）时，可以通过将 <code>VERBOSE=1</code> 添加到 <code>make</code> 中（比如 <code>make VERBOSE=1</code>）来完成。这将使 <code>make</code> 能够输出正在执行的编译器命令。然后，您可以运行 <a href="#pg7edcce763396">makepkg</a> 并检查输出，看看编译器是否使用了 <code>-D_FORTIFY_SOURCE=2</code> 和 <code>-O2</code> 标志。如果在每个命令行中显示多个优化标志，则该行中的最后一个标志将是编译器使用的标志（这意味着 <code>-O2</code> 需要是最后一个优化标志才能生效）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8614c182546c_.E5.89.8D.E7.BC.80.E5.92.8C.E5.BA.93.E5.AE.89.E8.A3.85.E7.9B.AE.E5.BD.95" id="前缀和库安装目录"><span id=".E5.89.8D.E7.BC.80.E5.92.8C.E5.BA.93.E5.AE.89.E8.A3.85.E7.9B.AE.E5.BD.95"></span>前缀和库安装目录</h2></div>
+<p>标准 Arch Linux <code>/usr</code> 前缀可以由 <code>-DCMAKE_INSTALL_PREFIX=/usr</code> CMake 选项指定。通常需要这样做，因为许多软件默认将文件安装到 <code>/usr/local</code> 前缀中。
+</p><p>一些上游项目将 CMake 文件设置为将库安装到 <code>/usr/lib64</code> 目录中。如果是这种情况，可以使用 <code>-DCMAKE_INSTALL_LIBDIR=lib</code> CMake 选项将库安装目录正确设置为 <code>/usr/lib</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8614c182546c_.E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7" id="提示和技巧"><span id=".E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7"></span>提示和技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8614c182546c_.E6.8C.87.E5.AE.9A.E7.9B.AE.E5.BD.95" id="指定目录"><span id=".E6.8C.87.E5.AE.9A.E7.9B.AE.E5.BD.95"></span>指定目录</h3></div>
+<p>自从 CMake 3.13 版本开始，可以使用 <code>-B</code> 来自动创建构建目录。这样可以避免使用单独的 <code>mkdir</code> 或 <code>install</code> 命令创建生成目录。<code>-S</code> 选项指定源目录（即搜索 <code>CMakeLists.txt</code> 文件的位置），并避免在执行 <code>cmake</code> 之前使用 <code>cd</code> 进入源码树。将这两个选项结合在一起，可以快捷指定生成目录和源目录。
+</p><p>构建 CMake 项目一般需要使用很多选项，可以把它们放到构建函数的本地数组中进行指定。这可以避免使用反斜杠将长命令切割为多行，还可以为各选项单独进行注释：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PKGBUILD</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">build() {
+  local cmake_options=(
+    -B build
+    -S $pkgname-$pkgver
+    # Any other options required to build a project may follow
+    <i>[other_cmake_options]</i>
+  )
+  cmake "${cmake_options[@]}"
+  cmake --build build
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8614c182546c_.E5.87.8F.E5.B0.91.E5.8F.AF.E8.83.BD.E4.B8.8D.E9.9C.80.E8.A6.81.E7.9A.84.E8.BE.93.E5.87.BA" id="减少可能不需要的输出"><span id=".E5.87.8F.E5.B0.91.E5.8F.AF.E8.83.BD.E4.B8.8D.E9.9C.80.E8.A6.81.E7.9A.84.E8.BE.93.E5.87.BA"></span>减少可能不需要的输出</h3></div>
+<p><code>-Wno-dev</code> 选项将抑制某些警告的输出，这些警告仅适用于编写 <code>CMakeLists.txt</code> 文件的上游项目开发人员。删除这些警告将使 CMake 输出更流畅，并减少检查它的负担。一般来说，打包者通常可以被安全地忽略这些警告。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8614c182546c_.E4.BB.8E.E4.BA.8C.E8.BF.9B.E5.88.B6.E6.96.87.E4.BB.B6.E4.B8.AD.E5.88.A0.E9.99.A4.E4.B8.8D.E5.AE.89.E5.85.A8.E7.9A.84_RPATH_.E5.BC.95.E7.94.A8" id="从二进制文件中删除不安全的_RPATH_引用"><span id=".E4.BB.8E.E4.BA.8C.E8.BF.9B.E5.88.B6.E6.96.87.E4.BB.B6.E4.B8.AD.E5.88.A0.E9.99.A4.E4.B8.8D.E5.AE.89.E5.85.A8.E7.9A.84_RPATH_.E5.BC.95.E7.94.A8"></span>从二进制文件中删除不安全的 RPATH 引用</h3></div>
+<p>有时生成的二进制文件可能在 <code>RPATH</code> 中包含不安全的引用。这可以通过在构建的包上运行 <a href="#pg00c132d82a07">Namcap</a> 来验证，并且这是一个需要修复的安全问题。使用 <code>CMAKE_SKIP_INSTALL_RPATH=YES</code> <b>或</b> <code>CMAKE_SKIP_RPATH=YES</code> CMake 选项很有可能解决此问题。你需要尝试这两个选项，并查看哪一个选项在对应软件中可用（不需要同时使用）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8614c182546c_.E8.8E.B7.E5.8F.96.E6.89.80.E6.9C.89.E5.8F.AF.E7.94.A8.E7.9A.84_CMake_.E9.80.89.E9.A1.B9" id="获取所有可用的_CMake_选项"><span id=".E8.8E.B7.E5.8F.96.E6.89.80.E6.9C.89.E5.8F.AF.E7.94.A8.E7.9A.84_CMake_.E9.80.89.E9.A1.B9"></span>获取所有可用的 CMake 选项</h3></div>
+<p>要获取软件项目可用的所有“可见” CMake 选项，请在源码树（主 <code>CMakeLists.txt</code> 文件所在位置）中执行 <code>cmake -LAH</code>。
+</p><p>如果要保存输出以供以后参考，可以将其重定向到文件：
+</p>
+<pre>$ cmake -LAH &gt;options.txt 2&gt;&amp;1
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8614c182546c_.E9.81.BF.E5.85.8D.E5.9C.A8.E6.9E.84.E5.BB.BA.E6.97.B6.E4.BD.BF.E7.94.A8_FetchContent_.E8.BF.9B.E8.A1.8C.E4.B8.8B.E8.BD.BD" id="避免在构建时使用_FetchContent_进行下载"><span id=".E9.81.BF.E5.85.8D.E5.9C.A8.E6.9E.84.E5.BB.BA.E6.97.B6.E4.BD.BF.E7.94.A8_FetchContent_.E8.BF.9B.E8.A1.8C.E4.B8.8B.E8.BD.BD"></span>避免在构建时使用 FetchContent 进行下载</h3></div>
+<p>CMake 提供了 <a href="https://cmake.org/cmake/help/latest/module/FetchContent.html">FetchContent</a> 模块，可以在构建时下载额外的资源和子项目。但在理想情况下，所有资源都应在 <code>sources</code> 数组中指定，并由 <a href="#pg7edcce763396">makepkg</a> 在构建之前获取。可以通过 <a href="https://cmake.org/cmake/help/latest/module/FetchContent.html#variable:FETCHCONTENT_SOURCE_DIR_%3CuppercaseName%3E">FETCHCONTENT_SOURCE_DIR_&lt;uppercaseName&gt;</a> 选项指定需获取的文件的路径，另外还可以使用 <a href="https://cmake.org/cmake/help/latest/module/FetchContent.html#variable:FETCHCONTENT_FULLY_DISCONNECTED">FETCHCONTENT_FULLY_DISCONNECTED=ON</a> 跳过所有构建时的下载，无视任何 <code>FetchContent</code> 定义。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8614c182546c_.E7.A4.BA.E4.BE.8B" id="示例"><span id=".E7.A4.BA.E4.BE.8B"></span>示例</h4></div>
+<p>假设项目需要获取的资源名为 <code>foo</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">CMakeLists.txt</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">FetchContent_Declare(
+    foo
+    URL https://example.com/foo.tar.gz
+    URL_HASH SHA256=cf051bf611a94884ba5e4c2d03932d14e83875c5b77f0fdf55c404cad0e4a6e6
+)
+FetchContent_MakeAvailable(foo)
+</pre>
+<p>可以将该资源添加到 <code>sources</code> 数组并在生成构建文件时进行声明，而不是在构建时下载：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PKGBUILD</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">sources=(
+    ...
+    "https://example.com/foo.tar.gz"
+)
+
+sha256sums=(
+    ...
+    "cf051bf611a94884ba5e4c2d03932d14e83875c5b77f0fdf55c404cad0e4a6e6"
+)
+</pre>
+<pre>$ cmake -B build -S "$pkgname-$pkgver" -DFETCHCONTENT_FULLY_DISCONNECTED=ON -DFETCHCONTENT_SOURCE_DIR_FOO="$srcdir/foo"
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8614c182546c_.E6.A8.A1.E6.9D.BF" id="模板"><span id=".E6.A8.A1.E6.9D.BF"></span>模板</h2></div>
+<p>下面是 <code>build()</code> 函数的通用模板，它是基于 CMake 的包的起点。假设软件基于 C 和 C++，且在 CMake 文件中没有为 <code>Release</code> 构建类型定义必需编译器标志：
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>check 函数只在 <code>CMakeLists.txt</code> 中使用了 <code>enable_testing()</code> 和/或 <code>add_test()</code> 功能时可用。</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PKGBUILD</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">build() {
+  local cmake_options=(
+    -B build
+    -S $pkgname-$pkgver
+    -W no-dev
+    -D CMAKE_BUILD_TYPE=None
+    -D CMAKE_INSTALL_PREFIX=/usr
+  )
+  cmake "${cmake_options[@]}"
+  cmake --build build
+}
+
+check() {
+  local excluded_tests=""
+  local ctest_flags=(
+    --test-dir build
+    # show the stdout and stderr when the test fails
+    --output-on-failure
+    # execute tests in parallel
+    --parallel $(nproc)
+    # exclude problematic tests
+    --exclude-regex "$excluded_tests"
+  )
+  ctest "${ctest_flags[@]}"
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+}</pre>
+<p>不要忘记将 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cmake">cmake</a></span><sup><small>包</small></sup></span> 添加到 <a href="#pge8237c80873f">makedepends</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8614c182546c_.E8.8C.83.E4.BE.8B.E5.8C.85" id="范例包"><span id=".E8.8C.83.E4.BE.8B.E5.8C.85"></span>范例包</h2></div>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=i2pd">i2pd</a></span><sup><small>包</small></sup></span></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libmysofa">libmysofa</a></span><sup><small>包</small></sup></span></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8614c182546c_.E5.8F.A6.E8.AF.B7.E5.8F.82.E8.A7.81" id="另请参见"><span id=".E5.8F.A6.E8.AF.B7.E5.8F.82.E8.A7.81"></span>另请参见</h2></div>
+<ul><li><a href="https://cmake.org/documentation/">CMake 文档</a></li>
+<li><a href="https://cmake.org/cmake/help/latest/">最新版本的文档参考</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/CMake">维基百科文章</a></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 1 cmake"><a href="https://man.archlinux.org/man/cmake.1">cmake(1)</a></span></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807172236
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.171 seconds
+Real time usage: 0.177 seconds
+Preprocessor visited node count: 843/1000000
+Revision size: 11472/2097152 bytes
+Post‐expand include size: 7739/2097152 bytes
+Template argument size: 2374/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 342/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   55.745      1 -total
+ 21.91%   12.213     91 Template:Ic
+  6.09%    3.397      1 Template:翻译状态
+  5.82%    3.242      1 Template:Note
+  5.02%    2.800      4 Template:Pkg
+  4.43%    2.467      4 Template:Hc
+  3.80%    2.118      1 Template:警告
+  3.46%    1.929      1 Template:Man
+  3.34%    1.862      1 Template:Package_guidelines
+-->
+<!-- Render ID 9519620e-9284-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2891:|#|:idhash:canonical!zh-cn and timestamp 20260807172236 and revision id 34840. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

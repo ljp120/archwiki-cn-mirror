@@ -1,0 +1,499 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgaacf649200cb">文件系统</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/File_systems">File systems</a>，最近一次同步于 2025-10-23，若英文版本有所<a href="https://wiki.archlinux.org/title/File_systems?diff=0&amp;oldid=849818">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/File_systems_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg8edad8d1135b">分区</a></li>
+<li><a href="#pg8fc701831ed9">设备文件#lsblk</a></li>
+<li><a href="#pgd9b7af1c137b">文件权限与属性</a></li>
+<li><a href="#pg7545319bee41">fsck</a></li>
+<li><a href="#pgced0cc449f44">fstab</a></li>
+<li><a href="#pga96df2a9d88c">应用程序列表/工具#挂载工具</a></li>
+<li><a href="#pg434f3f4063b1">QEMU#挂载 raw 镜像内的分区</a></li>
+<li><a href="#pge009209061ac">udev</a></li>
+<li><a href="#pgfb208edb391c">udisks</a></li>
+<li><a href="#pgf51971ffe792">umask</a></li>
+<li><a href="#pgb42228802789">USB 存储设备</a></li>
+</ul></div>
+<p>根据<a href="https://en.wikipedia.org/wiki/File_system">维基百科</a>：
+</p>
+<dl><dd>在计算机体系中，文件系统负责控制如何存放和读取数据。如果没有文件系统，存储介质中的数据就会完全混在一起，无法进行区分。通过把数据分块和命名，不同的信息就可以被隔离和区分。将各组数据命名为“文件”是取自纸质信息系统的命名方式，而“文件系统”是指用于管理信息的分组和命名的结构和逻辑规则。</dd></dl>
+<p>文件系统有很多种，每个硬盘分区可以且仅可使用其中的一种。每种文件系统有自己的优缺点和独有特性。以下内容是目前所支持的文件系统类型的概述，相应的链接会提供更加详细的信息。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaacf649200cb_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E7.B1.BB.E5.9E.8B" id="文件系统类型"><span id=".E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E7.B1.BB.E5.9E.8B"></span>文件系统类型</h2></div>
+<p><span class="plainlinks archwiki-template-man" title="$ man 5 filesystems"><a href="https://man.archlinux.org/man/filesystems.5">filesystems(5)</a></span> 包含一个简单介绍，详细比较请参考 <a href="https://zh.wikipedia.org/wiki/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AF%B9%E6%AF%94">zhwp:文件系统的对比</a>。内核已经加载和内置的文件系统可以通过 <code>/proc/filesystems</code> 查看。通过 <code>ls /lib/modules/$(uname -r)/kernel/fs</code> 可以查看所有已安装的内核模块。
+</p>
+<table class="wikitable sortable">
+<caption>内核树内和 FUSE 文件系统
+</caption>
+<tbody><tr>
+<th>文件系统
+</th>
+<th>创建命令
+</th>
+<th>用户空间工具
+</th>
+<th><a href="#pg2da385a25e75">Archiso</a> <a href="https://gitlab.archlinux.org/archlinux/archiso/-/blob/master/configs/releng/packages.x86_64">[1]</a>
+</th>
+<th>内核文档 <a href="https://docs.kernel.org/filesystems/index.html">[2]</a>
+</th>
+<th>说明
+</th></tr>
+<tr>
+<td><a href="#pgd0b81baa1ee5">Bcachefs</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 bcachefs"><a href="https://man.archlinux.org/man/bcachefs.8">bcachefs(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bcachefs-tools">bcachefs-tools</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><a href="https://docs.kernel.org/filesystems/bcachefs/index.html">[3]</a>
+</td>
+<td>Linux 6.7+ 版本可用，实验性
+</td></tr>
+<tr>
+<td><a href="#pg429e7ec45c9c">Btrfs</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.btrfs"><a href="https://man.archlinux.org/man/mkfs.btrfs.8">mkfs.btrfs(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=btrfs-progs">btrfs-progs</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><a href="https://docs.kernel.org/filesystems/btrfs.html">btrfs.html</a>
+</td>
+<td><a href="https://btrfs.readthedocs.io/en/latest/Status.html">可靠性</a>
+</td></tr>
+<tr>
+<td><a href="#pg5407b9e74c08">VFAT</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.fat"><a href="https://man.archlinux.org/man/mkfs.fat.8">mkfs.fat(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dosfstools">dosfstools</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><a href="https://docs.kernel.org/filesystems/vfat.html">vfat.html</a>
+</td>
+<td><a href="https://zh.wikipedia.org/wiki/Windows_9x">Windows 9x</a> 的文件系统，常用于 U 盘和 SD 卡。
+</td></tr>
+<tr>
+<td rowspan="2"><a href="https://zh.wikipedia.org/wiki/exFAT">exFAT</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.exfat"><a href="https://man.archlinux.org/man/mkfs.exfat.8">mkfs.exfat(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=exfatprogs">exfatprogs</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td>
+</td>
+<td>从 Linux 内核 5.4 <a href="https://itsfoss.com/linux-kernel-5-4/">[4]</a> 开始，内核原生支持该文件系统。常用于 U 盘和 SD 卡。
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkexfatfs"><a href="https://man.archlinux.org/man/mkexfatfs.8">mkexfatfs(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=exfat-utils">exfat-utils</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>N/A（基于 FUSE）
+</td>
+<td>
+</td></tr>
+<tr>
+<td><a href="#pgac7283731cf0">F2FS</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.f2fs"><a href="https://man.archlinux.org/man/mkfs.f2fs.8">mkfs.f2fs(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=f2fs-tools">f2fs-tools</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><a href="https://docs.kernel.org/filesystems/f2fs.html">f2fs.html</a>
+</td>
+<td>基于闪存的设备，无法缩容。
+</td></tr>
+<tr>
+<td><a href="#pg226ab64889d4">ext3</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.ext3"><a href="https://man.archlinux.org/man/mkfs.ext3.8">mkfs.ext3(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=e2fsprogs">e2fsprogs</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><a href="https://docs.kernel.org/filesystems/ext3.html">ext3.html</a>
+</td>
+<td>
+</td></tr>
+<tr>
+<td><a href="#pgb5dd09f37b3e">ext4</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.ext4"><a href="https://man.archlinux.org/man/mkfs.ext4.8">mkfs.ext4(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=e2fsprogs">e2fsprogs</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><a href="https://docs.kernel.org/admin-guide/ext4.html">ext4.html</a>
+</td>
+<td>
+</td></tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/%E5%88%86%E5%B1%82%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">HFS</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.hfsplus"><a href="https://manpages.debian.org/unstable/hfsprogs/mkfs.hfsplus.8.en.html">mkfs.hfsplus(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hfsprogs/">hfsprogs</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td><a href="https://docs.kernel.org/filesystems/hfs.html">hfs.html</a>
+</td>
+<td><a href="https://zh.wikipedia.org/wiki/Classic_Mac_OS">Classic Mac OS</a> 文件系统
+</td></tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/HFS%2B">HFS+</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.hfsplus"><a href="https://manpages.debian.org/unstable/hfsprogs/mkfs.hfsplus.8.en.html">mkfs.hfsplus(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/hfsprogs/">hfsprogs</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td><a href="https://docs.kernel.org/filesystems/hfsplus.html">hfsplus.html</a>
+</td>
+<td><a href="https://zh.wikipedia.org/wiki/macOS">macOS</a>（8-10.12）文件系统
+</td></tr>
+<tr>
+<td><a href="#pg55a5ea624780">JFS</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.jfs"><a href="https://man.archlinux.org/man/mkfs.jfs.8">mkfs.jfs(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=jfsutils">jfsutils</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><a href="https://docs.kernel.org/admin-guide/jfs.html">jfs.html</a>
+</td>
+<td>
+</td></tr>
+<tr>
+<td><a href="#pgf56a6a45cb9a">NILFS2</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.nilfs2"><a href="https://man.archlinux.org/man/mkfs.nilfs2.8">mkfs.nilfs2(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nilfs-utils">nilfs-utils</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><a href="https://docs.kernel.org/filesystems/nilfs2.html">nilfs2.html</a>
+</td>
+<td>设计用在基于闪存的设备上，不支持 <a href="#pg18404669bd64">xattrs</a> 和 <a href="#pg5a0884778d38">ACL</a>。
+</td></tr>
+<tr>
+<td rowspan="2"><a href="#pg172996877d67">NTFS</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><a href="https://docs.kernel.org/filesystems/ntfs3.html">ntfs3.html</a>
+</td>
+<td><a href="https://zh.wikipedia.org/wiki/Windows_NT">Windows NT</a> 文件系统。是从 Linux 5.15 起可用的<a href="https://www.paragon-software.com/home/ntfs3-driver-faq/">新驱动</a>。
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.ntfs"><a href="https://man.archlinux.org/man/mkfs.ntfs.8">mkfs.ntfs(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ntfs-3g">ntfs-3g</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td>N/A（基于 FUSE）
+</td>
+<td>有较多功能的 FUSE 驱动。
+</td></tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/ReiserFS">ReiserFS</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.reiserfs"><a href="https://manpages.debian.org/unstable/reiserfsprogs/mkfs.reiserfs.8.en.html">mkfs.reiserfs(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/reiserfsprogs/">reiserfsprogs</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td>
+<td>
+</td>
+<td>已在<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=eb103a51640ee32ab01c51e13bf8fca211f25f61">Linux 5.18</a> 版本内核中弃用，并已在 <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=fb6f20ecb121cef4d7946f834a6ee867c4e21b4a">Linux 6.13</a> 版本中移除。
+</td></tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/%E9%80%9A%E7%94%A8%E5%85%89%E7%9B%98%E6%A0%BC%E5%BC%8F">UDF</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.udf"><a href="https://man.archlinux.org/man/mkfs.udf.8">mkfs.udf(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=udftools">udftools</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td><a href="https://docs.kernel.org/filesystems/udf.html">udf.html</a>
+</td>
+<td>用于光盘映像，DVD 和蓝光盘的 ISO/IEC 13346 文件系统。
+</td></tr>
+<tr>
+<td><a href="#pg97815ebb0436">XFS</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.xfs"><a href="https://man.archlinux.org/man/mkfs.xfs.8">mkfs.xfs(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xfsprogs">xfsprogs</a></span><sup><small>包</small></sup></span>
+</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td>
+<td>
+<p><a href="https://docs.kernel.org/admin-guide/xfs.html">xfs.html</a><br/>
+<a href="https://docs.kernel.org/filesystems/xfs/xfs-delayed-logging-design.html">xfs-delayed-logging-design.html</a><br/>
+<a href="https://docs.kernel.org/filesystems/xfs/xfs-self-describing-metadata.html">xfs-self-describing-metadata.html</a>
+</p>
+</td>
+<td><a href="https://web.archive.org/web/20220902080136/https://xfs.org/index.php/XFS_FAQ#Q:_Is_there_a_way_to_make_a_XFS_filesystem_larger_or_smaller.3F">无法缩容</a>
+</td></tr></tbody></table>
+<table class="wikitable sortable">
+<caption>代码在单独仓库的文件系统
+</caption>
+<tbody><tr>
+<th>文件系统
+</th>
+<th>创建命令
+</th>
+<th>内核补丁
+</th>
+<th>用户空间工具
+</th>
+<th>说明
+</th></tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/Apple%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">APFS</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkapfs"><a href="https://manpages.debian.org/unstable/apfsprogs/mkapfs.8.en.html">mkapfs(8)</a></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-apfs-rw-dkms">linux-apfs-rw-dkms</a></span><sup><small>包</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=apfsprogs">apfsprogs</a></span><sup><small>包</small></sup></span>
+</td>
+<td><a href="https://zh.wikipedia.org/wiki/macOS">macOS</a>（10.13 及更新版本）的文件系统。只读，并带有实验性的写入支持。另外也请参考 FUSE 版的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/apfs-fuse-git/">apfs-fuse-git</a></span><sup><small>AUR</small></sup></span>。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Reiser4">Reiser4</a>
+</td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 8 mkfs.reiser4"><a href="https://manpages.debian.org/unstable/reiser4progs/mkfs.reiser4.8.en.html">mkfs.reiser4(8)</a></span>
+</td>
+<td>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/reiser4progs/">reiser4progs</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td>
+</td></tr>
+<tr>
+<td><a href="#pgefb77a75bb9b">ZFS</a>
+</td>
+<td>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zfs-linux/">zfs-linux</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zfs-dkms/">zfs-dkms</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zfs-utils/">zfs-utils</a></span><sup><small>AUR</small></sup></span>
+</td>
+<td><a href="https://zh.wikipedia.org/wiki/OpenZFS">OpenZFS</a> 移植
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaacf649200cb_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E6.97.A5.E5.BF.97" id="文件系统日志"><span id=".E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E6.97.A5.E5.BF.97"></span>文件系统日志</h3></div>
+<p>ext3/4，HFS+，JFS，NTFS，ReiserFS 和 XFS 文件系统都使用<a href="https://zh.wikipedia.org/wiki/%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">文件系统日志</a>。文件系统日志通过在数据更改写入储存设备前，把变更写入日志来提供故障恢复能力。当出现系统崩溃或电源故障的时候，这些文件系统能够更快的恢复到可用状态，并且在恢复过程中更不容易出现错误。日志活动在文件系统中专用的一部分空间里进行。
+</p><p>ext3/4 还可以记录数据日志（data-mode journaling），可以除元数据外额外记录数据本身。由于需要进行两次写入，该模式的速度损耗较大：首先需要写入日志，然后再将数据写入硬盘。因此，该模式默认不启用。在选择文件系统和功能时，必须考虑系统速度和数据安全性之间的平衡。
+</p><p>与之类似，Reiser4 提供了可配置的<a href="https://reiser4.wiki.kernel.org/index.php/Reiser4_transaction_models">“事务模型”（transaction models）</a>：一种被称为 <a href="https://reiser4.wiki.kernel.org/index.php/V4#Wandering_Logs">wandering logs</a>，使得无需两次写入硬盘；另一种被称为 <b>write-anywhere</b>，纯粹是是写时复制（copy-on-write）的实现；还有一种被称为 <b>hybrid</b>，可以智能地在前两种间进行切换。
+</p><p>类似 Reiser4，Btrfs，Bcachefs 和 ZFS 等基于写时复制（copy-on-write，又被称作 write-anywhere）的文件系统，其运行方式在设计上是完全原子化的，并为元数据和内联数据都提供了校验和（效果为操作只存在“完成”和“未发生”两种状态，在正常硬件上不会因操作卡在一半而导致数据损坏）。因此，这一类文件系统在设计上就相对不易发生数据丢失，且由于数据永远不会被就地更新，它们也不需要使用传统的日志来保护元数据。虽然 Btrfs 还在使用日志树，但这个树仅仅是为了加快 fdatasync/fsync 的速度。
+</p><p>FAT，exFAT，ext2 和 HFS 既不提供日志，也不具备原子性，因此只建议用于临时或是旧设备兼容上，不建议用于需要存储可靠性的情况。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaacf649200cb_.E5.9F.BA.E4.BA.8E_FUSE_.E7.9A.84.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="基于_FUSE_的文件系统"><span id=".E5.9F.BA.E4.BA.8E_FUSE_.E7.9A.84.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>基于 FUSE 的文件系统</h3></div>
+<p>参考 <a href="#pg28f17f5cf109">FUSE</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaacf649200cb_.E5.A0.86.E6.A0.88.E5.BC.8F.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="堆栈式文件系统"><span id=".E5.A0.86.E6.A0.88.E5.BC.8F.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>堆栈式文件系统</h3></div>
+<ul><li><b><a href="#pg8fbdf5e296d7">eCryptfs</a></b> — 企业级加密文件系统，这是一个 Linux 平台上的硬盘加密软件包。它被设计为与 POSIX 兼容的文件系统级加密层，目标是在操作系统级别提供类似 GnuPG 的功能。</li></ul>
+<dl><dd><a href="https://ecryptfs.org">https://ecryptfs.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ecryptfs-utils">ecryptfs-utils</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>mergerfs</b> — 基于 FUSE 的联合文件系统。</li></ul>
+<dl><dd><a href="https://github.com/trapexit/mergerfs">https://github.com/trapexit/mergerfs</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mergerfs/">mergerfs</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>mhddfs</b> — 多机械硬盘 FUSE 文件系统，是基于 FUSE 的联合文件系统。</li></ul>
+<dl><dd><a href="http://mhddfs.uvw.ru">http://mhddfs.uvw.ru</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mhddfs/">mhddfs</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgc1930632f19c">overlayfs</a></b> — OverlayFS 是为 Linux 设计的文件系统服务，为其它文件系统实现了联合挂载的功能。</li></ul>
+<dl><dd><a href="https://docs.kernel.org/filesystems/overlayfs.html">https://docs.kernel.org/filesystems/overlayfs.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>unionfs-fuse</b> — Unionfs 的用户空间实现。</li></ul>
+<dl><dd><a href="https://github.com/rpodgorny/unionfs-fuse">https://github.com/rpodgorny/unionfs-fuse</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/unionfs-fuse/">unionfs-fuse</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaacf649200cb_.E5.8F.AA.E8.AF.BB.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="只读文件系统"><span id=".E5.8F.AA.E8.AF.BB.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>只读文件系统</h3></div>
+<ul><li><b>DwarFS</b> — DwarFS is a fast high compression read-only file system for Linux and Windows. DwarFS more or less supports the same features as SquashFS, but is able to compress better, and has configurable hash algorithm.</li></ul>
+<dl><dd><a href="https://github.com/mhx/dwarfs">https://github.com/mhx/dwarfs</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dwarfs/">dwarfs</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://zh.wikipedia.org/wiki/EROFS">EROFS</a></b> — Enhanced Read-Only File System is a lightweight read-only file system, it aims to improve performance and compress storage capacity.</li></ul>
+<dl><dd><a href="https://erofs.docs.kernel.org/">https://erofs.docs.kernel.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=erofs-utils">erofs-utils</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://zh.wikipedia.org/wiki/SquashFS">SquashFS</a></b> — SquashFS 是一个压缩的只读文件系统，它会压缩文件、inodes 和目录，而且最高支持 1 MiB 的块大小来实现更强力的压缩。</li></ul>
+<dl><dd><a href="https://github.com/plougher/squashfs-tools">https://github.com/plougher/squashfs-tools</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=squashfs-tools">squashfs-tools</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaacf649200cb_.E9.9B.86.E7.BE.A4.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="集群文件系统"><span id=".E9.9B.86.E7.BE.A4.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>集群文件系统</h3></div>
+<ul><li><b><a href="#pg16669fb4cbbf">BeeGFS</a></b> — A parallel file system, developed and optimized for high-performance computing.</li></ul>
+<dl><dd><a href="https://www.beegfs.io/c/">https://www.beegfs.io/c/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/beegfs-client/">beegfs-client</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgf8dc90256aa3">Ceph</a></b> — 统一的分布式存储系统，旨在实现出色的性能，可靠性和可扩展性。</li></ul>
+<dl><dd><a href="https://ceph.com/">https://ceph.com/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ceph/">ceph</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="#pgfef97ff71f8d">Glusterfs</a></b> — 支持扩展到几 PB 的集群文件系统。</li></ul>
+<dl><dd><a href="https://www.gluster.org/">https://www.gluster.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glusterfs">glusterfs</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg20100ea010cd">IPFS</a></b> — 一种点对点超媒体协议，使网络更快，更安全，更开放。IPFS 旨在取代 HTTP 并为所有人构建更好的互联网。它使用块来存储文件的各个部分，每个网络节点仅存储它感兴趣的内容，并提供了仅受用户限制的去重、分布式的可扩展文件系统。（现为 alpha 阶段）</li></ul>
+<dl><dd><a href="https://ipfs.io/">https://ipfs.io/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kubo">kubo</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="#pg29ba07081ac6">MinIO</a></b> — MinIO offers high-performance, S3 compatible object storage.</li></ul>
+<dl><dd><a href="https://min.io">https://min.io</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=minio">minio</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/MooseFS">MooseFS</a></b> — MooseFS 是一个容错、高可用性和高性能的向外扩展的网络分布式文件系统。</li></ul>
+<dl><dd><a href="https://moosefs.com">https://moosefs.com</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=moosefs">moosefs</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>OpenAFS</b> — AFS 分布式文件系统的开源实现</li></ul>
+<dl><dd><a href="https://www.openafs.org">https://www.openafs.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/openafs/">openafs</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/OrangeFS">OrangeFS</a></b> — OrangeFS 是一个向外扩展的网络文件系统，为透明、并行地访问基于多个服务器的硬盘储存而设计。它为并行分布式应用提供了优化的 MPI-IO。它使 Linux 客户端、Windows、Hadoop 和 WebDAV 使用存储集群变得更为简便。它与 POSIX 兼容，而且是 Linux 内核（4.6+）的一部分。</li></ul>
+<dl><dd><a href="https://www.orangefs.org/">https://www.orangefs.org/</a> || <small>未被打包？<a href="https://aur.archlinux.org/packages/">在 AUR 里搜索</a></small></dd></dl>
+<ul><li><b>Sheepdog</b> — 用于卷和容器服务的分布式对象存储系统，能智能地管理硬盘和节点。</li></ul>
+<dl><dd><a href="https://sheepdog.github.io/sheepdog/">https://sheepdog.github.io/sheepdog/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/sheepdog/">sheepdog</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaacf649200cb_.E5.85.B1.E4.BA.AB.E7.A1.AC.E7.9B.98.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="共享硬盘文件系统"><span id=".E5.85.B1.E4.BA.AB.E7.A1.AC.E7.9B.98.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>共享硬盘文件系统</h3></div>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/GFS2">GFS2</a></b> — GFS2 allows all members of a cluster to have direct concurrent access to the same shared block storage</li></ul>
+<dl><dd><a href="https://pagure.io/gfs2-utils">https://pagure.io/gfs2-utils</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gfs2-utils/">gfs2-utils</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/OCFS2">OCFS2</a></b> — The Oracle Cluster File System (version 2) is a shared disk file system developed by Oracle Corporation and released under the GNU General Public License</li></ul>
+<dl><dd><a href="https://oss.oracle.com/projects/ocfs2/">https://oss.oracle.com/projects/ocfs2/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ocfs2-tools/">ocfs2-tools</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/VMware_VMFS">VMware VMFS</a></b> — VMware's VMFS (Virtual Machine File System) is used by the company's flagship server virtualization suite, vSphere.</li></ul>
+<dl><dd><a href="https://core.vmware.com/resource/vmware-vsphere-vmfs">https://core.vmware.com/resource/vmware-vsphere-vmfs</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vmfs-tools/">vmfs-tools</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaacf649200cb_.E6.9F.A5.E7.9C.8B.E7.8E.B0.E6.9C.89.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="查看现有文件系统"><span id=".E6.9F.A5.E7.9C.8B.E7.8E.B0.E6.9C.89.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>查看现有文件系统</h2></div>
+<p>用 <a href="#pge173af99a32b">lsblk</a> 查看现有的文件系统：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk -f</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME   FSTYPE LABEL     UUID                                 MOUNTPOINT
+sdb
+└─sdb1 vfat   Transcend 4A3C-A9E9</pre>
+<p>如果文件系统存在，那 <code>FSTYPE</code> 列会显示它的名字；如果它被<a href="#pgaacf649200cb">挂载</a>了，那么挂载点会显示在 <code>MOUNTPOINT</code> 那一列。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaacf649200cb_.E5.88.9B.E5.BB.BA.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="创建文件系统"><span id=".E5.88.9B.E5.BB.BA.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>创建文件系统</h2></div>
+<p>文件系统可以被创建在一个<a href="#pg8edad8d1135b">分区</a>上，逻辑容器（如 <a href="#pg02cd87050dfd">LVM</a>，<a href="#pg1b71ce42139c">RAID</a>，或是 <a href="#pg8e3a9446707a">dm-crypt</a>）上，或是普通文件上（参考 <a href="https://zh.wikipedia.org/wiki/Loop%E8%AE%BE%E5%A4%87">Loop 设备</a>)。下文将描述创建在分区上的情况。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>文件系统可以直接被写入到硬盘上，这样的设备叫做 <i>superfloppy</i> 或是<a href="#pg8edad8d1135b">无分区硬盘</a>。这样做会带来一些约束，特别是用它来<a href="#pg7e866ec617d4">启动</a>系统的时候。具体示例可参考 <a href="#pg429e7ec45c9c">Btrfs#无分区 Btrfs 磁盘</a>。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>创建新文件系统之后，之前存放在该分区的数据会丢失且通常无法找回。<b>请备份所有要保留的数据</b>。</li>
+<li>分区的用途通常会限制文件系统上的选择，比如 <a href="#pg635d4bd93303">EFI 系统分区</a>就只能用 <a href="#pgfeb479f7aff2">FAT32</a>，而包含 <code>/boot</code> 目录的文件系统要考虑<a href="#pgee8f2050088a">引导加载程序</a>是否支持。</li></ul>
+</div>
+<p>在进行下一步前，需<a href="#pge173af99a32b">识别</a>文件系统目标分区所在的设备，以及其是否已被挂载。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk -f</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME   FSTYPE   LABEL       UUID                                 MOUNTPOINT
+sda
+├─sda1                      C4DA-2C4D
+├─sda2 ext4                 5b1564b2-2e2c-452c-bcfa-d1f572ae99f2 /mnt
+└─sda3                      56adc99b-a61e-46af-aab7-a6d07e504652
+</pre>
+<p>如果分区已被挂载，则在进行下一步前<b>必须</b>先将其卸载。在该示例中，现有文件系统 <code>/dev/sda2</code> 被挂载到了 <code>/mnt</code>，这时可以使用以下命令进行卸载：
+</p>
+<pre># umount /dev/sda2
+</pre>
+<p>查看挂载了的所有文件系统，参考#列出挂载的文件系统。
+</p><p>要创建新的文件系统，需要使用 <span class="plainlinks archwiki-template-man" title="$ man 8 mkfs"><a href="https://man.archlinux.org/man/mkfs.8">mkfs(8)</a></span>。具体文件系统类型和对应需要安装的用户空间工具请参考#文件系统类型。
+</p><p>例如，如果要在 <code>/dev/sda1</code> 上创建新的 <a href="#pgb5dd09f37b3e">ext4</a> 类型（常用于 Linux 数据分区）文件系统，可以执行：
+</p>
+<pre># mkfs.ext4 /dev/sda1
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>使用 <i>mkfs.ext4</i> 的时候可以用 <code>-L</code> 选项来给文件系统设置一个 <a href="#pgd2fddf50b50f">文件系统标签</a>。<i>e2label</i> 可用来修改现有文件系统的标签。</li>
+<li>文件系统在创建之后是有条件地 <i>改变大小</i>（resized）的。比如 <a href="#pg97815ebb0436">XFS</a> 可以扩容，但是不能缩小。参考 <a href="https://en.wikipedia.org/wiki/Comparison_of_file_systems#Resize_capabilities">Resize capabilities</a>。</li>
+<li>在创建文件系统后或许可以<i>调整大小</i>，但会有一定限制。例如 <a href="#pg97815ebb0436">XFS</a> 可以扩容，但是不能缩小。具体请参考 <a href="https://en.wikipedia.org/wiki/Comparison_of_file_systems#Resize_capabilities">Wikipedia:Comparison of file systems#Resize capabilities</a> 和对应文件系统的文档。</li></ul>
+</div>
+<p>创建完成后就可以将新文件系统挂载到目录了。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaacf649200cb_.E6.8C.82.E8.BD.BD.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="挂载文件系统"><span id=".E6.8C.82.E8.BD.BD.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>挂载文件系统</h2></div>
+<p>如果要手动挂载一个设备（例如分区）上的文件系统到某个目录，需使用 <span class="plainlinks archwiki-template-man" title="$ man 8 mount"><a href="https://man.archlinux.org/man/mount.8">mount(8)</a></span>。下面这个例子将把 <code>/dev/sda1</code> 挂载到 <code>/mnt</code>：
+</p>
+<pre># mount /dev/sda1 /mnt
+</pre>
+<p>挂载之后，在 <code>/mnt</code> 下面就能看见 <code>/dev/sda1</code> 里的内容。在卸载设备前，<code>/mnt</code> 文件夹里挂载前的内容将会变得不可见。
+</p><p><a href="#pgced0cc449f44">fstab</a> 描述了如果某个设备存在的话系统应该怎么自动挂载它，相关修改方法请参考 <a href="#pgced0cc449f44">fstab</a>。
+</p><p>如果 <code>/etc/fstab</code> 里描述了一个设备的挂载参数，而用 <code>mount</code> 时只给了设备名字或者挂载点，这时就会用 <i>fstab</i> 里的参数自动补全。比如，<code>/etc/fstab</code> 里指示 <code>/dev/sda1</code> 应该挂载到 <code>/mnt</code>，那下面的命令就会把 <code>/dev/sda1</code> 挂载到 <code>/mnt</code>，即使你没有显式指明：
+</p>
+<pre># mount /dev/sda1
+</pre>
+<p>或者
+</p>
+<pre># mount /mnt
+</pre>
+<p><i>mount</i> 接受很多参数，这些参数依赖于文件系统是否支持。要改变这些参数的话，可以通过以下形式：
+</p>
+<ul><li><code>mount ... ... <b>-o</b> <i>options</i></code></li>
+<li>修改 <a href="#pgced0cc449f44">fstab</a></li>
+<li>创建 <a href="#pge009209061ac">udev 规则</a></li>
+<li><a href="#pg8d559a1b1a4f">自己编译内核</a></li>
+<li>使用针对不同文件系统的 mount 脚本（<code>/usr/bin/mount.*</code>）</li></ul>
+<p>更多信息请参考相关文件系统的页面。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>除了 <i>mount</i> 外，还可以使用 <i>systemd-mount</i> 进行挂载。如果没有指定挂载点，那么文件系统会被挂载到 <code>/run/media/system/<i>device_identifier</i>/</code>，这样就不用考虑具体要挂载到哪了。具体用法等信息请参考 <span class="plainlinks archwiki-template-man" title="$ man 1 systemd-mount"><a href="https://man.archlinux.org/man/systemd-mount.1">systemd-mount(1)</a></span>。</li>
+<li>如果需要以普通用户身份挂载文件系统，请参考 <a href="#pgfb208edb391c">udisks#使用</a>。这将使得无需图形环境或调用 udisk 的文件管理器就能免根用户权限进行挂载。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaacf649200cb_.E5.88.97.E5.87.BA.E6.8C.82.E8.BD.BD.E7.9A.84.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="列出挂载的文件系统"><span id=".E5.88.97.E5.87.BA.E6.8C.82.E8.BD.BD.E7.9A.84.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>列出挂载的文件系统</h3></div>
+<p>使用 <span class="plainlinks archwiki-template-man" title="$ man 8 findmnt"><a href="https://man.archlinux.org/man/findmnt.8">findmnt(8)</a></span>：
+</p>
+<pre>$ findmnt
+</pre>
+<p><i>findmnt</i> 支持很多参数，可以利用它们来筛选输出或者获得更多信息。比如把某个挂载点或者设备作为参数，它就会只输出这个下面挂载了什么：
+</p>
+<pre>$ findmnt /dev/sda1
+</pre>
+<p><i>findmnt</i> 会从 <code>/etc/fstab</code>、<code>/etc/mtab</code> 和 <code>/proc/self/mounts</code> 文件里收集信息。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaacf649200cb_.E5.8D.B8.E8.BD.BD.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F" id="卸载文件系统"><span id=".E5.8D.B8.E8.BD.BD.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F"></span>卸载文件系统</h3></div>
+<p>可以使用 <span class="plainlinks archwiki-template-man" title="$ man 8 umount"><a href="https://man.archlinux.org/man/umount.8">umount(8)</a></span> 来卸载文件系统。参数可以是包含文件系统的设备（比如 <code>/dev/sda1</code>），也可以是挂载点（比如 <code>/mnt</code>）：
+</p>
+<pre># umount /dev/sda1
+</pre>
+<p>也可以使用
+</p>
+<pre># umount /mnt
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgaacf649200cb_.22linux_Structure_needs_cleaning.22" id='"linux_Structure_needs_cleaning"'><span id=".22linux_Structure_needs_cleaning.22"></span>"linux Structure needs cleaning"</h3></div>
+<p>卸载文件系统，然后对出现报错的卷执行 <a href="#pg7545319bee41">fsck</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgaacf649200cb_.E5.8F.82.E9.98.85" id="参阅"><span id=".E5.8F.82.E9.98.85"></span>参阅</h2></div>
+<ul><li><span class="plainlinks archwiki-template-man" title="$ man 5 filesystems"><a href="https://man.archlinux.org/man/filesystems.5">filesystems(5)</a></span></li>
+<li><span class="plainlinks archwiki-template-man" title="$ man 1 systemd-mount"><a href="https://man.archlinux.org/man/systemd-mount.1">systemd-mount(1)</a></span></li>
+<li><a href="https://docs.kernel.org/filesystems/">Linux 支持的文件系统</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">zhwp:文件系统</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/mount_(Unix)">zhwp:mount (Unix)</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807024757
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.311 seconds
+Real time usage: 0.321 seconds
+Preprocessor visited node count: 1712/1000000
+Revision size: 18689/2097152 bytes
+Post‐expand include size: 28044/2097152 bytes
+Template argument size: 11957/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  103.035      1 -total
+ 14.75%   15.200     20 Template:App
+ 14.09%   14.515     26 Template:Man
+  6.34%    6.537     13 Template:Yes
+  5.77%    5.947     23 Template:Pkg
+  4.85%    4.998      4 Template:No
+  3.94%    4.061     29 Template:Ic
+  3.63%    3.735      2 Template:Tip
+  3.59%    3.700     18 Template:AUR
+  3.44%    3.545      1 Template:G
+-->
+<!-- Render ID 652d788e-920a-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3095:|#|:idhash:canonical!zh-cn and timestamp 20260807024757 and revision id 34499. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

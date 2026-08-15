@@ -1,0 +1,182 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg89b0b22607b7">鼠标加速度</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Mouse_acceleration">Mouse acceleration</a>，最近一次同步于 2024-06-07，若英文版本有所<a href="https://wiki.archlinux.org/title/Mouse_acceleration?diff=0&amp;oldid=810107">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Mouse_acceleration_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg2cb882e82d41">鼠标按键</a></li>
+<li><a href="#pga878f5660687">鼠标轮询率</a></li>
+</ul></div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg89b0b22607b7_.E7.A6.81.E7.94.A8.E9.BC.A0.E6.A0.87.E5.8A.A0.E9.80.9F.E5.BA.A6" id="禁用鼠标加速度"><span id=".E7.A6.81.E7.94.A8.E9.BC.A0.E6.A0.87.E5.8A.A0.E9.80.9F.E5.BA.A6"></span>禁用鼠标加速度</h2></div>
+<p>使用 <a href="#pga36c0aff60be">Xorg</a>，<a href="#pg83506eae4ba0">Arch Linux</a> 将 <a href="#pg6b314e43c2a8">libinput</a> 设置为默认驱动，位于
+</p>
+<pre>"/usr/share/X11/xorg.conf.d/40-libinput.conf"
+</pre>
+<p>为了激活我们的指针设备的<code>flat</code>（平坦）配置文件，我们需要将 <code>flat</code> 设置为 <code>1</code>，并将 <code>adaptive</code>（自适应）和 <code>custom</code>（自定义）配置文件选项设置为 <code>0</code>。
+</p><p>找出您的设备 ID。
+</p>
+<pre># xinput
+</pre>
+<p>第一个数字表示默认的加速度配置文件，第二个数字表示平坦配置文件（无加速度），第三个数字表示自定义配置文件。要激活平坦配置文件：
+</p>
+<pre># xinput set-prop "deviceid" "libinput Accel Profile Enabled" 0 1 0
+</pre>
+<p>确认更改：
+</p>
+<pre># xinput list-props "deviceid"
+</pre>
+<p>通过在 <code>/usr/share/X11/xorg.conf.d/40-libinput.conf</code> 中的指针部分添加选项来使其持久化。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/share/X11/xorg.conf.d/40-libinput.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"> Section "InputClass"
+  Identifier "libinput pointer catchall"
+  MatchIsPointer "on"
+  MatchDevicePath "/dev/input/event*"
+  Driver "libinput"
+  Option "AccelProfile" "flat"
+ EndSection
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg89b0b22607b7_.E9.85.8D.E7.BD.AE.E9.BC.A0.E6.A0.87.E5.8A.A0.E9.80.9F.E5.BA.A6" id="配置鼠标加速度"><span id=".E9.85.8D.E7.BD.AE.E9.BC.A0.E6.A0.87.E5.8A.A0.E9.80.9F.E5.BA.A6"></span>配置鼠标加速度</h2></div>
+
+<p><br/>
+设置鼠标加速度取决于您使用的窗口协议：Xorg 或 Wayland。
+</p>
+<ul><li>在 <a href="#pga36c0aff60be">Xorg</a> 上，有几种设置鼠标加速度的方法：
+<ul><li>通过编辑 Xorg 配置文件</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xset">xorg-xset</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xinput">xorg-xinput</a></span><sup><small>包</small></sup></span>，分别提供 'xset' 和 'xinput'</li>
+<li>以及在<a href="#pg712e4adaddad">桌面环境</a>中常见的配置界面。</li></ul></li></ul>
+<ul><li>如果您使用的是 <a href="#pga21a6be8b605">Wayland</a>，则事件通过 <a href="#pg6b314e43c2a8">libinput</a> 控制。这是合成器的工作，以暴露 <a href="#pg6b314e43c2a8">libinput</a> 带来的设置。目前还没有一种标准的方式来跨合成器更改设置。<a href="https://www.reddit.com/r/gnome/comments/3upay2/wayland_where_are_the_mouse_acceleration_options/">[1]</a></li>
+<li><a href="#pg1e095fe2c2a6">GNOME</a> 自行管理鼠标加速度。可以通过安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dconf-editor">dconf-editor</a></span><sup><small>包</small></sup></span> 并编辑 <code>org/gnome/desktop/peripherals/mouse/acceleration-profile</code> 的值，在 <code>adaptive</code>（自适应）和 <code>flat</code>（平坦）配置文件之间进行选择。或者，也可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gnome-tweaks">gnome-tweaks</a></span><sup><small>包</small></sup></span> 来编辑 <code>org/gnome/desktop/peripherals/mouse/acceleration-profile</code>。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg89b0b22607b7_.E4.BD.BF.E7.94.A8_libinput_.E9.85.8D.E7.BD.AE.E9.BC.A0.E6.A0.87.E5.8A.A0.E9.80.9F.E5.BA.A6" id="使用_libinput_配置鼠标加速度"><span id=".E4.BD.BF.E7.94.A8_libinput_.E9.85.8D.E7.BD.AE.E9.BC.A0.E6.A0.87.E5.8A.A0.E9.80.9F.E5.BA.A6"></span>使用 libinput 配置鼠标加速度</h3></div>
+<p>当使用自适应指针加速度配置文件时，<a href="#pg6b314e43c2a8">libinput</a> 根据 DPI 和参数 <code>Acceleration Speed</code> <a href="https://wayland.freedesktop.org/libinput/doc/latest/pointer-acceleration.html">[2]</a> 来计算鼠标加速度。libinput 依赖于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-evdev">xf86-input-evdev</a></span><sup><small>包</small></sup></span> <a href="https://wayland.freedesktop.org/libinput/doc/latest/normalization-of-relative-motion.html">[3]</a> 报告的分辨率。使用 <code>xset m</code> 设置的反馈设置实际上被忽略了。当使用平坦指针加速度配置文件时，加速度因子是恒定的，不论指针的速度如何。这提供了设备和屏幕上指针之间的 1:1 移动比例。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg89b0b22607b7_.E6.9B.B4.E6.94.B9.E5.8A.A0.E9.80.9F.E5.BA.A6" id="更改加速度"><span id=".E6.9B.B4.E6.94.B9.E5.8A.A0.E9.80.9F.E5.BA.A6"></span>更改加速度</h3></div>
+<p>使用 <code>xinput list</code> 查找您的设备 ID，并使用以下命令设置加速度。请注意，加速度必须在 [-1,1] 的范围内。查看<a href="https://wayland.freedesktop.org/libinput/doc/latest/pointer-acceleration.html#ptraccel-linear">这个图表</a>以了解不同加速度值的影响。
+</p>
+<pre>$ xinput --set-prop <i>&lt;device id&gt;</i> 'libinput Accel Speed' <i>&lt;acceleration factor&gt;</i>
+</pre>
+<p>使用以下命令确认您的更改：
+</p>
+<pre>$ xinput --list-props <i>&lt;device id&gt;</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg89b0b22607b7_.E6.8C.81.E4.B9.85.E5.8C.96.E9.85.8D.E7.BD.AE" id="持久化配置"><span id=".E6.8C.81.E4.B9.85.E5.8C.96.E9.85.8D.E7.BD.AE"></span>持久化配置</h3></div>
+<p><a href="#pg6b314e43c2a8">libinput</a> 本身不存储配置选项，由调用者管理这些配置。在 <a href="#pga21a6be8b605">Wayland</a> 下，桌面环境会恢复配置。在 <a href="#pga36c0aff60be">Xorg</a> 下，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xf86-input-libinput">xf86-input-libinput</a></span><sup><small>包</small></sup></span> 读取 <a href="#pga36c0aff60be">Xorg</a> 配置文件并应用选项 <a href="https://wayland.freedesktop.org/libinput/doc/latest/faqs.html#how-do-i-configure-my-device-on-x">[4]</a>。为了在 <a href="#pga36c0aff60be">Xorg</a> 下使更改持久化，可以创建如下的配置文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/99-libinput-custom-config.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "InputClass"
+  Identifier "<i>&lt;用于标识此片段的名称&gt;</i>"
+  MatchDriver "libinput"
+  MatchProduct "<i>&lt;设备名称的子字符串&gt;</i>"
+  Option "AccelSpeed" "<i>&lt;例如 0.3&gt;</i>"
+EndSection
+</pre>
+<p>更多选项请参见 <span class="plainlinks archwiki-template-man" title="$ man 4 libinput"><a href="https://man.archlinux.org/man/libinput.4">libinput(4)</a></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg89b0b22607b7_.E8.AE.BE.E7.BD.AE.E9.BC.A0.E6.A0.87.E5.8A.A0.E9.80.9F.E5.BA.A6" id="设置鼠标加速度"><span id=".E8.AE.BE.E7.BD.AE.E9.BC.A0.E6.A0.87.E5.8A.A0.E9.80.9F.E5.BA.A6"></span>设置鼠标加速度</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg89b0b22607b7_.E5.9C.A8_Xorg_.E9.85.8D.E7.BD.AE.E4.B8.AD" id="在_Xorg_配置中"><span id=".E5.9C.A8_Xorg_.E9.85.8D.E7.BD.AE.E4.B8.AD"></span>在 Xorg 配置中</h3></div>
+<p>详见 <span class="plainlinks archwiki-template-man" title="$ man 5 xorg.conf"><a href="https://man.archlinux.org/man/xorg.conf.5">xorg.conf(5)</a></span>。
+</p><p>示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/50-mouse-acceleration.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "InputClass"
+	Identifier "我的鼠标"
+	MatchIsPointer "yes"
+# 分别设置为 1 1 0 以禁用加速度。
+	Option "AccelerationNumerator" "2"
+	Option "AccelerationDenominator" "1"
+	Option "AccelerationThreshold" "4"
+EndSection</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/50-mouse-deceleration.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "InputClass"
+	Identifier "我的鼠标"
+	MatchIsPointer "yes"
+# 一些曲线减速
+#	Option "AdaptiveDeceleration" "2"
+# 线性减速（鼠标速度降低）
+	Option "ConstantDeceleration" "2"
+EndSection</pre>
+<p>您也可以通过在类部分中使用<code>MatchProduct</code>、<code>MatchVendor</code> 等匹配项来为特定硬件分配设置。运行 <code>lsusb</code> 来找出要匹配的产品名称和供应商：
+</p>
+<pre>$ lsusb -v | grep -e idProduct -e idVendor
+</pre>
+<p>如果您无法识别您的设备，尝试运行 <code>xinput list</code>。一些使用罗技优联接收器的设备共享相同的 USB 连接，因此鼠标在使用 <code>lsusb</code> 时可能不出现。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg89b0b22607b7_.E4.BD.BF.E7.94.A8_xinput" id="使用_xinput"><span id=".E4.BD.BF.E7.94.A8_xinput"></span>使用 xinput</h3></div>
+<p>首先，获取已连接设备的列表（忽略任何虚拟指针）：
+</p>
+<pre>$ xinput list
+</pre>
+<p>记下设备 ID。如果 ID 容易变化，也可以在命令中使用设备全名。
+</p><p>使用以下命令获取可修改的属性及其当前值的列表：
+</p>
+<pre>$ xinput list-props 9
+</pre>
+<p>其中 <code>9</code> 是您要使用的设备的 ID。或者
+</p>
+<pre>$ xinput list-props "<i>鼠标名称</i>"
+</pre>
+<p>其中 <code><i>鼠标名称</i></code> 是由 <code>xinput list</code> 提供的鼠标名称。
+</p><p>例如，将 <code>Constant Deceleration</code> 属性更改为 2：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ xinput list-props 9</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Device '<i>鼠标名称</i>':
+       Device Enabled (121):   1
+       Device Accel Profile (240):     0
+       Device Accel Constant Deceleration (241):       1.000000
+       Device Accel Adaptive Deceleration (243):       1.000000
+       Device Accel Velocity Scaling (244):    10.000000
+</pre>
+<pre>$ xinput --set-prop "<i>鼠标名称</i>" "Device Accel Constant Deceleration" 2
+</pre>
+<p>要使其永久生效，编辑 <a href="#pga36c0aff60be">Xorg</a> 配置文件（见上文）或将命令添加到 <a href="#pgde17e8bd8891">xprofile</a>。后者不会影响在<a href="#pg30e2075251d0">显示管理器</a>中的速度。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg89b0b22607b7_.E9.85.8D.E7.BD.AE.E7.A4.BA.E4.BE.8B" id="配置示例"><span id=".E9.85.8D.E7.BD.AE.E7.A4.BA.E4.BE.8B"></span>配置示例</h3></div>
+<p>您可能需要使用不止一种方法来实现您想要的鼠标设置。以下是我为一个通用光学鼠标配置的步骤：
+首先，将默认移动速度减慢 3 倍，使其更精确。
+</p>
+<pre>$ xinput --set-prop 9 'Device Accel Constant Deceleration' 3 &amp;
+</pre>
+<p>然后，启用加速度，并在移动超过 6 个单位后使其速度提高 3 倍。
+</p>
+<pre>$ xset mouse 3 6 &amp;
+</pre>
+<p>如果您对结果满意，将上述命令存储在 <code>~/.xinitrc</code> 中。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg89b0b22607b7_.E5.9C.A8_Hyprland_.E4.B8.AD" id="在_Hyprland_中"><span id=".E5.9C.A8_Hyprland_.E4.B8.AD"></span>在 Hyprland 中</h3></div>
+<p>参见 <a href="#pgc1bca245b144">Hyprland#鼠标加速度/灵敏度</a>。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807070226
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.129 seconds
+Real time usage: 0.138 seconds
+Preprocessor visited node count: 455/1000000
+Revision size: 7168/2097152 bytes
+Post‐expand include size: 6906/2097152 bytes
+Template argument size: 2471/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   39.395      1 -total
+ 10.48%    4.129      1 Template:翻译状态
+ 10.19%    4.015      1 Template:准确性
+  9.44%    3.719     24 Template:Ic
+  8.27%    3.258      6 Template:Pkg
+  6.02%    2.371      2 Template:Man
+  5.94%    2.339      1 Template:相关文章开始
+  5.77%    2.274      2 Template:Related
+  5.47%    2.154      1 Template:相关文章结束
+  4.79%    1.887      5 Template:Hc
+-->
+<!-- Render ID f235f90e-922d-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6903:|#|:idhash:canonical!zh-cn and timestamp 20260807070226 and revision id 33901. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

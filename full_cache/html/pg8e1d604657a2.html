@@ -1,0 +1,142 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg8e1d604657a2">键盘输入</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Keyboard_input">Keyboard input</a>，最近一次同步于 2025-02-02，若英文版本有所<a href="https://wiki.archlinux.org/title/Keyboard_input?diff=0&amp;oldid=826245">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Keyboard_input_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pga52b0e1d529a">额外的键盘按键</a></li>
+<li><a href="#pgb3c92f6cea50">输入重映射工具</a></li>
+</ul></div>
+<p>修改键位映射的前提是了解按键如何生成符号：
+</p>
+<ol><li>键盘向计算机发送一个<a href="https://zh.wikipedia.org/wiki/%E9%94%AE%E7%9B%98%E6%89%AB%E6%8F%8F%E7%A0%81">扫描码（scancode）</a>。</li>
+<li>Linux 内核将扫描码映射为<b>键码（keycode）</b>；参见<a href="#pg1bd150838556">扫描码映射至键位码</a>。</li>
+<li><a href="https://zh.wikipedia.org/wiki/%E9%94%AE%E7%9B%98%E5%B8%83%E5%B1%80">键盘布局</a>根据按下的<a href="https://zh.wikipedia.org/wiki/%E4%BF%AE%E9%A5%B0%E9%94%AE">修饰键</a>将键码映射为符号，称作<b>键符（keysym）</b>。
+<ul><li>关于 <a href="#pg27b8d938ed9d">Linux 控制台</a>，参见 <a href="#pg0c4d7f41106e">Linux 控制台/键盘配置</a>。</li>
+<li>关于 <a href="#pga36c0aff60be">Xorg</a> 和 <a href="#pga21a6be8b605">Wayland</a>，参见 <span class="ilh-all" data-foreign-title="Xorg/Keyboard configuration" data-lang-code="en" data-lang-name="英语" data-orig-title="Xorg/键盘配置"><span class="ilh-page"><a href="#pg5243338915e0">Xorg/键盘配置</a></span></span>。</li></ul></li></ol>
+<p>大部分按键应该有键码或至少有扫描码。内核无法识别没有扫描码的按键，如一些“游戏键盘”上附加的按键。
+</p><p>在 Xorg 中，某些键符（如 <code>XF86AudioPlay</code>、<code>XF86AudioRaiseVolume</code> 等）可以映射到操作（例如启动外部应用程序），详见<a href="#pg8b69f7e24e08">快捷键#Xorg</a>。
+</p><p>在 Linux 控制台中，某些键符（如 <code>F1</code> 到 <code>F246</code>）可被映射到特定操作（例如切换到其他控制台或打印字符序列）。详见 <a href="#pg0c4d7f41106e">Linux 控制台/键盘配置#创建自定义键盘映射</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8e1d604657a2_.E8.AF.86.E5.88.AB.E6.89.AB.E6.8F.8F.E7.A0.81" id="识别扫描码"><span id=".E8.AF.86.E5.88.AB.E6.89.AB.E6.8F.8F.E7.A0.81"></span>识别扫描码</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e1d604657a2_.E4.BD.BF.E7.94.A8_evtest" id="使用_evtest"><span id=".E4.BD.BF.E7.94.A8_evtest"></span>使用 evtest</h3></div>
+<p>识别扫描码的最可靠方法是参考按键按下时生成的 <code>MSC_SCAN</code> <a href="https://en.wikipedia.org/wiki/evdev">evdev</a> 事件<a href="https://web.archive.org/web/20210620050100/https://askbot.fedoraproject.org/en/question/46201/how-to-map-scancodes-to-keycodes/">[1]</a>。有多种 <a href="#pg13f5c5ea60c5">evdev API 测试工具</a>，但最直接的是来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=evtest">evtest</a></span><sup><small>包</small></sup></span> 包的 <span class="plainlinks archwiki-template-man" title="$ man 1 evtest"><a href="https://man.archlinux.org/man/evtest.1">evtest(1)</a></span>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># evtest /dev/input/event12</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+Event: time 1434666536.001123, type 4 (EV_MSC), code 4 (MSC_SCAN), value 70053
+Event: time 1434666536.001123, type 1 (EV_KEY), code 69 (KEY_NUMLOCK), value 0
+Event: time 1434666536.001123, -------------- EV_SYN ------------
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若不确定目标设备对应的事件编号，可<b>不带参数</b>运行 <code>evtest</code>，该命令会显示设备列表及其对应的事件编号并要求输入所需设备的事件编号。</div>
+<p><code>MSC_SCAN</code> 的“value”字段即为按键对应的扫描码。此示例显示 NumLock 的扫描码为70053，键码为 69。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e1d604657a2_.E4.BD.BF.E7.94.A8_showkey" id="使用_showkey"><span id=".E4.BD.BF.E7.94.A8_showkey"></span>使用 showkey</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>手册页中指出，在现代内核上，原始扫描码模式“并不是真正的原始（is not very raw at all）”。看起来这种方法对于 USB 设备尤其容易产生错误的结果。</div>
+<p>识别扫描码的传统方法是使用 <span class="plainlinks archwiki-template-man" title="$ man 1 showkey"><a href="https://man.archlinux.org/man/showkey.1">showkey(1)</a></span> 工具。showkey 等待按键按下，如果 10 秒内没有按下按键则退出。只有处于<a href="https://en.wikipedia.org/wiki/Virtual_console">虚拟控制台</a>而不是图形环境中，且不是通过网络连接登录时，showkey 才能正常工作。运行以下命令：
+</p>
+<pre># showkey --scancodes
+</pre>
+<p>然后尝试按下键盘按键，应当输出对应扫描码。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e1d604657a2_.E4.BD.BF.E7.94.A8_dmesg" id="使用_dmesg"><span id=".E4.BD.BF.E7.94.A8_dmesg"></span>使用 dmesg</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此方法仅可用于识别未知按键。</div>
+<p>可以通过按下所需的按键后查看 <a href="#pgcfe31b67199d">dmesg</a> 的输出来获取该按键的扫描码。例如，如果输出如下：
+</p>
+<pre>Unknown key pressed (translated set 2, code 0xa0 on isa0060/serio0
+</pre>
+<p>那么按下按键的扫描码就是 <code>0xa0</code>。
+</p><p><br/>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8e1d604657a2_.E8.AF.86.E5.88.AB.E9.94.AE.E7.A0.81" id="识别键码"><span id=".E8.AF.86.E5.88.AB.E9.94.AE.E7.A0.81"></span>识别键码</h2></div>
+<p>Linux 将键码定义在 <code>/usr/include/linux/input-event-codes.h</code> 中（参见其中以 <code>KEY_</code> 开头的变量）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e1d604657a2_.E5.9C.A8.E6.8E.A7.E5.88.B6.E5.8F.B0.E4.B8.AD.E8.AF.86.E5.88.AB.E9.94.AE.E7.A0.81" id="在控制台中识别键码"><span id=".E5.9C.A8.E6.8E.A7.E5.88.B6.E5.8F.B0.E4.B8.AD.E8.AF.86.E5.88.AB.E9.94.AE.E7.A0.81"></span>在控制台中识别键码</h3></div>
+<p><span class="plainlinks archwiki-template-man" title="$ man 1 showkey"><a href="https://man.archlinux.org/man/showkey.1">showkey(1)</a></span> 工具可用于报告<a href="https://en.wikipedia.org/wiki/Virtual_console">虚拟控制台</a>中按下按键的键码。showkey 等待按键按下，如果 10 秒内没有按下按键则退出。只有处于<a href="https://en.wikipedia.org/wiki/Virtual_console">虚拟控制台</a>而不是图形环境中，且不是通过网络连接登录时，showkey 才能正常工作。运行以下命令：
+</p>
+<pre># showkey --keycodes
+</pre>
+<p>然后尝试按下键盘按键，应当输出对应键码。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e1d604657a2_.E5.9C.A8_Xorg_.E4.B8.AD.E8.AF.86.E5.88.AB.E2.80.9C.E9.94.AE.E7.A0.81.E2.80.9D" id="在_Xorg_中识别“键码”"><span id=".E5.9C.A8_Xorg_.E4.B8.AD.E8.AF.86.E5.88.AB.E2.80.9C.E9.94.AE.E7.A0.81.E2.80.9D"></span>在 Xorg 中识别“键码”</h3></div>
+
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Xorg 使用的“键码”比 Linux 定义的键码大 8（详见 <a href="https://gitlab.freedesktop.org/xorg/driver/xf86-input-evdev/-/blob/master/src/evdev.c">[2]</a>），此处中使用带双引号的“键码”指代 Xorg 使用的“键码”。</div>
+<p><br/>
+<span class="plainlinks archwiki-template-man" title="$ man 1 xev"><a href="https://man.archlinux.org/man/xev.1">xev(1)</a></span> 工具可用于报告 <a href="#pga36c0aff60be">Xorg</a> 中按下按键的“键码”，该工具由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xev">xorg-xev</a></span><sup><small>包</small></sup></span> 软件包提供。当然，要运行 xev，需要处于图形环境而不是控制台中。
+</p><p>使用以下命令可以启动 xev 并仅显示相关部分：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ xev | awk -F'[ )]+' '/^KeyPress/ { a[NR+2] } NR in a { printf "%-3s %s\n", $5, $8 }'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">38  a
+55  v
+54  c
+50  Shift_L
+133 Super_L
+135 Menu
+</pre>
+<p>xev 的封装工具 <span class="ilh-all" data-foreign-title="xbindkeys#Identifying keycodes" data-lang-code="en" data-lang-name="英语" data-orig-title="xbindkeys#获取键码"><span class="ilh-page"><a href="#pg63ab98ba33b7">xbindkeys</a></span></span> 同样能报告“键码”。
+</p><p>如果你按下某个键后终端中没有任何输出，可能意味着该键没有扫描码，或者该扫描码未映射到“键码”，又或者有其他进程在捕捉该按键事件。如果怀疑某个监听 X 服务器的进程正在捕捉按键，可以尝试在一个干净的 X 会话中运行 xev：
+</p>
+<pre>$ xinit /usr/bin/xterm -- :1
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e1d604657a2_.E5.9C.A8_Wayland_.E4.B8.AD.E8.AF.86.E5.88.AB.E9.94.AE.E7.A0.81" id="在_Wayland_中识别键码"><span id=".E5.9C.A8_Wayland_.E4.B8.AD.E8.AF.86.E5.88.AB.E9.94.AE.E7.A0.81"></span>在 Wayland 中识别键码</h3></div>
+<p>虽然 xev 也能通过 XWayland 在 Wayland 上工作，但也可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wev">wev</a></span><sup><small>包</small></sup></span> 在纯 Wayland 环境下获取“键码”。（wev 获取的“键码”也比 Linux 定义、Wayland 使用的键码大 8。）
+</p><p>使用以下命令可仅检索键符及其 UTF-8 等效值：
+</p>
+<pre>$ wev | grep 'sym'
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8e1d604657a2_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8e1d604657a2_VIA_.E5.85.BC.E5.AE.B9.E9.94.AE.E7.9B.98.E7.9A.84.E9.85.8D.E7.BD.AE" id="VIA_兼容键盘的配置"><span id="VIA_.E5.85.BC.E5.AE.B9.E9.94.AE.E7.9B.98.E7.9A.84.E9.85.8D.E7.BD.AE"></span>VIA 兼容键盘的配置</h3></div>
+<p><a href="https://www.caniusevia.com/">VIA</a> 是一款直接将键位重映射到兼容键盘的程序。若拥有此类键盘，为了让浏览器能够识别并在线配置，需添加自定义的 <a href="#pge009209061ac">udev</a> 规则以修改通过 hidraw 驱动访问设备的权限。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此方法可能存在安全风险。</div>
+<p><a href="#pgeb027b34b7ae">创建</a>以下 <a href="#pg32154df14c0c">udev 规则</a>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-via.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0666", TAG+="uaccess", TAG+="udev-acl"</pre>
+<p>随后<a href="#pge009209061ac">重新加载规则</a>使其生效。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8e1d604657a2_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://kbd-project.org/">kbd-project</a>⸺showkeys 工具的官方网站</li>
+<li><span class="ilh-all" data-foreign-title="interception-tools" data-lang-code="en" data-lang-name="英语" data-orig-title="interception-tools"><span class="ilh-page"><a href="#pg3f4583eaa652">interception-tools</a></span></span>⸺用于控制和自定义键盘输入映射行为的工具集</li>
+<li><a href="https://github.com/kmonad/kmonad">kmonad</a>⸺高级键位重绑定与重映射守护进程</li>
+<li><a href="https://github.com/snyball/Hawck">Hawck</a>⸺又一个键位重绑定守护进程</li>
+<li><a href="https://github.com/rvaiya/keyd">keyd</a>⸺简约型键位重绑定守护进程</li>
+<li><a href="https://get.vial.today/manual/linux-udev.html#device-specific-udev-rules">Vial</a>⸺VIA 离线配置程序</li>
+<li><a href="https://github.com/hirak99/keyshift/">Keyshift</a>⸺注重性能的 Linux 键盘分层与重映射软件</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260808022312
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.164 seconds
+Real time usage: 0.170 seconds
+Preprocessor visited node count: 450/1000000
+Revision size: 6907/2097152 bytes
+Post‐expand include size: 8261/2097152 bytes
+Template argument size: 2066/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 3/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.015/7.000 seconds
+Lua memory usage: 662478/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   73.174      1 -total
+ 50.04%   36.620      3 Template:Link-en
+  6.52%    4.774      1 Template:Expansion
+  5.26%    3.849      4 Template:Man
+  4.38%    3.205      1 Template:翻译状态
+  3.60%    2.632      3 Template:Pkg
+  3.10%    2.266     10 Template:Ic
+  2.81%    2.053      1 Template:相关文章开始
+  2.77%    2.024      2 Template:Related
+  2.25%    1.645      3 Template:Hc
+-->
+<!-- Render ID 1a76340e-92d0-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8141:|#|:idhash:canonical!zh-cn and timestamp 20260808022312 and revision id 33888. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

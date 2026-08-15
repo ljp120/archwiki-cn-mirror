@@ -1,0 +1,190 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgb2b30451e491">xinit</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><span>
+</span>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/xinit">xinit</a>，最近一次同步于 2022-09-04，若英文版本有所<a href="https://wiki.archlinux.org/title/xinit?diff=0&amp;oldid=733065">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/xinit_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg9aa798802a24">Display manager</a></li>
+<li><a href="#pg99121e018880">Start X at Login</a></li>
+<li><a href="#pga36c0aff60be">Xorg</a></li>
+<li><a href="#pgde17e8bd8891">Xprofile</a></li>
+<li><a href="#pg75a4bf058502">Xresources</a></li>
+</ul></div>
+<p>摘自 <a href="https://en.wikipedia.org/wiki/xinit">Wikipedia</a>:
+</p>
+<dl><dd><i>xinit</i> 程序允许用户手动启动 <a href="#pga36c0aff60be">Xorg</a> 显示服务器。<span class="plainlinks archwiki-template-man" title="$ man 1 startx"><a href="https://man.archlinux.org/man/startx.1">startx(1)</a></span> 脚本是 <span class="plainlinks archwiki-template-man" title="$ man 1 xinit"><a href="https://man.archlinux.org/man/xinit.1">xinit(1)</a></span> 的一个前端。</dd></dl>
+<p>xinit 通常用于启动<a href="#pg3d6d7c1e6c7c">窗口管理器</a>或<a href="#pg712e4adaddad">桌面环境</a>。虽然您也可以用 <i>xinit</i> 在没有窗口管理器的情况下运行 GUI 应用程序，但许多图形应用程序期待一个 <a href="https://en.wikipedia.org/wiki/Extended_Window_Manager_Hints">EWMH</a> 兼容的窗口管理器。<a href="#pg30e2075251d0">显示管理器</a>一般都依据 <a href="#pgde17e8bd8891">xprofile</a> 为您启动 <a href="#pga36c0aff60be">Xorg</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2b30451e491_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xinit">xorg-xinit</a></span><sup><small>包</small></sup></span> 包。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2b30451e491_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<p><i>xinit</i> 和 <i>startx</i> 需要一个可选的客户端程序参数，见 #覆盖 xinitrc 。 如果您没有提供参数，它们会寻找 <code>~/.xinitrc</code>，作为一个shell脚本运行，以启动客户程序。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2b30451e491_xinitrc" id="xinitrc">xinitrc</h3></div>
+<p><code>~/.xinitrc</code> 可以方便地在X服务器启动时运行依赖于X的程序并设置环境变量。如果它存在于用户的主目录中，<i>startx</i> 和 <i>xinit</i> 会执行它。否则 <i>startx</i> 将运行默认的<code>/etc/X11/xinit/xinitrc</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><i>xinit</i> 有自己的默认行为，而不是执行该文件。详见 <span class="plainlinks archwiki-template-man" title="$ man 1 xinit"><a href="https://man.archlinux.org/man/xinit.1">xinit(1)</a></span>。</div>
+<p>这个默认的xinitrc将启动一个包含 <a href="#pgc43752c8b507">Twm</a>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xorg-xclock">xorg-xclock</a></span><sup><small>包</small></sup></span> 和 <a href="#pg12c4c9eae03a">Xterm</a> 的基本环境（假设安装了必要的软件包）。因此，要启动不同的窗口管理器或桌面环境，首先要在主目录下创建一个默认的 <code>xinitrc</code> 副本。
+</p>
+<pre>$ cp /etc/X11/xinit/xinitrc ~/.xinitrc
+</pre>
+<p>然后<a href="#pg7258f38183d6">编辑</a>该文件，用想要的命令替换默认程序。记住，在使用 <code>exec</code> 的命令之后的行会被忽略。例如，要在后台启动 <code>xscreensaver</code>，然后启动 <a href="#pg8bc45a0eb197">openbox</a>，请使用以下命令。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xinitrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+xscreensaver &amp;
+exec openbox-session</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>至少要确保 <code>/etc/X11/xinit/xinitrc</code> 中的最后一个 <code>if</code> 块出现在您的 <code>~/.xinitrc</code> 文件中，以确保 <code>/etc/X11/xinit/xinitrc.d</code> 中的脚本有源可循。</div>
+<p>在窗口管理器之前启动的长期运行的程序，如屏保和墙纸程序，必须自己分叉或通过附加 <code>&amp;</code> 符号在后台运行。否则，在执行窗口管理器或桌面环境之前，脚本会停止运行并等待每个程序退出。请注意，有些程序反而不应该被分叉，以避免出现竞争性错误，如 <a href="#pg8dd783a99458">xrdb</a> 的情况。在 <code>exec</code> 前缀会将脚本进程替换为窗口管理器进程，这样，即使该进程分叉到后台，X也不会退出。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2b30451e491_xserverrc" id="xserverrc">xserverrc</h3></div>
+<p><code>xserverrc</code> 文件是一个负责启动X服务器的shell脚本。startx "和 "xinit "都会执行 <code>~/.xserverrc</code>，如果它存在的话，"startx "会使用 <code>/etc/X11/xinit/xserverrc</code>。
+</p><p>为了保持 <code>logind</code>的<a href="#pg46cd0fd01f22">会话权限</a>，并防止通过切换终端绕过屏幕锁定器，<a href="#pga36c0aff60be">Xorg</a> 必须在发生登录的同一虚拟终端上启动 <a href="http://blog.falconindy.com/articles/back-to-basics-with-x-and-systemd.html">[1]</a>。因此建议在 <code>vt$XDG_VTNR</code>文件中指定 <code>~/.xserverrc</code>。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xserverrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">}文件：
+#!/bin/sh
+
+exec /usr/bin/Xorg -nolisten tcp "$@" vt$XDG_VTNR
+</pre>
+<p>参见 <span class="plainlinks archwiki-template-man" title="$ man 1 Xserver"><a href="https://man.archlinux.org/man/Xserver.1">Xserver(1)</a></span> 中的所有命令行选项列表。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><code>-nolisten local</code> 可以加在 <code>-nolisten tcp</code> 之后，以禁用X11的抽象套接字，帮助隔离。 关于这对X11安全的潜在影响，有一个 <a href="https://tstarling.com/blog/2016/06/x11-security-isolation/">简单背景</a>。</div>
+<p>另外，如果您想让X显示在一个独立的控制台，而不是调用服务器的控制台，您可以通过使用 <code>/usr/lib/systemd/systemd-multi-seat-x</code> 提供的X服务器包装器实现。为方便起见，可以通过修改 <code>~/.xserverrc</code> 设置 "xinit "和 "startx "使用该包装器。
+</p><p><code>-keeptty</code>选项，重新启用将X会话的输出重定向至Xorg日志文件的功能。详见 <a href="#pga36c0aff60be">Xorg#重定向Xorg会话日志</a>。}}
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2b30451e491_.E7.94.A8.E6.B3.95" id="用法"><span id=".E7.94.A8.E6.B3.95"></span>用法</h2></div>
+<p>要以普通用户身份运行 Xorg，请输入：
+</p>
+<pre>$ startx
+</pre>
+<p>或者如果配置了 <a href="#pgb2b30451e491_xserverrc">#xserverrc</a>。
+</p>
+<pre>$ xinit -- :1
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><i>xinit</i> 不能处理已启动的另一个X服务器的多个显示。为此，您必须通过附加 <code>--:<i>display_number</i></code> 来指定显示，其中 <code><i>display_number</i></code> 为 <code>1</code> 或以上。</div>
+<p>您选择的窗口管理器（或桌面环境）现在应该可以正确启动了。
+</p><p>要退出X，请运行您的窗口管理器的退出功能（假设它有的话）。如果它缺乏这样的功能，请运行。
+</p>
+<pre>$ pkill -15 Xorg
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><i>pkill</i> 将杀死所有正在运行的X实例。要指定杀死当前虚拟终端上的窗口管理器，请运行：
+<pre>$ pkill -15 -t tty"$XDG_VTNR" Xorg
+</pre>
+</div>
+<p>另见 <span class="plainlinks archwiki-template-man" title="$ man 7 signal"><a href="https://man.archlinux.org/man/signal.7">signal(7)</a></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb2b30451e491_.E6.8A.80.E5.B7.A7.E5.92.8C.E7.AA.8D.E9.97.A8" id="技巧和窍门"><span id=".E6.8A.80.E5.B7.A7.E5.92.8C.E7.AA.8D.E9.97.A8"></span>技巧和窍门</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2b30451e491_.E8.A6.86.E7.9B.96_xinitrc" id="覆盖_xinitrc"><span id=".E8.A6.86.E7.9B.96_xinitrc"></span>覆盖 xinitrc</h3></div>
+<p>如果您有一个正常工作的 <code>~/.xinitrc</code>，但只是想试试其他窗口管理器或桌面环境，您可以通过发出<i>startx</i>，并在后面加上窗口管理器的路径来运行它，例如。
+</p>
+<pre>$ startx /usr/bin/i3
+</pre>
+<p>如果二进制文件需要参数，它们需要加引号，以便被识别为<i>startx</i>的第一个参数的一部分。
+</p>
+<pre>$ startx "/usr/bin/<i>application</i> --<i>key value</i> "
+</pre>
+<p>注意，完整的路径是<b>必须的</b>。您也可以为 <a href="#pgb2b30451e491_xserverrc">#xserverrc</a> 脚本指定自定义选项，在双破折号 <code>--</code> 后加上这些选项。
+</p>
+<pre>$ startx /usr/bin/enlightenment -- -br +bs -dpi 96
+</pre>
+<p>另请参见 <span class="plainlinks archwiki-template-man" title="$ man 1 startx"><a href="https://man.archlinux.org/man/startx.1">startx(1)</a></span>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>由于 <code>/etc/X11/xinit/xinitrc.d/</code> 下的脚本被跳过，环境变量 <code>DISPLAY</code> 可能需要被设置。您可以通过执行<code>DISPLAY=:<i>display_number</i> startx /usr/bin/i3</code>，在所需的显示器上试用 <i>i3</i>。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>这可用于启动常规GUI程序，但没有任何基本的窗口管理器功能。参见 #在没有窗口管理器的情况下启动应用程序 和 <a href="#pgdf13c7e804f5">在独立的X显示屏中运行程序</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2b30451e491_.E7.99.BB.E5.BD.95.E6.97.B6.E8.87.AA.E5.8A.A8.E5.90.AF.E5.8A.A8_X" id="登录时自动启动_X"><span id=".E7.99.BB.E5.BD.95.E6.97.B6.E8.87.AA.E5.8A.A8.E5.90.AF.E5.8A.A8_X"></span>登录时自动启动 X</h3></div>
+<p>确保 <i>startx</i> 是正确的配置。
+</p><p>在您的 <a href="#pg2f2a09d8bdd6">login shell</a> 初始化文件（例如，<a href="#pg1ca1e15827ff">Bash</a> 的 <code>~/.bash_profile</code> 或 <a href="#pg187873cfd725">Zsh</a> 的 <code>~/.zprofile</code>）中放置以下内容。
+</p>
+<pre>if [ -z "${DISPLAY}" ] &amp;&amp; [ "${XDG_VTNR}" -eq 1 ]; then
+  exec startx
+fi
+</pre>
+<p>您可以用 <code>-eq</code> 替换 <code>-le 3</code> 这样的比较（用于 vt1 到 vt3），如果您想在一个以上的虚拟终端上使用图形化登录。
+</p><p>检测虚拟终端的其他条件包括 <code>"$(tty)" = "/dev/tty1"</code>，它不允许与 <code>-le</code> 比较，以及 <code>"$(fgconsole 2&gt;/dev/null || echo -1)" -eq 1</code>，它在<a href="#pgd08668beaee7">串行控制台</a>不起作用。
+</p><p><code>exec</code> 命令确保在X服务器退出、崩溃或被攻击者杀死时，用户被注销。如果您想承担风险，在X会话结束时保持登录状态，请删除 <code>exec</code>。
+</p><p>参见 <a href="#pg90d1113a9411">Fish_(简体中文)#登录_fish_时自动起动_X</a> 和 <a href="#pg69e42e2a0368">Systemd_(简体中文)/User_(简体中文)#Automatic_login_into_Xorg_without_display_manager</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>此方法可与 <a href="#pg054102648fb4">自动登录到虚拟控制台</a> 相结合。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2b30451e491_.E5.9C.A8.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83.2F.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8.E4.B9.8B.E9.97.B4.E8.BF.9B.E8.A1.8C.E5.88.87.E6.8D.A2" id="在桌面环境/窗口管理器之间进行切换"><span id=".E5.9C.A8.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83.2F.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8.E4.B9.8B.E9.97.B4.E8.BF.9B.E8.A1.8C.E5.88.87.E6.8D.A2"></span>在桌面环境/窗口管理器之间进行切换</h3></div>
+<p>如果您经常在不同的桌面环境或窗口管理器之间切换，使用<a href="#pg30e2075251d0">显示管理器</a>或扩展 <code>~/.xinitrc</code> 来实现切换是很方便的。
+</p><p>下面的例子展示了如何用一个参数来启动一个特定的桌面环境或窗口管理器。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xinitrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+
+# 这里 Xfce 保持默认
+session=${1:-xfce}
+
+case $session in
+    i3|i3wm           ) exec i3;;
+    kde               ) exec startplasma-x11;;
+    xfce|xfce4        ) exec startxfce4;;
+    # No known session, try to run it as command
+    *                 ) exec $1;;
+esac
+</pre>
+<p>要传递参数 <i>session</i>：
+</p>
+<pre>$ xinit <i>session</i>
+</pre>
+<p>或
+</p>
+<pre>$ startx ~/.xinitrc <i>session</i>
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2b30451e491_.E5.9C.A8.E6.B2.A1.E6.9C.89.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8.E7.9A.84.E6.83.85.E5.86.B5.E4.B8.8B.E5.90.AF.E5.8A.A8.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="在没有窗口管理器的情况下启动应用程序"><span id=".E5.9C.A8.E6.B2.A1.E6.9C.89.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8.E7.9A.84.E6.83.85.E5.86.B5.E4.B8.8B.E5.90.AF.E5.8A.A8.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>在没有窗口管理器的情况下启动应用程序</h3></div>
+<p>可以在没有窗口管理器的情况下只启动特定的应用程序，尽管这很可能只对全屏模式下的单个应用程序有用。比如说：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xinitrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+
+exec chromium
+</pre>
+<p>另外，也可以像 #覆盖 xinitrc 中描述的那样，直接从命令提示符中调用二进制。
+</p><p>使用这种方法，您需要通过自己的配置文件设置每个应用程序的窗口几何形状（如果可能的话）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>这对启动图形游戏很有用，排除合成器的开销有助于提高游戏的性能。</div>
+<p>另请参见<a href="#pg30e2075251d0">显示管理器#没有窗口管理启动应用程序</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb2b30451e491_.E4.BD.BF.E7.94.A8_startx_.E8.BF.9B.E8.A1.8C.E8.BE.93.E5.87.BA.E9.87.8D.E5.AE.9A.E5.90.91" id="使用_startx_进行输出重定向"><span id=".E4.BD.BF.E7.94.A8_startx_.E8.BF.9B.E8.A1.8C.E8.BE.93.E5.87.BA.E9.87.8D.E5.AE.9A.E5.90.91"></span>使用 startx 进行输出重定向</h3></div>
+<p>参见<a href="#pga36c0aff60be">Xorg#重定向Xorg会话日志</a>了解详情。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807035452
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.162 seconds
+Real time usage: 0.168 seconds
+Preprocessor visited node count: 687/1000000
+Revision size: 9114/2097152 bytes
+Post‐expand include size: 7404/2097152 bytes
+Template argument size: 2906/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 424/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   49.626      1 -total
+ 11.51%    5.711     41 Template:Ic
+ 11.43%    5.670      5 Template:注意
+  9.31%    4.619      6 Template:Man
+  6.51%    3.233      1 Template:翻译状态
+  5.50%    2.728      1 Template:小写标题
+  4.78%    2.371      5 Template:Related
+  4.69%    2.326      2 Template:Pkg
+  4.38%    2.173      1 Template:相关文章开始
+  4.08%    2.026      4 Template:Hc
+-->
+<!-- Render ID be4dda0e-9213-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:4027:|#|:idhash:canonical!zh-cn and timestamp 20260807035452 and revision id 32425. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

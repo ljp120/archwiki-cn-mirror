@@ -1,0 +1,232 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pga6cf703397a3">微码</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Microcode">Microcode</a>，最近一次同步于 2025-04-09，若英文版本有所<a href="https://wiki.archlinux.org/title/Microcode?diff=0&amp;oldid=827129">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Microcode_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>处理器制造商会发布对处理器<a href="https://zh.wikipedia.org/wiki/%E5%BE%AE%E7%A8%8B%E5%BA%8F">微码</a>的稳定性和安全性更新。这些更新提供了对系统稳定性至关重要的错误修复。如果没有这些更新，则可能会遇到不明原因的崩溃或难以跟踪的意外停机。
+</p><p>使用 AMD 或 Intel CPU 的用户都应该安装微码更新以确保系统稳定性。在虚拟机或容器中，微码更新应在主机上实施，而不是在客户机系统中。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6cf703397a3_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<p>要获取更新的微码，根据处理器类型，<a href="#pg811194d6beaa">安装</a>以下其中一个软件包：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=amd-ucode">amd-ucode</a></span><sup><small>包</small></sup></span> 用于 AMD 处理器，</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-ucode">intel-ucode</a></span><sup><small>包</small></sup></span> 用于 Intel 处理器。</li></ul>
+<p><a href="#pgbd0f46fbac92">mkinitcpio</a> 和 <a href="#pgb185d4cf00ac">dracut</a> 默认会生成组合的 initramfs 文件。微码将在启动时自动加载。<a href="#pg375fc9bbcc64">Booster</a> <a href="https://github.com/anatol/booster/issues/40">不支持</a>生成组合的 initramfs，请参阅#微码在单独的initramfs文件中中所需的引导加载程序配置。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6cf703397a3_.E5.8A.A0.E8.BD.BD.E5.BE.AE.E7.A0.81" id="加载微码"><span id=".E5.8A.A0.E8.BD.BD.E5.BE.AE.E7.A0.81"></span>加载微码</h2></div>
+<p>微码更新通常与主板的固件一起发布，并在固件初始化期间应用。由于OEM可能不会及时发布固件更新，且旧系统根本不会获得新的固件更新，Linux内核增加了在启动期间应用CPU微码更新的功能。<a href="https://docs.kernel.org/arch/x86/microcode.html">Linux微码加载器</a>支持三种加载方法：
+</p>
+<ol><li><b>内置微码</b>可以编译到内核中，然后由早期加载器应用。</li>
+<li><b>早期加载</b>在启动的非常早期阶段（在initramfs阶段之前）更新微码，比晚期加载更受推荐。这对于具有严重硬件错误的CPU（如Intel Haswell和Broadwell处理器系列）是强制性的。</li>
+<li><b>晚期加载</b>（<a href="https://github.com/torvalds/linux/commit/9407bda845dd19756e276d4f3abc15a20777ba45">可能</a>是<a href="https://docs.kernel.org/arch/x86/microcode.html#why-is-late-loading-dangerous">危险的</a>）在启动后更新微码，这可能为时已晚，因为CPU可能已经尝试使用有缺陷的指令。即使已经使用早期加载，晚期加载仍然可以用于应用更新的微码更新，而无需重新启动。</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6cf703397a3_.E6.97.A9.E6.9C.9F.E5.8A.A0.E8.BD.BD" id="早期加载"><span id=".E6.97.A9.E6.9C.9F.E5.8A.A0.E8.BD.BD"></span>早期加载</h3></div>
+<p>内核的早期加载器期望在未压缩的CPIO存档（initramfs镜像）中的<code>/kernel/x86/microcode/GenuineIntel.bin</code>或<code>/kernel/x86/microcode/AuthenticAMD.bin</code>中找到微码更新文件。
+</p><p>早期initramfs镜像可以与主initramfs镜像合并为一个文件，并作为单个initramfs传递给内核（通过引导加载程序的<code>initrd=</code>内核命令行选项或在打包为统一内核镜像时），或者它可以作为单独的文件存在，在这种情况下需要使用多个<code>initrd=</code>内核命令行选项。在这两种情况下，包含微码的未压缩CPIO存档<b>必须</b>放在主initramfs之前。
+</p><p>请注意，由于用户早期启动配置的广泛多样性，微码更新可能不会由Arch的默认配置自动触发。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6cf703397a3_.E8.87.AA.E5.AE.9A.E4.B9.89.E6.9E.84.E5.BB.BA.E7.9A.84.E5.86.85.E6.A0.B8" id="自定义构建的内核"><span id=".E8.87.AA.E5.AE.9A.E4.B9.89.E6.9E.84.E5.BB.BA.E7.9A.84.E5.86.85.E6.A0.B8"></span>自定义构建的内核</h4></div>
+<p>为了使早期加载在<a href="#pg4773eacb4d40">自定义内核</a>中工作，需要将“CPU微码加载支持”编译到内核中，<b>而不是</b>编译为模块。这将启用“早期加载微码”提示，应将其设置为<code>Y</code>。
+</p>
+<pre>CONFIG_BLK_DEV_INITRD=Y
+CONFIG_MICROCODE=y
+CONFIG_MICROCODE_INTEL=Y
+CONFIG_MICROCODE_AMD=y
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6cf703397a3_.E5.BE.AE.E7.A0.81initramfs.E4.B8.8E.E4.B8.BBinitramfs.E6.89.93.E5.8C.85.E5.9C.A8.E4.B8.80.E4.B8.AA.E6.96.87.E4.BB.B6.E4.B8.AD" id="微码initramfs与主initramfs打包在一个文件中"><span id=".E5.BE.AE.E7.A0.81initramfs.E4.B8.8E.E4.B8.BBinitramfs.E6.89.93.E5.8C.85.E5.9C.A8.E4.B8.80.E4.B8.AA.E6.96.87.E4.BB.B6.E4.B8.AD"></span>微码initramfs与主initramfs打包在一个文件中</h4></div>
+<p>未压缩的微码CPIO可以<a href="https://docs.kernel.org/arch/x86/microcode.html#early-load-microcode">预置到initramfs中</a>并用作单个initramfs文件。此方法优于#Microcode in a separate initramfs file，因为不需要额外的引导参数配置。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>您可以选择将<code>boot/*-ucode.img</code>添加到<code>/etc/pacman.conf</code>中的<a href="#pg6feca97708e4">NoExtract</a>，因为微码文件将直接从<code>/usr/lib/firmware/*-ucode/</code>中获取。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pga6cf703397a3_mkinitcpio" id="mkinitcpio">mkinitcpio</h5></div>
+<p>为了使<a href="#pgbd0f46fbac92">mkinitcpio</a>生成包含微码的initramfs文件，请确保<code>microcode</code>在<code>/etc/mkinitcpio.conf</code>中的<code>HOOKS</code>数组中。
+</p><p>如果<code>autodetect</code>钩子位于<code>microcode</code>之前，则仅包含当前CPU的微码。要包含系统上可以找到的所有CPU微码文件，请将<code>microcode</code>钩子移动到<code>autodetect</code>之前或完全删除<code>autodetect</code>钩子。
+</p><p>生成initramfs时，<i>mkinitcpio</i>将显示：
+</p>
+<pre>-&gt; Early uncompressed CPIO image generation successful
+</pre>
+<p>您可以使用<span class="plainlinks archwiki-template-man" title="$ man 1 lsinitcpio"><a href="https://man.archlinux.org/man/lsinitcpio.1">lsinitcpio(1)</a></span>验证initramfs是否包含微码更新文件。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># lsinitcpio --early /boot/initramfs-linux.img | grep microcode </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">kernel/x86/microcode/
+kernel/x86/microcode/AuthenticAMD.bin
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pga6cf703397a3_dracut" id="dracut">dracut</h5></div>
+<p>对于<a href="#pgb185d4cf00ac">dracut</a>，请参见<span class="plainlinks archwiki-template-man" title="$ man 5 dracut.conf"><a href="https://man.archlinux.org/man/dracut.conf.5#DESCRIPTION">dracut.conf(5) § DESCRIPTION</a></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6cf703397a3_.E5.BE.AE.E7.A0.81.E5.9C.A8.E5.8D.95.E7.8B.AC.E7.9A.84initramfs.E6.96.87.E4.BB.B6.E4.B8.AD" id="微码在单独的initramfs文件中"><span id=".E5.BE.AE.E7.A0.81.E5.9C.A8.E5.8D.95.E7.8B.AC.E7.9A.84initramfs.E6.96.87.E4.BB.B6.E4.B8.AD"></span>微码在单独的initramfs文件中</h4></div>
+<p>早期微码更新必须通过在引导加载程序配置文件中添加<code>/boot/amd-ucode.img</code>或<code>/boot/intel-ucode.img</code>作为<b>第一个initrd</b>来启用。这是在正常initrd文件之前。请参阅以下常见引导加载程序的说明。
+</p><p>在以下部分中，将<code><i>cpu_manufacturer</i></code>替换为您的CPU制造商，即<code>amd</code>或<code>intel</code>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pga6cf703397a3_GRUB" id="GRUB">GRUB</h5></div>
+<p><i>grub-mkconfig</i>将自动检测微码更新并适当配置<a href="#pgca9c4017f7ad">GRUB</a>。安装微码包后，通过运行以下命令重新生成GRUB配置以激活加载微码更新：
+</p>
+<pre># grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<p>或者，手动管理GRUB配置文件的用户可以添加<code>/boot/<i>cpu_manufacturer</i>-ucode.img</code>（或<code>/<i>cpu_manufacturer</i>-ucode.img</code>如果<code>/boot</code>是单独的分区）如下：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/boot/grub/grub.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+echo 'Loading initial ramdisk'
+initrd	<b>/boot/<i>cpu_manufacturer</i>-ucode.img</b> /boot/initramfs-linux.img
+...
+</pre>
+<p>为每个菜单项重复此操作。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pga6cf703397a3_systemd_boot" id="systemd-boot">systemd-boot</h5></div>
+<p>使用<code>initrd</code>选项加载微码，在初始ramdisk之前，如下所示：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/boot/loader/entries/<i>entry</i>.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">title   Arch Linux
+linux   /vmlinuz-linux
+<b>initrd  /<i>cpu_manufacturer</i>-ucode.img</b>
+initrd  /initramfs-linux.img
+...
+</pre>
+<p>最新的微码<code><i>cpu_manufacturer</i>-ucode.img</code>必须在引导时在您的<a href="#pgf1da7ad8e109">EFI系统分区</a>（ESP）中可用。ESP必须挂载为<code>/boot</code>，以便在每次更新<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=amd-ucode">amd-ucode</a></span><sup><small>包</small></sup></span>或<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-ucode">intel-ucode</a></span><sup><small>包</small></sup></span>时更新微码。否则，请在每次更新微码包时将<code>/boot/<i>cpu_manufacturer</i>-ucode.img</code>复制到您的ESP。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pga6cf703397a3_EFISTUB" id="EFISTUB">EFISTUB</h5></div>
+<p>附加两个<code>initrd=</code>选项：
+</p>
+<pre><b>initrd=\<i>cpu_manufacturer</i>-ucode.img</b> initrd=\initramfs-linux.img
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pga6cf703397a3_rEFInd" id="rEFInd">rEFInd</h5></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>以前未指定<code>initrd</code>内核参数的用户需要按照<a href="#pg155cf311d887">rEFInd#Configuration</a>中描述的步骤启用传递多个<code>initrd</code>参数。</div>
+<p>编辑<code>/boot/refind_linux.conf</code>中的引导选项，并添加一个<code>initrd=</code>选项作为传递的第一个<code>initrd</code>参数。使用<code>initrd=boot\<i>cpu_manufacturer</i>-ucode.img</code>或<code>initrd=<i>cpu_manufacturer</i>-ucode.img</code>，具体取决于<code>/boot</code>中的文件是否在单独分区的根目录中。
+</p><p>微码需要是引导选项列表中声明的第一个initramfs。例如：
+</p>
+<pre>"Boot using default options"  "root=PARTUUID=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i> rw add_efi_memmap initrd=boot\<i>cpu_manufacturer</i>-ucode.img initrd=boot\initramfs-%v.img"
+</pre>
+<div class="mw-heading mw-heading6"><h6 data-bm="pga6cf703397a3_.E6.89.8B.E5.8A.A8.E5.BC.95.E5.AF.BC.E8.8A.82" id="手动引导节"><span id=".E6.89.8B.E5.8A.A8.E5.BC.95.E5.AF.BC.E8.8A.82"></span>手动引导节</h6></div>
+<p>在<code><i>esp</i>/EFI/refind/refind.conf</code>中使用<a href="#pg155cf311d887">手动节</a>定义内核的用户应添加<code>initrd=</code>参数，并在引导分区内指定正确的路径。此参数是选项行的一部分，而不是节的主要部分。例如：
+</p>
+<pre>options  "root=PARTUUID=<i>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</i> rw add_efi_memmap <b>initrd=boot\<i>cpu_manufacturer</i>-ucode.img</b>"
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pga6cf703397a3_Syslinux" id="Syslinux">Syslinux</h5></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code><i>cpu_manufacturer</i>-ucode.img</code>和<code>initramfs-linux.img</code> initrd文件之间不能有空格。<code>INITRD</code>行必须完全如下所示。</div>
+<p>多个initrd可以在<code>/boot/syslinux/syslinux.cfg</code>中用逗号分隔：
+</p>
+<pre>LABEL arch
+    MENU LABEL Arch Linux
+    LINUX ../vmlinuz-linux
+    INITRD <b>../<i>cpu_manufacturer</i>-ucode.img</b>,../initramfs-linux.img
+...
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pga6cf703397a3_LILO" id="LILO">LILO</h5></div>
+<p><a href="#pg789c0f6ec01c">LILO</a>和可能其他旧的引导加载程序不支持多个initrd镜像。请改用#Microcode initramfs packed together with the main initramfs in one file方法。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pga6cf703397a3_Limine" id="Limine">Limine</h5></div>
+<p>对于<a href="#pg7b799300dd78">Limine</a>，您只需通过<code>MODULE_PATH</code>选项在您的<a href="#pg7b799300dd78">limine.conf</a>文件中添加微码的路径。以下是一个示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">limine.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">default_entry: 1
+timeout: 3
+
+/Arch
+    comment: Arch Linux
+
+    protocol: linux
+    kernel_path: boot():/vmlinuz-linux
+    kernel_cmdline: root=UUID=c0748521-eca9-4f38-989c-43811b6e39a1 rw loglevel=3
+    <b>module_path: boot():/<i>cpu_manufacturer-ucode</i>.img</b>
+    module_path: boot():/initramfs-linux.img</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6cf703397a3_.E6.99.9A.E6.9C.9F.E5.8A.A0.E8.BD.BD" id="晚期加载"><span id=".E6.99.9A.E6.9C.9F.E5.8A.A0.E8.BD.BD"></span>晚期加载</h3></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>晚期微码加载被认为是危险的，在Linux 5.19及更高版本上使用它将污染内核。<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=9784edd73a08ea08d0ce5606e1f0f729df688c59">[1]</a></div>
+<p>晚期加载微码更新发生在系统启动后。它使用<code>/usr/lib/firmware/amd-ucode/</code>和<code>/usr/lib/firmware/intel-ucode/</code>中的文件。微码更新文件分别由<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=amd-ucode">amd-ucode</a></span><sup><small>包</small></sup></span>和<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-ucode">intel-ucode</a></span><sup><small>包</small></sup></span>提供。
+</p><p>晚期加载需要内核构建时启用<code>CONFIG_MICROCODE_LATE_LOADING=y</code>，目前Arch <a href="#pg79837a9c7434">官方支持的内核</a>并未启用此选项。<a href="https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/blob/8d50b29ca6b927096ecf678cec193fc230b447cd/config#L462">[2]</a>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga6cf703397a3_.E6.99.9A.E6.9C.9F.E5.8A.A0.E8.BD.BD.E5.BE.AE.E7.A0.81.E6.9B.B4.E6.96.B0" id="晚期加载微码更新"><span id=".E6.99.9A.E6.9C.9F.E5.8A.A0.E8.BD.BD.E5.BE.AE.E7.A0.81.E6.9B.B4.E6.96.B0"></span>晚期加载微码更新</h4></div>
+<p>要手动重新加载微码，例如在更新<code>/usr/lib/firmware/amd-ucode/</code>或<code>/usr/lib/firmware/intel-ucode/</code>中的微码文件后，运行：
+</p>
+<pre># echo 1 &gt; /sys/devices/system/cpu/microcode/reload
+</pre>
+<p>这允许在不重新启动系统的情况下应用更新的微码更新。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6cf703397a3_.E9.AA.8C.E8.AF.81.E5.BE.AE.E7.A0.81.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E6.98.AF.E5.90.A6.E5.B7.B2.E6.9B.B4.E6.96.B0" id="验证微码在启动时是否已更新"><span id=".E9.AA.8C.E8.AF.81.E5.BE.AE.E7.A0.81.E5.9C.A8.E5.90.AF.E5.8A.A8.E6.97.B6.E6.98.AF.E5.90.A6.E5.B7.B2.E6.9B.B4.E6.96.B0"></span>验证微码在启动时是否已更新</h2></div>
+<p>使用 <i>journalctl</i> 检查内核消息，查看微码是否已更新：
+</p>
+<pre># journalctl -k --grep='microcode:'
+</pre>
+<p>每次启动时应该看到类似以下内容，表明微码在早期就已更新：
+</p>
+<pre>kernel: microcode: Current revision: 0x00000012
+kernel: microcode: Updated early from: 0x0000000e
+</pre>
+<p>特别是对于较新的硬件，可能没有适用于 CPU 的微码更新。
+</p><p>在 AMD 系统上使用延迟加载时，输出将显示重新加载微码前的旧微码版本以及重新加载后的新版本。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6cf703397a3_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://flossexperiences.wordpress.com/2013/11/17/updating-microcodes/">更新微码 – 社区经验</a></li>
+<li><a href="http://inertiawar.com/microcode/">关于 Intel 微码更新的笔记 – Ben Hawkes</a></li>
+<li><a href="https://docs.kernel.org/arch/x86/microcode.html">内核微码加载器 – 内核文档</a></li>
+<li><a href="https://www.anandtech.com/show/8376/intel-disables-tsx-instructions-erratum-found-in-haswell-haswelleep-broadwelly">Haswell/Broadwell 中的勘误 – AnandTech</a></li>
+<li><a href="https://gitlab.com/iucode-tool/iucode-tool">iucode-tool GitLab 项目</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6cf703397a3_.E5.93.AA.E4.BA.9B_CPU_.E6.8E.A5.E5.8F.97.E5.BE.AE.E7.A0.81.E6.9B.B4.E6.96.B0" id="哪些_CPU_接受微码更新"><span id=".E5.93.AA.E4.BA.9B_CPU_.E6.8E.A5.E5.8F.97.E5.BE.AE.E7.A0.81.E6.9B.B4.E6.96.B0"></span>哪些 CPU 接受微码更新</h2></div>
+<p>用户可以查阅 Intel 的仓库或 Gentoo 的 AMD 维基，以查看特定型号是否受支持：
+</p>
+<ul><li><a href="https://wiki.gentoo.org/wiki/AMD_microcode#Microcode_firmware_files">Gentoo:AMD microcode#Microcode firmware files</a>。</li>
+<li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/secure-coding/loading-microcode-os.html">Intel 的 Github 仓库</a>。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga6cf703397a3_.E6.A3.80.E6.B5.8B.E5.8F.AF.E7.94.A8.E7.9A.84.E5.BE.AE.E7.A0.81.E6.9B.B4.E6.96.B0" id="检测可用的微码更新"><span id=".E6.A3.80.E6.B5.8B.E5.8F.AF.E7.94.A8.E7.9A.84.E5.BE.AE.E7.A0.81.E6.9B.B4.E6.96.B0"></span>检测可用的微码更新</h3></div>
+<p>对于 Intel，可以使用 <span class="plainlinks archwiki-template-man" title="$ man 8 iucode_tool"><a href="https://man.archlinux.org/man/iucode_tool.8">iucode_tool(8)</a></span> 来检查 <code>/usr/lib/firmware/intel-ucode/</code> 是否包含运行中 CPU 的微码。
+</p>
+<ol><li><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=intel-ucode">intel-ucode</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iucode-tool">iucode-tool</a></span><sup><small>包</small></sup></span></li>
+<li>加载 <code>cpuid</code> 内核模块：<pre># modprobe cpuid</pre></li>
+<li>搜索您的 cpuid：<pre>$ iucode_tool -lS /usr/lib/firmware/intel-ucode/</pre></li>
+<li>如果有可用的更新，它应该会显示在“selected microcodes”下面</li>
+<li>微码可能已经在您的供应商 BIOS 中，并且不会在 <i>dmesg</i> 中显示加载。与当前运行的微码进行比较 <code>grep microcode /proc/cpuinfo</code></li></ol>
+<p>对于 AMD，可以手动完成。
+</p>
+<ol><li>找出 CPU 的系列、型号和步进。例如，通过运行以下命令：<pre># journalctl -k --grep='CPU0:'</pre> 查看输出部分，如 <code>(family: 0x15, model: 0x10, stepping: 0x1)</code>。</li>
+<li>根据 <a href="https://gitlab.com/kernel-firmware/linux-firmware/-/blob/main/amd-ucode/README">amd-ucode README</a> 中的列表匹配相应的值。</li>
+<li>如果匹配，将当前运行的微码版本与列出的 <code>Patch</code> 值进行比较。</li></ol>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>您也可以使用 <span class="plainlinks archwiki-template-man" title="$ man 1 lscpu"><a href="https://man.archlinux.org/man/lscpu.1">lscpu(1)</a></span> 或 <code>/proc/cpuinfo</code> 输出来获取系列、型号和步进。但您需要将值转换为十六进制。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6cf703397a3_.E5.8F.82.E8.A7.81_2" id="参见_2"><span id=".E5.8F.82.E8.A7.81_2"></span>参见</h2></div>
+<ul><li><a href="https://flossexperiences.wordpress.com/2013/11/17/updating-microcodes/">更新微码 – 社区经验</a></li>
+<li><a href="http://inertiawar.com/microcode/">关于 Intel 微码更新的笔记 – Ben Hawkes</a></li>
+<li><a href="https://docs.kernel.org/arch/x86/microcode.html">内核微码加载器 – 内核文档</a></li>
+<li><a href="https://www.anandtech.com/show/8376/intel-disables-tsx-instructions-erratum-found-in-haswell-haswelleep-broadwelly">Haswell/Broadwell 中的勘误 – AnandTech</a></li>
+<li><a href="https://gitlab.com/iucode-tool/iucode-tool">iucode-tool GitLab 项目</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6cf703397a3_.E7.A6.81.E7.94.A8.E5.BE.AE.E7.A0.81.E5.8A.A0.E8.BD.BD.E5.99.A8" id="禁用微码加载器"><span id=".E7.A6.81.E7.94.A8.E5.BE.AE.E7.A0.81.E5.8A.A0.E8.BD.BD.E5.99.A8"></span>禁用微码加载器</h2></div>
+<p>如果更新的 CPU 微码导致问题，您可能希望暂时禁用微码加载器以允许成功启动并降级软件包。要禁用内核的微码加载器，请指定 <code>dis_ucode_ldr</code> <a href="#pgec0856954f1c">内核参数</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga6cf703397a3_.E5.8F.82.E8.A7.81_3" id="参见_3"><span id=".E5.8F.82.E8.A7.81_3"></span>参见</h2></div>
+<ul><li><a href="https://flossexperiences.wordpress.com/2013/11/17/updating-microcodes/">Updating microcodes – Experiences in the community</a></li>
+<li><a href="http://inertiawar.com/microcode/">Notes on Intel Microcode updates – Ben Hawkes</a></li>
+<li><a href="https://docs.kernel.org/arch/x86/microcode.html">Kernel microcode loader – kernel documentation</a></li>
+<li><a href="https://www.anandtech.com/show/8376/intel-disables-tsx-instructions-erratum-found-in-haswell-haswelleep-broadwelly">Erratum found in Haswell/Broadwell – AnandTech</a></li>
+<li><a href="https://gitlab.com/iucode-tool/iucode-tool">iucode-tool GitLab project</a></li>
+<li><a href="https://github.com/platomav/CPUMicrocodes">Intel, AMD, VIA &amp; Freescale CPU Microcode Repositories</a></li>
+<li><a href="http://users.atw.hu/instlatx64/">CPUID dumps</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807033925
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.170 seconds
+Real time usage: 0.176 seconds
+Preprocessor visited node count: 773/1000000
+Revision size: 14213/2097152 bytes
+Post‐expand include size: 8298/2097152 bytes
+Template argument size: 3233/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 11/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   50.890      1 -total
+ 16.10%    8.194     56 Template:Ic
+  8.54%    4.345      2 Template:Tip
+  7.66%    3.899      4 Template:Man
+  6.90%    3.513      1 Template:翻译状态
+  6.76%    3.442      8 Template:Pkg
+  5.71%    2.907      1 Template:Note
+  3.76%    1.915      4 Template:Hc
+  3.62%    1.842      1 Template:Warning
+  3.13%    1.591      1 Template:注意
+-->
+<!-- Render ID 95c4e08e-9211-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3514:|#|:idhash:canonical!zh-cn and timestamp 20260807033925 and revision id 34237. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

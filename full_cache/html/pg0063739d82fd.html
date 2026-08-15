@@ -1,0 +1,463 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg0063739d82fd">Linux 容器</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><br/>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Linux_Containers">Linux Containers</a>，最近一次同步于 2025-02-14，若英文版本有所<a href="https://wiki.archlinux.org/title/Linux_Containers?diff=0&amp;oldid=824982">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Linux_Containers_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg6530d8749264">/使用 VPN</a></li>
+<li><a href="#pgaf57e242338f">Cgroups</a></li>
+<li><a href="#pg06238a3e6183">Docker</a></li>
+<li><a href="#pg6ba45532ccfd">Incus</a></li>
+<li><a href="#pg15c18fd983c7">LXD</a></li>
+<li><a href="#pgf4bc46666efb">Podman</a></li>
+<li><a href="#pgf6282688d557">systemd-nspawn</a></li>
+</ul></div>
+<p><a href="https://linuxcontainers.org/">Linux 容器</a> (LXC) 是一种在单个宿主机（LXC host）运行多个隔离的 Linux 系统（容器）的操作系统级虚拟化方法。它并不提供虚拟机，而是提供了一个具有独立 CPU、内存、块 I/O、网络等空间和资源控制环境的虚拟环境。这是通过 LXC 宿主机上 Linux 内核的 <a href="https://en.wikipedia.org/wiki/Linux_namespaces">namespaces</a> 和 <a href="#pgaf57e242338f">cgroups</a> 特性实现的。它类似于 chroot ，但是具有更好的隔离性。
+</p><p><a href="#pg15c18fd983c7">LXD</a> 可以被用做 LXC 的管理器，本页面则涉及直接使用 LXC 。
+</p><p>使用容器的替代方法包括 <a href="#pgf6282688d557">systemd-nspawn</a> 和 <a href="#pg06238a3e6183">Docker</a> 。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0063739d82fd_.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8.E6.88.96.E9.9D.9E.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8" id="特权容器或非特权容器"><span id=".E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8.E6.88.96.E9.9D.9E.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8"></span>特权容器或非特权容器</h2></div>
+<p>LXC 支持两种类型的容器：<i>特权</i>和<i>非特权</i>。
+</p><p>一般来说，<i>特权</i>容器被认为是<b>不安全</b>的<a href="https://linuxcontainers.org/lxc/security/">[1]</a>。
+</p><p>运行<i>非特权</i>容器比运行<i>特权</i>容器<a href="https://www.stgraber.org/2014/01/17/lxc-1-0-unprivileged-containers">更安全</a>，因为<i>非特权</i>容器在设计上具有更高程度的隔离性。其中的关键在于容器内的 root UID 被映射为宿主机上的非 root UID ，这使得容器内部的攻击更难以对宿主机系统施加影响。换句话说，如果攻击者设法逃离容器，它们会发现自己在宿主机上被限制或没有权限。
+</p><p>Arch 的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span> 、 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-lts">linux-lts</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-zen">linux-zen</a></span><sup><small>包</small></sup></span> 内核软件包现在提供了<i>非特权</i>容器的开箱即用支持。 类似的，对于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 软件包，<i>非特权</i>容器仅适用于系统管理员；对于普通用户，默认情况下禁用了 namespace ，因此需要进行额外的内核配置更改。
+</p><p>本文包含了用户运行任何类型容器所需的信息，但是为了运行<i>非特权</i>容器可能需要额外的操作。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_.E4.B8.80.E4.B8.AA.E4.BE.8B.E5.AD.90.E8.AF.B4.E6.98.8E.E9.9D.9E.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8" id="一个例子说明非特权容器"><span id=".E4.B8.80.E4.B8.AA.E4.BE.8B.E5.AD.90.E8.AF.B4.E6.98.8E.E9.9D.9E.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8"></span>一个例子说明非特权容器</h3></div>
+<p>为了说明 UID 映射的作用，考虑以下来自运行中的<i>非特权</i>容器的输出。在 <code>ps</code> 命令的输出中，我们可以看到容器化的进程由容器化的 root 用户所有：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">[root@unprivileged_container /]# ps -ef | head -n 5</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">UID        PID  PPID  C STIME TTY          TIME CMD
+root         1     0  0 17:49 ?        00:00:00 /sbin/init
+root        14     1  0 17:49 ?        00:00:00 /usr/lib/systemd/systemd-journald
+dbus        25     1  0 17:49 ?        00:00:00 /usr/bin/dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation
+systemd+    26     1  0 17:49 ?        00:00:00 /usr/lib/systemd/systemd-networkd</pre>
+<p>然而在宿主机中，可以看到这些容器化的 root 进程事实上显示为以映射用户（ID&gt;99999）的身份运行，而不是宿主机上真实的 root 用户：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">[root@host /]# lxc-info -Ssip --name sandbox</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">State:          RUNNING
+PID:            26204
+CPU use:        10.51 seconds
+BlkIO use:      244.00 KiB
+Memory use:     13.09 MiB
+KMem use:       7.21 MiB
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">[root@host /]# ps -ef | grep 26204 | head -n 5</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">UID        PID  PPID  C STIME TTY          TIME CMD
+100000   26204 26200  0 12:49 ?        00:00:00 /sbin/init
+100000   26256 26204  0 12:49 ?        00:00:00 /usr/lib/systemd/systemd-journald
+100081   26282 26204  0 12:49 ?        00:00:00 /usr/bin/dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation
+100000   26284 26204  0 12:49 ?        00:00:00 /usr/lib/systemd/systemd-logind</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0063739d82fd_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_.E9.9C.80.E8.A6.81.E7.9A.84.E8.BD.AF.E4.BB.B6" id="需要的软件"><span id=".E9.9C.80.E8.A6.81.E7.9A.84.E8.BD.AF.E4.BB.B6"></span>需要的软件</h3></div>
+<p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lxc">lxc</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=arch-install-scripts">arch-install-scripts</a></span><sup><small>包</small></sup></span> 使宿主机系统能够运行特权 lxc 容器。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg0063739d82fd_.E5.90.AF.E7.94.A8.E9.9D.9E.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8.E6.94.AF.E6.8C.81.EF.BC.88.E5.8F.AF.E9.80.89.EF.BC.89" id="启用非特权容器支持（可选）"><span id=".E5.90.AF.E7.94.A8.E9.9D.9E.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8.E6.94.AF.E6.8C.81.EF.BC.88.E5.8F.AF.E9.80.89.EF.BC.89"></span>启用非特权容器支持（可选）</h4></div>
+<p>更改 <code>/etc/lxc/default.conf</code> 使其包含下面的配置行：
+</p>
+<pre>lxc.idmap = u 0 100000 65536
+lxc.idmap = g 0 100000 65536
+</pre>
+<p>创建 <code>/etc/subuid</code> 和 <code>/etc/subgid</code> 为每个可以运行容器的用户配置容器化 UID/GID 对的映射。下面的示例仅针对 root 用户（和 <a href="#pgac06dd8bfe95">systemd</a> 系统单元）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/subuid</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">root:100000:65536
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/subgid</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">root:100000:65536
+</pre>
+<p>此外，只有在提前委派一个 <a href="#pgb3f3c5c80dbd">cgroup</a> 时，以非 root 用户运行非特权容器才有效（ cgroup2 委派模型强制执行此限制，而不是 liblxc ）。使用以下 <i>systemd</i> 命令来委派 cgroup （根据 <a href="https://linuxcontainers.org/lxc/getting-started/#creating-unprivileged-containers-as-a-user">LXC - Getting started: Creating unprivileged containers as a user</a>）：
+</p>
+<pre>$ systemd-run --unit=<i>myshell</i> --user --scope -p "Delegate=yes" lxc-start <i>container_name</i>
+</pre>
+<p>同样的方式也适用于其他 lxc 命令。
+</p>
+
+<p>或者，您可以通过创建一个 <i>systemd</i> 单元来委派<i>非特权</i> <a href="#pgb3f3c5c80dbd">cgroup</a> （根据 <a href="https://rootlesscontaine.rs/getting-started/common/cgroup2/#enabling-cpu-cpuset-and-io-delegation">Rootless Containers: Enabling CPU, CPUSET, and I/O delegation</a> ）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/user@.service.d/delegate.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+Delegate=cpu cpuset io memory pids</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg0063739d82fd_linux-hardened_.E5.92.8C.E8.87.AA.E5.AE.9A.E4.B9.89.E5.86.85.E6.A0.B8.E4.B8.8A.E7.9A.84.E9.9D.9E.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8" id="linux-hardened_和自定义内核上的非特权容器"><span id="linux-hardened_.E5.92.8C.E8.87.AA.E5.AE.9A.E4.B9.89.E5.86.85.E6.A0.B8.E4.B8.8A.E7.9A.84.E9.9D.9E.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8"></span>linux-hardened 和自定义内核上的非特权容器</h5></div>
+<p>希望在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 或自定义内核上运行<i>非特权</i>容器的用户需要完成几个额外的配置步骤。
+</p><p>首先，内核需要支持用户命名空间（具有 <code>CONFIG_USER_NS</code> 配置）。所有 Arch Linux 内核都有 <code>CONFIG_USER_NS</code> 的支持。然而，基于更一般的安全考虑， <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> 内核仅为 <i>root</i> 用户启用了用户命名空间。这里有两个建立<i>非特权</i>容器的选项：
+</p>
+<ul><li>只以 <i>root</i> 用户的身份建立非特权容器。同样为 <i>sysctl</i> 的 <code>user.max_user_namespaces</code> 配置设置一个正值来满足你的环境要求，如果当前值为 <code>0</code> （这将解决运行 <code>lxc info --show-log <i>container_name</i></code> 时产生的 <code>Failed to clone process in new user namespace</code> 错误）。</li>
+<li>在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-hardened">linux-hardened</a></span><sup><small>包</small></sup></span> &amp; <code>lxd 5.0.0</code> 下，你可能需要配置 <code>/etc/subuid</code> &amp; <code>/etc/subgid</code> 为使用 <code>root:1000000:65536</code> 。你还可能需要以特权模式启用<b>第一个</b>容器。这会解决错误 <code>newuidmap failed to write mapping "newuidmap: uid range [0-1000000000) -&gt; [1000000-1001000000) not allowed"</code> 。</li>
+<li>启用 <i>sysctl</i> 的 <code>kernel.unprivileged_userns_clone</code> 配置来允许普通用户运行非特权容器。可以以 root 身份运行 <code>sysctl kernel.unprivileged_userns_clone=1</code> 来为当前会话生效或阅读 <span class="plainlinks archwiki-template-man" title="$ man 5 sysctl.d"><a href="https://man.archlinux.org/man/sysctl.d.5">sysctl.d(5)</a></span> 使其永久生效。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_.E5.AE.BF.E4.B8.BB.E6.9C.BA.E7.BD.91.E7.BB.9C.E9.85.8D.E7.BD.AE" id="宿主机网络配置"><span id=".E5.AE.BF.E4.B8.BB.E6.9C.BA.E7.BD.91.E7.BB.9C.E9.85.8D.E7.BD.AE"></span>宿主机网络配置</h3></div>
+<p>LXC 支持多种不同的虚拟网络类型和设备（见 <span class="plainlinks archwiki-template-man" title="$ man 5 lxc.container.conf"><a href="https://man.archlinux.org/man/lxc.container.conf.5#NETWORK">lxc.container.conf(5) § NETWORK</a></span>）。本节所介绍的虚拟网络类型中，大部分都需要一个宿主机上的网桥设备。
+</p><p>这里主要有几个可供参考的配置：
+</p>
+<ol><li>主机网桥</li>
+<li>NAT 网桥</li></ol>
+<p>主机网桥需要宿主机上的网络设置工具来配置一个共享网桥接口。宿主机和所有 LXC 容器将在同一个网络中被指派 IP 地址（如 192.168.1.x）。当你的目标是将一些暴露在网络上的服务如 web 服务器或 VPN 服务器容器化时，这可能更加便捷。用户可以将 LXC 当作物理 LAN 上的其他 PC，并在路由器上为其配置相应的端口转发。增加的便捷也可以认为是增加的威胁向量，同样的，如果 WAN 流量被转发给 LXC，将其运行在不同的网络范围上将显现更小的威胁面。
+</p><p>NAT 网桥不需要宿主机的网络设置工具来配置网桥。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lxc">lxc</a></span><sup><small>包</small></sup></span> 自带的 <code>lxc-net</code> 将建立一个叫 <code>lxcbr0</code> 的 NAT 网桥。这个 NAT 网桥是一个独立的网桥，具有不与以太网设备或物理网络桥接的私有网络。它以宿主机的一个子网的形式存在。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg0063739d82fd_.E4.BD.BF.E7.94.A8.E4.B8.BB.E6.9C.BA.E7.BD.91.E6.A1.A5" id="使用主机网桥"><span id=".E4.BD.BF.E7.94.A8.E4.B8.BB.E6.9C.BA.E7.BD.91.E6.A1.A5"></span>使用主机网桥</h4></div>
+<p>见 <a href="#pgd18c17659bec">Network bridge</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg0063739d82fd_.E4.BD.BF.E7.94.A8_NAT_.E7.BD.91.E6.A1.A5" id="使用_NAT_网桥"><span id=".E4.BD.BF.E7.94.A8_NAT_.E7.BD.91.E6.A1.A5"></span>使用 NAT 网桥</h4></div>
+<p><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dnsmasq">dnsmasq</a></span><sup><small>包</small></sup></span>，它是 <code>lxc-net</code> 的依赖，并在网桥启动前，先为其建立配置文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/lxc-net</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Leave USE_LXC_BRIDGE as "true" if you want to use lxcbr0 for your
+# containers.  Set to "false" if you'll use virbr0 or another existing
+# bridge, or mavlan to your host's NIC.
+USE_LXC_BRIDGE="true"
+
+# If you change the LXC_BRIDGE to something other than lxcbr0, then
+# you will also need to update your /etc/lxc/default.conf as well as the
+# configuration (/var/lib/lxc/&lt;container&gt;/config) for any containers
+# already created using the default config to reflect the new bridge
+# name.
+# If you have the dnsmasq daemon installed, you'll also have to update
+# /etc/dnsmasq.d/lxc and restart the system wide dnsmasq daemon.
+LXC_BRIDGE="lxcbr0"
+LXC_ADDR="10.0.3.1"
+LXC_NETMASK="255.255.255.0"
+LXC_NETWORK="10.0.3.0/24"
+LXC_DHCP_RANGE="10.0.3.2,10.0.3.254"
+LXC_DHCP_MAX="253"
+# Uncomment the next line if you'd like to use a conf-file for the lxcbr0
+# dnsmasq.  For instance, you can use 'dhcp-host=mail1,10.0.3.100' to have
+# container 'mail1' always get ip address 10.0.3.100.
+#LXC_DHCP_CONFILE=/etc/lxc/dnsmasq.conf
+
+# Uncomment the next line if you want lxcbr0's dnsmasq to resolve the .lxc
+# domain.  You can then add "server=/lxc/10.0.3.1' (or your actual $LXC_ADDR)
+# to your system dnsmasq configuration file (normally /etc/dnsmasq.conf,
+# or /etc/NetworkManager/dnsmasq.d/lxc.conf on systems that use NetworkManager).
+# Once these changes are made, restart the lxc-net and network-manager services.
+# 'container1.lxc' will then resolve on your host.
+#LXC_DOMAIN="lxc"</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong> 确保网桥的 IP 网段不会和本地网络冲突。一种选择可用 IP 地址的方法是使用已经动态分配给容器的地址之一。可以使用 <code>lxc-ls -f</code> 命令进行检查。</div>
+<p>然后我们需要修改 LXC 容器模板使我们的容器使用我们的网桥：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/lxc/default.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">lxc.net.0.type = veth
+lxc.net.0.link = lxcbr0
+lxc.net.0.flags = up
+lxc.net.0.hwaddr = 00:16:3e:xx:xx:xx</pre>
+<p>作为一个可选配置，创建一个配置文件来手动为任意一个容器指定 IP 地址：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/lxc/dnsmasq.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">dhcp-host=playtime,10.0.3.100</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg0063739d82fd_.E9.98.B2.E7.81.AB.E5.A2.99.E7.9B.B8.E5.85.B3" id="防火墙相关"><span id=".E9.98.B2.E7.81.AB.E5.A2.99.E7.9B.B8.E5.85.B3"></span>防火墙相关</h5></div>
+<p>基于宿主机运行的防火墙类型，可能需要允许 <code>lxcbr0</code> 的入口流量进入宿主机，以及 <code>lxcbr0</code> 的出口流量穿过宿主机进入其他网络。为了测试这是否可以实现，尝试启动一个容器并使用 DHCP 自动获取 IP 地址，检查 <code>lxc-net</code> 是否能够为容器注册一个 IP 地址。（如果 IP 地址并没有被成功分配，可以用 <code>lxc-ls -f</code> 检查，宿主机有必要更改的策略。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ufw">ufw</a></span><sup><small>包</small></sup></span> 用户可以简单运行<a href="https://discuss.linuxcontainers.org/t/lxd-bridge-doesnt-work-with-ipv4-and-ufw-with-nftables/10034/17">下面两行命令</a>来放行入口和出口流量:
+</p>
+<pre># ufw allow in on lxcbr0
+# ufw route allow in on lxcbr0
+</pre>
+<p>或者，<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nftables">nftables</a></span><sup><small>包</small></sup></span> 用户可以编辑 <code>/etc/nftables.conf</code> （并运行 <code>nft -f /etc/nftables.conf</code> 重载该配置；运行 <code>nft -cf /etc/nftables.conf</code> 来检查格式是否正确）使容器能够具有互联网访问权限（将 <code>"eth0"</code> 替换成系统中具有互联网连接的设备；运行 <code>ip link</code> 列出所有设备：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nftables.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">table inet filter {
+  chain input {
+    ...
+    iifname "lxcbr0" accept comment "Allow lxc containers"
+    
+    pkttype host limit rate 5/second counter reject with icmpx type admin-prohibited
+    counter
+  }
+  chain forward {
+    ...
+    iifname "lxcbr0" oifname "eth0" accept comment "Allow forwarding from lxcbr0 to eth0"
+    iifname "eth0" oifname "lxcbr0" accept comment "Allow forwarding from eth0 to lxcbr0"
+  }
+}
+</pre>
+<p>另外，由于 LXC 运行在 10.0.3.x 子网上，需要将对诸如 ssh、httpd 等服务的访问主动转发到 LXC。原则上，主机上的防火墙需要对容器上预期端口的入口流量进行转发。
+</p>
+<div class="mw-heading mw-heading6"><h6 data-bm="pg0063739d82fd_iptables_.E8.A7.84.E5.88.99.E7.A4.BA.E4.BE.8B" id="iptables_规则示例"><span id="iptables_.E8.A7.84.E5.88.99.E7.A4.BA.E4.BE.8B"></span>iptables 规则示例</h6></div>
+<p>这个示例规则的功能是允许 ssh 流量转发到 LXC：
+</p>
+<pre># iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 2221 -j DNAT --to-destination 10.0.3.100:22
+</pre>
+<p>这个规则将 2221 端口的 tcp 流量转发到 LXC 的 22 端口上。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>确保允许宿主机上 2221/tcp 的流量和 LXC 上 22/tcp 的流量。</div>
+<p>为了从 LAN 上的另一台 PC 通过 ssh 连接到容器，需要 ssh 到宿主机的 2221 端口。宿主机将会把流量转发给容器。
+</p>
+<pre>$ ssh -p 2221 host.lan
+</pre>
+<div class="mw-heading mw-heading6"><h6 data-bm="pg0063739d82fd_ufw_.E8.A7.84.E5.88.99.E7.A4.BA.E4.BE.8B" id="ufw_规则示例"><span id="ufw_.E8.A7.84.E5.88.99.E7.A4.BA.E4.BE.8B"></span>ufw 规则示例</h6></div>
+<p>如果使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ufw">ufw</a></span><sup><small>包</small></sup></span>，将下面的内容添加到 <code>/etc/ufw/before.rules</code> 中：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ufw/before.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">*nat
+:PREROUTING ACCEPT [0:0]
+-A PREROUTING -i eth0 -p tcp --dport 2221 -j DNAT --to-destination 10.0.3.100:22
+COMMIT
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg0063739d82fd_.E4.BB.A5.E9.9D.9E_root_.E7.94.A8.E6.88.B7.E8.BF.90.E8.A1.8C.E5.AE.B9.E5.99.A8" id="以非_root_用户运行容器"><span id=".E4.BB.A5.E9.9D.9E_root_.E7.94.A8.E6.88.B7.E8.BF.90.E8.A1.8C.E5.AE.B9.E5.99.A8"></span>以非 root 用户运行容器</h5></div>
+<p>为了使用非 root 用户创建并启动容器，需要进行额外的配置。
+</p><p>建立 usernet 文件名为 <code>/etc/lxc/lxc-usernet</code>。根据 <span class="plainlinks archwiki-template-man" title="$ man 5 lxc-usernet"><a href="https://man.archlinux.org/man/lxc-usernet.5">lxc-usernet(5)</a></span>，每一行配置格式为：
+</p>
+<pre>user type bridge number
+</pre>
+<p>为每个需要建立容器的用户添加配置。bridge 需要和 <code>/etc/default/lxc-net</code> 中定义的一样。
+</p><p>在非 root 用户的家目录还需要一份 <code>/etc/lxc/default.conf</code> 配置文件的拷贝，如 <code>~/.config/lxc/default.conf</code> （如果有必要的话请建立该目录）。
+</p><p>以非 root 用户运行容器需要 <code>~/.local/share/</code> 具有 <code>+x</code> 权限。在启动容器前使用 <a href="#pgd868aa8d1162">chmod</a> 命令应用该更改。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_.E5.88.9B.E5.BB.BA.E5.AE.B9.E5.99.A8" id="创建容器"><span id=".E5.88.9B.E5.BB.BA.E5.AE.B9.E5.99.A8"></span>创建容器</h3></div>
+<p>使用 <span class="plainlinks archwiki-template-man" title="$ man 1 lxc-create"><a href="https://man.archlinux.org/man/lxc-create.1">lxc-create(1)</a></span> 命令创建容器。在 lxc-3.0.0-1 版本中，上游移除了本地存储的容器模板。
+</p><p>使用像下面这样的调用，来建立一个 Arch 容器：
+</p>
+<pre># lxc-create --name <i>playtime</i> --template download -- --dist archlinux --release current --arch amd64
+</pre>
+<p>使用像下面这样的调用并从支持的列表中选择，来建立其他发行版的容器：
+</p>
+<pre># lxc-create --name <i>playtime</i> --template download
+</pre>
+<p>要查看 <i>download</i> 模板的选项列表：
+</p>
+<pre># lxc-create -t download --help
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>用户可以选择安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=haveged">haveged</a></span><sup><small>包</small></sup></span> 包并 <a href="#pg073992cb666a">start</a> <code>haveged.service</code> ，来避免在设置过程中，等待系统熵种子生成时出现类似挂起的情况。否则 private/GPG 密钥的生成过程可能使整个过程变得更长。</li>
+<li><a href="#pg429e7ec45c9c">Btrfs</a> 用户可以应用 <code>-B btrfs</code> 来建立一个 Btrfs 子卷以存储容器化的根目录。这在使用 <code>lxc-clone</code> 命令进行容器克隆时十分有用。 <a href="#pgefb77a75bb9b">ZFS</a> 用户可以相应地应用 <code>-B zfs</code>。</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>想要使用传统模板的用户可以在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lxc-templates/">lxc-templates</a></span><sup><small>AUR</small></sup></span> 找到它们，或者用户也可以用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=distrobuilder">distrobuilder</a></span><sup><small>包</small></sup></span> 建立自己的模板。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_.E9.85.8D.E7.BD.AE.E5.AE.B9.E5.99.A8" id="配置容器"><span id=".E9.85.8D.E7.BD.AE.E5.AE.B9.E5.99.A8"></span>配置容器</h3></div>
+<p>下面的例子同时适用于<i>特权</i>和<i>非特权</i>容器。主要对于非特权容器，默认会出现例子中没有出现的额外配置，包括 <code>lxc.idmap = u 0 100000 65536</code> 和 <code>lxc.idmap = g 0 100000 65536</code> 这些在<a href="#pge372a6470bbb">启用非特权容器支持（可选）</a>中作为可选配置添加的值。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg0063739d82fd_.E5.85.B7.E6.9C.89.E7.BD.91.E7.BB.9C.E6.94.AF.E6.8C.81.E7.9A.84.E5.9F.BA.E6.9C.AC.E9.85.8D.E7.BD.AE" id="具有网络支持的基本配置"><span id=".E5.85.B7.E6.9C.89.E7.BD.91.E7.BB.9C.E6.94.AF.E6.8C.81.E7.9A.84.E5.9F.BA.E6.9C.AC.E9.85.8D.E7.BD.AE"></span>具有网络支持的基本配置</h4></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在 lxc-1:2.1.0-1 版本中，许多配置选项改变了。已有的容器需要被更新；用户需要参考 <a href="https://discuss.linuxcontainers.org/t/lxc-2-1-has-been-released/487">v2.1 发布注记</a> 中包含这些变化的表格。</div>
+<p>当一个进程使用 <code>/var/lib/lxc/CONTAINER_NAME/config</code> 中定义的容器时，系统资源将被虚拟化/隔离。在默认情况下，创建容器的进程将应用一个没有网络支持的最小化配置。下面是一个具有 <code>lxc-net.service</code> 提供网络支持的示例：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/var/lib/lxc/playtime/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Template used to create this container: /usr/share/lxc/templates/lxc-archlinux
+# Parameters passed to the template:
+# For additional config options, please look at lxc.container.conf(5)
+
+# Distribution configuration
+lxc.include = /usr/share/lxc/config/common.conf
+lxc.arch = x86_64
+
+# Container specific configuration
+lxc.rootfs.path = dir:/var/lib/lxc/playtime/rootfs
+lxc.uts.name = playtime
+
+# Network configuration
+lxc.net.0.type = veth
+lxc.net.0.link = lxcbr0
+lxc.net.0.flags = up
+lxc.net.0.hwaddr = ee:ec:fa:e9:56:7d
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg0063739d82fd_.E5.AE.B9.E5.99.A8.E4.B8.AD.E7.9A.84.E6.8C.82.E8.BD.BD.E7.82.B9" id="容器中的挂载点"><span id=".E5.AE.B9.E5.99.A8.E4.B8.AD.E7.9A.84.E6.8C.82.E8.BD.BD.E7.82.B9"></span>容器中的挂载点</h4></div>
+<p>对于<i>特权</i>容器，用户可以选择宿主机上的目录并以 bind 方式挂载在容器中。这在容器化相同架构并希望在容器和宿主机之间分享 pacman 软件包时非常有用。另一个例子是共享文件夹。配置的格式是：
+</p>
+<pre>lxc.mount.entry = /var/cache/pacman/pkg var/cache/pacman/pkg none bind 0 0
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>若不对文件系统权限进行更改，这在 <i>非特权</i> 容器上将无法使用。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg0063739d82fd_.E5.9B.BE.E5.BD.A2.E5.8C.96.E7.A8.8B.E5.BA.8F.E7.9B.B8.E5.85.B3.EF.BC.88.E5.8F.AF.E9.80.89.EF.BC.89" id="图形化程序相关（可选）"><span id=".E5.9B.BE.E5.BD.A2.E5.8C.96.E7.A8.8B.E5.BA.8F.E7.9B.B8.E5.85.B3.EF.BC.88.E5.8F.AF.E9.80.89.EF.BC.89"></span>图形化程序相关（可选）</h4></div>
+<p>为了在宿主机上显示容器中的程序窗口，需要定义一些挂载点，使容器化的程序可以获取宿主机上的资源。向 <code>/var/lib/lxc/playtime/config</code> 添加下面的段落：
+</p>
+<pre>## for xorg
+lxc.mount.entry = /dev/dri dev/dri none bind,optional,create=dir
+lxc.mount.entry = /dev/snd dev/snd none bind,optional,create=dir
+lxc.mount.entry = /tmp/.X11-unix tmp/.X11-unix none bind,optional,create=dir,ro
+lxc.mount.entry = /dev/video0 dev/video0 none bind,optional,create=file
+</pre>
+
+<p><br/>
+如果 LXC 客户机依然出现 <i>permission denied</i> 的报错，在宿主机调用 <code>xhost +</code> 来允许客户机连接宿主机的显示服务器。注意这种完全放开显示适配器权限可能带来的安全风险。
+另外，在上面的挂载点<b>之前</b>添加下面的配置。
+</p>
+<pre>lxc.mount.entry = tmpfs tmp tmpfs defaults
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg0063739d82fd_VPN_.E7.9B.B8.E5.85.B3" id="VPN_相关"><span id="VPN_.E7.9B.B8.E5.85.B3"></span>VPN 相关</h4></div>
+<p>运行容器化的 <a href="#pg6be7d32d4c06">OpenVPN</a> 或 <a href="#pgb6e345194870">WireGuard</a>, 见 <a href="#pg6530d8749264">Linux 容器/使用 VPN</a> 。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0063739d82fd_.E7.AE.A1.E7.90.86.E5.AE.B9.E5.99.A8" id="管理容器"><span id=".E7.AE.A1.E7.90.86.E5.AE.B9.E5.99.A8"></span>管理容器</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_.E5.9F.BA.E6.9C.AC.E4.BD.BF.E7.94.A8.E6.96.B9.E6.B3.95" id="基本使用方法"><span id=".E5.9F.BA.E6.9C.AC.E4.BD.BF.E7.94.A8.E6.96.B9.E6.B3.95"></span>基本使用方法</h3></div>
+<p>列出所有已安装的LXC容器：
+</p>
+<pre># lxc-ls -f
+</pre>
+<p>可以使用Systemd的<code>lxc@CONTAINER_NAME.service</code>来<a href="#pg073992cb666a">启动</a>或<a href="#pgdcb013fc86b7">停止</a>LXC。<a href="#pg6bfd324d34c9">启用</a> <code>lxc@CONTAINER_NAME.service</code>可以在宿主系统启动时连带启动LXC。
+</p><p>也可以不使用Systemd来启动或停止LXC。启动一个LXC容器：
+</p>
+<pre># lxc-start -n <i>CONTAINER_NAME</i>
+</pre>
+<p>停止容器：
+</p>
+<pre># lxc-stop -n <i>CONTAINER_NAME</i>
+</pre>
+<p>登录容器：
+</p>
+<pre># lxc-console -n <i>CONTAINER_NAME</i>
+</pre>
+<p>登录容器后，它就像普通的Linux系统一样，可以进行设置root账户密码、创建用户、下载软件包等操作。
+</p><p>执行容器内命令：
+</p>
+<pre># lxc-attach -n <i>CONTAINER_NAME</i> --clear-env
+</pre>
+<p>它和lxc-console相似，用于以root权限在容器内执行一条命令。若不使用<code> --clear-env</code>选项，容器将携带宿主机的环境变量值（例如<code>$PATH</code>，容器使用其他发行版的环境变量可能无法执行某些指令）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_.E9.AB.98.E7.BA.A7.E4.BD.BF.E7.94.A8.E6.96.B9.E6.B3.95" id="高级使用方法"><span id=".E9.AB.98.E7.BA.A7.E4.BD.BF.E7.94.A8.E6.96.B9.E6.B3.95"></span>高级使用方法</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg0063739d82fd_LXC.E5.AE.B9.E5.99.A8.E5.85.8B.E9.9A.86" id="LXC容器克隆"><span id="LXC.E5.AE.B9.E5.99.A8.E5.85.8B.E9.9A.86"></span>LXC容器克隆</h4></div>
+<p>通过快照运行多个容器可以减少管理容器权限的负担（如用户管理和系统更新等）。该策略是以一个最新版本的容器为基础，需要使用容器时，克隆一个基础容器并在这个克隆的基础容器上构建应用。容器使用overlayfs挂载，overlayfs只会存储和基本容器有差异的数据，故这种策略能尽可能减少对系统和磁盘的占用。基本容器是只读的，但是通过overlayfs，由基本容器衍生的其他容器可以进行修改。
+</p>
+
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>因为安全原因，目前的主线Arch Linux内核不支持非特权容器使用overlayfs</div>
+<p>例如，设置一个基础容器，并通过以下命令以基础容器为基础创建两个快照（snapshot）容器，称之为“snap1”和“snap2”.
+</p>
+<pre># lxc-copy -n base -N snap1 -B overlayfs -s
+# lxc-copy -n base -N snap2 -B overlayfs -s
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果在基础容器上设定了静态IP，在启动快照容器前应为它手动设定IP。如果涉及到自动化流程，可以在自动化脚本内使用sed对快照容器进行IP设置。</div>
+<p>这些快照可以像其他容器一样被启动和关闭。用户可以通过以下命令选择性的删除某些快照和其中的数据。该删除指令不会影响基础容器。
+</p>
+<pre># lxc-destroy -n snap1 -f
+</pre>
+<p>在<a href="#pg64cf41b3341e">pi-hole</a>和<a href="#pg6be7d32d4c06">OpenVPN</a>管理快照的脚本及系统组件可在<a href="https://github.com/graysky2/lxc-service-snapshots">lxc-service-snapshots</a>获得。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_.E5.B0.86.E4.B8.80.E4.B8.AA.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8.E8.BD.AC.E6.8D.A2.E4.B8.BA.E9.9D.9E.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8" id="将一个特权容器转换为非特权容器"><span id=".E5.B0.86.E4.B8.80.E4.B8.AA.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8.E8.BD.AC.E6.8D.A2.E4.B8.BA.E9.9D.9E.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8"></span>将一个特权容器转换为非特权容器</h3></div>
+<p>当一个系统被设置为使用非特权容器时（见 #Enable support to run unprivileged containers (optional)<sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>），<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/nsexec-bzr/">nsexec-bzr</a></span><sup><small>AUR</small></sup></span>包含一个被称为<code>uidmapshift</code>的工具将某个已经存在的特权容器转换为非特权容器从而避免重新构建新容器。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>强烈建议在使用这个工具前备份容器！！！</li>
+<li>这个工具不会更改<a href="#pg5a0884778d38">ACL</a>内的的UID和GID，请手动变更。</li></ul>
+</div>
+<p>可以使用以下命令来进行转换：
+</p>
+<pre># uidmapshift -b /var/lib/lxc/foo 0 100000 65536
+</pre>
+<p>直接运行<code>uidmapshift</code>可查看使用帮助。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0063739d82fd_.E8.BF.90.E8.A1.8CXorg.E7.A8.8B.E5.BA.8F" id="运行Xorg程序"><span id=".E8.BF.90.E8.A1.8CXorg.E7.A8.8B.E5.BA.8F"></span>运行Xorg程序</h2></div>
+<p>使用lxc-attach或<a href="#pg81569eb76dc7">SSH</a>调用目标容器，并在需要使用的程序前加上X程序的DISPLAY ID。对于大多数简单的设置，显示编号通常为0。
+</p><p>一个简单的例子，在容器内运行Firefox并在主机屏幕上显示：
+</p>
+<pre>$ DISPLAY=:0 firefox
+</pre>
+<p>或者为避免直接连接容器，以下命令可以在宿主容器使这个过程自动化：
+</p>
+<pre># lxc-attach -n playtime --clear-env -- sudo -u YOURUSER env DISPLAY=:0 firefox
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0063739d82fd_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_.E5.9C.A8.E9.9D.9E.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8.E4.B8.AD_ping_.E6.97.A0.E6.B3.95.E5.B7.A5.E4.BD.9C" id="在非特权容器中_ping_无法工作"><span id=".E5.9C.A8.E9.9D.9E.E7.89.B9.E6.9D.83.E5.AE.B9.E5.99.A8.E4.B8.AD_ping_.E6.97.A0.E6.B3.95.E5.B7.A5.E4.BD.9C"></span>在非特权容器中 ping 无法工作</h3></div>
+<p>在非特权容器中，如果没有额外的配置步骤，ping 很可能无法工作。示例错误：
+</p>
+<pre>% ping www.google.com
+ping: socktype: SOCK_RAW
+ping: socket: Operation not permitted
+ping: -&gt; missing cap_net_raw+p capability or setuid?
+</pre>
+<p>要在主机上修复容器 foo 中的此问题：
+</p>
+<pre># lxc-attach -n foo -- chmod u+s /usr/bin/ping</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0063739d82fd_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_Root.E7.94.A8.E6.88.B7.E7.99.BB.E5.BD.95.E5.A4.B1.E8.B4.A5" id="Root用户登录失败"><span id="Root.E7.94.A8.E6.88.B7.E7.99.BB.E5.BD.95.E5.A4.B1.E8.B4.A5"></span>Root用户登录失败</h3></div>
+<p>如果在使用lxc-console登录时显示以下错误：
+</p>
+<pre>login: root
+Login incorrect
+</pre>
+<p>以及容器的 <a href="#pg47c5e1af4d24">journal</a> 显示:
+</p>
+<pre>pam_securetty(login:auth): access denied: tty 'pts/0' is not secure !
+</pre>
+<p>删除容器内文件系统的 <code>/etc/securetty</code><a href="https://unix.stackexchange.com/questions/41840/effect-of-entries-in-etc-securetty/41939#41939">[2]</a> 和 <code>/usr/share/factory/etc/securetty</code>。或者将它们加入<code>/etc/pacman.conf</code>的<a href="#pg6feca97708e4">NoExtract</a>中以阻止它们被重新下载，见 <b><a href="https://bugs.archlinux.org/task/45903">FS#45903</a></b>。
+</p><p>或者使用lxc-attach创建一个新用户并用它来登陆系统，在登录后切换为root账户。
+</p>
+<pre># lxc-attach -n playtime
+[root@playtime]# useradd -m -Gwheel newuser
+[root@playtime]# passwd newuser
+[root@playtime]# passwd root
+[root@playtime]# exit
+# lxc-console -n playtime
+[newuser@playtime]$ su
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_.E5.AE.B9.E5.99.A8.E9.85.8D.E7.BD.AE.E4.B8.AD.E4.BD.BF.E7.94.A8_veth_.E6.97.B6.E6.97.A0.E7.BD.91.E7.BB.9C.E8.BF.9E.E6.8E.A5" id="容器配置中使用_veth_时无网络连接"><span id=".E5.AE.B9.E5.99.A8.E9.85.8D.E7.BD.AE.E4.B8.AD.E4.BD.BF.E7.94.A8_veth_.E6.97.B6.E6.97.A0.E7.BD.91.E7.BB.9C.E8.BF.9E.E6.8E.A5"></span>容器配置中使用 veth 时无网络连接</h3></div>
+<p>如果你通过<code>/etc/lxc/<i>containername</i>/config</code>将网络接口设定为<b>veth</b>后无法访问局域网或广域网，请检查这个虚拟网口是否获得ip地址并正确连接到网络。
+</p>
+<pre>ip addr show veth0 
+inet 192.168.1.111/24
+</pre>
+<p>你可以关闭所有有关的静态ip集，并像平常一样通过已启动的容器设置这些ip
+</p><p>例如 <code><i>container</i>/config</code>
+</p>
+<pre>...
+lxc.net.0.type = veth
+lxc.net.0.name = veth0
+lxc.net.0.flags = up
+lxc.net.0.link = <code>bridge</code>
+...
+</pre>
+<p>然后通过容器的首选方法分配 IP，见<a href="#pgf42a74f3af9c">网络配置#Network management</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_.E6.97.A0.E6.B3.95.E6.89.BE.E5.88.B0.E5.91.BD.E4.BB.A4" id="无法找到命令"><span id=".E6.97.A0.E6.B3.95.E6.89.BE.E5.88.B0.E5.91.BD.E4.BB.A4"></span>无法找到命令</h3></div>
+<p>当在相对于宿主机系统使用不同Linux发行版的容器中（例如在Arch Linux宿主机系统中运行Debian容器）执行基本命令（如<i>ls</i>、<i>cat</i>等）时，可能会出现此错误。在附加容器时，请使用参数<code>--clear-env</code>：
+</p>
+<pre># lxc-attach -n <i>container_name</i> --clear-env
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_Failed_at_step_KEYRING_spawning___" id="Failed_at_step_KEYRING_spawning...">Failed at step KEYRING spawning...</h3></div>
+<p>在非特权容器内执行的服务可能会出现以下错误：
+</p>
+<pre>some.service: Failed to change ownership of session keyring: Permission denied
+some.service: Failed to set up kernel keyring: Permission denied
+some.service: Failed at step KEYRING spawning ....: Permission denied
+</pre>
+<p>在容器内添加文件<code>/etc/lxc/unpriv.seccomp</code>，并写入以下配置：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/lxc/unpriv.seccomp</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">2
+blacklist
+[all]
+keyctl errno 38</pre>
+<p>并在容器配置文件的lxc.idmap属性后添加：
+</p>
+<pre>lxc.seccomp.profile = /etc/lxc/unpriv.seccomp
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0063739d82fd_.E5.B7.B2.E7.9F.A5.E7.9A.84.E9.97.AE.E9.A2.98" id="已知的问题"><span id=".E5.B7.B2.E7.9F.A5.E7.9A.84.E9.97.AE.E9.A2.98"></span>已知的问题</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0063739d82fd_.E7.BC.BA.E5.A4.B1lxc.init.static.E4.BC.9A.E5.AF.BC.E8.87.B4lxc-execute.E6.89.A7.E8.A1.8C.E5.A4.B1.E8.B4.A5" id="缺失lxc.init.static会导致lxc-execute执行失败"><span id=".E7.BC.BA.E5.A4.B1lxc.init.static.E4.BC.9A.E5.AF.BC.E8.87.B4lxc-execute.E6.89.A7.E8.A1.8C.E5.A4.B1.E8.B4.A5"></span>缺失lxc.init.static会导致lxc-execute执行失败</h3></div>
+<p><code>lxc-execute</code> 指令运行失败并显示以下错误：<code>Unable to open lxc.init.static</code>。参见 <a href="https://bugs.archlinux.org/task/63814">FS#63814</a> 了解详情。
+</p><p>使用 <code>lxc-start</code> 命令重启即可。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0063739d82fd_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://linuxcontainers.org/lxc/introduction/">官方网站</a></li>
+<li><a href="https://linuxcontainers.org/lxc/getting-started/">入门指南</a></li>
+<li><a href="https://linuxcontainers.org/lxc/documentation/">文档</a></li>
+<li><a href="https://discuss.linuxcontainers.org/">论坛</a></li>
+<li><a href="https://github.com/lxc/lxc">官方 GitHub 仓库</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807031730
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.273 seconds
+Real time usage: 0.283 seconds
+Preprocessor visited node count: 1254/1000000
+Revision size: 25234/2097152 bytes
+Post‐expand include size: 20571/2097152 bytes
+Template argument size: 9105/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 534/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   86.291      1 -total
+  9.67%    8.340     65 Template:Ic
+  5.66%    4.882      1 Template:Merge
+  5.54%    4.783     16 Template:Pkg
+  5.00%    4.311      2 Template:Tip
+  4.32%    3.730      1 Template:Accuracy
+  4.26%    3.680      4 Template:Man
+  4.15%    3.584     13 Template:Hc
+  4.03%    3.478      1 Template:翻译状态
+  3.67%    3.163      3 Template:META_Message
+-->
+<!-- Render ID 85f7cd0e-920e-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3408:|#|:idhash:canonical!zh-cn and timestamp 20260807031730 and revision id 34966. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

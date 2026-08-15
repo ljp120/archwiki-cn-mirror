@@ -1,0 +1,71 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg12da11d7b316">Project:机器人</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg999b83be2df8">帮助:操作流程</a></li>
+</ul></div>
+<p><a href="https://en.wikipedia.org/wiki/Bots">机器人（Bots）</a>是<a href="#pg5a4d15a87122">维护团队</a>的重要工具，能够轻松执行从日常维护到复杂一次性更新的各种重复性任务。机器人编辑贡献了维基超过 8% 的内容更新量——所有这些编辑若通过手动操作会非常繁琐。
+</p><p>目前有五个机器人账户：
+</p>
+<ul><li><a href="#pg5ac71289d3c9">Archeb.bot</a>（由 <a href="#pg92eaf3598884">Archeb</a> 操控）</li>
+<li><a href="#pg3d8550bff21d">Lilydjwg.bot</a>（由 <a href="#pg9b5acf2122f6">Lilydjwg</a> 操控）</li>
+<li><a href="#pgff94443f9729">Prince213.bot</a>（由 <a href="#pg7ef2f8576d9b">Prince213</a> 操控）</li>
+<li><a href="#pg6b6312f39d2b">RivuletCedar.bot</a>（由 <a href="#pg45e759541ddc">RivuletCedar</a> 操控）</li>
+<li><a href="#pga62076681723">Y7n05h.bot</a>（由 <a href="#pg377a55656fff">Y7n05h</a> 操控）</li></ul>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg12da11d7b316_.E8.BD.AF.E4.BB.B6" id="软件"><span id=".E8.BD.AF.E4.BB.B6"></span>软件</h2></div>
+<p>机器人使用 <a href="https://www.mediawiki.org/wiki/API">MediaWiki API</a> 与维基服务器通信。<a href="https://en.wikipedia.org/wiki/Wikimedia_Foundation">维基媒体基金会</a>开发了许多使用此 API 的机器人，但它们通常不够通用，无法在其他维基上工作，甚至可能与我们的风格指南冲突。因此，我们一直在开发专用于 ArchWiki 的机器人工具，这些工具在外界评估时也存在同样的缺陷。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12da11d7b316_Wiki_Monkey" id="Wiki_Monkey">Wiki Monkey</h3></div>
+<p><a href="https://github.com/kynikos/wiki-monkey">Wiki Monkey</a> 项目的目标是通过直接在网页浏览器中增强维基页面来促进高效编辑。它以用户脚本形式运行，允许在条目编辑页面半自动执行重复性任务，或在<a href="#pg56a330c35f60">分类</a>、<a href="#pga50663679bf9">链入页面</a>等条目列表页面全自动执行任务。Wiki Monkey 还添加了<a href="#pg7f2d23997ef9">最近更改</a>和<a href="#pg8ab4529e3a30">新页面</a>过滤器等辅助工具。详情请参阅<a href="https://github.com/kynikos/wiki-monkey/wiki">文档</a>。
+</p><p>通过 Wiki Monkey 机器人界面进行的编辑会标记 <code>wiki-monkey</code> <a href="#pg240ae95caa58">标签</a>，可在<a href="#pg10d1075d9e0f">最近更改列表</a>中过滤查看。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12da11d7b316_wiki_scripts" id="wiki-scripts">wiki-scripts</h3></div>
+<p><a href="https://github.com/lahwaacz/wiki-scripts">wiki-scripts</a> 项目包含许多基于 MediaWiki API 小型类库抽象开发的 Python 脚本。这些脚本的用途涵盖从无需编辑维基的信息收集到执行复杂的自动化编辑（详见#任务描述）。
+</p><p>通过 wiki-scripts 进行的编辑（无论是自动还是交互模式）会标记 <code>wiki-scripts</code> <a href="#pg240ae95caa58">标签</a>，可在<a href="#pg10d1075d9e0f">最近更改列表</a>中过滤查看。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg12da11d7b316_.E4.BB.BB.E5.8A.A1" id="任务"><span id=".E4.BB.BB.E5.8A.A1"></span>任务</h2></div>
+<p>本节描述了维基中机器人重复执行的任务。内容旨在概述和记录已部署机器人脚本的功能特性。请注意，机器人编辑默认不会显示在<a href="#pg7f2d23997ef9">最近更改</a>中，因为这些自动化编辑会显著增加追踪和参与常规贡献的难度。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12da11d7b316_.E5.8F.8C.E9.87.8D.E9.87.8D.E5.AE.9A.E5.90.91" id="双重重定向"><span id=".E5.8F.8C.E9.87.8D.E9.87.8D.E5.AE.9A.E5.90.91"></span>双重重定向</h3></div>
+<p>修复<a href="#pg999b83be2df8">双重重定向</a>是最早的自动化任务之一。可通过以下方式实现：
+</p>
+<ul><li>使用这个 <a href="https://github.com/lahwaacz/wiki-scripts/blob/master/fix-double-redirects.py">Python 脚本</a></li>
+<li>使用 <a href="#pg12da11d7b316_Wiki_Monkey">Wiki Monkey</a> 的专用插件</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12da11d7b316_.E8.BD.AF.E4.BB.B6.E5.8C.85.E6.A8.A1.E6.9D.BF" id="软件包模板"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E6.A8.A1.E6.9D.BF"></span>软件包模板</h3></div>
+<p><a href="https://github.com/lahwaacz/wiki-scripts/blob/master/update-package-templates.py">update-package-templates.py</a> 脚本会解析所有页面内容并更新<a href="#pg89460d1734b2">包</a>、<a href="#pg186eb2720721">包组</a>和 <a href="#pgac37c59064e1">AUR</a> 模板。该脚本不会实际更改软件包名称，但会对近期从 AUR 迁移至官方仓库的软件包，将其链接从<a href="#pgac37c59064e1">模板:AUR</a> 更新为<a href="#pg89460d1734b2">模板:包</a>。无效的软件包链接会被标记<a href="#pgcbf03a7fb513">模板:损坏的软件包链接</a>，并附有时效性提示以显示软件包状态。
+</p><p>当存在本地化版本时，脚本会优先使用<a href="#pgcbf03a7fb513">模板:损坏的软件包链接</a>的本地化模板，否则回退至英文版本。除此之外无需其他服务端配置。
+</p><p>针对 ArchWiki，脚本每次运行后（最多每 7 天一次）会在 <a href="https://wiki.archlinux.org/title/User:Lahwaacz.bot/Reports/archpkgs">arch:User:Lahwaacz.bot/Reports/archpkgs</a> 生成包含损坏链接的详细报告。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg12da11d7b316_.E9.93.BE.E6.8E.A5.E6.A3.80.E6.9F.A5" id="链接检查"><span id=".E9.93.BE.E6.8E.A5.E6.A3.80.E6.9F.A5"></span>链接检查</h3></div>
+<ul><li><a href="https://github.com/lahwaacz/wiki-scripts/blob/master/extlink-checker.py">extlink-checker.py</a> 尝试检查外部链接状态，将确定失效的链接标记<a href="#pgc6c7357836b7">模板:失效的链接</a>。许多链接仍无法通过此工具检测，主要因为部分网站需要 JavaScript 支持或服务器返回不确定的 HTTP 状态码。</li>
+<li><a href="https://github.com/lahwaacz/wiki-scripts/blob/master/url-replace.py">url-replace.py</a> 执行多种外部链接替换操作，例如将 HTTP 链接更新为 HTTPS、将指向 wiki.archlinux.org 的外部链接替换为内部链接。</li>
+<li><a href="https://github.com/lahwaacz/wiki-scripts/blob/master/link-checker.py">link-checker.py</a> 对内部链接、手册页链接和外部链接（使用与 <code>url-replace.py</code> 相同的代码）执行多种检查与替换操作。</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807225432
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.076 seconds
+Real time usage: 0.079 seconds
+Preprocessor visited node count: 102/1000000
+Revision size: 4999/2097152 bytes
+Post‐expand include size: 548/2097152 bytes
+Template argument size: 68/2097152 bytes
+Highest expansion depth: 4/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%    7.857      1 -total
+ 30.48%    2.395      1 Template:相关文章开始
+ 15.79%    1.241      3 Template:Ic
+ 12.08%    0.949      1 Template:相关
+ 11.84%    0.930      1 Template:META_Related_articles_start
+ 10.49%    0.824      1 Template:相关文章结束
+-->
+<!-- Render ID f3f5d00e-92b2-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8314:|#|:idhash:canonical!zh-cn and timestamp 20260807225432 and revision id 34297. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

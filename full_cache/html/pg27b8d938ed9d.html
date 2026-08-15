@@ -1,0 +1,312 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg27b8d938ed9d">Linux 控制台</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Linux_console">Linux console</a>，最近一次同步于 2025-08-06，若英文版本有所<a href="https://wiki.archlinux.org/title/Linux_console?diff=0&amp;oldid=842110">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Linux_console_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg4ae8bd8bb6ff">/Keyboard configuration</a></li>
+<li><a href="#pg7aa1ee29f1ff">捕获屏幕#虚拟控制台</a></li>
+<li><a href="#pg62400c6b447c">Color output in console</a></li>
+<li><a href="#pg9683b73bd6d3">getty</a></li>
+</ul></div>
+<p>根据<a href="https://en.wikipedia.org/wiki/Linux_console">维基百科</a>：
+</p>
+<dl><dd><b>Linux 控制台</b>是 <a href="#pg8288dbb5822a">Linux 内核</a>内部的一个系统控制台。Linux 控制台为内核和其他进程提供了一种向用户发送文本输出并接收用户文本输入的方式。用户通常用计算机键盘输入文本，并在计算机显示器上阅读输出的文本。Linux 内核支持虚拟控制台——在逻辑上独立的控制台，但它们访问相同的物理键盘和显示器。</dd></dl>
+<p>本文介绍了 Linux 控制台的基础知识以及如何配置字体显示。<a href="#pg4ae8bd8bb6ff">/Keyboard configuration</a> 子页面中描述了键盘配置。对于提供更多功能的替代控制台解决方案（完整的 Unicode 字体、现代图形适配器等），请参阅 <a href="#pg7d148943633d">KMSCON</a> 或类似项目。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg27b8d938ed9d_.E5.AE.9E.E7.8E.B0" id="实现"><span id=".E5.AE.9E.E7.8E.B0"></span>实现</h2></div>
+<p>与大多数直接与用户交互的服务不同，控制台是在内核中实现的。这与终端仿真软件形成鲜明对比，如 <a href="#pg12c4c9eae03a">Xterm</a>，它是一个在用户空间实现的普通的应用程序。控制台一直是发布的 Linux 内核的一部分，但在其历史上经历了一些变化，最明显的是过渡到使用 <a href="https://en.wikipedia.org/wiki/Linux_framebuffer">framebuffer</a> 以及对 <a href="https://en.wikipedia.org/wiki/Unicode">Unicode</a> 的支持。
+</p><p>虽然对控制台进行了许多改进，但它对旧硬件完全的向后兼容性意味着与图形终端仿真器相比它是受限的。Linux 控制台与图形终端仿真器的主要区别在于：Linux 控制台中的 shell 直接连接到 <a href="#pg7dfeabbd827f">TTY</a> 设备（<code>/dev/tty*</code>），而图形终端仿真器中的 shell 则连接到伪 TTY（<code>/dev/pty*</code>）。
+</p><p>此外，图形终端仿真器可以拥有比 Linux 控制台更多的功能，包括更丰富的可用字体集、多标签页/窗口、分屏视图、回滚缓冲区/滑块、背景颜色/图像（可选透明）等。其中一些功能可以通过终端多路复用器（如 <a href="#pgf321cb9cdda1">Tmux</a> 或 <a href="#pg1aae65d0b9f1">GNU Screen</a>）在 Linux 控制台中使用，或通过依赖 ncurses 等库的文本用户界面程序（TUI）实现，例如 <a href="#pg74a2a3e4814c">Vim</a>、<a href="#pg431294adbe18">nano</a> 或 <a href="#pg9de7470c4ea9">Emacs</a>。这些功能也可在图形终端仿真器中使用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg27b8d938ed9d_.E8.99.9A.E6.8B.9F.E6.8E.A7.E5.88.B6.E5.8F.B0" id="虚拟控制台"><span id=".E8.99.9A.E6.8B.9F.E6.8E.A7.E5.88.B6.E5.8F.B0"></span>虚拟控制台</h3></div>
+<p>控制台以一系列<a href="https://en.wikipedia.org/wiki/Virtual_console">虚拟控制台</a>的形式呈现给用户。这些虚拟控制台给人的印象是几个独立的终端在同时运行；每个虚拟控制台可以用不同的用户登录，运行自己的 shell，并有自己的字体设置。每个虚拟控制台都使用一个 <code>/dev/ttyX</code> 设备，可以通过按 <code>Alt+F<i>x</i></code>（其中 <code><i>x</i></code> 是虚拟控制台编号，从 1 开始）在它们之间切换。<code>/dev/console</code> 设备会被自动映射到活动的虚拟控制台。
+</p><p>另请参阅 <span class="plainlinks archwiki-template-man" title="$ man 1 chvt"><a href="https://man.archlinux.org/man/chvt.1">chvt(1)</a></span>、<span class="plainlinks archwiki-template-man" title="$ man 1 openvt"><a href="https://man.archlinux.org/man/openvt.1">openvt(1)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 1 deallocvt"><a href="https://man.archlinux.org/man/deallocvt.1">deallocvt(1)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg27b8d938ed9d_.E6.96.87.E6.9C.AC.E6.A8.A1.E5.BC.8F" id="文本模式"><span id=".E6.96.87.E6.9C.AC.E6.A8.A1.E5.BC.8F"></span>文本模式</h3></div>
+<p>由于 Linux 最初是适用于 PC 硬件的内核，所以控制台是使用标准 IBM <a href="https://en.wikipedia.org/wiki/VGA">CGA/EGA/VGA</a>图形开发的，当时所有 PC 都支持这种图形。图形在 VGA 文本模式下运行，它提供了一个简单的 16 色 80x25 字符显示。这种传统模式类似于专用文本终端的功能，例如 <a href="https://en.wikipedia.org/wiki/VT100">DEC VT100</a> 系列。如果系统硬件支持的话，仍可以通过内核参数（<code>vga=0 nomodeset</code>）以文本模式启动，但几乎所有的现代发行版（包括 Arch Linux）都使用 framebuffer 控制台来代替。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg27b8d938ed9d_Framebuffer_.E6.8E.A7.E5.88.B6.E5.8F.B0" id="Framebuffer_控制台"><span id="Framebuffer_.E6.8E.A7.E5.88.B6.E5.8F.B0"></span>Framebuffer 控制台</h3></div>
+<p>随着 Linux 被移植到其他非 PC 架构上，需要一个更好的解决方案，因为其他架构不使用兼容 VGA 的图形适配器，而且可能根本不支持文本模式。framebuffer 控制台的实现是为了在所有平台上提供一个标准的控制台，因此无论底层的图形硬件如何，都会呈现相同的 VGA 风格界面。因此，Linux 控制台不是一个终端模拟器，它本身就是一个终端。它使用终端类型 <code>linux</code>，并与 VT100 基本兼容。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg27b8d938ed9d_.E9.94.AE.E7.9B.98.E5.BF.AB.E6.8D.B7.E9.94.AE" id="键盘快捷键"><span id=".E9.94.AE.E7.9B.98.E5.BF.AB.E6.8D.B7.E9.94.AE"></span>键盘快捷键</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>键盘快捷键
+</th>
+<th>描述
+</th></tr>
+<tr>
+<td><code>Ctrl+Alt+Del</code>
+</td>
+<td>重新启动系统（由符号链接 <code>/usr/lib/systemd/system/ctrl-alt-del.target</code> 指定）
+</td></tr>
+<tr>
+<td><code>Alt+F1</code>、<code>F2</code>、<code>F3</code>……
+</td>
+<td>切换到第 <i>n</i> 个虚拟控制台（不同于 <a href="#pg8110fdf8ce6e">Xorg 和 Wayland</a> 中使用的 <code>Ctrl+Alt+F<i>n</i></code>）
+</td></tr>
+<tr>
+<td><code>Alt+左箭头</code>
+</td>
+<td>切换到上一个虚拟控制台
+</td></tr>
+<tr>
+<td><code>Alt+右箭头</code>
+</td>
+<td>切换到下一个虚拟控制台
+</td></tr>
+<tr>
+<td><code>Scroll Lock</code>
+</td>
+<td>当 Scroll Lock 被激活时，输入/输出被锁定
+</td></tr>
+<tr>
+<td><code>Ctrl+c</code>
+</td>
+<td>杀死当前任务
+</td></tr>
+<tr>
+<td><code>Ctrl+d</code>
+</td>
+<td>插入 EOF
+</td></tr>
+<tr>
+<td><code>Ctrl+z</code>
+</td>
+<td>暂停当前任务
+</td></tr></tbody></table>
+<p>参见 <span class="plainlinks archwiki-template-man" title="$ man 4 console_codes"><a href="https://man.archlinux.org/man/console_codes.4">console_codes(4)</a></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg27b8d938ed9d_.E5.AD.97.E4.BD.93" id="字体"><span id=".E5.AD.97.E4.BD.93"></span>字体</h2></div>
+<p><a href="https://en.wikipedia.org/wiki/Linux_console">Linux 控制台</a>默认使用 UTF-8 编码，但由于使用的是标准的兼容 VGA 的 framebuffer，终端字体限定为 256 或 512 个字形。如果字体超出了 256 个字形，那么颜色的数量就会从 16 减少到 8。为了为给定的 Unicode 值分配正确的符号来显示，需要一个特殊的翻译映射，通常称为 <i>unimap</i>。现在，大多数控制台字体都内置了 "unimap"；在历史上，它必须被单独加载。
+</p><p>默认情况下，<a href="https://en.wikipedia.org/wiki/Virtual_console">虚拟控制台</a>使用内核的内置字体，其包含 <a href="https://en.wikipedia.org/wiki/CP437">CP437</a> 字符集<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/tty/vt/Makefile#n5">[1]</a>，但这个设置很容易改变。内核提供了约 15 种内置字体可供选择，其中<a href="#pg79837a9c7434">官方支持的内核</a>提供两种：VGA 8x16 字体（<code>CONFIG_FONT_8x16</code>）和 Terminus 16x32 字体（<code>CONFIG_FONT_TER16x32</code>）。内核根据屏幕分辨率的评估结果选择使用的字体。可以通过<a href="#pgc7833704a8db">内核参数</a>强制使用其他内置字体，例如 <code>fbcon=font:TER16x32</code>。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=kbd">kbd</a></span><sup><small>包</small></sup></span> 包提供改变虚拟控制台字体和字体映射的工具。可用的字体存储在 <code>/usr/share/kbd/consolefonts/</code> 目录中，以 <i>.psfu</i> 或 <i>.psfu.gz</i> 结尾的字体内置 Unicode 翻译映射。
+</p><p>键盘映射是按键和计算机使用的字符的对应关系，位于 <code>/usr/share/kbd/keymaps/</code> 的子目录中，详情请参阅 <a href="#pg4ae8bd8bb6ff">/Keyboard configuration</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>替换字体可能会导致需要标准 VGA 样式字体的程序出现问题，例如使用线条绘图图形的程序。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>对于用拉丁/希腊字母书写的欧洲语言，可以使用 <code>eurlatgr</code> 字体，它包括广泛的拉丁/希腊字母变化以及特殊字符<a href="https://lists.altlinux.org/pipermail/kbd/2014-February/000439.html">[2]</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg27b8d938ed9d_.E9.A2.84.E8.A7.88.E5.92.8C.E6.B5.8B.E8.AF.95" id="预览和测试"><span id=".E9.A2.84.E8.A7.88.E5.92.8C.E6.B5.8B.E8.AF.95"></span>预览和测试</h3></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>这里有一个整理过的预览影像数据库：<a href="https://adeverteuil.github.io/linux-console-fonts-screenshots/">Linux 控制台字体截图</a>。</div>
+<pre>$ showconsolefont
+</pre>
+<p>显示字体可用字形与字符的列表。
+</p><p>如果指定（<code>/usr/share/kbd/consolefonts/</code> 中的）字体名称，<code>setfont</code> 将暂时改变字体：
+</p>
+<pre>$ setfont lat2-16 -m 8859-2
+</pre>
+<p>字体名称区分大小写。如果不加参数，<code>setfont</code> 会将控制台字体重设为默认字体。
+</p><p>因此，要使用一个<b>小的 8x8</b> 字体，在安装字体后，使用类似如下所示的命令：
+</p>
+<pre>$ setfont -h8 /usr/share/kbd/consolefonts/drdos8x8.psfu.gz
+</pre>
+<p>如果要使用<b>更大</b>的字体，Terminus 字体 (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=terminus-font">terminus-font</a></span><sup><small>包</small></sup></span>) 有多种尺寸可供选择，例如 <code>ter-132b</code> 就很大。
+</p><p>你也可以添加 <code>-d</code> 选项来使用双倍大小。这将使用 64x64 字体：
+</p>
+<pre>$ setfont -d ter-132n
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>
+<ul><li>所有更改字体的命令都可以“盲打”。</li>
+<li>Terminus 字体名称（<code>ter-*</code>）的解释见 <code>/usr/share/terminus-font/README</code>。</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><i>setfont</i> 只作用于当前正在使用的控制台。其它终端无论活跃与否都不受影响。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg27b8d938ed9d_.E6.8C.81.E4.B9.85.E6.80.A7.E9.85.8D.E7.BD.AE" id="持久性配置"><span id=".E6.8C.81.E4.B9.85.E6.80.A7.E9.85.8D.E7.BD.AE"></span>持久性配置</h3></div>
+<p><code>/etc/vconsole.conf</code> 中的 <code>FONT</code> 变量可用于在启动时设置字体，这对于所有控制台都具有持久性作用。详情请参见 <span class="plainlinks archwiki-template-man" title="$ man 5 vconsole.conf"><a href="https://man.archlinux.org/man/vconsole.conf.5">vconsole.conf(5)</a></span>。
+</p><p>要显示<i>Č, ž, đ, š</i>或<i>Ł, ę, ą, ś</i>之类的字符，请使用 <code>lat2-16.psfu.gz</code> 字体：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/vconsole.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+FONT=lat2-16
+FONT_MAP=8859-2</pre>
+<p>这代表使用 ISO/IEC 8859 字符的第二部分，尺寸设置为 16。可以使用其它值来更改字体尺寸（如 <code>lat2-08</code>）。可以在 <a href="https://zh.wikipedia.org/wiki/ISO/IEC_8859#.E5.90.84.E7.A7.8DISO_8859.E5.AD.97.E7.AC.A6.E9.9B.86">zhwp:ISO/IEC 8859#各种ISO 8859字符集</a>查询 8859 规范定义的区域。
+</p><p>自 <a href="https://gitlab.archlinux.org/archlinux/mkinitcpio/mkinitcpio/-/blob/v33/mkinitcpio.conf#L52">mkinitcpio v33</a> 起，<code>/etc/vconsole.conf</code> 中指定的字体默认通过 <code>consolefont</code> 钩子在早期用户空间自动加载，该钩子将字体添加到 initramfs。详情请参见 <a href="#pgbd0f46fbac92">Mkinitcpio#钩子(HOOKS)</a>。
+</p><p>更改 <code>/etc/vconsole.conf</code> 后，你可能还需要<a href="#pgdf6211f8fea3">重启</a> <code>systemd-vconsole-setup.service</code>。
+</p><p>如果启动时字体没有变化，或只暂时变化，则最可能是因为初始化图形驱动时字体被复位，然后控制台切换到 framebuffer。默认情况下，所有树内内核驱动程序都会提前加载。NVIDIA 用户应参阅 <a href="#pge12579b7d4ac">NVIDIA#Early loading</a> 以在应用 <code>/etc/vconsole.conf</code> 之前加载图形驱动程序。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg27b8d938ed9d_.E5.85.89.E6.A0.87.E5.A4.96.E8.A7.82" id="光标外观"><span id=".E5.85.89.E6.A0.87.E5.A4.96.E8.A7.82"></span>光标外观</h2></div>
+<p>此主题文档较少，建议阅读以下文章：
+</p>
+<ul><li><a href="https://docs.kernel.org/admin-guide/vga-softcursor.html">Software cursor for VGA</a>（VGA 的软件光标）</li>
+<li><a href="https://linuxgazette.net/137/anonymous.html">Cursor Appearance in the Linux Console</a>（Linux 控制台中的光标外观）</li>
+<li><a href="https://web.archive.org/web/20220318101402/https://nutr1t07.github.io/post/disable-cursor-blinking-on-linux-console/">Disable Cursor Blinking on Linux Console</a>（在 Linux 控制台上禁用光标闪烁）</li></ul>
+<table class="wikitable">
+<caption>光标类型
+</caption>
+<tbody><tr>
+<th></th>
+<th>硬件</th>
+<th>软件
+</th></tr>
+<tr>
+<th>形状
+</th>
+<td>
+<dl><dd>(0) 默认
+<dl><dd>应用 (2) 下划线</dd></dl></dd>
+<dd>(1) 不可见</dd>
+<dd>(2) 下划线</dd>
+<dd>(3) 下三分之一</dd>
+<dd>(4) 下半部</dd>
+<dd>(5) 下三分之二</dd>
+<dd>(6) 全方块</dd></dl>
+</td>
+<td>
+<dl><dd>(16) 全方块
+<dl><dd>形状无法更改，但当背景色和前景色相同时，光标实际上不可见</dd></dl></dd></dl>
+</td></tr>
+<tr>
+<th>闪烁
+</th>
+<td>
+<dl><dd>闪烁</dd></dl>
+</td>
+<td>
+<dl><dd>取决于驱动程序
+<dl><dd>背景色的最高位可解释为"高亮"或"闪烁"</dd></dl></dd></dl>
+</td></tr>
+<tr>
+<th>颜色
+</th>
+<td>
+<dl><dd>与控制台文本颜色相同（通常为白色/灰色）
+<dl><dd>无法单独设置</dd></dl></dd></dl>
+</td>
+<td>
+<dl><dd>可由用户设置</dd></dl>
+</td></tr></tbody></table>
+<p>控制台光标可通过<b>设备属性（DA）</b>控制函数调整。参数序列<b>必须</b>以单个问号开头（尽管 <span class="plainlinks archwiki-template-man" title="$ man 4 console_codes"><a href="https://man.archlinux.org/man/console_codes.4">console_codes(4)</a></span> 有相反的说法）。
+</p><p>以下是一个全方块、不闪烁、绿色光标（光标下的符号为黑色）的示例：
+</p>
+<pre>$ printf "\x1b\x5b?16;$((8+4+2+1));$((32+0+8+4+2+1))\x63"
+</pre>
+<p>也可以使用八进制和字符代替十六进制代码表达：
+</p>
+<pre>$ printf '\033[?16;15;47c'
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>控制函数（转义序列）的完整指南请参阅标准 <a href="https://ecma-international.org/wp-content/uploads/ECMA-48_5th_edition_june_1991.pdf">ECMA-48 — Control Functions for Coded Character Sets</a>。</div>
+<p>相同的配置可通过<a href="#pga479202f6eed">内核参数</a>永久应用：
+</p>
+<pre>vt.cur_default=0x2f0f10
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>转义序列参数（<b>16, 15, 47</b>）以十六进制（<b>10, 0f, 2f</b>）按<b>相反顺序</b>写入。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg27b8d938ed9d_.E5.85.89.E6.A0.87.E5.A4.A7.E5.B0.8F" id="光标大小"><span id=".E5.85.89.E6.A0.87.E5.A4.A7.E5.B0.8F"></span>光标大小</h3></div>
+<p>第一个参数名为<i>光标大小</i>，数字 <b>16</b>（内核参数最右侧两位十六进制数字为 <b>10</b>）表示"<i>使用软件光标</i>"。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>你可能需要使用 <b>48</b> (32+16)、<b>80</b> (64+16) 或 <b>112</b> (64+32+16) 代替 <b>16</b>。</div>
+<p>如果想更改硬件光标形状，使用对应数字（从 <b>0</b> 到 <b>6</b>，见上表）。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><i>光标大小</i>是唯一适用于<i>硬件</i>光标的参数。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg27b8d938ed9d_.E5.88.87.E6.8D.A2.E6.8E.A9.E7.A0.81" id="切换掩码"><span id=".E5.88.87.E6.8D.A2.E6.8E.A9.E7.A0.81"></span>切换掩码</h3></div>
+<p>第二个参数称为<i>切换掩码</i>，用于翻转颜色的对应位。
+</p>
+<table class="wikitable" style="text-align: center;">
+<caption>字符属性位
+</caption>
+<tbody><tr>
+<th></th>
+<th colspan="4">背景
+<p><i>（光标块）</i>
+</p>
+</th>
+<th colspan="4">前景
+<p><i>（光标下的符号）</i>
+</p>
+</th></tr>
+<tr>
+<th>
+</th>
+<td><b>高亮</b>
+<p>或闪烁
+</p>
+</td>
+<td><b>红</b>
+</td>
+<td><b>绿</b>
+</td>
+<td><b>蓝</b>
+</td>
+<td><b>高亮</b>
+<p>或闪烁
+</p>
+</td>
+<td><b>红</b>
+</td>
+<td><b>绿</b>
+</td>
+<td><b>蓝</b>
+</td></tr>
+<tr>
+<th>十进制
+</th>
+<td>128</td>
+<td>64</td>
+<td>32</td>
+<td>16</td>
+<td>8</td>
+<td>4</td>
+<td>2</td>
+<td>1
+</td></tr>
+<tr>
+<th>十六进制
+</th>
+<td>80</td>
+<td>40</td>
+<td>20</td>
+<td>10</td>
+<td>8</td>
+<td>4</td>
+<td>2</td>
+<td>1
+</td></tr></tbody></table>
+<p>在我们的例子中，第二个参数是 <b>15</b>（内核参数中间两位十六进制数字为 <b>0f</b>），因此所有四个前景（符号）位都将被翻转。最重要的规则是：切换（第二个参数）在设置（第三个参数）之后应用。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果某个位被第三个参数设置<b>且</b>被第二个参数切换——它实际上会被清除。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg27b8d938ed9d_.E8.AE.BE.E7.BD.AE.E6.8E.A9.E7.A0.81" id="设置掩码"><span id=".E8.AE.BE.E7.BD.AE.E6.8E.A9.E7.A0.81"></span>设置掩码</h3></div>
+<p>第三个参数称为<i>设置掩码</i>。它设置相应的字符属性位。我们在示例中使用 <b>47</b>（内核参数最左侧两位十六进制数字为 <b>2f</b>），这表示两点：
+</p>
+<ul><li>(32) 为光标块使用纯绿色</li>
+<li>(8+4+2+1) 设置所有四个前景（符号颜色）位。这些位将被第二个参数切换，因此光标下的符号颜色将为黑色（<code>0000</code>）。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg27b8d938ed9d_HiDPI" id="HiDPI">HiDPI</h2></div>
+<p>参见 <a href="#pg1f5bbda7ab0a">HiDPI#Linux 控制台</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg27b8d938ed9d_.E5.A3.B0.E9.9F.B3.E6.8F.90.E7.A4.BA" id="声音提示"><span id=".E5.A3.B0.E9.9F.B3.E6.8F.90.E7.A4.BA"></span>声音提示</h2></div>
+<p>参见 <a href="#pg562e8d103236">PC 扬声器#beep</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg27b8d938ed9d_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://www.linusakesson.net/programming/tty/">The TTY demystified – Linus Åkesson</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807030933
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.165 seconds
+Real time usage: 0.171 seconds
+Preprocessor visited node count: 675/1000000
+Revision size: 13472/2097152 bytes
+Post‐expand include size: 6504/2097152 bytes
+Template argument size: 2342/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   45.676      1 -total
+ 13.02%    5.949     43 Template:Ic
+  9.82%    4.487      6 Template:Man
+  9.27%    4.235      1 Template:翻译状态
+  6.14%    2.803      2 Template:Pkg
+  5.17%    2.363      4 Template:Related
+  4.88%    2.227      1 Template:相关文章开始
+  4.77%    2.178      3 Template:提示
+  3.13%    1.432      7 Template:注意
+  2.58%    1.180      1 Template:Hc
+-->
+<!-- Render ID 69a7608f-920d-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3409:|#|:idhash:canonical!zh-cn and timestamp 20260807030933 and revision id 33641. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

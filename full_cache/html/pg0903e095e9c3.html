@@ -1,0 +1,213 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg0903e095e9c3">Python 打包准则</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Python_package_guidelines">Python package guidelines</a>，最近一次同步于 2026-01-19，若英文版本有所<a href="https://wiki.archlinux.org/title/Python_package_guidelines?diff=0&amp;oldid=850782">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Python_package_guidelines_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-box" style="display:block; text-align: center; margin-bottom: 1em;"><b><a href="#pg604525fe585e">Arch 打包准则</a></b>
+<hr/>
+<p><a href="#pg95c43df55d71">32 位</a> – <a href="#pgfe5f6c29d8b8">安全</a> – <a href="#pg2f6942b6d018">CLR</a> – <a href="#pg8614c182546c">CMake</a> – <a href="#pg35309cb600db">DKMS</a> – <a href="#pg94d495667cf1">Eclipse</a> – <a href="#pg30216a466efc">Electron</a> – <a href="#pgf4920db0fb7d">Free Pascal</a> – <a href="#pg495f9c81af9a">GNOME</a> – <a href="#pg25eee26160c7">Go</a> – <a href="#pg6745976c67a6">Haskell</a> – <a href="#pg608e3a14075c">Java</a> – <a href="#pgdb35188d0d47">交叉编译工具</a> – <a href="#pg3b0cb0ca7f3c">KDE</a> – <a href="#pg5fa0c1219aab">Lisp</a> – <a href="#pg73cdc287ea7c">Meson</a> – <a href="#pgddbbb3b35303">MinGW</a> – <a href="#pg49b462fb61bb">内核模块</a> – <a href="#pg39cc2ff49b72">Node.js</a> – <a href="#pge8e96600d1a5">Nonfree</a> – <a href="#pg4b9a9fc43b1c">OCaml</a> – <a href="#pgc36dc0572f98">Perl</a> – <a href="#pg5e8e58afbe44">PHP</a> – Python – <a href="#pg79748acf2083">R</a> – <a href="#pg43183ca37e2a">Ruby</a> – <a href="#pg2ce18142b976">Rust</a> – <a href="#pg77ee4ff28c91">Shell</a> – <a href="#pg2e95a0584036">VCS</a> – <a href="#pga4012eb9e457">Web</a> – <a href="#pg943ab5e713fc">Wine</a> – <a href="#pg9d7e0c937471">字体</a>
+</p>
+</div>
+<p>本文档描述了使用 <a href="#pgf9d748a7b27b">PKGBUILD</a> 来为 <a href="#pgf6d3de5ccfac">Python</a> 程序进行打包时须遵守的标准和指引。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0903e095e9c3_.E5.8C.85.E5.90.8D" id="包名"><span id=".E5.8C.85.E5.90.8D"></span>包名</h2></div>
+<p>对于 <a href="#pgf6d3de5ccfac">Python 3</a> 的<b>库</b>模块，或与 Python 生态紧密耦合的<b>应用程序</b>（如 <i>pip</i> 和 <i>tox</i>），使用 <code>python-<i>模块名或应用程序名</i></code> 命名。对于其他<b>应用程序</b>，则仅使用程序原名。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>包名应全为小写。</div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0903e095e9c3_.E6.9E.B6.E6.9E.84" id="架构"><span id=".E6.9E.B6.E6.9E.84"></span>架构</h2></div>
+<p>参见 <a href="#pgf9d748a7b27b">PKGBUILD#arch</a>。
+</p><p>包含 C 扩展的 Python 软件包与架构相关。反之则通常无关于架构。
+</p><p>使用 <a href="https://setuptools.pypa.io/">setuptools</a> 构建的软件包通过在 <code>setup.py</code> 中定义 <code>ext_modules</code> 关键字来声明其使用的 C 扩展。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0903e095e9c3_.E6.BA.90.E4.BB.A3.E7.A0.81" id="源代码"><span id=".E6.BA.90.E4.BB.A3.E7.A0.81"></span>源代码</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>根据 <a href="https://rfc.archlinux.page/0020-sources-for-python-packaging/">RFC0020</a>，默认应使用上游提供的源代码压缩包，而非 PyPI 提供的 sdist 压缩包。</div>
+<p>PyPI 网站提供的下载链接包含不可预测的哈希值，每次更新软件包时需重新从 PyPI 获取。这导致其不适合直接用于 PKGBUILD。PyPI <a href="https://github.com/pypa/pypi-legacy/issues/438#issuecomment-226940730">提供</a>了以下稳定方案：<a href="#pgf9d748a7b27b">PKGBUILD#source</a> <code>source=()</code> 数组应使用以下 URL 模板：
+</p>
+<dl><dt>源代码包：</dt>
+<dd><code>https://files.pythonhosted.org/packages/source/${_name::1}/${_name//-/_}/${_name//-/_}-$pkgver.tar.gz</code></dd>
+<dt>纯 Python wheel 包</dt>
+<dd><code>https://files.pythonhosted.org/packages/py2.py3/${_name::1}/$_name/${_name//-/_}-$pkgver-py2.py3-none-any.whl</code>（同时兼容 Python 2 和 Python 3）</dd>
+<dd><code>https://files.pythonhosted.org/packages/py3/${_name::1}/$_name/${_name//-/_}-$pkgver-py3-none-any.whl</code> （仅兼容 Python 3）</dd>
+<dd>注意分发包名称（distribution name，在 PyPI 注册的名称）可能包含连字符，但在 wheel 文件名中需转换为下划线。</dd>
+<dt>架构相关的 wheel 包</dt>
+<dd>可通过追加下划线和架构名添加额外数组（如 <code>source_x86_64=('...')</code>）。另可使用 <code>_py=cp310</code> 避免重复 Python 版本：</dd>
+<dd><code>https://files.pythonhosted.org/packages/$_py/${_name::1}/$_name/${_name//-/_}-$pkgver-$_py-${_py}m-manylinux1_x86_64.whl</code></dd></dl>
+<p>注意使用自定义变量 <code><b>_name</b></code> 代替 <code>pkgname</code>，因 Python 软件包通常带有 <code>python-</code> 前缀。该变量可通过以下方式定义：
+</p>
+<pre>_name=${pkgname#python-}
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0903e095e9c3_.E5.AE.89.E8.A3.85.E6.96.B9.E5.BC.8F" id="安装方式"><span id=".E5.AE.89.E8.A3.85.E6.96.B9.E5.BC.8F"></span>安装方式</h2></div>
+<p>Python 中的包通常使用 Python 专用的包管理器（如 <a href="https://pip.pypa.io/">pip</a>）进行安装，这类工具会从在线仓库（通常是 <a href="https://pypi.org/">PyPI</a> —— Python 软件包索引）获取软件包并追踪相关文件。
+</p><p>然而，在使用 <code>PKGBUILD</code> 管理 Python 软件包时，需要将 Python 包“安装”到临时位置 <code><i>$pkgdir</i>/usr/lib/python<i>&lt;Python 版本&gt;</i>/site-packages/<i>$pkgname</i></code>。
+</p><p>对于使用<a href="https://www.python.org/dev/peps/pep-0517/">标准元数据（standard metadata）</a>在 <code>pyproject.toml</code> 中指定了构建后端（build backend）的 Python 包，使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-build">python-build</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-installer">python-installer</a></span><sup><small>包</small></sup></span> 是完成上述“安装”过程最容易的方式。
+旧版本软件包可能未声明使用 setuptools，仅提供需手动调用的 <code>setup.py</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>必须将元数据中的依赖关系声明在 <code>depends</code> 数组中，否则相关依赖不会被安装。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0903e095e9c3_.E5.9F.BA.E4.BA.8E.E6.A0.87.E5.87.86.EF.BC.88PEP_517.EF.BC.89.E7.9A.84.E5.AE.89.E8.A3.85.E6.96.B9.E5.BC.8F" id="基于标准（PEP_517）的安装方式"><span id=".E5.9F.BA.E4.BA.8E.E6.A0.87.E5.87.86.EF.BC.88PEP_517.EF.BC.89.E7.9A.84.E5.AE.89.E8.A3.85.E6.96.B9.E5.BC.8F"></span>基于标准（PEP 517）的安装方式</h3></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>当从上游提供的源代码 tarball 构建时，若项目依赖 git 生成版本字符串，在构建 wheel 前需根据使用的工具将特定的环境变量设为 <code>$pkgver</code>：
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-flit-core">python-flit-core</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-hatch-vcs">python-hatch-vcs</a></span><sup><small>包</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-setuptools-scm">python-setuptools-scm</a></span><sup><small>包</small></sup></span>：<code>SETUPTOOLS_SCM_PRETEND_VERSION</code></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-pbr">python-pbr</a></span><sup><small>包</small></sup></span>：<code>PBR_VERSION</code></li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-pdm-backend">python-pdm-backend</a></span><sup><small>包</small></sup></span>：<code>PDM_BUILD_SCM_VERSION</code></li></ul>
+</div>
+<p>基于标准的工作流程很简单：使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-build">python-build</a></span><sup><small>包</small></sup></span> 构建一个 wheel，再使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-installer">python-installer</a></span><sup><small>包</small></sup></span> 将其安装到 <code>$pkgdir</code>：
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>除 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-build">python-build</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-installer">python-installer</a></span><sup><small>包</small></sup></span> 外，还需将软件包使用的<a href="https://packaging.python.org/en/latest/tutorials/packaging-projects/#choosing-a-build-backend">构建后端（build backend）</a>添加至 <code>makedepends</code>。仓库中所有可用的构建后端均属于 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/groups/x86_64/python-build-backend/">python-build-backend</a></span><sup><small>包组</small></sup></span>。请检查项目的 <code>pyproject.toml</code> 文件中 <code>build-system.build-backend</code> 配置项的值，该值即为此项目实际使用的构建后端，若未配置则默认使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-setuptools">python-setuptools</a></span><sup><small>包</small></sup></span>。</div>
+<pre>makedepends=(python-build python-installer python-wheel)
+
+build() {
+    cd $_name-$pkgver
+    python -m build --wheel --no-isolation
+}
+
+package() {
+    cd $_name-$pkgver
+    python -m installer --destdir="$pkgdir" dist/*.whl
+}</pre>
+<p>其中：
+</p>
+<ul><li><code>--wheel</code> 表示仅构建 wheel 文件，不生成源代码分发包</li>
+<li><code>--no-isolation</code> 表示使用系统已安装的包（含 <code>depends</code> 中声明的依赖）进行构建，默认会创建隔离的虚拟环境执行构建</li>
+<li><code>--destdir="$pkgdir"</code> 可防止直接尝试安装到宿主系统（而非软件包目录），避免权限错误</li>
+<li>可将 <code>--compile-bytecode=……</code> 或 <code>--no-compile-bytecode</code> 传递给 <code>installer</code>，但默认值较为合理，无需手动指定</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>不建议跳过 <code>build</code> 阶段而直接将 <code>.whl</code> 文件放入 <code>source</code> 数组，应优先采用源代码构建。仅在无法通过源码构建时（例如项目<b>仅</b>提供 wheel 源）才应使用此方式。</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>若软件包为 <a href="#pg2e95a0584036">VCS 包</a>（<code>python-……-git</code>），请在 <code>prepare</code> 函数中添加 <code>git -C "${srcdir}/${pkgname}" clean -dfx</code> 命令。此操作可清除旧版 wheel 及其他构建产物，避免后续问题。另请参阅 <a href="https://github.com/pypa/setuptools/issues/1347">setuptools</a> 与 <a href="https://github.com/python-poetry/poetry/issues/1329">Poetry</a> 的上游 issue。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0903e095e9c3_.E4.BD.BF.E7.94.A8_setuptools_.E6.88.96_distutils_.E7.9A.84.E5.AE.89.E8.A3.85.E6.96.B9.E5.BC.8F" id="使用_setuptools_或_distutils_的安装方式"><span id=".E4.BD.BF.E7.94.A8_setuptools_.E6.88.96_distutils_.E7.9A.84.E5.AE.89.E8.A3.85.E6.96.B9.E5.BC.8F"></span>使用 setuptools 或 distutils 的安装方式</h3></div>
+<p>若项目中不存在 <code>pyproject.toml</code> 文件，或该文件未包含 <code>[build-system]</code> 表，则说明项目使用遗留格式，即通过 <i>setup.py</i> 文件调用 <i>setuptools</i> 或 <i>distutils.core</i> 的 <code>setup</code> 函数。
+</p><p>此类软件包通常仍可使用上述 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-build">python-build</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-installer">python-installer</a></span><sup><small>包</small></sup></span> 方法构建安装（推荐方式），但需在 <code>makedepends</code> 中添加 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-setuptools">python-setuptools</a></span><sup><small>包</small></sup></span>。
+</p><p>通过直接运行 <i>setup.py</i> 的旧方式（见下）仍可构建安装，但此方法已弃用，仅建议在 PEP 517 兼容方式因故不可用时作为备选方案。
+</p><p>需注意，使用此方法构建时会在 <code>package</code> 阶段输出以下警告：
+</p>
+<pre>SetuptoolsDeprecationWarning: setup.py install is deprecated.</pre>
+<p>另请注意，Python 3.12 及后续版本的标准库中已移除 <i>distutils</i>。对于仍使用 <i>setup.py</i> 的项目，必须在 <code>makedepends</code> 中添加 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-setuptools">python-setuptools</a></span><sup><small>包</small></sup></span>（该软件包提供了自带的 <i>distutils</i> 实现）。
+</p>
+<pre>makedepends=('python-setuptools')
+
+build() {
+    cd $_name-$pkgver
+    python setup.py build
+}
+
+package() {
+    cd $_name-$pkgver
+    python setup.py install --root="$pkgdir" --optimize=1
+}</pre>
+<p>其中：
+</p>
+<ul><li><code>--root="$pkgdir"</code> 作用同前文 <code>--destdir</code></li>
+<li><code>--optimize=1</code> 预生成优化字节码文件（<i>.opt-1.pyc</i>）而非在宿主系统按需生成，以便由 <a href="#pg9ef105bf1e3c">pacman</a> 追踪这些文件</li>
+<li>添加 <code>--skip-build</code> 可以跳过不必要的重复构建步骤（如 <code>build()</code> 函数已执行过的构建过程）</li></ul>
+<p>若软件包使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-setuptools-scm">python-setuptools-scm</a></span><sup><small>包</small></sup></span>，构建时可能报错如下：
+</p>
+<pre>LookupError: setuptools-scm was unable to detect version for /build/python-jsonschema/src/jsonschema-3.2.0.
+
+Make sure you're either building from a fully intact git repository or PyPI tarballs. Most other sources (such as GitHub's tarballs, a git checkout without the .git folder) don't contain the necessary metadata and will not work.</pre>
+<p>需将 <code>SETUPTOOLS_SCM_PRETEND_VERSION</code> 环境变量设为 <code>$pkgver</code> 以完成构建：
+</p>
+<pre>export SETUPTOOLS_SCM_PRETEND_VERSION=$pkgver
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0903e095e9c3_.E6.B5.8B.E8.AF.95" id="测试"><span id=".E6.B5.8B.E8.AF.95"></span>测试</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>避免使用 <code>tox</code> 运行测试套件，因其明确设计用于依据从 PyPI 下载的可复现的、固定的配置环境测试，而<b>不会</b>测试软件包实际安装后的版本，若使用则将使 <i>check</i> 函数失去意义</li>
+<li>避免在 <b>checkdepends</b> 中添加用于代码检查（lint）、覆盖率或类型检查的 pytest 插件（详见 #禁用 pytest 附加选项章节）。这些工具会增加引导难度且非发行版打包必需，因其不验证功能正确性</li>
+<li>在为测试配置自定义 <code>PYTHONPATH</code> 时，避免使用相对路径，否则可能导致问题出现。请使用绝对路径。</li></ul>
+</div>
+<p>大多数提供测试套件的 Python 项目使用 unittest 运行器、nosetests 或 pytest（分别由 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python">python</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-nose">python-nose</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-pytest">python-pytest</a></span><sup><small>包</small></sup></span> 提供），通过检测特定格式的文件/目录名和类/函数名（如含 <code>test</code> 的命名）自动发现测试套件。通常直接运行 <code>nosetests</code> 或 <code>pytest</code> 即可执行测试套件。
+</p>
+<pre>check(){
+    cd $_name-$pkgver
+    
+    # 使用内置的 unittest
+    python -m unittest discover -vs .
+
+    # 使用 nosetests
+    nosetests
+
+    # 使用 pytest
+    pytest
+}
+</pre>
+<p>若存在已编译的 C 扩展模块，测试时需通过 <code>$PYTHONPATH</code> 指定与当前 Python 主次版本匹配的构建路径以正确加载模块。
+</p>
+<pre>check(){
+    cd $_name-$pkgver
+    local python_version=$(python -c 'import sys; print("".join(map(str, sys.version_info[:2])))')
+    
+    # 使用内置的 unittest
+    PYTHONPATH="$PWD/build/lib.linux-$CARCH-cpython-$python_version" python -m unittest discover -vs .
+    
+    # 使用 nosetests
+    PYTHONPATH="$PWD/build/lib.linux-$CARCH-cpython-$python_version" nosetests
+
+    # 使用 pytest
+    PYTHONPATH="$PWD/build/lib.linux-$CARCH-cpython-$python_version" pytest
+}</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg0903e095e9c3_.E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7" id="提示和技巧"><span id=".E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7"></span>提示和技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0903e095e9c3_.E8.8E.B7.E5.8F.96_Python_.E7.89.88.E6.9C.AC.E5.8F.B7" id="获取_Python_版本号"><span id=".E8.8E.B7.E5.8F.96_Python_.E7.89.88.E6.9C.AC.E5.8F.B7"></span>获取 Python 版本号</h3></div>
+<p>在准备、构建、测试或安装过程中，如需引用系统 Python 的主次版本号（如 <code>3.9</code> 或 <code>3.10</code>），请勿硬编码版本号，而应通过 Python 解释器动态获取并存储至局部变量：
+</p>
+<pre>check(){
+  local python_version=$(python -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+  ...
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0903e095e9c3_.E8.8E.B7.E5.8F.96_site-packages_.E8.B7.AF.E5.BE.84" id="获取_site-packages_路径"><span id=".E8.8E.B7.E5.8F.96_site-packages_.E8.B7.AF.E5.BE.84"></span>获取 site-packages 路径</h3></div>
+<p>在构建、测试或安装过程中，如需引用系统的 <code>site-packages</code> 目录，请勿硬编码路径，而应通过 Python 解释器动态获取并存储至局部变量：
+</p>
+<pre>check(){
+  local site_packages=$(python -c "import site; print(site.getsitepackages()[0])")
+  ...
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0903e095e9c3_.E9.81.BF.E5.85.8D.E5.9C.A8_site-package_.E4.B8.AD.E6.94.BE.E7.BD.AE.E6.B5.8B.E8.AF.95.E7.9B.AE.E5.BD.95" id="避免在_site-package_中放置测试目录"><span id=".E9.81.BF.E5.85.8D.E5.9C.A8_site-package_.E4.B8.AD.E6.94.BE.E7.BD.AE.E6.B5.8B.E8.AF.95.E7.9B.AE.E5.BD.95"></span>避免在 site-package 中放置测试目录</h3></div>
+<p>避免在 <code>site-packages/</code> 下直接安装名为 <code>tests/</code> 的目录（即 <code>/usr/lib/python<i>X</i>.<i>Y</i>/site-packages/tests/</code>），否则可能引发软件包冲突。某些使用 <i>setuptools</i> 的 Python 项目存在错误配置，可能将其测试目录作为顶层 Python 包包含。若发现此类问题，请向项目提交 issue 请求修复，例如<a href="https://github.com/Lightning-AI/lightning/issues/10335">此 issue</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0903e095e9c3_.E7.A6.81.E7.94.A8_pytest_.E9.99.84.E5.8A.A0.E9.80.89.E9.A1.B9" id="禁用_pytest_附加选项"><span id=".E7.A6.81.E7.94.A8_pytest_.E9.99.84.E5.8A.A0.E9.80.89.E9.A1.B9"></span>禁用 pytest 附加选项</h3></div>
+<p>运行 pytest 时，通常应禁用额外插件。特别是代码检查（lint）和覆盖率（coverage）插件在打包场景中可能适得其反，因其行为变更可能导致测试失败。
+</p><p>推荐通过命令行覆盖配置选项（而非修改 pytest 配置文件）来禁用 <code>addopts</code> 等参数，以减少维护成本。要清空所有附加选项，可使用：
+</p>
+<pre>pytest -o addopts=""
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0903e095e9c3_.E4.BF.AE.E5.A4.8D_meson-python_.E7.9A.84.E5.8F.AF.E5.A4.8D.E7.8E.B0.E6.80.A7.E9.97.AE.E9.A2.98" id="修复_meson-python_的可复现性问题"><span id=".E4.BF.AE.E5.A4.8D_meson-python_.E7.9A.84.E5.8F.AF.E5.A4.8D.E7.8E.B0.E6.80.A7.E9.97.AE.E9.A2.98"></span>修复 meson-python 的可复现性问题</h3></div>
+<p>使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=meson-python">meson-python</a></span><sup><small>包</small></sup></span> 作为 PEP 517 构建后端时，其随机生成的构建目录路径会导致<a href="https://github.com/mesonbuild/meson-python/issues/703">可复现性问题</a>。可通过 <code>-Cbuild-dir</code> 参数硬编码构建目录来规避此问题：
+</p>
+<pre>python -m build --wheel --no-isolation -Cbuild-dir=build
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg0903e095e9c3_.E4.BD.BF.E7.94.A8.E5.B7.B2.E5.AE.89.E8.A3.85.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85.E8.BF.90.E8.A1.8C.E6.B5.8B.E8.AF.95" id="使用已安装的软件包运行测试"><span id=".E4.BD.BF.E7.94.A8.E5.B7.B2.E5.AE.89.E8.A3.85.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.8C.85.E8.BF.90.E8.A1.8C.E6.B5.8B.E8.AF.95"></span>使用已安装的软件包运行测试</h3></div>
+<p>有些软件包需要安装后才能正常测试。在这种情况下（例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-narwhals">python-narwhals</a></span><sup><small>包</small></sup></span>），可以将构建的软件包安装到<i>虚拟环境</i>下，并在该环境中运行测试：
+</p>
+<pre>python -m venv --system-site-packages test-env
+test-env/bin/python -m installer dist/*.whl
+test-env/bin/python -P -m pytest
+</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807042509
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.195 seconds
+Real time usage: 0.204 seconds
+Preprocessor visited node count: 808/1000000
+Revision size: 12766/2097152 bytes
+Post‐expand include size: 15603/2097152 bytes
+Template argument size: 7598/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 451/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   54.942      1 -total
+ 16.85%    9.256     66 Template:Ic
+ 15.39%    8.454      6 Template:注意
+ 11.56%    6.351     22 Template:Pkg
+ 10.83%    5.952      2 Template:提示
+  6.14%    3.374      1 Template:翻译状态
+  4.04%    2.221      1 Template:Grp
+  3.55%    1.951      1 Template:Package_guidelines
+  3.38%    1.856      8 Template:Bc
+-->
+<!-- Render ID f9520c8e-9217-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3710:|#|:idhash:canonical!zh-cn and timestamp 20260807042509 and revision id 34726. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

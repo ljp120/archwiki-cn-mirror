@@ -1,0 +1,601 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pga78b1bddc071">ALSA/疑难解答</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Advanced_Linux_Sound_Architecture/Troubleshooting">Advanced Linux Sound Architecture/Troubleshooting</a>，最近一次同步于 2021-09-18，若英文版本有所<a href="https://wiki.archlinux.org/title/Advanced_Linux_Sound_Architecture/Troubleshooting?diff=0&amp;oldid=696282">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Advanced_Linux_Sound_Architecture_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Troubleshooting_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga78b1bddc071_.E9.9F.B3.E9.87.8F" id="音量"><span id=".E9.9F.B3.E9.87.8F"></span>音量</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E6.B2.A1.E6.9C.89.E8.BE.93.E5.87.BA" id="没有输出"><span id=".E6.B2.A1.E6.9C.89.E8.BE.93.E5.87.BA"></span>没有输出</h3></div>
+<p>如果<code>speaker-test</code>能发出声音而一些其他程序却不能，确认是否使用了<a href="#pga942ba974b3d">PulseAudio</a>：
+</p>
+<pre># fuser -v /dev/snd/*
+</pre>
+<p>若是，试试<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/apulse/">apulse</a></span><sup><small>AUR</small></sup></span>，见<a href="#pge3bd6ffc74f5">Advanced Linux Sound Architecture#PulseAudio 兼容性</a>。或者，终止PulseAudio进程可能会让声音在所需的进程中开始工作。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E9.87.8D.E5.90.AF.E5.90.8E.E8.BE.93.E5.87.BA.E8.A2.AB.E9.9D.99.E9.9F.B3" id="重启后输出被静音"><span id=".E9.87.8D.E5.90.AF.E5.90.8E.E8.BE.93.E5.87.BA.E8.A2.AB.E9.9D.99.E9.9F.B3"></span>重启后输出被静音</h3></div>
+<p>运行以下命令：
+</p>
+<pre># alsactl restore
+</pre>
+<p>如果问题持续，请确认<i>alsamixer</i>中的 <code>Auto-Mute</code> 选项已被设为 <code>Disabled</code>（禁用）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E9.9F.B3.E9.87.8F.E8.BF.87.E4.BD.8E" id="音量过低"><span id=".E9.9F.B3.E9.87.8F.E8.BF.87.E4.BD.8E"></span>音量过低</h3></div>
+<p>运行<i>alsamixer</i>，尝试提高滑块的值，必要时解除声道的静音。注意如果滑块很多，可能需要滚动到右侧查看是否有被遗漏的滑块。
+</p><p>如果所有滑块都已被推到最大，但音量仍然过低，可以尝试运行以下<a href="https://git.alsa-project.org/?p=alsa.git;a=blob_plain;f=hda-analyzer/run.py">脚本</a>复位编解码器设置：
+</p>
+<pre>$ wget -O hda-analyzer.py <a href="https://git.alsa-project.org/?p=alsa.git;a=blob_plain;f=hda-analyzer/run.py">https://git.alsa-project.org/?p=alsa.git;a=blob_plain;f=hda-analyzer/run.py</a>
+$ su -c 'python2 hda-analyzer.py' 
+</pre>
+<p>该脚本假定<code>/usr/bin/python</code>指向Python 2，但这不符合Arch的默认设置。为避免此问题，运行以下命令：
+</p>
+<pre>$ sed -i 's/python %s/python2 %s/' hda-analyzer.py
+</pre>
+<p>关闭analyzer，当提示是否要复位编解码器时回答“yes”。
+</p><p>如果音量仍然过低，请再次运行<i>alsamixer</i>：复位编解码器可能会使新的滑块可用，其中一些可能被设定得较低。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E5.A3.B0.E9.9F.B3.E9.9F.B3.E9.87.8F.E4.BD.8E" id="声音音量低"><span id=".E5.A3.B0.E9.9F.B3.E9.9F.B3.E9.87.8F.E4.BD.8E"></span>声音音量低</h3></div>
+<p>如果发现把音箱/耳机开到最大之后音量仍然低，可以试试softvol插件。将以下内容加入<code>/etc/asound.conf</code>。
+</p>
+<pre>pcm.!default {
+    type plug
+    slave.pcm "softvol"
+}
+
+pcm.softvol {
+    type softvol
+    slave {
+        pcm "dmix"
+    }
+    control {
+        name "Pre-Amp"
+        card 0
+    }
+    min_dB -5.0
+    max_dB 20.0
+    resolution 6
+}</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>可能需要重启电脑，因为（原作者）重启alsa后未能加载新配置。另外，如果重启之后上述配置依然不起效，试试将上述配置中的<code>plug</code>换成<code>hw</code>。</div>
+<p>成功载入更改之后，在alsamixer中会看到 <code>Pre-Amp</code> 部分，在此即可调整音量水平。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>对 <code>Pre-Amp</code> 设置较高的值可能导致声音失真，请根据对你来说合适的水平进行调节。</li>
+<li>一些音频编解码器可能需要在HDA分析器中更改设置（见#音量过低）才能达到正确的音量而不失真。Checking the HP option under widget control in the Playback Switch (Node[0x14] PIN in the ALC892 codec, for instance) can sometimes improve audio quality and volume significantly.</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E5.90.AF.E5.8A.A8.E5.90.8E.E9.9A.8F.E6.9C.BA.E5.87.BA.E7.8E.B0.E6.97.A0.E5.A3.B0" id="启动后随机出现无声"><span id=".E5.90.AF.E5.8A.A8.E5.90.8E.E9.9A.8F.E6.9C.BA.E5.87.BA.E7.8E.B0.E6.97.A0.E5.A3.B0"></span>启动后随机出现无声</h3></div>
+<p>运行<code>speaker-test</code>可以快速测试声音。如果没有声音，错误消息可能会像这样：
+</p>
+<pre> ALSA lib pcm_dmix.c:1022:(snd_pcm_dmix_open) unable to open slave
+ Playback open error: -16
+ Device or resource busy
+</pre>
+<p>如果是启动时就没有声音，可能是因为你的系统有多块声卡，它们的顺序在启动时有时可能变化。如果是这种情况，试试<a href="#pge3bd6ffc74f5">设置默认声卡</a>。
+</p><p>如果你使用mpd，而上面的配置提示不起作用，再试试<a href="https://mpd.wikia.com/wiki/Configuration#ALSA_MPD_software_volume_control">这个方法</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga78b1bddc071_.E9.BA.A6.E5.85.8B.E9.A3.8E" id="麦克风"><span id=".E9.BA.A6.E5.85.8B.E9.A3.8E"></span>麦克风</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E6.B2.A1.E6.9C.89.E9.BA.A6.E5.85.8B.E9.A3.8E.E8.BE.93.E5.85.A5" id="没有麦克风输入"><span id=".E6.B2.A1.E6.9C.89.E9.BA.A6.E5.85.8B.E9.A3.8E.E8.BE.93.E5.85.A5"></span>没有麦克风输入</h3></div>
+<p>请在alsamixer中确保recording下的所有音量等级都调了上去，并且已对麦克风（如Mic、Internal Mic）和/或Capture激活CAPTURE（在alsamixer中，选定这些项并按空格）。试试把Mic Boost设为正，并调高Capture和Digital音量等级；这样可能会造成静电噪声或失真，但一旦你在录音时听到有动静，就可以把它们调低回去了。
+</p><p>由于pulseaudio wrapper在alsamixer中显示为“default”，可能需要先按F6选择你的实际声卡。可能也需要在Playback部分中启用并调高Line-in的音量。
+</p><p>使用以下命令来测试麦克风（参考arecord的手册页获取更多信息）：
+</p>
+<pre>$ arecord --duration=5 --format=dat test-mic.wav
+$ aplay test-mic.wav
+</pre>
+<p>或者也可用以下命令：
+</p>
+<pre>$ arecord -vv --format=dat /dev/null
+</pre>
+<p>同时使用alsamixer就可以轻松分辨应当选择哪个声道并解除其静音。
+</p><p>要测试特定设备，使用<code>--device</code>后接<code>hw:<i>C</i>,<i>D</i></code>形式的PCM硬件名称，声卡编号为 <i>C</i> 而设备编号为 <i>D</i>，如果是plug类硬件的话则使用<code>plughw:<i>C</i>,<i>D</i></code>。例如：
+</p>
+<pre>$ arecord -vvv --format=dat --device=plughw:0,0 /dev/null
+</pre>
+<p>如果都不管用，可能需要通过另一设备测试麦克风，以排除硬件故障。
+</p><p>至少对于某些电脑来说，静音麦克风（MM）仅仅意味着其输入并不直接送往音箱。它仍然会接收输入。
+</p><p>很多戴尔笔记本需要在<code>/etc/modprobe.d/modprobe.conf</code>中的model名字后面添加“-dmic”：
+</p>
+<pre>options snd-hda-intel model=dell-m6-dmic
+</pre>
+<p>一些程序尝试将OSS作为主输入软件。如果之前启用了<code>snd_pcm_oss</code>、<code>snd_mixer_oss</code> 或 <code>snd_seq_oss</code> <a href="#pga016157dc9e9">内核模块</a>（默认不会加载它们），尝试卸载（unloading）它们。
+</p><p>另见：
+</p>
+<ul><li><a href="https://www.alsa-project.org/main/index.php/SoundcardTesting">https://www.alsa-project.org/main/index.php/SoundcardTesting</a></li>
+<li><a href="https://alsa.opensrc.org/Record_from_mic">https://alsa.opensrc.org/Record_from_mic</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E8.AE.BE.E7.BD.AE.E9.BB.98.E8.AE.A4.E9.BA.A6.E5.85.8B.E9.A3.8E.2F.E6.8D.95.E8.8E.B7.E8.AE.BE.E5.A4.87" id="设置默认麦克风/捕获设备"><span id=".E8.AE.BE.E7.BD.AE.E9.BB.98.E8.AE.A4.E9.BA.A6.E5.85.8B.E9.A3.8E.2F.E6.8D.95.E8.8E.B7.E8.AE.BE.E5.A4.87"></span>设置默认麦克风/捕获设备</h3></div>
+<p>一些应用（Pidgin、Adobe Flash）并不提供更改捕获设备的选项。如果你的麦克风是在内置声卡之外的单独设备上的话（如USB网络摄像头或麦克风）这就会成为问题。要想只更改默认捕获设备，而让默认回放设备保持原样，可以更改 <code>~/.asoundrc</code> 文件，加入以下内容：
+</p>
+<pre>pcm.usb
+{
+    type hw
+    card U0x46d0x81d
+}
+
+pcm.!default
+{
+    type asym
+    playback.pcm
+    {
+        type plug
+        slave.pcm "dmix"
+    }
+    capture.pcm
+    {
+        type plug
+        slave.pcm "usb"
+    }
+}
+</pre>
+<p>把“U0x46d0x81d”改为你的捕获设备在ALSA中的声卡名字。用<code>arecord -L</code>可以列出ALSA检测到的所有捕获设备。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E5.86.85.E7.BD.AE.E9.BA.A6.E5.85.8B.E9.A3.8E.E4.B8.8D.E5.B7.A5.E4.BD.9C" id="内置麦克风不工作"><span id=".E5.86.85.E7.BD.AE.E9.BA.A6.E5.85.8B.E9.A3.8E.E4.B8.8D.E5.B7.A5.E4.BD.9C"></span>内置麦克风不工作</h3></div>
+<p>首先确保<i>alsamixer</i>中的<code>Capture</code>视图下的音量已经启用。有时“Internal Microphone”不会显示在按F4显示出的捕获列表当中。如果是这样，启动<i>alsamixer</i>时指定 <code>aplay -l</code> 给出的声卡编号（如 <code>alsamixer -c 0</code> ）就有可能让它出现。 
+</p><p>之后将以下内容加入 <code>/etc/modprobe.d/snd-hda-intel.conf</code>：
+</p>
+<pre>options snd-hda-intel enable_msi=1
+</pre>
+<p>然后重新加载模块：
+</p>
+<pre># rmmod snd-hda-intel &amp;&amp; modprobe snd-hda-intel
+</pre>
+<p>现在在前述的<code>Capture</code>视图当中就应该会多出来一路输入了。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E9.BA.A6.E5.85.8B.E9.A3.8E.E6.9C.89.E7.88.86.E8.A3.82.E5.A3.B0" id="麦克风有爆裂声"><span id=".E9.BA.A6.E5.85.8B.E9.A3.8E.E6.9C.89.E7.88.86.E8.A3.82.E5.A3.B0"></span>麦克风有爆裂声</h3></div>
+<p>如果你的麦克风有爆裂或噗噗声，且无法通过ALSA设置或清洁麦克风插头解决，试试在 <code>/etc/modprobe.d/modprobe.conf</code> 中添加以下行：
+</p>
+<pre>options snd-hda-intel model=MODEL position_fix=3
+</pre>
+<p>该选项可以解决纯ALSA的爆裂声，但会对pulseaudio造成问题。要让pulseaudio等同使用这些设置，编辑<code>/etc/pulse/default.pa</code>，找到这一行：
+</p>
+<pre>load-module module-udev-detect
+</pre>
+<p>并将其更改为：
+</p>
+<pre>load-module module-udev-detect tsched=0
+</pre>
+<p>见 <a href="https://docs.kernel.org/sound/hd-audio/notes.html#dma-position-problem">DMA-Position Problem in the kernel docs</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga78b1bddc071_.E9.9F.B3.E9.A2.91.E8.B4.A8.E9.87.8F" id="音频质量"><span id=".E9.9F.B3.E9.A2.91.E8.B4.A8.E9.87.8F"></span>音频质量</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E9.80.9A.E8.BF.87.E8.80.B3.E6.9C.BA.E6.8F.92.E5.AD.94.E6.9C.89.E7.88.86.E8.A3.82.E5.A3.B0" id="通过耳机插孔有爆裂声"><span id=".E9.80.9A.E8.BF.87.E8.80.B3.E6.9C.BA.E6.8F.92.E5.AD.94.E6.9C.89.E7.88.86.E8.A3.82.E5.A3.B0"></span>通过耳机插孔有爆裂声</h3></div>
+<p>无论是遵循了<a href="#pge3bd6ffc74f5">同时输出操作提示</a>或是尝试自己完成，都有可能在耳机或外接音箱中听到爆裂声。通过将<b>Mic</b>项静音或音量设为0%可以解决。使用 <code>alsamixer</code> 或 <code>amixer</code>：
+</p>
+<pre>$ amixer sset "Mic" 0%
+$ amixer sset "Mic" mute
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E4.BB.8E.E6.8C.82.E8.B5.B7.E7.8A.B6.E6.80.81.E6.81.A2.E5.A4.8D.E5.90.8E.E5.90.AC.E5.88.B0.E5.99.97.E5.A3.B0" id="从挂起状态恢复后听到噗声"><span id=".E4.BB.8E.E6.8C.82.E8.B5.B7.E7.8A.B6.E6.80.81.E6.81.A2.E5.A4.8D.E5.90.8E.E5.90.AC.E5.88.B0.E5.99.97.E5.A3.B0"></span>从挂起状态恢复后听到噗声</h3></div>
+<p>在从挂起状态恢复电脑后可能会听到一声噗声。编辑<code>/etc/pm/sleep.d/90alsa</code>，删除<code>aplay -d 1 /dev/zero</code>行即可解决。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E5.9B.9E.E6.94.BE.E6.97.B6.E5.A3.B0.E9.9F.B3.E8.B7.B3.E8.B7.83" id="回放时声音跳跃"><span id=".E5.9B.9E.E6.94.BE.E6.97.B6.E5.A3.B0.E9.9F.B3.E8.B7.B3.E8.B7.83"></span>回放时声音跳跃</h3></div>
+<p>运行<i>alsamixer</i>，如果其中有与不存在的输出设备相对应的声道则禁用它们（例如<i>alsamixer</i>显示了一个实际上并没有的中置音箱）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E9.9F.B3.E8.B4.A8.E5.B7.AE.E6.88.96.E5.8D.A1.E9.A1.BF" id="音质差或卡顿"><span id=".E9.9F.B3.E8.B4.A8.E5.B7.AE.E6.88.96.E5.8D.A1.E9.A1.BF"></span>音质差或卡顿</h3></div>
+<p>如果发现音质特别差，试试在 alsamixer 中调节 PCM 音量到增益（gain）为0的水平。
+</p><p>若使用 snd-usb-audio 驱动，可以试试在 <code>/etc/asound.conf</code> 中启用 <code>softvol</code>。下面是针对第一个声音设备的配置范例：
+</p>
+<pre>pcm.!default {
+    type plug
+    slave.pcm "softvol"
+}
+pcm.dmixer {
+    type dmix
+    ipc_key 1024
+    slave {
+        pcm "hw:0"
+        period_size 4096
+        buffer_size 131072
+        rate 50000
+    }
+    bindings {
+        0 0
+        1 1
+    }
+}
+pcm.dsnooper {
+    type dsnoop
+    ipc_key 1024
+    slave {
+        pcm "hw:0"
+        channels 2
+        period_size 4096
+        buffer_size 131072
+        rate 50000
+    }
+    bindings {
+        0 0
+        1 1
+        }
+}
+pcm.softvol {
+  type softvol
+  slave { pcm "dmixer" }
+  control {
+    name "Master"
+    card 0
+  }
+}
+ctl.!default {
+  type hw
+  card 0
+}
+ctl.softvol {
+  type hw
+  card 0
+}
+ctl.dmixer {
+  type hw
+  card 0
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E5.BC.80.E5.A7.8B.E6.88.96.E5.81.9C.E6.AD.A2.E9.9F.B3.E9.A2.91.E6.92.AD.E6.94.BE.E6.97.B6.E5.87.BA.E7.8E.B0.E5.99.AA.E9.9F.B3" id="开始或停止音频播放时出现噪音"><span id=".E5.BC.80.E5.A7.8B.E6.88.96.E5.81.9C.E6.AD.A2.E9.9F.B3.E9.A2.91.E6.92.AD.E6.94.BE.E6.97.B6.E5.87.BA.E7.8E.B0.E5.99.AA.E9.9F.B3"></span>开始或停止音频播放时出现噪音</h3></div>
+<p>某些驱动模块（如  <code>snd_ac97_codec</code> 和 <code>snd_hda_intel</code>）会在声卡闲置时关闭它以节约用电。声卡启动或关闭时，就会发出刺耳的噪音。甚至在调节音量或开关窗口（KDE4）时也可能发生这种情况。如果你觉得烦的话，试试用 <code>modinfo <i>your_module</i></code> 寻找调整或禁用此功能的模块选项。
+</p><p>例如，要禁用 <code>snd_hda_intel</code> 模块的节电模式，向 <code>/etc/modprobe.d/modprobe.conf</code>添加：
+</p>
+<pre>options snd_hda_intel power_save=0
+</pre>
+<p>也可能需要对于声卡控制器禁用节电：
+</p>
+<pre>options snd_hda_intel power_save=0 power_save_controller=N
+</pre>
+<p>也可以使用 <code>modprobe snd_hda_intel power_save=0</code> 等为<a href="#pga016157dc9e9">内核模块</a>设置参数。
+</p><p>也可能需要解除ALSA“Line”通道的静音才能奏效。任何值都可以（只要不是0或者过高的话）。例如对于板载VIA VT1708S（使用<code>snd_hda_intel</code>模块），即使将 <code>power_save</code> 设为0也会发出爆裂声。解除“Line”通道的静音并设置音量值为1即可解决问题。
+</p><p>来源： <a href="https://docs.kernel.org/sound/designs/powersave.html">https://docs.kernel.org/sound/designs/powersave.html</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E4.BD.BF.E7.94.A8CPU.E9.A2.91.E7.8E.87.E5.8A.A8.E6.80.81.E8.B0.83.E6.95.B4.E6.97.B6.E5.A3.B0.E9.9F.B3.E5.8F.91.E7.94.9F.E8.B7.B3.E8.B7.83" id="使用CPU频率动态调整时声音发生跳跃"><span id=".E4.BD.BF.E7.94.A8CPU.E9.A2.91.E7.8E.87.E5.8A.A8.E6.80.81.E8.B0.83.E6.95.B4.E6.97.B6.E5.A3.B0.E9.9F.B3.E5.8F.91.E7.94.9F.E8.B7.B3.E8.B7.83"></span>使用CPU频率动态调整时声音发生跳跃</h3></div>
+<p>使用 <code>ondemand</code> 或 <code>conservative</code> 频率策略、启用CPU频率动态调整时，某些声卡和 ALSA 驱动的组合会导致来自所有来源的声音出现跳跃。目前的解决方案是用回 <code>performance</code> 策略。
+</p><p>更多信息见 <a href="#pg863f270f94d0">CPU frequency scaling</a> 。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga78b1bddc071_.E7.A1.AC.E4.BB.B6.E4.B8.8E.E5.A3.B0.E5.8D.A1" id="硬件与声卡"><span id=".E7.A1.AC.E4.BB.B6.E4.B8.8E.E5.A3.B0.E5.8D.A1"></span>硬件与声卡</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E9.AA.8C.E8.AF.81.E8.BE.93.E5.87.BA.E5.8F.82.E6.95.B0" id="验证输出参数"><span id=".E9.AA.8C.E8.AF.81.E8.BE.93.E5.87.BA.E5.8F.82.E6.95.B0"></span>验证输出参数</h3></div>
+<p>检查 <code>/proc/asound/cardX/pcmYp/subZ/hw_params</code> 的内容，其中 <code>X</code>、 <code>Y</code>和<code>Z</code>与系统有关。
+要找到该文件，请在通过ALSA进行输出的同时执行以下命令：
+</p>
+<pre>$ find /proc/asound/ -name hw_params | xargs -I FILE grep -v -l "closed" FILE | grep '/proc/asound/card./pcm.p/sub./hw_params'
+</pre>
+<p>如果没有任何播放，应该不会有结果。
+</p><p>以下示例输出是对于一段<a href="https://en.wikipedia.org/wiki/Audio_bit_depth">位深度</a>24位，<a href="https://en.wikipedia.org/wiki/Sampling_frequency">采样频率</a>44.1 kHz的音频：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">cat /proc/asound/card1/pcm0p/sub0/hw_params</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">access: RW_INTERLEAVED
+format: S24_3LE
+subformat: STD
+channels: 2
+rate: 44100 (44100/1)
+period_size: 5513
+buffer_size: 22050
+</pre>
+<p>更多信息见 <a href="https://alsa.opensrc.org/Proc_asound_documentation">ALSA文档</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E5.86.85.E6.A0.B8.E5.8D.87.E7.BA.A7.E5.90.8E.E5.87.BA.E7.8E.B0.E2.80.9CUnknown_hardware.E2.80.9D.E9.94.99.E8.AF.AF" id="内核升级后出现“Unknown_hardware”错误"><span id=".E5.86.85.E6.A0.B8.E5.8D.87.E7.BA.A7.E5.90.8E.E5.87.BA.E7.8E.B0.E2.80.9CUnknown_hardware.E2.80.9D.E9.94.99.E8.AF.AF"></span>内核升级后出现“Unknown hardware”错误</h3></div>
+<p>在初始化ALSA的过程中有可能会输出下面的错误信息：
+</p>
+<pre>Unknown hardware "foo" "bar" ...
+Hardware is initialized using a guess method
+/usr/bin/alsactl: set_control:nnnn:failed to obtain info for control #mm (No such file or directory)
+</pre>
+<p>或者：
+</p>
+<pre>Found hardware: "HDA-Intel" "VIA VT1705" "HDA:11064397,18490397,00100000" "0x1849" "0x0397"
+Hardware is initialized using a generic method
+/usr/bin/alsactl: set_control:1328: failed to obtain info for control #1 (No such file or directory)
+/usr/bin/alsactl: set_control:1328: failed to obtain info for control #2 (No such file or directory)
+/usr/bin/alsactl: set_control:1328: failed to obtain info for control #25 (No such file or directory)
+/usr/bin/alsactl: set_control:1328: failed to obtain info for control #26 (No such file or directory)
+</pre>
+<p>只需重新保存ALSA混音器设定：
+</p>
+<pre># alsactl -f /var/lib/alsa/asound.state store
+</pre>
+<p>可能需要用alsamixer重新配置ALSA。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E4.BF.AE.E5.A4.8D.E9.94.99.E8.AF.AF.E7.9A.84.E9.9F.B3.E9.A2.91.E6.8F.92.E5.AD.94.E6.98.A0.E5.B0.84" id="修复错误的音频插孔映射"><span id=".E4.BF.AE.E5.A4.8D.E9.94.99.E8.AF.AF.E7.9A.84.E9.9F.B3.E9.A2.91.E6.8F.92.E5.AD.94.E6.98.A0.E5.B0.84"></span>修复错误的音频插孔映射</h3></div>
+<p>如果你的音频插孔（插头）映射不正确，但ALSA工作正常，可以试试HDA Analyzer，一个用于HD-audio控制的pyGTK2 GUI，见<a href="https://www.alsa-project.org/main/index.php/HDA_Analyzer">ALSA wiki</a>。
+尝试调整 PIN 节点的 Widget Control 部分，让麦克风为 IN 而耳机插孔为 OUT。 Referring to the Config Defaults heading is a good idea.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此脚本不兼容Python 3（Arch Linux的默认Python实现）。要使用该脚本，将<code>run.py</code>中出现的<code>python</code>全部替换为<code>python2</code>，从而将脚本指向Python 2版本。之后把脚本设为<a href="#pgd868aa8d1162">可执行</a>并运行。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_S.2FPDIF.E8.BE.93.E5.87.BA.E4.B8.8D.E5.B7.A5.E4.BD.9C" id="S/PDIF输出不工作"><span id="S.2FPDIF.E8.BE.93.E5.87.BA.E4.B8.8D.E5.B7.A5.E4.BD.9C"></span>S/PDIF输出不工作</h3></div>
+<p>若主板/声卡的同轴/光纤数字输出不工作或停止工作，且已经在alsamixer启用之并解除静音，尝试运行：
+</p>
+<pre>$ iecset audio on
+</pre>
+<p>由于这样有时在重启后可能又会停止工作，也可以将其写成<a href="#pgac06dd8bfe95">systemd</a>服务并启用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E4.B8.8EPC.E5.96.87.E5.8F.AD.E5.86.B2.E7.AA.81" id="与PC喇叭冲突"><span id=".E4.B8.8EPC.E5.96.87.E5.8F.AD.E5.86.B2.E7.AA.81"></span>与PC喇叭冲突</h3></div>
+<p>如果你确认所有声道都已解除静音，声卡驱动配置正确，且音量大小也合适，但还是听不到声音，那么请试试将下面的内容添加到<code>/etc/modprobe.d/modprobe.conf</code>：
+</p>
+<pre>options snd-NAME-OF-MODULE ac97_quirk=0
+</pre>
+<p>以上修补据观察可用于 <code>via82xx</code>
+</p>
+<pre>options snd-NAME-OF-MODULE ac97_quirk=1
+</pre>
+<p>以上修补据报告可用于 <code>snd-intel8x0</code>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_HP_TX2500" id="HP_TX2500">HP TX2500</h3></div>
+<p>添加以下2 行到 <code>/etc/modprobe.d/modprobe.conf</code>：
+</p>
+<pre>options snd-cmipci mpu_port=0x330 fm_port=0x388
+options snd-hda-intel index=0 model=toshiba position_fix=1
+options snd-hda-intel model=hp (works for tx2000cto)
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E5.BD.93_S.2FPDIF_.E6.98.BE.E5.8D.A1.E5.AE.89.E8.A3.85.E4.B8.8A.E6.97.B6.E6.97.A0.E5.A3.B0" id="当_S/PDIF_显卡安装上时无声"><span id=".E5.BD.93_S.2FPDIF_.E6.98.BE.E5.8D.A1.E5.AE.89.E8.A3.85.E4.B8.8A.E6.97.B6.E6.97.A0.E5.A3.B0"></span>当 S/PDIF 显卡安装上时无声</h3></div>
+<p>查询可用的模块及其次序：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /proc/asound/modules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"> 0 snd_hda_intel
+ 1 snd_ca0106
+</pre>
+<p>在<code>/etc/modprobe.d/modprobe.conf</code>中禁用不想要的显卡音频编解码器：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/modprobe.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">install snd_hda_intel /bin/false
+</pre>
+<p>如果两个设备使用同一模块，可使用snd_hda_intel模块的<code>enable</code>参数；它是一个布尔数组，可以启用/禁用所希望的显卡。
+</p>
+<pre>options snd_hda_intel enable=1,0
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E9.94.99.E8.AF.AF.E7.9A.84.E5.A3.B0.E5.8D.A1model.E7.B1.BB.E5.9E.8B" id="错误的声卡model类型"><span id=".E9.94.99.E8.AF.AF.E7.9A.84.E5.A3.B0.E5.8D.A1model.E7.B1.BB.E5.9E.8B"></span>错误的声卡model类型</h3></div>
+<p>尽管ALSA通过BIOS检测声卡，有时候ALSA可能无法识别你的<a href="https://docs.kernel.org/sound/hd-audio/models.html">model类型</a>。声卡芯片可以在<code>alsamixer</code>中找到（如ALC662），model可以在 <code>/etc/modprobe.d/modprobe.conf</code> 或 <code>/etc/modprobe.d/sound.conf</code>中设置。例如：
+</p>
+<pre>options snd-hda-intel model=MODEL
+</pre>
+<p>也有其他的model设置。大部分情况下ALSA默认的就可以了。如果想要查询更加针对于你声卡的设置，访问<a href="https://bugtrack.alsa-project.org/main/index.php/Matrix:Main">ALSA声卡列表</a>，查找你的型号，点击Details，然后阅读“Setting up modprobe...”部分。将这些值输入<code>/etc/modprobe.d/modprobe.conf</code>。例如对于英特尔AC97声卡：
+</p>
+<pre># ALSA portion
+alias char-major-116 snd
+alias snd-card-0 snd-intel8x0
+# module options should go here
+
+# OSS/Free portion
+alias char-major-14 soundcore
+alias sound-slot-0 snd-card-0
+
+# card #1
+alias sound-service-0-0 snd-mixer-oss
+alias sound-service-0-1 snd-seq-oss
+alias sound-service-0-3 snd-pcm-oss
+alias sound-service-0-8 snd-seq-oss
+alias sound-service-0-12 snd-pcm-oss
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E8.8B.B1.E7.89.B9.E5.B0.94.E6.9D.BF.E8.BD.BD.E5.A3.B0.E5.8D.A1" id="英特尔板载声卡"><span id=".E8.8B.B1.E7.89.B9.E5.B0.94.E6.9D.BF.E8.BD.BD.E5.A3.B0.E5.8D.A1"></span>英特尔板载声卡</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga78b1bddc071_.E8.8B.B1.E7.89.B9.E5.B0.94.E6.9D.BF.E8.BD.BD.E5.A3.B0.E5.8D.A1.E6.97.A0.E5.A3.B0" id="英特尔板载声卡无声"><span id=".E8.8B.B1.E7.89.B9.E5.B0.94.E6.9D.BF.E8.BD.BD.E5.A3.B0.E5.8D.A1.E6.97.A0.E5.A3.B0"></span>英特尔板载声卡无声</h4></div>
+<p>问题可能是由加载了两个相冲突的模块导致的，具体是 <code>snd-intel8x0</code> 和 <code>snd-intel8x0m</code>。这种情况下屏蔽掉 <code>snd-intel8x0m</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/modprobe.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">blacklist snd-intel8x0m</pre>
+<p>在<code>alsamixer</code> 或 <code>amixer</code>中<i>静音</i>“External Amplifier” 也可能有效。见 <a href="https://alsa.opensrc.org/Intel8x0#Dell_Inspiron_8600_.28and_probably_others.29">ALSA wiki</a>。
+</p><p>在mixer中解除“Mix”设置的静音也有可能有帮助。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga78b1bddc071_.E8.8B.B1.E7.89.B9.E5.B0.94.E6.9D.BF.E8.BD.BD.E5.A3.B0.E5.8D.A1.E8.80.B3.E6.9C.BA.E6.97.A0.E5.A3.B0" id="英特尔板载声卡耳机无声"><span id=".E8.8B.B1.E7.89.B9.E5.B0.94.E6.9D.BF.E8.BD.BD.E5.A3.B0.E5.8D.A1.E8.80.B3.E6.9C.BA.E6.97.A0.E5.A3.B0"></span>英特尔板载声卡耳机无声</h4></div>
+<p>如果是使用 <b>Intel Corporation 82801 I (ICH9 Family) HD Audio Controller</b> 的笔记本，可能需要将该行加入 modprobe 或 sound.conf：
+</p>
+<pre>options snd-hda-intel model=<i>model</i>
+</pre>
+<p>其中 <i>model</i> 为下列之中的一个：
+</p>
+<ul><li>dell-m6</li>
+<li>dell-vostro</li>
+<li>generic</li>
+<li>laptop</li>
+<li>laptop-hpsense</li>
+<li>olpc-xo-1_5</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>可能需要将此“options”行置于对应于您的声卡的“alias”行之后。</div>
+<p>可以在内核文档中看到所有可用的 model，如 <a href="https://docs.kernel.org/sound/hd-audio/models.html">https://docs.kernel.org/sound/hd-audio/models.html</a> ，但请确认它是对应于您的内核版本的正确文档版本。
+</p><p>可用 model 列表也见于<a href="https://www.mjmwired.net/kernel/Documentation/sound/alsa/HD-Audio-Models.txt">这里</a>。使用以下命令即可获知声卡芯片名称（其中的*应当改为符合您的相应文件的值）。注意有些芯片可能已经更名，不能直接对应于该文件中的条目。
+</p>
+<pre>$ grep Codec /proc/asound/card*/codec*
+</pre>
+<p>注意如果进行此操作，则有很大可能所有输入设备（内置及外置麦克风）都不能工作，所以要么就用耳机，要么用麦克风。如果受到此bug影响，请将其报告给ALSA。
+</p><p>另外，如果蜂鸣器（pcspkr）出现问题：
+</p>
+<pre>options snd-hda-intel model=$model enable=1 index=0
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_HDMI" id="HDMI">HDMI</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga78b1bddc071_HDMI_.E8.BE.93.E5.87.BA.E4.B8.8D.E5.B7.A5.E4.BD.9C" id="HDMI_输出不工作"><span id="HDMI_.E8.BE.93.E5.87.BA.E4.B8.8D.E5.B7.A5.E4.BD.9C"></span>HDMI 输出不工作</h4></div>
+<p>以下流程可以用来测试 HDMI 音频。继续之前请确认已经通过 <code>alsamixer</code> 启用输出并解除其静音。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果是使用 AMD 显卡，则有一个必要的内核模块默认被禁用了。详见 <a href="#pgedfe18626036">ATI#HDMI 音频输出</a><sup>[<a href="#pgafcb8f89d795">损坏的链接</a>：无效的章节]</sup>。</div>
+<p>使用 HDMI 电缆连接 PC 与显示器，并使用 <a href="#pgaa98d1ed067b">xrandr</a> 启用显示器。
+</p><p>用 <code>aplay -l</code> 检测声卡与设备编号。例如：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ aplay -l</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">**** List of PLAYBACK Hardware Devices ****
+card 0: SB [HDA ATI SB], device 0: ALC892 Analog [ALC892 Analog]
+  Subdevices: 1/1
+  Subdevice #0: subdevice #0
+card 0: SB [HDA ATI SB], device 1: ALC892 Digital [ALC892 Digital]
+  Subdevices: 1/1
+  Subdevice #0: subdevice #0
+<b>card 1</b>: Generic [HD-Audio Generic], <b>device 3</b>: HDMI 0 [HDMI 0]
+  Subdevices: 1/1
+  Subdevice #0: subdevice #0</pre>
+<p>向设备发送音频。按照上面步骤的例子，将音频发送到 <code><b>card 1</b></code>， <code><b>device 3</b></code>：
+</p>
+<pre>$ aplay -D plughw:1,3 /usr/share/sounds/alsa/Front_Center.wav
+</pre>
+<p>若 aplay 没有任何报错，但还是听不到声音，“重启”功放、显示器或电视机。由于 HDMI 接口在连接时会进行握手，它在之前可能会发现没有音频流嵌入，于是禁用音频解码。如果使用独立的窗口管理器，可能需要在声音正在播放时插入 HDMI 电缆。
+</p><p>mplay 及其他应用可以配置为使用特别的 HDMI 设备作为音频输出。但 flashplugin 只能使用默认设备。以下方法可以覆盖默认设备，但在从 HDMI 接口断开电视的时候就需要改回去。
+</p><p>若测试成功，创建或编辑 <code>~/.asoundrc</code> 文件，以将 HDMI 设为默认音频设备。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.asoundrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">pcm.!default {
+    type hw
+    card 1
+    device 3
+}
+</pre>
+<p>或者如果以上配置不奏效，请尝试：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.asoundrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">defaults.pcm.card 1
+defaults.pcm.device 3
+defaults.ctl.card 1
+</pre>
+<p>或者如果使用
+</p>
+<pre>$ speaker-test -Dplug:hdmi
+</pre>
+<p>在 HDMI 或 DisplayPort 上测试成功，可以使用以下配置（在联想 ThinkPad T430s 上测试成功）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.asoundrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">pcm.!default {
+    type plug
+    slave.pcm "hdmi"
+}
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pga78b1bddc071_HDMI_5.1_.E5.A3.B0.E9.9F.B3.E5.8F.91.E9.80.81.E5.88.B0.E4.BA.86.E9.94.99.E8.AF.AF.E7.9A.84.E6.89.AC.E5.A3.B0.E5.99.A8" id="HDMI_5.1_声音发送到了错误的扬声器"><span id="HDMI_5.1_.E5.A3.B0.E9.9F.B3.E5.8F.91.E9.80.81.E5.88.B0.E4.BA.86.E9.94.99.E8.AF.AF.E7.9A.84.E6.89.AC.E5.A3.B0.E5.99.A8"></span>HDMI 5.1 声音发送到了错误的扬声器</h4></div>
+<p>可通过 ALSA 的 <code>remap</code> 功能将声音重定向到想要的扬声器。为此，将以下内容加入 <code>/etc/asound.conf</code>：
+</p>
+<pre>pcm.!hdmi-remap {
+    type asym
+    playback.pcm {
+        type plug
+        slave.pcm "remap-surround51"
+    }
+}
+
+pcm.!remap-surround51 {
+    type route
+    slave.pcm "hw:0,3"
+    ttable {
+        0.0= 1
+        1.1= 1
+        2.4= 1
+        3.5= 1
+        4.2= 1
+        5.3= 1
+    }
+}</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga78b1bddc071_.E5.BA.94.E7.94.A8" id="应用"><span id=".E5.BA.94.E7.94.A8"></span>应用</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_SDL.EF.BC.9ASDL_.E5.BA.94.E7.94.A8.E6.B2.A1.E6.9C.89.E5.A3.B0.E9.9F.B3" id="SDL：SDL_应用没有声音"><span id="SDL.EF.BC.9ASDL_.E5.BA.94.E7.94.A8.E6.B2.A1.E6.9C.89.E5.A3.B0.E9.9F.B3"></span>SDL：SDL 应用没有声音</h3></div>
+<p>如果在使用基于 SDL 的应用时听不到声音，尝试设置<a href="#pge575f3f9cef9">环境变量</a> <code>SDL_AUDIODRIVER</code> 为 <code>alsa</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_OpenAL.EF.BC.9A.E4.BD.BF.E7.94.A8_OpenAL_.E7.9A.84.E5.BA.94.E7.94.A8.E6.B2.A1.E6.9C.89.E5.A3.B0.E9.9F.B3" id="OpenAL：使用_OpenAL_的应用没有声音"><span id="OpenAL.EF.BC.9A.E4.BD.BF.E7.94.A8_OpenAL_.E7.9A.84.E5.BA.94.E7.94.A8.E6.B2.A1.E6.9C.89.E5.A3.B0.E9.9F.B3"></span>OpenAL：使用 OpenAL 的应用没有声音</h3></div>
+<p>Openal 默认使用 pulseaudio，要更改次序，将以下配置加入 <code>/etc/openal/alsoft.conf</code>：
+</p>
+<pre>drivers=alsa,pulse</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_VirtualBox.EF.BC.9A.E8.99.9A.E6.8B.9F.E6.9C.BA.E6.B2.A1.E6.9C.89.E5.A3.B0.E9.9F.B3" id="VirtualBox：虚拟机没有声音"><span id="VirtualBox.EF.BC.9A.E8.99.9A.E6.8B.9F.E6.9C.BA.E6.B2.A1.E6.9C.89.E5.A3.B0.E9.9F.B3"></span>VirtualBox：虚拟机没有声音</h3></div>
+<p>如果你在使用VirtualBox的时候出现问题，尝试以下命令：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ alsactl init</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Found hardware: "ICH" "SigmaTel STAC9700,83,84" "AC97a:83847600" "0x8086" "0x0000"
+Hardware is initialized using a generic method</pre>
+<p>同时你需要在你的音频软件中激活ALSA输出。也可以尝试在虚拟机设置中选择不同的声音设备，从而找到能够工作的。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E5.85.B6.E4.BB.96.EF.BC.9A.E4.B8.80.E8.88.AC.E6.80.A7.E5.BA.94.E7.94.A8.E9.97.AE.E9.A2.98" id="其他：一般性应用问题"><span id=".E5.85.B6.E4.BB.96.EF.BC.9A.E4.B8.80.E8.88.AC.E6.80.A7.E5.BA.94.E7.94.A8.E9.97.AE.E9.A2.98"></span>其他：一般性应用问题</h3></div>
+<p>对于其它坚持采用其自身音频设置的应用，如 XMMS 或 MPlayer，需要设置其特定选项。
+</p><p>对于 <a href="#pgb6ea2b1dfebb">MPlayer</a> 或 <a href="#pg110f55dc83f2">mpv</a>，将以下行加入相应的配置文件：
+</p>
+<pre>ao=alsa
+</pre>
+<p>如对于 XMMS2，进入其选项并确保声音驱动设为 ALSA 而非 oss。
+</p><p>要在 XMMS 中进行此操作：
+</p>
+<ul><li>打开 XMMS
+<ul><li>Options &gt; Preferences.</li>
+<li>选择 ALSA 输出插件。</li></ul></li></ul>
+<p>对于不提供 ALSA 输出的应用，可以使用来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=alsa-oss">alsa-oss</a></span><sup><small>包</small></sup></span> 软件包的 aoss。要使用 aoss，请在运行程序时加上 <code>aoss</code> 前缀，例如：
+</p>
+<pre>aoss realplay
+</pre>
+<p>pcm.!default{ ... }  对于我（原作者）来说不管用了。下面这些还可以用：
+</p>
+<pre>pcm.default pcm.dmixer
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pga78b1bddc071_.E5.85.B6.E4.BB.96.E9.97.AE.E9.A2.98" id="其他问题"><span id=".E5.85.B6.E4.BB.96.E9.97.AE.E9.A2.98"></span>其他问题</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E5.90.8C.E6.97.B6.E6.92.AD.E6.94.BE.E6.97.B6.E5.87.BA.E7.8E.B0.E9.97.AE.E9.A2.98" id="同时播放时出现问题"><span id=".E5.90.8C.E6.97.B6.E6.92.AD.E6.94.BE.E6.97.B6.E5.87.BA.E7.8E.B0.E9.97.AE.E9.A2.98"></span>同时播放时出现问题</h3></div>
+<p>如果您在同时播放时遇到问题，且安装了 <a href="#pga942ba974b3d">PulseAudio</a> ，则其默认配置是“独占”声卡。一些 ALSA 用户可能对自己的配置已经很满意，不希望使用 PulseAudio。 解决方案是编辑 <code>/etc/asound.conf</code> 并注释掉以下内容：
+</p>
+<pre># Use PulseAudio by default
+pcm.!default {
+    type pulse
+    fallback "sysdefault"
+    hint {
+        show on
+        description "Default ALSA Output (currently PulseAudio Sound Server)"
+    }
+}</pre>
+<p>注释掉以下内容可能也有帮助：
+</p>
+<pre>ctl.!default {
+    type pulse
+    fallback "sysdefault"
+}</pre>
+<p>比起完全卸载 PulseAudio，这大概是个更简单的方法。
+</p><p>相应地，以下是一个可用的 /etc/asound.conf 的示例：
+</p>
+<pre>pcm.dmixer {
+    type dmix
+    ipc_key 1024
+    ipc_key_add_uid 0
+    ipc_perm 0660
+}
+pcm.dsp {
+    type plug
+    slave.pcm "dmix"
+}</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>此 <code>/etc/asound.conf</code> 本来是配合 <a href="#pg1c26b1ba043d">MPD</a> 全局配置使用的，在该情况下工作正常。见 #同一时间只有一个用户可以使用。</div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>或者，如果<b>没有</b>安装 PulseAudio，只是想在原版 ALSA 下使用 <code>dmix</code> 的话，见 <a href="https://www.alsa-project.org/main/index.php/Asoundrc#dmix">上游文档</a>。特别地，可能需要将上述配置中的 <code>dsp</code> 换成 <code>!default</code>。另外，如果察觉到该操作导致某些应用在播放时出现跳跃（声音听起来不流畅）， and complain about underrun occurring, 可能需要在 <code>pcm.dmixer</code> 中调整 <code>slave.buffer_size</code>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E5.88.A0.E9.99.A4.E6.97.A7.E7.9A.84_ALSA_.E7.8A.B6.E6.80.81.E6.96.87.E4.BB.B6" id="删除旧的_ALSA_状态文件"><span id=".E5.88.A0.E9.99.A4.E6.97.A7.E7.9A.84_ALSA_.E7.8A.B6.E6.80.81.E6.96.87.E4.BB.B6"></span>删除旧的 ALSA 状态文件</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=alsa-utils">alsa-utils</a></span><sup><small>包</small></sup></span> 软件包提供了 <code>alsa-store.service</code> ，在系统关机时会自动将当前 ALSA 状态保存到 <code>/var/lib/alsa/asound.state</code>。对于尝试重置当前 ALSA 状态的用户来说这可能会带来问题，因为每次关机时都会以当前状态重新创建 <code>asound.state</code> 文件（如试图从混音器移除用户定义的通道时）。通过创建以下空文件，可暂时禁用 <code>alsa-store.service</code> 服务：
+</p>
+<pre># mkdir -p /etc/alsa
+# touch /etc/alsa/state-daemon.conf
+</pre>
+<p><code>state-daemon.conf</code> 的存在会阻止 <code>alsa-store.service</code> 在关机时保存 <code>asound.state</code>。禁用该服务后，可以这样删除 <code>asound.state</code> 文件：
+</p>
+<pre># rm /var/lib/alsa/asound.state
+</pre>
+<p>重启之后，之前的 ALSA 状态应该会丢失，当前状态应该会重置到默认值。删除我们创建的条件文件来重新启用 <code>alsa-store.service</code>：
+</p>
+<pre># rm /etc/alsa/state-daemon.conf
+</pre>
+<p>下次关机时应该就会以 ALSA 默认值重新创建 <code>asound.state</code> 文件。也可以用此命令立即生成该文件：
+</p>
+<pre># alsactl store
+</pre>
+<p>如果想要清除 ALSA 状态而不重启，可使用 <code>rmmod</code> 移除声音驱动模块，然后手动删除 <code>asound.state</code> 中不想要的条目，然后用 <code>modprobe</code> 重新安装声音驱动模块。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E5.90.8C.E4.B8.80.E6.97.B6.E9.97.B4.E5.8F.AA.E6.9C.89.E4.B8.80.E4.B8.AA.E7.94.A8.E6.88.B7.E5.8F.AF.E4.BB.A5.E4.BD.BF.E7.94.A8" id="同一时间只有一个用户可以使用"><span id=".E5.90.8C.E4.B8.80.E6.97.B6.E9.97.B4.E5.8F.AA.E6.9C.89.E4.B8.80.E4.B8.AA.E7.94.A8.E6.88.B7.E5.8F.AF.E4.BB.A5.E4.BD.BF.E7.94.A8"></span>同一时间只有一个用户可以使用</h3></div>
+<p>你可能会发现同一时间只有一个用户可以使用 dmixer。对于大多数情况这样也许可以，但对于以单独用户运行 <a href="#pg1c26b1ba043d">mpd</a> 的人来说就会造成问题。当 mpd 正在播放，普通用户就不能通过 dmixer 播放声音。尽管确实可以在用户的登录账户下运行 mpd，也有另一个解决方案被发现出来。将 <code>ipc_key_add_uid 0</code> 行加入 <code>pcm.dmixer</code> 块就可以解除这一锁定。以下是来自 <code>asound.conf</code> 的一个片段，其余部分与上述相同。
+</p>
+<pre>...
+pcm.dmixer {
+    type dmix
+    ipc_key 1024
+    ipc_key_add_uid 0
+    ipc_perm 0660
+slave {
+ ...</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pga78b1bddc071_.E6.88.B4.E5.B0.94.E7.AC.94.E8.AE.B0.E6.9C.AC.E4.B8.8A.E5.87.BA.E7.8E.B0.E7.88.86.E8.A3.82.E6.88.96.E5.99.97.E5.99.97.E5.A3.B0" id="戴尔笔记本上出现爆裂或噗噗声"><span id=".E6.88.B4.E5.B0.94.E7.AC.94.E8.AE.B0.E6.9C.AC.E4.B8.8A.E5.87.BA.E7.8E.B0.E7.88.86.E8.A3.82.E6.88.96.E5.99.97.E5.99.97.E5.A3.B0"></span>戴尔笔记本上出现爆裂或噗噗声</h3></div>
+<p>检查是否安装了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/i8kutils/">i8kutils</a></span><sup><small>AUR</small></sup></span> ，是否有程序（如 <code>i8kmon.service</code>）在读写该模块提供的接口，因为 i8kutils BIOS 系统调用在一些系统上会短时阻塞内核运行。详见 <a href="#pg8a01229126d3">Fan speed control#Dell laptops</a> 中的警告。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807191305
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.230 seconds
+Real time usage: 0.236 seconds
+Preprocessor visited node count: 1098/1000000
+Revision size: 26240/2097152 bytes
+Post‐expand include size: 12940/2097152 bytes
+Template argument size: 7090/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 2/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   61.636      1 -total
+ 20.02%   12.341    100 Template:Ic
+ 14.02%    8.640      7 Template:注意
+  6.03%    3.716      1 Template:翻译状态
+  4.03%    2.485      9 Template:Hc
+  4.00%    2.467      2 Template:Pkg
+  3.90%    2.406      1 Template:Broken_section_link
+  3.51%    2.166     10 Template:Bc
+  2.10%    1.297      2 Template:AUR
+-->
+<!-- Render ID 044a828e-9294-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2719:|#|:idhash:canonical!zh-cn and timestamp 20260807191305 and revision id 33565. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

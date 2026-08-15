@@ -1,0 +1,278 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg80f72e0236ed">固态硬盘/存储单元擦除</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><br/>
+</p>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Solid_state_drive/Memory_cell_clearing">Solid state drive/Memory cell clearing</a>，最近一次同步于 2025-08-09，若英文版本有所<a href="https://wiki.archlinux.org/title/Solid_state_drive/Memory_cell_clearing?diff=0&amp;oldid=826129">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Solid_state_drive_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Memory_cell_clearing_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgcb28ba980ed7">固态硬盘</a></li>
+<li><a href="#pg8e3f3779e38c">安全地擦除磁盘</a></li>
+</ul></div>
+<p>有时，可能希望将固态硬盘完全重置到其出厂时的“干净”状态，这可以将<a href="https://www.anandtech.com/storage/showdoc.aspx?i=3531&amp;p=8">其写入性能恢复到出厂时的水平</a>。即使固态硬盘原生支持TRIM，写入性能也会随着时间的推移而下降，这是由于 TRIM 仅在文件删除时起作用，而对文件替换（例如增量保存）无效。
+</p><p>注意，执行安全擦除不能重置固态硬盘单元的损耗状态。在安全擦除后，一个接近使用寿命的硬盘在短时间内<b>可能</b>可再次写入，但在不久之后仍会失效。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>继续操作前请备份所有重要数据！<b>此过程将销毁固态硬盘上的所有数据</b>，即使专业数据恢复服务提供商也无法恢复数据！完成此过程后，需要重新分区设备并将需要的数据重新复制到硬盘上！</li>
+<li>如果要擦除的硬盘不是直接连接到SATA/NVMe接口，请<b>不要</b>继续。在通过USB或SAS/RAID卡连接的硬盘上执行安全擦除/格式化/净化（Sanitize）命令可能会导致硬盘变砖！</li></ul>
+</div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>清理硬盘后，在分区之前，应当检查<a href="#pg1e179f17182c">其逻辑扇区大小是否已设置为最佳大小</a>。更改逻辑扇区大小需要清空数据，因此最好在还未存入数据时更改。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg80f72e0236ed_SATA_.E7.A1.AC.E7.9B.98" id="SATA_硬盘"><span id="SATA_.E7.A1.AC.E7.9B.98"></span>SATA 硬盘</h2></div>
+<p>ATA有两个用于擦除硬盘的命令——<code>SECURITY ERASE UNIT</code> 和 <code>ENHANCED SECURITY ERASE UNIT</code>。<a href="https://ata.wiki.kernel.org/index.php/ATA_Secure_Erase">[1]</a>
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>这些命令也可用于将机械硬盘清零。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg80f72e0236ed_.E7.A1.AE.E4.BF.9D.E7.A1.AC.E7.9B.98.E6.9C.AA.E5.A4.84.E4.BA.8E.E5.86.BB.E7.BB.93.E6.A8.A1.E5.BC.8F" id="确保硬盘未处于冻结模式"><span id=".E7.A1.AE.E4.BF.9D.E7.A1.AC.E7.9B.98.E6.9C.AA.E5.A4.84.E4.BA.8E.E5.86.BB.E7.BB.93.E6.A8.A1.E5.BC.8F"></span>确保硬盘未处于冻结模式</h3></div>
+<p>执行以下命令：
+</p>
+<pre># hdparm -I /dev/sd<i>X</i> | grep frozen
+</pre>
+<p>在输出的安全（security）部分，应该显示 <code>not frozen</code>。若显示 <code>frozen</code>，将无法进行下一步操作。详见<a href="#pgcb28ba980ed7">固态硬盘#冻结模式</a>。
+</p><p>一个可能的解决方法是，<a href="#pg146ac4b0e523">挂起</a>系统（注意要使用 S3 而非 S0ix）。唤醒后，冻结状态很可能会被解除。若不成功，且硬盘通过SATA接口连接，可以尝试热插拔硬盘数据线（注意，这可能会导致内核崩溃）。如果热插拔SATA数据线导致内核崩溃，重启系统，在系统完全启动后，快速地热插拔SATA电源线和数据线。如果热插拔SATA线仍然导致内核崩溃，请确保在BIOS中启用了AHCI（AHCI允许进行热插拔操作，不应引起系统崩溃）。如果有支持热插拔的USB-to-SATA适配器，可尝试通过适配器连接设备。此外，还可通过 USB 使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hdparm">hdparm</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg80f72e0236ed_Dell_.E7.B3.BB.E7.BB.9F" id="Dell_系统"><span id="Dell_.E7.B3.BB.E7.BB.9F"></span>Dell 系统</h4></div>
+<p>如果命令输出显示"frozen"，或许可以通过以下方式解决：
+</p>
+<ol><li>启动时按 F2，进入 Dell BIOS。</li>
+<li>在 BIOS 中设置内置硬盘密码（注意，BIOS中使用的键盘布局是 en_US / qwerty）。</li>
+<li>应用更改并重启。</li>
+<li>当 Dell Security Manager 提示输入密码时，直接按ESC而不要输入密码。硬盘将保持锁定但非冻结状态。</li>
+<li>在下文的步骤中，跳过启用安全功能的部分，直接执行擦除命令。</li></ol>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果正在使用联想系统，并且无法通过上面提到的方法解除"frozen"状态（例如，联想平板电脑通过M.2接口而不是SATA接口连接固态硬盘），可以使用<b><a href="https://pcsupport.lenovo.com/us/en/olddownloads/ds019026">联想提供的专有工具</a></b>完成闪存单元清理，而不是遵循本文的步骤。另见<a href="https://superuser.com/questions/763642/secure-erase-ssd-on-lenovo-thinkpad-t520-cant-unfreeze-ssd-machine-reboots-on">[2]</a></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg80f72e0236ed_.E9.80.9A.E8.BF.87.E8.AE.BE.E7.BD.AE.E7.94.A8.E6.88.B7.E5.AF.86.E7.A0.81.E6.9D.A5.E5.90.AF.E7.94.A8.E5.AE.89.E5.85.A8.E5.8A.9F.E8.83.BD" id="通过设置用户密码来启用安全功能"><span id=".E9.80.9A.E8.BF.87.E8.AE.BE.E7.BD.AE.E7.94.A8.E6.88.B7.E5.AF.86.E7.A0.81.E6.9D.A5.E5.90.AF.E7.94.A8.E5.AE.89.E5.85.A8.E5.8A.9F.E8.83.BD"></span>通过设置用户密码来启用安全功能</h3></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>设置用户密码后，在下一次重启后，硬盘将被锁定，只有使用正确密码解锁后才能正常访问。</div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>执行此步骤后<b>不要</b>重启计算机，特别是联想笔记本电脑。某些联想 BIOS 版本可能使用一种有偏差的算法来计算加密密钥。重启后，机器可能识别到固态硬盘。<a href="https://jbeekman.nl/blog/2015/03/lenovo-thinkpad-hdd-password/">[3]</a></div>
+<p>由于只是临时性地使用密码，因此对密码强度没有要求，可以使用任何密码。安全擦除后，密码将被重置为 NULL。在本例中，假定密码为 <code><i>PasSWorD</i></code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># hdparm --user-master u --security-set-pass <i>PasSWorD</i> /dev/sd<i>X</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">security_password="<i>PasSWorD</i>"
+/dev/sd<i>X</i>:
+Issuing SECURITY_SET_PASS command, password="<i>PasSWorD</i>", user=user, mode=high</pre>
+<p>执行如下命令检查设置是否成功：
+</p>
+<pre># hdparm -I /dev/sd<i>X</i>
+</pre>
+<p>命令输出应为"enabled"：
+</p>
+<pre>Security:
+        Master password revision code = 65534
+                supported
+                <b>enabled</b>
+        not     locked
+        not     frozen
+        not     expired: security count
+                supported: enhanced erase
+        Security level high
+        2min for SECURITY ERASE UNIT. 2min for ENHANCED SECURITY ERASE UNIT.</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg80f72e0236ed_.E6.89.A7.E8.A1.8C_ATA_SECURITY_ERASE_UNIT_.E5.91.BD.E4.BB.A4" id="执行_ATA_SECURITY_ERASE_UNIT_命令"><span id=".E6.89.A7.E8.A1.8C_ATA_SECURITY_ERASE_UNIT_.E5.91.BD.E4.BB.A4"></span>执行 ATA SECURITY ERASE UNIT 命令</h3></div>
+<p>最后一步是执行 ATA SECURITY ERASE UNIT 命令，指示设备固件擦除其内容。注意，对于本例中使用的设备，前面的输出显示：
+</p>
+<pre>2min for SECURITY ERASE UNIT. 2min for ENHANCED SECURITY ERASE UNIT.
+</pre>
+<p>根据 ATA 规范，“增强型”安全擦除（<code>--security-erase-enhanced</code>）会执行更彻底的擦除。如果两个命令的预计完成时间相等，表明硬盘制造商简化了规范，对两个命令使用了相同的擦除功能。若预计时间较短（如2分钟），表明该设备是自加密的，执行安全擦除操作时，其固件将只擦除内部的加密密钥，而不是覆写所有数据单元。<a href="https://security.stackexchange.com/questions/62253/what-is-the-difference-between-ata-secure-erase-and-security-erase-how-can-i-en">[4]</a>
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>
+<ul><li>请再三检查是否使用了正确的硬盘代号。一旦确认命令，将<b>无法挽回</b>。</li>
+<li>确保执行命令时硬盘未被挂载。如果在设备已挂载时执行安全擦除命令，可能无法正常完成擦除。</li></ul>
+</div>
+<pre># hdparm --user-master u --security-erase <i>PasSWorD</i> /dev/sd<i>X</i>
+</pre>
+<p>等待命令完成。对于在本例中使用的Intel X25-M 80GB固态硬盘，该过程耗时约 40 秒。
+</p>
+<pre>security_password="<i>PasSWorD</i>"
+/dev/sd<i>X</i>:
+Issuing SECURITY_ERASE command, password="<i>PasSWorD</i>", user=user
+0.000u 0.000s 0:39.71 0.0%      0+0k 0+0io 0pf+0w
+</pre>
+<p>硬盘现已被擦除。成功擦除后，硬盘安全状态应当已经被自动设置为禁用（因此不再需要密码即可访问）。可通过如下命令验证：
+</p>
+<pre># hdparm -I /dev/sd<i>X</i>
+</pre>
+<p>命令输出应显示 "not enabled"：
+</p>
+<pre>Security:
+        Master password revision code = 65534
+                supported
+        <b>not     enabled</b>
+        not     locked
+        not     frozen
+        not     expired: security count
+                supported: enhanced erase
+        2min for SECURITY ERASE UNIT. 2min for ENHANCED SECURITY ERASE UNIT.</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg80f72e0236ed_NVMe_.E7.A1.AC.E7.9B.98" id="NVMe_硬盘"><span id="NVMe_.E7.A1.AC.E7.9B.98"></span>NVMe 硬盘</h2></div>
+<p>NVMe 硬盘不使用 SATA 接口，因而不能使用与 SATA 固态硬盘相同的方式进行清理。<a href="https://nvmexpress.org/developers/nvme-specification/">NVMe 规范</a>定义了一种标准化的格式化 NVMe 硬盘的方法。最初，可通过<span class="plainlinks archwiki-template-man" title="$ man 1 nvme-format"><a href="https://man.archlinux.org/man/nvme-format.1">nvme-format(1)</a></span> 命令（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=nvme-cli">nvme-cli</a></span><sup><small>包</small></sup></span> 的一部分）进行格式化。在此基础之上，<a href="https://nvmexpress.org/changes-in-nvme-revision-1-3/">1.3 版规范</a>增加了专用的 <span class="plainlinks archwiki-template-man" title="$ man 1 nvme-sanitize"><a href="https://man.archlinux.org/man/nvme-sanitize.1">nvme-sanitize(1)</a></span> 命令。<a href="https://nvmexpress.org/open-source-nvme-management-utility-nvme-command-line-interface-nvme-cli/">NVM Express 联盟对上述命令的描述如下</a>：
+</p>
+<dl><dd>这些命令用于安全地擦除设备上的用户数据。可在部署新设备、报废旧设备、设备寿命耗尽、将设备用于新应用等场景使用。在 NVMe 1.3 规范中引入净化（Sanitize）之前，NVMe 格式化（Format）专门用于执行安全擦除。虽然格式化与净化都能擦除数据，但净化在确保数据被正确擦除方面更为可靠；格式化则适用于日常使用和测试。</dd></dl>
+<p>要获取硬盘支持的功能，使用Identify Controller命令：
+</p>
+<pre># nvme id-ctrl /dev/nvme0 -H | grep -E 'Format |Crypto Erase|Sanitize'
+</pre>
+<p>示例输出：
+</p>
+<pre>  [1:1] : 0x1	Format NVM Supported
+  [29:29] : 0	No-Deallocate After Sanitize bit in Sanitize command Supported
+    [2:2] : 0	Overwrite Sanitize Operation Not Supported
+    [1:1] : 0x1	Block Erase Sanitize Operation Supported
+    [0:0] : 0x1	Crypto Erase Sanitize Operation Supported
+  [2:2] : 0x1	Crypto Erase Supported as part of Secure Erase
+  [1:1] : 0	Crypto Erase Applies to Single Namespace(s)
+  [0:0] : 0	Format Applies to Single Namespace(s)
+</pre>
+<p>根据设备支持情况，选择使用格式化或净化命令。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg80f72e0236ed_.E6.A0.BC.E5.BC.8F.E5.8C.96.E5.91.BD.E4.BB.A4" id="格式化命令"><span id=".E6.A0.BC.E5.BC.8F.E5.8C.96.E5.91.BD.E4.BB.A4"></span>格式化命令</h3></div>
+<p>在概念上，格式化（Format）命令更接近于<a href="#pg62a34c92338a">hdparm</a>和<a href="#pgc1328f332dd1">fdisk</a>的结合体。能够设置硬盘的底层参数，<b>并</b>额外发送安全擦除命令。
+</p><p><span class="plainlinks archwiki-template-man" title="$ man 1 nvme-format"><a href="https://man.archlinux.org/man/nvme-format.1">nvme-format(1)</a></span>介绍了关于安全擦除选项（<code>-s</code>/<code>--ses</code>）的如下信息：
+</p>
+<dl><dd>安全擦除设置：此字段指定是否应在格式化过程中执行安全擦除以及安全擦除操作的类型。擦除操作将作用于所有用户数据，无论其位置如何（例如，在向操作系统暴露的 LBA 内、在缓存内、在已释放的 LBA 内等）。默认为 0。</dd></dl>
+<p>可能的值：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>值
+</th>
+<th>定义
+</th></tr>
+<tr>
+<td>0
+</td>
+<td>不执行安全擦除操作
+</td></tr>
+<tr>
+<td>1
+</td>
+<td>用户数据擦除：所有用户数据都将被擦除，擦除后用户数据的内容是不确定的（例如，用户数据可能被填充为全零、全一等）。如果所有用户数据都已加密，控制器在收到用户数据擦除请求时可能转而选择执行加密擦除。
+</td></tr>
+<tr>
+<td>2
+</td>
+<td>加密擦除：所有用户数据都将通过密码学加密方式擦除。通过擦除加密密钥完成。
+</td></tr></tbody></table>
+<p>格式化命令支持对整个NVMe字符设备（例如<code>/dev/nvme0</code>）或特定的命名空间块设备（例如<code>/dev/nvme0n1</code>）进行擦除操作。但不同硬盘对命名空间擦除的支持情况不同，在执行格式化操作前，需确保硬盘的支持情况。例如，在本例Identify Controller命令的输出中，<code>Crypto Erase Applies to Single Namespace(s)</code>和<code>Format Applies to Single Namespace(s)</code>位被设置为零，根据规范，这意味着“控制器<b>支持</b>基于每个命名空间的格式化”（参见“Non-Volatile Memory Host Controller Interface”文档中，图表82“Identify Controller Data Structure”中对第524字节，“Format NVM Attributes”字段的描述<a href="https://www.nvmexpress.org/wp-content/uploads/NVM-Express-1_1a.pdf">[5]</a>）。
+</p><p>例如，要对<code>/dev/nvme0</code>设备命名空间1使用加密擦除方式进行格式化：
+</p>
+<pre># nvme format /dev/nvme0 -s 2 -n 1
+</pre>
+<p>使用<code>-n 0xffffffff</code>可格式化所有命名空间。
+</p><p>有关设备/命名空间选择的更多信息和注意事项，参见<span class="plainlinks archwiki-template-man" title="$ man 1 nvme-format"><a href="https://man.archlinux.org/man/nvme-format.1">nvme-format(1)</a></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg80f72e0236ed_.E5.87.80.E5.8C.96.E5.91.BD.E4.BB.A4" id="净化命令"><span id=".E5.87.80.E5.8C.96.E5.91.BD.E4.BB.A4"></span>净化命令</h3></div>
+<p>净化（Sanitize）命令用于实现“在功能上等同于 SATA 和 SAS 实现中同名的命令”的功能<a href="https://nvmexpress.org/changes-in-nvme-revision-1-3/">[6]</a>。<a href="https://web.archive.org/web/20200430084547/https://nvmexpress.org/open-source-nvme-management-utility-nvme-command-line-interface-nvme-cli/">前述文章</a>中提到：
+</p>
+<dl><dd>根据 <a href="https://nvmexpress.org/wp-content/uploads/NVM-Express-1_4-2019.06.10-Ratified.pdf#%5B%7B%22num%22%3A1051%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C70%2C369%2C0%5D">NVMe 1.4 规范</a>，“净化操作会改变 NVM 子系统中的所有用户数据，使得不可能从任何缓存、非易失性介质或任何控制器内存缓冲区中恢复任何先前的用户数据。”</dd>
+<dd>净化和格式化之间的最大区别在于，净化确保缓存被擦除，并且在意外断电后重新启动时，该过程会重新开始。对于安全擦除操作，净化还支持使用特定模式覆写（pattern overwrite）。注意，对于NAND存储设备，使用特定模式覆写将损耗闪存寿命。因此，特定模式覆写一般用于使用其它存储方式的设备，但若要进一步降低用户数据恢复的可能性，也可以用于NAND存储设备。</dd></dl>
+<p><code>-a/--sanact</code>选项的用法和可能取值参见<span class="plainlinks archwiki-template-man" title="$ man 1 nvme-sanitize"><a href="https://man.archlinux.org/man/nvme-sanitize.1">nvme-sanitize(1)</a></span>。
+</p><p>根据<a href="https://nvmexpress.org/wp-content/uploads/NVM-Express-1_4-2019.06.10-Ratified.pdf#%5B%7B%22num%22%3A663%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C70%2C567%2C0%5D">NVMe 1.4 规范</a>中的定义，块擦除和加密擦除的区别在于，加密擦除仅擦除加密密钥：
+</p>
+<dl><dd>用户数据擦除：所有用户数据都将被擦除，擦除后用户数据的内容是不确定的（例如，用户数据可能被填充为全零、全一等）。如果所有用户数据都已加密，控制器在收到用户数据擦除请求时可能转而选择执行加密擦除。</dd>
+<dd>加密擦除：所有用户数据都将通过密码学加密方式擦除。通过擦除加密密钥完成。</dd>
+<dd>…</dd>
+<dd>块擦除净化操作使用依介质而异的低级块擦除方法，更改 NVM 子系统中可能存储用户数据的所有位置的用户数据；</dd>
+<dd>加密擦除净化操作通过更改 NVM 子系统中可能存储用户数据的所有位置的介质加密密钥来更改用户数据…</dd></dl>
+<p>可以获取硬盘执行各种擦除操作所需时间的估计值（如果支持）：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># nvme sanitize-log /dev/nvme0</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+Estimated Time For Overwrite                   :  4294967295 (No time period reported)
+Estimated Time For Block Erase                 :  174
+Estimated Time For Crypto Erase                :  34
+</pre>
+<p>如果得到如下结果：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># nvme sanitize-log /dev/nvme0</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+Estimated Time For Overwrite                   :  4294967295 (No time period reported)
+Estimated Time For Block Erase                 :  4294967295 (No time period reported)
+Estimated Time For Crypto Erase                :  4294967295 (No time period reported)
+</pre>
+<p>说明擦除操作将需要<b>很长时间</b>才能完成。例如，在一块报告了上述结果的 Intel 660p 512GB 硬盘上，块擦除大约需要 2-3 小时才能完成。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>一旦开始，擦除操作便无法中断（即使将设备断电再重启），并且在完成之前，硬盘将无法使用。擦除可能需要<a href="https://github.com/linux-nvme/nvme-cli/issues/752#issuecomment-647821283">很长时间</a>。</div>
+<p>要开始加密擦除净化操作：
+</p>
+<pre># nvme sanitize <i>device</i> -a start-crypto-erase
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code><i>device</i></code> 参数必须指向整个NVMe字符设备（例如 <code>/dev/nvme0</code> 而<b>不是</b> <code>/dev/nvme0n1</code>）。加密擦除净化操作只适用于<b>整个设备</b>。</div>
+<p>若要使用块擦除：
+</p>
+<pre># nvme sanitize <i>device</i> -a start-block-erase
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>即使硬盘支持，也应当避免使用<b>块擦除（Overwrite）</b>操作，因为“<a href="https://nvmedeveloperdays.com/English/Collaterals/Proceedings/2018/20181204_PRECON2_Hands.pdf">由于将损耗设备寿命，不推荐对基于NAND的固态硬盘进行块擦除操作</a>”。</div>
+<p>可以使用净化日志（Sanitize Log）跟踪进度：
+</p>
+<pre># nvme sanitize-log /dev/nvme0
+</pre>
+<p>对于正在进行加密擦除的硬盘，输出应形如：
+</p>
+<pre>Sanitize Progress                      (SPROG) :  655
+Sanitize Status                        (SSTAT) :  0x4
+Sanitize Command Dword 10 Information (SCDW10) :  0x4
+Estimated Time For Overwrite                   :  4294967295 (No time period reported)
+Estimated Time For Block Erase                 :  174
+Estimated Time For Crypto Erase                :  34
+Estimated Time For Overwrite (No-Deallocate)   :  0
+Estimated Time For Block Erase (No-Deallocate) :  0
+Estimated Time For Crypto Erase (No-Deallocate):  0
+</pre>
+<p>当擦除操作完成时，输入应形如：
+</p>
+<pre>Sanitize Progress                      (SPROG) :  65535
+Sanitize Status                        (SSTAT) :  0x101
+Sanitize Command Dword 10 Information (SCDW10) :  0x4
+Estimated Time For Overwrite                   :  4294967295 (No time period reported)
+Estimated Time For Block Erase                 :  174
+Estimated Time For Crypto Erase                :  34
+Estimated Time For Overwrite (No-Deallocate)   :  0
+Estimated Time For Block Erase (No-Deallocate) :  0
+Estimated Time For Crypto Erase (No-Deallocate):  0
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg80f72e0236ed_.E4.BD.BF.E7.94.A8blkdiscard.E7.9A.84.E9.80.9A.E7.94.A8.E6.96.B9.E6.B3.95" id="使用blkdiscard的通用方法"><span id=".E4.BD.BF.E7.94.A8blkdiscard.E7.9A.84.E9.80.9A.E7.94.A8.E6.96.B9.E6.B3.95"></span>使用blkdiscard的通用方法</h2></div>
+<p><span class="plainlinks archwiki-template-man" title="$ man 8 blkdiscard"><a href="https://man.archlinux.org/man/blkdiscard.8">blkdiscard(8)</a></span>命令（<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=util-linux">util-linux</a></span><sup><small>包</small></sup></span>软件包的一部分）支持<code>--secure</code>选项，用于“执行安全discard操作。安全discard操作与常规discard操作相同。只是，对于正在discard的块，其所有副本（可能在垃圾回收过程中创建）也将被擦除。安全discard操作需要设备的支持”。
+</p><p>要执行安全discard操作：
+</p>
+<pre># blkdiscard --secure /dev/<i>device</i>
+</pre>
+<p>对于不支持安全擦除的设备，可使用<code>-z</code>/<code>--zeroout</code>选项，在discard设备上的所有块的基础上，还会将设备填充为零。
+</p><p>关于<code>blkdiscard</code>安全性的讨论，参见<a href="https://unix.stackexchange.com/questions/659931/how-secure-is-blkdiscard">[7]</a>。关于使用<code>blkdiscard</code>擦除卷的示例，参见<a href="https://www.ovirt.org/develop/release-management/features/storage/wipe-volumes-using-blkdiscard.html">[8]</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg80f72e0236ed_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg80f72e0236ed_.E6.93.A6.E9.99.A4.E7.A1.AC.E7.9B.98.E5.90.8E_UEFI_.E5.90.AF.E5.8A.A8.E9.A1.B9.E8.A2.AB.E7.A7.BB.E9.99.A4" id="擦除硬盘后_UEFI_启动项被移除"><span id=".E6.93.A6.E9.99.A4.E7.A1.AC.E7.9B.98.E5.90.8E_UEFI_.E5.90.AF.E5.8A.A8.E9.A1.B9.E8.A2.AB.E7.A7.BB.E9.99.A4"></span>擦除硬盘后 UEFI 启动项被移除</h3></div>
+<p>某些<a href="#pg46c3147defaf">UEFI</a>实现会在系统启动时移除引用了不存在启动文件的启动项。如果计划在擦除设备后从备份中恢复系统，需要使用<a href="#pg996df5ed0532">efibootmgr</a>或通过重新安装<a href="#pgee8f2050088a">引导加载程序</a>的方法恢复启动项。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg80f72e0236ed_.E5.8F.A6.E8.A7.81" id="另见"><span id=".E5.8F.A6.E8.A7.81"></span>另见</h2></div>
+<ul><li><a href="https://web.archive.org/web/20190326142043/http://forum.notebookreview.com/threads/secure-erase-hdds-ssds-sata-nvme-using-hdparm-nvme-cli-on-linux.827525/">Secure Erase HDDs/SSDs (SATA/NVMe) using hdparm &amp; nvme-cli on Linux</a> (2019): good tutorial with images</li>
+<li><a href="https://nvmexpress.org/wp-content/uploads/Session-3-Verifying-SSD-Sanitization_Micron_Toshiba_Final-as-of-4.26.pdf">Verifying SSD Sanitization</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807070517
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.136 seconds
+Real time usage: 0.140 seconds
+Preprocessor visited node count: 556/1000000
+Revision size: 18236/2097152 bytes
+Post‐expand include size: 10819/2097152 bytes
+Template argument size: 6239/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   38.410      1 -total
+ 10.79%    4.144      6 Template:Man
+  8.87%    3.405     23 Template:Ic
+  8.73%    3.353      1 Template:翻译状态
+  6.26%    2.405      3 Template:Pkg
+  6.23%    2.393      2 Template:Related
+  5.60%    2.152      1 Template:相关文章开始
+  4.88%    1.874      1 Template:注意
+  3.65%    1.402      3 Template:Hc
+  3.61%    1.388      5 Template:Bc
+-->
+<!-- Render ID 5822808e-922e-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8398:|#|:idhash:canonical!zh-cn and timestamp 20260807070517 and revision id 34226. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

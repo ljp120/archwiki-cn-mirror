@@ -1,0 +1,507 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg24be1d21a7ac">归档与压缩</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Archiving_and_compression">Archiving and compression</a>，最近一次同步于 2023-2-12，若英文版本有所<a href="https://wiki.archlinux.org/title/Archiving_and_compression?diff=0&amp;oldid=767298">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Archiving_and_compression_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>根据 <a href="https://en.wikipedia.org/wiki/Unix_philosophy">Unix 哲学</a>,归档与压缩工具应当是分离的:
+</p>
+<ul><li><a href="https://en.wikipedia.org/wiki/File_archiver">归档工具</a>将多个文件合并为一个归档文件，例如 <i>tar</i>。</li>
+<li><a href="https://en.wikipedia.org/wiki/Data_compression">压缩工具</a>压缩和解压缩数据，例如 <i>gzip</i>。</li></ul>
+<p>这些工具通常按顺序使用，首先创建一个归档文件，然后压缩它。
+</p><p>当然，也有一些工具可以同时实现这两个功能，它们往往还提供加密、错误检测和恢复功能。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24be1d21a7ac_.E4.BB.85.E5.BD.92.E6.A1.A3" id="仅归档"><span id=".E4.BB.85.E5.BD.92.E6.A1.A3"></span>仅归档</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>名称</th>
+<th>包</th>
+<th>手册</th>
+<th>说明
+</th></tr>
+<tr>
+<td>GNU <a href="https://en.wikipedia.org/wiki/tar_(computing)">tar</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=tar">tar</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 tar"><a href="https://man.archlinux.org/man/tar.1">tar(1)</a></span>, <a href="https://www.gnu.org/software/tar/manual/html_chapter/index.html">info</a></td>
+<td>用于处理无处不在的 tar 归档文件(tarball)的<a href="#pgc9277cee06e3">核心工具</a>，<a href="#pg9ef105bf1e3c">pacman</a> 和 <a href="#pg89cb7b475cfb">AUR</a> 使用这些文件。
+</td></tr>
+<tr>
+<td><a href="https://libarchive.org/">libarchive</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libarchive">libarchive</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 bsdtar"><a href="https://man.archlinux.org/man/bsdtar.1">bsdtar(1)</a></span><br/><span class="plainlinks archwiki-template-man" title="$ man 1 bsdcpio"><a href="https://man.archlinux.org/man/bsdcpio.1">bsdcpio(1)</a></span></td>
+<td><i>tar</i> 和 <i>cpio</i> 的实现,同时也提供了一个库。<a href="#pg9ef105bf1e3c">pacman</a> 和 <a href="#pgbd0f46fbac92">mkinitcpio</a> 使用该库。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/ar_(Unix)">ar</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=binutils">binutils</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 ar"><a href="https://man.archlinux.org/man/ar.1">ar(1)</a></span></td>
+<td>在 <i>tar</i> 之前的传统 Unix 归档程序。现在只用于创建<a href="https://en.wikipedia.org/wiki/Static_library">静态库</a>文件。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/cpio">cpio</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cpio">cpio</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 cpio"><a href="https://man.archlinux.org/man/cpio.1">cpio(1)</a></span></td>
+<td>通过 stdin/stdout 进行文件归档，支持 cpio 和 tar 格式。
+</td></tr>
+<tr>
+<td><a href="http://dar.linux.free.fr/">DAR</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dar/">dar</a></span><sup><small>AUR</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 dar"><a href="http://dar.linux.free.fr/doc/man/dar.html">dar(1)</a></span></td>
+<td>归档以备份大型活动文件系统，处理硬链接、<a href="#pgd9b7af1c137b">扩展属性</a>、稀疏文件和 inode 类型。
+</td></tr></tbody></table>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>GNU 和 BSD tar 都自动为 bzip2、compress、gzip、lzip、lzma、lzop、zstd 和 xz 压缩归档执行解压缩。lz4 只有 BSD tar 支持（但是 GNU tar 可以使用<code>--use-compress-program=lz4</code>/<code>-Ilz4</code>进行等效操作）。当创建归档文件时，两者都支持<code>-a</code>开关，以根据文件扩展名通过正确的压缩程序自动处理创建的归档。BSD tar 根据格式识别压缩格式，而 GNU tar 只根据文件扩展名猜测压缩格式。</div>
+<p>参见#仅归档用法。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24be1d21a7ac_.E5.8E.8B.E7.BC.A9.E5.B7.A5.E5.85.B7" id="压缩工具"><span id=".E5.8E.8B.E7.BC.A9.E5.B7.A5.E5.85.B7"></span>压缩工具</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24be1d21a7ac_.E4.BB.85.E5.8E.8B.E7.BC.A9" id="仅压缩"><span id=".E4.BB.85.E5.8E.8B.E7.BC.A9"></span>仅压缩</h3></div>
+<p>这些压缩程序实现自己的文件格式。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>名称</th>
+<th>包</th>
+<th>手册</th>
+<th>扩展名</th>
+<th>Tar 扩展名</th>
+<th>说明</th>
+<th>并行实现
+</th></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/bzip2">bzip2</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bzip2">bzip2</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 bzip2"><a href="https://man.archlinux.org/man/bzip2.1">bzip2(1)</a></span></td>
+<td>.bz2, .bz</td>
+<td>.tbz2, .tbz</td>
+<td>使用 <a href="https://en.wikipedia.org/wiki/Burrows%E2%80%93Wheeler_transform">Burrows–Wheeler 算法</a>。</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lbzip2">lbzip2</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pbzip2">pbzip2</a></span><sup><small>包</small></sup></span>
+</td></tr>
+<tr>
+<td>bzip3</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bzip3">bzip3</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 bzip3"><a href="https://man.archlinux.org/man/bzip3.1">bzip3(1)</a></span></td>
+<td>.bz3</td>
+<td>.tbz3</td>
+<td>使用 <a href="https://en.wikipedia.org/wiki/Burrows%E2%80%93Wheeler_transform">Burrows–Wheeler 算法</a>。</td>
+<td>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/gzip">gzip</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gzip">gzip</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 gzip"><a href="https://man.archlinux.org/man/gzip.1">gzip(1)</a></span></td>
+<td>.gz, .z</td>
+<td>.tgz, .taz</td>
+<td>GNU zip, 基于 <a href="https://en.wikipedia.org/wiki/DEFLATE">DEFLATE</a> 算法。</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pigz">pigz</a></span><sup><small>包</small></sup></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 bgzip"><a href="https://manpages.debian.org/latest/tabix/bgzip.1.en.html">bgzip(1)</a></span> (<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/htslib/">htslib</a></span><sup><small>AUR</small></sup></span> 的一部分), <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/crabz/">crabz</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td><span class="ilh-all" data-foreign-title="lrzip" data-lang-code="en" data-lang-name="英语" data-orig-title="lrzip"><span class="ilh-page"><a href="#pg85dbf1495a2e">lrzip</a></span></span></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lrzip">lrzip</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 lrzip"><a href="https://man.archlinux.org/man/lrzip.1">lrzip(1)</a></span></td>
+<td>.lrz</td>
+<td></td>
+<td>改良版的 <a href="https://en.wikipedia.org/wiki/rzip">rzip</a>,使用多种算法。</td>
+<td>是多线程的
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/LZ4_(compression_algorithm)">LZ4</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lz4">lz4</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 lz4"><a href="https://man.archlinux.org/man/lz4.1">lz4(1)</a></span></td>
+<td>.lz4</td>
+<td></td>
+<td>用 C 语言编写，专注于压缩和解压缩速度。</td>
+<td>可以是多线程的，尽管 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lz4">lz4</a></span><sup><small>包</small></sup></span> 不是。查看 <a href="https://lz4.github.io/lz4/">https://lz4.github.io/lz4/</a> 获取替代方案。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/lzip">lzip</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lzip">lzip</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 lzip"><a href="https://man.archlinux.org/man/lzip.1">lzip(1)</a></span></td>
+<td>.lz</td>
+<td></td>
+<td>使用 <a href="https://en.wikipedia.org/wiki/LZMA">LZMA</a>.</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/plzip/">plzip</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/lzop">lzop</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lzop">lzop</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 lzop"><a href="https://man.archlinux.org/man/lzop.1">lzop(1)</a></span></td>
+<td>.lzo</td>
+<td>.tzo</td>
+<td>使用 <a href="https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Oberhumer">LZO</a> 库(<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lzo">lzo</a></span><sup><small>包</small></sup></span>).</td>
+<td>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/XZ_Utils">xz</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xz">xz</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 xz"><a href="https://man.archlinux.org/man/xz.1">xz(1)</a></span></td>
+<td>.xz, .lzma</td>
+<td>.txz, .tlz</td>
+<td>使用 <a href="https://en.wikipedia.org/wiki/LZMA">LZMA</a>，GNU <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=coreutils">coreutils</a></span><sup><small>包</small></sup></span> 和内核归档文件的默认值。</td>
+<td>是多线程的, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pixz">pixz</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pxz-git/">pxz-git</a></span><sup><small>AUR</small></sup></span>
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/zstd">zstd</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=zstd">zstd</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 zstd"><a href="https://man.archlinux.org/man/zstd.1">zstd(1)</a></span></td>
+<td>.zst</td>
+<td></td>
+<td>使用 <a href="https://en.wikipedia.org/wiki/Zstandard">Zstandard</a> 算法。</td>
+<td>是多线程的
+</td></tr>
+</tbody></table>
+<ul><li>并行实现通过使用多个CPU核心提高速度。</li>
+<li>Tar 扩展名是指使用<code>tar</code>和压缩工具的压缩归档，例如<code>.tzo</code>相当于<code>.tar.lzo</code>。</li>
+<li>参见#仅压缩用法。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24be1d21a7ac_.E5.BD.92.E6.A1.A3.E5.92.8C.E5.8E.8B.E7.BC.A9" id="归档和压缩"><span id=".E5.BD.92.E6.A1.A3.E5.92.8C.E5.8E.8B.E7.BC.A9"></span>归档和压缩</h3></div>
+<table class="wikitable">
+<tbody><tr>
+<th>名称</th>
+<th>包</th>
+<th>手册</th>
+<th>扩展名</th>
+<th>说明
+</th></tr>
+<tr>
+<td><a href="#pg39700517986d">p7zip</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=p7zip">p7zip</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 7z"><a href="https://man.archlinux.org/man/7z.1">7z(1)</a></span></td>
+<td rowspan="2">.7z</td>
+<td><a href="https://en.wikipedia.org/wiki/7-Zip">7-zip</a> 命令行的第三方 POSIX 移植。
+</td></tr>
+<tr>
+<td><a href="https://www.7-zip.org/">7-Zip</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/7-zip/">7-zip</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/7-zip-full/">7-zip-full</a></span><sup><small>AUR</small></sup></span> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/7-zip-full">7-zip-full</a></span><sup><small><a href="#pgc6e2daf482c3">CNRepo</a></small></sup></span></td>
+<td>-</td>
+<td>一个高压缩比的文件归档器的上游 Linux 版本。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/RAR_(file_format)">RAR</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rar/">rar</a></span><sup><small>AUR</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=unrar">unrar</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 rar"><a href="https://manned.org/rar.1">rar(1)</a></span></td>
+<td>.rar</td>
+<td><a href="#pg758435aaf7af">rar</a> 格式和工具都是专有的。
+</td></tr>
+<tr>
+<td><a href="https://github.com/martinellimarco/t2sz">t2sz</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/t2sz/">t2sz</a></span><sup><small>AUR</small></sup></span></td>
+<td></td>
+<td>.tar.zst .tzst</td>
+<td>用 C 写得 Tar 归档工具，使用成员对齐的 zstd 压缩
+</td></tr>
+<tr>
+<td><a href="https://lzip.nongnu.org/tarlz.html">tarlz</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/tarlz/">tarlz</a></span><sup><small>AUR</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 tarlz"><a href="https://manpages.debian.org/latest/tarlz/tarlz.1.en.html">tarlz(1)</a></span></td>
+<td>.tar.lz .tlz</td>
+<td>用 C++ 写得 Tar 归档工具，使用成员对齐的 lzip 压缩
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Zip_(file_format)">ZIP</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=zip">zip</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=unzip">unzip</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 zip"><a href="https://man.archlinux.org/man/zip.1">zip(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 unzip"><a href="https://man.archlinux.org/man/unzip.1">unzip(1)</a></span></td>
+<td>.zip</td>
+<td>在 Linux 世界之外广泛使用。
+</td></tr>
+<tr>
+<td><a href="https://theunarchiver.com/">Unarchiver</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=unarchiver">unarchiver</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 unar"><a href="https://man.archlinux.org/man/unar.1">unar(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 lsar"><a href="https://man.archlinux.org/man/lsar.1">lsar(1)</a></span></td>
+<td><i>many</i></td>
+<td>Mac 应用程序的命令行工具，支持40多种归档格式。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/ZPAQ">ZPAQ</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zpaq/">zpaq</a></span><sup><small>AUR</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 zpaq"><a href="https://mattmahoney.net/dc/zpaqdoc.html">zpaq(1)</a></span></td>
+<td>.zpaq</td>
+<td>用 C++ 编写的高压缩比归档程序，使用多种算法。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/LHA_(file_format)">LHa</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lhasa">lhasa</a></span><sup><small>包</small></sup></span>, <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/lha/">lha</a></span><sup><small>AUR</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 lha"><a href="https://man.archlinux.org/man/lha.1">lha(1)</a></span></td>
+<td>.lzh (在 Amiga 上: .lha)</td>
+<td>LZH/LHA 归档，支持 lh7 方法。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/WinAce">WinAce</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=unace">unace</a></span><sup><small>包</small></sup></span></td>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 unace"><a href="https://manned.org/unace.1">unace(1)</a></span></td>
+<td>.ace</td>
+<td><a href="https://en.wikipedia.org/wiki/ACE_(compressed_file_format)">ACE</a> 文件格式和归档工具都是专有的。
+</td></tr></tbody></table>
+<p>参见#归档和压缩用法。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24be1d21a7ac_.E5.8A.9F.E8.83.BD.E5.9B.BE.E8.A1.A8" id="功能图表"><span id=".E5.8A.9F.E8.83.BD.E5.9B.BE.E8.A1.A8"></span>功能图表</h3></div>
+<p>上面的一些工具能够处理多种格式，允许安装更少的软件包。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg24be1d21a7ac_.E8.A7.A3.E5.8E.8B.E7.BC.A9" id="解压缩"><span id=".E8.A7.A3.E5.8E.8B.E7.BC.A9"></span>解压缩</h4></div>
+<table class="wikitable sortable">
+<tbody><tr>
+<th>名称</th>
+<th>gzip</th>
+<th>bzip2</th>
+<th>ZIP</th>
+<th>LHa/LZH</th>
+<th>RAR</th>
+<th>compress</th>
+<th>CAB</th>
+<th>ARJ
+</th></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gzip">gzip</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">部分<sup>1</sup></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=p7zip">p7zip</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=unarchiver">unarchiver</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">部分
+</td></tr></tbody></table>
+<ol><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gzip">gzip</a></span><sup><small>包</small></sup></span> 的 <i>gunzip</i> 只能解压缩单个成员的 ZIP 文件。</li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24be1d21a7ac_.E7.94.A8.E6.B3.95.E6.AF.94.E8.BE.83" id="用法比较"><span id=".E7.94.A8.E6.B3.95.E6.AF.94.E8.BE.83"></span>用法比较</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24be1d21a7ac_.E4.BB.85.E5.BD.92.E6.A1.A3.E7.94.A8.E6.B3.95" id="仅归档用法"><span id=".E4.BB.85.E5.BD.92.E6.A1.A3.E7.94.A8.E6.B3.95"></span>仅归档用法</h3></div>
+<table class="wikitable">
+<tbody><tr>
+<th>名称</th>
+<th>创建归档</th>
+<th>提取归档</th>
+<th>列出内容
+</th></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 tar"><a href="https://man.archlinux.org/man/tar.1">tar(1)</a></span></td>
+<td><code>tar cfv archive.tar file1 file2</code></td>
+<td><code>tar xfv archive.tar</code></td>
+<td><code>tar -tvf archive.tar</code>
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 cpio"><a href="https://man.archlinux.org/man/cpio.1">cpio(1)</a></span></td>
+<td><code>ls file1 file2 | cpio -o &gt; archive.cpio</code></td>
+<td><code>cpio -i -vd &lt; archive.cpio</code></td>
+<td><code>cpio -t &lt; archive.cpio</code>
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24be1d21a7ac_.E4.BB.85.E5.8E.8B.E7.BC.A9.E7.94.A8.E6.B3.95" id="仅压缩用法"><span id=".E4.BB.85.E5.8E.8B.E7.BC.A9.E7.94.A8.E6.B3.95"></span>仅压缩用法</h3></div>
+<table class="wikitable">
+<tbody><tr>
+<th>名称</th>
+<th>压缩</th>
+<th>解压缩</th>
+<th>解压缩到 stdout
+</th></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 bzip2"><a href="https://man.archlinux.org/man/bzip2.1">bzip2(1)</a></span></td>
+<td><code>bzip2 file</code></td>
+<td><code>bzip2 -d file.bz2</code></td>
+<td><code>bzcat file.bz2</code>
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 gzip"><a href="https://man.archlinux.org/man/gzip.1">gzip(1)</a></span></td>
+<td><code>gzip file</code></td>
+<td><code>gzip -d file.gz</code></td>
+<td><code>zcat file.gz</code>
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 lrzip"><a href="https://man.archlinux.org/man/lrzip.1">lrzip(1)</a></span></td>
+<td><code>lrzip file</code><br/><code>lrztar folder</code></td>
+<td><code>lrzip -d file.lrz</code><br/><code>lrztar -d folder.tar.lrz</code></td>
+<td><code>lrzcat file.lrz</code>
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 xz"><a href="https://man.archlinux.org/man/xz.1">xz(1)</a></span></td>
+<td><code>xz file</code></td>
+<td><code>xz -d file.xz</code></td>
+<td><code>xzcat file.xz</code>
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24be1d21a7ac_.E5.BD.92.E6.A1.A3.E5.92.8C.E5.8E.8B.E7.BC.A9.E7.94.A8.E6.B3.95" id="归档和压缩用法"><span id=".E5.BD.92.E6.A1.A3.E5.92.8C.E5.8E.8B.E7.BC.A9.E7.94.A8.E6.B3.95"></span>归档和压缩用法</h3></div>
+<table class="wikitable">
+<tbody><tr>
+<th>名称</th>
+<th>压缩</th>
+<th>解压缩</th>
+<th>解压缩到 stdout</th>
+<th>列出内容
+</th></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 7z"><a href="https://man.archlinux.org/man/7z.1">7z(1)</a></span></td>
+<td><code>7z a archive.7z file1 file2</code></td>
+<td><code>7z x archive.7z</code></td>
+<td><code>7z e -so archive.7z file1</code></td>
+<td><code>7z l archive.7z</code>
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 rar"><a href="https://manned.org/rar.1">rar(1)</a></span></td>
+<td><code>rar a archive.rar file1 file2</code></td>
+<td><code>rar x archive.rar</code></td>
+<td><code>rar p -inul archive.rar file1</code></td>
+<td><code>rar l archive.rar</code>
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 zip"><a href="https://man.archlinux.org/man/zip.1">zip(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 1 unzip"><a href="https://man.archlinux.org/man/unzip.1">unzip(1)</a></span></td>
+<td><code>zip archive.zip file1 file2</code></td>
+<td><code>unzip archive.zip</code></td>
+<td><code>unzip -p archive.zip file1</code></td>
+<td><code>unzip -l archive.zip</code>
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 lha"><a href="https://man.archlinux.org/man/lha.1">lha(1)</a></span></td>
+<td><code>lha ao7 archive.lzh file1 file2</code></td>
+<td><code>lha x archive.lzh</code></td>
+<td></td>
+<td>简单: <code>lha l archive.lzh</code> 详细: <code>lha v archive.lzh</code>
+</td></tr>
+</tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24be1d21a7ac_.E4.BE.BF.E5.88.A9.E5.B7.A5.E5.85.B7" id="便利工具"><span id=".E4.BE.BF.E5.88.A9.E5.B7.A5.E5.85.B7"></span>便利工具</h2></div>
+<ul><li><b>atool</b> — 用于管理各种类型的文件归档的脚本。</li></ul>
+<dl><dd><a href="https://www.nongnu.org/atool/">https://www.nongnu.org/atool/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=atool">atool</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>dtrx</b> — 一个智能归档提取工具。</li></ul>
+<dl><dd><a href="https://github.com/brettcs/dtrx">https://github.com/brettcs/dtrx</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/dtrx/">dtrx</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>J7Z</b> — 用 Java 写得 Linux GUI 工具，尝试简化数据压缩和备份。它可以创建 7z, BZip2, Zip, GZip, Tar 归档。</li></ul>
+<dl><dd><a href="http://j7z.xavion.name/">http://j7z.xavion.name/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/j7z/">j7z</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>unp</b> — 命令行工具，可以轻松解包归档文件。</li></ul>
+<dl><dd><a href="https://github.com/mitsuhiko/unp">https://github.com/mitsuhiko/unp</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/python-unp/">python-unp</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>unpack</b> — 用于处理多种归档格式的包装器脚本。</li></ul>
+<dl><dd><a href="https://github.com/githaff/unpack">https://github.com/githaff/unpack</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/unpack-git/">unpack-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>zutils</b> — 用 C++ 编写，包含 <span class="plainlinks archwiki-template-man" title="$ man 1 zcat"><a href="https://man.archlinux.org/man/zcat.1">zcat(1)</a></span>/<span class="plainlinks archwiki-template-man" title="$ man 1 zgrep"><a href="https://man.archlinux.org/man/zgrep.1">zgrep(1)</a></span>/<span class="plainlinks archwiki-template-man" title="$ man 1 zdiff"><a href="https://man.archlinux.org/man/zdiff.1">zdiff(1)</a></span>，以像 <span class="plainlinks archwiki-template-man" title="$ man 1 bsdcat"><a href="https://man.archlinux.org/man/bsdcat.1">bsdcat(1)</a></span> 一样透明地透明地处理压缩和未压缩文件的任何组合。支持 bzip2、gzip、lzip、xz和zstd。通常与常见（解）压缩器的并行变体（如 <span class="plainlinks archwiki-template-man" title="$ man 1 pixz"><a href="https://man.archlinux.org/man/pixz.1">pixz(1)</a></span>）结合使用。</li></ul>
+<dl><dd><a href="https://www.nongnu.org/zutils/zutils.html">https://www.nongnu.org/zutils/zutils.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zutils/">zutils</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><a href="#pg8e59e98fa126">Bash/函数#提取</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24be1d21a7ac_.E7.A1.AE.E5.AE.9A.E5.BD.92.E6.A1.A3.E6.A0.BC.E5.BC.8F" id="确定归档格式"><span id=".E7.A1.AE.E5.AE.9A.E5.BD.92.E6.A1.A3.E6.A0.BC.E5.BC.8F"></span>确定归档格式</h2></div>
+<p>要提取归档，需要确定其文件格式。如果文件名正确，则可以从文件扩展名推断其格式。
+</p><p>否则，您可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=file">file</a></span><sup><small>包</small></sup></span> 工具，参见 <span class="plainlinks archwiki-template-man" title="$ man 1 file"><a href="https://man.archlinux.org/man/file.1">file(1)</a></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24be1d21a7ac_.E5.B0.8F.E4.BC.97.E3.80.81.E7.BD.95.E8.A7.81.E6.88.96.E8.BF.87.E6.97.B6.E7.9A.84.E5.B7.A5.E5.85.B7" id="小众、罕见或过时的工具"><span id=".E5.B0.8F.E4.BC.97.E3.80.81.E7.BD.95.E8.A7.81.E6.88.96.E8.BF.87.E6.97.B6.E7.9A.84.E5.B7.A5.E5.85.B7"></span>小众、罕见或过时的工具</h2></div>
+<table class="wikitable">
+<tbody><tr>
+<th>名称</th>
+<th>包</th>
+<th>扩展名</th>
+<th>包
+</th></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/ARC_(file_format)">ARC</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/arc/">arc</a></span><sup><small>AUR</small></sup></span></td>
+<td>.arc, .ark</td>
+<td>在拨号 BBS 的早期非常流行。被 ZIP 取代。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/ARJ">ARJ</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=arj">arj</a></span><sup><small>包</small></sup></span></td>
+<td>.arj</td>
+<td>1990年代中期在 DOS/Windows 上使用的归档程序，源中包为一个开源克隆。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/compress">compress</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ncompress">ncompress</a></span><sup><small>包</small></sup></span></td>
+<td>.Z</td>
+<td>在 gzip 出现之前是 UNIX 压缩工具的事实标准，因使用哈夫曼算法而成功。Man 页面：<span class="plainlinks archwiki-template-man" title="$ man 1 pack"><a href="https://illumos.org/man/1/pack">pack(1)</a></span>。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Parchive">PAR2</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=par2cmdline">par2cmdline</a></span><sup><small>包</small></sup></span></td>
+<td>.par2</td>
+<td>用于提高数据完整性的奇偶校验归档程序。参见 <span class="ilh-all" data-foreign-title="Parchive" data-lang-code="en" data-lang-name="英语" data-orig-title="Parchive"><span class="ilh-page"><a href="#pgbf65c5ae3109">Parchive</a></span></span>。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/shar">shar</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=sharutils">sharutils</a></span><sup><small>包</small></sup></span></td>
+<td>.shar</td>
+<td>用于创建自提取归档。这些自提取归档是有效的 shell 脚本。
+</td></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Zoo_(file_format)">Zoo</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zoo/">zoo</a></span><sup><small>AUR</small></sup></span></td>
+<td>.zoo</td>
+<td>在 PKZIP 流行之前，在 <a href="https://en.wikipedia.org/wiki/OpenVMS">OpenVMS</a> 操作系统上流行。
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24be1d21a7ac_.E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E5.8E.8B.E7.BC.A9" id="文件系统压缩"><span id=".E6.96.87.E4.BB.B6.E7.B3.BB.E7.BB.9F.E5.8E.8B.E7.BC.A9"></span>文件系统压缩</h2></div>
+<p>有些<a href="#pg6c70b7fdfa57">文件系统</a>支持动态压缩文件数据:
+</p>
+<ul><li>默认情况下，<a href="#pg429e7ec45c9c">Btrfs</a>可以配置为压缩单个文件、目录或整个卷。</li>
+<li>在<a href="#pgefb77a75bb9b">ZFS</a>上，可以在池或文件系统上启用压缩。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24be1d21a7ac_.E8.AE.BE.E5.A4.87.E6.98.A0.E5.B0.84.E5.99.A8.E5.8E.8B.E7.BC.A9" id="设备映射器压缩"><span id=".E8.AE.BE.E5.A4.87.E6.98.A0.E5.B0.84.E5.99.A8.E5.8E.8B.E7.BC.A9"></span>设备映射器压缩</h2></div>
+<p>目前正在将开源的 VDO 项目主线化(集成到 Linux 内核项目中)，该项目为提高存储效率提供了一个重复数据消除和压缩设备映射器层。以下包可供选择：
+</p>
+<ul><li><b>vdo</b> — 用于管理 VDO 卷的用户空间工具</li></ul>
+<dl><dd><a href="https://github.com/dm-vdo/vdo">https://github.com/dm-vdo/vdo</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vdo/">vdo</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>kvdo</b> — 两个内核模块，提供重复数据消除和/或压缩块存储池</li></ul>
+<dl><dd><a href="https://github.com/dm-vdo/kvdo">https://github.com/dm-vdo/kvdo</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/kvdo-dkms/">kvdo-dkms</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24be1d21a7ac_.E5.8E.8B.E7.BC.A9.E5.BA.93" id="压缩库"><span id=".E5.8E.8B.E7.BC.A9.E5.BA.93"></span>压缩库</h2></div>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Brotli">Brotli</a></b> — 使用LZ77算法、霍夫曼编码和二阶上下文建模的数据流压缩算法。</li></ul>
+<dl><dd><a href="https://github.com/google/brotli">https://github.com/google/brotli</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=brotli">brotli</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/libzip">libzip</a></b> — 提供ZIP文件的创建和提取。由 KDE 和 Deepin 代替 zip/unzip 工具使用。</li></ul>
+<dl><dd><a href="https://libzip.org">https://libzip.org</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=libzip">libzip</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/zlib">zlib</a></b> — 压缩库中实现了 gzip 和 PKZIP 中的 deflate 压缩方法。</li></ul>
+<dl><dd><a href="https://www.zlib.net/">https://www.zlib.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=zlib">zlib</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b><a href="https://en.wikipedia.org/wiki/Zopfli">Zopfli</a></b> — Google 提供的高压缩比文件压缩器，使用了一种名为 zopfli 的 deflate 兼容算法。</li></ul>
+<dl><dd><a href="https://github.com/google/zopfli">https://github.com/google/zopfli</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zopfli-git/">zopfli-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24be1d21a7ac_.E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4" id="故障排除"><span id=".E6.95.85.E9.9A.9C.E6.8E.92.E9.99.A4"></span>故障排除</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg24be1d21a7ac_.E6.97.A5.E8.AF.AD.E6.96.87.E4.BB.B6.E5.90.8D.E4.B9.B1.E7.A0.81" id="日语文件名乱码"><span id=".E6.97.A5.E8.AF.AD.E6.96.87.E4.BB.B6.E5.90.8D.E4.B9.B1.E7.A0.81"></span>日语文件名乱码</h3></div>
+<p>Windows 的日文版本使用 Shift-JIS 编码 ZIP 归档。默认情况下，这些归档在解压缩时会受到<a href="https://en.wikipedia.org/wiki/mojibake">乱码</a>文件名的影响。要正确解压缩，请在命令行中使用 shift-jis 选项解压缩。
+</p>
+<pre>$ unzip -O shift-jis nihongo.zip
+</pre>
+<p>或者也可以使用社区提供的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/unzip-natspec/">unzip-natspec</a></span><sup><small>AUR</small></sup></span> 包。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg24be1d21a7ac_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="#pga96df2a9d88c">应用程序列表/工具#Archive_managers</a></li>
+<li><a href="#pga59ba9915999">应用程序列表/多媒体#Image_compression</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Comparison_of_file_archivers">Wikipedia:Comparison of file archivers</a></li>
+<li><a href="https://en.wikipedia.org/wiki/List_of_archive_formats">Wikipedia:List of archive formats</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Comparison_of_archive_formats">Wikipedia:Comparison of archive formats</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807030440
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.364 seconds
+Real time usage: 0.371 seconds
+Preprocessor visited node count: 2345/1000000
+Revision size: 13088/2097152 bytes
+Post‐expand include size: 30907/2097152 bytes
+Template argument size: 7900/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 2/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 1/5000000 bytes
+Lua time usage: 0.013/7.000 seconds
+Lua memory usage: 629082/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  144.476      1 -total
+ 23.06%   33.309      2 Template:Link-en
+ 15.65%   22.605     44 Template:Man
+  8.55%   12.350     12 Template:App
+  6.05%    8.743     40 Template:Pkg
+  4.50%    6.501     16 Template:Yes
+  3.78%    5.462     42 Template:Ic
+  3.52%    5.088      6 Template:No
+  2.66%    3.846     19 Template:AUR
+  2.41%    3.477      1 Template:G
+-->
+<!-- Render ID bb03200f-920c-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7298:|#|:idhash:canonical!zh-cn and timestamp 20260807030440 and revision id 33776. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

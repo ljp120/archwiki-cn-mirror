@@ -1,0 +1,160 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg239be104fb71">Arch Linux 愚人节笑话</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="noteTA" id="noteTA-7f3f5856"><div class="noteTA-group"><div data-noteta-group="ArchWiki" data-noteta-group-source="module"></div></div></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Arch_Linux_April_Jokes">Arch Linux April Jokes</a>，最近一次同步于 2023-03-11，若英文版本有所<a href="https://wiki.archlinux.org/title/Arch_Linux_April_Jokes?diff=0&amp;oldid=771927">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Arch_Linux_April_Jokes_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>每年4月1日，Arch Linux网站都会在头版刊登一则<a href="https://en.wikipedia.org/wiki/April_Fools%27_Day">愚人节</a>笑话。本文收集了这些笑话，供本wiki的读者阅读。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg239be104fb71_2014.E2.80.932020" id="2014–2020"><span id="2014.E2.80.932020"></span>2014–2020</h2></div>
+<p>这几年的愚人节笑话比较微妙，尚未有人发现，但我们可以证明的是，这些年份确实有发布愚人节笑话。有关寻找这些笑话尝试（虽然都失败了）的英文论坛帖子见下：<a href="https://bbs.archlinux.org/viewtopic.php?id=179466">2014</a>、<a href="https://bbs.archlinux.org/viewtopic.php?id=210784">2016</a>、<a href="https://bbs.archlinux.org/viewtopic.php?id=235878">2018</a>、 <a href="https://bbs.archlinux.org/viewtopic.php?pid=1895357">2020</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg239be104fb71_2013.EF.BC.9APacman.E5.9F.BA.E4.BA.8Esystemd" id="2013：Pacman基于systemd"><span id="2013.EF.BC.9APacman.E5.9F.BA.E4.BA.8Esystemd"></span>2013：Pacman基于systemd</h2></div>
+<p><b>发布于：</b> 2013 / <b>永久链接：</b> <a href="http://allanmcrae.com/2013/04/pacman-4-1-released/">Pacman 4.1 released</a>
+</p><p>该版本的主要特性是PackageManager和systemd之间的紧密集成。在对如何最好地在滚动发布系统上执行更新进行了大量讨论之后，我们意识到，在执行更新时，尽可能少地运行其他进程是至关重要的。此外，更新的安全方面意味着必须尽快提供更新。我们认为实现这一点的最佳方法是在关机时执行更新。这是通过一个新的守护进程pacmand实现的，它在后台监视和下载更新。当发现更新时，它会安排重新启动系统（因此需要集成systemd）。此时，重新启动的时间不可配置，但会弹出一个计时器，允许您将其延迟预设的时间。配置可能会添加到pacman-4.2中，届时pacmanctl将可供一般使用。在该版本发布之前，Arch Linux将通过在其[testing]仓库中执行所有更新，并仅在一周内的某一时间推送更新，从而将影响降至最低。决定后将发布新闻。 
+</p><p>当然，这些将使systemd成为pacman的硬依赖。我们认为这是可以接受的，因为Arch Linux已经正式改用systemd。由于此版本未在没有systemd的系统上进行测试（不太可能能够工作），因此如果Arch用户或其他使用pacman的发行版希望继续使用pacman作为其包管理器，则需要切换到systemd。在pacman-4.2中，与系统的集成将变得更加紧密，我们计划使用即将推出的kdbus消息传递接口——通过libsystemd总线——来允许其他程序与pacman交互，从而使替代前端的开发更加容易。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg239be104fb71_2012" id="2012">2012</h2></div>
+<p>看起来2012年没有愚人节笑话……
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg239be104fb71_2011.EF.BC.9ACanterbury" id="2011：Canterbury"><span id="2011.EF.BC.9ACanterbury"></span>2011：Canterbury</h2></div>
+<p><b>发布于：</b> 2011 / <b>永久链接：</b> <a href="https://archlinux.org/news/519/">Arch news archive #519</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_.E5.8E.86.E5.8F.B2" id="历史"><span id=".E5.8E.86.E5.8F.B2"></span>历史</h3></div>
+<p>在<a href="https://web.archive.org/web/20110404015153/http://www.fosdem.org/2011/schedule/event/distro_collaboration">FOSDEM 2011 发行版合作活动</a>上，Arch Linux 和 Debian 的主要开发者讨论了一个想法：结合各自项目最突出的优点，共同开发出一个新的、更优秀的发行版。这个想法其实是最初在先前的一次openSUSE会议中提出的，他们相信协同努力，共同开发一个新发行版还是有可能性的。
+</p><p>一周后的2月16日，<a href="https://www.linuxfoundation.org/collaborate/workgroups/lsb">Linux标准规范（Linux Standard Base）</a>的版本<a href="https://wiki.linuxfoundation.org/lsb/lsb-41">4.1</a> 发布了。随着新规范的发布，“新的统一发行版”再度成为热门话题。这次Gentoo和Grml也参与进来了。
+</p><p>Dieter，双ISO/USB-IMG安装文件的策划人员，已经开始着手开始新安装程序的讨论，确定将负责进一步合并更难的 p2arts，例如其基础设施和系统工具。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_.E7.9B.AE.E6.A0.87" id="目标"><span id=".E7.9B.AE.E6.A0.87"></span>目标</h3></div>
+<p>我们的目标是真正在一起努力，并能够共同对抗专有操作系统，展示自由软件社区实际上真正能够为一个共同的目标而合作，而不是创造更多的分歧。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_.E7.89.B9.E6.80.A7" id="特性"><span id=".E7.89.B9.E6.80.A7"></span>特性</h3></div>
+<p>Canterbury发行版为用户着想，致力于将各个Linux发行版的精华集于一身，成为操作系统界新的转机：
+</p>
+<ul><li>像Arch一样简单——简洁且保持前沿。</li>
+<li>像Debian一样稳定——高度可靠。</li>
+<li>像Gentoo一样可定制——用户能得到真正想要的。</li>
+<li>像Grml一样便携——随时可用。</li>
+<li>像openSUSE一样开放——广泛且欢迎所有人。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg239be104fb71_2010.EF.BC.9A.E6.84.9A.E4.BA.BA.E8.8A.82.E6.8C.91.E6.88.98" id="2010：愚人节挑战"><span id="2010.EF.BC.9A.E6.84.9A.E4.BA.BA.E8.8A.82.E6.8C.91.E6.88.98"></span>2010：愚人节挑战</h2></div>
+<p><b>发布于：</b> 2010 / <b>永久链接：</b> <a href="https://archlinux.org/news/492/">Arch news archive #492</a>
+</p><p>又是一年愚人节，但今年愚人节我们不会“那么”愚人。“不那么”，甚至大部分人都注意不到今年的愚人节笑话，但它确实存在。在本帖发布你对本次愚人节真相的猜测吧！第一个完全解开今年愚人节笑话的人将会得到一个上网本（当初是捐给我们的）作为解开谜题的奖励。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_.E5.85.B3.E4.BA.8E.E6.84.9A.E4.BA.BA.E8.8A.82.E6.8C.91.E6.88.98.E7.9A.84.E7.AC.91.E8.AF.9D" id="关于愚人节挑战的笑话"><span id=".E5.85.B3.E4.BA.8E.E6.84.9A.E4.BA.BA.E8.8A.82.E6.8C.91.E6.88.98.E7.9A.84.E7.AC.91.E8.AF.9D"></span>关于愚人节挑战的笑话</h3></div>
+<p><b>Arch 论坛：</b> <a href="https://bbs.archlinux.org/viewtopic.php?id=94255">April Fools Challenge</a>
+</p><p>第1页：“当然是个递归笑话。”
+</p><p>第15页：“四月份都快过一半了，怎么这帖子还有热度呢？”
+</p><p>第16页：“我要再发一个‘继续往下翻，这里啥都没有’的回复，这样人们就会真的觉得有点东西在……”
+</p><p>第16页：“？？？啥都没有？？？？？可是有386个回复和49275次浏览欸！……我是被困在黑客帝国里面了？”
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg239be104fb71_2009.EF.BC.9A.E7.BB.93.E6.9D.9Fi686.E6.94.AF.E6.8C.81" id="2009：结束i686支持"><span id="2009.EF.BC.9A.E7.BB.93.E6.9D.9Fi686.E6.94.AF.E6.8C.81"></span>2009：结束i686支持</h2></div>
+<p><b>发布于：</b> 2009 / <b>永久链接：</b> <a href="https://archlinux.org/news/440/">Arch news archive #440</a>
+</p><p>近期，开发者们一直在讨论向i686 port添加一点额外的优化以改进多媒体支持，但这将导致对旧设备的兼容性下降。就跟你们部分人已经知道的一样（<a href="https://groups.google.com/group/archlinux-br/browse_thread/thread/d1b6075adf9eba2d">[1]</a>，谷歌机翻 <a href="https://translate.google.com/translate?prev=_t&amp;hl=en&amp;ie=UTF-8&amp;u=http%3A%2F%2Fgroups.google.com%2Fgroup%2Farchlinux-br%2Fbrowse_thread%2Fthread%2Fd1b6075adf9eba2d&amp;sl=pt&amp;tl=en&amp;history_state0=">[2]</a>），相关讨论的最终结果是，开发者决定只关注x86_64 port。开发者的总体意见是，现阶段x86_64 port已经足够完整，这让只关注x86_64 port成为可能，并且这符合 Arch 支持当前时代硬件的理念。x86_64架构2002年就已经可用了（i686是1995年的），我们相信大部分i686用户其实都应该有兼容x86_64的硬件了。
+</p><p>有关正式结束i686支持的时间线还没有确定，但我们得做出这样一个官方公告，毕竟这个决定已经泄露给Arch Linux-BR社区了。然而，在不久的将来可能确实不再会为 i686 构建主要更新（GNOME、KDE、Xorg 等）。用户仍将能通过ABS构建i686软件包。由于大多数特定于体系结构的补丁都是针对 x86_64 的，因此迁移过程应该是相对轻松的。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_.E5.85.B3.E4.BA.8E.E7.BB.93.E6.9D.9Fi686.E6.94.AF.E6.8C.81.E7.AC.91.E8.AF.9D.E7.9A.84.E5.AE.9E.E9.99.85.E6.83.85.E5.86.B5" id="关于结束i686支持笑话的实际情况"><span id=".E5.85.B3.E4.BA.8E.E7.BB.93.E6.9D.9Fi686.E6.94.AF.E6.8C.81.E7.AC.91.E8.AF.9D.E7.9A.84.E5.AE.9E.E9.99.85.E6.83.85.E5.86.B5"></span>关于结束i686支持笑话的实际情况</h3></div>
+<p>2009年4月1日，该则关于结束i686架构支持的公告发布于frontpage以及Arch-Dev-Public邮件列表。这一公告在论坛、邮件列表和IRC上引发了一系列激烈的争论。本次争论导致的最大热点事件是 Aaron 威胁要离开 Arch。Similar to previous years, various phrases on the forums and other Arch sites were filtered to make life more entertaining。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_.E4.BA.8B.E5.90.8E.E6.8A.A5.E5.91.8A" id="事后报告"><span id=".E4.BA.8B.E5.90.8E.E6.8A.A5.E5.91.8A"></span>事后报告</h3></div>
+<p><b>发布于：</b> 2009 / <b>永久链接：</b> <a href="https://archlinux.org/news/441/">Arch news archive #441</a>
+</p><p>各位Arch Linux用户你好，我们很高兴通知您，Arch Linux对i686的支持将不会结束。有关内容全部都是愚人节笑话的一部分，所有的开发者和论坛管理员在其中都扮演了很大的角色。
+</p><p>值得注意的是，这个愚人节笑话确实做了点好事。这个笑话促使部分用户发现他们用的是64位处理器，但却在使用32位操作系统，于是便迁移到了Arch Linux的64位版本。我们鼓励这些已经迁移的用户继续使用64位版本，以继续为该架构做出贡献，促进广大软件厂商跟进。
+</p><p>一个最终接受64位社区需求的典型例子是Adobe公司。他们近期为Flash插件添加了64位Linux支持，对此我们表示感谢。
+</p><p>对于此笑话造成的任何不便，我们深表歉意。但我们又如何能抗拒4月1日的恶作剧呢？
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_.E7.9C.9F.E6.AD.A3.E7.BB.93.E6.9D.9F.E6.94.AF.E6.8C.81" id="真正结束支持"><span id=".E7.9C.9F.E6.AD.A3.E7.BB.93.E6.9D.9F.E6.94.AF.E6.8C.81"></span>真正结束支持</h3></div>
+<p>2017年1月25日，官方正式<a href="https://archlinux.org/news/phasing-out-i686-support/">公告</a>，由于i686架构在开发人员和用户群中的实际使用比例下降，将逐步取消对i686架构的支持。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg239be104fb71_2008.EF.BC.9AArch.E5.B0.86.E9.87.87.E7.94.A8.E5.BE.B7.E8.AF.AD.E4.BD.9C.E4.B8.BA.E5.AE.98.E6.96.B9.E8.AF.AD.E8.A8.80" id="2008：Arch将采用德语作为官方语言"><span id="2008.EF.BC.9AArch.E5.B0.86.E9.87.87.E7.94.A8.E5.BE.B7.E8.AF.AD.E4.BD.9C.E4.B8.BA.E5.AE.98.E6.96.B9.E8.AF.AD.E8.A8.80"></span>2008：Arch将采用德语作为官方语言</h2></div>
+<p><b>发布于：</b> 2008 / <b>永久链接：</b> n/a
+</p><p>有关使用英语的Arch Linux用户的重要通知
+</p><p>在过去的两个月里，在私密的开发人员邮件列表上，开发者进行了热烈的讨论。而我们得出的结论是，将Arch定位为主要语言为英语的发行版对我们最大的用户群体是一种损害。因此，我们投票决定是否将 Arch Linux 的官方主要语言更改为德语，且更改为德语这一选项胜出。
+</p><p>请在过渡期间耐心等待——我们正在与 archlinux.de 密切合作以促进过渡，届时我们计划合并网站。不过我们很了解Arch这一伟大社区，我们确信将很快出现一个社区项目填补我们完全停止英语站点后留下的小空白。
+</p><p>另外，请注意，我们现在将使用“Arch”的德语发音。别担心，您会习惯的——我们 90% 的开发人员已经习惯了呢！
+</p><p>Happy Computenpeepers,
+管理团队
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_.E5.85.B3.E4.BA.8EArch.E5.B0.86.E9.87.87.E7.94.A8.E5.BE.B7.E8.AF.AD.E4.BD.9C.E4.B8.BA.E5.AE.98.E6.96.B9.E8.AF.AD.E8.A8.80.E8.BF.99.E4.B8.80.E7.AC.91.E8.AF.9D.E7.9A.84.E5.AE.9E.E9.99.85.E6.83.85.E5.86.B5" id="关于Arch将采用德语作为官方语言这一笑话的实际情况"><span id=".E5.85.B3.E4.BA.8EArch.E5.B0.86.E9.87.87.E7.94.A8.E5.BE.B7.E8.AF.AD.E4.BD.9C.E4.B8.BA.E5.AE.98.E6.96.B9.E8.AF.AD.E8.A8.80.E8.BF.99.E4.B8.80.E7.AC.91.E8.AF.9D.E7.9A.84.E5.AE.9E.E9.99.85.E6.83.85.E5.86.B5"></span>关于Arch将采用德语作为官方语言这一笑话的实际情况</h3></div>
+<p>2008年4月1日，大部分Arch Linux网站（包括论坛）都被翻译为德语。上述通知也在大部分网站上出现，且论坛重写了用户发表的内容，将所有指向ArchWiki条目的链接指向一个叫“Deutschland”的页面，类似于“joke”（笑话）之类的词被“genius idea”（绝妙主意）这样的词汇重写。比如“Arch Linux April Jokes Collection（愚人节笑话合集）”被改写成“Arch Linux Deutschland genius idea Collection（绝妙主意合集）”。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg239be104fb71_2007.EF.BC.9AArch_Ark" id="2007：Arch_Ark"><span id="2007.EF.BC.9AArch_Ark"></span>2007：Arch Ark</h2></div>
+<p><b>发布于：</b> 2007 / <b>永久链接：</b> <a href="https://archlinux.org/news/307/">Arch news archive #307</a>
+</p><p>我们要改名啦！
+</p><p>这五年来，我们一直被称作Arch Linux，也有人一直把我们和Ark Linux搞混，而现在，我们郑重提出这一问题的解决方案。前几个月我们一直在尝试同Ark Linux的人员达成一个让双方发行版都受益的解决方案。今天，我们很高兴地宣布，Arch Linux将会改名，之后我们将会改叫Ark Linux！
+</p><p>接下来的几周内 archlinux.org 域名仍将由我们管理，这期间你们将适应改名，但最终我们会将域名也交换过来。通过改名这一方式，我们确信人们再也不会在区分Arch Linux和Ark Linux时出现问题。
+</p><p>Ark Linux万岁！
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_Ark_Linux" id="Ark_Linux">Ark Linux</h3></div>
+<p>Ark Linux曾经是一个真实存在的Linux发行版（已经停止开发了 <a href="https://distrowatch.com/table.php?distribution=ark">[3]</a>）。上方的笑话对那些因不小心打错“www.arklinux.org”成“www.archlinux.org”而开始使用Arch Linux的用户来说应该是更加有趣。“Arch Linux”这一名字的“Arch”被认为应当念作 /ɑːt͡ʃ/（/a-ch/，与larch、starch等英文单词押尾韵，与单词“archer”中“arch”的读音相同）。但是好像就实际到底怎么发音这一问题上并没有真正的共识。<a href="https://bbs.archlinux.org/viewtopic.php?id=4901&amp;p=2">[4]</a>
+</p><p>相同的笑话同样发表在了Ark Linux社区，让这则公告乍看上去更加真实（至少第一眼是这样。很遗憾的是，Ark Linux新闻似乎没有人存档）。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg239be104fb71_2006.EF.BC.9AJudd.E5.89.8D.E5.BE.80Google.E5.B7.A5.E4.BD.9C" id="2006：Judd前往Google工作"><span id="2006.EF.BC.9AJudd.E5.89.8D.E5.BE.80Google.E5.B7.A5.E4.BD.9C"></span>2006：Judd前往Google工作</h2></div>
+<p><b>发布于：</b> 2006 / <b>永久链接：</b> <a href="https://archlinux.org/news/214/">Arch news archive #214</a>
+</p><p>当前变化
+</p><p>我在想向大家分享一些近期流言的实际情况。
+</p><p>Judd正式宣布接受了来自Google的工作，因此，将不再能继续参与Arch Linux的相关工作。
+</p><p>项目领头人已交接给十分有能力的Jason Chu（Xentac）。Jason负责的首要任务——在我们朝着0.7.1.1版本（代号Pony）的发布不断努力的同时——是创建[stable]软件仓库，里面将会放置一些较旧的软件。这将成为之后工作的重点，与此同时还包括安全更新的旧版移植以及兼容性修复。因此，现在的仓库将开始缺少一点内容，但最终这些会随着我们向更“稳定”和“注重生产级质量”的发布机制而被及时移除。
+</p><p>几周后你们就能看到0.7.1.1啦。
+</p><p>此致，
+Aaron
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_Judd.27s_.E5.AF.B9Arch.E9.A1.B9.E7.9B.AE.E7.9A.84.E6.9C.80.E7.BB.88.E5.91.8A.E5.88.AB" id="Judd's_对Arch项目的最终告别"><span id="Judd.27s_.E5.AF.B9Arch.E9.A1.B9.E7.9B.AE.E7.9A.84.E6.9C.80.E7.BB.88.E5.91.8A.E5.88.AB"></span>Judd's 对Arch项目的最终告别</h3></div>
+<p>Arch Linux的创始人Judd Vinet实际上已于2007年10月1日离开该项目，成为“Arch的头号啦啦队员”。 <a href="https://archlinux.org/news/350/">[5]</a> 自此，Aaron Griffin将是项目的领导者。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_Arch-Linux.E5.8F.8A.E5.85.B6.E5.8F.91.E5.B8.83.E6.9C.BA.E5.88.B6" id="Arch-Linux及其发布机制"><span id="Arch-Linux.E5.8F.8A.E5.85.B6.E5.8F.91.E5.B8.83.E6.9C.BA.E5.88.B6"></span>Arch-Linux及其发布机制</h3></div>
+<p>Arch Linux当然从未想过“稳定”和“生产级质量”的发布机制。我们是<a href="https://en.wikipedia.org/wiki/Rolling_release">滚动更新</a>的系统，系统始终保持最新，没有固定的发布时间表。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg239be104fb71_2005.EF.BC.9AArch.E4.B8.8E.E8.A2.8B.E7.86.8A.EF.BC.88Wombat.EF.BC.89.E7.9A.84.E7.9B.B8.E5.85.B3.E4.BA.89.E8.AE.AE" id="2005：Arch与袋熊（Wombat）的相关争议"><span id="2005.EF.BC.9AArch.E4.B8.8E.E8.A2.8B.E7.86.8A.EF.BC.88Wombat.EF.BC.89.E7.9A.84.E7.9B.B8.E5.85.B3.E4.BA.89.E8.AE.AE"></span>2005：Arch与袋熊（Wombat）的相关争议</h2></div>
+<p><b>发布于：</b> 2005 / <b>永久链接：</b> <a href="https://archlinux.org/news/147/">Arch news archive #147</a>
+</p><p>CETW问题
+</p><p>我个人怀着极大的悲伤写下这条消息。
+</p><p>当我们首次发布 Arch Linux 0.7（代号Wombat）时，袋熊伦理治疗中心 (CETW) 联系了我们。 CETW不知为何认为我们发布一个代号为Wombat，袋熊，的“开源项目”是在伤害全世界的袋熊。虽然我们试图说服他们 Arch Linux 是一个 Linux 发行版，并且在我们的发行版制作过程中没有袋熊受到伤害，但他们没有接受。
+</p><p>所以他们威胁要起诉我们，除非我们改变对袋熊的伤害。
+</p><p>经过深思熟虑，我们发现我们实际上没有足够的钱在法庭上与他们抗争。因而，我们选择了庭外和解。我们解决方案的一部分是停止Arch Linux的开发。
+</p><p>因此，由于命名选择不当，Arch Linux将不复存在。在此我代表所有开发人员感谢社区的支持和贡献。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_Wombat.EF.BC.88.E8.A2.8B.E7.86.8A.EF.BC.89.E6.98.AF.E4.B8.AA.E5.95.A5.EF.BC.9F" id="Wombat（袋熊）是个啥？"><span id="Wombat.EF.BC.88.E8.A2.8B.E7.86.8A.EF.BC.89.E6.98.AF.E4.B8.AA.E5.95.A5.EF.BC.9F"></span>Wombat（袋熊）是个啥？</h3></div>
+<p>引自<a href="https://zh.wikipedia.org/wiki/%E8%A2%8B%E7%86%8A">维基百科的“袋熊”页面</a>：“袋熊（英语：Wombat，学名：Phascolomidae），是澳洲的有袋类动物。它们的脚短及肌肉发达，身长约有1米，尾巴亦很短。它们生活于澳洲东南部及塔斯马尼亚州的森林、山地及石楠地。袋熊的Wombat这个名字来自Eora土著社区，他们是悉尼地区的原住民。”
+</p><p>袋熊显然不会雇佣律师来骚扰Linux发行版。<a href="https://zh.wikipedia.org/wiki/%E8%A2%8B%E7%86%8A%E7%A7%91#.E4.B8.8E.E4.BA.BA.E7.B1.BB.E7.9A.84.E5.85.B3.E7.B3.BB">了解袋熊与人类的关系</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg239be104fb71_2004.EF.BC.9AGNOME_2.6" id="2004：GNOME_2.6"><span id="2004.EF.BC.9AGNOME_2.6"></span>2004：GNOME 2.6</h2></div>
+<p><b>发布于：</b> 2004 / <b>永久链接：</b> <a href="https://archlinux.org/news/58/">Arch news archive #58</a>
+</p><p>GNOME 2.6 发布了！
+</p><p>正如标题所说，gnome 2.6 已经位于软件源中。没有太多需要注意的, Arjan 和 JGC 在测试阶段很好地消除了潜在问题，所以安装后体验应该是完美的。
+</p><p>升级：pacman -Syu
+安装：pacman -S gnome
+</p><p>一些与GTK 2.x相关的软件包也进行了升级，以满足GNOME 2.6的要求。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg239be104fb71_GNOME.E7.89.88.E6.9C.AC.E5.8E.86.E5.8F.B2" id="GNOME版本历史"><span id="GNOME.E7.89.88.E6.9C.AC.E5.8E.86.E5.8F.B2"></span>GNOME版本历史</h3></div>
+<p>在上述“新闻”发布前，GNOME项目在2002年才发布GNOME 2.0，而2004年4月1日前最新的发布版本也才GNOME 2.2而已。<a href="https://web.archive.org/web/20081007092046/http://www.greaterbostonrubyandrails.com/Release.html">[6]</a>
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807034756
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc, prevent‐selective‐update]
+CPU time usage: 0.237 seconds
+Real time usage: 0.242 seconds
+Preprocessor visited node count: 114/1000000
+Revision size: 15517/2097152 bytes
+Post‐expand include size: 65297/2097152 bytes
+Template argument size: 104/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+Lua time usage: 0.056/7.000 seconds
+Lua memory usage: 1221992/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   84.698      1 -total
+ 96.74%   81.933      1 Template:NoteTA
+  2.55%    2.164      1 Template:翻译状态
+-->
+<!-- Render ID c6594a0e-9212-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2764:|#|:idhash:canonical!zh-cn and timestamp 20260807034756 and revision id 33571. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,811 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgf9c69fac770d">网络配置/无线网络配置</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Network_configuration/Wireless">Network configuration/Wireless</a>，最近一次同步于 2023-01-20，若英文版本有所<a href="https://wiki.archlinux.org/title/Network_configuration/Wireless?diff=0&amp;oldid=452586">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Network_configuration_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)/Wireless_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pgf42a74f3af9c">网络配置</a></li>
+<li><a href="#pgc6b34d32c15c">软AP</a></li>
+<li><a href="#pg658839f030ad">Ad-hoc networking</a></li>
+<li><a href="#pg48560ebc1733">Internet sharing</a></li>
+<li><a href="#pgd2e4f49166c2">无线网络绑定</a></li>
+<li><a href="#pg2b03729397c8">Network Debugging</a></li>
+<li><a href="#pg0379b52c0e22">Bluetooth</a></li>
+</ul></div>
+<p>网络配置的主页面是<a href="#pgf42a74f3af9c">网络配置</a>。
+</p><p>配置无线网络一般分两步：第一步是识别硬件、安装正确的驱动程序并进行配置，安装盘中已经包含驱动，但是通常需要额外安装；第二步是选择一种管理无线连接的方式。这篇文章涵盖了这两方面，并提供了无线管理工具的链接地址。
+</p><p><a href="#pgf9c69fac770d_iw">#iw</a> 段落描述了如何使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iw">iw</a></span><sup><small>包</small></sup></span> 来手动管理你的网络接口/无线局域网连接。<a href="#pgf42a74f3af9c">网络配置#网络管理器</a>段落介绍了几个可以自动管理您无线网络接口的程序。这些程序中的某些会包含一个图形界面，而所有的程序都支持网络配置文件（在频繁切换网络时有用，比如使用笔记本电脑的场合）。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf9c69fac770d_.E8.AE.BE.E5.A4.87.E9.A9.B1.E5.8A.A8" id="设备驱动"><span id=".E8.AE.BE.E5.A4.87.E9.A9.B1.E5.8A.A8"></span>设备驱动</h2></div>
+<p>默认的 Arch Linux 内核是<i>模块化</i>的，硬件的设备驱动作为<a href="#pg446fdafcb30b">内核模块</a>保存在硬盘上。启动时，<a href="#pge009209061ac">udev</a> 会根据硬件加载不同的驱动模块，从而允许创建网络接口。
+</p><p>除了相应的驱动程序之外，某些无线芯片组还需要固件。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span> 提供了很多固件，然而专有固件并不包含在内，需要另行安装。这部分指南请参考 #安装 driver/firmware。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果 udev 在启动时未加载正确的模块，只需 <a href="#pg6dbfce2ea89d">手动加载</a> 即可。 如果 udev 为一台设备加载多个驱动程序，则产生的冲突可能会导致配置失败。 确保将不需要的模块加入 <a href="#pg6dbfce2ea89d">黑名单</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E6.A3.80.E6.9F.A5.E9.A9.B1.E5.8A.A8.E7.8A.B6.E6.80.81" id="检查驱动状态"><span id=".E6.A3.80.E6.9F.A5.E9.A9.B1.E5.8A.A8.E7.8A.B6.E6.80.81"></span>检查驱动状态</h3></div>
+<p>根据设备的连接方式是 PCI(e) 或 USB，对应地执行 <code>lspci -k</code> 或 <code>lsusb -v</code> 可以检查设备驱动是否已经加载：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lspci -k</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">06:00.0 Network controller: Intel Corporation WiFi Link 5100
+	Subsystem: Intel Corporation WiFi Link 5100 AGN
+	Kernel driver in use: iwlwifi
+	Kernel modules: iwlwifi
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果网卡是 USB 设备，以 root 权限执行 <code> grep usbcore</code> 的输出应当类似于 <code>usbcore: registered new interface driver rtl8187</code>。
+<p><br/>
+</p>
+If you do not see the card at all, it may not be seated/plugged in properly in its PCI(e) slot/USB port. Try re-plugging it in.</div>
+<p>同时也要通过 <code>ip link</code> 命令来查看无线接口是否已经创建。通常来说，<a href="#pgd9535840e0ba">设备名</a>以字母“w”开头，例如<code>wlan0</code> 或 <code>wlp2s1</code>。确认之后，使用以下命令使设备上线：
+</p>
+<pre># ip link set <i>&lt;设备名&gt;</i> up
+</pre>
+<p>例如，接口设备名是 <code>wlan0</code>，此命令就是 <code>ip link set wlan0 up</code>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>如果你从命令中得到如下错误：<code>RTNETLINK answers: Operation not possible due to RF-kill</code> 错误，请确保设备没有被 软锁定 或 硬锁定，详情请参考 Rfkill 说明。</li>
+<li>如果你从命令中得到如下错误：<code>SIOCSIFFLAGS: No such file or directory</code>， 那么大概率您的无线芯片组需要额外的固件来运行。</li></ul>
+</div>
+<p>检查内核信息中关于已加载固件的信息：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg | grep firmware </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[   7.148259] iwlwifi 0000:02:00.0: loaded firmware version 39.30.4.1 build 35138 op_mode iwldvm
+</pre>
+<p>如果没有相关的输出，那么需要在消息中查找关于您之前指定的模块的完整输出（本示例中的模块是<code>iwlwifi</code>），然后查找对应的错误信息：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg | grep iwlwifi </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[   12.342694] iwlwifi 0000:02:00.0: irq 44 for MSI/MSI-X
+[   12.353466] iwlwifi 0000:02:00.0: loaded firmware version 39.31.5.1 build 35138 op_mode iwldvm
+[   12.430317] iwlwifi 0000:02:00.0: CONFIG_IWLWIFI_DEBUG disabled
+...
+[   12.430341] iwlwifi 0000:02:00.0: Detected Intel(R) Corporation WiFi Link 5100 AGN, REV=0x6B
+</pre>
+<p>如果需要的内核模块已经加载且网络接口已经上线，您可以跳过下一节的内容。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E5.AE.89.E8.A3.85.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F.2F.E5.9B.BA.E4.BB.B6" id="安装驱动程序/固件"><span id=".E5.AE.89.E8.A3.85.E9.A9.B1.E5.8A.A8.E7.A8.8B.E5.BA.8F.2F.E5.9B.BA.E4.BB.B6"></span>安装驱动程序/固件</h3></div>
+<p><span id="安装_driver/firmware"></span>
+根据获得的信息，在下面网址查找硬件支持：
+</p>
+<ul><li>参阅表格 <a href="https://wireless.wiki.kernel.org/en/users/drivers">Linux 支持的无线驱动</a>并转到特定驱动程序页面，其中包含受支持设备的列表。</li>
+<li><a href="https://help.ubuntu.com/community/WifiDocs/WirelessCardsSupported">Ubuntu Wiki</a> 维护了一个设备被内核和用户空间驱动支持状况的列表。</li>
+<li><a href="http://linux-wless.passys.nl/">Linux 无线支持页面</a>和<a href="https://web.archive.org/web/20110711100256/http://www.linuxquestions.org/hcl/index.php?cat=10">硬件兼容性列表</a>(HCL)也维护了一个内核友好的设备列表。</li></ul>
+<p>注意有些厂商的产品名称相同，实际使用的芯片组却不同。usb-id (USB设备) 或 pci-id (PCI设备)才是唯一识别名称。
+</p><p>如果您在上述列表里找到了您的无线网卡，请按照驱动与固件排错中的指示操作，这一节中包含有关安装某些特定无线网卡所需的驱动程序和固件的信息。完成后，再次检查驱动程序状态。
+</p><p>如果您的上述列表里<i>没有</i>找到您的无线网卡，那么大概率您的网卡仅在windows操作系统下受支持。对于这些设备，您可以尝试使用 <a href="#pgf9c69fac770d_ndiswrapper">#ndiswrapper</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf9c69fac770d_.E5.B7.A5.E5.85.B7" id="工具"><span id=".E5.B7.A5.E5.85.B7"></span>工具</h2></div>
+<p>同其他网络设备一样，无线网络接口可以通过 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iproute2">iproute2</a></span><sup><small>包</small></sup></span> 包提供的 <i>ip</i> 命令来管理。
+</p><p>管理一个无线网络连接需要一套基本的工具。可以使用一个<a href="#pgf42a74f3af9c">网络管理器</a>或直接使用以下表格中的一个：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>软件</th>
+<th>软件包</th>
+<th><a href="https://wireless.wiki.kernel.org/en/developers/documentation/wireless-extensions">WEXT</a></th>
+<th><a href="https://wireless.wiki.kernel.org/en/developers/documentation/nl80211">nl80211</a></th>
+<th>WEP</th>
+<th>WPA/WPA2/WPA3</th>
+<th><a href="#pg2da385a25e75">Archiso</a> <a href="https://gitlab.archlinux.org/archlinux/archiso/-/blob/master/configs/releng/packages.x86_64">[1]</a>
+</th></tr>
+<tr>
+<td><a href="https://hewlettpackard.github.io/wireless-tools/Tools.html">wireless_tools</a><sup>1</sup></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wireless_tools">wireless_tools</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td><a href="https://wireless.wiki.kernel.org/en/users/documentation/iw">iw</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iw">iw</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td><a href="#pgf33bf2d25099">wpa_supplicant</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wpa_supplicant">wpa_supplicant</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td><a href="#pg0b514fda2edb">iwd</a></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iwd">iwd</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr></tbody></table>
+<ol><li>过时，不推荐使用.</li>
+<li>一些老驱动只支持WEXT</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_iw_.E4.B8.8E_wireless_tools_.E7.9A.84.E5.AF.B9.E6.AF.94" id="iw_与_wireless_tools_的对比"><span id="iw_.E4.B8.8E_wireless_tools_.E7.9A.84.E5.AF.B9.E6.AF.94"></span>iw 与 wireless_tools 的对比</h3></div>
+<p>下面表格给出了 <code>iw</code> 和 <code>wireless_tools</code> 命令的对比（更多示例参阅<a href="https://wireless.wiki.kernel.org/en/users/Documentation/iw/replace-iwconfig">这里</a>）。 
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th><i>iw</i> 命令
+</th>
+<th><i>wireless_tools</i> 命令
+</th>
+<th>描述
+</th></tr>
+<tr>
+<td>iw dev <i>wlan0</i> link
+</td>
+<td>iwconfig <i>wlan0</i>
+</td>
+<td>获取连接状态。
+</td></tr>
+<tr>
+<td>iw dev <i>wlan0</i> scan
+</td>
+<td>iwlist <i>wlan0</i> scan
+</td>
+<td>扫描可用接入点。
+</td></tr>
+<tr>
+<td>iw dev <i>wlan0</i> set type ibss
+</td>
+<td>iwconfig <i>wlan0</i> mode ad-hoc
+</td>
+<td>设置操作模式为 <i>ad-hoc</i>。
+</td></tr>
+<tr>
+<td>iw dev <i>wlan0</i> connect <i>your_essid</i>
+</td>
+<td>iwconfig <i>wlan0</i> essid <i>your_essid</i>
+</td>
+<td>连接到开放网络。
+</td></tr>
+<tr>
+<td>iw dev <i>wlan0</i> connect <i>your_essid</i> 2432
+</td>
+<td>iwconfig <i>wlan0</i> essid <i>your_essid</i> freq 2432M
+</td>
+<td>连接到开放网络的特定频道。
+</td></tr>
+<tr>
+<td>iw dev <i>wlan0</i> connect <i>your_essid</i> key 0:<i>your_key</i>
+</td>
+<td>iwconfig <i>wlan0</i> essid <i>your_essid</i> key <i>your_key</i>
+</td>
+<td>用16进制密匙连接到 WEP 加密网络。
+</td></tr>
+<tr>
+<td>iw dev <i>wlan0</i> connect <i>your_essid</i> key 0:<i>your_key</i>
+</td>
+<td>iwconfig <i>wlan0</i> essid <i>your_essid</i> key s:<i>your_key</i>
+</td>
+<td>用 ASCII 密匙连接到 WEP 加密网络。
+</td></tr>
+<tr>
+<td>iw dev <i>wlan0</i> set power_save on
+</td>
+<td>iwconfig <i>wlan0</i> power on
+</td>
+<td>启用省电功能。
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf9c69fac770d_iw" id="iw">iw</h2></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>多数命令需要使用 <a href="#pg60160f86c6a5">root权限</a> 执行。 使用普通用户执行某些命令,如 <i>iw list</i>，不会输出任何错误但并不会产生正确的输出，造成疑惑。</li>
+<li>根据您硬件或加密类型的不同，某些步骤并非必要。在连接至某个接入点及获取IP地址之前，某些网卡需要首先被 激活 与/或 扫描热点。这可能需要您自己尝试。例如，WPA/WPA2 用户可能会尝试直接从步骤 连接到接入点 开始来激活无线网络。</li></ul></div>
+<p>本章节的示例会假定您的无线接口设备名称是 <code><i>interface</i></code>, 您想要连接到的WiFi接入点名称是 <code><i>your_essid</i></code>。请将这两个字段作相应替换。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E8.8E.B7.E5.8F.96.E6.8E.A5.E5.8F.A3.E5.90.8D" id="获取接口名"><span id=".E8.8E.B7.E5.8F.96.E6.8E.A5.E5.8F.A3.E5.90.8D"></span>获取接口名</h3></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>更多关于 <i>iw</i> 工具的示例，请查看 <a href="https://wireless.wiki.kernel.org/en/users/documentation/iw">官方文档</a> 。</div>
+<p>获取您无线网卡的名称，运行：
+</p>
+<pre>$ iw dev
+</pre>
+<p>接口的名称会在 "Interface" 单词后显示。比如，常见的无线网卡设备名是 <code>wlan0</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E6.A3.80.E6.9F.A5.E8.BF.9E.E6.8E.A5.E7.8A.B6.E6.80.81" id="检查连接状态"><span id=".E6.A3.80.E6.9F.A5.E8.BF.9E.E6.8E.A5.E7.8A.B6.E6.80.81"></span>检查连接状态</h3></div>
+<p>用下面的命令检查连接状态:
+</p>
+<pre>$ iw dev <i>interface</i> link
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E8.8E.B7.E5.8F.96.E7.BB.9F.E8.AE.A1.E6.95.B0.E6.8D.AE" id="获取统计数据"><span id=".E8.8E.B7.E5.8F.96.E7.BB.9F.E8.AE.A1.E6.95.B0.E6.8D.AE"></span>获取统计数据</h3></div>
+<p>获取一些统计数据，比如上传下载的数据量，信号强度等：
+</p>
+<pre>$ iw dev <i>interface</i> station dump
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_.E6.BF.80.E6.B4.BB.E6.8E.A5.E5.8F.A3" id="激活接口"><span id=".E6.BF.80.E6.B4.BB.E6.8E.A5.E5.8F.A3"></span>激活接口</h4></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>通常不需要执行此步骤。</div>
+<p>一些无线网卡在使用 <code>iw</code> 或 <code>wireless_tools</code>前需要先激活内核接口：
+</p>
+<pre># ip link set <i>interface</i> up
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果出现错误 <code>RTNETLINK answers: Operation not possible due to RF-kill</code>, 请确保硬件开关已经打开。参阅 #Rfkill 说明。</div>
+<p>如果出现错误 <code>RTNETLINK answers: Operation not possible due to RF-kill</code>, 请确保硬件开关已经打开。参阅 #Rfkill 说明。
+</p><p>要验证接口确实打开： 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ip link show <i>interface</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">3: wlan0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq state DOWN mode DORMANT group default qlen 1000
+    link/ether 12:34:56:78:9a:bc brd ff:ff:ff:ff:ff:ff
+</pre>
+<p><code>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;</code> 中的<code>UP</code> 显示接口已经打开，不要和后面的 <code>state DOWN</code> 混淆。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E6.89.AB.E6.8F.8F.E6.8E.A5.E5.85.A5.E7.82.B9" id="扫描接入点"><span id=".E6.89.AB.E6.8F.8F.E6.8E.A5.E5.85.A5.E7.82.B9"></span>扫描接入点</h3></div>
+<p>查看可用的接入点：
+</p>
+<pre># iw dev <i>interface</i> scan | less
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果显示 "Interface doesn't support scanning"，可能是忘了安装固件。有时不以 root 运行 <code>iwlist</code> 也会产生这个问题。无线网络也可能被软锁定，请运行 <code>rfkill list all</code> 进行检查。</div>
+<p><br/>
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>Depending on your location, you might need to set the correct regulatory domain in order to see all available networks.</div>
+<p>需要关注的信息:
+</p>
+<ul><li><b>SSID:</b> 网络的名称.</li>
+<li><b>Signal:</b> 用 dbm (-100 to 0) 报告的无线信号强度。数值越接近零，信号越好。观察高质量连接和低质量连接的数值差异可以了解设备的信号范围。</li>
+<li><b>Security:</b> 没有直接报告, 检查 <code>capability</code> 开头的行，如果有 <code>Privacy</code> 信息，例如 <code>capability: ESS Privacy ShortSlotTime (0x0411)</code>, 表示网络具有某种程度的保护，
+<ul><li>如果有 <code>RSN</code> 信息，网络被 <a href="https://en.wikipedia.org/wiki/IEEE_802.11i-2004">Robust Security Network</a>(WPA2) 协议保护。</li>
+<li>如果有 <code>WPA</code> 信息，网络被 <a href="https://en.wikipedia.org/wiki/Wi-Fi_Protected_Access">Wi-Fi Protected Access</a> 协议保护。</li>
+<li>在 <code>RSN</code> 和 <code>WPA</code> 信息块中，可能看到如下信息：
+<ul><li><b>Group cipher:</b> 数值包括 TKIP, CCMP, both, others.</li>
+<li><b>Pairwise ciphers:</b> 数值包括 TKIP, CCMP, both, others. 可能和 Group cipher 数值不同.</li>
+<li><b>Authentication suites:</b> 数值包括 PSK, 802.1x, others. 家用路由器通常可以看到 PSK (<i>i.e.</i> 密码). 在大学中，通常会链接到需要登录名和密码的 802.1x 网络。需要知道其使用的密码管理方式(例如 EAP), 封装方法 (例如 PEAP). 详情请参考<a href="#pg7f33cd982919">这里</a>和<a href="https://en.wikipedia.org/wiki/Authentication_protocol">这里</a>.</li></ul></li>
+<li>如果没有看到 <code>RSN</code> 或 <code>WPA</code>，但是看到了 <code>Privacy</code>, 表示使用的是 WEP.</li></ul></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E8.BF.90.E8.A1.8C.E6.A8.A1.E5.BC.8F" id="运行模式"><span id=".E8.BF.90.E8.A1.8C.E6.A8.A1.E5.BC.8F"></span>运行模式</h3></div>
+<p>设置无线网卡的操作模式，如果连接到<a href="#pg658839f030ad">漫游网络</a>，需要设置操作模式为 <b>ibss</b>
+</p>
+<pre># iw dev <i>interface</i> set type ibss
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>有些网卡需要先关闭无线接口(<code>ip link set <i>interface</i> down</code>)才能修改模式。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E8.BF.9E.E6.8E.A5.E5.88.B0.E6.8E.A5.E5.85.A5.E7.82.B9" id="连接到接入点"><span id=".E8.BF.9E.E6.8E.A5.E5.88.B0.E6.8E.A5.E5.85.A5.E7.82.B9"></span>连接到接入点</h3></div>
+<p>根据加密方式不同，需要使用密码将无线设备关联到接入点。
+</p><p>假设要使用的接入点 ESSID 为 <code>MyEssid</code>: 
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_.E6.97.A0.E5.8A.A0.E5.AF.86" id="无加密"><span id=".E6.97.A0.E5.8A.A0.E5.AF.86"></span>无加密</h4></div>
+<pre># iw dev <i>interface</i> connect "<i>your_essid</i>"
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_WEP" id="WEP">WEP</h4></div>
+<p>使用十六进制或 ASCII 密码(格式是自动识别出来的，因为 WEP 密码长度是固定的):
+</p>
+<pre># iw dev <i>interface</i> connect "<i>your_essid</i>" key 0:<i>your_key</i>
+</pre>
+<p>使用十六进制或 ASCII 密码，第三个是默认 (从0计数，共四个):
+</p>
+<pre># iw dev <i>interface</i> connect "<i>your_essid</i>" key d:2:<i>your_key</i>
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_.E5.85.B6.E5.AE.83" id="其它"><span id=".E5.85.B6.E5.AE.83"></span>其它</h4></div>
+<ul><li><ul><li><i>iw</i> 只能处理 WEP。要使用其他加密方案登录, 请查看下文中的 #认证章节。</li></ul></li></ul>
+<p>无论您使用什么认证方法，都可以使用以下命令来确认连接是否成功：
+</p>
+<pre># iw dev <i>interface</i> link
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf9c69fac770d_.E8.AE.A4.E8.AF.81" id="认证"><span id=".E8.AE.A4.E8.AF.81"></span>认证</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_WPA2_.E4.B8.AA.E4.BA.BA.E6.A8.A1.E5.BC.8F" id="WPA2_个人模式"><span id="WPA2_.E4.B8.AA.E4.BA.BA.E6.A8.A1.E5.BC.8F"></span>WPA2 个人模式</h3></div>
+<p>WPA2 个人（模式）, 又名 WPA2-PSK, 是一种 受保护Wi-Fi访问（<a href="https://zh.wikipedia.org/wiki/WPA">Wi-Fi存取保护</a>）的模式。
+</p><p>您可以通过 <a href="#pgf33bf2d25099">wpa_supplicant</a> 或 <a href="#pg0b514fda2edb">iwd</a> 来连接, 或者直接使用<a href="#pg3d6df3561234">网络管理器</a>. 如果您只进行了认证，那么要获取功能齐全的连接，您仍然需要<a href="#pgd9535840e0ba">进行手动连接</a>或使用 <a href="#pgf42a74f3af9c">DHCP</a> 客户端。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_WPA2_.E4.BC.81.E4.B8.9A.E6.A8.A1.E5.BC.8F" id="WPA2_企业模式"><span id="WPA2_.E4.BC.81.E4.B8.9A.E6.A8.A1.E5.BC.8F"></span>WPA2 企业模式</h3></div>
+<p><i>WPA2 企业模式</i>也是一种 受保护Wi-Fi访问（<a href="https://zh.wikipedia.org/wiki/WPA">Wi-Fi存取保护</a>）的模式，提供了比 WPA2 个人版更好的安全性和密钥管理，并支持其他的企业型功能，例如 <a href="#pg4063816c9354">VLAN</a> 和 NAP。然而，与个人模式不同，此种加密需要额外的 <a href="https://en.wikipedia.org/wiki/RADIUS">RADIUS</a> 认证服务器来处理用户的认证。个人模式不需要除无线路由器/接入点以外的设备，对所有用户也只要求一个密码或密码短语。
+</p><p>企业模式允许用户使用用户名和密码或者数字证书来登录 Wi-Fi。因为每个用户都拥有一个动态唯一的加密密码，因此企业模式可以防止通过无限网络的用户探听，并提高加密强度。
+</p><p>本章节描述如何使用<a href="#pgf42a74f3af9c">网络管理器</a>来连接到使用 WPA2 企业模式的无线接入点。
+</p><p>查看<a href="#pg3ccf0d5298af">软件接入点#RADIUS</a> 来获取关于<i>设置接入点自身</i>的相关信息。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>企业级加密模式需要更复杂的客户端配置，个人模式则只需要在出现提示时输入密码。客户端可能需要安装服务器的 签名证书(CA certificate)，如果使用 EAP-TLS, 则另需要为每个用户安装证书，再手动配置无线安全和 802.1X 认证设置。</div>
+<p>协议间的对照可以参照此<a href="http://deployingradius.com/documents/protocols/compatibility.html">表格</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>您可以让客户端在使用WPA2企业级时不检查服务器的授权证书。然而，您在任何情况下都该尽最大努力来配置证书，因为如果不验证接入点，连接可能遭受中间人攻击。虽然连接握手可能是加密的，但最常见的密码传输配置会将密码用明文或易于破解的MS-CHAPv2协议协议进行传输。因此，客户端可能会将密码发送到代理连接的恶意接入点。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_MS_CHAPv2" id="MS-CHAPv2">MS-CHAPv2</h4></div>
+<p>有时，除了原配的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ppp">ppp</a></span><sup><small>包</small></sup></span> (Point-to-Point Protocol) 之外，要求 MSCHAPv2 type-2 with PEAP 的 WPA2 企业级接入点有时会需求 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pptpclient">pptpclient</a></span><sup><small>包</small></sup></span>。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=netctl">netctl</a></span><sup><small>包</small></sup></span> 似乎能在缺少 ppp-mppe 的情况下开箱即用。虽然其他认证实现方式通常都并不可用，由于其高度脆弱的特性，用户在任何情况下都不被鼓励使用 MSCHAPv2。 
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_eduroam" id="eduroam">eduroam</h4></div>
+<p><a href="https://en.wikipedia.org/wiki/eduroam">eduroam</a> 是一项面向科研，高等教育与继续教育领域人员的国际漫游服务。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>* 在应用本章节列出的任何配置之前，<b>首先</b>向您的机构确认连接的详细信息。示例配置不保证任何安全性或者匹配任何安全需求。
+<ul><li>存储未加密的连接配置文件时，建议用 root 用户运行以下命令以限制 root 帐户对此文件的的读取访问权限: <code>chmod 600 <i>配置文件</i></code></li></ul></div>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>针对 <a href="#pg5e6298ca298f">NetworkManager</a> 的配置可以用 <a href="https://cat.eduroam.org/">eduroam 配置助手工具</a> 来生成。 此工具需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python">python</a></span><sup><small>包</small></sup></span> 与 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dbus-python">dbus-python</a></span><sup><small>包</small></sup></span> 。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_.E6.89.8B.E5.8A.A8.2F.E8.87.AA.E5.8A.A8.E9.85.8D.E7.BD.AE" id="手动/自动配置"><span id=".E6.89.8B.E5.8A.A8.2F.E8.87.AA.E5.8A.A8.E9.85.8D.E7.BD.AE"></span>手动/自动配置</h4></div>
+<ul><li><a href="#pgf33bf2d25099">wpa_supplicant</a> 可以直接通过其配置文件或使用其 CLI/GUI 前端进行配置，并与 DHCP 客户端结合使用。   请参阅<code>/usr/share/doc/wpa_supplicant/wpa_supplicant.conf</code> 中的示例来结合您的详细连接信息。</li>
+<li><a href="#pg0b514fda2edb">iwd#WPA Enterprise</a></li>
+<li><a href="#pg5e6298ca298f">NetworkManager</a> 可以使用 <i>nmcli</i> 或 <a href="#pg5e6298ca298f">graphical front ends</a> 来创建 WPA2 企业级配置文件。<i>nmtui</i> 不支持此功能 (<a href="https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/issues/376">NetworkManager issue 376</a>), 但可以使用现有配置。</li>
+<li><a href="#pgdcf318d43727">ConnMan</a> 需要在<a href="#pgdcf318d43727">连接至网络</a>之前配置一个单独的配置文件。详情请参阅 <span class="plainlinks archwiki-template-man" title="$ man 5 connman-service.config"><a href="https://man.archlinux.org/man/connman-service.config.5">connman-service.config(5)</a></span> 和 <a href="#pgdcf318d43727">ConnMan#连接到 eduroam (802.1X)</a>。</li>
+<li><a href="#pgab24d2b1ec71">netctl</a> 可以通过填写配置中的<code>WPAConfigSection=</code> 字段来支持 wpa_supplicant 配置文件。详情请参阅 <span class="plainlinks archwiki-template-man" title="$ man 5 netctl.profile"><a href="https://man.archlinux.org/man/netctl.profile.5">netctl.profile(5)</a></span>。</li></ul>
+<dl><dd><div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>特殊引用规则适用: 参考 <span class="plainlinks archwiki-template-man" title="$ man 5 netctl.profile"><a href="https://man.archlinux.org/man/netctl.profile.5#SPECIAL_QUOTING_RULES">netctl.profile(5) § SPECIAL QUOTING RULES</a></span>.</div></dd>
+<dd><div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>自定义证书可通过在 <code>WPAConfigSection</code> 中添加字段 <code>'ca_cert="/path/to/special/certificate.cer"'</code> 来配置。</div></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_WPA3_.E4.B8.AA.E4.BA.BA" id="WPA3_个人"><span id="WPA3_.E4.B8.AA.E4.BA.BA"></span>WPA3 个人</h3></div>
+<p>WPA3 Personal, 又名 WPA3-SAE, 是一种 受保护Wi-Fi访问（<a href="https://zh.wikipedia.org/wiki/WPA">Wi-Fi存取保护</a>）的模式。
+</p><p><a href="#pgf33bf2d25099">wpa_supplicant</a> 及 <a href="#pg0b514fda2edb">iwd</a> 都支持 WPA3 个人认证模式。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_WPA3_.E4.BC.81.E4.B8.9A.E6.A8.A1.E5.BC.8F" id="WPA3_企业模式"><span id="WPA3_.E4.BC.81.E4.B8.9A.E6.A8.A1.E5.BC.8F"></span>WPA3 企业模式</h3></div>
+<p>WPA3 企业模式 是一种 受保护Wi-Fi访问（<a href="https://zh.wikipedia.org/wiki/WPA">Wi-Fi存取保护</a>）的模式。
+</p><p><a href="#pgf33bf2d25099">wpa_supplicant</a> (自版本起 2:2.10-8) 支持 WPA3 企业模式。 参见 <a href="https://bugs.archlinux.org/task/65314">FS#65314</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf9c69fac770d_.E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7" id="提示和技巧"><span id=".E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7"></span>提示和技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E9.81.B5.E5.BE.AA.E7.9B.91.E7.AE.A1.E5.8C.BA.E5.9F.9F.E8.A6.81.E6.B1.82" id="遵循监管区域要求"><span id=".E9.81.B5.E5.BE.AA.E7.9B.91.E7.AE.A1.E5.8C.BA.E5.9F.9F.E8.A6.81.E6.B1.82"></span>遵循监管区域要求</h3></div>
+<p><a href="https://en.wikipedia.org/wiki/IEEE_802.11#Regulatory_domains_and_legal_compliance">监管区域</a>用于配置无线驱动，确保对无线硬件的使用符合由 FCC、ETSI 及其他组织制定的当地法规。监管区域使用<a href="https://en.wikipedia.org/wiki/zh:ISO_3166-1%E4%BA%8C%E4%BD%8D%E5%AD%97%E6%AF%8D%E4%BB%A3%E7%A0%81">ISO 3166-1二位字母国家代码</a>。例如，美国的监管区域代码是“US”，中国则是“CN”，等等。
+</p><p>监管区域影响无线信道的可用性。在2.4GHz波段，美国允许使用1-11信道，日本是1-14，世界上多数其它地区则是1-13。在5GHz波段，允许使用信道的规则要复杂得多。这两种情况的更详细信息见<a href="https://en.wikipedia.org/wiki/zh:WLAN%E4%BF%A1%E9%81%93%E5%88%97%E8%A1%A8">这一WLAN信道列表</a>。
+</p><p>监管区域也影响对来自无线设备的<a href="https://en.wikipedia.org/wiki/Equivalent_isotropically_radiated_power">等效各向同性辐射功率（EIRP）</a>所作的限制。这衍生自发射功率（tx power）并以<a href="https://en.wikipedia.org/wiki/zh:%E5%88%86%E8%B4%9D%E6%AF%AB%E7%93%A6">dBm/mBm（1dBm=100mBm）或mW（对数尺度）</a>衡量。在2.4GHz波段，美国和加拿大最大限制30dBm，欧洲大部分是20dBm，世界上其他地区则是20dB-30dBm。在5GHz波段，最大值通常更低。更详细的信息请参考 <a href="https://git.kernel.org/cgit/linux/kernel/git/linville/wireless-regdb.git/tree/db.txt">wireless-regdb</a>（EIRP dBm 值在每行第二对括号里）。
+</p><p>错误设置监管区域可能会有用——例如，在其他信道拥挤时可以使用未用信道，或者提升发射功率以扩大传输范围。然而<b>不推荐这种做法</b>，因为可能会违反当地法规以及造成与其他无线电设备的干扰。
+</p><p>要配置监管区域，安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=crda">crda</a></span><sup><small>包</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：replaced by <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wireless-regdb">wireless-regdb</a></span><sup><small>包</small></sup></span>]</sup> 并重启（以重新加载 <code>cfg80211</code> 模块及所有相关驱动）。检查启动日志以确认 <code>cfg80211</code> 正在调用CRDA：
+</p>
+<pre># dmesg | grep cfg80211
+</pre>
+<p>以下命令可将当前监管区域设为美国：
+</p>
+<pre># iw reg set US
+</pre>
+<p>用以下命令查询：
+</p>
+<pre>$ iw reg get
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>
+<ul><li>你的设备国家代码可能为“00”，它是包含了通用设置的“世界监管区域”。如果无法解除此设置，则CRDA可能配置有误。</li>
+<li>根据 <a href="https://git.kernel.org/pub/scm/linux/kernel/git/mcgrof/crda.git/tree/README">CRDA 的 README</a>，从内核版本4.15开始就不再需要它，因为内核会自动从固件加载监管数据库。然而<a href="https://bugs.gentoo.org/462032#c17">也有说法称</a>这一加载操作需要特定的内核设置。</li></ul>
+</div>
+<p>然而设置监管区域可能不会改变您的设置。有些设备在固件/EEPROM中设置了一个监管区域，为设备规定了限制，这意味着通过软件设置监管区域<a href="https://wiki.openwrt.org/doc/howto/wireless.utilities#iw">只能增加限制</a>而不能减少。例如，一个 CN（中国）设备可以用软件设置为 US（美国）监管区域，但由于中国的 EIRP 最大值为20dBm，设备将无法以美国的最大值30dBm进行发射。
+</p><p>例如，查看一个 Atheros 设备的固件中是否设置了监管区域：
+</p>
+<pre># dmesg | grep ath:
+</pre>
+<p>对于其他芯片组，搜索“EEPROM”、“regdomain”或设备驱动的名字可能会有用。
+</p><p>要查看监管区域更改是否成功，以及查询可用信道数和允许发射功率：
+</p>
+<pre>$ iw list | grep -A 15 Frequencies:
+</pre>
+<p>监管区域的持久设置可以通过编辑 <code>/etc/conf.d/wireless-regdom</code> 并解除相应区域的注释实现。 <code>wpa_supplicant</code> 也可以在 <code>/etc/wpa_supplicant/wpa_supplicant.conf</code> 中的 <code>country=</code> 行应用监管区域。
+</p><p>也可以通过添加<a href="#pg2710ba58e238">模块参数</a>（如 <code>options cfg80211 ieee80211_regdom=EU</code>），配置 <a href="https://wireless.wiki.kernel.org/en/developers/Documentation/cfg80211">cfg80211</a> 内核模块，从而使用指定的监管区域。然而这是一种<a href="https://wireless.wiki.kernel.org/en/developers/Regulatory#the_ieee80211_regdom_module_parameter">老旧的监管实现</a>。
+</p><p>更多信息请阅读 <a href="https://wireless.wiki.kernel.org/en/developers/Regulatory/">wireless.kernel.org 监管文档</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_Rfkill_.E8.AF.B4.E6.98.8E" id="Rfkill_说明"><span id="Rfkill_.E8.AF.B4.E6.98.8E"></span>Rfkill 说明</h3></div>
+<p>许多笔记本都有一个硬件按钮或开关用于关闭无线网卡，然而无线网卡也可以通过内核来屏蔽。这一任务可由 <i>rfkill</i> 处理。显示当前状态：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ rfkill</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ID TYPE      DEVICE      SOFT      HARD
+ 0 bluetooth hci0   unblocked unblocked
+ 1 wlan      phy0   unblocked unblocked
+</pre>
+<p>如果网卡处于<i>硬件屏蔽（hard-blocked）</i>状态，请使用硬件按钮或开关来开启它。 如果无线网卡并没有被<i>硬件屏蔽</i>但处于<i>软件屏蔽（soft-blocked）</i>，请使用以下命令：
+</p>
+<pre># rfkill unblock wifi
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>按下硬件按钮可能会让无线网卡从硬件屏蔽，软件未屏蔽状态变为硬件未屏蔽，软件屏蔽状态。 可以通过调整 <code>rfkill</code> <a href="#pg2710ba58e238">内核模块</a>的一些选项改变这一现象。</div>
+<p>切换无线网卡的硬件按钮是厂商专用的<a href="#pg2710ba58e238">内核模块</a>处理的，经常是 <a href="https://lwn.net/Articles/391230/">WMI</a> 模块。特别是非常新的硬件型号，可能还没有得到最新稳定内核的完全支持。这种情况下，在内核 bug 跟踪系统搜索信息，并将型号报告给对应厂商内核模块的维护者（如果还没有报告的话）经常会有帮助。
+</p><p>参见 <a href="https://askubuntu.com/questions/62166/siocsifflags-operation-not-possible-due-to-rf-kill">https://askubuntu.com/questions/62166/siocsifflags-operation-not-possible-due-to-rf-kill</a> 。u
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E8.8A.82.E8.83.BD" id="节能"><span id=".E8.8A.82.E8.83.BD"></span>节能</h3></div>
+<p>见<a href="#pga6e29fecd7a5">电源管理#网络接口</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf9c69fac770d_.E6.8E.92.E9.94.99" id="排错"><span id=".E6.8E.92.E9.94.99"></span>排错</h2></div>
+<p>这个单元包含一般性的错误排除提示, 目的并非是排除与设备或固件驱动有关的错误。 对于驱动与固件上的问题, 请看 #驱动与固件排错.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E4.B8.B4.E6.97.B6.E4.B8.8A.E7.BD.91" id="临时上网"><span id=".E4.B8.B4.E6.97.B6.E4.B8.8A.E7.BD.91"></span>临时上网</h3></div>
+<p>如果您的网络设备出了问题但需要网络访问，例如， 下载一些软件或向社区寻求帮助， 您可以利用安卓的内置功能来通过USB端口共享网络。 详见 <a href="https://wiki.archlinux.org/title/Android_tethering#USB_tethering">Android Tethering#USB tethering</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E8.A7.82.E5.AF.9F.E6.97.A5.E5.BF.97.E6.96.87.E4.BB.B6" id="观察日志文件"><span id=".E8.A7.82.E5.AF.9F.E6.97.A5.E5.BF.97.E6.96.87.E4.BB.B6"></span>观察日志文件</h3></div>
+<p>分析系统日志文件是排错的良好切入点。在进行操作（如尝试连接到无线网络）的同时，打开第二个终端/控制台窗口并用以下命令监看内核消息： 
+</p>
+<pre># dmesg -w
+</pre>
+<p>这样，您就不需要手动一行一行的浏览这些消息了。 
+</p><p>当您使用<a href="#pgf42a74f3af9c">网络管理器</a>时，同样的，可以用 systemd 提供的日志命令： 
+</p>
+<pre># journalctl -f 
+</pre>
+<p>通常来说，无线网络错误都伴随着具有特定理由代码（reason code）的取消验证（deauthentication）。例如：   
+</p>
+<pre>wlan0: deauthenticating from XX:XX:XX:XX:XX:XX by local choice (reason=3)
+</pre>
+<p>对照<a href="http://www.aboutcher.co.uk/2012/07/linux-wifi-deauthenticated-reason-codes/">原因代码</a>表可能会给出解决问题的第一个提示。 
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E8.8E.B7.E5.8F.96IP.E5.9C.B0.E5.9D.80.E5.A4.B1.E8.B4.A5" id="获取IP地址失败"><span id=".E8.8E.B7.E5.8F.96IP.E5.9C.B0.E5.9D.80.E5.A4.B1.E8.B4.A5"></span>获取IP地址失败</h3></div>
+
+
+<ul><li>如果用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dhcpcd">dhcpcd</a></span><sup><small>包</small></sup></span> 客户端获取ip地址反复多次均失败, 尝试安装并使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dhclient">dhclient</a></span><sup><small>包</small></sup></span> 。不要忘记在连接管理器中选择 dhclient 作为首选DHCP客户端</li></ul>
+<ul><li>如果你使用有线接口可以获得IP地址而无线接口不能， 尝试禁用无线网卡的省电功能(指定 <code>off</code> 而非 <code>on</code>).</li></ul>
+<ul><li>如果由于等待网络连接而导致超时错误，可能要将特定网卡设备的信道模式改为自动: <code>auto</code></li></ul>
+<pre># iwconfig wlan0 channel auto
+</pre>
+<p>在将wifi信道更改为自动之前，请确保无线接口已关闭。成功地更改后，再次打开无线接口并继续。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_IP.E5.9C.B0.E5.9D.80.E6.9C.89.E6.95.88.E4.BD.86.E6.97.A0.E6.B3.95.E6.8E.A5.E8.A7.A3.E6.9E.90.E4.B8.BB.E6.9C.BA.E5.90.8D" id="IP地址有效但无法接解析主机名"><span id="IP.E5.9C.B0.E5.9D.80.E6.9C.89.E6.95.88.E4.BD.86.E6.97.A0.E6.B3.95.E6.8E.A5.E8.A7.A3.E6.9E.90.E4.B8.BB.E6.9C.BA.E5.90.8D"></span>IP地址有效但无法接解析主机名</h3></div>
+<p>如果你正在使用公共无线网络，可能会有<a href="https://en.wikipedia.org/wiki/Captive_portal">认证门户</a>, 确保在浏览器查询认证页面时使用HTTP 而不是HTTPS, 因为有些认证门户会重定向到HTTP.
+如果不是这个导致的问题, <a href="#pg5e90005cb568">检查你是否可以解析域名</a>, 可能有必要使用通过DHCP方式得到的DNS服务器。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E8.AE.BE.E7.BD.AE_RTS_.E5.92.8C.E9.9D.99.E6.80.81.E5.B8.A7.E5.88.86.E6.AE.B5.E9.98.88.E5.80.BC" id="设置_RTS_和静态帧分段阈值"><span id=".E8.AE.BE.E7.BD.AE_RTS_.E5.92.8C.E9.9D.99.E6.80.81.E5.B8.A7.E5.88.86.E6.AE.B5.E9.98.88.E5.80.BC"></span>设置 RTS 和静态帧分段阈值</h3></div>
+<p>无线网卡默认禁用了 RTS 和 分段机制 。这两种方法都以牺牲带宽来换取吞吐量 (i.e. 以速度为代价提高可靠性)。在由于无线干扰和有多个相邻接入点，从而导致连接超时或失败的环境中，这两个设置非常有用。 
+</p><p>数据包分段通过将超过阈值的包分割，从而提高吞吐量。最大值（2346）实际上禁用了分段，因为没有任何包可以超过这个值，最小值（256）最大化了吞吐量，但带宽成本很会大。
+</p>
+<pre># iw phy0 set frag 512
+</pre>
+<p><a href="https://en.wikipedia.org/wiki/IEEE_802.11_RTS/CTS">RTS</a> 通过在与接入点传输超过RTS阈值的分组之前来进行握手，从而提高吞吐量。最大值（2347）实际上禁用了RTS，没有分组可以超过这个值。最小值（0）意味着所有分组都启用RTS，但这很极端。
+</p>
+<pre># iw phy0 set rts 500
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>phy0</code> 是用<code>iw phy</code> 命令 列举出的无线网卡的名称</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E9.9A.8F.E6.97.B6.E5.8F.AF.E8.83.BD.E6.96.AD.E5.BC.80.E8.BF.9E.E6.8E.A5" id="随时可能断开连接"><span id=".E9.9A.8F.E6.97.B6.E5.8F.AF.E8.83.BD.E6.96.AD.E5.BC.80.E8.BF.9E.E6.8E.A5"></span>随时可能断开连接</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_Cause_.231" id="Cause_#1"><span id="Cause_.231"></span>Cause #1</h4></div>
+<p>如果你在<a href="#pg47c5e1af4d24">日志</a>里看到：<code>wlan0: deauthenticating from MAC by local choice (reason=3)</code> 并且 Wi-Fi 断开连接, 很可能是你的无线网卡的电源节能设置太激进。尝试禁用无线网卡的<a href="#pg3bfeacfb89ba">省电功能</a>。
+</p><p>如果你的网卡不支持 启用/禁用 节能模式, 看看 BIOS 的电源管理选项。 比如，在 联想 W520 的BIOS中禁用PCI-Express电源管理就解决了这个问题。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_Cause_.232" id="Cause_#2"><span id="Cause_.232"></span>Cause #2</h4></div>
+<p>如果你经常断连，并且在<a href="#pg47c5e1af4d24">日志</a>看到如下信息： 
+</p><p><code>ieee80211 phy0: wlan0: No probe response from AP xx:xx:xx:xx:xx:xx after 500ms, disconnecting</code>
+</p><p>在你路由器设置面板里把频道带宽改成 <code>20MHz</code> 。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_Cause_.233" id="Cause_#3"><span id="Cause_.233"></span>Cause #3</h4></div>
+<p>有些笔记本有硬件 rfkill 开关（如Thinkpad X200系列），因为磨损或有问题，开关（或与主板的连接）可能会随时间的推移而变松，不小心触摸开关或移动电脑时就可能出现断连。这问题没有软件解决方案，除非开关是电子式的，BIOS提供了禁用开关的选项。如果开关是机械式的（大部分机型都是），就有很多解决方案，其中大多数都是要禁用开关：在主板/无线网卡上的接触点进行焊接，用胶水封堵或阻挡，使用螺丝来拧紧开关，或者直接拆除开关。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_Cause_.234" id="Cause_#4"><span id="Cause_.234"></span>Cause #4</h4></div>
+<p>导致随时断连或完全无法连接的其他原因，比如路由器质量差，配置不完整，其他无线设备干扰，或信号质量差。 
+</p><p>为了排错, 首先要靠近路由器，并且在不需要身份验证的情况下进行连接 
+</p><p>如果有效，那重新启用 WPA/WPA2 ，但是选择固定/有限的路由器配置，比如： 
+</p>
+<ul><li>如果路由器比你用的无线设备客户端老的多，把路由器设置为单一无线模式进行测试。</li>
+<li>禁用混合验证模式 ，(e.g. 只启用 WPA2 with AES, o如果是老路由器，则是TKIP)</li>
+<li>使用固定频道而不是自动频道 (因为附近的路由器可能老旧而且存在干扰)</li>
+<li>禁用 <a href="https://en.wikipedia.org/wiki/Wi-Fi_Protected_Setup">WPS</a></li>
+<li>把路由器的 5 GHz 频道切换为 <a href="https://en.wikipedia.org/wiki/List_of_WLAN_channels#5_GHz_.28802.11a.2Fh.2Fj.2Fn.2Fac.2Fax.29">non-DFS (Dynamic Frequency Selection) 频道</a>. 在这种频道的连接<a href="https://wifinigel.blogspot.com/2018/05/the-5ghz-problem-for-wi-fi-networks-dfs.html">突然被丢弃或者切换</a>，这是因为附近天气雷达的干扰。</li>
+<li>只使用2.4 GHz ，而不是自动在 5 GHz 和2.4 GHz 切换。 (后者吞吐量低，但是远距离连接更稳定)</li>
+<li>禁用 <code>40MHz</code> 频道带宽 (吞吐量低，但冲突更少) ，用<code>cfg80211.cfg80211_disable_40mhz_24ghz=1</code></li>
+<li>如果路由器有 Qos功能, 检查设置的完整性。(e.g. Wi-Fi 多媒体 (WMM) 是 QoS 流控制中可选的功能， 损坏的路由器固件可能会表明他已经存在，即使没有启用这个功能)</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_Cause_.235" id="Cause_#5"><span id="Cause_.235"></span>Cause #5</h4></div>
+<p>对于一些无线网卡适配器 (e.g. Qualcomm Atheros AR9485), 随时断连可能会伴随一个 DMA 报错：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># journalctl -xb</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ath: phy0: DMA failed to stop in 10 ms AR_CR=0x00000024 AR_DIAG_SW=0x02000020 DMADBG_7=0x0000a400
+wlp1s0: authenticate with 56:e7:ee:7b:55:bc
+wlp1s0: send auth to 56:e7:ee:7b:55:bc (try 1/3)
+wlp1s0: send auth to 56:e7:ee:7b:55:bc (try 2/3)
+wlp1s0: send auth to 56:e7:ee:7b:55:bc (try 3/3)
+wlp1s0: authentication with 56:e7:ee:7b:55:bc timed out</pre>
+<p>可行的方案是禁用 <a href="https://docs.kernel.org/x86/iommu.html">Intel IOMMU driver (DMA)</a>, 把<code>intel_iommu=off</code> 加入  <a href="#pgc7833704a8db">kernel parameters</a> <a href="https://bbs.archlinux.org/viewtopic.php?pid=1907446#p1907446">[2]</a>.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Intel IOMMU 驱动对于一些高级虚拟机功能是必需的，如PCI直通。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_Cause_.236" id="Cause_#6"><span id="Cause_.236"></span>Cause #6</h4></div>
+<p>如果你用的是带 <code>iwlwifi</code> 或 <code>iwlmvm</code> 的设备进行无线连接，使用电池电源的时候，无线网卡似乎消失了，（可能是重启或从休眠中恢复后），可以通过 iwlmvm 里的节能模式设置修复。
+</p><p>创建  <code>/etc/modprobe.d/iwlmvm.conf</code> ，再添加以下行：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/iwlmvm.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options iwlmvm power_scheme=1</pre>
+<p><code>power_scheme</code> 为 1 表明把 iwlmvm 设置为<i>总是活跃</i>。可选项如下：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>值</th>
+<th>描述
+</th></tr>
+<tr>
+<td>1</td>
+<td>总是活跃
+</td></tr>
+<tr>
+<td>2</td>
+<td>平衡
+</td></tr>
+<tr>
+<td>3</td>
+<td>节能
+</td></tr></tbody></table>
+<p>这个修复方法是在 <a href="https://forums.debian.net/viewtopic.php?t=121696#p576208">[3]</a>被找到的。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_Cause_.237" id="Cause_#7"><span id="Cause_.237"></span>Cause #7</h4></div>
+<p>若设备长期不使用 (e.g. 文件服务器),  可能会因为节能模式导致无法连接，节能模式会阻止流量传入和建立连接。尝试为接口禁用节能模式:
+</p>
+<pre># iw dev <i>interface</i> set power_save off
+</pre>
+<p>可以创建udev规则，让开机时自动执行它。参阅 <a href="#pg3bfeacfb89ba">Power management#Network interfaces</a>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_Cause_.238" id="Cause_#8"><span id="Cause_.238"></span>Cause #8</h4></div>
+<p>如果你连接 Mesh 网络时 (e.g., WiFi6) ，会偶尔中断连接，并且你看到了如下日志信息：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># journalctl -b</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">kernel: wlan0: disconnect from AP aa:bb:cc:dd:ee:ff for new auth to 11:22:33:44:55:66
+</pre>
+<p>你遇到的是漫游问题，可采取以下措施：
+</p>
+<ul><li>如果不需要漫游，在 NetworkManager中锁定BSSID (如上面的 <code>aa:bb:cc:dd:ee:ff</code> )  (参阅 <a href="#pg5e6298ca298f">NetworkManager#Regular network disconnects, latency and lost packets (WiFi)</a>).</li>
+<li>在  <a href="#pgf33bf2d25099">Wpa_supplicant#Roaming</a> 中调整 <code>bgscan</code></li></ul>
+<p>C
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_Cause_.239" id="Cause_#9"><span id="Cause_.239"></span>Cause #9</h4></div>
+<p>如果你使用Intel WiFi 7 BE200网卡，并且WiFi在启动时完全正常，但暂停/恢复后，找不到任何网络。
+</p><p>问题可能在于，在新版 Linux 内核中，驱动程序或设备本身会声明其具备将设备设置为低功耗 D3cold 睡眠状态的功能，而这种状态本身存在问题。 解决方案是指示 udev 配置该卡，使其不使用该状态。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ /etc/udev/rules.d/99-disable-d3cold-be200.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">$ ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x272b", ATTR{d3cold_allowed}="0"</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_Wi-Fi_.E7.94.B1.E4.BA.8E.E9.94.99.E8.AF.AF.E7.9A.84.E4.BF.A1.E9.81.93.E8.AE.BE.E7.BD.AE.E8.80.8C.E5.8F.98.E5.BE.97.E4.B8.8D.E5.8F.AF.E8.A7.81" id="Wi-Fi_由于错误的信道设置而变得不可见"><span id="Wi-Fi_.E7.94.B1.E4.BA.8E.E9.94.99.E8.AF.AF.E7.9A.84.E4.BF.A1.E9.81.93.E8.AE.BE.E7.BD.AE.E8.80.8C.E5.8F.98.E5.BE.97.E4.B8.8D.E5.8F.AF.E8.A7.81"></span>Wi-Fi 由于错误的信道设置而变得不可见</h3></div>
+<p>若电脑 Wi-Fi 信道不符合用户所处国家之规定，部分Wi-Fi即使处于信号覆盖范围内，也可能因信道默认不被允许而不可见。参阅 #Respecting the regulatory domain.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf9c69fac770d_.E9.A9.B1.E5.8A.A8.E4.B8.8E.E5.9B.BA.E4.BB.B6.E6.8E.92.E9.94.99" id="驱动与固件排错"><span id=".E9.A9.B1.E5.8A.A8.E4.B8.8E.E5.9B.BA.E4.BB.B6.E6.8E.92.E9.94.99"></span>驱动与固件排错</h2></div>
+<p>这一部分包含了关于特定芯片组安装内核模块与固件的方法与规范，不同于一般的方法。
+</p><p>参阅<a href="#pg6dbfce2ea89d">内核模块</a>了解通用的模块操作方法。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_Ralink" id="Ralink">Ralink</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_rt2x00" id="rt2x00">rt2x00</h4></div>
+<p>Ralink 芯片组的统一驱动，代替了 <code>rt2500</code>、<code>rt61</code>、<code>rt73</code> 等。Linux 内核从 2.6.24
+</p>
+<pre>开始包含此驱动，但是有些设备可能需要额外固件。可以使用标准 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=wpa_supplicant">wpa_supplicant</a></span><sup><small>包</small></sup></span> 和 <code>iwconfig</code> 工具配置。
+</pre>
+<p>有些芯片组需要固件文件，可以安装软件包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span>。
+</p><p>参见: <a href="#pg86d9c720ee6a">Using the new rt2x00 beta driver</a>。
+</p>
+<ul><li>从内核 3.0 开始，rt2x00 也包含了这些驱动程序：</li></ul>
+<p><code>rt2800pci</code>、<code>rt2800usb</code>。  <code>rt2860sta</code> 被主分支驱动 <code>rt2800pci</code> 替代，<code>rt2870sta</code> 被  <code>rt2800usb</code> 替代。
+</p>
+<ul><li>通过 <code>iwpriv</code> 可以配置很多参数，文档在 <a href="https://web.archive.org/web/20111105120212/http://web.ralinktech.com/ralink/Home/Support/Linux.html">Ralink 源代码包</a>中。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_rt3090" id="rt3090">rt3090</h4></div>
+<p>对于使用 rt3090 芯片组的设备, 应该使用的驱动是<code>rt2800pci</code> ; 然而， 它并没有非常好的适配这个芯片组 (例如：有时候网速甚至不能到 2Mb/s).
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_rt3290" id="rt3290">rt3290</h4></div>
+<p>rt3290 芯片组是由内核模块 <code>rt2800pci</code> 识别的。一些用户遇到这些<a href="https://bbs.archlinux.org/viewtopic.php?id=161952">问题</a>，他们选择恢复到打了补丁的 Ralink 驱动，这样效果更好。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_rt3573" id="rt3573">rt3573</h4></div>
+<p>2012年新出的芯片组，需要 Ralink 的闭源驱动，有不同的厂商使用他们，参阅 <a href="https://bbs.archlinux.org/viewtopic.php?pid=1164228#p1164228">Belkin N750 示例</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_mt7612u" id="mt7612u">mt7612u</h4></div>
+<p>2014年新发布的芯片组，以新的商用名称联发科发布。这是一款 AC1200 或 AC1300 级别的芯片组。制造商提供了 Linux 驱动程序在<a href="https://www.mediatek.com/products/broadbandWifi/mt7612u">支持页面</a>。从内核 5.5 版本开始，该芯片组应该已被包含的 <code>mt76</code> 驱动所支持。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_Realtek" id="Realtek">Realtek</h3></div>
+<p>参见 <a href="https://wikidevi.com/wiki/Realtek">[4]</a><sup>[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2022-11-10]</sup> 查看 Realtek 芯片组和规范列表
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_rtl8192cu" id="rtl8192cu">rtl8192cu</h4></div>
+<p>这个驱动已经被包含在内核里了, 但很多用户报告指出即使扫描到了 wifi 也无法连接。
+</p><p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/8192cu-dkms/">8192cu-dkms</a></span><sup><small>AUR</small></sup></span> 包含了很多补丁；如果内核里的驱动并没有很好的起效果可以尝试这个。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_rtl8723ae.2Frtl8723be" id="rtl8723ae/rtl8723be"><span id="rtl8723ae.2Frtl8723be"></span>rtl8723ae/rtl8723be</h4></div>
+<p><code>rtl8723ae</code> 和 <code>rtl8723be</code> 模块已经被包含在 Linux 内核主线。
+</p><p>一些用户使用此网卡时可能会遇到省电方面的问题. 这表现为可能偶尔断开连接，但高级网络管理器无法识别 (<a href="#pgab24d2b1ec71">netctl</a>、<a href="#pg5e6298ca298f">NetworkManager</a>)。以 root 身份执行 <code>dmesg -w</code> 可以验证这个错误 ，或以 root 身份执行 <code>journalctl -f</code> 查找与 powersave 和<code>rtl8723ae</code>/<code>rtl8723be</code>
+</p>
+<pre>模块相关的输出. 如果你遇到了这个问题，使用 <code>fwlps=0</code> 内核选项，这样可以防止无线网卡自动休眠或停止连接。参阅<a href="#pg6dbfce2ea89d">内核模块#配置模块参数</a>。
+</pre>
+<p>如果你信号很差，可能你只有一个物理天线连接了，并且天线的自动选择损坏了。可以用 <code>ant_sel=1</code> 或 <code>ant_sel=2</code> 内核选项强制选择天线<a href="https://bbs.archlinux.org/viewtopic.php?id=208472">[5]</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_rtl88xxau" id="rtl88xxau">rtl88xxau</h4></div>
+<p>Realtek 芯片组 rtl8811au、rtl8812au、rtl8814au 和 rtl8821au 被设计为用于各种 USB 适配器，范围从 AC600 到 AC1900。有几个包提供对应的内核驱动，需要 DKMS 和内核头文件：
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>C</th>
+<th>P</th>
+<th>N
+</th></tr>
+<tr>
+<td>rtl8811au、rtl8812au、rtl8821au</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rtl88xxau-aircrack-dkms-git/">rtl88xxau-aircrack-dkms-git</a></span><sup><small>AUR</small></sup></span></td>
+<td>Aircrack-ng 给 8811au、8812au、8821au 提供了监控模式和注入支持。
+</td></tr>
+<tr>
+<td>rtl8812au</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rtl8812au-dkms-git/">rtl8812au-dkms-git</a></span><sup><small>AUR</small></sup></span></td>
+<td>Realtek 最新官方驱动版本，仅适用于 rtl8812au。
+</td></tr>
+<tr>
+<td>rtl8811au、rtl8821au</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rtl8821au-dkms-git/">rtl8821au-dkms-git</a></span><sup><small>AUR</small></sup></span></td>
+<td>用于  rtl8821au 的新一代驱动版本
+</td></tr>
+<tr>
+<td>rtl8814au</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rtl8814au-dkms-git/">rtl8814au-dkms-git</a></span><sup><small>AUR</small></sup></span></td>
+<td>rtl8813au 可能也适用
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_rtl8811cu.2Frtl8821cu" id="rtl8811cu/rtl8821cu"><span id="rtl8811cu.2Frtl8821cu"></span>rtl8811cu/rtl8821cu</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rtl8821cu-dkms-git/">rtl8821cu-dkms-git</a></span><sup><small>AUR</small></sup></span> 提供了一个内核模块给 Realtek 8811cu 和 8821cu 芯片组。
+</p><p>需要 <a href="#pgeae7d2a5f976">DKMS</a>, 确保安装了内核头文件。
+</p><p>如果安装并加载了 <code>8821cu</code> 模块，无线接口还是没有显示，需要手动指定 <code>rtw_RFE_type</code> 选项<a href="https://forums.linuxmint.com/viewtopic.php?p=1913190&amp;sid=68f2d6eff91cd47e184ae5a56385dc02#p1913190">[6]</a><a href="https://github.com/brektrou/rtl8821CU/issues/83">[7]</a>。试试例如 <code>echo "options 8821cu rtw_RFE_type=0x26" | sudo tee /etc/modprobe.d/8821cu.conf</code>，其他值可能也可以，比如 1 或 2 等等。详见<a href="#pg6dbfce2ea89d">内核模块#配置模块参数</a>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_rtl8821ce" id="rtl8821ce">rtl8821ce</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rtl8821ce-dkms-git/">rtl8821ce-dkms-git</a></span><sup><small>AUR</small></sup></span> 为华硕 X543UA 中的 Realtek 8821ce 芯片组提供了一个内核模块。
+</p><p>它需要 <a href="#pgeae7d2a5f976">DKMS</a>，所以应确保已安装内核头文件。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>有报告<a href="https://bbs.archlinux.org/viewtopic.php?id=273440">[8]</a>提出，在 Linux 内核版本 ≥ 5.9 中由 Realtek 提供的 <code>rtl8821ce</code> 无线模块是破损的，会导致连接弱，应该优先使用上面的 AUR 版本。详见<a href="https://github.com/tomaspinho/rtl8821ce#wi-fi-not-working-for-kernel--59">在 github 上的讨论</a>，使用 <code>lspci -k</code> 检查是否在用默认的 (<code>rtw88_8821ce</code>)模块。如果是，把它加入<a href="#pg6dbfce2ea89d">黑名单</a>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_rtl8822bu" id="rtl8822bu">rtl8822bu</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rtl88x2bu-dkms-git/">rtl88x2bu-dkms-git</a></span><sup><small>AUR</small></sup></span>  给 Edimax EW7822ULC USB3、Asus AC53 Nano USB 802.11ac 和 TP-Link Archer T3U adapter 的 Realtek 8822bu 芯片组提供了内核模块。
+</p><p>确保安装了 DKMS 和内核头文件。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_rtl8xxxu" id="rtl8xxxu">rtl8xxxu</h4></div>
+
+<p>可以通过<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span> 来获得 <code>rtl8xxxu</code> 的固件。
+</p><p><code>rtl8xxxu</code> 驱动程序已在主线内核中。但是 <a href="#pg481dd104a5a4">linux-libre</a> 内核不包含。
+</p><p><code>rtl8xxxu</code> 主线内核模块的问题可通过编译特定芯片组的第三方模块来解决。源代码可在 <a href="https://github.com/lwfinger?tab=repositories">GitHub 存储库</a>中找到。
+某些驱动程序可能已存在于在 AUR 中，例如 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rtl8723bu-dkms-git/">rtl8723bu-dkms-git</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果您的 USB 无线适配器基于 <code>RTL8188GU</code> 或 <code>RTL8192FU</code> 芯片，您可能需要<a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=usb_modeswitch">usb_modeswitch</a></span><sup><small>包</small></sup></span> 以将其切换至 <b>Wifi 模式</b>。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_RTW88" id="RTW88">RTW88</h4></div>
+<p>一份 RTW88 内核模块补丁集最近被发到内核邮件列表中，有望被添加进内核主线。
+</p><p>如果正确配置和编译的话，上游内核以及带有补丁集的内核将会支持大部分 RTW88 芯片设备。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-zen">linux-zen</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-zen-git/">linux-zen-git</a></span><sup><small>AUR</small></sup></span> 均包含了这些补丁，其中已打包的版本已经内置了该模块。
+</p><p>驱动支持型号有：882BE、8822BU、8822CE、8822CU、8723DE、8723DU、8821CE 与 8821CU。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_Atheros" id="Atheros">Atheros</h3></div>
+<p><a href="http://madwifi-project.org/">MadWifi</a> 开发团队维护了三个模块：
+</p>
+<ul><li><code>madwifi</code> 是最老的驱动，Arch 内核 从 2.6.39.1 开始已经不再包含。</li>
+<li><a href="#pgf9c69fac770d_ath5k"><code>ath5k</code></a> 将逐步替代 <code>ath_pci</code>，有些芯片组使用效果很好，但有些还不能很好工作(后面有说明)</li>
+<li><a href="#pgf9c69fac770d_ath9k"><code>ath9k</code></a> 是新的官方驱动，适用于新 Atheros 硬件。</li></ul>
+<p>还有一些驱动适用于其他的 Atheros 设备. 详见 <a href="https://wireless.wiki.kernel.org/en/users/Drivers/Atheros#pci_.2f_pci-e_.2f_ahb_drivers">Linux Wireless 文档</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_ath5k" id="ath5k">ath5k</h4></div>
+<p>参考:
+</p>
+<ul><li><a href="https://wireless.wiki.kernel.org/en/users/drivers/ath5k">https://wireless.wiki.kernel.org/en/users/drivers/ath5k</a></li>
+<li><a href="http://wiki.debian.org/ath5k">http://wiki.debian.org/ath5k</a></li></ul>
+<p>若网页有时加载缓慢或设备无法获取 ip 地址，尝试从硬件加密切换为软件加密，使用 <code>nohwcrypt=1</code> 内核选项加载 <code>ath5k</code> 模块。详见<a href="#pg6dbfce2ea89d">内核模块#配置模块参数</a>
+</p><p>有些笔记本的 LED 指示灯有问题，可以：
+</p>
+<pre>echo none &gt; "/sys/class/leds/ath5k-phy0::tx/trigger"
+echo none &gt; "/sys/class/leds/ath5k-phy0::rx/trigger"
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_ath9k" id="ath9k">ath9k</h4></div>
+<p>外部文档资源:
+</p>
+<ul><li><a href="https://wireless.wiki.kernel.org/en/users/drivers/ath9k">https://wireless.wiki.kernel.org/en/users/drivers/ath9k</a></li>
+<li><a href="https://wiki.debian.org/ath9k">https://wiki.debian.org/ath9k</a></li></ul>
+<p>截至 Linux 3.15.1，一些用户可能会遇到网络带宽下降的问题，这种情况可以为 <code>ath9k</code> 模块设置 <code>nohwcrypt=1</code> 的内核选项。 详见<a href="#pg6dbfce2ea89d">内核模块#配置模块参数</a>.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>使用命令 <code>lsmod</code> 查看正在使用的模块，如果名称不同（例如 <code>ath9k_htc</code>），请更改 <code>ath9k</code>。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgf9c69fac770d_.E8.8A.82.E8.83.BD.2F.E7.9C.81.E7.94.B5.E6.A8.A1.E5.BC.8F" id="节能/省电模式"><span id=".E8.8A.82.E8.83.BD.2F.E7.9C.81.E7.94.B5.E6.A8.A1.E5.BC.8F"></span>节能/省电模式</h5></div>
+<p>虽然 Linux 无线工具表明对于比 AR9280 更新的 Atheros ath9k 单芯片设备已经启用了动态电源节能功能，虽然 <a href="https://wireless.wiki.kernel.org/en/users/Documentation/dynamic-power-save">Linux Wireless</a> 指出比 AR9280 更新的 Atheros ath9k 单芯片设备已启用动态节能功能，但一些设备仍 (例如 AR9285) <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=powertop">powertop</a></span><sup><small>包</small></sup></span> 被指出省电被禁用，这种情况需手动开启。
+</p><p>一些设备 (例如 AR9285)，启用省电功能可能会有如下报错：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># iw dev wlan0 set power_save on</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">command failed: Operation not supported (-95)
+</pre>
+<p>解决方法：为 <code>ath9k</code> 模块设置  <code>ps_enable=1</code> 内核选项，详见<a href="#pg6dbfce2ea89d">内核模块#配置模块参数</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_Intel" id="Intel">Intel</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_iwlegacy" id="iwlegacy">iwlegacy</h4></div>
+<p><a href="https://wireless.wiki.kernel.org/en/users/Drivers/iwlegacy">iwlegacy</a> 是 Intel 3945 和 4965 网卡的无线驱动。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span> 已经包含此驱动。
+</p><p><a href="#pge009209061ac">udev</a> 会自动加载驱动，否则要手动加载 <code>iwl3945</code> 或 <code>iwl4965</code>。详见<a href="#pg6dbfce2ea89d">内核模块</a>。
+</p><p>如果连不上网或者连接很弱，尝试启用 802.11n：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/iwl4965.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options iwl4965 11n_disable=1</pre>
+<p>若启动过程中一直失败，且你正在使用 Nouveau 驱动, 尝试<a href="#pg172970a5f8dd">启用早期 KMS</a> 避免冲突 <a href="https://bbs.archlinux.org/viewtopic.php?pid=1748667#p1748667">[9]</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_iwlwifi" id="iwlwifi">iwlwifi</h4></div>
+<p><a href="https://wireless.wiki.kernel.org/en/users/drivers/iwlwifi">iwlwifi</a> 是适用于 Intel 当前网卡的无线驱动，例如 5100AGN、5300AGN、和 5350AGN。<a href="https://wireless.wiki.kernel.org/en/users/drivers/iwlwifi#supported_devices">查看所有受支持的文件列表</a>。该固件已包含在 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span> 里。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/linux-firmware-iwlwifi-git/">linux-firmware-iwlwifi-git</a></span><sup><small>AUR</small></sup></span> 可能包含更新的驱动。
+</p><p>若联网存在问题或连接很弱，尝试启用 802.11n，也可能需要启用软件加密：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/iwlwifi.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options iwlwifi 11n_disable=1 swcrypto=1</pre>
+<p>在 802.11n 模式下网络上行速度很慢，比如只有 20Mbps，尝试启用 TX AMPDU：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/iwlwifi.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options iwlwifi 11n_disable=8</pre>
+<p>若上行速度很慢，可以禁用无线网卡的<a href="https://wiki.archlinux.org/title/Power_saving#Network_interfaces">省电模式</a>。
+</p><p>如果你有 802.11ax (WiFi 6) 接入点并且也有连接不稳定等问题，可参阅 <a href="https://www.intel.com/content/www/us/en/support/articles/000054799/network-and-i-o/wireless.html">Intel Article 54799</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>用 <code>11n_disable=0</code> 参数将会阻止 802.11ac，只能使用较慢的协议，（5GHz 频段用 802.11a，2.4 GHz 频段用802.11b/g）。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgf9c69fac770d_.E8.93.9D.E7.89.99.E5.85.B1.E5.AD.98" id="蓝牙共存"><span id=".E8.93.9D.E7.89.99.E5.85.B1.E5.AD.98"></span>蓝牙共存</h5></div>
+<p>若无法连接蓝牙耳机或无法保持良好的数据接受速度，请禁用蓝牙共存，参考 <a href="https://wireless.docs.kernel.org/en/latest/en/users/drivers/iwlwifi.html#wi-fi-bluetooth-coexistence">[10]</a>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/iwlwifi.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options iwlwifi bt_coex_active=0</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>从内核版本 5.8 起, 对于由 <code>iwlmvm</code> 内核模块处理的硬件， <code>bt_coex_active</code> 和 <code>sw_crypto</code> 模块选项已被禁用，但对于由 <code>iwldvm</code> 模块处理的老硬件，这些选项依旧起作用。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgf9c69fac770d_.E5.9B.BA.E4.BB.B6.E9.97.AE.E9.A2.98" id="固件问题"><span id=".E5.9B.BA.E4.BB.B6.E9.97.AE.E9.A2.98"></span>固件问题</h5></div>
+<p>你可能会遇到驱动程序输出堆栈跟踪与报错，这会导致有点卡顿。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># dmesg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Microcode SW error detected.  Restarting 0x2000000.</pre>
+<p>你也可能遇到其他各种各样的问题（例如<a href="https://www.reddit.com/r/archlinux/comments/x0v5jj/rant_intel_wifi_firmwares_are_utter_garbage/">连接 5GHz 频段时的问题，随时断连，恢复后无法连接</a>）。
+</p><p>要想确认是否是固件的原因，请<a href="#pg003e475392dc">降级</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span> 包。 
+</p><p>如果确定是固件的问题, 移除有 bug 的固件文件以确保可以加载旧版本固件 (要更新 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span><sup><small>包</small></sup></span> 包，因为它不仅仅提供 Intel 无线网卡的固件更新): 
+</p>
+<pre># for i in {64..73} ; do mv /usr/lib/firmware/iwlwifi-ty-a0-gf-a0-$i.ucode.xz /usr/lib/firmware/iwlwifi-ty-a0-gf-a0-$i.ucode.xz.bak ; done
+</pre>
+<p>为了避免每次更新后都需要手动重复这些步骤, 可以在 <code>pacman.conf</code> 里用  <code>NoExtract</code> 数组搭配通配符以此禁止它们的安装。详见 <a href="#pg9ef105bf1e3c">pacman#在安装时跳过文件</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgf9c69fac770d_.E4.BB.8E_Windows_.E9.87.8D.E5.90.AF.E5.90.8E.E6.97.A0.E6.B3.95.E6.A3.80.E6.B5.8B.E5.88.B0_WiFi_.E9.80.82.E9.85.8D.E5.99.A8" id="从_Windows_重启后无法检测到_WiFi_适配器"><span id=".E4.BB.8E_Windows_.E9.87.8D.E5.90.AF.E5.90.8E.E6.97.A0.E6.B3.95.E6.A3.80.E6.B5.8B.E5.88.B0_WiFi_.E9.80.82.E9.85.8D.E5.99.A8"></span>从 Windows 重启后无法检测到 WiFi 适配器</h5></div>
+<p>如果从 Windows 重启到 Linux 后，检测不到 WiFi 适配器，可能是由于 Windows 默认启用的快速启动功能。尝试<a href="#pgeaa450c2a061">禁用快速启动</a>。<a href="https://wireless.wiki.kernel.org/en/users/drivers/iwlwifi#about_dual-boot_with_windows_and_fast-boot_enabled">iwlwifi 内核驱动维基页面有关于此问题的条目</a>。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgf9c69fac770d_.E7.A6.81.E7.94.A8_LED_.E9.97.AA.E7.83.81" id="禁用_LED_闪烁"><span id=".E7.A6.81.E7.94.A8_LED_.E9.97.AA.E7.83.81"></span>禁用 LED 闪烁</h5></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>适用于 <code>iwlegacy</code> 和 <code>iwlwifi</code> 驱动</div>
+<p>默认设置中 LED 闪烁是开启的，有些人不喜欢，可以用 <a href="#pgac06dd8bfe95">systemd-tmpfiles</a> 禁止闪烁：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tmpfiles.d/phy0-led.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">w /sys/class/leds/phy0-led/trigger - - - - phy0radio
+</pre>
+<p>运行 <code>systemd-tmpfiles --create phy0-led.conf</code> 使更改生效，或重启
+</p><p>查看此 LED 所有可选的触发值：
+</p>
+<pre># cat /sys/class/leds/phy0-led/trigger
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>如果你没有 <code>/sys/class/leds/phy0-led</code>，尝试使用 <code>led_mode="1"</code> <a href="#pg6dbfce2ea89d">模块参数</a>。它应当同时适用于 <code>iwlwifi</code> 和 <code>iwlegacy</code> 驱动。</div>
+<pre># cat /sys/class/leds/phy0-led/trigger
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_Broadcom" id="Broadcom">Broadcom</h3></div>
+<p>参见<a href="#pg269f17a1a0fd">博通无线网卡</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_.E5.85.B6.E4.BB.96.E9.A9.B1.E5.8A.A8.2F.E8.AE.BE.E5.A4.87" id="其他驱动/设备"><span id=".E5.85.B6.E4.BB.96.E9.A9.B1.E5.8A.A8.2F.E8.AE.BE.E5.A4.87"></span>其他驱动/设备</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_Tenda_w322u" id="Tenda_w322u">Tenda w322u</h4></div>
+<p>该型号 Tenda 卡 可被视为 <code>rt2870sta</code> 设备。参阅 <a href="#pgf9c69fac770d_rt2x00">#rt2x00</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_orinoco" id="orinoco">orinoco</h4></div>
+<p>这应当是内核的一部分，是已经被安装的。
+</p><p>部分 Orinoco 芯片组属于 Hermes 二代系列。应使用 <code>wlags49_h2_cs</code> 驱动而非 <code>orinoco_cs</code> 以获得WPA 支持。 使用此驱动前需先把 <code>orinoco_cs</code> 加入<a href="#pg6dbfce2ea89d">黑名单</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_prism54" id="prism54">prism54</h4></div>
+<p><code>p54</code> 已经包含在内核中，不过必须从<a href="https://wireless.wiki.kernel.org/en/users/drivers/p54#firmware">此网站</a>下载适合你网卡的驱动并且把它安装进<code>/usr/lib/firmware</code> 目录。
+</p><p>过时的 <code>prism54</code> 和新内核模块 <code>p54pci</code> 或 <code>p54usb</code> 同时装入造成冲突，使用 <code>lsmod | grep prism54</code> 查看是否装入了过时模块，如果是，那么就<a href="#pg3a5d8bdf10b8">屏蔽</a> <code>prism54</code> 并根据上面方法修改固件名称。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_zd1211rw" id="zd1211rw">zd1211rw</h4></div>
+<p><a href="https://sourceforge.net/projects/zd1211/">zd1211rw</a> 是 ZyDAS ZD1211 802.11b/g USB WLAN 芯片的驱动，最近的版本的内核已经包括了。有<a href="https://wireless.wiki.kernel.org/en/users/Drivers/zd1211rw/devices">被支持的设备列表</a>。需要安装固件<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/zd1211-firmware/">zd1211-firmware</a></span><sup><small>AUR</small></sup></span>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_hostap_cs" id="hostap_cs">hostap_cs</h4></div>
+<p><a href="https://hostap.epitest.fi/">Host AP</a> 是一个 Linux 驱动程序，对于基于 Intersil 的 Prism2/2.5/3 芯片组的无线局域网卡。该驱动程序包含在 Linux 内核中。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>确保把 <code>orinico_cs</code> 驱动程序加入<a href="#pg6dbfce2ea89d">黑名单</a>。</div>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgf9c69fac770d_ACX100.2F111" id="ACX100/111"><span id="ACX100.2F111"></span>ACX100/111</h4></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>适用于这些设备的驱动 <a href="https://lists.archlinux.org/archives/list/arch-dev-public@lists.archlinux.org/message/N5VBSKHSPV72HLNSZHPZXEBENOSB542C/">已损坏</a>且并不适用于更新的内核版本。</div>
+<p>软件包: <code>tiacx</code>、<code>tiacx-firmware</code> (已被官方仓库 和 AUR 移除)。
+</p><p>详见<a href="https://sourceforge.net/apps/mediawiki/acx100/index.php?title=Main_Page">官方维基</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgf9c69fac770d_ndiswrapper" id="ndiswrapper">ndiswrapper</h3></div>
+<p>Ndiswrapper并不是一个真正的驱动,但是如果你无法找到适合你的无线网卡驱动, 它就派上用场了.有的时候, 它是非常有用的.为了使用Ndiswrapper, 你需要 Windows 驱动中的 *.inf 文件(*.sys 文件应该和 *.info 在同一个目录中)。如果你需要从 <code>*.exe</code> 文件解压缩，你可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=cabextract">cabextract</a></span><sup><small>包</small></sup></span>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>确保使用合适架构(也就是 32/64 位)的驱动。</div>
+<p>下面是安装 ndiswrapper 的几个步骤:
+</p><p><br/>	
+1. 安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ndiswrapper-dkms">ndiswrapper-dkms</a></span><sup><small>包</small></sup></span>
+2. 安装驱动到 <code>/etc/ndiswrapper/*</code>
+</p>
+<pre>ndiswrapper -i filename.inf
+</pre>
+<p>3. 列出所有的安装的驱动
+</p>
+<pre>ndiswrapper -l
+</pre>
+<p>4. 配置文件写到 <code>/etc/modprobe.d/ndiswrapper.conf</code>
+</p>
+<pre>ndiswrapper -m
+depmod -a
+</pre>
+<p>然后依照<a href="#pg6dbfce2ea89d">内核模块</a>一文设置启动时加载这个模块。
+</p>
+<pre>modprobe ndiswrapper
+iwconfig
+</pre>
+<p>如果正常的话, 你应该可以看到wlan0接口了。如果有问题的话, 你可以阅读：
+<a href="http://ndiswrapper.sourceforge.net/joomla/index.php?/component/option,com_openwiki/Itemid,33/id,installation/">Ndiswrapper installation wiki</a><sup title="最后检查状态：404">[<a href="https://zh.wikipedia.org/wiki/Wikipedia:%E5%A4%B1%E6%95%88%E9%93%BE%E6%8E%A5">失效链接</a> 2020-08-04 ⓘ]</sup>.
+<a href="https://sourceforge.net/p/ndiswrapper/ndiswrapper/HowTos/">ndiswrapper howto</a> 和 <a href="https://sourceforge.net/p/ndiswrapper/ndiswrapper/FAQ/">ndiswrapper FAQ</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgf9c69fac770d_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://wireless.wiki.kernel.org/">Linux Wireless 项目</a></li>
+<li><a href="https://aircrack-ng.org/doku.php?id=install_drivers">Aircrack-ng 驱动程序安装指南</a></li>
+<li><a href="https://wikidevi.wi-cat.ru">Wireless Device Database Wiki</a> (由于原维基站点已关闭，该分叉站点由 wi-cat.ru 托管。目前有两个不太完整的版本： <a href="http://en.techinfodepot.shoutwiki.com">TechInfoDepot</a>、<a href="https://deviwiki.com/">deviwiki</a>)</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807032747
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.563 seconds
+Real time usage: 0.578 seconds
+Preprocessor visited node count: 2472/1000000
+Revision size: 51691/2097152 bytes
+Post‐expand include size: 38576/2097152 bytes
+Template argument size: 15393/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 47/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  292.287      1 -total
+ 47.91%  140.025      1 Template:翻译状态
+  6.68%   19.532    147 Template:Ic
+  4.83%   14.109     20 Template:注意
+  2.58%    7.535     30 Template:Pkg
+  2.28%    6.658     13 Template:Yes
+  2.11%    6.170      1 Template:Accuracy
+  1.86%    5.436      7 Template:No
+  1.41%    4.110      3 Template:META_Message
+  1.34%    3.926     16 Template:Hc
+-->
+<!-- Render ID f5ba878e-920f-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:7197:|#|:idhash:canonical!zh-cn and timestamp 20260807032747 and revision id 35040. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,213 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pge5099fd95a3f">常见问题</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge5099fd95a3f_.E4.B8.80.E8.88.AC.E9.97.AE.E9.A2.98" id="一般问题"><span id=".E4.B8.80.E8.88.AC.E9.97.AE.E9.A2.98"></span>一般问题</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_Arch_Linux_.E6.98.AF.E4.BB.80.E4.B9.88.EF.BC.9F" id="Q)_Arch_Linux_是什么？"><span id="Q.29_Arch_Linux_.E6.98.AF.E4.BB.80.E4.B9.88.EF.BC.9F"></span>Q) Arch Linux 是什么？</h3></div>
+<p><b>A)</b> 请阅读 <a href="#pg83506eae4ba0">Arch Linux</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E4.B8.BA.E4.BB.80.E4.B9.88.E6.88.91.E4.B8.8D.E6.83.B3.E7.94.A8_Arch_Linux_.EF.BC.9F" id="Q)_为什么我不想用_Arch_Linux_？"><span id="Q.29_.E4.B8.BA.E4.BB.80.E4.B9.88.E6.88.91.E4.B8.8D.E6.83.B3.E7.94.A8_Arch_Linux_.EF.BC.9F"></span>Q) 为什么我不想用 Arch Linux ？</h3></div>
+<p><b>A)</b>  您或许不想使用 Arch Linux，如果您：
+</p>
+<ul><li>没有经验、能力、时间、想法和愿望去打理这样一个高度可定制的 GNU/Linux 发行版。</li>
+<li>需要非 x86_64 平台支持。</li>
+<li>你是狂热的自由软件爱好者，只希望发行版提供 GNU 定义的自由软件。</li>
+<li>你认为好的操作系统应当是已经配置好的：安装介质应默认包含一套完整的应用软件包、图形化桌面环境——达到“开箱即用”。</li>
+<li>你不需要或不想使用滚动升级的发行版。</li>
+<li>你对目前使用的操作系统感到满意。</li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E4.B8.BA.E4.BB.80.E4.B9.88.E6.88.91.E8.A6.81.E7.94.A8_Arch_Linux_.EF.BC.9F" id="Q)_为什么我要用_Arch_Linux_？"><span id="Q.29_.E4.B8.BA.E4.BB.80.E4.B9.88.E6.88.91.E8.A6.81.E7.94.A8_Arch_Linux_.EF.BC.9F"></span>Q) 为什么我要用 Arch Linux ？</h3></div>
+<p><b>A)</b>  因为 <a href="#pg8adc49483987">Arch 是最好的！</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_Arch_Linux_.E6.94.AF.E6.8C.81.E4.BB.80.E4.B9.88.E6.9E.B6.E6.9E.84.3F" id="Q)_Arch_Linux_支持什么架构?"><span id="Q.29_Arch_Linux_.E6.94.AF.E6.8C.81.E4.BB.80.E4.B9.88.E6.9E.B6.E6.9E.84.3F"></span>Q) Arch Linux 支持什么架构?</h3></div>
+<p><b>A)</b> Arch Linux 现在只支持 <a href="https://en.wikipedia.org/wiki/x86_64">x86_64</a>(也被称为 amd64 ) 架构，<a href="https://archlinux.org/news/the-end-of-i686-support/">对 i686 架构的支持已于 2017 年 11 月结束</a>。
+</p><p><b>非官方支持</b>的移植版本有： <a href="https://archlinux32.org/">i686</a> 和 <a href="https://en.wikipedia.org/wiki/ARM_architecture">ARM</a> <a href="https://archlinuxarm.org/">[1]</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_Arch_Linux_.E9.81.B5.E5.BE.AA_FHS_.E5.90.97.3F" id="Q)_Arch_Linux_遵循_FHS_吗?"><span id="Q.29_Arch_Linux_.E9.81.B5.E5.BE.AA_FHS_.E5.90.97.3F"></span>Q) Arch Linux 遵循 <a href="https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html">FHS</a> 吗?</h3></div>
+<p><b>A)</b> Arch Linux 遵循适用于 <a href="#pgac06dd8bfe95">systemd</a> 服务管理器的文件系统架构，<span class="plainlinks archwiki-template-man" title="$ man 7 file-hierarchy"><a href="https://man.archlinux.org/man/file-hierarchy.7">file-hierarchy(7)</a></span> 包含了每个文件夹的解释和设计。 <code>/bin</code>, <code>/sbin</code> 和 <code>/usr/sbin</code> 现在是  <code>/usr/bin</code> 的符号链接，<code>/lib</code> (以及 <code>/lib64</code>) 是 <code>/usr/lib</code> 的符号链接。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.88.91.E6.98.AF.E4.B8.80.E4.B8.AA.E5.BD.BB.E5.A4.B4.E5.BD.BB.E5.B0.BE.E7.9A.84Linux.E6.96.B0.E6.89.8B.EF.BC.8C.E6.88.91.E5.BA.94.E8.AF.A5.E7.94.A8_Arch_Linux_.E5.90.97.EF.BC.9F" id="Q)_我是一个彻头彻尾的Linux新手，我应该用_Arch_Linux_吗？"><span id="Q.29_.E6.88.91.E6.98.AF.E4.B8.80.E4.B8.AA.E5.BD.BB.E5.A4.B4.E5.BD.BB.E5.B0.BE.E7.9A.84Linux.E6.96.B0.E6.89.8B.EF.BC.8C.E6.88.91.E5.BA.94.E8.AF.A5.E7.94.A8_Arch_Linux_.E5.90.97.EF.BC.9F"></span>Q) 我是一个彻头彻尾的Linux新手，我应该用 Arch Linux 吗？</h3></div>
+<p><b>A)</b> 如果您是新手，要使用 Arch Linux 就必须愿意花时间学习新系统，并接受 Arch 是一个需要有 DIY 精神及能力的系统，每个用户都是自己系统的组建者。
+</p><p>在您开始问任何问题之前，建议您自己先通过 Google 、Wiki 类网站、ArchWiki 或者 Linux 相关论坛进行搜索。我们为您创建了这些资源并让您可以随时访问，有成千上万的<b>志愿者与爱好者</b>为您提供大量的信息资源。
+</p><p>推荐阅读: <a href="#pgebd29fd57a1a">Arch术语#RTFM</a> 。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_Arch_Linux_.E7.9A.84.E5.AE.89.E8.A3.85.E5.92.8C.E9.85.8D.E7.BD.AE.E5.8D.81.E5.88.86.E9.BA.BB.E7.83.A6.EF.BC.8C.E7.A4.BE.E5.8C.BA.E7.9A.84.E4.BA.BA.E6.80.BB.E6.98.AF.E8.AE.A9.E6.88.91.E5.8E.BB.E8.AF.BB.E9.82.A3.E4.BA.9B.E6.AD.BB.E9.95.BF.E6.AD.BB.E9.95.BF.E7.9A.84.E6.89.8B.E5.86.8C.E3.80.82" id="Q)_Arch_Linux_的安装和配置十分麻烦，社区的人总是让我去读那些死长死长的手册。"><span id="Q.29_Arch_Linux_.E7.9A.84.E5.AE.89.E8.A3.85.E5.92.8C.E9.85.8D.E7.BD.AE.E5.8D.81.E5.88.86.E9.BA.BB.E7.83.A6.EF.BC.8C.E7.A4.BE.E5.8C.BA.E7.9A.84.E4.BA.BA.E6.80.BB.E6.98.AF.E8.AE.A9.E6.88.91.E5.8E.BB.E8.AF.BB.E9.82.A3.E4.BA.9B.E6.AD.BB.E9.95.BF.E6.AD.BB.E9.95.BF.E7.9A.84.E6.89.8B.E5.86.8C.E3.80.82"></span>Q) Arch Linux 的安装和配置十分麻烦，社区的人总是让我去读那些死长死长的手册。</h3></div>
+<p><b>A)</b> Arch Linux 是针对一部分特定用户群体设计的，如果您不在其中，也许 Arch Linux 并不适合您。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_Arch_Linux_.E6.98.AF.E4.B8.BA.E6.9C.8D.E5.8A.A1.E5.99.A8.E3.80.81.E6.A1.8C.E9.9D.A2.E8.BF.98.E6.98.AF.E5.B7.A5.E4.BD.9C.E7.AB.99.E8.AE.BE.E8.AE.A1.E7.9A.84.EF.BC.9F" id="Q)_Arch_Linux_是为服务器、桌面还是工作站设计的？"><span id="Q.29_Arch_Linux_.E6.98.AF.E4.B8.BA.E6.9C.8D.E5.8A.A1.E5.99.A8.E3.80.81.E6.A1.8C.E9.9D.A2.E8.BF.98.E6.98.AF.E5.B7.A5.E4.BD.9C.E7.AB.99.E8.AE.BE.E8.AE.A1.E7.9A.84.EF.BC.9F"></span>Q) Arch Linux 是为服务器、桌面还是工作站设计的？</h3></div>
+<p><b>A)</b> Arch Linux 并不是针对特定应用设计的，而是针对有特定需求的用户群体设计的。Arch Linux 适合那些喜欢并有动手能力的用户，以及希望打造属于自己的独一无二的系统的用户。因此，对于这些用户，Arch Linux 能胜任各种工作。也有许多人把 Arch Linux 同时当做桌面、服务器和工作站系统。此外，archlinux.org 网站也在 Arch Linux 上运行。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.88.91.E5.A4.AA.E5.96.9C.E6.AC.A2_Arch_Linux_.E4.BA.86.EF.BC.8C.E5.B8.8C.E6.9C.9B.E5.BC.80.E5.8F.91.E5.9B.A2.E9.98.9F.E5.AE.9E.E7.8E.B0.E4.B8.80.E4.B8.AA.E6.96.B0.E5.8A.9F.E8.83.BD.E3.80.82" id="Q)_我太喜欢_Arch_Linux_了，希望开发团队实现一个新功能。"><span id="Q.29_.E6.88.91.E5.A4.AA.E5.96.9C.E6.AC.A2_Arch_Linux_.E4.BA.86.EF.BC.8C.E5.B8.8C.E6.9C.9B.E5.BC.80.E5.8F.91.E5.9B.A2.E9.98.9F.E5.AE.9E.E7.8E.B0.E4.B8.80.E4.B8.AA.E6.96.B0.E5.8A.9F.E8.83.BD.E3.80.82"></span>Q) 我太喜欢 Arch Linux 了，希望开发团队实现一个新功能。</h3></div>
+<p><b>A)</b> 您可以<a href="#pg7cd5cc0fed34">参与进来</a>，分享代码和解决方案。如果广大用户和开发者确实认同这个功能，您的想法有机会被添加到新版本系统中。Arch 社区依靠大众贡献分享的代码和工具蓬勃发展。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E4.B8.80.E8.88.AC.E4.BB.80.E4.B9.88.E6.97.B6.E5.80.99.E5.8F.91.E5.B8.83.E6.96.B0.E7.89.88.E6.9C.AC.EF.BC.9F" id="Q)_一般什么时候发布新版本？"><span id="Q.29_.E4.B8.80.E8.88.AC.E4.BB.80.E4.B9.88.E6.97.B6.E5.80.99.E5.8F.91.E5.B8.83.E6.96.B0.E7.89.88.E6.9C.AC.EF.BC.9F"></span>Q) 一般什么时候发布新版本？</h3></div>
+<p><b>A)</b> Arch Linux 的发布版本只是安装和修复环境，包含<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=base">base</a></span><sup><small>包</small></sup></span> <a href="#pgac5d7e9d277d">元软件包</a>和一些<a href="https://gitlab.archlinux.org/archlinux/archiso/-/blob/master/configs/releng/packages.x86_64">辅助软件</a>，一般每月上旬发布一次。
+</p><p>Arch Linux 使用滚动升级模式，只需执行一条命令，便可升级系统到最新版本。基于上述原因，发布新版本对 Arch Linux 来说并不重要，因为滚动升级的机制会使系统永葆青春。使用<code>pacman -Syu</code>命令升级系统，无需重装系统即可更新到最新版本。同样，Arch Linux 的新发行版本并不会提供什么新的功能，新的功能通过<code>pacman -Syu</code>命令即可立即拥有。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_Arch_Linux_.E6.98.AF.E5.90.A6.E7.A8.B3.E5.AE.9A.EF.BC.9F.E4.BC.9A.E4.B8.8D.E4.BC.9A.E7.BB.8F.E5.B8.B8.E5.9D.8F.E6.8E.89.EF.BC.9F" id="Q)_Arch_Linux_是否稳定？会不会经常坏掉？"><span id="Q.29_Arch_Linux_.E6.98.AF.E5.90.A6.E7.A8.B3.E5.AE.9A.EF.BC.9F.E4.BC.9A.E4.B8.8D.E4.BC.9A.E7.BB.8F.E5.B8.B8.E5.9D.8F.E6.8E.89.EF.BC.9F"></span>Q) Arch Linux 是否稳定？会不会经常坏掉？</h3></div>
+<p><b>A)</b> 每个 Arch Linux 的用户应当对自己执行滚动升级的系统稳定性负责。由用户自行决定何时升级、修改配置。Arch Linux 与其他发行版的一个不同之处在于，Arch Linux 是真正的“DIY”发行版。一味抱怨系统损坏是没有意义的，毕竟上游的改动不是 Arch 开发者的责任。
+</p><p>如果您想要使系统变得更加稳定，请参阅：<a href="#pg9a1cc6af125e">系统维护</a>，以提高系统稳定性。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_Arch_Linux_.E9.9C.80.E8.A6.81.E6.9B.B4.E5.A4.9A.E6.9B.9D.E5.85.89.EF.BC.88.E6.AF.94.E5.A6.82.E5.B9.BF.E5.91.8A.EF.BC.89.E3.80.82" id="Q)_Arch_Linux_需要更多曝光（比如广告）。"><span id="Q.29_Arch_Linux_.E9.9C.80.E8.A6.81.E6.9B.B4.E5.A4.9A.E6.9B.9D.E5.85.89.EF.BC.88.E6.AF.94.E5.A6.82.E5.B9.BF.E5.91.8A.EF.BC.89.E3.80.82"></span>Q) Arch Linux 需要更多曝光（比如广告）。</h3></div>
+<p><b>A)</b> Arch Linux 已经得到了应有的新闻媒体曝光机会。Arch Linux 的目标不是为了一步登天。我们的目标只是使它变得更好。让它自然成长吧，试图强迫它成长得更快会造成诸多问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_Arch_Linux_.E9.9C.80.E8.A6.81.E6.9B.B4.E5.A4.9A.E5.BC.80.E5.8F.91.E8.80.85.E3.80.82" id="Q)_Arch_Linux_需要更多开发者。"><span id="Q.29_Arch_Linux_.E9.9C.80.E8.A6.81.E6.9B.B4.E5.A4.9A.E5.BC.80.E5.8F.91.E8.80.85.E3.80.82"></span>Q) Arch Linux 需要更多开发者。</h3></div>
+<p><b>A)</b> 或许吧。欢迎您来帮助我们！可以来逛逛<a href="https://bbs.archlinux.org">论坛</a>，<a href="#pg6e8132991ce2">IRC channels</a> 以及<a href="https://lists.archlinux.org/mailman3/lists/">邮件列表</a>，看看您有什么需要做的。或者，看看论坛的 Community Contributions 子版面吧。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge5099fd95a3f_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.88.91.E6.84.9F.E8.A7.89_Arch_Linux_.E9.9C.80.E8.A6.81.E5.AE.89.E8.A3.85.E7.A8.8B.E5.BA.8F.EF.BC.8C.E6.AF.94.E5.A6.82.E5.B8.A6.E6.9C.89.E5.9B.BE.E5.BD.A2.E7.95.8C.E9.9D.A2.E7.9A.84.E9.82.A3.E7.A7.8D.E3.80.82" id="Q)_我感觉_Arch_Linux_需要安装程序，比如带有图形界面的那种。"><span id="Q.29_.E6.88.91.E6.84.9F.E8.A7.89_Arch_Linux_.E9.9C.80.E8.A6.81.E5.AE.89.E8.A3.85.E7.A8.8B.E5.BA.8F.EF.BC.8C.E6.AF.94.E5.A6.82.E5.B8.A6.E6.9C.89.E5.9B.BE.E5.BD.A2.E7.95.8C.E9.9D.A2.E7.9A.84.E9.82.A3.E7.A7.8D.E3.80.82"></span>Q) 我感觉 Arch Linux 需要安装程序，比如带有图形界面的那种。</h3></div>
+<p><b>A)</b> 从 <a href="https://archlinux.org/news/installation-medium-with-installer/">2021-04-01</a> 起，Arch Linux 有了更好的安装程序。参见 <a href="#pg3248ceed1562">archinstall</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.88.91.E5.AE.89.E8.A3.85.E4.BA.86_Arch_Linux.EF.BC.8C.E7.8E.B0.E5.9C.A8.E7.9C.BC.E5.89.8D.E5.8F.AA.E6.9C.89.E4.B8.80.E4.B8.AA.E5.91.BD.E4.BB.A4.E8.A1.8C.E7.99.BB.E5.BD.95.E7.95.8C.E9.9D.A2.EF.BC.8C.E6.88.91.E8.AF.A5.E6.80.8E.E4.B9.88.E5.8A.9E.EF.BC.9F" id="Q)_我安装了_Arch_Linux，现在眼前只有一个命令行登录界面，我该怎么办？"><span id="Q.29_.E6.88.91.E5.AE.89.E8.A3.85.E4.BA.86_Arch_Linux.EF.BC.8C.E7.8E.B0.E5.9C.A8.E7.9C.BC.E5.89.8D.E5.8F.AA.E6.9C.89.E4.B8.80.E4.B8.AA.E5.91.BD.E4.BB.A4.E8.A1.8C.E7.99.BB.E5.BD.95.E7.95.8C.E9.9D.A2.EF.BC.8C.E6.88.91.E8.AF.A5.E6.80.8E.E4.B9.88.E5.8A.9E.EF.BC.9F"></span>Q) 我安装了 Arch Linux，现在眼前只有一个命令行登录界面，我该怎么办？</h3></div>
+<p><b>A)</b> 建议您阅读<a href="#pgb2db5e40b019">通用建议</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E5.93.AA.E4.B8.AA.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83.E6.88.96.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8.E6.AF.94.E8.BE.83.E5.A5.BD.EF.BC.9F" id="Q)_哪个桌面环境或窗口管理器比较好？"><span id="Q.29_.E5.93.AA.E4.B8.AA.E6.A1.8C.E9.9D.A2.E7.8E.AF.E5.A2.83.E6.88.96.E7.AA.97.E5.8F.A3.E7.AE.A1.E7.90.86.E5.99.A8.E6.AF.94.E8.BE.83.E5.A5.BD.EF.BC.9F"></span>Q) 哪个桌面环境或窗口管理器比较好？</h3></div>
+<p><b>A)</b> 有很多不同的选择，从中选择最适合您的即可。参见：<a href="#pg712e4adaddad">桌面环境</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_Arch_Linux_.E6.AF.94.E8.B5.B7.E5.85.B6.E4.BB.96.E2.80.9C.E5.B0.8F.E5.9E.8B.E2.80.9D.E5.8F.91.E8.A1.8C.E7.89.88.EF.BC.8C.E6.9C.89.E4.BD.95.E7.8B.AC.E7.89.B9.E4.B9.8B.E5.A4.84.EF.BC.9F" id="Q)_Arch_Linux_比起其他“小型”发行版，有何独特之处？"><span id="Q.29_Arch_Linux_.E6.AF.94.E8.B5.B7.E5.85.B6.E4.BB.96.E2.80.9C.E5.B0.8F.E5.9E.8B.E2.80.9D.E5.8F.91.E8.A1.8C.E7.89.88.EF.BC.8C.E6.9C.89.E4.BD.95.E7.8B.AC.E7.89.B9.E4.B9.8B.E5.A4.84.EF.BC.9F"></span>Q) Arch Linux 比起其他“小型”发行版，有何独特之处？</h3></div>
+<p><b>A)</b> 建议您阅读 <a href="#pgd4f869e4ef4f">Arch与其他发行版的比较</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge5099fd95a3f_.E5.85.B6.E4.BB.96" id="其他"><span id=".E5.85.B6.E4.BB.96"></span>其他</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E4.BB.80.E4.B9.88.E6.98.AF_AUR_.EF.BC.9F" id="Q)_什么是_AUR_？"><span id="Q.29_.E4.BB.80.E4.B9.88.E6.98.AF_AUR_.EF.BC.9F"></span>Q) 什么是 AUR ？</h3></div>
+<p><b>A)</b> 建议您参见：<a href="#pg6a9e963f286f">Arch用户软件仓库#FAQ</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E4.B8.BA.E4.BB.80.E4.B9.88.E6.88.91.E6.84.9F.E8.A7.89_Arch_Linux_.E4.B8.8B.E7.BD.91.E9.80.9F.E6.AF.94.E5.85.B6.E4.BB.96.E7.B3.BB.E7.BB.9F.E6.85.A2.EF.BC.9F" id="Q)_为什么我感觉_Arch_Linux_下网速比其他系统慢？"><span id="Q.29_.E4.B8.BA.E4.BB.80.E4.B9.88.E6.88.91.E6.84.9F.E8.A7.89_Arch_Linux_.E4.B8.8B.E7.BD.91.E9.80.9F.E6.AF.94.E5.85.B6.E4.BB.96.E7.B3.BB.E7.BB.9F.E6.85.A2.EF.BC.9F"></span>Q) 为什么我感觉 Arch Linux 下网速比其他系统慢？</h3></div>
+<p><b>A)</b> 您的网络是否正确配置？如有疑问，您可以读一读<a href="#pgf42a74f3af9c">网络配置</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E4.B8.BA.E4.BB.80.E4.B9.88_Arch_Linux_.E6.8A.8A.E6.88.91.E7.9A.84.E6.89.80.E6.9C.89.E5.86.85.E5.AD.98.E7.94.A8.E5.85.89.E4.BA.86.EF.BC.9F" id="Q)_为什么_Arch_Linux_把我的所有内存用光了？"><span id="Q.29_.E4.B8.BA.E4.BB.80.E4.B9.88_Arch_Linux_.E6.8A.8A.E6.88.91.E7.9A.84.E6.89.80.E6.9C.89.E5.86.85.E5.AD.98.E7.94.A8.E5.85.89.E4.BA.86.EF.BC.9F"></span>Q) 为什么 Arch Linux 把我的所有内存用光了？</h3></div>
+<p><b>A)</b> 实际上，内存不用就浪费了。
+</p><p>很多新用户发现，Linux 内核对物理内存的处理机制和他们所以为的有所不同。由于访问物理内存比访问磁盘要快得多，内核会把最近访问的数据缓存到物理内存中。物理内存中缓存数据会在空闲物理内存耗尽时被释放。
+</p><p>而造成新用户的困惑的罪魁祸首，恐怕是<code>free</code>命令：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ free -h</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">              total        used        free      shared  buff/cache   available
+Mem:          2.8Gi       1.1Gi       283Mi       224Mi       1.4Gi       1.2Gi
+Swap:         3.0Gi       881Mi       2.1Gi
+</pre>
+<p>要注意 "free" 和 "available" 的区别，即空闲和可用的区别。在上面的例子中, 电脑所有的 2.8G 内存几乎全部占用。"free"中只剩下 283 MiB 是未使用的。但是在总量 2.8G 内存中的 1.4G 是 "buff/cache" 缓存。实际上还剩下 1.2G 是可使用的（不考虑交换空间）。查看 <span class="plainlinks archwiki-template-man" title="$ man 1 free"><a href="https://man.archlinux.org/man/free.1">free(1)</a></span> 了解更多。
+</p><p>这有什么用？当然是更好的性能！
+</p><p>如果您对此十分困惑，请参见<a href="https://www.linuxjournal.com/article/2770">此文</a>。另外还有一篇文章有详细的解释：<a href="https://www.linuxatemyram.com/">https://www.linuxatemyram.com/</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.88.91.E7.9A.84.E7.A3.81.E7.9B.98.E7.A9.BA.E9.97.B4.E8.A2.AB.E4.BB.80.E4.B9.88.E4.B8.9C.E8.A5.BF.E5.8D.A0.E7.94.A8.E4.BA.86.EF.BC.9F" id="Q)_我的磁盘空间被什么东西占用了？"><span id="Q.29_.E6.88.91.E7.9A.84.E7.A3.81.E7.9B.98.E7.A9.BA.E9.97.B4.E8.A2.AB.E4.BB.80.E4.B9.88.E4.B8.9C.E8.A5.BF.E5.8D.A0.E7.94.A8.E4.BA.86.EF.BC.9F"></span>Q) 我的磁盘空间被什么东西占用了？</h3></div>
+<p><b>A)</b> 问题的答案因系统而异。有一些<a href="#pg35ee6d3d486f">应用列表</a>或许能告诉您答案。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge5099fd95a3f_.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.AE.A1.E7.90.86" id="软件包管理"><span id=".E8.BD.AF.E4.BB.B6.E5.8C.85.E7.AE.A1.E7.90.86"></span>软件包管理</h2></div>
+<p>详情请参考 <a href="#pg9ef105bf1e3c">pacman</a>、<a href="#pg2749aa4d6728">pacman/提示和技巧</a>和<a href="#pg15c7e809c461">官方仓库</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.88.91.E5.8F.91.E7.8E.B0.E4.BA.86.E6.9F.90.E4.B8.AA.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.9A.84.E9.94.99.E8.AF.AF.EF.BC.8C.E8.AF.A5.E6.80.8E.E4.B9.88.E5.8A.9E.EF.BC.9F" id="Q)_我发现了某个软件包的错误，该怎么办？"><span id="Q.29_.E6.88.91.E5.8F.91.E7.8E.B0.E4.BA.86.E6.9F.90.E4.B8.AA.E8.BD.AF.E4.BB.B6.E5.8C.85.E7.9A.84.E9.94.99.E8.AF.AF.EF.BC.8C.E8.AF.A5.E6.80.8E.E4.B9.88.E5.8A.9E.EF.BC.9F"></span>Q) 我发现了某个软件包的错误，该怎么办？</h3></div>
+<p><b>A)</b> 首先您需要搞清楚 Arch 队伍是否能够解决这个错误。有时并非如此（Firefox 崩溃也许是 Mozilla 开发团队的错误）——这便是所谓的<i><b>上游错误</b></i>。如果您确信是 Arch 的问题，您可以采取以下步骤： 
+</p>
+<ol><li>在论坛中搜索有关信息。看看是否有人已经注意到这个情况。</li>
+<li>在 <a href="https://gitlab.archlinux.org/groups/archlinux/packaging/packages/-/issues">Arch Linux Gitlab 的 Bugtracker</a> 提交具有详细信息的 <a href="#pgbd58e8d9d126">Bug 报告</a>。</li>
+<li>也可在论坛中发篇帖子，阐述问题细节并说明您已经报告过这个情况。这会避免其他人重复报告同样的问题。</li></ol>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_Arch_Linux_.E8.BD.AF.E4.BB.B6.E5.8C.85.E9.9C.80.E8.A6.81.E7.8B.AC.E7.89.B9.E7.9A.84.E5.90.8E.E7.BC.80.E5.90.8D.E3.80.82.E2.80.9C.pkg.tar.zst.E2.80.9D.E5.A4.AA.E9.95.BF.E4.BA.86.EF.BC.8C.E8.80.8C.E4.B8.94.E4.BB.A4.E4.BA.BA.E5.9B.B0.E6.83.91" id="Q)_Arch_Linux_软件包需要独特的后缀名。“.pkg.tar.zst”太长了，而且令人困惑"><span id="Q.29_Arch_Linux_.E8.BD.AF.E4.BB.B6.E5.8C.85.E9.9C.80.E8.A6.81.E7.8B.AC.E7.89.B9.E7.9A.84.E5.90.8E.E7.BC.80.E5.90.8D.E3.80.82.E2.80.9C.pkg.tar.zst.E2.80.9D.E5.A4.AA.E9.95.BF.E4.BA.86.EF.BC.8C.E8.80.8C.E4.B8.94.E4.BB.A4.E4.BA.BA.E5.9B.B0.E6.83.91"></span>Q) Arch Linux 软件包需要独特的后缀名。“.pkg.tar.zst”太长了，而且令人困惑</h3></div>
+<p><b>A)</b> 在 Arch 邮件列表曾有过讨论。一些用户提议使用 .pac 作为文件扩展名。但就目前情况来说，我们没有计划改变软件包的扩展名。
+</p><p>正如 Tobias Kieslich（一名 Arch 开发者）所说： “一个软件包就是一个 <b>[压缩包]</b> ！它可以被很多软件打开、研究和操作。此外，这种 mime-type 也可以被大多数软件自动地正确识别。”
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_Pacman.E5.BA.94.E8.AF.A5.E6.8F.90.E4.BE.9B.E5.87.BD.E6.95.B0.E5.BA.93.E6.8E.A5.E5.8F.A3.EF.BC.8C.E8.BF.99.E6.A0.B7.E5.85.B6.E4.BB.96.E8.BD.AF.E4.BB.B6.E5.B0.B1.E5.8F.AF.E5.AE.B9.E6.98.93.E5.9C.B0.E8.8E.B7.E5.BE.97.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.BF.A1.E6.81.AF.E3.80.82" id="Q)_Pacman应该提供函数库接口，这样其他软件就可容易地获得软件包信息。"><span id="Q.29_Pacman.E5.BA.94.E8.AF.A5.E6.8F.90.E4.BE.9B.E5.87.BD.E6.95.B0.E5.BA.93.E6.8E.A5.E5.8F.A3.EF.BC.8C.E8.BF.99.E6.A0.B7.E5.85.B6.E4.BB.96.E8.BD.AF.E4.BB.B6.E5.B0.B1.E5.8F.AF.E5.AE.B9.E6.98.93.E5.9C.B0.E8.8E.B7.E5.BE.97.E8.BD.AF.E4.BB.B6.E5.8C.85.E4.BF.A1.E6.81.AF.E3.80.82"></span>Q) Pacman应该提供函数库接口，这样其他软件就可容易地获得软件包信息。</h3></div>
+<p><b>A)</b> <span class="plainlinks archwiki-template-man" title="$ man 3 libalpm"><a href="https://man.archlinux.org/man/libalpm.3">libalpm(3)</a></span>（Arch Linux Package Management，Arch Linux 软件包管理）是 pacman 的后端，这个库大大方便了交互式前端的编写（例如图形化前端）。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_Pacman.E9.9C.80.E8.A6.81.E6.9F.90.E6.9F.90.E5.8A.9F.E8.83.BD.EF.BC.81" id="Q)_Pacman需要某某功能！"><span id="Q.29_Pacman.E9.9C.80.E8.A6.81.E6.9F.90.E6.9F.90.E5.8A.9F.E8.83.BD.EF.BC.81"></span>Q) Pacman需要某某功能！</h3></div>
+<p><b>A)</b> 如果您有新想法，可以在 <a href="https://lists.archlinux.org/mailman3/lists/pacman-dev.lists.archlinux.org/">pacman-dev</a> 邮件列表进行讨论，或者查看<a href="https://bbs.archlinux.org/">官方论坛</a>看看其他人有没有类似的想法。
+</p><p>也欢迎您自己在系统中实现新功能。也许您的代码或补丁不会被官方接受，但他人可能会用到。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E4.BB.93.E5.BA.93.E5.92.8C.E9.95.9C.E5.83.8F.E7.9A.84.E5.8C.BA.E5.88.AB.E6.98.AF.E4.BB.80.E4.B9.88.EF.BC.9F" id="Q)_仓库和镜像的区别是什么？"><span id="Q.29_.E4.BB.93.E5.BA.93.E5.92.8C.E9.95.9C.E5.83.8F.E7.9A.84.E5.8C.BA.E5.88.AB.E6.98.AF.E4.BB.80.E4.B9.88.EF.BC.9F"></span>Q) 仓库和镜像的区别是什么？</h3></div>
+<p><b>A)</b> 请您参考<a href="#pg9ef105bf1e3c">软件仓库</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.88.91.E5.88.9A.E5.88.9A.E5.AE.89.E8.A3.85.E4.BA.86.E4.B8.80.E4.B8.AA.E8.BD.AF.E4.BB.B6.E5.8C.85.EF.BC.8C.E6.80.8E.E4.B9.88.E5.90.AF.E5.8A.A8.E5.91.A2.EF.BC.9F" id="Q)_我刚刚安装了一个软件包，怎么启动呢？"><span id="Q.29_.E6.88.91.E5.88.9A.E5.88.9A.E5.AE.89.E8.A3.85.E4.BA.86.E4.B8.80.E4.B8.AA.E8.BD.AF.E4.BB.B6.E5.8C.85.EF.BC.8C.E6.80.8E.E4.B9.88.E5.90.AF.E5.8A.A8.E5.91.A2.EF.BC.9F"></span>Q) 我刚刚安装了一个软件包，怎么启动呢？</h3></div>
+<p><b>A)</b> 如果您正在使用像<a href="#pg5b70e23b1711">KDE</a>和<a href="#pg1e095fe2c2a6">GNOME</a>这样的软件包，它们的程序一般会自动出现在菜单中。如果是命令行程序，则可使用如下命令查看可执行文件名称和位置：
+</p>
+<pre>$ pacman -Qlq <i>package_name</i> | grep /usr/bin/
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E5.9C.A8.E5.AE.98.E6.96.B9.E4.BB.93.E5.BA.93.E4.B8.AD.EF.BC.8C.E4.B8.BA.E4.BB.80.E4.B9.88.E5.8F.AA.E4.B8.BA.E6.AF.8F.E4.B8.AA.E5.85.B1.E4.BA.AB.E9.93.BE.E6.8E.A5.E5.BA.93.E6.8F.90.E4.BE.9B.E4.B8.80.E4.B8.AA.E7.89.88.E6.9C.AC.EF.BC.9F" id="Q)_在官方仓库中，为什么只为每个共享链接库提供一个版本？"><span id="Q.29_.E5.9C.A8.E5.AE.98.E6.96.B9.E4.BB.93.E5.BA.93.E4.B8.AD.EF.BC.8C.E4.B8.BA.E4.BB.80.E4.B9.88.E5.8F.AA.E4.B8.BA.E6.AF.8F.E4.B8.AA.E5.85.B1.E4.BA.AB.E9.93.BE.E6.8E.A5.E5.BA.93.E6.8F.90.E4.BE.9B.E4.B8.80.E4.B8.AA.E7.89.88.E6.9C.AC.EF.BC.9F"></span>Q) 在官方仓库中，为什么只为每个共享链接库提供一个版本？</h3></div>
+<p><b>A)</b> 某些发行版，比如 Debian，会为一个共享库提供多个版本，比如：<code>libfoo1</code>，<code>libfoo2</code>，<code>libfoo3</code>等等。这样，就可以同时安装那些依赖不同版本 libfoo 的程序。
+</p><p>Arch 官方只对最新版的程序提供支持。只要摆脱了过时的软件包，包的维护人员就可以全力维护新版本的程序。而只要上游提供新版本的共享库，我们就会重新编译相关程序，更新仓库。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.89.A7.E8.A1.8C-.7B.7D-pacman_-Syu.E6.97.B6.EF.BC.8C.E7.BB.88.E7.AB.AF.E6.98.BE.E7.A4.BA.E6.9F.90.E4.B8.AA.E5.85.B1.E4.BA.AB.E5.BA.93.E9.9C.80.E8.A6.81.E5.8D.87.E7.BA.A7.EF.BC.8C.E4.BD.86.E4.BE.9D.E8.B5.96.E5.AE.83.E7.9A.84.E7.A8.8B.E5.BA.8F.E6.B2.A1.E6.9C.89.E5.8D.87.E7.BA.A7.EF.BC.8C.E6.88.91.E8.AF.A5.E6.80.8E.E4.B9.88.E5.81.9A.E5.91.A2.EF.BC.9F" id="Q)_执行-{}-pacman_-Syu时，终端显示某个共享库需要升级，但依赖它的程序没有升级，我该怎么做呢？"><span id="Q.29_.E6.89.A7.E8.A1.8C-.7B.7D-pacman_-Syu.E6.97.B6.EF.BC.8C.E7.BB.88.E7.AB.AF.E6.98.BE.E7.A4.BA.E6.9F.90.E4.B8.AA.E5.85.B1.E4.BA.AB.E5.BA.93.E9.9C.80.E8.A6.81.E5.8D.87.E7.BA.A7.EF.BC.8C.E4.BD.86.E4.BE.9D.E8.B5.96.E5.AE.83.E7.9A.84.E7.A8.8B.E5.BA.8F.E6.B2.A1.E6.9C.89.E5.8D.87.E7.BA.A7.EF.BC.8C.E6.88.91.E8.AF.A5.E6.80.8E.E4.B9.88.E5.81.9A.E5.91.A2.EF.BC.9F"></span>Q) 执行<code>pacman -Syu</code>时，终端显示某个共享库需要升级，但依赖它的程序没有升级，我该怎么做呢？</h3></div>
+<p><b>A)</b> 这种情况理应不会发生。假如官方源一个名为<code>foobaz</code>的程序，成功地使用新版本共享库<code>libbaz</code>编译成功，那么它应该和<code>libbaz</code>一同更新。如果编译不成功，由于旧的<code>foobaz</code>存在依赖关系，例如：
+</p>
+<pre>libbaz=1.5
+</pre>
+<p>所以当<code>libbaz</code>升级时，它会被移除。
+</p><p>如果<code>foobaz</code>是您自己编译的或是从 AUR 获取的，当<code>libbaz</code>升级时您应当重新编译它。如果编译失败，还请您通知<code>foobaz</code>开发者。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E4.BC.9A.E4.B8.8D.E4.BC.9A.E5.87.BA.E7.8E.B0.E4.B8.80.E7.A7.8D.E6.83.85.E5.86.B5.E5.B0.B1.E6.98.AF.EF.BC.8C.E4.BB.93.E5.BA.93.E4.B8.AD.E7.9A.84.E5.86.85.E6.A0.B8.E4.B8.BB.E7.89.88.E6.9C.AC.E6.9B.B4.E6.96.B0.E4.BA.86.EF.BC.8C.E8.80.8C.E6.9F.90.E4.BA.9B.E9.A9.B1.E5.8A.A8.E5.8C.85.E6.B2.A1.E6.9C.89.E4.B8.80.E5.90.8C.E5.8D.87.E7.BA.A7.E7.9A.84.E6.83.85.E5.86.B5.EF.BC.9F" id="Q)_会不会出现一种情况就是，仓库中的内核主版本更新了，而某些驱动包没有一同升级的情况？"><span id="Q.29_.E4.BC.9A.E4.B8.8D.E4.BC.9A.E5.87.BA.E7.8E.B0.E4.B8.80.E7.A7.8D.E6.83.85.E5.86.B5.E5.B0.B1.E6.98.AF.EF.BC.8C.E4.BB.93.E5.BA.93.E4.B8.AD.E7.9A.84.E5.86.85.E6.A0.B8.E4.B8.BB.E7.89.88.E6.9C.AC.E6.9B.B4.E6.96.B0.E4.BA.86.EF.BC.8C.E8.80.8C.E6.9F.90.E4.BA.9B.E9.A9.B1.E5.8A.A8.E5.8C.85.E6.B2.A1.E6.9C.89.E4.B8.80.E5.90.8C.E5.8D.87.E7.BA.A7.E7.9A.84.E6.83.85.E5.86.B5.EF.BC.9F"></span>Q) 会不会出现一种情况就是，仓库中的内核主版本更新了，而某些驱动包没有一同升级的情况？</h3></div>
+<p><b>A)</b> 这个绝对不可能。当内核主版本升级时，所有支持的驱动一定会一同更新。
+</p><p>然而，如果您安装有非内核支持的驱动程序包，比如<code>catalyst</code>，内核升级有可能导致系统挂机。您应当在内核升级时自行重编译它们。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E5.8D.87.E7.BA.A7.E5.89.8D.E8.AF.A5.E5.81.9A.E4.BB.80.E4.B9.88.3F" id="Q)_升级前该做什么?"><span id="Q.29_.E5.8D.87.E7.BA.A7.E5.89.8D.E8.AF.A5.E5.81.9A.E4.BB.80.E4.B9.88.3F"></span>Q) 升级前该做什么?</h3></div>
+<p><b>A)</b> 在升级之前，记得访问 <a href="https://archlinux.org/">Arch Linux 新闻列表</a>、<a href="https://lists.archlinux.org/mailman3/lists/arch-announce.lists.archlinux.org/">通告邮件列表</a> (有时候需要看一看<a href="https://forum.archlinuxcn.org/">论坛</a>和<a href="https://lists.archlinux.org/mailman3/lists/">各个邮件列表</a>）。需要特别注意的事项都会列在那里。另见<a href="#pg9a1cc6af125e">系统维护#更新系统</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.88.91.E7.9F.A5.E9.81.93.E6.9F.90.E4.B8.AA.E5.8C.85.E5.B7.B2.E7.BB.8F.E6.9B.B4.E6.96.B0.EF.BC.8C.E4.BD.86.E6.98.AF_pacman_.E5.B9.B6.E6.B2.A1.E6.9C.89.E5.8F.91.E7.8E.B0.E6.9B.B4.E6.96.B0" id="Q)_我知道某个包已经更新，但是_pacman_并没有发现更新"><span id="Q.29_.E6.88.91.E7.9F.A5.E9.81.93.E6.9F.90.E4.B8.AA.E5.8C.85.E5.B7.B2.E7.BB.8F.E6.9B.B4.E6.96.B0.EF.BC.8C.E4.BD.86.E6.98.AF_pacman_.E5.B9.B6.E6.B2.A1.E6.9C.89.E5.8F.91.E7.8E.B0.E6.9B.B4.E6.96.B0"></span>Q) 我知道某个包已经更新，但是 pacman 并没有发现更新</h3></div>
+<p><b>A)</b> 可能是 pacman 镜像还没有同步，最好是等等看或者是换一个镜像服务器。<a href="https://archlinux.org/mirrors/status/">MirrorStatus</a> 可以帮助您区分哪些镜像服务器是最新的。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.9F.90.E4.B8.8A.E6.B8.B8.E9.A1.B9.E7.9B.AE.E5.B7.B2.E7.BB.8F.E5.8F.91.E5.B8.83.E4.BA.86.E4.B8.80.E4.B8.AA.E6.96.B0.E7.89.88.E6.9C.AC.EF.BC.8C.E8.A6.81.E5.A4.9A.E9.95.BF.E6.97.B6.E9.97.B4_Arch_Linux_.E6.89.8D.E4.BC.9A.E6.9B.B4.E6.96.B0.E5.88.B0.E6.96.B0.E7.89.88.E6.9C.AC.EF.BC.9F" id="Q)_某上游项目已经发布了一个新版本，要多长时间_Arch_Linux_才会更新到新版本？"><span id="Q.29_.E6.9F.90.E4.B8.8A.E6.B8.B8.E9.A1.B9.E7.9B.AE.E5.B7.B2.E7.BB.8F.E5.8F.91.E5.B8.83.E4.BA.86.E4.B8.80.E4.B8.AA.E6.96.B0.E7.89.88.E6.9C.AC.EF.BC.8C.E8.A6.81.E5.A4.9A.E9.95.BF.E6.97.B6.E9.97.B4_Arch_Linux_.E6.89.8D.E4.BC.9A.E6.9B.B4.E6.96.B0.E5.88.B0.E6.96.B0.E7.89.88.E6.9C.AC.EF.BC.9F"></span>Q) 某上游项目已经发布了一个新版本，要多长时间 Arch Linux 才会更新到新版本？</h3></div>
+<p><b>A)</b> 软件包将会在准备好之后发布，发布的时间取决于上游的变动和打包人员的精力。
+</p><p>如果发布的是小版本，可能只需要几个小时。如果是大版本更新，则可能需要数周时间。
+</p><p>此外，有些软件包会在 <a href="#pg15c7e809c461">testing 仓库</a>中停留一段时间进行小范围测试。<a href="#pgebd29fd57a1a">软件包维护者</a>会尽快将稳定的版本发布到仓库中。如果您发现官方软件仓库中的软件过旧，可以在<a href="https://archlinux.org/packages/">软件包页面</a>进行标记。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E5.A6.82.E6.9E.9C.E9.9C.80.E8.A6.81.E4.B8.80.E4.B8.AA.E8.80.81.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.BA.93.EF.BC.8C.E5.8F.AF.E4.BB.A5_symlink_.E5.88.B0.E6.96.B0.E7.89.88.E6.9C.AC.E5.90.97.EF.BC.9F" id="Q)_如果需要一个老的软件库，可以_symlink_到新版本吗？"><span id="Q.29_.E5.A6.82.E6.9E.9C.E9.9C.80.E8.A6.81.E4.B8.80.E4.B8.AA.E8.80.81.E7.9A.84.E8.BD.AF.E4.BB.B6.E5.BA.93.EF.BC.8C.E5.8F.AF.E4.BB.A5_symlink_.E5.88.B0.E6.96.B0.E7.89.88.E6.9C.AC.E5.90.97.EF.BC.9F"></span>Q) 如果需要一个老的软件库，可以 symlink 到新版本吗？</h3></div>
+<p><b>A)</b> 运气好的话，可以用来救急。但是这并不是一个好办法：
+</p>
+<ul><li>软件库不会无缘无故更新版本 - API/ABI 可能发生变动，这些变动是否影响到使用只能听天由命。</li>
+<li>软件包管理器不会记录软链接，缺乏经验的新手执行这种操作，可能会引起难以恢复的错误。</li>
+<li>未被记录的老版本文件很快就会被遗忘，且安全漏洞不会被修复。</li></ul>
+<p>最好是使用或编写<a href="https://aur.archlinux.org/packages/?SeB=n&amp;K=compat">兼容软件包</a>，用其提供需要的版本。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge5099fd95a3f_.E5.85.B3.E4.BA.8E64-bit" id="关于64-bit"><span id=".E5.85.B3.E4.BA.8E64-bit"></span>关于64-bit</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.88.91.E5.A6.82.E4.BD.95.E7.A1.AE.E5.AE.9A.E6.88.91.E7.9A.84.E5.A4.84.E7.90.86.E5.99.A8.EF.BC.88CPU.EF.BC.89.E6.98.AF.E5.90.A6.E6.94.AF.E6.8C.81_x86_64.3F" id="Q)_我如何确定我的处理器（CPU）是否支持_x86_64?"><span id="Q.29_.E6.88.91.E5.A6.82.E4.BD.95.E7.A1.AE.E5.AE.9A.E6.88.91.E7.9A.84.E5.A4.84.E7.90.86.E5.99.A8.EF.BC.88CPU.EF.BC.89.E6.98.AF.E5.90.A6.E6.94.AF.E6.8C.81_x86_64.3F"></span>Q) 我如何确定我的处理器（CPU）是否支持 x86_64?</h3></div>
+<p><b>A)</b> 运行下面的命令：
+</p>
+<pre>$ less /proc/cpuinfo
+</pre>
+<p>查找 <code>flags</code> 条目。如果你看见 <code>lm</code> 标志，那么您的处理器是支持 x86_64 的。
+</p><p>Windows 系统用户可以使用免费软件 <a href="https://www.cpuid.com/cpuz.php">CPU-Z</a> 或商业软件 <a href="http://aida64.com.cn/">AIDA64 中的 CPUID 工具</a>查看 CPU 的信息，这些软件可以通过识别 CPU 的指令集来确定处理器是否支持64位。
+</p><p>如果您使用带有 AMD 的 "x86-64" 指令集或者英特尔的 "EM64T" 指令集的 CPU，则可以使用 x86_64 的发行版和二进制包。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E4.B8.BA.E4.BB.80.E4.B9.88.E7.8E.B0.E5.9C.A8.E5.BA.94.E8.AF.A5.E4.BD.BF.E7.94.A864.E4.BD.8D.E7.B3.BB.E7.BB.9F.3F" id="Q)_为什么现在应该使用64位系统?"><span id="Q.29_.E4.B8.BA.E4.BB.80.E4.B9.88.E7.8E.B0.E5.9C.A8.E5.BA.94.E8.AF.A5.E4.BD.BF.E7.94.A864.E4.BD.8D.E7.B3.BB.E7.BB.9F.3F"></span>Q) 为什么现在应该使用64位系统?</h3></div>
+<p><b>A)</b> 在大多数情况下，64位系统会更快，而且更安全。更安全是因为它拥有 <a href="https://en.wikipedia.org/wiki/Address_space_layout_randomization">Address space layout randomization (ASLR)</a> 、 <a href="https://en.wikipedia.org/wiki/Position-independent_code">Position-independent code (PIC)</a> 特性，以及 <a href="https://en.wikipedia.org/wiki/NX_Bit">NX Bit</a> (它在i686内核中，由于禁用了<a href="https://en.wikipedia.org/wiki/Physical_Address_Extension">物理地址扩展 (PAE)</a>而无法使用)。
+</p><p>如果你的计算机在运行 4.0 GiB 或者更多的内存，那应该使用64位系统，因为多余的内存是无法被32位系统分配的。
+</p><p>现如今，程序员也更加倾向于忽视32位系统，因为新的 x86 CPU 通常都支持64位扩展。
+</p><p>还有许多其他的理由让我们抛弃32位系统。但是在内核、用户空间和单独的程序中，我们没有办法列出所有的64位系统比32位系统做得更好的地方。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pge5099fd95a3f_.E4.B8.AD.E6.96.87.E7.A4.BE.E5.8C.BA.E4.BB.93.E5.BA.93" id="中文社区仓库"><span id=".E4.B8.AD.E6.96.87.E7.A4.BE.E5.8C.BA.E4.BB.93.E5.BA.93"></span>中文社区仓库</h2></div>
+<p><b>主条目：</b> <a href="#pgc6e2daf482c3">Arch Linux 中文社区仓库</a>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.5Barchlinuxcn.5D_.E4.BB.93.E5.BA.93.E5.92.8C_AUR_.E6.98.AF.E4.BB.80.E4.B9.88.E5.85.B3.E7.B3.BB.EF.BC.9F" id="Q)_[archlinuxcn]_仓库和_AUR_是什么关系？"><span id="Q.29_.5Barchlinuxcn.5D_.E4.BB.93.E5.BA.93.E5.92.8C_AUR_.E6.98.AF.E4.BB.80.E4.B9.88.E5.85.B3.E7.B3.BB.EF.BC.9F"></span>Q) [archlinuxcn] 仓库和 AUR 是什么关系？</h3></div>
+<p><b>A)</b> 没有特别的关系。部分软件包的 PKGBUILD 打包脚本也同时存在于 AUR 而已。然而并不是所有 [archlinuxcn] 提供的软件包都存在于 AUR，也不是所有同时存在于 [archlinuxcn] 和 AUR 的软件包就一定会使用相同的打包脚本。我们不是 AUR 的二进制版。
+</p><p>在使用 [archlinuxcn] 提供的软件包时遇到问题，也请您报告到我们的 GitHub <a href="https://github.com/archlinuxcn/repo/issues">issues</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.97.A2.E7.84.B6.E6.9C.89_AUR.EF.BC.8C.E6.88.91.E4.B8.BA.E4.BB.80.E4.B9.88.E4.BC.9A.E6.83.B3.E8.A6.81.E4.BD.BF.E7.94.A8_.5Barchlinuxcn.5D_.E4.BB.93.E5.BA.93.EF.BC.9F" id="Q)_既然有_AUR，我为什么会想要使用_[archlinuxcn]_仓库？"><span id="Q.29_.E6.97.A2.E7.84.B6.E6.9C.89_AUR.EF.BC.8C.E6.88.91.E4.B8.BA.E4.BB.80.E4.B9.88.E4.BC.9A.E6.83.B3.E8.A6.81.E4.BD.BF.E7.94.A8_.5Barchlinuxcn.5D_.E4.BB.93.E5.BA.93.EF.BC.9F"></span>Q) 既然有 AUR，我为什么会想要使用 [archlinuxcn] 仓库？</h3></div>
+<p><b>A)</b> [archlinuxcn] 仓库提供许多额外的、已经打包好的软件。相比于 AUR，您不必就地从世界各地下载软件源码然后花费时间编译，而是可以直接安装已经编译好的软件包。
+</p><p>如果您是中国大陆用户，您可以利用我们位于中国大陆境内的多个镜像源，来快速下载到软件，而不必处理访问国际网络可能会遇到的问题。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pge5099fd95a3f_Q.29_.E6.88.91.E6.98.AF_Manjaro_.EF.BC.88.E6.88.96.E5.85.B6.E5.AE.83_Arch_Linux_.E8.A1.8D.E7.94.9F.E5.8F.91.E8.A1.8C.E7.89.88.EF.BC.89.E7.94.A8.E6.88.B7.EF.BC.8C.E6.88.91.E5.8F.AF.E4.BB.A5.E4.BD.BF.E7.94.A8_.5Barchlinuxcn.5D_.E4.BB.93.E5.BA.93.E5.90.97.EF.BC.9F" id="Q)_我是_Manjaro_（或其它_Arch_Linux_衍生发行版）用户，我可以使用_[archlinuxcn]_仓库吗？"><span id="Q.29_.E6.88.91.E6.98.AF_Manjaro_.EF.BC.88.E6.88.96.E5.85.B6.E5.AE.83_Arch_Linux_.E8.A1.8D.E7.94.9F.E5.8F.91.E8.A1.8C.E7.89.88.EF.BC.89.E7.94.A8.E6.88.B7.EF.BC.8C.E6.88.91.E5.8F.AF.E4.BB.A5.E4.BD.BF.E7.94.A8_.5Barchlinuxcn.5D_.E4.BB.93.E5.BA.93.E5.90.97.EF.BC.9F"></span>Q) 我是 Manjaro （或其它 Arch Linux 衍生发行版）用户，我可以使用 [archlinuxcn] 仓库吗？</h3></div>
+<p><b>A)</b> 我们不建议这样做。[archlinuxcn] 仓库只支持 Arch Linux，在衍生发行版上使用可能会出现问题。
+</p><p>如果您在非 Arch Linux 系统上使用 [archlinuxcn] 仓库遇到了问题，还请不要将问题报告给我们。
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260807031341
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.161 seconds
+Real time usage: 0.168 seconds
+Preprocessor visited node count: 444/1000000
+Revision size: 17391/2097152 bytes
+Post‐expand include size: 1726/2097152 bytes
+Template argument size: 471/2097152 bytes
+Highest expansion depth: 5/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   22.878      1 -total
+ 20.18%    4.616     25 Template:Ic
+ 15.30%    3.501      3 Template:Man
+  8.58%    1.963      1 Template:Pkg
+  5.35%    1.224      1 Template:Hc
+-->
+<!-- Render ID fd792c8e-920d-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3123:|#|:idhash:canonical!zh-cn and timestamp 20260807031341 and revision id 33761. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

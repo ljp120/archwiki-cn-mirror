@@ -1,0 +1,196 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg68b7759639b4">HDR 显示器支持</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/HDR_monitor_support">HDR monitor support</a>，最近一次同步于 2025-07-30，若英文版本有所<a href="https://wiki.archlinux.org/title/HDR_monitor_support?diff=0&amp;oldid=842185">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/HDR_monitor_support_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg95e65bdea0f3">Steam</a></li>
+<li><a href="#pg937d8e90f2bd">游戏</a></li>
+<li><a href="#pg873bd3c6e9b8">Gamescope</a></li>
+</ul></div>
+<p>HDR 支持已<a href="https://gitlab.freedesktop.org/wayland/wayland-protocols/-/merge_requests/14">合并</a>到 <a href="#pga21a6be8b605">Wayland</a> 协议中，部分混成器已实现该功能。而 <a href="#pga36c0aff60be">Xorg</a> <a href="https://gitlab.freedesktop.org/xorg/xserver/-/issues/1037#note_521100">没有支持 HDR 的计划</a>。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg68b7759639b4_.E8.A6.81.E6.B1.82" id="要求"><span id=".E8.A6.81.E6.B1.82"></span>要求</h2></div>
+<ul><li>支持 HDR 的显示器。尽管现在有许多宣称支持 HDR 的显示器，但采用边缘照明局部调光（edge-lit local dimming）的设备提供的 HDR 体验可能无法令人满意。更多信息请参阅 <a href="https://www.rtings.com/tv/tests/picture-quality/local-dimming">Local Dimming on TVs</a>。</li>
+<li>支持 HDR 的显卡驱动：已确认 <a href="#pg4a4bc5e5df24">AMDGPU</a> 和 <a href="#pge12579b7d4ac">NVIDIA</a>（550.54.14 及以后的版本）可正常工作。
+<ul><li><a href="#pge12579b7d4ac">NVIDIA</a> 565.57.01 之前的版本存在一个可能导致 HDR 模式下色彩表现不正确或偏淡的 bug。<a href="https://www.nvidia.com/en-us/drivers/details/233008/">[1]</a></li>
+<li><a href="#pg9800307f9050">Intel 图形处理器</a>自内核版本 5.12 起为第 9 代及更新的核显提供实验性的 HDR 支持<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=1a911350dd6c777b4a08ca60fe6e2249fd3c254a">[2]</a>，但据<a href="https://www.reddit.com/r/linux/comments/1atnp5k/comment/kqzj69z/">报告</a>其实现不完整。</li></ul></li>
+<li>兼容的混成器，参见 #混成器。</li>
+<li>兼容的应用程序，参见 #应用程序</li>
+<li>支持 HDR 的 Vulkan WSI（窗口系统集成），参见 <a href="#pg68b7759639b4_Vulkan_HDR_WSI">#Vulkan HDR WSI</a>。</li></ul>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg68b7759639b4_.E9.85.8D.E7.BD.AE" id="配置"><span id=".E9.85.8D.E7.BD.AE"></span>配置</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg68b7759639b4_Vulkan_HDR_WSI" id="Vulkan_HDR_WSI">Vulkan HDR WSI</h3></div>
+<p>对于 <a href="#pge12579b7d4ac">NVIDIA</a> 和版本 25 之前的 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span>，需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vk-hdr-layer-kwin6-git/">vk-hdr-layer-kwin6-git</a></span><sup><small>AUR</small></sup></span> 才能支持 <code>VK_EXT_swapchain_colorspace</code> 和 <code>VK_EXT_hdr_metadata</code> 这两个 Vulkan 扩展 <a href="https://www.phoronix.com/news/Mesa-Vulkan-WSI-HDR-CM">[3]</a> <a href="https://github.com/Zamundaaa/VK_hdr_layer?tab=readme-ov-file#vulkan-wayland-hdr-wsi-layer">[4]</a>。没有这两个扩展则无法通过 Vulkan API 使用 HDR。
+</p><p>通过设置 <code>ENABLE_HDR_WSI=1</code> 来启用 Wayland 下的 Vulkan HDR WSI。不建议全局启用，应分别为每个需要使用 HDR 的游戏或其它应用程序启用。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg68b7759639b4_.E6.B7.B7.E6.88.90.E5.99.A8" id="混成器"><span id=".E6.B7.B7.E6.88.90.E5.99.A8"></span>混成器</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg68b7759639b4_KWin_.28KDE_Plasma.29" id="KWin_(KDE_Plasma)"><span id="KWin_.28KDE_Plasma.29"></span>KWin (KDE Plasma)</h4></div>
+<p>参见 <a href="#pg5b70e23b1711">KDE#HDR</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg68b7759639b4_Hyprland" id="Hyprland">Hyprland</h4></div>
+<p>首先确保 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=hyprland">hyprland</a></span><sup><small>包</small></sup></span> 的版本 ≥ 0.47.0 并配置 <code>xx_color_management_v4</code> 变量为 true。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg68b7759639b4_Monitor_v1" id="Monitor_v1">Monitor v1</h5></div>
+<p>在 Hyprland 配置文件中对应显示器的配置行末尾追加：<code>, bitdepth, 10, cm, hdr</code>
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Monitor v2 是通过“monitorv2”声明的，Monitor v1 则直接通过“monitor”声明。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg68b7759639b4_Monitor_v2" id="Monitor_v2">Monitor v2</h5></div>
+<p>在对应显示器的配置中添加以下内容：
+</p>
+<pre>   supports_wide_color = 1
+   supports_hdr = 1
+</pre>
+<p>更多设置请参阅 <a href="https://wiki.hypr.land/Configuring/Monitors/#monitor-v2">Hyprland Wiki</a>。
+</p><p>更多信息可在 <a href="https://wiki.hyprland.org/Configuring/Variables/#experimental">Hyprland 实验性功能文档</a>和 <a href="https://wiki.hypr.land/Configuring/Monitors/#color-management-presets">Hyprland 显示器文档</a>中找到。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg68b7759639b4_GNOME" id="GNOME">GNOME</h4></div>
+<p>首先确保 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mutter">mutter</a></span><sup><small>包</small></sup></span> 的版本 ≥ 48.0。
+</p><p>在 GNOME 的显示设置中启用 HDR。每个显示器都有 单独的 HDR 开关，在分辨率和刷新率设置旁。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在 GNOME 中使用 Gamescope HDR 时会出现“褪色”现象，因为 GNOME 缺少对 scRGB 和 <code>frog-color-management-v1</code> 协议的支持 <a href="https://gitlab.gnome.org/GNOME/mutter/-/issues/4083">[5]</a> <a href="https://github.com/ValveSoftware/gamescope/issues/1825">[6]</a>。参见 #使用 Gamescope</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg68b7759639b4_Steam_.E7.9A.84_Gamescope_.E4.BC.9A.E8.AF.9D" id="Steam_的_Gamescope_会话"><span id="Steam_.E7.9A.84_Gamescope_.E4.BC.9A.E8.AF.9D"></span>Steam 的 Gamescope 会话</h4></div>
+<p>Valve 的混成器 <a href="#pg873bd3c6e9b8">Gamescope</a> 提供了实验性 HDR 支持。按以下步骤可尝试在 Gamescope 环境中运行 Steam 客户端：
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>建议使用 <a href="#pg4a4bc5e5df24">AMDGPU</a> 显卡驱动运行 Gamescope⸺已知 <a href="#pge12579b7d4ac">NVIDIA</a> 驱动存在严重问题。</div>
+<ul><li>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gamescope">gamescope</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/gamescope-session-steam-git/">gamescope-session-steam-git</a></span><sup><small>AUR</small></sup></span>。</li>
+<li>可创建可选配置文件 <code>~/.config/environment.d/gamescope-session.conf</code>，内容如下：<pre>if [ "$XDG_SESSION_DESKTOP" = "gamescope" ] ; then
+    SCREEN_WIDTH=1920       # 屏幕宽度
+    SCREEN_HEIGHT=1080      # 屏幕高度
+    CONNECTOR=*,eDP-1       # 显示接口
+    CLIENTCMD="steam -gamepadui -pipewire-dmabuf"  # 客户端启动命令
+    GAMESCOPECMD="/usr/bin/gamescope --hdr-enabled --hdr-itm-enable \
+    --hide-cursor-delay 3000 --fade-out-duration 200 --xwayland-count 2 \
+    -W $SCREEN_WIDTH -H $SCREEN_HEIGHT -O $CONNECTOR"  # Gamescope 启动参数
+fi
+</pre>
+<ul><li>需将分辨率数值设置为实际值（可通过 <code>xrandr --query</code> 命令查询显示设备参数）。</li>
+<li>若未自动识别显示接口，需手动设置 <code>CONNECTOR</code> 参数。</li></ul></li></ul>
+<p>现在可通过以下任一方式启动 Gamescope：
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg68b7759639b4_.E9.80.9A.E8.BF.87.E6.98.BE.E7.A4.BA.E7.AE.A1.E7.90.86.E5.99.A8" id="通过显示管理器"><span id=".E9.80.9A.E8.BF.87.E6.98.BE.E7.A4.BA.E7.AE.A1.E7.90.86.E5.99.A8"></span>通过显示管理器</h5></div>
+<p>登出，在<a href="#pg30e2075251d0">显示管理器</a>中选择“Steam Big Picture”登录。
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg68b7759639b4_.E9.80.9A.E8.BF.87.E6.8E.A7.E5.88.B6.E5.8F.B0" id="通过控制台"><span id=".E9.80.9A.E8.BF.87.E6.8E.A7.E5.88.B6.E5.8F.B0"></span>通过控制台</h5></div>
+<ol><li>按下 <code>Ctrl+Alt+F<i>x</i></code> 进入一个新的 TTY。</li>
+<li>登录后执行 <code>gamescope-session-plus steam</code> 在 Gamescope 中启动 <a href="https://github.com/ChimeraOS/gamescope-session">Steam 独立会话</a>。
+<ul><li>若网络不可用，安装并<a href="#pg3ef6532bc644">启用</a> <a href="#pg5e6298ca298f">NetworkManager</a>。</li></ul></li></ol>
+<p><br/>
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg68b7759639b4_.E9.85.8D.E7.BD.AE_Steam" id="配置_Steam"><span id=".E9.85.8D.E7.BD.AE_Steam"></span>配置 Steam</h5></div>
+<ol><li>在常规设置中的“显示”部分，启用 HDR 和实验性 HDR 支持。</li>
+<li>选择一款支持 HDR 的游戏，点击旁边的齿轮图标。</li>
+<li>将兼容性设置为强制使用 Proton 8.0 或 Proton Experimental。</li>
+<li>将游戏分辨率设置为与显示器一致，否则将默认以 Steam Deck 的分辨率启动。</li>
+<li>点击“开始游戏”启动游戏。进入游戏后检查设置中的 HDR 选项，并将其启用。</li>
+<li>若需切换回正常桌面会话，请在 Steam 菜单中选择“电源” -&gt; “切换到桌面模式”。</li></ol>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg68b7759639b4_COSMIC" id="COSMIC">COSMIC</h4></div>
+<p><a href="#pgf5b636120775">COSMIC</a> 的开发者在<a href="https://blog.system76.com/post/may-flowers-spring-cosmic-showers">博文</a>中承诺将在初始稳定版本中加入 HDR 支持。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg68b7759639b4_.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="应用程序"><span id=".E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>应用程序</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg68b7759639b4_.E6.B8.B8.E6.88.8F" id="游戏"><span id=".E6.B8.B8.E6.88.8F"></span>游戏</h4></div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg68b7759639b4_Wine.2FProton" id="Wine/Proton"><span id="Wine.2FProton"></span>Wine/Proton</h5></div>
+<p>通过 <a href="#pg39e5cd9380ff">Wine</a> 或 <a href="#pg95e65bdea0f3">Steam Proton</a> 实现 HDR 需要 <a href="#pg39e5cd9380ff">DXVK</a>（2.1 及以上版本）或 <a href="#pg39e5cd9380ff">VKD3D-Proton</a>（2.8 及以上版本），具体的依赖视游戏所使用的 DirectX 版本而定。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>建议使用 Proton 8.0 及以上版本，或 Proton GE 44+。这些版本均包含符合要求的 DXVK 和 VKD3D。</div>
+<div class="mw-heading mw-heading6"><h6 data-bm="pg68b7759639b4_.E4.B8.8D.E4.BD.BF.E7.94.A8_Gamescope" id="不使用_Gamescope"><span id=".E4.B8.8D.E4.BD.BF.E7.94.A8_Gamescope"></span>不使用 Gamescope</h6></div>
+<p>若不使用 Gamescope 启用 HDR，需要运行包含 Wayland 驱动的 Wine 构建版本。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Wine 的原生 <a href="#pga21a6be8b605">Wayland</a> 驱动仍属实验性质，具体游戏表现可能优于也可能劣于 Xwayland。</div>
+<ul><li><a href="https://github.com/GloriousEggroll/proton-ge-custom">proton-ge-custom</a>：安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/proton-ge-custom-bin/">proton-ge-custom-bin</a></span><sup><small>AUR</small></sup></span>，并设置 <code>PROTON_ENABLE_WAYLAND=1</code> 与 <code>PROTON_ENABLE_HDR=1</code> <a href="https://github.com/GloriousEggroll/proton-ge-custom/releases/tag/GE-Proton10-1">[7]</a>。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>PROTON_ENABLE_HDR=1</code> 实际上设置的是 <code>DXVK_HDR=1</code> <a href="https://github.com/GloriousEggroll/proton-ge-custom/blob/master/proton#L1741">[8]</a>。</div>
+<ul><li><a href="https://github.com/Frogging-Family/wine-tkg-git">wine-tkg</a>：安装 wine-tkg，设置 <code>DXVK_HDR=1</code>，并取消设置环境变量 <code>DISPLAY</code>。</li></ul>
+<ul><li><a href="https://github.com/cachyos/proton-cachyos">proton-cachyos</a> 或 <a href="https://github.com/CachyOS/wine-cachyos">wine-cachyos</a>：安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/proton-cachyos/">proton-cachyos</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wine-cachyos-opt/">wine-cachyos-opt</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wine-cachyos/">wine-cachyos</a></span><sup><small>AUR</small></sup></span> 三者之一，并设置 <code>PROTON_ENABLE_WAYLAND=1</code> 与 <code>DXVK_HDR=1</code> <a href="https://www.reddit.com/r/linux_gaming/comments/1km81f4/proton_cachy_10_released_native_wayland_gaming/">[9]</a>。</li></ul>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>你也可以使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/protonup-qt/">protonup-qt</a></span><sup><small>AUR</small></sup></span> 将上述的 Wine 构建轻松安装到 Lutris、Bottles 或 Steam 中。</div>
+<div class="mw-heading mw-heading6"><h6 data-bm="pg68b7759639b4_.E4.BD.BF.E7.94.A8_Gamescope" id="使用_Gamescope"><span id=".E4.BD.BF.E7.94.A8_Gamescope"></span>使用 Gamescope</h6></div>
+<p>Gamescope 正常启用 HDR 需要混成器支持 scRGB，且支持 <code>xx-color-management-v4</code>、<a href="https://gitlab.freedesktop.org/wayland/wayland-protocols/-/merge_requests/14"><code>frog-color-management-v1</code></a> 两个协议之一。
+</p><p>因此，Gamescope 无法与 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/vk-hdr-layer-kwin6-git/">vk-hdr-layer-kwin6-git</a></span><sup><small>AUR</small></sup></span> 一起使用。请确保没有将 <code>ENABLE_HDR_WSI</code> 设置为 <code>1</code>。
+</p><p>根据需要，有多种方式使用 Gamescope：
+</p>
+<ul><li>使用 Gamescope 启动 Steam。使用该方式，从 Steam 启动的所有游戏都会启用 HDR，但 Steam 和这些游戏将被运行在一个 Gamescope 窗口内：</li></ul>
+<pre>$ gamescope --hdr-enabled --steam -- env DXVK_HDR=1 steam
+</pre>
+<ul><li>在 Steam 设置中使用以下“启动选项”，为通过 Steam 启动的每个游戏启用 HDR：</li></ul>
+<pre>$ DXVK_HDR=1 gamescope -f --hdr-enabled -- %command%
+</pre>
+<ul><li>在 Gamescope 中启动非 Steam 游戏：</li></ul>
+<pre>$ DXVK_HDR=1 gamescope -f --hdr-enabled -- <i>可执行文件</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>默认情况下，Gamescope 会以 1280x720 分辨率启动。若需自定义分辨率，可使用 <code>-W</code>（宽）和 <code>-H</code>（高）参数设置需要的分辨率。</div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg68b7759639b4_RetroArch" id="RetroArch">RetroArch</h5></div>
+<p>RetroArch 目前仅在 Git 版本 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/retroarch-git/">retroarch-git</a></span><sup><small>AUR</small></sup></span> 中支持 HDR。请在 RetroArch 的视频设置中启用 HDR。
+</p>
+<pre>$ retroarch
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg68b7759639b4_.E5.8E.9F.E7.94.9F_SDL" id="原生_SDL"><span id=".E5.8E.9F.E7.94.9F_SDL"></span>原生 SDL</h5></div>
+<p>要运行使用 SDL 的原生游戏并启用 HDR，请设置 <code>SDL_VIDEODRIVER=wayland</code>。
+</p><p>例如运行 Quake II RTX：
+</p>
+<pre>$ SDL_VIDEODRIVER=wayland quake2rtx
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg68b7759639b4_mpv" id="mpv">mpv</h4></div>
+<p>为了获得最佳图像质量，mpv 的维护者推荐使用 <code>gpu-next</code> 输出模式 <a href="https://github.com/mpv-player/mpv/discussions/16105#discussioncomment-12629196">[10]</a>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>这需要支持 HDR 的 Vulkan WSI，参见 <a href="#pg68b7759639b4_Vulkan_HDR_WSI">#Vulkan HDR WSI</a>。</div>
+<pre>$ mpv --vo=gpu-next --target-colorspace-hint --gpu-api=vulkan --gpu-context=waylandvk "path/to/video"
+</pre>
+<p>其他启用 <a href="https://github.com/mpv-player/mpv/discussions/16105#discussioncomment-12619072">Wayland HDR 支持</a>的方式包括使用 <code>dmabuf-wayland</code> 和 <code>drm</code> 视频输出。
+</p>
+<pre>$ mpv --vo=dmabuf-wayland "path/to/video"
+</pre>
+<ul><li>在 tty 终端下，也可以使用：</li></ul>
+<pre>$ mpv --vo=drm "path/to/video"
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg68b7759639b4_Firefox" id="Firefox">Firefox</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=firefox">firefox</a></span><sup><small>包</small></sup></span> 从 138.0 版本开始引入了可用的实验性 HDR 支持，通过隐藏的配置项 <code>gfx.wayland.hdr</code> 启用。可在 <code>about:config</code> 中启用。
+</p><p>稳定的 HDR 支持仍在开发中 <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=hdr">[11]</a> <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1642854">[12]</a>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg68b7759639b4_Chromium" id="Chromium">Chromium</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=chromium">chromium</a></span><sup><small>包</small></sup></span> 目前正在开发 HDR 支持 <a href="https://chromium-review.googlesource.com/c/chromium/src/+/6771393">[13]</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg68b7759639b4_.E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7" id="提示与技巧"><span id=".E6.8F.90.E7.A4.BA.E4.B8.8E.E6.8A.80.E5.B7.A7"></span>提示与技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg68b7759639b4_HDR_.E8.A7.86.E9.A2.91.E6.A0.B7.E6.9C.AC" id="HDR_视频样本"><span id="HDR_.E8.A7.86.E9.A2.91.E6.A0.B7.E6.9C.AC"></span>HDR 视频样本</h3></div>
+<p><a href="#pg559d0d1281b7">Kodi</a> 的 Wiki 提供了一份<a href="https://kodi.wiki/view/Samples#4K_(UltraHD)_&amp;_HDR_Formats">合理使用的 HDR 视频样本列表</a>，可使用支持 HDR 的视频播放器（如 <a href="#pg68b7759639b4_mpv">#mpv</a>）播放来测试 HDR 输出效果。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg68b7759639b4_.E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3" id="问题解决"><span id=".E9.97.AE.E9.A2.98.E8.A7.A3.E5.86.B3"></span>问题解决</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg68b7759639b4_.E5.90.AF.E7.94.A8_HDR10_.E6.97.B6.E5.B1.8F.E5.B9.95.E5.85.B1.E4.BA.AB.E5.BC.82.E5.B8.B8" id="启用_HDR10_时屏幕共享异常"><span id=".E5.90.AF.E7.94.A8_HDR10_.E6.97.B6.E5.B1.8F.E5.B9.95.E5.85.B1.E4.BA.AB.E5.BC.82.E5.B8.B8"></span>启用 HDR10 时屏幕共享异常</h3></div>
+<p>Pipewire 会尝试以 BGRA 格式进行流传输，但由于 WebRTC 当前无法解析该格式，因此会导致异常。具体表现为抛出 <code>ParamId:EnumFormat: 0:0 Invalid argument</code> 错误，并导致该应用的 WebRTC 套接字崩溃 <a href="https://github.com/hyprwm/xdg-desktop-portal-hyprland/issues/52">[14]</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg68b7759639b4_.E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85" id="另请参阅"><span id=".E5.8F.A6.E8.AF.B7.E5.8F.82.E9.98.85"></span>另请参阅</h2></div>
+<ul><li><a href="https://www.youtube.com/watch?t=21171&amp;v=yTO8QRIfOjA">X.Org 开发者大会 2022｜Harry Wentland：“HDR 更难吗？”</a>（英文视频）</li>
+<li><a href="https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/3941">wlroots/wlroots｜HDR10 支持</a>（英文）</li>
+<li><a href="https://zamundaaa.github.io/wayland/2023/12/18/update-on-hdr-and-colormanagement-in-plasma.html">Xaver Hugl 的博客｜关于 KWin 中 HDR 与色彩管理的最新进展</a>（英文）</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807135942
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.161 seconds
+Real time usage: 0.167 seconds
+Preprocessor visited node count: 580/1000000
+Revision size: 11737/2097152 bytes
+Post‐expand include size: 7433/2097152 bytes
+Template argument size: 2561/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 483/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   44.111      1 -total
+ 11.77%    5.192     32 Template:Ic
+  7.67%    3.385      6 Template:Pkg
+  7.59%    3.347      1 Template:翻译状态
+  6.62%    2.921      6 Template:Aur
+  6.32%    2.787      5 Template:注意
+  5.22%    2.303      3 Template:Related
+  5.11%    2.253      1 Template:相关文章开始
+  4.21%    1.855      1 Template:Note
+  3.49%    1.539      3 Template:提示
+-->
+<!-- Render ID 3cd4670e-9268-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8374:|#|:idhash:canonical!zh-cn and timestamp 20260807135942 and revision id 33631. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

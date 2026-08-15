@@ -1,0 +1,292 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg2394d2f9797c">默认应用程序</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Default_applications">Default applications</a>，最近一次同步于 2026-02-21，若英文版本有所<a href="https://wiki.archlinux.org/title/Default_applications?diff=0&amp;oldid=857795">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Default_applications_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<p>不同程序会使用不同的方式实现默认应用程序关联。命令行程序通常使用<a href="#pg4989d4f46056">环境变量</a>，而图形应用程序则倾向于通过调用 <a href="https://en.wikipedia.org/wiki/GIO_(software)">GIO</a> API、<a href="#pg5016907af879">Qt</a> API 或执行 <code>/usr/bin/xdg-open</code>（<a href="#pga1898b9793a9">xdg-utils</a> 的一部分），使用 <a href="#pg11c49d01fb59">XDG MIME 应用程序</a>作为默认。由于 <a href="#pgb93e62033a8f">xdg-open</a> 和 <a href="#pg11c49d01fb59">XDG MIME 应用程序</a>相当复杂，因此开发了各种替代的资源打开器。下表列出了使用各种方法的应用程序示例。
+</p>
+<table class="wikitable">
+<tbody><tr>
+<th>方法</th>
+<th>使用 XDG</th>
+<th>应用程序示例</th>
+<th>检查关联
+</th></tr>
+<tr>
+<td><a href="https://docs.gtk.org/gio/iface.AppInfo.html">GIO 的 GAppInfo</a></td>
+<td>是</td>
+<td><a href="#pg9b5d7fec8088">Firefox</a>、<a href="#pg3738a76f9acc">GNOME 文件</a>、<a href="#pg9519798d0f49">PCManFM</a>、<a href="#pgc3ce5bd2b24c">Thunar</a>、<a href="#pgcd88917e409e">Thunderbird</a>、<a href="#pg431c9a9aac24">Telegram</a></td>
+<td><code>gio mime <i>mimetype</i></code>
+</td></tr>
+<tr>
+<td><code>/usr/bin/xdg-open</code></td>
+<td>默认</td>
+<td><a href="#pgad69d7c7a814">Chromium</a>（打开下载的文件）</td>
+<td><code>xdg-mime query default  <i>mimetype</i></code>
+</td></tr>
+<tr>
+<td>自定义</td>
+<td>通常没有</td>
+<td><a href="#pgab39c6f836d5">mc</a>、<a href="#pg8375614265d3">ranger</a></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="#pg4989d4f46056">环境变量</a></td>
+<td>否</td>
+<td><a href="#pg6bf93da0c984">man</a>、<a href="#pg023562413be7">sudoedit</a>、<a href="#pg9d3beada0a18">systemctl</a></td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr>
+<tr>
+<td><a href="#pg05349798cdb5">D-Bus</a> 的 FileManager1</td>
+<td>org.freedesktop.FileManager1</td>
+<td><a href="#pg9b5d7fec8088">Firefox</a>（打开包含文件的文件夹）、Zotero（显示文件）、<a href="#pg431c9a9aac24">Telegram</a>（在文件夹中显示）</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–
+</td></tr></tbody></table>
+<p>许多<a href="#pg712e4adaddad">桌面环境</a>和图形<a href="#pg83bf07747458">文件管理器</a>提供用于配置默认应用程序的图形界面。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><a href="#pg11c49d01fb59">XDG MIME 应用程序</a>规范允许 MIME 类型定义为其它类型的子类型或别名。对于没有默认程序的子类型，这种处理方式可能不够直观⸺会使用其父类型的默认程序。例如，Firefox 可能通过 GIO 将 <code>application/rss+xml</code> 解析为由自身打开，就是因为该类型是 <code>application/xml</code> 的子类，而 Firefox 正是 <code>application/xml</code> 的默认处理程序。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2394d2f9797c_.E8.83.8C.E6.99.AF.E4.BF.A1.E6.81.AF" id="背景信息"><span id=".E8.83.8C.E6.99.AF.E4.BF.A1.E6.81.AF"></span>背景信息</h2></div>
+<p>程序有时需要使用用户首选的应用程序打开文件或 <a href="https://zh.wikipedia.org/wiki/%E7%BB%9F%E4%B8%80%E8%B5%84%E6%BA%90%E6%A0%87%E8%AF%86%E7%AC%A6">URI</a>，这需要检测文件类型（通常通过扩展名或<a href="https://en.wikipedia.org/wiki/List_of_file_signatures">魔术数字</a>映射到 <a href="https://zh.wikipedia.org/wiki/%E4%BA%92%E8%81%94%E7%BD%91%E5%AA%92%E4%BD%93%E7%B1%BB%E5%9E%8B">MIME 类型</a>），并将其关联到应用程序。
+</p><p>传承自 UNIX 的程序（<a href="#pg0f5fe8a5563d">Heirloom</a> UNIX programs）使用 <a href="https://en.wikipedia.org/wiki/Media_type#mime.types">mime.types</a> 检测 MIME 类型，使用 <a href="https://en.wikipedia.org/wiki/Media_type#Mailcap">mailcap</a> 将其关联到应用程序。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg2394d2f9797c_.E8.B5.84.E6.BA.90.E6.89.93.E5.BC.80.E5.99.A8" id="资源打开器"><span id=".E8.B5.84.E6.BA.90.E6.89.93.E5.BC.80.E5.99.A8"></span>资源打开器</h2></div>
+<ul><li><b>XDG MIME 应用程序</b>：遵循 <a href="#pg11c49d01fb59">XDG MIME 应用程序</a>规范</li>
+<li><b>正则表达式</b>：允许使用正则表达式将 MIME 类型与应用程序关联</li>
+<li><b>URI 支持</b>：允许将任意 URI 方案（scheme）与应用程序关联</li></ul>
+<table class="wikitable sortable">
+<tbody><tr>
+<th>名称</th>
+<th>包</th>
+<th>XDG MIME 应用程序</th>
+<th>正则表达式</th>
+<th>URI 支持
+</th></tr>
+<tr>
+<td><a href="#pgb93e62033a8f">xdg-open</a></td>
+<td><a href="#pga1898b9793a9">xdg-utils</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 gio"><a href="https://man.archlinux.org/man/gio.1">gio(1)</a></span></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=glib2">glib2</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td data-sort-value="5" style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">–</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1p mimeopen"><a href="https://man.archlinux.org/man/mimeopen.1p">mimeopen(1p)</a></span></td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perl-file-mimeinfo">perl-file-mimeinfo</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td>mimeo</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mimeo/">mimeo</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>mimi</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mimi/">mimi</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mimi-git/">mimi-git</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">部分
+</td></tr>
+<tr>
+<td>busking</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/busking-git/">busking-git</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td><span class="plainlinks archwiki-template-man" title="$ man 1 rifle"><a href="https://man.archlinux.org/man/rifle.1">rifle(1)</a></span></td>
+<td><a href="#pg8375614265d3">ranger</a></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否
+</td></tr>
+<tr>
+<td>handlr</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=handlr-regex">handlr-regex</a></span><sup><small>包</small></sup></span></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr>
+<tr>
+<td>clifm</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/clifm/">clifm</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td class="archwiki-table-cell-background-yellow" data-sort-value="3" style="vertical-align: middle; text-align: center;">部分
+</td></tr>
+<tr>
+<td>mimejs-git</td>
+<td><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mimejs-git/">mimejs-git</a></span><sup><small>AUR</small></sup></span></td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是
+</td></tr></tbody></table>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2394d2f9797c_xdg_open" id="xdg-open">xdg-open</h3></div>
+<p><a href="#pgb93e62033a8f">xdg-open</a>（<a href="#pga1898b9793a9">xdg-utils</a> 的一部分）遵循 <a href="#pg11c49d01fb59">XDG MIME 应用程序</a>规范，并由许多程序使用。
+</p><p>因为 <a href="#pga1898b9793a9">xdg-utils</a> 版本的 <a href="#pgb93e62033a8f">xdg-open</a> 比较复杂，默认应用程序错误时可能很难调试，所以出现了许多尝试改进它的替代方案。其中一些替代方案通过直接替换 <code>/usr/bin/xdg-open</code> 可执行文件，能够改变大多数应用程序的行为。其它则仅提供选择默认应用程序的一种替代方法。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2394d2f9797c_perl_file_mimeinfo" id="perl-file-mimeinfo">perl-file-mimeinfo</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perl-file-mimeinfo">perl-file-mimeinfo</a></span><sup><small>包</small></sup></span> 提供 <span class="plainlinks archwiki-template-man" title="$ man 1p mimeopen"><a href="https://man.archlinux.org/man/mimeopen.1p">mimeopen(1p)</a></span> 和 <span class="plainlinks archwiki-template-man" title="$ man 1p mimetype"><a href="https://man.archlinux.org/man/mimetype.1p">mimetype(1p)</a></span> 两个工具。提供的界面比 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-utils">xdg-utils</a></span><sup><small>包</small></sup></span> 的对应工具更好一些：
+</p>
+<pre># 确定文件的 MIME 类型
+$ mimetype photo.jpeg
+photo.jpeg: image/jpeg
+
+# 关联文件类型到默认应用程序
+$ mimeopen -d photo.jpeg
+Please choose a default application for files of type image/jpeg
+
+    1) Feh (feh)
+    2) GNU 图像处理程序 (gimp)
+    3) Pinta (pinta)
+
+use application #
+
+# 使用默认应用程序打开文件
+$ mimeopen -n photo.jpeg
+</pre>
+<p>最重要的是，如果没有检测到<a href="#pg712e4adaddad">桌面环境</a>，<a href="#pga1898b9793a9">xdg-utils</a> 会调用 <code>file</code> 而不是 <code>mimetype</code> 来进行 MIME 类型检测。这很重要，因为 <code>file</code> 并不遵循 XDG 规范。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=perl-file-mimeinfo">perl-file-mimeinfo</a></span><sup><small>包</small></sup></span> <b>不完全</b>遵循 XDG 规范。
+<ul><li>在 0.28-1 版本之前，它不读取<a href="https://github.com/mbeijen/File-MimeInfo/issues/20">发行版范围的默认设置</a>，并且将其配置保存在<a href="https://github.com/mbeijen/File-MimeInfo/issues/8">已弃用的位置</a>。</li>
+<li>截至 0.35-3 版本，它仍未遵循规范，没有实现 <a href="https://github.com/mbeijen/File-MimeInfo/issues/11">glob 解析优先级、glob 权重和魔术数字优先级</a>。安装该软件包可能会悄然改变 <code>xdg-mime</code> 和 <code>xdg-open</code> 对于一组与<b>相同</b>文件扩展名关联的 MIME 类型的处理行为。</li></ul>
+</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2394d2f9797c_mimeo" id="mimeo">mimeo</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mimeo/">mimeo</a></span><sup><small>AUR</small></sup></span> 提供 <code>mimeo</code> 工具，兼具 <code>xdg-open</code> 和 <code>xdg-mime</code> 的功能。
+</p><p>以下示例展示了如何将 SVG 文件与 Inkscape 关联：
+</p>
+<pre># 确定文件的 MIME 类型
+$ mimeo --mimetype Svg_example2.svg
+Svg_example2.svg
+ image/svg+xml
+
+# 确定与可执行文件 "inkscape" 相关联的桌面项
+$ mimeo --app2desk inkscape
+inkscape
+ org.inkscape.Inkscape.desktop
+ 
+# 查找桌面项路径
+$ mimeo --finddesk org.inkscape.Inkscape.desktop
+/usr/share/applications/org.inkscape.Inkscape.desktop
+
+# 选择此 MIME 类型的默认应用程序
+$ mimeo --prefer image/svg+xml org.inkscape.Inkscape.desktop
+
+# 检查关联
+$ mimeo --mime2desk image/svg+xml
+image/svg+xml
+ org.inkscape.Inkscape.desktop
+ 
+# 使用默认应用程序打开文件
+$ mimeo Svg_example2.svg
+</pre>
+<p>还可以查找 <code>mimeapps.list</code> 文件的路径：
+</p>
+<pre>$ mimeo --mimeapps-list
+/home/user/.config/mimeapps.list
+</pre>
+<p>与 <a href="#pga1898b9793a9">xdg-utils</a> 的一个主要区别是，mimeo 还支持自定义的“关联文件”，允许进行更复杂的关联。例如，可以根据匹配的正则表达式，传递特定的参数：
+</p>
+<pre># 在 VLC 中打开 YouTube 链接而不打开新实例
+vlc --one-instance --playlist-enqueue %U
+  ^https?://(www.)?youtube.com/watch\?.*v=
+</pre>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/xdg-utils-mimeo/">xdg-utils-mimeo</a></span><sup><small>AUR</small></sup></span> 修补了 <a href="#pga1898b9793a9">xdg-utils</a>，使得 <code>xdg-open</code> 在未检测到桌面环境时回退到 mimeo。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2394d2f9797c_handlr" id="handlr">handlr</h3></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=handlr-regex">handlr-regex</a></span><sup><small>包</small></sup></span> 由 Rust 编写，提供了与 <code>xdg-open</code> 和 <code>xdg-mime</code> 相同的功能，但界面更加简洁。
+<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=handlr-regex">handlr-regex</a></span><sup><small>包</small></sup></span> 是 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/handlr/">handlr</a></span><sup><small>AUR</small></sup></span> 的一个带有正则表达式支持的分支。
+</p><p>与 <code>xdg-utils</code> 相比，handlr 增加了以下功能：
+</p>
+<ul><li>通过扩展名设置关联，省去了查找或记住 MIME 类型的必要</li>
+<li>校验 MIME 类型和扩展名是否正确</li>
+<li>从 <code>mimeapps.list</code> 中删除无效条目</li>
+<li>扩展名不明确时，通过文件内容智能检测 MIME 类型</li>
+<li>自动补全 MIME 类型、扩展名和桌面条目</li>
+<li>设置任意命令作为正则表达式匹配时的处理程序</li></ul>
+<pre># 以下两个命令是相同的
+handlr set .png feh.desktop
+handlr set image/png feh.desktop
+
+# 列出默认应用程序
+handlr list
+
+# 获取 MIME 类型/扩展名的处理程序
+$ handlr get .png --json
+{"handler":"pqiv.desktop","name":"pqiv","cmd":"/usr/bin/pqiv"}
+
+# 启动处理程序，可选传递路径/URL
+handlr launch x-scheme-handler/https
+handlr launch x-scheme-handler/https -- <a href="https://google.ca">https://google.ca</a>
+</pre>
+<p>要用 <code>handlr</code> 替代 <code>xdg-open</code>，可以使用以下脚本遮蔽 <code>xdg-open</code> 文件：
+</p>
+<pre>#!/usr/bin/bash
+handlr open "$@"
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2394d2f9797c_clifm" id="clifm">clifm</h3></div>
+<p><code>clifm</code> 内置 Lira 作为资源打开器，可以通过 <code>--open</code> 命令行选项作为独立资源打开器使用。其配置文件（<code>~/.config/clifm/profiles/PROFILE_NAME/mimelist.clifm</code>）支持对 MIME 类型和文件名（及扩展名）使用正则表达式。以下是几个示例：
+</p>
+<pre># 打开常规文件
+clifm --open /etc/hosts
+
+# 打开目录
+clifm --open /media/data
+
+# 打开 URL（通过配置文件中与 text/http MIME 类型关联的应用程序）
+clifm --open www.archlinux.org
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg2394d2f9797c_.E8.BD.BB.E9.87.8F.E6.9B.BF.E4.BB.A3.E5.93.81" id="轻量替代品"><span id=".E8.BD.BB.E9.87.8F.E6.9B.BF.E4.BB.A3.E5.93.81"></span>轻量替代品</h3></div>
+<p>以下包<a href="#pgf9d748a7b27b">冲突</a>并<a href="#pgf9d748a7b27b">提供</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-utils">xdg-utils</a></span><sup><small>包</small></sup></span>，通过提供自己的 <code>/usr/bin/xdg-open</code> 脚本直接替代 <a href="#pga1898b9793a9">xdg-utils</a>。
+</p><p>如果使用这些资源打开器但仍需要使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xdg-utils">xdg-utils</a></span><sup><small>包</small></sup></span>，请将这些资源打开器手动安装到在 PATH 中位于 <code>/usr/bin</code> 之前的目录下。
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mimi/">mimi</a></span><sup><small>AUR</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mimi-git/">mimi-git</a></span><sup><small>AUR</small></sup></span> ⸺ 130 行 Bash 脚本，可为每种 MIME 类型自定义命令参数</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/busking-git/">busking-git</a></span><sup><small>AUR</small></sup></span> ⸺ 80 行 Perl 脚本，与 <code>mimi</code> 类似，额外支持正则表达式规则</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg2394d2f9797c_run_mailcap" id="run-mailcap">run-mailcap</h4></div>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>如果使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/run-mailcap/">run-mailcap</a></span><sup><small>AUR</small></sup></span>，<code>xdg-open</code> 在未检测到桌面环境时可能将请求委托给它处理。若同时使用了 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mailcap">mailcap</a></span><sup><small>包</small></sup></span> 默认提供的 <code>/etc/mailcap</code>，由于该文件中的条目会调用 <code>xdg-open</code>，这将导致无限循环。</div>
+<!-- 
+NewPP limit report
+Cached time: 20260807051857
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.199 seconds
+Real time usage: 0.205 seconds
+Preprocessor visited node count: 904/1000000
+Revision size: 9996/2097152 bytes
+Post‐expand include size: 16138/2097152 bytes
+Template argument size: 4590/2097152 bytes
+Highest expansion depth: 9/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   66.147      1 -total
+  9.51%    6.291      1 Template:Expansion
+  7.51%    4.970     34 Template:Ic
+  6.99%    4.622      6 Template:Man
+  6.70%    4.433     16 Template:是
+  6.30%    4.169     11 Template:否
+  6.02%    3.985      1 Template:META_Message
+  5.77%    3.820     11 Template:Pkg
+  5.47%    3.620      1 Template:翻译状态
+  4.72%    3.119      2 Template:注意
+-->
+<!-- Render ID 7d5bc28e-921f-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6551:|#|:idhash:canonical!zh-cn and timestamp 20260807051857 and revision id 34856. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

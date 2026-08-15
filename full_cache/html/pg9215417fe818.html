@@ -1,0 +1,167 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg9215417fe818">联想 ThinkPad X1 Carbon (Gen 8)</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_X1_Carbon_(Gen_8)">Lenovo ThinkPad X1 Carbon (Gen 8)</a>，最近一次同步于 2021-03-31，若英文版本有所<a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_X1_Carbon_(Gen_8)?diff=0&amp;oldid=657019">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Lenovo_ThinkPad_X1_Carbon_(Gen_8)_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg9ef8531d7a78">Lenovo ThinkPad X1 Carbon</a></li>
+<li><a href="#pg23c291d5cafc">Lenovo ThinkPad X1 Carbon (Gen 2)</a></li>
+<li><a href="#pg5de2e3de3950">Lenovo ThinkPad X1 Carbon (Gen 3)</a></li>
+<li><a href="#pga49d2da7d760">Lenovo ThinkPad X1 Carbon (Gen 4)</a></li>
+<li><a href="#pg6278ee6758e0">Lenovo ThinkPad X1 Carbon (Gen 5)</a></li>
+<li><a href="#pg7cbb85ba3ac9">Lenovo ThinkPad X1 Carbon (Gen 6)</a></li>
+<li><a href="#pgea6dde3c8db1">Lenovo ThinkPad X1 Carbon (Gen 7)</a></li>
+<li><a href="#pg36e32446f7ad">Lenovo ThinkPad X1 Yoga (Gen 3)</a></li>
+<li><a href="#pgdebdb3970f1e">Lenovo ThinkPad X1 Yoga (Gen 4)</a></li>
+</ul></div>
+<p>第八代Lenovo ThinkPad X1 Carrbon发布于2020年初，是一款配备了14寸屏幕、第十代英特尔酷睿处理器并集成<a href="#pgcf92ea97092d">Intel UHD 620</a>显卡的超极本。
+</p><p>为了确保电脑型号正确，<a href="#pg3296932e5bbe">安装</a><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=dmidecode">dmidecode</a></span><sup><small>包</small></sup></span>并运行:
+</p>
+<pre># dmidecode -s system-version
+ThinkPad X1 Carbon  Gen 8
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><a href="https://www.thinkwiki.org/wiki/ThinkWiki">https://www.thinkwiki.org/wiki/ThinkWiki</a> 含有大量与ThinkPad相关的资源</div>
+<table class="wikitable" style="float: right; clear: right; margin: 0 0 0.5em 0.5em; max-width: 420px; width: 100%;">
+<tbody><tr>
+<td><b>硬件</b></td>
+<td><b>是否正常工作</b></td>
+<td><b>使用模组</b>
+</td></tr>
+<tr>
+<td><a href="#pgcf92ea97092d">英特尔核显</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>i915, (intel_agp)
+</td></tr>
+<tr>
+<td><a href="#pgd841fa6aaa73">无线局域网卡</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>iwlmvm
+</td></tr>
+<tr>
+<td><a href="https://www.lenovo.com/us/en/accessories-and-monitors/cables-and-adapters/adapters/CABLE-BO-Ethernet-Extension-Adapter-2/p/4X90Q84427">有线网卡转接器</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>？
+</td></tr>
+<tr>
+<td>Fibocom移动宽带</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是¹</td>
+<td>？
+</td></tr>
+<tr>
+<td>声卡</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>snd_hda_intel
+</td></tr>
+<tr>
+<td>麦克风</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是⁴</td>
+<td>snd_sof
+</td></tr>
+<tr>
+<td><a href="#pg90ee508ff185">触摸板</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>psmouse, rmi_smbus, i2c_i801
+</td></tr>
+<tr>
+<td><a href="#pgb019bc62c706">指点杆</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>psmouse, rmi_smbus, i2c_i801
+</td></tr>
+<tr>
+<td>摄像头</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>uvcvideo
+</td></tr>
+<tr>
+<td><a href="#pgb8b247e2c1dc">指纹传感器</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是²</td>
+<td>？
+</td></tr>
+<tr>
+<td><a href="#pg3bfeacfb89ba">电源管理</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是³</td>
+<td>？
+</td></tr>
+<tr>
+<td><a href="#pg0379b52c0e22">蓝牙</a></td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>btusb
+</td></tr>
+<tr>
+<td>键盘背光灯</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>thinkpad_acpi
+</td></tr>
+<tr>
+<td>NFC</td>
+<td class="archwiki-table-cell-background-red" data-sort-value="1" style="vertical-align: middle; text-align: center;">否⁵</td>
+<td>?
+</td></tr>
+<tr>
+<td>Fn键/多媒体控制键</td>
+<td class="archwiki-table-cell-background-green" data-sort-value="5" style="vertical-align: middle; text-align: center;">是</td>
+<td>？
+</td></tr>
+<tr>
+<td colspan="3" style="font-size: 70%; border: none;">
+<ol><li>Fibcom LTE移动宽带模块需要使用USB模式以工作在Linux环境下，具体参考<a href="https://forums.lenovo.com/t5/Other-Linux-Discussions/How-To-Configure-X1-Carbon-Gen-7-on-Debian-FingerPrint-4G-Modem/td-p/4550327">[1]</a>和<a href="https://github.com/abrasive/xmm7360">[2]</a>的相关内容</li>
+<li>已有官方<a href="#pg8f5df3654778">fwupd</a>发布</li>
+<li>S3级别的休眠需要更改BIOS设置，详情键#待机/休眠。</li>
+<li>使用5.3之前版本的<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=linux">linux</a></span><sup><small>包</small></sup></span>内核时，内置麦克风不工作。使用5.3或之后版本的内核时，可开启SOF固件,详见see <a href="#pg98f078518a22">Talk#Microphone</a>。</li>
+<li>联想开发者认为此功能无关紧要（2020年8月）<a href="https://forums.lenovo.com/t5/Redhat-Fedora-CentOS/X1-Carbon-Gen8-and-other-models-too-coming-with-Fedora-Linux/m-p/5011378?page=1#5042158">论坛</a></li></ol>
+</td></tr></tbody></table>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9215417fe818_.E5.8D.87.E7.BA.A7" id="升级"><span id=".E5.8D.87.E7.BA.A7"></span>升级</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9215417fe818_.E8.87.AA.E5.8A.A8_.28Linux.E4.BE.9B.E5.BA.94.E5.95.86.E5.9B.BA.E4.BB.B6.E6.9C.8D.E5.8A.A1.29" id="自动_(Linux供应商固件服务)"><span id=".E8.87.AA.E5.8A.A8_.28Linux.E4.BE.9B.E5.BA.94.E5.95.86.E5.9B.BA.E4.BB.B6.E6.9C.8D.E5.8A.A1.29"></span>自动 (Linux供应商固件服务)</h3></div>
+<p><a href="https://blogs.gnome.org/hughsie/2018/08/06/please-welcome-lenovo-to-the-lvfs/">联想已于2018年8月宣布加入</a><a href="https://fwupd.org/">Linux供应商固件服务(LVFS)</a>计划。该计划允许在操作系统内升级固件。BIOS升级文件（可能也包括其他固件，如雷电控制器固件）可以通过<a href="#pg8f5df3654778">fwupd</a>获取和安装。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg9215417fe818_.E6.89.8B.E5.8A.A8_.28fwupdmgr.29" id="手动_(fwupdmgr)"><span id=".E6.89.8B.E5.8A.A8_.28fwupdmgr.29"></span>手动 (fwupdmgr)</h3></div>
+<p>未来联想可能提供能直接通过fwupdmgr安装的固件升级程序。具体可以在<a href="https://pcsupport.lenovo.com/de/de/products/laptops-and-netbooks/thinkpad-x-series-laptops/thinkpad-x1-carbon-8th-gen-type-20u9-20ua/20u9/parts/display/compatible">Lenovo ThinkPad X1 Carbon (Gen 8) 驱动</a>页面查找Linux相关的.cab文件。
+</p>
+<ol><li>确保电源适配器已经稳定连接</li>
+<li>打开终端</li>
+<li>定位到.cab文件所在的路径</li>
+<li>运行<code>fwupdmgr install xxxxxxxx.cab</code>升级固件</li>
+<li>重启系统</li>
+<li>系统重启后UEFI固件会被升级</li></ol>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9215417fe818_.E5.BE.85.E6.9C.BA.2F.E4.BC.91.E7.9C.A0" id="待机/休眠"><span id=".E5.BE.85.E6.9C.BA.2F.E4.BC.91.E7.9C.A0"></span>待机/休眠</h2></div>
+<p>BIOS有两个“睡眠状态”选项：Windows和Linux，可以在<i>Config &gt; Power &gt; Sleep State</i>找到。Linux选项提供传统的S3级电源状态——除了内存外的所有硬件组件全部断电，这个选项可以使休眠正常运作。Windows选项则提供较新的基于软件的待机状态，这一选项在Linux上应该能正常工作。使用Windows选项可能会更快地从休眠中恢复，但也可能会增加电量消耗。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg9215417fe818_.E5.A3.B0.E5.8D.A1" id="声卡"><span id=".E5.A3.B0.E5.8D.A1"></span>声卡</h2></div>
+<p>参考 <a href="#pgea6dde3c8db1">Lenovo ThinkPad X1 Carbon (Gen 7)#Audio</a>
+</p>
+<!-- 
+NewPP limit report
+Cached time: 20260808041354
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.108 seconds
+Real time usage: 0.112 seconds
+Preprocessor visited node count: 273/1000000
+Revision size: 4606/2097152 bytes
+Post‐expand include size: 5586/2097152 bytes
+Template argument size: 1149/2097152 bytes
+Highest expansion depth: 8/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 0/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   36.802      1 -total
+ 14.94%    5.497     14 Template:是
+ 10.39%    3.822      1 Template:否
+  9.91%    3.647      1 Template:G
+  9.38%    3.452      1 Template:翻译状态
+  9.05%    3.332      1 Template:Laptop_style
+  7.57%    2.786      9 Template:Related
+  6.87%    2.528      1 Template:R
+  6.58%    2.423      2 Template:Pkg
+  5.96%    2.193      1 Template:相关文章开始
+-->
+<!-- Render ID 9166f90e-92df-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:3394:|#|:idhash:canonical!zh-cn and timestamp 20260808041354 and revision id 33851. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

@@ -1,0 +1,520 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pgb5d5921e44b9">蓝牙耳机</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg0379b52c0e22">Bluetooth</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Bluetooth_headset">Bluetooth headset</a>，最近一次同步于 2024-05-01，若英文版本有所<a href="https://wiki.archlinux.org/title/Bluetooth_headset?diff=0&amp;oldid=804586">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Bluetooth_headset_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>目前存在三种蓝牙音频系统:
+</p>
+<ul><li>A2DP (advanced audio distribution) 提供了音乐级立体声输出(sink)，通常不支持输入(source)。
+<ul><li>A2DP 可以使用很多中编码格式。标准的 SBC 质量和压缩比的处理不是很好，而更好的开源替代(LDAC, AptX)被广泛使用。</li>
+<li>AVRCP 在 A2DP 上层提供播放控制。</li></ul></li>
+<li>HFP/HSP (hands-free/headset) 体用了语音级单声道输入和输出。HFP 是基于 HSP 的，在上层工作。</li>
+<li>LE Audio 是低功耗音频标准，于2020 年发布。标准编码格式是 LC3。</li></ul>
+<p>内核、BlueZ 5 和 PipeWire 支持上述三种配置。PulseAudio 和 ALSA等老的声音服务器仅支持 A2DP 和 HFP/HSP。尽管蓝牙的不稳定已经臭名昭著<a href="https://xkcd.com/2055/">[1]</a>, 最近蓝牙软件栈已经有了很大提升，所以使用常见硬件，比如 Intel 蓝牙芯片的时候，痛苦大大减轻了。
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb5d5921e44b9_.E9.80.9A.E8.BF.87_Pipewire_.E8.BF.9E.E6.8E.A5.E8.80.B3.E6.9C.BA" id="通过_Pipewire_连接耳机"><span id=".E9.80.9A.E8.BF.87_Pipewire_.E8.BF.9E.E6.8E.A5.E8.80.B3.E6.9C.BA"></span>通过 Pipewire 连接耳机</h2></div>
+<p><a href="#pgfd2dc6e44edd">PipeWire</a> 提供简单易用的蓝牙耳机配置方式，可以无缝替换 <a href="#pga942ba974b3d">PulseAudio</a>。PipeWire 内置了对 A2DP 的支持，可以使用 SBC/SBC-XQ、AptX、LDAC 及 AAC 蓝牙音频编码，同时也支持 HFP/HSP 蓝牙音频协议。
+</p><p>安装软件包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pipewire-pulse">pipewire-pulse</a></span><sup><small>包</small></sup></span> （将会替代 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pulseaudio">pulseaudio</a></span><sup><small>包</small></sup></span> 和 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pulseaudio-bluetooth">pulseaudio-bluetooth</a></span><sup><small>包</small></sup></span>）。
+</p><p>守护程序将会自动启动<a href="#pg88cdcc283b9b">用户服务</a>。请使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pavucontrol">pavucontrol</a></span><sup><small>包</small></sup></span> 或桌面环境提供的“设置”应用程序设置 PipeWire。更多信息请查看 <a href="#pgfd2dc6e44edd">PipeWire#Bluetooth devices</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb5d5921e44b9_Troubleshooting" id="Troubleshooting">Troubleshooting</h3></div>
+
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_.E7.94.B1.E4.BA.8E.E8.80.B3.E6.9C.BA.E5.92.8CPipeWire.E4.B9.8B.E9.97.B4.E7.9A.84.E5.90.8C.E6.AD.A5.EF.BC.8C.E9.9F.B3.E9.A2.91.E9.9F.B3.E9.87.8F.E9.AB.98" id="由于耳机和PipeWire之间的同步，音频音量高"><span id=".E7.94.B1.E4.BA.8E.E8.80.B3.E6.9C.BA.E5.92.8CPipeWire.E4.B9.8B.E9.97.B4.E7.9A.84.E5.90.8C.E6.AD.A5.EF.BC.8C.E9.9F.B3.E9.A2.91.E9.9F.B3.E9.87.8F.E9.AB.98"></span>由于耳机和PipeWire之间的同步，音频音量高</h4></div>
+<p>Since <a href="https://gitlab.freedesktop.org/pipewire/pipewire/-/releases/0.3.26">version 0.3.26</a>, PipeWire uses "hardware volume" to link the volume of the headphones with the system, making it impossible to change one without the other. On some devices, this may result in the lowest possible volume being uncomfortably loud, and volume controls becoming too coarse. Hardware volume can be disabled using either WirePlumber or Pipewire Media Session.
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgb5d5921e44b9_Using_WirePlumber" id="Using_WirePlumber">Using WirePlumber</h5></div>
+<p>If it doesn't exist, create the directory <code>/etc/wireplumber/bluetooth.lua.d/</code> to disable hardware volume system-wide, or <code>~/.config/wireplumber/bluetooth.lua.d</code> to disable it only for your user. Then, copy <code>/usr/share/wireplumber/bluetooth.lua.d/50-bluez-config.lua</code> to the directory you created. Edit the file, and change the line
+</p>
+<pre>--["bluez5.enable-hw-volume"] = true
+</pre>
+<p>to
+</p>
+<pre>["bluez5.enable-hw-volume"] = false
+</pre>
+<p>Restart the system or the PipeWire services for the changes to take effect.
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pgb5d5921e44b9_Using_Pipewire_Media_Session" id="Using_Pipewire_Media_Session">Using Pipewire Media Session</h5></div>
+<p>If it doesn't exist, create the directory <code>/etc/pipewire/media-session.d/</code> to disable hardware volume system-wide, or <code>~/.config/pipewire/media-session.d/</code> to disable it only for your user. Then, copy <code>/usr/share/pipewire/media-session.d/bluez-monitor.conf</code> to the directory you created. Edit the file, and add the line
+</p>
+<pre>bluez5.enable-hw-volume = false
+</pre>
+<p>Restart the system or the PipeWire services for the changes to take effect.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb5d5921e44b9_.E9.80.9A.E8.BF.87_Bluez5.2FPulseAudio_.E8.BF.9E.E6.8E.A5.E8.93.9D.E7.89.99.E8.80.B3.E6.9C.BA" id="通过_Bluez5/PulseAudio_连接蓝牙耳机"><span id=".E9.80.9A.E8.BF.87_Bluez5.2FPulseAudio_.E8.BF.9E.E6.8E.A5.E8.93.9D.E7.89.99.E8.80.B3.E6.9C.BA"></span>通过 Bluez5/PulseAudio 连接蓝牙耳机</h2></div>
+
+<p>安装软件包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pulseaudio-alsa">pulseaudio-alsa</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pulseaudio-bluetooth">pulseaudio-bluetooth</a></span><sup><small>包</small></sup></span>、<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-utils">bluez-utils</a></span><sup><small>包</small></sup></span>。其中 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-utils">bluez-utils</a></span><sup><small>包</small></sup></span> 提供了 <code>bluetoothctl</code> 工具。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>在继续下一步之前，请确认蓝牙设备没有被 <a href="#pg8a736e641a47">rfkill</a> 占用。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb5d5921e44b9_.E9.80.9A.E8.BF.87.E5.91.BD.E4.BB.A4.E8.A1.8C.E8.BF.9B.E8.A1.8C.E8.AE.BE.E7.BD.AE" id="通过命令行进行设置"><span id=".E9.80.9A.E8.BF.87.E5.91.BD.E4.BB.A4.E8.A1.8C.E8.BF.9B.E8.A1.8C.E8.AE.BE.E7.BD.AE"></span>通过命令行进行设置</h3></div>
+<p>启动 <code>bluetooth.service</code>。
+</p><p>现在我们可以使用 <i>bluetoothctl</i> 命令行工具来配对、连接蓝牙。关于 <i>bluetoothctl</i> 的更多详细信息请查看<a href="#pg20f71a8eddbf">蓝牙</a>。
+</p><p>运行以下命令进入 bluetooth 命令环境：
+</p>
+<pre>$ bluetoothctl
+</pre>
+<p>然后输入：
+</p>
+<pre>[bluetooth]# power on
+[bluetooth]# agent on
+[bluetooth]# default-agent
+[bluetooth]# scan on
+</pre>
+<p>现在让你的蓝牙耳机进入配对模式，它应该很快就能被发现。如：
+</p>
+<pre>[NEW] Device 00:1D:43:6D:03:26 Lasmex LBT10
+</pre>
+<p>这里发现了一个名字是"Lasmex LBT10"，对应 MAC 地址是<i>00:1D:43:6D:03:26</i>的设备。接下来我们使用这个MAC地址来配对：
+</p>
+<pre># pair 00:1D:43:6D:03:26
+</pre>
+<p>配对成功后，你需要显式地连接设备。
+（如果不起效，请尝试在连接蓝牙设备之前先使用 <code>trust</code> 命令）
+</p>
+<pre># [bluetooth]# connect 00:1D:43:6D:03:26
+</pre>
+<p>如果出现连接错误 <code>org.bluez.Error.Failed</code>，先停止现存的 PulseAudio daemon 再重试：
+</p>
+<pre>$ pulseaudio -k
+[bluetooth]# connect 00:1D:43:6D:03:26
+</pre>
+<p>最后，如果希望将来自动连接此设备：
+</p>
+<pre>[bluetooth]# trust 00:1D:43:6D:03:26
+</pre>
+<p>如果一切正常，可以在<a href="#pga942ba974b3d">PulseAudio</a>中看到一个独立的输出设备。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>设备默认情况下可能是停用的。可以在<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pavucontrol">pavucontrol</a></span><sup><small>包</small></sup></span>的"Configuration"标签页里选择配置(<code>OFF</code>, <code>A2DP</code>, <code>HFP</code>)</div>
+<p>现在可以通过<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pavucontrol">pavucontrol</a></span><sup><small>包</small></sup></span>的"Playback"和"Pecording"标签页重定向音频的输入、输出了。
+</p><p>现在可以禁用蓝牙发现新设备并退出此程序：
+</p>
+<pre>[bluetooth]# scan off
+[bluetooth]# exit
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_.E8.AE.BE.E7.BD.AE.E8.87.AA.E5.8A.A8.E8.BF.9E.E6.8E.A5" id="设置自动连接"><span id=".E8.AE.BE.E7.BD.AE.E8.87.AA.E5.8A.A8.E8.BF.9E.E6.8E.A5"></span>设置自动连接</h4></div>
+<p>若要自动连接蓝牙耳机，需要启用 PulseAudio 的 switch-on-connect 模块。请添加以下几行到 <code>/etc/pulse/default.pa</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pulse/default.pa</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">### Automatically switch to newly-connected devices
+load-module module-switch-on-connect
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>请确认蓝牙音频设备是被信任的。否则重新配对会失败。详细信息请查看 <a href="#pg0379b52c0e22">Bluetooth#Pairing</a>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb5d5921e44b9_.E9.80.9A.E8.BF.87_GNOME_Bluetooth_.E8.BF.9B.E8.A1.8C.E8.AE.BE.E7.BD.AE" id="通过_GNOME_Bluetooth_进行设置"><span id=".E9.80.9A.E8.BF.87_GNOME_Bluetooth_.E8.BF.9B.E8.A1.8C.E8.AE.BE.E7.BD.AE"></span>通过 GNOME Bluetooth 进行设置</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>由于一个现存的 bug，在 PulseAudio 9/10 下，通过如下方法无法使 A2DP Profile 启动，这可能导致声音质量劣化。#A2DP not working with PulseAudio提供了可能的解决方案。</div>
+<p>可以使用 <a href="#pg0379b52c0e22">GNOME Bluetooth</a> 作为一个图形化前端来简单地配置你的蓝牙耳机。
+</p><p>首先，确保 <code>bluetooth.service</code> systemd 单元正在运行。
+</p><p>打开 GNOME Bluetooth，开启蓝牙、扫描设备、在设备列表中选择蓝牙设备进行连接。可以在设备配置菜单中直接进入声音控制面板中。当设备已连接后，声音控制面板中将会出现一个新的播放设备。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb5d5921e44b9_LDAC.2FaptX_.E7.BC.96.E7.A0.81" id="LDAC/aptX_编码"><span id="LDAC.2FaptX_.E7.BC.96.E7.A0.81"></span>LDAC/aptX 编码</h3></div>
+<p>PulseAudio 15.0 已经支持 <a href="https://en.wikipedia.org/wiki/LDAC_(codec)">LDAC</a>/<a href="https://en.wikipedia.org/wiki/aptX">aptX</a> 蓝牙音频编码，通过下列代码进行检查：
+</p>
+<pre>$ pactl list | grep a2dp_codec
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb5d5921e44b9_.E5.B8.B8.E8.A7.81.E9.97.AE.E9.A2.98.E5.8F.8A.E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88" id="常见问题及解决方案"><span id=".E5.B8.B8.E8.A7.81.E9.97.AE.E9.A2.98.E5.8F.8A.E8.A7.A3.E5.86.B3.E6.96.B9.E6.A1.88"></span>常见问题及解决方案</h3></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>有很多用户报告 A2DP/蓝牙 耳机不能正常工作。更多信息请查看 #在 HSP/HFP 和 A2DP 配置间切换。</div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_.E9.9F.B3.E8.B4.A8.E5.B7.AE.2F.E5.BA.95.E5.99.AA.2F.E5.A3.B0.E9.9F.B3.E6.B5.91.E6.B5.8A" id="音质差/底噪/声音浑浊"><span id=".E9.9F.B3.E8.B4.A8.E5.B7.AE.2F.E5.BA.95.E5.99.AA.2F.E5.A3.B0.E9.9F.B3.E6.B5.91.E6.B5.8A"></span>音质差/底噪/声音浑浊</h4></div>
+<p>如果音质很差，很可能是因为你的耳机没有被正确配置。
+查看 #在 HSP/HFP 和 A2DP 配置间切换来解决这个问题。
+</p><p>If you suspect the bad sound quality is due to a poor bluetooth connection, you might compensate for it by switching to a lower bit-rate and lower audio quality codec such as SBC or aptX using <code>pactl</code>:
+</p>
+<pre>$ pactl send-message /card/bluez_card.XX_XX_XX_XX_XX_XX/bluez switch-codec '"sbc"'
+</pre>
+<p>where a list of available codecs can be obtained by:
+</p>
+<pre>$ pactl send-message /card/bluez_card.XX_XX_XX_XX_XX_XX/bluez list-codecs
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_.E5.B7.B2.E7.BB.8F.E9.80.89.E6.8B.A9.E9.9F.B3.E9.A2.91.E9.85.8D.E7.BD.AE.EF.BC.8C.E4.BD.86.E8.80.B3.E6.9C.BA.E6.B2.A1.E6.9C.89.E6.BF.80.E6.B4.BB.EF.BC.8C.E4.B8.8D.E8.83.BD.E9.87.8D.E5.AE.9A.E5.90.91.E9.9F.B3.E9.A2.91" id="已经选择音频配置，但耳机没有激活，不能重定向音频"><span id=".E5.B7.B2.E7.BB.8F.E9.80.89.E6.8B.A9.E9.9F.B3.E9.A2.91.E9.85.8D.E7.BD.AE.EF.BC.8C.E4.BD.86.E8.80.B3.E6.9C.BA.E6.B2.A1.E6.9C.89.E6.BF.80.E6.B4.BB.EF.BC.8C.E4.B8.8D.E8.83.BD.E9.87.8D.E5.AE.9A.E5.90.91.E9.9F.B3.E9.A2.91"></span>已经选择音频配置，但耳机没有激活，不能重定向音频</h4></div>
+<p>音频配置的菜单项在设备还没有成功连接的时候就已经存在了，但它并不能起作用。这个菜单项似乎是在设备被发现的时候就马上创建了。
+</p><p>确认一下 <code>bluetoothctl</code> 是以 root 权限运行；然后手动连接设备。有配置选项可以避免每次都需要手动连接，但是配对和信任并不会导致自动连接。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_.E6.8E.88.E6.9D.83.E5.A4.B1.E8.B4.A5.E5.AF.BC.E8.87.B4.E9.85.8D.E5.AF.B9.E5.A4.B1.E8.B4.A5" id="授权失败导致配对失败"><span id=".E6.8E.88.E6.9D.83.E5.A4.B1.E8.B4.A5.E5.AF.BC.E8.87.B4.E9.85.8D.E5.AF.B9.E5.A4.B1.E8.B4.A5"></span>授权失败导致配对失败</h4></div>
+<p>如果配对失败，可以尝试<a href="https://stackoverflow.com/questions/12888589/linux-command-line-howto-accept-pairing-for-bluetooth-device-without-pin">禁用 SSPMode</a>:
+</p>
+<pre># btmgmt ssp off
+</pre>
+<p>或
+</p>
+<pre># btmgmt ssp on
+</pre>
+<p>运行这个命令时，可能需要关闭蓝牙。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_.E9.85.8D.E5.AF.B9.E6.88.90.E5.8A.9F.2C_.E4.BD.86.E8.BF.9E.E6.8E.A5.E5.A4.B1.E8.B4.A5" id="配对成功,_但连接失败"><span id=".E9.85.8D.E5.AF.B9.E6.88.90.E5.8A.9F.2C_.E4.BD.86.E8.BF.9E.E6.8E.A5.E5.A4.B1.E8.B4.A5"></span>配对成功, 但连接失败</h4></div>
+<p>可能在 <i>bluetoothctl</i> 里面看到下面的错误:
+</p>
+<pre>[bluetooth]# connect 00:1D:43:6D:03:26
+Attempting to connect to 00:1D:43:6D:03:26
+Failed to connect: org.bluez.Error.Failed
+</pre>
+<p>你可以查看 <code>bluetooth.service</code> 的<a href="#pga7d036f50280">单元状态</a>或通过以下命令查看日志以进一步定位问题：
+</p>
+<pre># journalctl -n 20
+</pre>
+<p>你可能会在日志里看到下面类似的信息:
+</p>
+<pre>bluetoothd[5556]: a2dp-sink profile connect failed for 00:1D:43:6D:03:26: Protocol not available
+</pre>
+<p>这是因为没有安装<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pulseaudio-bluetooth">pulseaudio-bluetooth</a></span><sup><small>包</small></sup></span> 包导致的。 如果确实没有安装，安装一下这个包，然后重启一下<a href="#pga942ba974b3d">PulseAudio</a>。
+</p><p>问题也可能由权限问题引发。如果 root 用户可以连接蓝牙设备而普通用户不可，请将你的用户添加到 <i>lp</i> 用户组，再重启 pulseaudio。
+参考：<code>/etc/dbus-1/system.d/bluetooth.conf</code>。
+</p><p>如果不是因为缺失包导致的， 很可能是PulseAudio没收到消息，一般重启一下PulseAudio就可以解决问题。 注意<i>bluetoothctl</i>和PulseAudio不需要在相同的用户下运行，<i>bluetooth</i>在root环境下运行，而PulseAudio在用户环境下运行也可以很好的工作。 重启PulseAudio后，不需要重新配对，直接重连即可。
+</p><p>如果重启PulseAudio后，仍然不能正常工作，你需要重新加载 module-bluetooth-discover 模块。
+</p>
+<pre># pactl load-module module-bluetooth-discover
+</pre>
+<p>你可以把同样的加载命令添加到 <code>/etc/pulse/default.pa</code>，让PulseAudio启动时自动加载。
+</p><p>如果仍然不能正常工作，或者你使用的是系统级别的PulseAudio，下面的模块也需要加载一下(同样可以把他们加到 <code>default.pa</code> 或 <code>system.pa</code> 里面):
+</p>
+<pre>module-bluetooth-policy
+module-bluez5-device
+module-bluez5-discover
+</pre>
+<p>也可能是因为 <code>/var/lib/bluetooth/</code> 缺少写<a href="#pgb27c176d600d">权限</a>。可以通过移除再重新配对设备来使其工作，但重启后问题会再次出现。恢复写权限会修复问题：
+</p>
+<pre># chmod -R u+w /var/lib/bluetooth
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_.E8.BF.9E.E6.8E.A5.E6.88.90.E5.8A.9F.EF.BC.8C.E4.BD.86.E5.A3.B0.E9.9F.B3.E6.92.AD.E6.94.BE.E6.80.BB.E6.9C.89.E5.B0.8F.E6.9D.82.E9.9F.B3" id="连接成功，但声音播放总有小杂音"><span id=".E8.BF.9E.E6.8E.A5.E6.88.90.E5.8A.9F.EF.BC.8C.E4.BD.86.E5.A3.B0.E9.9F.B3.E6.92.AD.E6.94.BE.E6.80.BB.E6.9C.89.E5.B0.8F.E6.9D.82.E9.9F.B3"></span>连接成功，但声音播放总有小杂音</h4></div>
+<p>如果蓝牙与 WiFi 设备为同一个硬件，这非常有可能发生。因为它们共享了同一个天线甚至是频段(2.4GHz)。尽管在 Windows 上它们可以共同工作，但在 Linux上不行。
+</p><p>一个可能的解决方案是让 WiFi 工作在 5 GHz，从而使得它们不会互相干扰。如果网卡/路由器不支持 5GHz WiFi，可以升级 WiFi 固件或驱动。这个方法对 Realtek 8723BE 配合最新版 rtl 驱动(AUR)有效。
+</p><p>如果难以使用以上方法，一个不那么有效的方法是在 PulseAudio 输出端优化信号元包大小与延迟时长来试图补偿信号干扰问题。需要选择合适的参数值大小，因为这有可能使得音画不同步。若要设置更改蓝牙耳机的延时（以更改到125000微秒为例）：
+</p>
+<pre>$ pactl set-port-latency-offset &lt;bluez_card&gt; headset-output <b>125000</b>
+</pre>
+<p>其中蓝牙驱动器的ID号可以通过如下命令获得：
+</p>
+<pre>$ pacmd list-sinks | egrep -o 'bluez_card[^&gt;]*'
+</pre>
+<p>元包大小可以在配置文件 <code>/etc/pulse/daemon.conf</code> 中设定，重启 PulseAudio 生效。更多信息请参考 <a href="#pga1af3ff81178">PulseAudio/Troubleshooting#Setting the default fragment number and buffer size in PulseAudio</a>
+</p><p>对于某些特定的蓝牙适配器，添加 <code>options ath9k btcoex_enable=1</code> 到 <code>/etc/modprobe.d/ath9k.conf</code> 中可能会有帮助
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/ath9k.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># possibly fix for sound glitches
+options ath9k btcoex_enable=1</pre>
+<p>之后重启 PulseAudio 服务。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_.E8.BF.9E.E6.8E.A5.E6.88.90.E5.8A.9F.EF.BC.8C.E4.BD.86.E6.97.A0.E6.B3.95.E6.92.AD.E6.94.BE.E5.A3.B0.E9.9F.B3" id="连接成功，但无法播放声音"><span id=".E8.BF.9E.E6.8E.A5.E6.88.90.E5.8A.9F.EF.BC.8C.E4.BD.86.E6.97.A0.E6.B3.95.E6.92.AD.E6.94.BE.E5.A3.B0.E9.9F.B3"></span>连接成功，但无法播放声音</h4></div>
+<p>确定你在系统日志里面可以看到如下信息:
+</p>
+<pre>bluetoothd[5556]: Endpoint registered: sender=:1.83 path=/MediaEndpoint/A2DPSource
+bluetoothd[5556]: Endpoint registered: sender=:1.83 path=/MediaEndpoint/A2DPSink
+</pre>
+<p>如果你可以看到类似的信息，说明蓝牙没有问题，你可以去检查PulseAudio的配置问题了。否则的话，退回来再次确认蓝牙是否已经连接成功。
+</p>
+
+<p><br/>
+如果使用的是<a href="#pg89573e816846">GDM</a>， PulseAudio 的另外一个实例可能已经启动，并且“捕获”了你的蓝牙连接。这种情况可以通过屏蔽GDM用户的pulseaudio socket来解决：
+</p>
+<pre># mkdir -p  /var/lib/gdm/.config/systemd/user
+# ln -s /dev/null  /var/lib/gdm/.config/systemd/user/pulseaudio.sockett
+</pre>
+<p>重启电脑后，PulseAudio的第二个实例将不再启动。
+</p><p>bluez 可能会错误地认为某个蓝牙耳机不兼容 A2DP。这种情况下，首先确定蓝牙设备的标号：
+</p>
+<pre>$ pacmd ls
+</pre>
+<p>在输出中应当会有一段关于蓝牙耳机的内容，类似于：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ pacmd ls</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">index: 2
+        name: &lt;bluez_card.XX_XX_XX_XX_XX_XX&gt;
+        driver: &lt;module-bluez5-device.c&gt;
+        owner module: 27
+        properties:
+                device.description = "SONY MDR-100ABN"
+                device.string = "XX:XX:XX:XX:XX:XX"
+                device.api = "bluez"
+                device.class = "sound"
+                ...</pre>
+<p>若要手动更改配置文件，运行以下命令：
+</p>
+<pre>$ pacmd set-card-profile <i>2</i> a2dp_sink
+</pre>
+<p>其中 <i>2</i> 是通过 <code>pacmd ls</code> 得到的设备标号。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_.E8.BF.9E.E6.8E.A5.E6.88.90.E5.8A.9F.EF.BC.8C.E5.A3.B0.E9.9F.B3.E6.92.AD.E6.94.BE.E6.AD.A3.E5.B8.B8.EF.BC.8C.E4.BD.86.E6.92.AD.E6.94.BE.E6.9A.82.E5.81.9C.E5.90.8E.E5.86.8D.E7.BB.A7.E7.BB.AD.E5.B0.B1.E4.BC.9A.E6.92.AD.E6.94.BE.E5.8D.A1.E9.A1.BF" id="连接成功，声音播放正常，但播放暂停后再继续就会播放卡顿"><span id=".E8.BF.9E.E6.8E.A5.E6.88.90.E5.8A.9F.EF.BC.8C.E5.A3.B0.E9.9F.B3.E6.92.AD.E6.94.BE.E6.AD.A3.E5.B8.B8.EF.BC.8C.E4.BD.86.E6.92.AD.E6.94.BE.E6.9A.82.E5.81.9C.E5.90.8E.E5.86.8D.E7.BB.A7.E7.BB.AD.E5.B0.B1.E4.BC.9A.E6.92.AD.E6.94.BE.E5.8D.A1.E9.A1.BF"></span>连接成功，声音播放正常，但播放暂停后再继续就会播放卡顿</h4></div>
+<p>如果原先声音播放正常，但蓝牙连接空闲后再恢复播放就会出现卡顿/高延迟/无声，可以尝试禁用 PulseAudio 的音源/音响空闲自动挂起功能。这是由 <code>module-suspend-on-idle</code> 模块控制的。
+</p><p>若要禁用 <code>module-suspend-on-idle</code>，将配置文件中的以下行注释掉：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/pulse/default.pa</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">### Automatically suspend sinks/sources that become idle for too long
+#load-module module-suspend-on-idle
+</pre>
+<p>之后，重启 PulseAudio。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_UUIDs_has_unsupported_type" id="UUIDs_has_unsupported_type">UUIDs has unsupported type</h4></div>
+<p>在配对的时候，你可能会在<i>bluetoothctl</i>看到如下信息:
+</p>
+<pre>[CHG] Device 00:1D:43:6D:03:26 UUIDs has unsupported type
+</pre>
+<p>这种情况很常见，没有影响，可以被忽略。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_PC_.E4.B8.8A.E6.98.BE.E7.A4.BA.E8.AE.BE.E5.A4.87.E5.B7.B2.E7.BB.8F.E9.85.8D.E5.AF.B9.EF.BC.8C.E4.BD.86.E5.A4.96.E8.AE.BE.E7.AB.AF.E6.97.A0.E6.B3.95.E8.AF.86.E5.88.AB_PC" id="PC_上显示设备已经配对，但外设端无法识别_PC"><span id="PC_.E4.B8.8A.E6.98.BE.E7.A4.BA.E8.AE.BE.E5.A4.87.E5.B7.B2.E7.BB.8F.E9.85.8D.E5.AF.B9.EF.BC.8C.E4.BD.86.E5.A4.96.E8.AE.BE.E7.AB.AF.E6.97.A0.E6.B3.95.E8.AF.86.E5.88.AB_PC"></span>PC 上显示设备已经配对，但外设端无法识别 PC</h4></div>
+<p>这也许是因为设备不支持 Bluetooth LE 配对。
+</p><p>尝试在 <code>/etc/bluetooth/main.conf</code> 中设置 <code>ControllerMode = bredr</code>。
+</p><p>更多信息查看此链接<a href="https://unix.stackexchange.com/questions/292189/pairing-bose-qc-35-over-bluetooth-on-fedora">[3]</a>（关于 Bose QC 35）
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_.E8.AE.BE.E5.A4.87.E8.BF.9E.E6.8E.A5.E6.88.90.E5.8A.9F.EF.BC.8C.E4.BD.86.E9.9A.8F.E5.8D.B3.E6.96.AD.E8.BF.9E" id="设备连接成功，但随即断连"><span id=".E8.AE.BE.E5.A4.87.E8.BF.9E.E6.8E.A5.E6.88.90.E5.8A.9F.EF.BC.8C.E4.BD.86.E9.9A.8F.E5.8D.B3.E6.96.AD.E8.BF.9E"></span>设备连接成功，但随即断连</h4></div>
+<p>如果你的设备蓝牙连接失败或很快断连，并且在日志 (<a href="#pgeb782ecab4fb">systemd/Journal</a>) 中看到了如下内容：
+</p>
+<pre>bluetoothd: Unable to get connect data for Headset Voice gateway: getpeername: Transport endpoint is not connected (107)
+bluetoothd: connect error: Connection refused (111)
+</pre>
+<p>这有可能是因为你已经在本电脑的蓝牙适配器上用其他操作系统配对了此蓝牙设备。有些设备不能处理来自同一 MAC 地址（例如：同一蓝牙适配器）的多次配对。你可以通过重新配对来修复问题：
+</p>
+<pre>$ bluetoothctl
+[bluetooth]# devices
+Device XX:XX:XX:XX:XX:XX My Device
+[bluetooth]# remove XX:XX:XX:XX:XX:XX
+</pre>
+<p>之后，重启 <code>bluetooth.service</code>，开启蓝牙适配器并处于可被发现模式，重新扫描、重新配对。对于某些蓝牙管理程序，你可能需要重启电脑来从头进行设备扫描。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_Apple_Airpods_.E5.A3.B0.E9.9F.B3.E5.B0.8F" id="Apple_Airpods_声音小"><span id="Apple_Airpods_.E5.A3.B0.E9.9F.B3.E5.B0.8F"></span>Apple Airpods 声音小</h4></div>
+<p>创建一个 <code>bluetooth.service</code> 的 <a href="#pg1a2ec25e3c0c">drop-in file</a>，添加以下内容：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/bluetooth.service.d/noplugin-avrc.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+ExecStart=
+ExecStart=/usr/lib/bluetooth/bluetoothd --noplugin=avrcp</pre>
+<p>之后，重启 <code>bluetooth.service</code>，重新载入(<a href="#pgd732b403250d">reload</a>)其配置文件，重新连接耳机。
+</p><p>另外，对于 Airpods Pro，请禁用空间音频功能，开启单声道模式（使用iPhone进行设置）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_Apple_AirPods_Pro_.E6.97.A0.E6.B3.95.E5.9C.A8_HSP.2FHFP_.E9.85.8D.E7.BD.AE.E6.A8.A1.E5.BC.8F.E4.B8.8B.E5.B7.A5.E4.BD.9C.EF.BC.8C.E5.8F.AF.E4.BB.A5.E5.9C.A8_A2DP_.E9.85.8D.E7.BD.AE.E6.A8.A1.E5.BC.8F.E4.B8.8B.E5.B7.A5.E4.BD.9C" id="Apple_AirPods_Pro_无法在_HSP/HFP_配置模式下工作，可以在_A2DP_配置模式下工作"><span id="Apple_AirPods_Pro_.E6.97.A0.E6.B3.95.E5.9C.A8_HSP.2FHFP_.E9.85.8D.E7.BD.AE.E6.A8.A1.E5.BC.8F.E4.B8.8B.E5.B7.A5.E4.BD.9C.EF.BC.8C.E5.8F.AF.E4.BB.A5.E5.9C.A8_A2DP_.E9.85.8D.E7.BD.AE.E6.A8.A1.E5.BC.8F.E4.B8.8B.E5.B7.A5.E4.BD.9C"></span>Apple AirPods Pro 无法在 HSP/HFP 配置模式下工作，可以在 A2DP 配置模式下工作</h4></div>
+<p>如果 Airpods Pro 可以与 PluseAudio 正常工作，但无法兼容 HSP/HFP 配置模式（在 <i>pavucontrol</i> 的 <i>Configurations</i> 标签也下，通常被表明“不可用”），请尝试换用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pipewire-pulse">pipewire-pulse</a></span><sup><small>包</small></sup></span>。
+</p><p>请注意，换用 <i>pipewire-pulse</i>（并重启电脑或某些 systemd service）后，HSP/HFP 应当可以使用了。但这也可能导致 A2DP 不可用（当选择为 A2DP sink 时，立即被取消选择，并选择到"OFF"模式）。遇到这个问题，请尝试删除/重命名 <code>/var/lib/bluetooth</code> 文件夹：
+</p>
+<pre># mv /var/lib/bluetooth /var/lib/bluetooth.bak
+</pre>
+<p>重新配对你的蓝牙设备后，所有的配置模式理论上都应当可用了。你可以使用<i>pavucontrol</i> 或 <i>pacmd</i> 进行选择。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_HSP_.E9.97.AE.E9.A2.98.EF.BC.9A.E8.93.9D.E7.89.99.E9.9F.B3.E9.A2.91.E6.BA.90.E4.B8.8E.E6.92.AD.E6.94.BE.E8.AE.BE.E5.A4.87.E9.83.BD.E6.AD.A3.E5.B8.B8.EF.BC.8C.E4.BD.86.E5.A3.B0.E9.9F.B3.E4.BF.A1.E5.8F.B7.E6.B2.A1.E6.9C.89.E8.A2.AB.E5.9C.A8.E4.B8.A4.E8.80.85.E9.97.B4.E6.AD.A3.E7.A1.AE.E4.BC.A0.E8.BE.93" id="HSP_问题：蓝牙音频源与播放设备都正常，但声音信号没有被在两者间正确传输"><span id="HSP_.E9.97.AE.E9.A2.98.EF.BC.9A.E8.93.9D.E7.89.99.E9.9F.B3.E9.A2.91.E6.BA.90.E4.B8.8E.E6.92.AD.E6.94.BE.E8.AE.BE.E5.A4.87.E9.83.BD.E6.AD.A3.E5.B8.B8.EF.BC.8C.E4.BD.86.E5.A3.B0.E9.9F.B3.E4.BF.A1.E5.8F.B7.E6.B2.A1.E6.9C.89.E8.A2.AB.E5.9C.A8.E4.B8.A4.E8.80.85.E9.97.B4.E6.AD.A3.E7.A1.AE.E4.BC.A0.E8.BE.93"></span>HSP 问题：蓝牙音频源与播放设备都正常，但声音信号没有被在两者间正确传输</h4></div>
+<p>可能缺少某些固件或 SCO (audio protocol of HSP and HFP) 路由配置错误。
+</p><p>请查看<a href="https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/Bluetooth/#index10h3">[4]</a>。
+</p><p>BCM20702 所需固件：<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bcm20702a1-firmware/">bcm20702a1-firmware</a></span><sup><small>AUR</small></sup></span> or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bcm20702b0-firmware/">bcm20702b0-firmware</a></span><sup><small>AUR</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_Error__Failed_to_start_discovery_org_blu" id="Error:_Failed_to_start_discovery_org.bluez.Error.InProgress">Error: Failed to start discovery org.bluez.Error.InProgress</h4></div>
+<p>如果你的耳机可被发现，但由于 "Failed to start discovery org.bluez.Error.InProgress" 错误无法连接，请安装软件包 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/bluez-hciconfig/">bluez-hciconfig</a></span><sup><small>AUR</small></sup></span> 并运行如下命令：
+</p>
+<pre>$ hciconfig hci<i>X</i> up
+$ hciconfig hci<i>X</i> reset
+</pre>
+<p>其中 <i>X</i> 是你电脑的蓝牙适配器的标号（通常为 0）
+</p><p>之后应当就可以进行设备连接了。参考以下步骤：#通过命令行进行设置.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_High_audio_volume_due_to_synchronization" id="High_audio_volume_due_to_synchronization_between_headphones_and_PulseAudio">High audio volume due to synchronization between headphones and PulseAudio</h4></div>
+<p>As of <a href="https://www.freedesktop.org/wiki/Software/PulseAudio/Notes/15.0/#supportforbluetootha2dpavrcpabsolutevolume">PulseAudio 15</a>, "Absolute Volume" interlocks the audio volume of your headphones with PulseAudio, making it impossible to change one without the other. On some headphones, e.g. on the Hoco W25, this may result in irritating loudness. To disable "Absolute Volume", edit <code>/etc/pulse/default.pa</code> and change the line
+</p>
+<pre> load-module module-bluetooth-discover
+</pre>
+<p>to
+</p>
+<pre>  load-module module-bluetooth-discover avrcp_absolute_volume=false
+</pre>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb5d5921e44b9_.E5.9C.A8_HSP.2FHFP_.E5.92.8C_A2DP_.E9.85.8D.E7.BD.AE.E9.97.B4.E5.88.87.E6.8D.A2" id="在_HSP/HFP_和_A2DP_配置间切换"><span id=".E5.9C.A8_HSP.2FHFP_.E5.92.8C_A2DP_.E9.85.8D.E7.BD.AE.E9.97.B4.E5.88.87.E6.8D.A2"></span>在 HSP/HFP 和 A2DP 配置间切换</h2></div>
+<p>通过下面命令可以很容易的在两者间做切换：
+</p>
+<pre>$ pacmd set-card-profile <i>card_number</i> a2dp_sink
+</pre>
+<p>其中 <code><i>card_number</i></code> 可以通过 <code>pacmd list-cards</code> 命令获得。
+</p><p>For enabling automatic profile switching from A2DP to HSP when a recording stream appears without any role set, you can append <code>auto_switch=2</code> to <code>load-module module-bluetooth-policy</code> in <code>/etc/pulse/default.pa</code>.
+</p><p>更多关于 PulseAudio 配置的说明请参考 <a href="https://freedesktop.org/wiki/Software/PulseAudio/Documentation/User/Bluetooth/#index1h2">PulseAudio 文档</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb5d5921e44b9_PulseAudio_.E4.B8.8B_A2DP_.E4.B8.8D.E8.83.BD.E5.B7.A5.E4.BD.9C" id="PulseAudio_下_A2DP_不能工作"><span id="PulseAudio_.E4.B8.8B_A2DP_.E4.B8.8D.E8.83.BD.E5.B7.A5.E4.BD.9C"></span>PulseAudio 下 A2DP 不能工作</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_Socket_Interface_problem" id="Socket_Interface_problem">Socket Interface problem</h4></div>
+<p>对于 bluez 4.1+, PulseAudio 3.0+，若 PulseAudio 无更改到 A2DP 配置模式，你可以尝试禁用 Socket interface from <code>/etc/bluetooth/audio.conf</code>。在此文件中将行 <code>Enable=Socket</code> 改为 <code>Disable=Socket</code>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_A2DP_sink_profile_.E4.B8.8D.E5.8F.AF.E7.94.A8" id="A2DP_sink_profile_不可用"><span id="A2DP_sink_profile_.E4.B8.8D.E5.8F.AF.E7.94.A8"></span>A2DP sink profile 不可用</h4></div>
+<p>当 A2DP 播放设备配置(A2DP sink profile) 不可用时，你无法将 PluseAudio 切换到 A2DP 输出，甚至 A2DP 播放设备不会被列出。可以通过 <code>pactl</code> 来确定是否是这种情况：
+</p>
+<pre>$ pactl list | grep -C2 A2DP
+     Profiles:
+             headset_head_unit: Headset Head Unit (HSP/HFP) (sinks: 1, sources: 1, priority: 30, available: yes)
+             a2dp_sink: High Fidelity Playback (A2DP Sink) (sinks: 1, sources: 0, priority: 40, available: no)
+             off: Off (sinks: 0, sources: 0, priority: 0, available: yes)
+        Active Profile: headset_head_unit
+</pre>
+<p>无法通过 <code>pacmd</code> 手动设置声卡配置
+</p>
+<pre>$ pacmd set-card-profile bluez_card.C4_45_67_09_12_00 a2dp_sink
+Failed to set card profile to 'a2dp_sink'.
+</pre>
+<p>对于 10.0 版本的 PulseAudio，当你通过 Bluedevil 或其他 BlueZ 前端连接蓝牙耳机时，这个问题可能会出现。
+</p><p>在第一次通过某些蓝牙控制器（例如<code>0a12:0001, Cambridge Silicon Radio</code>）与耳机配对时，这个问题同样可能出现。这些蓝牙控制器默认使用 <code>Handsfree</code> 或 <code>Headset - HS</code> service，并且不允许切换到需要使用 <code>AudioSink</code> service 的 A2DP PulseAudio 音频播放设备。
+</p><p>可能的解决方案：
+</p>
+<ul><li>对于某些耳机，连接成功后在蓝牙耳机段调整音量或播放/暂停音乐可能会触发 A2DP 配置，使其可用</li></ul>
+<ul><li>使用 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bluez-utils">bluez-utils</a></span><sup><small>包</small></sup></span> 软件包中的 <code>bluetoothctl</code> 连接蓝牙耳机可能会使 A2DP 播放配置可用。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fix-bt-a2dp/">fix-bt-a2dp</a></span><sup><small>AUR</small></sup></span> 可以在蓝牙设备连接后自动完成这一过程。详细使用方法请看<a href="https://github.com/pastleo/fix-bt-a2dp#usage">[5]</a>。</li></ul>
+<pre>[bluetooth]# connect <i>headset_MAC_address</i>
+</pre>
+<ul><li>手动切换到蓝牙的 <code>AudioSink</code> service 可能会使 A2DP 配置文件与 A2DP PulseAudio 播放设备可用。<span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=blueman">blueman</a></span><sup><small>包</small></sup></span> 软件包中的 blueman-manager 可以帮你完成这一过程。你也可以使用 <code>bluetoothctl</code> 中注册 AudioSink service 的 UUID：</li></ul>
+<pre>$ bluetoothctl
+[bluetooth]# menu gatt
+[bluetooth]# register-service 0000110b-0000-1000-8000-00805f9b34fb
+[bluetooth]# quit
+</pre>
+<ul><li>禁用蓝牙耳机的配置文件</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/bluetooth/main.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[General]
+Disable=Headset</pre>
+<ul><li>启用多配置文件模式。这可以使得蓝牙耳机同时支持 A2DP 以及 HSP/HFP</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/bluetooth/main.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[General]
+MultiProfile=multiple</pre>
+<ul><li>有时以上方法都无效。你可能已经尝试过重启电脑、开关蓝牙。此时可以尝试重启 <code>bluetooth.service</code>。</li></ul>
+<pre>$ sudo systemctl restart bluetooth.service
+</pre>
+<ul><li>你也可以尝试将 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=pulseaudio-bluetooth">pulseaudio-bluetooth</a></span><sup><small>包</small></sup></span> 替换为 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pulseaudio-modules-bt/">pulseaudio-modules-bt</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> 或 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pulseaudio-modules-bt-git/">pulseaudio-modules-bt-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup>。后两者提供了更多的蓝牙编码，这可能有助于解决问题。</li></ul>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_Gnome_with_GDM" id="Gnome_with_GDM">Gnome with GDM</h4></div>
+
+<p>The instructions below were tested on Gnome 3.24.2 and PulseAudio 10.0 however they may still be applicable and useful for other versions.
+</p><p>If PulseAudio fails when changing the profile to A2DP while using GNOME with GDM, you need to prevent GDM from starting its own instance of PulseAudio:
+</p>
+<ul><li>Prevent Pulseaudio clients from automatically starting a server if one is not running by adding the following:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/var/lib/gdm/.config/pulse/client.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">autospawn = no
+daemon-binary = /bin/true</pre>
+<ul><li>Prevent systemd from starting Pulseaudio anyway with socket activation:</li></ul>
+<pre>$ sudo -ugdm mkdir -p /var/lib/gdm/.config/systemd/user
+$ sudo -ugdm ln -s /dev/null /var/lib/gdm/.config/systemd/user/pulseaudio.socket
+</pre>
+<ul><li>Restart, and check that there is no PulseAudio process for the <code>gdm</code> user using:</li></ul>
+<pre>$ pgrep -u gdm pulseaudio
+</pre>
+<p>Further discussion about this problem and alternative fixes can be found at <a href="https://bbs.archlinux.org/viewtopic.php?id=194006">[6]</a> and <a href="https://bbs.archlinux.org/viewtopic.php?id=196689">[7]</a>. Alternatively, one may try and install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/fix-bt-a2dp/">fix-bt-a2dp</a></span><sup><small>AUR</small></sup></span>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb5d5921e44b9_HFP_not_working_with_PulseAudio" id="HFP_not_working_with_PulseAudio">HFP not working with PulseAudio</h3></div>
+<p>HFP-only bluetooth headsets may not be usable in the standard configuration of PulseAudio. The respective profiles occur, but they are not available:
+</p>
+<ul><li><code>bluetoothctl info</code> output shows:</li></ul>
+<pre>UUID: Audio Sink                (0000110b-0000-1000-8000-00805f9b34fb)
+UUID: A/V Remote Control Target (0000110c-0000-1000-8000-00805f9b34fb)
+UUID: A/V Remote Control        (0000110e-0000-1000-8000-00805f9b34fb)
+UUID: Handsfree                 (0000111e-0000-1000-8000-00805f9b34fb)
+</pre>
+<ul><li><code>pactl list</code> of respective device shows:</li></ul>
+<pre>...
+Profiles:
+      ...
+      headset_head_unit: Headset Head Unit (HSP/HFP) (sinks: 1, sources: 1, priority: 30, available: no)
+</pre>
+<p>To solve the respective issue, update to pulseaudio (&gt;=13) and potentially <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/pulseaudio-modules-bt-git/">pulseaudio-modules-bt-git</a></span><sup><small>AUR</small></sup></span><sup>[<a href="#pg999b83be2df8">损坏的链接</a>：package not found]</sup> and bluez (&gt;=5.5) to latest versions. Then install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ofono/">ofono</a></span><sup><small>AUR</small></sup></span> (start and enable using systemctl) and  <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/phonesim/">phonesim</a></span><sup><small>AUR</small></sup></span> and create / activate a fake modem as described here <a href="https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/Bluetooth/#index1h3">[8]</a>:
+</p>
+<ul><li>Create <code>/etc/ofono/phonesim.conf</code> with:</li></ul>
+<pre>[phonesim]
+Address=127.0.0.1
+Driver=phonesim
+Port=12345
+</pre>
+<ul><li>Start as user:</li></ul>
+<pre>$ phonesim -p 12345 /usr/share/phonesim/default.xml &amp;
+</pre>
+<ul><li><a href="#pg6bfd324d34c9">Enable</a> and <a href="#pg073992cb666a">start</a> <code>ofono</code> service.</li>
+<li>Power modem:</li></ul>
+<pre>$ dbus-send --print-reply --system --dest=org.ofono /phonesim org.ofono.Modem.SetProperty string:"Powered" variant:boolean:true
+</pre>
+<ul><li>Activate modem:</li></ul>
+<pre>$ dbus-send --print-reply --system --dest=org.ofono /phonesim org.ofono.Modem.SetProperty string:"Online" variant:boolean:true
+</pre>
+<ul><li>If you want to check the results of this, download ofono git sources (<a href="https://github.com/rilmodem/ofono.git">[9]</a>) and call <code>list-modems</code> from the <code>ofono/test</code> directory. The output of the respective modem section should read like this:</li></ul>
+<pre>...
+[ /phonesim ]
+  Online = 1
+  Powered = 1
+  Lockdown = 0
+  Emergency = 0
+  Manufacturer = MeeGo
+  ...
+</pre>
+<ul><li>Finally, restart pulseaudio and reconnect headset. Now, HFP should be available:</li></ul>
+<pre>headset_head_unit: Headset Head Unit (HSP/HFP) (sinks: 1, sources: 1, priority: 30, available: yes)
+</pre>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>HFP support is not stable and may cause glitches with switching to A2DP; try reconnecting, if the needed mode is not available.</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb5d5921e44b9_Disable_auto_switching_headset_to_HSP.2FHFP" id="Disable_auto_switching_headset_to_HSP/HFP"><span id="Disable_auto_switching_headset_to_HSP.2FHFP"></span>Disable auto switching headset to HSP/HFP</h3></div>
+<p>When using a bluetooth headset that supports multiple profiles, some applications switch to HSP/HFP profile automatically. If this behaviour is undesired you can disable this by appending the auto_switch=false parameter to the bluetooth-policy module:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pulse/default.pa</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">load-module module-bluetooth-policy auto_switch=false</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb5d5921e44b9_Disable_PipeWire_HSP.2FHFP_profile" id="Disable_PipeWire_HSP/HFP_profile"><span id="Disable_PipeWire_HSP.2FHFP_profile"></span>Disable PipeWire HSP/HFP profile</h3></div>
+<p>Unlike PulseAudio, <a href="#pgfd2dc6e44edd">PipeWire does not automatically switch between A2DP and HSP/HFP</a> in response to input events. However, rather than to enable automatically switching to the (lower audio quality) HSP/HFP profile if A2DP fails, you may prefer to disable the former altogether. To do so, create or edit a bluez configuration as shown below.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>HSP mode is required for built-in microphones to work <a href="https://www.reddit.com/r/pop_os/comments/otofgt/bluetooth_headphone_switches_to_hsphfp_when/">[10]</a>.</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/wireplumber/wireplumber.conf.d/50-bluez.conf (or ~/.config/wireplumber/wireplumber.conf.d/50-bluez.conf)</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">monitor.bluez.rules = [
+  {
+    matches = [
+      {
+        ## This matches all bluetooth devices.
+        device.name = "~bluez_card.*"
+      }
+    ]
+    actions = {
+      update-props = {
+        bluez5.auto-connect = [ a2dp_sink ]
+        bluez5.hw-volume = [ a2dp_sink ]
+      }
+    }
+  }
+]
+
+monitor.bluez.properties = {
+  bluez5.roles = [ a2dp_sink ]
+  bluez5.hfphsp-backend = "none"
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb5d5921e44b9_Alternative__A2DP_duplex_channel" id="Alternative:_A2DP_duplex_channel">Alternative: A2DP duplex channel</h3></div>
+<p>FastStream, AptX LL, and "Opus 05 Pro" (<a href="https://gitlab.freedesktop.org/pipewire/pipewire/-/merge_requests/1322">a pipewire invention</a>) have a "duplex" channel that allows for sending microphone audio back without needing to go into HSP/HFP and tolerate the sound quality degradation. PipeWire, but not PulseAudio, has support for this feature. Support is automatic upon feature detection. Interaction with existing profile switcher (WirePlumber) is unknown.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb5d5921e44b9_Tips_and_tricks" id="Tips_and_tricks">Tips and tricks</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb5d5921e44b9_.E8.8E.B7.E5.8F.96.E8.93.9D.E7.89.99.E8.80.B3.E6.9C.BA.E7.9A.84.E7.94.B5.E6.B1.A0.E7.94.B5.E9.87.8F" id="获取蓝牙耳机的电池电量"><span id=".E8.8E.B7.E5.8F.96.E8.93.9D.E7.89.99.E8.80.B3.E6.9C.BA.E7.9A.84.E7.94.B5.E6.B1.A0.E7.94.B5.E9.87.8F"></span>获取蓝牙耳机的电池电量</h3></div>
+<p>若要获取蓝牙耳机的剩余电量并将其提供给 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=upower">upower</a></span><sup><small>包</small></sup></span>，需要启动守护程序 <i>bluetoothd</i> 的试验性功能，方法如下：
+</p><p>建立一个 <code>bluetooth.service</code> 的替换单元文件（<a href="#pg4122967c3de0">replacement unit file</a>），在 <code>ExecStart</code> 行后添加 <code>-E</code>。这之后重新启动 <code>bluetooth.service</code>。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pgb5d5921e44b9_.E5.AA.92.E4.BD.93.E6.92.AD.E6.94.BE.E6.8E.A7.E5.88.B6" id="媒体播放控制"><span id=".E5.AA.92.E4.BD.93.E6.92.AD.E6.94.BE.E6.8E.A7.E5.88.B6"></span>媒体播放控制</h4></div>
+<p>媒体控制信号需要被转发给 MPRIS，并被支持 MPRIS 的媒体播放器所获取，来实现外部播放控制。详细信息请查看 <a href="#pg0a9b2cc841d1">MPRIS#Bluetooth</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pgb5d5921e44b9_AVRCP_Media_controls" id="AVRCP_Media_controls">AVRCP Media controls</h3></div>
+<p>This may be desired for bluetooth headsets with overly sensitive touch controls, and AVRCP playback controls can be disabled through the <code>inhibited</code> sysfs file corresponding to the virtual AVRCP input device, for example <code>/sys/devices/virtual/input/input877/inhibited</code>. The correct virtual input can be identified via the <code>name</code> attribute, <code>/sys/devices/virtual/input/input877/name</code>, which may for example be "Soundcore Life P3 (AVRCP)". Echoing <code>1</code> to this file inhibits/disables AVRCP, and echoing <code>0</code> re-enables it. This can be changed dynamically at runtime without restarting bluetoothd or disconnecting your device.
+</p><p>This will be reset on device disconnect and reconnect, so it is likely desired to automatically set it via a <a href="#pge009209061ac">udev</a> rule such as:
+</p>
+<pre>SUBSYSTEM=="input" ATTR{name}=="Soundcore Life P3 (AVRCP)" ATTR{inhibited}="1"
+</pre>
+<p>If you want to be able to change this attribute as a regular user, see <a href="#pge009209061ac">udev#Allowing regular users to use devices</a>
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pgb5d5921e44b9_See_also" id="See_also">See also</h2></div>
+<p>Using the same device on Windows and Linux without pairing the device over and over again
+</p>
+<ul><li><a href="https://ubuntuforums.org/showthread.php?p=9363229#post9363229">Dual booting with a Bluetooth keyboard</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807083226
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.290 seconds
+Real time usage: 0.301 seconds
+Preprocessor visited node count: 1249/1000000
+Revision size: 30138/2097152 bytes
+Post‐expand include size: 19315/2097152 bytes
+Template argument size: 6766/2097152 bytes
+Highest expansion depth: 7/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 6/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   78.315      1 -total
+ 11.94%    9.348     71 Template:Ic
+ 10.07%    7.888      3 Template:Merge
+  6.51%    5.101     16 Template:Pkg
+  4.35%    3.409      1 Template:Move
+  4.30%    3.368      3 Template:Broken_package_link_(简体中文)
+  4.04%    3.161      1 Template:翻译状态
+  3.99%    3.127      4 Template:META_Message
+  3.80%    2.975      6 Template:注意
+  3.50%    2.738     10 Template:Hc
+-->
+<!-- Render ID 84dc950e-923a-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6837:|#|:idhash:canonical!zh-cn and timestamp 20260807083226 and revision id 34602. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

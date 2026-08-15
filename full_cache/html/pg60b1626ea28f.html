@@ -1,0 +1,484 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg60b1626ea28f">在终端输出彩色</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><p><br/>
+</p>
+
+
+<div class="archwiki-template-meta-related-articles-start"><p>相关文章</p><ul>
+<li><a href="#pg9de7470c4ea9">Emacs#Custom colors and theme</a></li>
+<li><a href="#pg431294adbe18">nano#Syntax highlighting</a></li>
+</ul></div>
+<aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Color_output_in_console">Color_output_in_console</a>，最近一次同步于 202510-10，若英文版本有所<a href="https://wiki.archlinux.org/title/Color_output_in_console?diff=0&amp;oldid=828098">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Color_output_in_console_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+
+<p>This page was created to consolidate colorization of CLI outputs.
+</p>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg60b1626ea28f_Background" id="Background">Background</h2></div>
+
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_Escape_sequences" id="Escape_sequences">Escape sequences</h3></div>
+<p><a href="https://en.wikipedia.org/wiki/ANSI_escape_sequence">ANSI escape sequences</a> 定义了一种把附加信息追加在终端输出，并且颜色也是“附加信息”的一部分的方法。从最开始的八种颜色到24位全真式色彩，终端颜色在迅速的扩展。
+</p><p>基本颜色编码具有8种亮度颜色和8种这些颜色更亮的版本。现代终端模拟器，包括 Linux 控制台本身，可以指定翻译为更精确的 RGB 值。这种模式大多数仿真终端都是支持的。
+</p><p>With the advent of 256-color displays came the 256-color escape. The 256 colors are the 16 basic colors, the 216 RGB colors (laid out in a 6x6x6 cube), and 24 levels of greyscale. Except for the first 16 colors, the scheme is usually not customizable as it has a well-defined mapping to RGB. This mode is supported by most terminal emulators. (A minority of emulators use a similar but incompatible encoding with only 88 colors. You are very unlikely to use them in practice, but they will appear in the terminfo database.)
+</p><p>Less commonly supported is the truecolor mode, allowing one to use 16.7 million (2<sup>24</sup>) colors in RGB (each value ranging from 0 to 255).
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_Termcap_and_terminfo" id="Termcap_and_terminfo">Termcap and terminfo</h3></div>
+<p>Termcap and terminfo, part of <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ncurses">ncurses</a></span><sup><small>包</small></sup></span>, are databases that provide information on the escape sequences terminals (usually specified by the <code>TERM</code> env-var) understand. The <span class="plainlinks archwiki-template-man" title="$ man 1 tput"><a href="https://man.archlinux.org/man/tput.1">tput(1)</a></span> and <span class="plainlinks archwiki-template-man" title="$ man 1 infocmp"><a href="https://man.archlinux.org/man/infocmp.1">infocmp(1)</a></span> commands can be used to access them from command-line.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg60b1626ea28f_Applications" id="Applications">Applications</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_diff" id="diff">diff</h3></div>
+<p>diffutils from version 3.4 includes the <code>--color</code> option (<a href="https://lists.gnu.org/archive/html/info-gnu/2016-08/msg00004.html">GNU mailing list</a>).
+</p>
+<pre>$ alias diff='diff --color=auto'
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_grep" id="grep">grep</h3></div>
+<p>The <code>--color=auto</code> option enables color highlighting. Color codes are emitted only on standard output; not in pipes or redirection.
+</p><p>Color output in <i>grep</i> is also useful with <a href="https://en.wikipedia.org/wiki/regexp">regexp</a> tasks.
+</p><p>Use an <a href="#pg73ccc732cfb7">alias</a> to permanently enable this option:
+</p>
+<pre>alias grep='grep --color=auto'
+</pre>
+<p>The <code>GREP_COLORS</code> variable is used to define colors, and it configures various parts of highlighting. To change the colors, find the needed <a href="https://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x329.html">ANSI escape sequence</a> and apply it. See <span class="plainlinks archwiki-template-man" title="$ man 1 grep"><a href="https://man.archlinux.org/man/grep.1#GREP_COLORS">grep(1) § GREP COLORS</a></span> for more information.
+</p><p>The <code>-n</code> option includes file line numbers in the output.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_ip" id="ip">ip</h3></div>
+<p><span class="plainlinks archwiki-template-man" title="$ man 8 ip"><a href="https://man.archlinux.org/man/ip.8">ip(8)</a></span> command from <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iproute2">iproute2</a></span><sup><small>包</small></sup></span> supports colors with <code>-c</code>/<code>-color</code> option. When using the <code>auto</code> parameter, colored output will be enabled only when stdout is a terminal. <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=iproute2">iproute2</a></span><sup><small>包</small></sup></span> can be built with <code>auto</code> as the default, but <a href="https://gitlab.archlinux.org/archlinux/packaging/packages/iproute2/-/merge_requests/2">such a change</a> has been rejected by the Arch package maintainer.
+</p><p>You can use an <a href="#pg73ccc732cfb7">alias</a> to enable colored output, e.g.:
+</p>
+<pre>alias ip='ip -color=auto'
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_less" id="less">less</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_Environment_variables" id="Environment_variables">Environment variables</h4></div>
+<p>As with the <a href="#pg60b1626ea28f_man">#man</a> case, we can tell less to emit colors when it is meaning to make bold text and other formatting effects.
+</p><p>Add the following lines to your shell configuration file:
+</p>
+<pre>export LESS='-R --use-color -Dd+r$Du+b$'
+</pre>
+<p>It will set red for bold and blue for underlined.
+</p><p>For more information about the <code>--use-color</code> and <code>-D</code> options, see <span class="plainlinks archwiki-template-man" title="$ man 1 less"><a href="https://man.archlinux.org/man/less.1#D">less(1) § D</a></span> or <a href="https://felipec.wordpress.com/2021/06/05/adventures-with-man-color/">[1]</a>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_Reading_from_stdin" id="Reading_from_stdin">Reading from stdin</h4></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>It is recommended to add colored output through <a href="#pg60b1626ea28f_Environment_variables">#Environment variables</a> to your <code>~/.bashrc</code> or <code>~/.zshrc</code>, as the below is based on <code>export LESS='-R'</code></div>
+<p>When you run a command and pipe its <a href="https://en.wikipedia.org/wiki/Standard_output">standard output</a> (<i>stdout</i>) to <i>less</i> for a paged view (e.g. <code>pacman -Qe | less</code>), you may find that the output is no longer colored. This is usually because the program tries to detect if its <i>stdout</i> is an interactive terminal, in which case it prints colored text, and otherwise prints uncolored text. This is good behaviour when you want to redirect <i>stdout</i> to a file, e.g. <code>pacman -Qe &gt; pkglst-backup.txt</code>, but less suited when you want to view output in <code>less</code>.
+</p><p>Some programs provide an option to disable the interactive tty detection:
+</p>
+<pre># dmesg --color=always | less
+</pre>
+<p>In case that the program does not provide any similar option, it is possible to trick the program into thinking its <i>stdout</i> is an interactive terminal with the following utilities:
+</p>
+<ul><li><b>ColorThis</b> — Force colored output of a program by running it within a (group of) pty, support forwarding stdin.</li></ul>
+<dl><dd><a href="https://github.com/Sasasu/ColorThis">https://github.com/Sasasu/ColorThis</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/colorthis-git/">colorthis-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>stdoutisatty</b> — A small program and a <code>LD_PRELOAD</code>-able library that catches the <span class="plainlinks archwiki-template-man" title="$ man 3 isatty"><a href="https://man.archlinux.org/man/isatty.3">isatty(3)</a></span> function call.</li></ul>
+<dl><dd><a href="https://github.com/lilydjwg/stdoutisatty">https://github.com/lilydjwg/stdoutisatty</a>. || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=stdoutisatty">stdoutisatty</a></span><sup><small>包</small></sup></span></dd>
+<dd>Example: <code>stdoutisatty <i>program</i> | less</code></dd></dl>
+<ul><li><b>unbuffer</b> — A tclsh script comes with expect, it invokes desired program within a pty.</li></ul>
+<dl><dd><span class="plainlinks archwiki-template-man" title="$ man 1 unbuffer"><a href="https://man.archlinux.org/man/unbuffer.1">unbuffer(1)</a></span> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=expect">expect</a></span><sup><small>包</small></sup></span></dd>
+<dd>Example: <code>unbuffer <i>program</i> | less</code></dd></dl>
+<p>Alternatively, using <a href="https://zsh.sourceforge.net/Doc/Release/Zsh-Modules.html#The-zsh_002fzpty-Module">zpty</a> module from <a href="#pg187873cfd725">zsh</a>: <a href="https://blog.lilydjwg.me/2011/6/29/using-zpty-module-of-zsh.27677.html">[2]</a>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.zshrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">zmodload zsh/zpty
+
+pty() {
+	zpty pty-${UID} ${1+$@}
+	if [[ ! -t 1 ]];then
+		setopt local_traps
+		trap '' INT
+	fi
+	zpty -r pty-${UID}
+	zpty -d pty-${UID}
+}
+
+ptyless() {
+	pty $@ | less
+}
+</pre>
+<p>Usage:
+</p>
+<pre>$ ptyless <i>program</i>
+</pre>
+<p>To pipe it to other pager (less in this example):
+</p>
+<pre>$ pty <i>program</i> | less
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_ls" id="ls">ls</h3></div>
+<p>The <code>--color=auto</code> option enables color highlighting. Color codes are emitted only on standard output; not in pipes or redirection.
+</p><p>Use an <a href="#pg73ccc732cfb7">alias</a> to permanently enable this option:
+</p>
+<pre>alias ls='ls --color=auto'
+</pre>
+<p>The <code>LS_COLORS</code> variable is used to define colors, and it configures various parts of highlighting. Use the <span class="plainlinks archwiki-template-man" title="$ man 1 dircolors"><a href="https://man.archlinux.org/man/dircolors.1">dircolors(1)</a></span> command to set it. 
+</p><p>An advanced alternative to <i>dircolors</i> that ships with many themes is the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vivid">vivid</a></span><sup><small>包</small></sup></span> package, see <code>vivid --help</code> for usage.
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Using the <code>--color</code> option may incur a noticeable performance penalty when <i>ls</i> is run in a directory with very many entries. The default settings require <i>ls</i> to <span class="plainlinks archwiki-template-man" title="$ man 1 stat"><a href="https://man.archlinux.org/man/stat.1">stat(1)</a></span> every single file it lists. However, if you would like most of the file-type coloring but can live without the other coloring options (e.g. executable, orphan, sticky, other-writable, capability), use <i>dircolors</i> to set the <code>LS_COLORS</code> environment variable like this:
+<pre>eval $(dircolors -p | perl -pe 's/^((CAP|S[ET]|O[TR]|M|E)\w+).*/$1 00/' | dircolors -)
+</pre>
+</div>
+<p>See <span class="plainlinks archwiki-template-man" title="$ man 1 ls"><a href="https://man.archlinux.org/man/ls.1">ls(1)</a></span> for more information.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_man" id="man">man</h3></div>
+
+<p>There is a real color facility in <span class="plainlinks archwiki-template-man" title="$ man 1 grotty"><a href="https://man.archlinux.org/man/grotty.1">grotty(1)</a></span>, but it is strongly discouraged for man pages. Here we fake a colored <code>man</code> by hacking two main pagers, <code>less</code> and <code>most</code>: we replace the sequences for bold, standout, and underline with spiced ones that contain color.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_Using_bat" id="Using_bat">Using bat</h4></div>
+<p><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bat">bat</a></span><sup><small>包</small></sup></span> can be used as a colorizing pager for man, by setting the <code>MANPAGER</code> environment variable
+<a href="https://github.com/sharkdp/bat#man">as documented here</a>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_Using_less" id="Using_less">Using less</h4></div>
+<p>See <a href="#pg60b1626ea28f_less">#less</a> for a more detailed description.
+</p>
+<pre>export MANPAGER="less -R --use-color -Dd+r -Du+b"
+export MANROFFOPT="-P -c"
+</pre>
+<p>For <a href="#pg5d70232b3a46">Fish</a> you could accomplish this with:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/fish/config.fish</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">set -xU MANPAGER 'less -R --use-color -Dd+r -Du+b'
+set -xU MANROFFOPT '-P -c'</pre>
+<p>Remember to source your config or restart your shell to make the changes take effect.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_Using_most" id="Using_most">Using most</h4></div>
+<p>The basic function of 'most' is similar to <code>less</code> and <code>more</code>, but it has a smaller feature set. Configuring most to use colors is easier than using less, but additional configuration is necessary to make most behave like less.
+Install the <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=most">most</a></span><sup><small>包</small></sup></span> package.
+</p><p>Edit <code>/etc/man_db.conf</code>, uncomment the pager definition and change it to:
+</p>
+<pre>DEFINE     pager     most -s
+</pre>
+<p>Test the new setup by typing:
+</p>
+<pre>$ man whatever_man_page
+</pre>
+<p>Modifying the color values requires editing <code>~/.mostrc</code> (creating the file if it is not present) or editing <code>/etc/most.conf</code> for system-wide changes. Example <code>~/.mostrc</code>:
+</p>
+<pre>% Color settings
+color normal lightgray black
+color status yellow blue
+color underline yellow black
+color overstrike brightblue black
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_Using_X_resources" id="Using_X_resources">Using X resources</h4></div>
+<p>A quick way to add color to manual pages viewed on <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=xterm">xterm</a></span><sup><small>包</small></sup></span>/<code>uxterm</code> or <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=rxvt-unicode">rxvt-unicode</a></span><sup><small>包</small></sup></span> is to modify <code>~/.Xresources</code>.
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg60b1626ea28f_xterm" id="xterm">xterm</h5></div>
+<pre>*VT100.colorBDMode:     true
+*VT100.colorBD:         red
+*VT100.colorULMode:     true
+*VT100.colorUL:         cyan
+</pre>
+<p>which <i>replaces</i> the decorations with the colors.  Also add:
+</p>
+<pre>*VT100.veryBoldColors: 6
+</pre>
+<p>if you want colors and decorations (bold or underline) <i>at the same time</i>.  See <span class="plainlinks archwiki-template-man" title="$ man 1 xterm"><a href="https://man.archlinux.org/man/xterm.1#veryBoldColors">xterm(1) § veryBoldColors</a></span> for more information.
+</p>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg60b1626ea28f_rxvt_unicode" id="rxvt-unicode">rxvt-unicode</h5></div>
+<pre>URxvt.colorIT:      #87af5f
+URxvt.colorBD:      #d7d7d7
+URxvt.colorUL:      #87afd7
+</pre>
+<p>Run:
+</p>
+<pre>$ xrdb -load ~/.Xresources
+</pre>
+<p>Launch a new <code>xterm/uxterm</code> or <code>rxvt-unicode</code> and you should see colorful man pages.
+</p><p>This combination puts colors to <b>bold</b> and <u>underlined</u> words in <code>xterm/uxterm</code> or to <b>bold</b>, <u>underlined</u>, and <i>italicized</i> text in <code>rxvt-unicode</code>. You can play with different combinations of these attributes. See the <a href="https://web.archive.org/web/20210512042458/http://vger.cz/setup/XFree86/app-defaults/XTerm">sources</a> (archived) of this item.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_pacman" id="pacman">pacman</h3></div>
+<p><a href="#pg9ef105bf1e3c">Pacman</a> has a color option. Uncomment the <code>Color</code> line in <code>/etc/pacman.conf</code>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg60b1626ea28f_Wrappers" id="Wrappers">Wrappers</h2></div>
+
+<p><br/>
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_Universal_wrappers" id="Universal_wrappers">Universal wrappers</h3></div>
+<p>(most of them outdated, but still functioning)
+</p><p>They go with multiple preconfigured presets that can be changed, and new ones can be created/contributed.
+</p>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>Wrappers replace output of commands with escape sequences. Some shell scripts and programs which use the output of standard shell utilities may not work correctly.</div>
+<ul><li><b>rainbow</b> — Colorize commands output or STDIN using patterns.<br/>Presets: df, diff, env, host, ifconfig, java-stack-trace, jboss, jonas, md5sum, mvn2, mvn3, ping, tomcat, top, traceroute.</li></ul>
+<dl><dd><a href="https://github.com/nicoulaj/rainbow">https://github.com/nicoulaj/rainbow</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/rainbow/">rainbow</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>grc</b> — Yet another colouriser for beautifying your logfiles or output of commands.<br/>Presets: cat, cvs, df, diff, dig, gcc, g++, ls, ifconfig, make, mount, mtr, netstat, ping, ps, tail, traceroute, wdiff, blkid, du, dnf, docker, docker-machine, env, id, ip, iostat, last, lsattr, lsblk, lspci, lsmod, lsof, getfacl, getsebool, ulimit, uptime, nmap, fdisk, findmnt, free, semanage, sar, ss, sysctl, systemctl, stat, showmount, tune2fs and tcpdump.</li></ul>
+<dl><dd><a href="https://github.com/garabik/grc">https://github.com/garabik/grc</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=grc">grc</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>cope</b> — A colourful wrapper for terminal programs.<br/>Presets: acpi, arp, cc, df, dprofpp, fdisk, free, g++, gcc, id, ifconfig, ls, lspci, lsusb, make, md5sum, mpc, netstat, nm, nmap, nocope, ping, pmap, ps, readelf, route, screen, sha1sum, sha224sum, sha256sum, sha384sum, sha512sum, shasum, socklist, stat, strace, tcpdump, tracepath, traceroute, w, wget, who, xrandr.</li></ul>
+<dl><dd><a href="https://github.com/yogan/cope">https://github.com/yogan/cope</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cope-git/">cope-git</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>cw</b> — A non-intrusive real-time ANSI color wrapper for common unix-based commands. Wraps <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=file">file</a></span><sup><small>包</small></sup></span> which can cause issues.<br/>Presets: arp, arping, auth.log@, blockdev, cal, cksum, clock, configure, cpuinfo@, crontab@, cw-pipe, cw-test.cgi, date, df, diff, dig, dmesg, du, env, figlet, file, find, finger, free, fstab@, fuser, g++, gcc, group@, groups, hdparm, hexdump, host, hosts@, id, ifconfig, inittab@, iptables, last, lastlog, lsattr, lsmod, lsof, ltrace-color, make, md5sum, meminfo@, messages@, mount, mpg123, netstat, nfsstat, nmap, nslookup, objdump, passwd@, ping, pmap, pmap_dump, praliases, profile@, protocols@, ps, pstree, quota, quotastats, resolv.conf@, route, routel, sdiff, services@, showmount, smbstatus, stat, strace-color, sysctl, syslog, tar, tcpdump, tracepath, traceroute, umount, uname, uptime, users, vmstat, w, wc, whereis, who, xferlog.</li></ul>
+<dl><dd><a href="https://cwrapper.sourceforge.net/">https://cwrapper.sourceforge.net/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cw/">cw</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>ccze</b> — A fast log colorizer written in C, intended to be a drop-in replacement for colorize</li></ul>
+<dl><dd><a href="https://github.com/cornet/ccze/">https://github.com/cornet/ccze/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/ccze/">ccze</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_Libraries_for_colorizing_an_output" id="Libraries_for_colorizing_an_output">Libraries for colorizing an output</h3></div>
+<ul><li><b>libtextstyle</b> — A C library for styling text output to terminals</li></ul>
+<dl><dd><a href="https://www.gnu.org/software/gettext/libtextstyle/manual/index.html">https://www.gnu.org/software/gettext/libtextstyle/manual/index.html</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=gettext">gettext</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>ruby-rainbow</b> — Rainbow is extension to ruby's String class adding support for colorizing text on ANSI terminal</li></ul>
+<dl><dd><a href="https://rubygems.org/gems/rainbow/">https://rubygems.org/gems/rainbow/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=ruby-rainbow">ruby-rainbow</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>python-blessings</b> — A thin, practical wrapper around terminal coloring, styling, and positioning</li></ul>
+<dl><dd><a href="https://github.com/erikrose/blessings">https://github.com/erikrose/blessings</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/python-blessings/">python-blessings</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>lolcat</b> — Ruby program that makes the output colorful like a rainbow</li></ul>
+<dl><dd><a href="https://github.com/busyloop/lolcat/">https://github.com/busyloop/lolcat/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lolcat">lolcat</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_Application_specific" id="Application_specific">Application specific</h3></div>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_Compilers" id="Compilers">Compilers</h4></div>
+<ul><li><b>colorgcc</b> — A Perl wrapper to colorize the output of compilers with warning/error messages matching the gcc output format</li></ul>
+<dl><dd><a href="https://github.com/colorgcc/colorgcc">https://github.com/colorgcc/colorgcc</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=colorgcc">colorgcc</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_diff" id="diff_2">diff</h4></div>
+<p>Diff has <a href="#pg60b1626ea28f_diff">built-in color output</a>, which is reasonable to use. But the following wrappers can be used:
+</p>
+<ul><li><b>colordiff</b> — Perl script for <i>diff</i> highlighting.</li></ul>
+<dl><dd><a href="https://www.colordiff.org/">https://www.colordiff.org/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=colordiff">colordiff</a></span><sup><small>包</small></sup></span></dd></dl>
+<ul><li><b>cwdiff</b> — <i>(w)diff</i> wrapper with directories support and highlighting.</li></ul>
+<dl><dd><a href="https://github.com/junghans/cwdiff">https://github.com/junghans/cwdiff</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/cwdiff/">cwdiff</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<ul><li><b>git-delta</b> — A syntax-highlighting pager for git and diff output.</li></ul>
+<dl><dd><a href="https://github.com/dandavison/delta">https://github.com/dandavison/delta</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=git-delta">git-delta</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_cat" id="cat">cat</h4></div>
+<ul><li><b>bat</b> — Cat clone with syntax highlighting and git integration.</li></ul>
+<dl><dd><a href="https://github.com/sharkdp/bat">https://github.com/sharkdp/bat</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=bat">bat</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_less" id="less_2">less</h4></div>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg60b1626ea28f_source_highlight" id="source-highlight">source-highlight</h5></div>
+<p>You can enable code syntax coloring in <i>less</i>. First, <a href="#pg54c3351b3e3b">install</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=source-highlight">source-highlight</a></span><sup><small>包</small></sup></span>, then add these lines to your shell configuration file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bashrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">export LESSOPEN="| /usr/bin/source-highlight-esc.sh %s"
+export LESS='-R '
+</pre>
+<div class="mw-heading mw-heading5"><h5 data-bm="pg60b1626ea28f_lesspipe" id="lesspipe">lesspipe</h5></div>
+<p>Frequent users of the command line interface might want to install <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lesspipe">lesspipe</a></span><sup><small>包</small></sup></span>.
+</p><p>Users may now list the compressed files inside of an archive using their pager:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ less <i>compressed_file</i>.tar.gz</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">==&gt; use tar_file:contained_file to view a file in the archive
+-rw------- <i>username</i>/<i>group</i>  695 2008-01-04 19:24 <i>compressed_file</i>/<i>content1</i>
+-rw------- <i>username</i>/<i>group</i>   43 2007-11-07 11:17 <i>compressed_file</i>/<i>content2</i>
+<i>compressed_file</i>.tar.gz (END)</pre>
+<p><i>lesspipe</i> also grants <i>less</i> the ability of interfacing with files other than archives, serving as an alternative for the specific command associated for that file-type (such as viewing HTML via <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=python-html2text">python-html2text</a></span><sup><small>包</small></sup></span>).
+</p><p>Re-login after installing <i>lesspipe</i> in order to activate it, or source <code>/etc/profile.d/lesspipe.sh</code>.
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_Make" id="Make">Make</h4></div>
+<ul><li><b>colormake</b> — A simple wrapper around make to make its output more readable.</li></ul>
+<dl><dd><a href="https://github.com/pagekite/Colormake/">https://github.com/pagekite/Colormake/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/colormake/">colormake</a></span><sup><small>AUR</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_Ping" id="Ping">Ping</h4></div>
+<ul><li><b>prettyping</b> — Add some great features to ping monitoring. A wrapper around the standard ping tool with the objective of making the output prettier, more colorful, more compact, and easier to read.</li></ul>
+<dl><dd><a href="https://denilson.sa.nom.br/prettyping/">https://denilson.sa.nom.br/prettyping/</a> || <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=prettyping">prettyping</a></span><sup><small>包</small></sup></span></dd></dl>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg60b1626ea28f_Shells" id="Shells">Shells</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_bash" id="bash">bash</h3></div>
+<p>See <a href="#pge07457b07cc4">Bash/Prompt customization#Colors</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_Fish" id="Fish">Fish</h3></div>
+<p>See <a href="#pg5d70232b3a46">Fish#Web interface</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_xonsh" id="xonsh">xonsh</h3></div>
+<p>See <a href="https://xon.sh/tutorial.html#customizing-the-prompt">Customizing the Prompt</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_zsh" id="zsh">zsh</h3></div>
+<p>See <a href="#pg187873cfd725">Zsh#Colors</a>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg60b1626ea28f_Terminal_emulators" id="Terminal_emulators">Terminal emulators</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_Virtual_console" id="Virtual_console">Virtual console</h3></div>
+
+<p>The colors in the <a href="https://en.wikipedia.org/wiki/Virtual_console">Linux virtual console</a> running on the framebuffer can be changed. This is done by writing the escape code <code>\\e]PXRRGGBB</code>, where <code>X</code> is the hexadecimal index of the color from 0-F, and <code>RRGGBB</code> is a traditional hexadecimal RGB code. 
+</p><p>For example, to reuse existing colors defined in <code>~/.Xresources</code>, add the following to the shell initialization file (such as <code>~/.bashrc</code>):
+</p>
+<pre>if [ "$TERM" = "linux" ]; then
+    _SEDCMD='s/.*\*color\([0-9]\{1,\}\).*#\([0-9a-fA-F]\{6\}\).*/\1 \2/p'
+    for i in $(sed -n "$_SEDCMD" $HOME/.Xresources | awk '$1 &lt; 16 {printf "\\e]P%X%s", $1, $2}'); do
+        echo -en "$i"
+    done
+    clear
+fi
+</pre>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg60b1626ea28f_Login_screen" id="Login_screen">Login screen</h4></div>
+<p>The below is a colored example of the virtual console login screen in <code>/etc/issue</code>. Create a backup of the original file with <code>mv /etc/issue /etc/issue.bak</code> as root, and create a new <code>/etc/issue</code>:
+</p>
+<pre>\e[H\e[2J
+                                                             \e[1;30m| \e[34m\r \s
+      \e[36;1m/\\\\                        \e[37m||      \e[36m| =                 \e[30m|
+     \e[36m/  \\\\                       \e[37m||      \e[36m|                   \e[30m| \e[32m\t
+    \e[1;36m/ \e[0;36m.. \e[1m\\\\   \e[37m//==\\\\\\ ||/= /==\\\\ ||/=\\\\  \e[36m| | |/\\\\ |  | \\\\ /  \e[30m| \e[32m\d
+   \e[0;36m/ .  . \\\\ \e[37m||    || ||  ||     ||  ||  \e[36m| | |  | |  |   X   \e[1;30m|
+  \e[0;36m/  .  .  \\\\ \e[37m\\\\\\==/| ||   \\\\==/ ||  ||  \e[36m| | |  |\  \\/|  / \\\\ \e[1;30m| \e[31m\U
+ \e[0;36m/ ..    .. \\\\   \e[0;37mA simple, lightweight linux distribution.   \e[1;30m|
+\e[0;36m/_'        `_\\\\                                              \e[1;30m| \e[35m\l \e[0mon \e[1;33m\n
+\e[0m 
+</pre>
+<p>See also:
+</p>
+<ul><li><a href="https://bbs.archlinux.org/viewtopic.php?pid=386429#p386429">https://bbs.archlinux.org/viewtopic.php?pid=386429#p386429</a></li>
+<li><a href="https://www.linuxfromscratch.org/blfs/view/svn/postlfs/logon.html">https://www.linuxfromscratch.org/blfs/view/svn/postlfs/logon.html</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_X_window_system" id="X_window_system">X window system</h3></div>
+<p>Most <a href="#pga36c0aff60be">Xorg</a> terminals, including <a href="#pg12c4c9eae03a">xterm</a> and <a href="#pg447cf8233070">urxvt</a>, support at least 16 basic colors. The colors 0-7 are the 'normal' colors. Colors 8-15 are their 'bright' counterparts, used for highlighting. These colors can be modified through <a href="#pg4c36b893db9d">X resources</a>, or through specific terminal settings. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.Xresources</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">! Black + DarkGrey
+*color0:  #000000
+*color8:  #555753
+! DarkRed + Red
+*color1:  #ff6565
+*color9:  #ff8d8d
+! DarkGreen + Green
+*color2:  #93d44f
+*color10: #c8e7a8
+! DarkYellow + Yellow
+*color3:  #eab93d
+*color11: #ffc123
+! DarkBlue + Blue
+*color4:  #204a87
+*color12: #3465a4
+! DarkMagenta + Magenta
+*color5:  #ce5c00
+*color13: #f57900
+!DarkCyan + Cyan (both not tango)
+*color6:  #89b6e2
+*color14: #46a4ff
+! LightGrey + White
+*color7:  #cccccc
+*color15: #ffffff</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>Color resources such as <code>foreground</code> and <code>background</code> can be read by other applications (such as <a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Table-of-Resources.html">emacs</a>). This can be avoided by specifiying the class name, for example <code>XTerm.foreground</code>.</div>
+<p>See also:
+</p>
+<ul><li><a href="#pg60b1626ea28f_Using_X_resources">#Using X resources</a> for how to color bold and underlined text automatically.</li>
+<li><a href="https://web.archive.org/web/20090130061234/http://phraktured.net/terminal-colors/">Color Themes</a> - Extensive list of terminal color themes by Phraktured.</li>
+<li><a href="https://github.com/dkeg/xcolors">Xcolors by dkeg</a> (see files with paths matching <code>theme/dkeg - <i>theme</i></code> in the repository)</li>
+<li><a href="https://github.com/chriskempson/base16">base16 color schemes</a></li></ul>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_Setting_foreground_and_background_colors" id="Setting_foreground_and_background_colors_with_tput">Setting foreground and background colors with tput</h3></div>
+<p>Example to set bold, yellow text, with blue background:
+</p>
+<pre>$ tput bold; tput setaf 3; tput setab 4
+</pre>
+<table class="wikitable">
+<caption>tput command line option cheatsheet
+</caption>
+<tbody><tr>
+<th>tput command</th>
+<th>Description
+</th></tr>
+<tr>
+<td><code>tput bold</code></td>
+<td>Bold text
+</td></tr>
+<tr>
+<td><code>tput setaf [CODE]</code></td>
+<td>Set foreground color
+</td></tr>
+<tr>
+<td><code>tput setab [CODE]</code></td>
+<td>Set background color
+</td></tr>
+<tr>
+<td><code>tput rev</code></td>
+<td>Inverse colors
+</td></tr>
+<tr>
+<td><code>tput sgr0</code></td>
+<td>Reset everything
+</td></tr></tbody></table>
+<table class="wikitable sortable">
+<caption>tput color codes
+</caption>
+<tbody><tr>
+<th>tput color [CODE]</th>
+<th>Color
+</th></tr>
+<tr>
+<td>0</td>
+<td>Black
+</td></tr>
+<tr>
+<td>1</td>
+<td>Red
+</td></tr>
+<tr>
+<td>2</td>
+<td>Green
+</td></tr>
+<tr>
+<td>3</td>
+<td>Yellow
+</td></tr>
+<tr>
+<td>4</td>
+<td>Blue
+</td></tr>
+<tr>
+<td>5</td>
+<td>Magenta
+</td></tr>
+<tr>
+<td>6</td>
+<td>Cyan
+</td></tr>
+<tr>
+<td>7</td>
+<td>White
+</td></tr></tbody></table>
+<p>Example to print 256 colors across the screen:
+</p>
+<pre>$ (x=`tput op` y=`printf %76s`;for i in {0..256};do o=00$i;echo -e ${o:${#o}-3:3} `tput setaf $i;tput setab $i`${y// /=}$x;done)
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_Display_tput_escape_codes" id="Display_tput_escape_codes">Display tput escape codes</h3></div>
+
+<p>Replace <code>tput op</code> with whatever tput you want to trace. <code>op</code> is the default foreground and background color.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ( strace -s5000 -e write tput op 2&gt;&amp;2 2&gt;&amp;1 ) | tee -a /dev/stderr | grep -o '"[^"]*"'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">033[\033[1;34m"\33[39;49m"\033[00m
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_Enumerate_supported_colors" id="Enumerate_supported_colors">Enumerate supported colors</h3></div>
+<p>The following command will let you discover all the terminals you have terminfo support for, and the number of colors each terminal supports. The possible values are: 8, 15, 16, 52, 64, 88 and 256.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ for T in `find /usr/share/terminfo -type f -printf '%f '`;do echo "$T `tput -T $T colors`";done|sort -nk2</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Eterm-88color 88
+rxvt-88color 88
+xterm+88color 88
+xterm-88color 88
+Eterm-256color 256
+gnome-256color 256
+konsole-256color 256
+putty-256color 256
+rxvt-256color 256
+screen-256color 256
+screen-256color-bce 256
+screen-256color-bce-s 256
+screen-256color-s 256
+xterm+256color 256
+xterm-256color 256
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_Color_scheme_scripts" id="Color_scheme_scripts">Color scheme scripts</h3></div>
+<p>See <a href="https://paste.xinu.at/m-dAiJ/">[3]</a> for scripts which display a chart of your current terminal scheme.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg60b1626ea28f_True_color_support" id="True_color_support">True color support</h3></div>
+<p>Some terminals support the full range of 16 million colors (RGB, each with 8 bit resolution): xterm, konsole, st, etc. The corresponding TERM values <code>xterm-direct</code>, <code>konsole-direct</code>, <code>st-direct</code>, etc. are supported starting with ncurses version 6.1 <a href="https://lists.gnu.org/archive/html/bug-ncurses/2018-01/msg00045.html">[4]</a>. For more info about terminal emulators and applications that support true color, see <a href="https://github.com/termstandard/colors/blob/master/README.md">[5]</a>.
+</p><p>Note that the Linux kernel supports the SGR (Select Graphic Rendition) escape sequences for true-color, but it is pointless to use it, because the driver maps the 24-bit color specifications to a 256-colors color map in the kernel (see the functions <code>rgb_foreground</code>, <code>rgb_background</code>). For this reason, there is no terminfo entry <code>linux-direct</code>.
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg60b1626ea28f_See_also" id="See_also">See also</h2></div>
+<ul><li><a href="https://gkbrk.com/2016/07/lolcat-clone-in-x64-assembly/">lolcat clone in x64 assembly</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807033147
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [prevent‐selective‐update, show‐toc]
+CPU time usage: 0.373 seconds
+Real time usage: 0.389 seconds
+Preprocessor visited node count: 1837/1000000
+Revision size: 23724/2097152 bytes
+Post‐expand include size: 34595/2097152 bytes
+Template argument size: 16362/2097152 bytes
+Highest expansion depth: 9/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 635/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  123.537      1 -total
+ 14.52%   17.934     19 Template:App
+  8.62%   10.649     71 Template:Ic
+  7.70%    9.518     13 Template:Man
+  6.56%    8.100      8 Template:META_Message
+  5.86%    7.241      2 Template:Expansion
+  5.66%    6.986      3 Template:Style
+  5.02%    6.203     23 Template:Pkg
+  4.28%    5.282      2 Template:Note
+  3.87%    4.778      1 Template:Move
+-->
+<!-- Render ID 84c79f8e-9210-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:6911:|#|:idhash:canonical!zh-cn and timestamp 20260807033147 and revision id 34600. Rendering was triggered because: unknown
+ -->
+</div>
+</div>

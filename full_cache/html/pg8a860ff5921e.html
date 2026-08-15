@@ -1,0 +1,260 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg8a860ff5921e">在 WSL 上安装 Arch Linux</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Install_Arch_Linux_on_WSL">Install Arch Linux on WSL</a>，最近一次同步于 2025-08-22，若英文版本有所<a href="https://wiki.archlinux.org/title/Install_Arch_Linux_on_WSL?diff=0&amp;oldid=844836">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Install_Arch_Linux_on_WSL_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<p>作为 <a href="https://gitlab.archlinux.org/archlinux/archlinux-wsl">archlinux-wsl</a> 项目的一部分，Arch Linux 提供官方 <a href="https://learn.microsoft.com/en-us/windows/wsl/about">WSL（Windows Subsystem for Linux，适用于 Linux 的 Windows 子系统）</a>镜像。
+</p><p>镜像每月构建并发布一次，旨在通过最简且完整的系统在 WSL 上提供完整的 Arch Linux 体验。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>需要 <b>WSL 2</b>。<b>不支持</b> WSL 1。以下内容均假定您使用最新稳定版的 WSL 2。</div>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8a860ff5921e_.E5.AE.89.E8.A3.85" id="安装"><span id=".E5.AE.89.E8.A3.85"></span>安装</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8a860ff5921e_.E5.AE.89.E8.A3.85_WSL" id="安装_WSL"><span id=".E5.AE.89.E8.A3.85_WSL"></span>安装 WSL</h3></div>
+<p>在 UEFI 设置中<a href="https://support.microsoft.com/en-us/windows/enable-virtualization-on-windows-c5578302-6e43-4b4b-a449-8ced115f58e1">启用虚拟化</a>，然后从 Microsoft Store <a href="https://learn.microsoft.com/en-us/windows/wsl/install">安装</a> <b>Windows Subsystem for Linux（适用于 Linux 的 Windows 子系统）</b>。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>Microsoft Store 内的 WSL 是<a href="https://devblogs.microsoft.com/commandline/the-windows-subsystem-for-linux-in-the-microsoft-store-is-now-generally-available-on-windows-10-and-11/">默认版本</a>。不要启用 "Windows Subsystem for Linux" 组件，也不要安装 WSL 内核或 WSLg 的 MSI 安装包，因为它们不再被需要。相比于 Windows 组件，使用 <a href="https://aka.ms/wslstorepage">Microsoft Store 版本</a>的 WSL 可让您<a href="https://devblogs.microsoft.com/commandline/a-preview-of-wsl-in-the-microsoft-store-is-now-available/">更快地获取更新</a>，<a href="https://aka.ms/wslg">WSLg</a> 现也已被打包。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8a860ff5921e_.E6.9B.B4.E6.96.B0_WSL" id="更新_WSL"><span id=".E6.9B.B4.E6.96.B0_WSL"></span>更新 WSL</h3></div>
+<p>要更新到最新稳定版的 WSL 和 WSLg，在具有管理员权限的 Windows 的命令行 Shell 中执行以下命令：
+</p>
+<pre>&gt; wsl --update
+</pre>
+<p>要更新到最新的预发行版本，请换用以下命令：
+</p>
+<pre>&gt; wsl --update --pre-release
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8a860ff5921e_.E5.9C.A8_WSL_.E4.B8.8A.E5.AE.89.E8.A3.85_Arch_Linux" id="在_WSL_上安装_Arch_Linux"><span id=".E5.9C.A8_WSL_.E4.B8.8A.E5.AE.89.E8.A3.85_Arch_Linux"></span>在 WSL 上安装 Arch Linux</h3></div>
+<p>在<a href="https://learn.microsoft.com/en-us/windows/wsl/install">已安装了 WSL 2</a> 的 Windows 系统上遵循以下安装方式之一：
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8a860ff5921e_.E8.87.AA.E5.8A.A8.E5.AE.89.E8.A3.85" id="自动安装"><span id=".E8.87.AA.E5.8A.A8.E5.AE.89.E8.A3.85"></span>自动安装</h4></div>
+<p>在 Windows 的命令行 Shell 中执行该命令：
+</p>
+<pre>&gt; wsl --install archlinux
+</pre>
+<p>然后您可以在开始菜单中通过  <code>archlinux</code> 应用程序在 WSL 中运行 Arch Linux，亦可在 Windows 的命令行 Shell 中执行 <code>wsl -d archlinux</code>。
+</p><p>如果您不希望使用 WSL 的默认安装路径和发行版名称，可以使用以下命令：
+</p>
+<pre>&gt; wsl --install -d archlinux --name <i>自定义名称</i> --location <i>自定义路径</i>
+</pre>
+<p>其中 <code>--name</code> 用于设置名称，<code>--location</code> 用于设置安装路径，例如：
+</p>
+<pre>&gt; wsl --install -d archlinux --name Arrrrch --location D:\WSLOS\Arch
+</pre>
+<p>执行 <code>wsl --help</code> 命令以查看 WSL 的更多操作。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8a860ff5921e_.E6.89.8B.E5.8A.A8.E5.AE.89.E8.A3.85" id="手动安装"><span id=".E6.89.8B.E5.8A.A8.E5.AE.89.E8.A3.85"></span>手动安装</h4></div>
+<p>下载<a href="https://geo.mirror.pkgbuild.com/wsl/latest/archlinux.wsl">最新的 Arch Linux <code>.wsl</code> 镜像</a>，然后双击以进行安装或在 Windows 的命令行 Shell 中执行以下命令：
+</p>
+<pre>&gt; wsl --install --from-file <i>WSL_image</i>
+</pre>
+<p>直接安装：
+</p>
+<pre>&gt; wsl --install --from-file C:\Users\<i>用户名</i>\Downloads\archlinux-2025.04.01.121271.wsl
+</pre>
+<p>导入式安装（可自定义位置）：
+</p>
+<pre>&gt; wsl --import archlinux D:\WSL\Arch D:\Download\archlinux-2025.04.01.121271.wsl
+</pre>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong>这会以默认发行版名称 <code>archlinux</code> 安装 WSL 镜像，若您欲以不同名称导入，请添加 <code>--name <i>名称</i></code> 选项。</div>
+<p>然后您可以在开始菜单中通过  <code>archlinux</code> 应用程序在 WSL 中运行 Arch Linux，亦可在 Windows 的命令行 Shell 中执行 <code>wsl -d archlinux</code>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8a860ff5921e_.E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7" id="提示和技巧"><span id=".E6.8F.90.E7.A4.BA.E5.92.8C.E6.8A.80.E5.B7.A7"></span>提示和技巧</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8a860ff5921e_.E8.AE.BE.E5.AE.9A.E9.BB.98.E8.AE.A4.E7.94.A8.E6.88.B7" id="设定默认用户"><span id=".E8.AE.BE.E5.AE.9A.E9.BB.98.E8.AE.A4.E7.94.A8.E6.88.B7"></span>设定默认用户</h3></div>
+<p>要设定 <code>root</code> 以外的默认用户，首先<a href="#pg60160f86c6a5">确保该用户已被创建</a>，然后将以下行添加到 <code>/etc/wsl.conf</code>：
+</p>
+<pre>[user]
+default=<i>username</i>
+</pre>
+<p>关闭会话前记得为 <code>root</code> 用户设置密码，如果您被“拒之门外”，请在 Windows 主机的 CMD 中执行：
+</p>
+<pre>&gt; wsl -u root
+</pre>
+<p>此更改将在下次会话启动时生效，要终止当前会话，请在 Windows 的命令行 Shell 中执行以下命令：
+</p>
+<pre>&gt; wsl --terminate archlinux
+</pre>
+<p>若您使用 WSL 2.4.10 或更新版本，则可以使用以下命令为您的发行版设定默认用户：
+</p>
+<pre>&gt; wsl --manage archlinux --set-default-user <i>用户名</i>
+</pre>
+<p>此更改将在下次启动时生效。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8a860ff5921e_.E7.94.A8_WSLg_.E8.BF.90.E8.A1.8C.E5.9B.BE.E5.BD.A2.E7.95.8C.E9.9D.A2.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F" id="用_WSLg_运行图形界面应用程序"><span id=".E7.94.A8_WSLg_.E8.BF.90.E8.A1.8C.E5.9B.BE.E5.BD.A2.E7.95.8C.E9.9D.A2.E5.BA.94.E7.94.A8.E7.A8.8B.E5.BA.8F"></span>用 WSLg 运行图形界面应用程序</h3></div>
+<p><a href="https://github.com/microsoft/wslg">WSLg（Windows Subsystem for Linux GUI）</a>项目致力于<a href="https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps">让 WSL 支持 Linux 音频（PulseAudio）和图形界面（X11 和 Wayland）</a>。
+</p><p>WSLg 默认启用，您可在 <a href="https://learn.microsoft.com/en-us/windows/wsl/wsl-config">WSL 配置文件</a>中将 <code>wsl2.guiApplications</code> 设为 <code>false</code> 以将其关闭。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8a860ff5921e_.E7.A1.AC.E4.BB.B6.E5.8A.A0.E9.80.9F.E6.B8.B2.E6.9F.93" id="硬件加速渲染"><span id=".E7.A1.AC.E4.BB.B6.E5.8A.A0.E9.80.9F.E6.B8.B2.E6.9F.93"></span>硬件加速渲染</h4></div>
+<p>欲在 WSL 中启用 <a href="https://devblogs.microsoft.com/commandline/d3d12-gpu-video-acceleration-in-the-windows-subsystem-for-linux-now-available/">GPU 视频加速渲染</a>，请<a href="#pg811194d6beaa">安装</a>以下软件包：
+</p>
+<ul><li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=mesa">mesa</a></span><sup><small>包</small></sup></span> - 包含 OpenGL 所需的 <code>d3d12</code> Gallium 驱动</li>
+<li><span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vulkan-dzn">vulkan-dzn</a></span><sup><small>包</small></sup></span> - 包含实验性的 <code>dzn</code>（亦作 <code>microsoft-experimental</code>）Vulkan 驱动</li></ul>
+<p>还需要安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=vulkan-icd-loader">vulkan-icd-loader</a></span><sup><small>包</small></sup></span>（要运行 32 位应用程序则亦需安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=lib32-vulkan-icd-loader">lib32-vulkan-icd-loader</a></span><sup><small>包</small></sup></span>）。
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bashrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">	
+export GALLIUM_DRIVER=d3d12
+	
+export LIBVA_DRIVER_NAME=d3d12
+	
+</pre>
+<p>若 openGL 依然在英特尔 GPU 上使用 llvmpipe 软件渲染，则需要为 libedit 创建符号链接：
+</p>
+<pre># ln -s /usr/lib/libedit.so /usr/lib/libedit.so.2
+</pre>
+<p>更多信息参见 <a href="https://github.com/microsoft/wslg/issues/996">Issue 996</a> 和 <a href="https://wiki.gentoo.org/wiki/Gentoo_in_WSL#OpenGL_falling_back_to_llvmpipe_software_renderer_on_Intel_GPUs">Gentoo:Gentoo in WSL#OpenGL falling back to llvmpipe software renderer on Intel GPUs</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8a860ff5921e_WSL_.E4.BA.92.E6.93.8D.E4.BD.9C" id="WSL_互操作"><span id="WSL_.E4.BA.92.E6.93.8D.E4.BD.9C"></span>WSL 互操作</h3></div>
+<p>WSL 支持<a href="https://github.com/ubuntu/WSL/blob/main/docs/tutorials/interop.md">与 Windows 互操作</a>，这让您可以从 WSL 运行 Windows 二进制程序。
+</p><p>其默认启用，您可在 <code>/etc/wsl.conf</code> 中将 <code>interop.enabled</code> 设定为 <code>false</code> 以将其禁用<a href="https://learn.microsoft.com/en-us/windows/wsl/wsl-config#interop-settings">[1]</a>。
+</p><p>有一些工具能让您在 WSL 内使用 Windows 服务和功能。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8a860ff5921e_.E4.BB.8E_Windows_.E6.A1.A5.E6.8E.A5_SSH_.E4.BB.A3.E7.90.86.E6.9C.8D.E5.8A.A1" id="从_Windows_桥接_SSH_代理服务"><span id=".E4.BB.8E_Windows_.E6.A1.A5.E6.8E.A5_SSH_.E4.BB.A3.E7.90.86.E6.9C.8D.E5.8A.A1"></span>从 Windows 桥接 SSH 代理服务</h4></div>
+<p><a href="https://github.com/mame/wsl2-ssh-agent">wsl2-ssh-agent</a> 工具允许您在 WSL 内使用 Windows <a href="#pg0f0d45f60e57">SSH 代理</a>。
+</p><p>当您使用需要物理安全密钥甚至是 <a href="https://www.microsoft.com/windows/tips/windows-hello">Windows Hello</a> 的 <code>*-sk</code> SSH 密钥时，这会很有用。
+</p><p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wsl2-ssh-agent/">wsl2-ssh-agent</a></span><sup><small>AUR</small></sup></span> 并将以下行添加到您的 <code>~/.bashrc</code>：
+</p>
+<pre>eval "$(/usr/sbin/wsl2-ssh-agent)"
+</pre>
+<p>重启 shell，<code>SSH_AUTH_SOCK</code> <a href="#pg4989d4f46056">环境变量</a>应该已正确设置。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8a860ff5921e_.E4.BD.BF.E7.94.A8_Windows_Hello_.E8.BF.9B.E8.A1.8C_PAM_.E8.AE.A4.E8.AF.81" id="使用_Windows_Hello_进行_PAM_认证"><span id=".E4.BD.BF.E7.94.A8_Windows_Hello_.E8.BF.9B.E8.A1.8C_PAM_.E8.AE.A4.E8.AF.81"></span>使用 Windows Hello 进行 PAM 认证</h4></div>
+<p><a href="https://github.com/nullpo-head/WSL-Hello-sudo">WSL-Hello-Sudo</a> 是一个使用 <a href="https://www.microsoft.com/windows/tips/windows-hello">Windows Hello</a> 进行用户身份认证的 <a href="#pgdacf2e1d6f91">PAM</a> 插件。
+</p><p>安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wsl-hello-sudo-bin/">wsl-hello-sudo-bin</a></span><sup><small>AUR</small></sup></span> 并运行 <code>/opt/wsl-hello-sudo/install.sh</code>。安装程序会复制一个 Windows 可执行程序到您选定的目录并存储用于身份认证的证书。
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><a href="https://github.com/nullpo-head/WSL-Hello-sudo">WSL-Hello-Sudo</a> 已经 4 年没有更新了，因此 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/wsl-hello-sudo-bin/">wsl-hello-sudo-bin</a></span><sup><small>AUR</small></sup></span> 打包了一个<a href="https://github.com/lzlrd/wsl-hello-sudo">分支</a>，合并了一些依赖更新。</div>
+<p>欲使用 Windows Hello 进行认证，将 <code>auth sufficient pam_wsl_hello.so</code> 行添加到 <code>/etc/pam.d</code> 中相应组件的配置文件，例如 Sudo：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/sudo</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+auth            sufficient      pam_wsl_hello.so
+auth            include         system-auth
+account         include         system-auth
+session         include         system-auth
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8a860ff5921e_.E5.90.91_WSL_.E8.BF.9E.E6.8E.A5.E8.AE.BE.E5.A4.87" id="向_WSL_连接设备"><span id=".E5.90.91_WSL_.E8.BF.9E.E6.8E.A5.E8.AE.BE.E5.A4.87"></span>向 WSL 连接设备</h3></div>
+<p>WSL 2 是一个 <a href="#pg01cff0e0878b">Hyper-V</a> 虚拟机，这使得设备可以从主机（Windows）直连到客户机（WSL 2）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8a860ff5921e_.E6.8C.82.E8.BD.BD.E7.A3.81.E7.9B.98" id="挂载磁盘"><span id=".E6.8C.82.E8.BD.BD.E7.A3.81.E7.9B.98"></span>挂载磁盘</h4></div>
+<p>WSL 2 支持附加并挂载 Windows 可用的磁盘。
+</p><p>欲如此做，首先请用以下 PowerShell 命令获取磁盘的 <code>DeviceID</code>：
+</p>
+<pre>&gt; GET-CimInstance -query "SELECT * from Win32_DiskDrive"
+</pre>
+<p>找到欲挂载的磁盘后，请在 Windows 上执行以下命令（需要管理员权限）：
+</p>
+<pre>&gt; wsl --mount <i>DeviceID</i> --bare
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>这会使相应磁盘在 Windows 上下线，挂载前确保您已关闭所有正在使用该驱动器的应用程序。</div>
+<p>附加后，您应当可以用 <code>lsblk</code> 看到该磁盘。
+</p><p>要取消挂载，请运行：
+</p>
+<pre>&gt; wsl --unmount <i>DeviceID</i>
+</pre>
+<p>欲获取更多信息，请参阅<a href="https://learn.microsoft.com/en-us/windows/wsl/wsl2-mount-disk">官方文档</a>（中文文档<a href="https://learn.microsoft.com/zh-cn/windows/wsl/wsl2-mount-disk">在此</a>）。
+</p>
+<div class="mw-heading mw-heading4"><h4 data-bm="pg8a860ff5921e_.E8.BF.9E.E6.8E.A5_USB_.E8.AE.BE.E5.A4.87" id="连接_USB_设备"><span id=".E8.BF.9E.E6.8E.A5_USB_.E8.AE.BE.E5.A4.87"></span>连接 USB 设备</h4></div>
+<p><a href="https://github.com/dorssel/usbipd-win">usbipd-win</a> 项目可以将本地连接的 USB 共享到其他设备，包括 WSL 2。
+</p><p>首先请在 Windows 上安装该软件。您可以选择运行<a href="https://github.com/dorssel/usbipd-win/releases/latest">最新发布</a>的安装程序（<i>.msi</i>）或使用 <a href="https://learn.microsoft.com/en-us/windows/package-manager/winget/">Windows 包管理器</a>：
+</p>
+<pre>&gt; winget install usbipd
+</pre>
+<p>安装完成后，请在 Windows 上执行以下命令，找到欲共享的 USB 设备，特别留意其 bus ID：
+</p>
+<pre>&gt; usbipd list
+</pre>
+<p>执行以下命令以准备欲共享的 USB 设备（需要管理员权限）：
+</p>
+<pre>&gt; usbipd bind --busid <i>busid</i>
+</pre>
+<div class="archwiki-template-box archwiki-template-box-warning"><strong>警告：</strong>确保您已关闭了所有使用该 USB 设备的应用程序。</div>
+<p>然后执行以下命令将 USB 设备连接到 WSL 2：
+</p>
+<pre>&gt; usbipd attach --wsl --busid <i>busid</i>
+</pre>
+<p>连接后，您应当可以用 <code>lsusb</code> 看到该设备。
+</p><p>要与 USB 设备断开连接，请执行：
+</p>
+<pre>&gt; usbipd detach --busid <i>busid</i>
+</pre>
+<p>欲获取更多信息，请参阅<a href="https://learn.microsoft.com/en-us/windows/wsl/connect-usb">官方文档</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8a860ff5921e_.E4.BF.AE.E6.94.B9.E5.8C.BA.E5.9F.9F.E8.AE.BE.E7.BD.AE" id="修改区域设置"><span id=".E4.BF.AE.E6.94.B9.E5.8C.BA.E5.9F.9F.E8.AE.BE.E7.BD.AE"></span>修改区域设置</h3></div>
+<p>WSL 默认会尝试将区域设置调整为与 Windows 相匹配。欲手动设置，请执行以下命令：
+</p>
+<pre>ln -sf /etc/locale.conf /etc/default/locale
+</pre>
+<p>然后像正常安装一样<a href="#pgbf65db42be1c">设定区域</a>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8a860ff5921e_.E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94" id="疑难解答"><span id=".E7.96.91.E9.9A.BE.E8.A7.A3.E7.AD.94"></span>疑难解答</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8a860ff5921e_systemd_.E6.94.AF.E6.8C.81" id="systemd_支持"><span id="systemd_.E6.94.AF.E6.8C.81"></span>systemd 支持</h3></div>
+<p>Arch Linux WSL 镜像支持 <a href="#pgac06dd8bfe95">systemd</a>。
+</p><p>然而，有一些<a href="https://gitlab.archlinux.org/archlinux/archlinux-wsl#known-issues">已知问题</a>可能需要额外操作才能使 systemd 正常工作。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg8a860ff5921e_Docker_.E5.AE.B9.E5.99.A8.E8.BF.90.E8.A1.8C.E5.87.BA.E9.94.99" id="Docker_容器运行出错"><span id="Docker_.E5.AE.B9.E5.99.A8.E8.BF.90.E8.A1.8C.E5.87.BA.E9.94.99"></span>Docker 容器运行出错</h3></div>
+<p>从 WSL 运行 <a href="#pg06238a3e6183">Docker</a> 容器可能会出现如下报错：
+</p>
+<pre>Error response from daemon: path / is mounted on / but it is not a shared or slave mount
+Error: failed to start containers
+</pre>
+<p>有可能是 <code>docker run</code> 之类的命令一直挂起而不输出。
+</p><p>因为 Docker 需要根目录（<code>/</code>）被挂载为可共享。
+</p><p>欲修复，请运行：
+</p>
+<pre># mount --make-rshared /
+</pre>
+<p>欲持久化该更改，您可以<a href="https://github.com/microsoft/WSL/issues/11715#issuecomment-2798498272">创建一个 systemd 服务</a>，使其在启动时就执行命令：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/mount-root-rshared.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Remount / with shared propagation
+Requires=-.mount
+After=-.mount
+
+[Service]
+Type=oneshot
+ExecStart=/bin/mount --make-rshared /
+
+[Install]
+WantedBy=local-fs.target</pre>
+<p>然后<a href="#pg75b0ec583607">启动/启用</a> <code>mount-root-rshared.service</code>。
+</p><p>关于该选项的更多信息，请参阅 <span class="plainlinks archwiki-template-man" title="$ man 8 mount"><a href="https://man.archlinux.org/man/mount.8#Shared_subtree_operations">mount(8) § Shared subtree operations</a></span>。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg8a860ff5921e_.E5.8F.82.E8.A7.81" id="参见"><span id=".E5.8F.82.E8.A7.81"></span>参见</h2></div>
+<ul><li><a href="https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux">Wikipedia:Windows Subsystem for Linux</a></li>
+<li><a href="https://wiki.gentoo.org/wiki/Gentoo_in_WSL">Gentoo:Gentoo in WSL</a></li>
+<li><a href="https://learn.microsoft.com/en-us/windows/wsl">官方文档（英文）</a></li>
+<li><a href="https://learn.microsoft.com/zh-cn/windows/wsl">官方文档（中文）</a></li>
+<li><a href="https://github.com/microsoft/WSLg/wiki">WSLg GitHub Wiki</a></li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20260807024123
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.162 seconds
+Real time usage: 0.166 seconds
+Preprocessor visited node count: 482/1000000
+Revision size: 11783/2097152 bytes
+Post‐expand include size: 6709/2097152 bytes
+Template argument size: 2764/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 25/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%   39.421      1 -total
+ 12.72%    5.013     33 Template:Ic
+  9.23%    3.639      1 Template:翻译状态
+  8.48%    3.341      2 Template:Tip
+  7.92%    3.122      2 Template:Warning
+  7.37%    2.906      4 Template:Pkg
+  5.79%    2.284      2 Template:Note
+  5.44%    2.143      1 Template:Man
+  4.31%    1.698      3 Template:Hc
+  3.50%    1.381      3 Template:AUR
+-->
+<!-- Render ID 7a55d78e-9209-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:8198:|#|:idhash:canonical!zh-cn and timestamp 20260807024123 and revision id 34413. Rendering was triggered because: page_view
+ -->
+</div>
+</div>

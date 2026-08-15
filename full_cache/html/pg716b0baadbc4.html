@@ -1,0 +1,214 @@
+<div class="mw-body-content" id="mw-content-text"><h1 data-bm="pg716b0baadbc4">启动时打开数字锁定键</h1><div class="mw-content-ltr mw-parser-output" dir="ltr" lang="zh-Hans-CN"><aside class="archwiki-template-box archwiki-template-box-note noexcerpt"><strong>翻译状态：</strong>
+<ul><li>本文（或部分内容）译自 <a href="https://wiki.archlinux.org/title/Activating_numlock_on_bootup">Activating numlock on bootup</a>，最近一次同步于 2026-05-03，若英文版本有所<a href="https://wiki.archlinux.org/title/Activating_numlock_on_bootup?diff=0&amp;oldid=872550">更改</a>，则您可以帮助同步与<a href="#pgbec17c48c855">翻译</a>更改的内容。</li>
+<li>您可以在 <a href="https://wiki.archlinux.org/title/Activating_numlock_on_bootup_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)?action=history">ArchWiki 的对应页面</a>找到本文翻译的<b>原始</b>修订历史。</li>
+<li>本文可能与英文原文存在出入。</li></ul></aside>
+<meta property="mw:PageProp/toc"/>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg716b0baadbc4_.E6.8E.A7.E5.88.B6.E5.8F.B0" id="控制台"><span id=".E6.8E.A7.E5.88.B6.E5.8F.B0"></span>控制台</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_.E6.97.A9.E6.9C.9F.E5.90.AF.E5.8A.A8_.28mkinitcpio.29" id="早期启动_(mkinitcpio)"><span id=".E6.97.A9.E6.9C.9F.E5.90.AF.E5.8A.A8_.28mkinitcpio.29"></span>早期启动 (mkinitcpio)</h3></div><p>
+您可以在内核启动后立即在 initramfs 中启用 numlock。这是确保即使在输入<a href="#pg29ec7c5af952">全盘加密</a>密码期间 numlock 也开启的唯一方法。安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-numlock/">mkinitcpio-numlock</a></span><sup><small>AUR</small></sup></span> ，并在 <code>/etc/mkinitcpio.conf</code> HOOKS 数组中的 <code>encrypt</code> 之前添加 <code>numlock</code> <a href="#pgbd0f46fbac92">mkinitcpio</a> 钩子：</p><pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont numlock block encrypt lvm2 filesystems fsck)
+...</pre>
+<p>然后重新<a href="#pgbd0f46fbac92">生成镜像</a>以应用更改。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong><code>numlock</code> 钩子在基于 systemd 的 <a href="#pg5409190f7704">initramfs</a> 上不起作用。这种情况下，可以安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/mkinitcpio-sd-numlock/">mkinitcpio-sd-numlock</a></span><sup><small>AUR</small></sup></span> 并在 initramfs 配置中使用 <code>sd-numlock</code>。</div>
+<p>使用此方法的优势在于，numlock 设置将在后续启动过程中被复制，并且新的虚拟控制台将默认开启 numlock。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_.E4.BD.BF.E7.94.A8_systemd_.E6.9C.8D.E5.8A.A1" id="使用_systemd_服务"><span id=".E4.BD.BF.E7.94.A8_systemd_.E6.9C.8D.E5.8A.A1"></span>使用 systemd 服务</h3></div>
+
+<p><br/>
+</p>
+<div class="archwiki-template-box archwiki-template-box-tip"><strong>提示：</strong><a href="#pg811194d6beaa">安装</a> <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://aur.archlinux.org/packages/systemd-numlockontty/">systemd-numlockontty</a></span><sup><small>AUR</small></sup></span> 并<a href="#pg3ef6532bc644">启用</a> <code>numLockOnTty</code> 服务可以替代这些步骤。</div>
+<p>首先安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=numlockx">numlockx</a></span><sup><small>包</small></sup></span>。
+</p><p>然后创建在特定 TTY 上设置 numlock 的脚本：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/numlock</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+
+for tty in /dev/tty{1..6}
+do
+    /usr/bin/setleds -D +num &lt; "$tty";
+done
+</pre>
+<p>创建好文件后，添加<a href="#pg778bd495870f">可执行</a>权限，这样才能运行脚本。
+</p><p>然后创建并<a href="#pg3ef6532bc644">启用</a> systemd 服务:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/numlock.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=numlock
+
+[Service]
+ExecStart=/usr/local/bin/numlock
+StandardInput=tty
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_.E6.89.A9.E5.B1.95_getty.40.service" id="扩展_getty@.service"><span id=".E6.89.A9.E5.B1.95_getty.40.service"></span>扩展 getty@.service</h3></div>
+<p>这个方法比使用单独服务简单，不需要在脚本中写入 TTY 编号。在原始 gettty 单元文件上添加一段扩展：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/getty@.service.d/activate-numlock.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+ExecStartPre=/bin/sh -c 'setleds -D +num &lt; /dev/%I'</pre><p>
+要禁用登录屏幕上的数字键启用提示，<a href="#pg965c4680152b">编辑</a> <code>getty@tty1.service</code>，添加 <code>--nohints</code> 到 agetty 选项:</p><div class="mw-highlight mw-highlight-lang-systemd mw-content-ltr" dir="ltr"><pre><span></span><span class="k">[Service]</span>
+<span class="na">ExecStart</span><span class="o">=</span>
+<span class="na">ExecStart</span><span class="o">=</span><span class="s">-/sbin/agetty --noreset --nohints --noclear - ${TERM}</span>
+</pre></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_Bash_.E6.9B.BF.E4.BB.A3.E6.96.B9.E6.A1.88" id="Bash_替代方案"><span id="Bash_.E6.9B.BF.E4.BB.A3.E6.96.B9.E6.A1.88"></span>Bash 替代方案</h3></div>
+<p>将 <code>setleds -D +num</code> 加入到 <code>~/.bash_profile</code>。需要注意的是，不同于其他方法，这种方式将会在你登录后才生效。
+</p>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg716b0baadbc4_X_org" id="X.org">X.org</h2></div>
+<p>有许多可选方案：
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_startx" id="startx">startx</h3></div><p>
+安装 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=numlockx">numlockx</a></span><sup><small>包</small></sup></span> 包，并将其添加到 <s><code>~/.xinitrc</code></s> <a href="#pg9fc1e9437ae5">xinitrc</a> 文件所有 <s><code>exec</code></s> 语句前：</p><pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xinitrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">numlockx &amp;
+exec <i>window manager</i></pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_MATE" id="MATE">MATE</h3></div><p>
+MATE 默认会保存上次启动时的数字键盘状态，要确保每次启动都启用：</p><div class="mw-highlight mw-highlight-lang-bash mw-content-ltr" dir="ltr"><pre><span></span>$<span class="w"> </span>dconf<span class="w"> </span>write<span class="w"> </span>org.mate.peripherals-keyboard<span class="w"> </span>remember-numlock-state<span class="w"> </span><span class="nb">false</span>
+$<span class="w"> </span>dconf<span class="w"> </span>write<span class="w"> </span>org.mate.peripherals-keyboard<span class="w"> </span>numlock-state<span class="w"> </span><span class="s1">'on'</span>
+</pre></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_KDE_Plasma" id="KDE_Plasma">KDE Plasma</h3></div>
+<p>前往<b>系统设置</b> &gt; <b>输入和输出</b> &gt; <b>键盘</b>，在<b>键盘</b>标签页的 <b>NumLock 在开机时的状态</b>部分，选择所需的 NumLock 行为。
+</p><p>要使其生效，请确保<b>系统设置</b> &gt; <b>系统</b> &gt; <b>会话</b> &gt; <b>后台服务</b> &gt; <b>键盘守护进程</b>已启用。
+</p>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果在 KDE Plasma 中无法通过<b>系统设置</b>访问<b>后台服务</b>部分，运行 shell 命令 <code>kcmshell6 kcm_kded</code>（必要时替换为您的 kcmshell 版本）应该会显示此菜单。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_GNOME" id="GNOME">GNOME</h3></div>
+<p>运行下面命令:
+</p>
+<pre>$ gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
+</pre>
+<p>要记住上次的 numlock 状态:
+</p>
+<pre>$ gsettings set org.gnome.desktop.peripherals.keyboard remember-numlock-state true
+</pre>
+<p>或者也可以将 <code>numlockx on</code>（来自 <span class="nobreak"><span class="plainlinks archwiki-template-pkg"><a href="https://archlinux.org/packages/?name=numlockx">numlockx</a></span><sup><small>包</small></sup></span>）添加到启动脚本或 <code>~/.profile</code> 中。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_GDM" id="GDM">GDM</h3></div>
+<p>创建以下 dconf 配置文件：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dconf/db/gdm.d/90-numlock</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[org/gnome/desktop/peripherals/keyboard]
+remember-numlock-state=true
+numlock-state=true</pre>
+<p>根据 <a href="https://github.com/GNOME/gsettings-desktop-schemas/blob/8c672b3a0b659ddafb361411f820589627653642/schemas/org.gnome.desktop.peripherals.gschema.xml.in#L107">gsettings 定义</a>，<code>remember-numlock-state</code> 决定是否记住并恢复上次的 numlock 状态，而 <code>numlock-state</code> 提供的是上次的 numlock 状态。<a href="https://github.com/GNOME/mutter/blob/e7b7c1648474b22d3f49422d5f818a5b03b208ff/src/backends/meta-input-settings.c#L1890">mutter 源代码</a>表明，如果 <code>remember-numlock-state</code> 为 false，则 <code>numlock-state</code> 设置根本不会被触及，查询函数将直接返回默认值 false。
+</p><p>若要阻止 GDM 更新 <code>numlock-state</code> 的值（强制一个确定的 numlock 状态），用 <a href="https://help.gnome.org/system-admin-guide/dconf-lockdown.html">GNOME 指南</a>所述的方式创建一个 <code>locks</code> 目录并锁定该键，所述：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dconf/db/gdm.d/locks/numlock</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/org/gnome/desktop/peripherals/keyboard/numlock-state</pre>
+<p>然后运行以下命令：
+</p>
+<pre># dconf update
+</pre>
+<p>这是一种通用方法，也同样适用于 Wayland 上的 GDM。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_Xfce" id="Xfce">Xfce</h3></div>
+<p>在 <code>~/.config/xfce4/xfconf/xfce-perchannel-xml/keyboards.xml</code> 中确保以下值设定为 true:
+</p>
+<div class="mw-highlight mw-highlight-lang-xml mw-content-ltr" dir="ltr"><pre><span></span><span class="nt">&lt;property</span><span class="w"> </span><span class="na">name=</span><span class="s">"Numlock"</span><span class="w"> </span><span class="na">type=</span><span class="s">"bool"</span><span class="w"> </span><span class="na">value=</span><span class="s">"true"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;property</span><span class="w"> </span><span class="na">name=</span><span class="s">"RestoreNumlock"</span><span class="w"> </span><span class="na">type=</span><span class="s">"bool"</span><span class="w"> </span><span class="na">value=</span><span class="s">"true"</span><span class="nt">/&gt;</span>
+</pre></div>
+<div class="archwiki-template-box archwiki-template-box-note"><strong>注意：</strong>如果文件不存在，可以通过<b>设置</b> &gt; <b>键盘</b> 中的<b>启动时恢复数字按键状态</b>进行配置，它会自动创建 <code>keyboards.xml</code>。</div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_SDDM" id="SDDM">SDDM</h3></div>
+<p>在<code>/etc/sddm.conf</code>配置文件中, 在<code>[General]</code>部分中添加以下行:
+</p>
+<pre>[General]
+Numlock=on
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_SLiM" id="SLiM">SLiM</h3></div>
+<p>取消文件<code>/etc/slim.conf</code>中如下行的注释(删除<code>#</code>):
+</p>
+<pre>#numlock             on
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_OpenBox" id="OpenBox">OpenBox</h3></div>
+<p>在文件 <code>~/.config/openbox/autostart</code> 中加入如下内容：
+</p>
+<pre>numlockx &amp;
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_LightDM" id="LightDM">LightDM</h3></div>
+<p>参见 <a href="#pg145f4ecf55dc">LightDM#NumLock on by default</a>.
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_LXDM" id="LXDM">LXDM</h3></div>
+<p>在 <code>/etc/lxdm/lxdm.conf</code> 中设置:
+</p>
+<pre>numlock=1
+</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_LXQt" id="LXQt">LXQt</h3></div>
+<p>在 <code>~/.config/lxqt/session.conf</code> 中设置:
+</p>
+<div class="mw-highlight mw-highlight-lang-ini mw-content-ltr" dir="ltr"><pre><span></span><span class="k">[Keyboard]</span>
+<span class="na">numlock</span><span class="o">=</span><span class="s">true</span>
+</pre></div>
+<div class="mw-heading mw-heading2"><h2 data-bm="pg716b0baadbc4_Wayland" id="Wayland">Wayland</h2></div>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_Sway" id="Sway">Sway</h3></div>
+<p>参见 <a href="#pg7c25baec4c3f">Sway#启动时启用 NumLock</a>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_Hyprland" id="Hyprland">Hyprland</h3></div><p>
+在 <code>~/.config/hypr/hyprland.conf</code> 中配置：</p><pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/hypr/hyprland.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">input {
+  numlock_by_default = true
+  ...
+}</pre>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_Labwc" id="Labwc">Labwc</h3></div>
+<p>参见 <span class="ilh-all" data-foreign-title="Labwc#Activating numlock on startup" data-lang-code="en" data-lang-name="英语" data-orig-title="Labwc#启动时启用 numlock"><span class="ilh-page"><a href="#pg9f011775c790">Labwc#启动时启用 numlock</a></span></span>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_SDDM_.E5.90.AF.E5.8A.A8_KWin.EF.BC.88KDE_Plasma.EF.BC.89" id="SDDM_启动_KWin（KDE_Plasma）"><span id="SDDM_.E5.90.AF.E5.8A.A8_KWin.EF.BC.88KDE_Plasma.EF.BC.89"></span>SDDM 启动 KWin（KDE Plasma）</h3></div>
+<p>创建或编辑 <code>/var/lib/sddm/.config/kcminputrc</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/var/lib/sddm/.config/kcminputrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Keyboard]
+NumLock=0</pre>
+<p>该文件拥所有者必须为 <code>sddm:sddm</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_Plasma_.E7.99.BB.E5.BD.95.E7.AE.A1.E7.90.86.E5.99.A8" id="Plasma_登录管理器"><span id="Plasma_.E7.99.BB.E5.BD.95.E7.AE.A1.E7.90.86.E5.99.A8"></span>Plasma 登录管理器</h3></div>
+<p>编辑 <code>/var/lib/plasmalogin/.config/kdedefaults/kcminputrc</code>：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/var/lib/plasmalogin/.config/kdedefaults/kcminputrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Keyboard]
+NumLock=0</pre>
+<p>该文件的所有者必须为 <code>plasmalogin:plasmalogin</code>。
+</p>
+<div class="mw-heading mw-heading3"><h3 data-bm="pg716b0baadbc4_DWL" id="DWL">DWL</h3></div>
+<p>初始化 <code>xkb_rules</code> 结构体时启用 <code>numpad:mac</code> 选项：
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">[dwl_source_root]/config.def.h</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">static const struct xkb_rule_names xkb_rules = {
+  .options = "numpad:mac",
+};</pre>
+<!-- 
+NewPP limit report
+Cached time: 20260807032945
+Cache expiry: 864000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.199 seconds
+Real time usage: 1.310 seconds
+Preprocessor visited node count: 601/1000000
+Revision size: 7547/2097152 bytes
+Post‐expand include size: 9702/2097152 bytes
+Template argument size: 3447/2097152 bytes
+Highest expansion depth: 6/100
+Expensive parser function count: 5/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 2073/5000000 bytes
+Lua time usage: 0.010/7.000 seconds
+Lua memory usage: 541268/52428800 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00% 1184.816      1 -total
+  2.67%   31.607      1 Template:Link-en
+  0.43%    5.091     34 Template:Ic
+  0.36%    4.280      3 Template:注意
+  0.31%    3.699      1 Template:准确性
+  0.30%    3.529     11 Template:Hc
+  0.29%    3.445      1 Template:翻译状态
+  0.23%    2.766      3 Template:Pkg
+  0.15%    1.746      1 Template:提示
+  0.13%    1.519      3 Template:AUR
+-->
+<!-- Render ID 3c0fe68f-9210-11f1-bfa3-3971f15f47ee -->
+<!-- Saved in parser cache with key http-archcnwiki-:pcache:2713:|#|:idhash:canonical!zh-cn and timestamp 20260807032945 and revision id 35114. Rendering was triggered because: page_view
+ -->
+</div>
+</div>
