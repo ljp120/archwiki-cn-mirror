@@ -59,7 +59,7 @@ jobs:
         run: |
           git config user.email "mirror-bot@users.noreply.github.com"
           git config user.name "mirror-bot"
-          git add full_cache crawl.log
+          git add -f full_cache crawl.log
           if git diff --cached --quiet; then
             echo "no changes to commit"
           else
