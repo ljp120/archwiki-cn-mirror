@@ -28,3 +28,9 @@
 03:59:17 [INFO] === 爬取完成 ===
 03:59:17 [INFO] 总页数=646 (分类=0, 文章=646) | 复用缓存=646 | 失败=88 | robots跳过=0
 03:59:17 [INFO] 最大深度=6 | 图片=0 | 缓存大小=14.8 MB | 耗时=88.5s
+03:57:07 [INFO] === ArchWiki 爬虫启动 ===
+03:57:07 [INFO] 起始页: https://wiki.archlinuxcn.org/wiki/Main_page | 最大深度: -1 | 并发: 4 | 间隔: 1.0s
+03:57:08 [INFO] 已加载 robots.txt: https://wiki.archlinuxcn.org/robots.txt
+03:58:36 [INFO] === 爬取完成 ===
+03:58:36 [INFO] 总页数=646 (分类=0, 文章=646) | 复用缓存=646 | 失败=88 | robots跳过=0
+03:58:36 [INFO] 最大深度=6 | 图片=0 | 缓存大小=14.8 MB | 耗时=88.5s
