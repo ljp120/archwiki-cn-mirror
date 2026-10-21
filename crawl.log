@@ -400,3 +400,97 @@
 08:30:03 [INFO] === 爬取完成 ===
 08:30:03 [INFO] 总页数=646 (分类=0, 文章=646) | 复用缓存=646 | 失败=88 | robots跳过=0
 08:30:03 [INFO] 最大深度=6 | 图片=0 | 缓存大小=14.8 MB | 耗时=89.3s
+08:31:04 [INFO] === ArchWiki 爬虫启动 ===
+08:31:04 [INFO] 起始页: https://wiki.archlinuxcn.org/wiki/Main_page | 最大深度: -1 | 并发: 4 | 间隔: 1.0s
+08:31:04 [INFO] 已加载 robots.txt: https://wiki.archlinuxcn.org/robots.txt
+08:31:49 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/在_LVM_上安装_Arch_Linux | HTTP 502
+08:31:50 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Xorg/键盘配置 | HTTP 502
+08:31:51 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/声音系统 | HTTP 502
+08:31:52 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Aurweb_RPC_界面 | HTTP 502
+08:32:33 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/二分排查 | HTTP 502
+08:32:35 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/编译内核模块 | HTTP 502
+08:32:36 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/EFI_启动存根 | HTTP 502
+08:32:38 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/休眠 | HTTP 502
+08:33:16 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/启动管理器 | HTTP 502
+08:33:17 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/持久块设备命名 | HTTP 502
+08:33:19 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/安全擦除磁盘 | HTTP 502
+08:33:22 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/固态硬盘/NVMe | HTTP 502
+08:33:58 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/雷电 | HTTP 502
+08:34:01 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/EFI系统分区 | HTTP 502
+08:34:03 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/以太网 | HTTP 502
+08:34:07 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/无线网 | HTTP 502
+08:34:39 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/无线网络绑定 | HTTP 502
+08:34:42 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Kernel_module_(简体中文) | HTTP 502
+08:34:46 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/软AP | HTTP 502
+08:34:53 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Wpzh:中间人攻击 | HTTP 502
+08:35:21 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Limine_启动引导器带有用于Btrfs的Snapper集成 | HTTP 502
+08:35:26 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/高级格式化 | HTTP 502
+08:35:28 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Linux_内核 | HTTP 502
+08:35:35 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Linux_控制台/Keyboard_configuration | HTTP 502
+08:36:03 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/使用终端仿真器程序连接串口的操作方式 | HTTP 502
+08:36:08 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/层叠文件系统 | HTTP 502
+08:36:12 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/软件包 | HTTP 502
+08:36:17 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/专业音频/硬件 | HTTP 502
+08:36:44 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/实时内核 | HTTP 502
+08:36:51 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Zsh_启动/结束文件 | HTTP 502
+08:36:54 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/用户数据库 | HTTP 502
+08:37:00 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/压力测试 | HTTP 502
+08:37:26 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/公制兼容字体 | HTTP 502
+08:37:32 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/会话锁 | HTTP 502
+08:37:36 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/虚拟机 | HTTP 502
+08:37:41 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/鼠标轮询率 | HTTP 502
+08:38:08 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/网络唤醒 | HTTP 502
+08:38:13 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/笔记本电脑/东芝 | HTTP 502
+08:38:18 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/笔记本电脑/其他 | HTTP 502
+08:38:23 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/笔记本电脑/华硕 | HTTP 502
+08:38:49 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/笔记本电脑/惠普 | HTTP 502
+08:38:54 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/笔记本电脑/戴尔 | HTTP 502
+08:38:59 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/笔记本电脑/联想 | HTTP 502
+08:39:04 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/运行 | HTTP 502
+08:39:29 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Wireless_Setup_(简体中文) | HTTP 502
+08:39:34 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/DeveloperWiki:商标政策 | HTTP 502
+08:39:40 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Sudo_(简体中文) | HTTP 502
+08:39:45 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Users_and_groups_(简体中文) | HTTP 502
+08:40:10 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Rxvt-unicode/提示和技巧 | HTTP 502
+08:40:15 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Web_源 | HTTP 502
+08:40:20 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/ICC_配置文件 | HTTP 502
+08:40:25 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Fish_(简体中文) | HTTP 502
+08:40:51 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/General_troubleshooting_(简体中文) | HTTP 502
+08:40:56 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Getty_(简体中文) | HTTP 502
+08:41:01 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Systemd_(简体中文)/User_(简体中文) | HTTP 502
+08:41:06 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/File_recovery_(简体中文) | HTTP 502
+08:41:31 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/启动加载器 | HTTP 502
+08:41:36 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/MAC_地址伪装 | HTTP 502
+08:41:42 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/不使用_LiveCD_替换当前系统 | HTTP 502
+08:41:47 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/PulseAudio/问题解决 | HTTP 502
+08:42:12 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/GDM_(简体中文) | HTTP 502
+08:42:17 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Persistent_block_device_naming_(简体中文) | HTTP 502
+08:42:22 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/X11_转发 | HTTP 502
+08:42:27 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/终端复用器 | HTTP 502
+08:42:53 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/联想_ThinkPad_Helix_2nd_Gen | HTTP 502
+08:42:58 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/CUPS/问题解决 | HTTP 502
+08:43:03 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/打包_Brother_打印机驱动程序 | HTTP 502
+08:43:08 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/非官方用户存储库 | HTTP 502
+08:43:34 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Systemd_日志 | HTTP 502
+08:43:39 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/编辑单元文件 | HTTP 502
+08:43:44 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/List_of_applications_(简体中文)/Internet_(简体中文) | HTTP 502
+08:43:49 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Arch_boot_process_(简体中文) | HTTP 502
+08:44:14 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/GRUB2_(简体中文) | HTTP 502
+08:44:19 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/GRUB_(简体中文) | HTTP 502
+08:44:24 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Mkinitcpio_(简体中文) | HTTP 502
+08:44:29 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/ArchWiki_维护团队 | HTTP 502
+08:44:55 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/IRC_频道 | HTTP 502
+08:45:00 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/通用图形处理器 | HTTP 502
+08:45:05 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/文件恢复/Post_recovery_tasks | HTTP 502
+08:45:10 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/将现有安装移动到（或移出）虚拟机 | HTTP 502
+08:45:36 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/启用非特权容器支持（可选） | HTTP 502
+08:45:41 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/USB_闪存安装介质 | HTTP 502
+08:45:46 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/去除系统加密 | HTTP 502
+08:45:51 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/安全擦除硬盘 | HTTP 502
+08:46:16 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/自加密驱动 | HTTP 502
+08:46:21 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Systemd(简体中文) | HTTP 502
+08:46:26 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/回显区 | HTTP 502
+08:46:32 [ERROR] 请求失败（放弃）: https://wiki.archlinuxcn.org/wiki/Apple_键盘 | HTTP 502
+08:46:32 [INFO] === 爬取完成 ===
+08:46:32 [INFO] 总页数=646 (分类=0, 文章=646) | 复用缓存=646 | 失败=88 | robots跳过=0
+08:46:32 [INFO] 最大深度=6 | 图片=0 | 缓存大小=14.8 MB | 耗时=927.3s
